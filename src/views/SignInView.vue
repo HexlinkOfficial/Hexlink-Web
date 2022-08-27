@@ -21,15 +21,17 @@
             </v-btn>
         </v-row>
     </v-container>
-            
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent } from 'vue'
+import { useAuthStore } from '@/stores/auth'
 
 export default defineComponent({
   name: 'SignInView',
-  components: {
+  setup() {
+    const store = useAuthStore();
+    return { };
   },
 });
 </script>

@@ -1,9 +1,12 @@
-import * as functions from "firebase-functions";
+import {firebaseApp} from "./initFirebase.js";
+firebaseApp;
 
-// // Start writing Firebase Functions
-// // https://firebase.google.com/docs/functions/typescript
-//
-// export const helloWorld = functions.https.onRequest((request, response) => {
-//   functions.logger.info("Hello logs!", {structuredData: true});
-//   response.send("Hello from Firebase!");
-// });
+import {
+  processSignUp,
+  refreshToken,
+} from "./hasura";
+
+export {
+  processSignUp,
+  refreshToken,
+};

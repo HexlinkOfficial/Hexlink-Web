@@ -4,7 +4,9 @@ import router from './router'
 
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 import { createPinia } from 'pinia'
-import vuetify from './plugins/vuetify'
+
+import Antd from 'ant-design-vue';
+import 'ant-design-vue/dist/antd.css';
 
 import { getAuth } from 'firebase/auth'
 import { app } from '@/services/firebase'
@@ -23,7 +25,7 @@ getAuth(app).onAuthStateChanged(async (user: any) => {
     vueApp = createApp(AppVue)
       .use(router)
       .use(pinia)
-      .use(vuetify)
+      .use(Antd)
       .mount('#app');
   }
 

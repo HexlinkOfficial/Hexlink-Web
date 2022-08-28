@@ -1,54 +1,44 @@
 <template>
-    <v-container class="fill-height">
-        <v-row justify="center" class="logo">
-            <v-img
-                src="/src/assets/logo.png"
-                contain
-                height="150"
-                width="150"
-            />
-        </v-row>
-        <v-row justify="center" class="title">
-            <span>Yaw: start your path to web3</span>
-        </v-row>
-        <v-row justify="center" class="ma-0">
-            <v-btn elevation="2" @click="login">
-                <v-img
-                    src="/images/google.svg"
-                    style="height: 20px; width: 20px; margin-right: 10px;"
+    <a-row justify="center" align="middle" style="height: 100%;">
+        <a-col>
+            <a-row justify="center">
+                <img
+                    src="/src/assets/logo.png"
+                    height="150"
+                    width="150"
                 />
-                <span>Sign In with Google</span>
-            </v-btn>
-        </v-row>
-    </v-container>
+            </a-row>
+            <a-row justify="center" class="title">
+                <span>Yaw: start your path to web3</span>
+            </a-row>
+            <a-row justify="center" class="ma-0">
+                <a-button size="large" @click="login">
+                    <img
+                        src="/images/google.svg"
+                        style="height: 20px; width: 20px; margin-right: 10px;"
+                    />
+                    <span>Sign In with Google</span>
+                </a-button>
+            </a-row>
+        </a-col>
+    </a-row>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue'
+<script setup lang="ts">
 import { useRouter } from 'vue-router';
 import { socialLogin } from '@/services/auth'
 import { useAuthStore } from '@/stores/auth'
 
-export default defineComponent({
-  name: 'SignInView',
-  setup() {
-    const store = useAuthStore();
-    const router = useRouter();
+const store = useAuthStore();
+const router = useRouter();
 
-    const login = async () => {
-        await socialLogin();
-        router.push(store.returnUrl ? store.returnUrl : "/");
-    }
-    return { login };
-  },
-});
+const login = async () => {
+    await socialLogin();
+    router.push(store.returnUrl || "/");
+}
 </script>
 
 <style lang="less" scoped>
-.logo {
-    margin-top: calc(50% - 100px);
-}
-
 .title {
     margin: 0px 0px 20px 0px;
     font-family: system-ui;

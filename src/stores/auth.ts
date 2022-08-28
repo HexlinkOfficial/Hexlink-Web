@@ -22,6 +22,7 @@ export const useAuthStore = defineStore({
     currentUser: null as IUser | null,
     returnUrl: null as string | null,
   }),
+  persist: true,
   getters: {
     authenticated: (state) => state.currentUser !== null && state.idToken != null,
   },
@@ -46,5 +47,4 @@ export const useAuthStore = defineStore({
       this.returnUrl = returnUrl;
     },
   },
-  persist: true,
 })

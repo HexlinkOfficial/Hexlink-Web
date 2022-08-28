@@ -7,3 +7,13 @@ typings/
 
 # Node.js dependency directory
 node_modules/
+
+node_modules
+.env
+coverage
+coverage.json
+typechain
+
+#Hardhat files
+cache
+artifacts

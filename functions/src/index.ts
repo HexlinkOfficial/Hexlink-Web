@@ -1,12 +1,24 @@
-import {firebaseApp} from "./initFirebase.js";
-firebaseApp;
+import * as admin from "firebase-admin";
+import * as functions from "firebase-functions";
+
+const credential = process.env.GOOGLE_CREDENTIAL_JSON;
+let params;
+if (credential) {
+  const serviceAccount = JSON.parse(credential);
+  params = {
+    credential: admin.credential.cert(serviceAccount),
+  };
+} else {
+  params = functions.config().firebase;
+}
+
+admin.initializeApp(params);
+admin.firestore().settings({ignoreUndefinedProperties: true});
 
 import {
   processSignUp,
   refreshToken,
 } from "./hasura";
 
-export {
-  processSignUp,
-  refreshToken,
-};
+exports.processSignUp = processSignUp;
+exports.refreshToken = refreshToken;

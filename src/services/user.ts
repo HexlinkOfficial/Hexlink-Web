@@ -1,10 +1,8 @@
 import type { User } from 'firebase/auth'
-import { gql } from '@apollo/client'
+import { gql } from '@urql/core'
 import { getAuth } from 'firebase/auth'
-import { useAuthStore } from '@/stores/auth'
-import { getIdTokenAndSetClaimsIfNecessary } from './auth'
 import { app } from './firebase'
-import { getApolloClient, setApolloClientIfNecessary } from './apolloClient'
+import { setUrqlClientIfNecessary } from './urql'
 
 const auth = getAuth(app)
 
@@ -68,19 +66,9 @@ export const ADD_USER = gql`
 `
 
 export async function getUser(user: User, idToken: string) : Promise<User | null> {
-    const client = setApolloClientIfNecessary(idToken)
-    const { data, networkStatus } = await client.query({
-        query: GET_USER,
-        variables: {
-            id: user.uid,
-        },
-    })
-    if (networkStatus === 8) {
-        console.error('You appear to be offline, check your internet connection!')
-        return null;
-    }
-
-    if (!data?.users_by_pk) {
+    const client = setUrqlClientIfNecessary(idToken)
+    const result = await client.query(GET_USER, {id: user.uid}).toPromise();
+    if (result?.data == undefined) {
         try {
             await createInitialUser(user, idToken)
         } catch (error) {
@@ -89,24 +77,17 @@ export async function getUser(user: User, idToken: string) : Promise<User | null
         }
         return getUser(user, idToken)
     }
-
-    return data.users_by_pk
+    return result.data.users_by_pk;
 }
 
 export async function createInitialUser(user: User, idToken: string) {
     const userToWrite = {
         id: user.uid,
         displayName: user.displayName,
-        emailVerified: user.emailVerified,
         email: user.email,
         photoURL: user.photoURL,
     }
-    const client = setApolloClientIfNecessary(idToken)
-    await client.mutate({
-        mutation: ADD_USER,
-        variables: userToWrite,
-    })
-    await getApolloClient()!.refetchQueries({
-        include: ['GetUser'],
-    })
+    const client = setUrqlClientIfNecessary(idToken)
+    const result = await client.mutation(ADD_USER, userToWrite).toPromise()
+    return result?.data.insert_users;
 }

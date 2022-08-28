@@ -1,16 +1,12 @@
 import { defineStore } from 'pinia'
-import { getAuth } from 'firebase/auth'
-import { app } from '@/services/firebase'
-import { getIdTokenAndSetClaimsIfNecessary } from '@/services/auth'
-import { getUser } from '@/services/user'
-import { clearApolloClient } from '@/services/apolloClient'
+import type {  User } from 'firebase/auth'
 
 export interface IUser {
   emailVerified: boolean,
-  email: string
-  photoURL: string
+  email: string | null
+  photoURL: string | null
   uid: string
-  displayName: string
+  displayName: string | null
 }
 
 export interface IAuth {
@@ -30,32 +26,25 @@ export const useAuthStore = defineStore({
     authenticated: (state) => state.currentUser !== null && state.idToken != null,
   },
   actions: {
-    initializeAuthListener() {
-      return new Promise((resolve) => {
-        getAuth(app).onAuthStateChanged(async (user: any) => {
-          if (user) {
-            console.log("User logged in");
-            this.idToken = await getIdTokenAndSetClaimsIfNecessary(user);
-            this.currentUser = {
-              emailVerified: user.emailVerified,
-              email: user.email,
-              photoURL: user.photoURL,
-              uid: user.uid,
-              displayName: user.displayName
-            }
-          } else {
-            console.log("User logged out");
-            this.currentUser =  null;
-            this.idToken = null;
-            clearApolloClient();
-          }
-          await getUser(user, this.idToken!);
-          resolve(true);
-        });
-      });
+    signIn(user: User, idToken: string) {
+      console.log("User logged in");
+      this.idToken = idToken;
+      this.currentUser = {
+        emailVerified: user.emailVerified,
+        email: user.email,
+        photoURL: user.photoURL,
+        uid: user.uid,
+        displayName: user.displayName
+      }
+    },
+    signOut() {
+      console.log("User logged out");
+      this.currentUser =  null;
+      this.idToken = null;
     },
     setReturnUrl(returnUrl: string) {
       this.returnUrl = returnUrl;
     },
-  }
+  },
+  persist: true,
 })

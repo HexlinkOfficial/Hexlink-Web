@@ -12,7 +12,7 @@
             <span>Yaw: start your path to web3</span>
         </v-row>
         <v-row justify="center" class="ma-0">
-            <v-btn elevation="2">
+            <v-btn elevation="2" @click="login">
                 <v-img
                     src="/images/google.svg"
                     style="height: 20px; width: 20px; margin-right: 10px;"
@@ -25,13 +25,21 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue'
+import { useRouter } from 'vue-router';
+import { socialLogin } from '@/services/auth'
 import { useAuthStore } from '@/stores/auth'
 
 export default defineComponent({
   name: 'SignInView',
   setup() {
     const store = useAuthStore();
-    return { };
+    const router = useRouter();
+
+    const login = async () => {
+        await socialLogin();
+        router.push(store.returnUrl ? store.returnUrl : "/");
+    }
+    return { login };
   },
 });
 </script>

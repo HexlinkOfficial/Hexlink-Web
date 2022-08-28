@@ -14,5 +14,21 @@ export default defineConfig({
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
     }
-  }
-})
+  },
+  optimizeDeps: {
+    include: [
+      '@apollo/client/core',
+      '@apollo/client/cache',
+      '@apollo/client/link/ws',
+      '@apollo/client/link/context',
+      '@apollo/client/utilities'
+    ],
+    exclude: ['@vue/apollo-composable']
+  },
+  build: {
+    rollupOptions: {
+      external: ['react', 'subscriptions-transport-ws', '@vue/apollo-composable']
+    }
+  },
+});
+

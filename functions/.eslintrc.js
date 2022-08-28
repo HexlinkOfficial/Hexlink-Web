@@ -8,11 +8,11 @@ module.exports = {
   },
   extends: [
     "eslint:recommended",
+    "google",
     "plugin:import/errors",
     "plugin:import/warnings",
     "plugin:import/typescript",
     "plugin:@typescript-eslint/recommended",
-    "standard",
     "plugin:prettier/recommended",
     "plugin:node/recommended",
   ],

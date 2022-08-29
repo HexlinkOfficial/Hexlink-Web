@@ -16,15 +16,15 @@ admin.initializeApp(params);
 admin.firestore().settings({ignoreUndefinedProperties: true});
 
 import {
+  createWallet,
+} from "./contract";
+
+exports.createWallet = createWallet;
+
+import {
   processSignUp,
   refreshToken,
 } from "./hasura";
 
 exports.processSignUp = processSignUp;
 exports.refreshToken = refreshToken;
-
-import {
-  createWallet,
-} from "./hardhat";
-
-exports.createWallet = createWallet;

@@ -1,52 +1,35 @@
-import { expect } from "chai";
-import { ethers, deployments } from "hardhat";
-import type { Contract } from "ethers";
+import {expect} from "chai";
+import {ethers, deployments} from "hardhat";
+import type {Contract} from "ethers";
 
 const email = "mailto:test@gmail.com";
 
 const getContract = async function(name: string) {
-    var deployment = await deployments.get(name);
-    return await ethers.getContractAt(name, deployment.address);
-}
+  const deployment = await deployments.get(name);
+  return await ethers.getContractAt(name, deployment.address);
+};
 
 const walletImplAddress = async function(admin: Contract) {
-    const artifact = await deployments.getArtifact("YawWallet");
-    const initCodeHash = ethers.utils.keccak256(artifact.bytecode);
-    return ethers.utils.getCreate2Address(
-        admin.address, ethers.constants.HashZero, initCodeHash);
-}
+  const artifact = await deployments.getArtifact("YawWallet");
+  const initCodeHash = ethers.utils.keccak256(artifact.bytecode);
+  return ethers.utils.getCreate2Address(
+      admin.address, ethers.constants.HashZero, initCodeHash);
+};
 
-describe("Yaw", function () {
+describe("Yaw", function() {
   beforeEach(async function() {
-      await deployments.fixture(['TEST']);
+    await deployments.fixture(["TEST"]);
   });
 
-  it.only("Should parse log", async function () {
-    const admin = await getContract('YawAdmin');
-    const [deployer] = await ethers.getSigners();
-
-    const salt = ethers.utils.keccak256(ethers.utils.toUtf8Bytes(email));
-    const implAddr = await walletImplAddress(admin);
-    const walletAddr = await admin.predictWalletAddress(implAddr, salt);
-    const tx = await admin.connect(deployer).clone(implAddr, salt);
-
-    const receipt = await tx.wait();
-    const artifact = await deployments.getArtifact("YawAdmin");
-    const iface = new ethers.utils.Interface(artifact.abi);
-    const log = iface.parseLog(receipt.logs[0]);
-    console.log(log.args.cloned);
-    console.log(walletAddr);
-  });
-
-  it("Should clone wallet contract", async function () {
-    const admin = await getContract('YawAdmin');
+  it("Should clone wallet contract", async function() {
+    const admin = await getContract("YawAdmin");
     const [deployer] = await ethers.getSigners();
 
     const salt = ethers.utils.keccak256(ethers.utils.toUtf8Bytes(email));
     const implAddr = await walletImplAddress(admin);
     const walletAddr = await admin.predictWalletAddress(implAddr, salt);
     await expect(admin.connect(deployer).clone(implAddr, salt))
-        .to.emit(admin, 'CloneWallet')
+        .to.emit(admin, "CloneWallet")
         .withArgs(implAddr, salt, walletAddr);
 
     // check owner
@@ -54,9 +37,9 @@ describe("Yaw", function () {
     expect(await wallet.owner()).to.eq(deployer.address);
   });
 
-  it("Should transfer token successfully", async function () {
+  it("Should transfer token successfully", async function() {
     const token = await getContract("YawToken");
-    const admin = await getContract('YawAdmin');
+    const admin = await getContract("YawAdmin");
     const [deployer] = await ethers.getSigners();
 
     // deploy wallet contract implementation and compute target address
@@ -68,11 +51,11 @@ describe("Yaw", function () {
     await expect(
         token.connect(deployer).transfer(walletAddr, 10000)
     ).to.emit(token, "Transfer")
-     .withArgs(deployer.address, walletAddr, 10000);
-     expect(await token.balanceOf(walletAddr)).to.eq(10000);
+        .withArgs(deployer.address, walletAddr, 10000);
+    expect(await token.balanceOf(walletAddr)).to.eq(10000);
 
     // create new wallet contract
-    await admin.connect(deployer).clone(implAddr, salt)
+    await admin.connect(deployer).clone(implAddr, salt);
     const wallet = await ethers.getContractAt("YawWallet", walletAddr);
 
     // send tokens

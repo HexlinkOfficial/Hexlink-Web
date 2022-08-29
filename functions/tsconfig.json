@@ -11,6 +11,6 @@
     "declaration": true
   },
   "compileOnSave": true,
-  "include": ["src", "./scripts", "./test", "./typechain", "./deploy"],
+  "include": ["src", "./tasks", "./test", "./typechain", "./deploy"],
   "files": ["./hardhat.config.ts"]
 }

@@ -1,0 +1,11 @@
+import { HardhatUserConfig } from "hardhat/config";
+import "@nomiclabs/hardhat-etherscan";
+import "@nomiclabs/hardhat-waffle";
+import "@nomiclabs/hardhat-ethers";
+import "@typechain/hardhat";
+import "hardhat-contract-sizer";
+import "hardhat-gas-reporter";
+import "hardhat-deploy";
+import "./tasks/yaw";
+declare const config: HardhatUserConfig;
+export default config;

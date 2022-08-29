@@ -22,3 +22,9 @@ import {
 
 exports.processSignUp = processSignUp;
 exports.refreshToken = refreshToken;
+
+import {
+  createWallet,
+} from "./hardhat";
+
+exports.createWallet = createWallet;

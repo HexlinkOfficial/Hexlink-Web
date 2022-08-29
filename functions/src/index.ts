@@ -22,3 +22,13 @@ import {
 
 exports.processSignUp = processSignUp;
 exports.refreshToken = refreshToken;
+
+import {
+  metadata,
+  deployWallet,
+  executeTransaction,
+} from "./yaw";
+
+exports.metadata = metadata;
+exports.deployWallet = deployWallet;
+exports.executeTransaction = executeTransaction;

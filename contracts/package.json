@@ -1,22 +1,5 @@
 {
   "name": "yaw-api",
-  "dependencies": {
-    "body-parser": "^1.20.0",
-    "cookie-parser": "^1.4.6",
-    "cors": "^2.8.5",
-    "express": "^4.18.1",
-    "firebase-admin": "^11.0.1"
-  },
-  "main": "dist/index.js",
-  "scripts": {
-    "prebuild": "tslint -c tslint.json -p tsconfig.json --fix",
-    "build": "rimraf dist/* && tsc",
-    "prestart": "npm run build",
-    "dev:start": "npm-run-all build start",
-    "dev": "nodemon --watch src -e ts,ejs --exec npm run dev:start",
-    "start": "node .",
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.1.1",
     "@nomiclabs/hardhat-etherscan": "^2.1.8",

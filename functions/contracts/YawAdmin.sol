@@ -8,22 +8,21 @@ import "@openzeppelin/contracts/utils/Create2.sol";
 import "./YawWallet.sol";
 
 contract YawAdmin is Ownable {
-    event InitWallet(address walletAddress);
-    event NewWallet(address newWallet);
+    event DeployWallet(address walletAddress);
+    event CloneWallet(address source, bytes32 salt, address newWallet);
 
-    function init() external onlyOwner {
-        address wallet = Create2.deploy(0, 0, type(YawWallet).creationCode);
-        emit InitWallet(wallet);
+    function deploy() external onlyOwner {
+        address wallet = Create2.deploy(0, bytes32(0), type(YawWallet).creationCode);
+        emit DeployWallet(wallet);
     }
 
-    function create(
-        address walletImplAddress,
-        bytes32 salt
-    ) external onlyOwner {
-        address cloned = Clones.cloneDeterministic(
-            walletImplAddress,
-            salt
-        );
-        emit NewWallet(cloned);
+    function clone(address source, bytes32 salt) external onlyOwner {
+        address cloned = Clones.cloneDeterministic(source, salt);
+        Ownable(cloned).transferOwnership(address(this));
+        emit CloneWallet(source, salt, cloned);
+    }
+
+    function predictWalletAddress(address source, bytes32 salt) external view returns(address) {
+        return Clones.predictDeterministicAddress(source, salt);
     }
 }

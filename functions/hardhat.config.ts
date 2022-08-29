@@ -3,11 +3,9 @@ import "@nomiclabs/hardhat-etherscan";
 import "@nomiclabs/hardhat-waffle";
 import "@nomiclabs/hardhat-ethers";
 import "@typechain/hardhat";
-import "solidity-coverage";
 import "hardhat-contract-sizer";
 import "hardhat-gas-reporter";
 import "hardhat-deploy";
-import "hardhat-deploy-ethers";
 
 task('abi', 'Prints abi of contract')
     .addParam('contract', 'contract name')
@@ -46,7 +44,7 @@ const config: HardhatUserConfig = {
     currency: "USD",
   },
   namedAccounts: {
-    admin: {
+    deployer: {
       default: 0
     },
   },

@@ -3,10 +3,13 @@ pragma solidity ^0.8.4;
 
 import "hardhat/console.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/Address.sol";
+
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 contract YawWallet is ReentrancyGuard {
-    Ownable constant public ADMIN = Ownable(0xE0f5206BBD039e7b0592d8918820024e2a7437b9);
+    using Address for address;
+
     address private _owner;
 
     event OwnershipTransferred(
@@ -14,16 +17,22 @@ contract YawWallet is ReentrancyGuard {
         address indexed newOwner
     );
 
-    modifier onlyOwner() { _checkOwner();
+    modifier onlyOwner() {
+        _checkOwner();
         _;
     }
 
     function owner() public view virtual returns (address) {
-        return _owner == address(0) ? ADMIN.owner() : _owner;
+        if (_owner.isContract()) {
+            return Ownable(_owner).owner();
+        } else {
+            return _owner;
+        }
     }
 
     function _checkOwner() internal view virtual {
-        require(owner() == msg.sender, "YAW001");
+        address ownerAddr = owner();
+        require(ownerAddr == address(0) || ownerAddr == msg.sender, "YAW001");
     }
 
     function transferOwnership(address newOwner) public virtual onlyOwner {

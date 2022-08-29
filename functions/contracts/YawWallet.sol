@@ -31,11 +31,15 @@ contract YawWallet is ReentrancyGuard {
     }
 
     function _checkOwner() internal view virtual {
-        address ownerAddr = owner();
-        require(ownerAddr == address(0) || ownerAddr == msg.sender, "YAW001");
+        require(owner() == msg.sender, "YAW001");
     }
 
-    function transferOwnership(address newOwner) public virtual onlyOwner {
+    function initOwner(address ownerAddr) external {
+        require(_owner == address(0) && ownerAddr != address(0), "YAW005");
+        _owner = ownerAddr;
+    }
+
+    function transferOwnership(address newOwner) external onlyOwner {
         require(newOwner != address(0), "YAW002");
         address oldOwner = owner();
         _owner = newOwner;

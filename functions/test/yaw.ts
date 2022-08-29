@@ -21,20 +21,26 @@ describe("Yaw", function () {
       await deployments.fixture(['TEST']);
   });
 
-  it("Should deploy wallet contract", async function () {
+  it.only("Should parse log", async function () {
     const admin = await getContract('YawAdmin');
     const [deployer] = await ethers.getSigners();
 
-    expect(await admin.owner()).to.eq(deployer.address);
-    await expect(admin.connect(deployer).deploy())
-        .to.emit(admin, 'DeployWallet')
-        .withArgs(await walletImplAddress(admin));
+    const salt = ethers.utils.keccak256(ethers.utils.toUtf8Bytes(email));
+    const implAddr = await walletImplAddress(admin);
+    const walletAddr = await admin.predictWalletAddress(implAddr, salt);
+    const tx = await admin.connect(deployer).clone(implAddr, salt);
+
+    const receipt = await tx.wait();
+    const artifact = await deployments.getArtifact("YawAdmin");
+    const iface = new ethers.utils.Interface(artifact.abi);
+    const log = iface.parseLog(receipt.logs[0]);
+    console.log(log.args.cloned);
+    console.log(walletAddr);
   });
 
   it("Should clone wallet contract", async function () {
     const admin = await getContract('YawAdmin');
     const [deployer] = await ethers.getSigners();
-    await admin.connect(deployer).deploy();
 
     const salt = ethers.utils.keccak256(ethers.utils.toUtf8Bytes(email));
     const implAddr = await walletImplAddress(admin);
@@ -54,7 +60,6 @@ describe("Yaw", function () {
     const [deployer] = await ethers.getSigners();
 
     // deploy wallet contract implementation and compute target address
-    await admin.connect(deployer).deploy();
     const implAddr = await walletImplAddress(admin);
     const salt = ethers.utils.keccak256(ethers.utils.toUtf8Bytes(email));
     const walletAddr = await admin.predictWalletAddress(implAddr, salt);

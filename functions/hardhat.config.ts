@@ -6,6 +6,7 @@ import "@typechain/hardhat";
 import "hardhat-contract-sizer";
 import "hardhat-gas-reporter";
 import "hardhat-deploy";
+import "./tasks/yaw"
 
 task('abi', 'Prints abi of contract')
     .addParam('contract', 'contract name')
@@ -18,11 +19,8 @@ task('abi', 'Prints abi of contract')
         return artifact.abi;
     });
 
-// This is a sample Hardhat task. To learn how to create your own go to
-// https://hardhat.org/guides/create-task.html
 task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
   const accounts = await hre.ethers.getSigners();
-
   for (const account of accounts) {
     console.log(account.address);
   }

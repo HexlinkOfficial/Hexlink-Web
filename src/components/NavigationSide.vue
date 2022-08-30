@@ -8,7 +8,7 @@
     <a-row justify="center" style="margin-top: 100px;">
       <a-col align-self="center">
         <a-row justify="center">
-          <a-avatar :src="user?.photoURL!" :size="{ xs: 24, sm: 32, md: 40, lg: 64, xl: 80, xxl: 100 }">
+          <a-avatar :src="user?.photoURL!" :size="64">
           </a-avatar>
         </a-row>
         <a-row justify="center">

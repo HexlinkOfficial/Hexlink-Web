@@ -27,19 +27,17 @@ const walletContract = function(contractAddress: string) {
   return new ethers.Contract(contractAddress, YawWallet.abi, signer);
 };
 
-const salt = function(email: string) {
+const genSalt = function(email: string) {
   return ethers.utils.keccak256(ethers.utils.toUtf8Bytes(`mailto:${email}`));
 };
 
-const walletImplAddress = async function() {
-  const initCodeHash = ethers.utils.keccak256(YawWallet.bytecode);
+const walletAddress = function(email: string | null = null) {
+  const salt = email ? genSalt(email) : ethers.constants.HashZero;
   return ethers.utils.getCreate2Address(
-      YawAdmin.address, ethers.constants.HashZero, initCodeHash);
-};
-
-const walletAddress = async function(email: string) {
-  const yawAdmin = adminContract();
-  return await yawAdmin.predictWalletAddress(walletImplAddress(), salt(email));
+      YawAdmin.address,
+      salt,
+      ethers.utils.keccak256(YawWallet.bytecode)
+  );
 };
 
 export const metadata = functions.https.onCall(async (_data, context) => {
@@ -52,19 +50,15 @@ export const metadata = functions.https.onCall(async (_data, context) => {
   if (user.email) {
     return {
       code: 200,
-      admin: {
-        address: YawAdmin.address,
-        abi: YawAdmin.abi,
-      },
-      walletImpl: {
-        address: walletImplAddress(),
-        abi: YawWallet.abi,
-      },
-      token: {
-        address: YawToken.address,
-        abi: YawToken.abi,
-      },
+      admin: YawAdmin.address,
+      walletImpl: walletAddress(),
+      token: YawToken.address,
       wallet: walletAddress(user.email),
+      abi: {
+        admin: YawAdmin.abi,
+        wallet: YawWallet.abi,
+        token: YawToken.abi,
+      },
     };
   } else {
     return {code: 400, message: "Email not set"};
@@ -80,7 +74,7 @@ export const deployWallet = functions.https.onCall(async (_data, context) => {
   const user = await getAuth().getUser(uid);
   if (user.email) {
     const yawAdmin = adminContract();
-    const tx = await yawAdmin.clone(walletImplAddress(), salt(user.email));
+    const tx = await yawAdmin.clone(walletAddress(), genSalt(user.email));
     return {code: 200, txHash: tx.hash};
   } else {
     return {code: 400, message: "Email not set"};

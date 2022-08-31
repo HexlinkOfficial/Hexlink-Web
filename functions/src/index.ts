@@ -26,9 +26,13 @@ exports.refreshToken = refreshToken;
 import {
   metadata,
   deployWallet,
-  executeTransaction,
+  executeTx,
+  estimateERC20Transfer,
+  estimateETHTransfer,
 } from "./yaw";
 
 exports.metadata = metadata;
 exports.deployWallet = deployWallet;
-exports.executeTransaction = executeTransaction;
+exports.executeTx = executeTx;
+exports.estimateERC20Transfer = estimateERC20Transfer;
+exports.estimateETHTransfer = estimateETHTransfer;

@@ -1,8 +1,8 @@
 <template>
     <a-modal
         v-model:visible="showSend"
-        @cancel="clearSendInput"
-        :title="token.balance + ' ' + token.symbol"
+        @cancel="clearSendInput()"
+        :title="'You have ' + token.balance + ' ' + token.symbol"
         style="width: 100%; max-width: 800px;"
     >
         <a-steps :current="sendInput.step">
@@ -30,15 +30,12 @@
                     name="amount"
                     :rules="[{ validator: sendAmountValidator, trigger: 'change' }]"
                 >
-                    <a-input-number v-model:value="sendInput.amount" style="width: calc(100% - 100px); min-width: 100px;"></a-input-number>
-                    <a-button
-                        type="primary"
-                        size="small"
-                        class="action"
-                        @click="sendInput.amount = token.balance"
-                    >
-                        Max
-                    </a-button>
+                    <a-input-search
+                        v-model:value="sendInput.amount"
+                        placeholder="Amount to send"
+                        enter-button="Max"
+                        @search="sendInput.amount = token.balance.toString()"
+                    />
                 </a-form-item>
             </a-form>
         </a-row>
@@ -60,18 +57,47 @@
                 </template>
             </a-list>
         </a-row>
-        <a-row justify="center" v-if="sendInput.step == 2">
-           <a-spin></a-spin>
+        <a-row justify="start" v-if="sendInput.step == 2">
+            <a-col>
+                <a-typography-paragraph
+                    style="margin-top: 10px;"
+                >
+                    Receiver: {{sendInput.receiver}}
+                </a-typography-paragraph>
+                <a-typography-paragraph
+                    style="margin-top: 10px;"
+                >
+                    Amount to send: {{sendInput.amount}}
+                </a-typography-paragraph>
+                <a-typography-paragraph
+                    style="margin-top: 10px;"
+                >
+                    New Balance: {{token.balance - Number(sendInput.amount)}}
+                </a-typography-paragraph>
+                <a-row v-if="sendInput.confirming" style="margin-top: 10px;">
+                    <span>Estimating service Fee </span>
+                    <a-spin style="margin-left: 10px;"></a-spin>
+                </a-row>
+                <a-row v-if="!sendInput.confirming" style="margin-top: 10px;">
+                    <a-tooltip placement="top" :title="'ETH Price: $' + sendInput.gasEstimation.ethPrice">
+                        <span>Base service Fee: ${{baseCostAsUSD.toFixed(2)}} ({{baseCostAsETH}} ETH)</span>
+                        <br />
+                        <span>Max service Fee: ${{maxCostAsUSD.toFixed(2)}} {{maxCostAsETH}} ETH)</span>
+                    </a-tooltip>
+                </a-row>
+            </a-col>
         </a-row>
         <a-row justify="center" v-if="sendInput.step == 3">
+            <a-spin v-if="sendInput.sending"></a-spin>
             <a-typography-paragraph
+                v-if="!sendInput.sending"
                 :copyable="{ text: sendInput.response.txHash }"
                 style="margin-top: 10px;"
             >
                 Transaction sent, transaction id is {{sendInput.response.txHash}}
             </a-typography-paragraph>
         </a-row>
-        <a-row justify="center">
+        <a-row justify="center" style="margin-top: 20px;">
             <a-button
                 v-if="sendInput.step == 0"
                 type="primary"
@@ -83,10 +109,18 @@
             <a-button
                 v-if="sendInput.step == 1"
                 type="primary"
-                @click="executeSending()"
+                @click="toConfirmSend()"
                 :disabled="!validateSendAmount(sendInput.amount).success"
             >
-                Send
+                Next
+            </a-button>
+            <a-button
+                v-if="sendInput.step == 2"
+                type="primary"
+                :disabled="sendInput.confirming"
+                @click="executeSending()"
+            >
+                Execute
             </a-button>
             <a-button
                 v-if="sendInput.step == 1"
@@ -101,12 +135,15 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import type { Rule } from 'ant-design-vue/es/form';
 import * as ethers from "ethers";
 
 import {
     prettyPrintAddress,
+    estimateERC20Transfer,
+    estimateETHTransfer,
+    getETHPrice,
     type Token,
 } from "@/services/ethers";
 import type { Contact } from "@/services/contacts";
@@ -114,8 +151,15 @@ import { validateEmail } from '@/services/validator';
 
 export interface SendInput {
     receiver: string,
-    amount: number,
+    amount: string,
     step: number,
+    sending: boolean,
+    confirming: boolean,
+    gasEstimation: {
+        baseCost: ethers.BigNumber,
+        maxCost: ethers.BigNumber,
+        ethPrice: number,
+    }
     response: {
         txHash: string,
     },
@@ -144,10 +188,10 @@ const sendSteps = [
         title: 'Set Amount',
     },
     {
-        title: 'Executing',
+        title: 'Confirm',
     },
     {
-        title: 'Done',
+        title: 'Execute',
     }
 ];
 
@@ -162,40 +206,43 @@ const props = defineProps({
   }
 });
 
-const sendInput = ref<SendInput>({
+const EMPTY_INPUT: SendInput = {
     receiver: "",
-    amount: 0,
+    amount: "0",
     step: 0,
+    sending: false,
+    confirming: false,
+    gasEstimation: {
+        baseCost: ethers.BigNumber.from(0),
+        maxCost: ethers.BigNumber.from(0),
+        ethPrice: 0,
+    },
     response: {
         txHash: "",
     }
-});
-
+};
+const sendInput = ref<SendInput>({...EMPTY_INPUT});
 const emit = defineEmits(['close']);
 const clearSendInput = function() {
-    sendInput.value = {
-        receiver: "",
-        amount: 0,
-        step: 0,
-        response: {
-            txHash: "",
-        }
-    };
-    emit('close')
+    sendInput.value = {...EMPTY_INPUT};
+    emit('close');
 };
 
-const validateSendAmount = function(value: number) {
+const validateSendAmount = function(value: string) {
+    const amount = Number(value);
     let maxAllowed = props.token.balance;
-    if (value <= 0) {
+    if (isNaN(amount)) {
+        return {message: 'Invalid amount, please input a valid number'};
+    } if (amount <= 0) {
         return {message: 'Amount must be higher than 0'};
-    } else if (value > maxAllowed) {
+    } else if (amount > maxAllowed) {
         return {message: 'Amount cannot be higher than your balance'};
     } else {
         return {success: true};
     }
 }
 
-const sendAmountValidator = async function(_rule: Rule, value: number) {
+const sendAmountValidator = async function(_rule: Rule, value: string) {
     const result = validateSendAmount(value);
     if (result.success) {
         return Promise.resolve();
@@ -237,14 +284,53 @@ function sleep(ms: number) {
 
 const executeSending = async function() {
     sendInput.value.step++;
+    sendInput.value.sending = true;
     // sendInput.value.response.txHash = (await send(
     //     props.token,
     //     sendInput.value.receiver,
-    //     sendInput.value.amount,
+    //     Number(sendInput.value.amount),
     // )).txHash;
     await sleep(3000);
     sendInput.value.response.txHash = "0x12345";
-    sendInput.value.step++;
+    sendInput.value.sending = false;
 }
+
+const toConfirmSend = async function() {
+    sendInput.value.step++;
+    sendInput.value.confirming = true;
+    const ethPrice = await getETHPrice();
+    if (props.token.contract) {
+        const gasEstimation = await estimateERC20Transfer(
+            props.token,
+            sendInput.value.receiver,
+            Number(sendInput.value.amount)
+        );
+        sendInput.value.gasEstimation = {...gasEstimation, ethPrice}
+    } else {
+        const gasEstimation = await estimateETHTransfer();
+        sendInput.value.gasEstimation = {...gasEstimation, ethPrice}
+    }
+    sendInput.value.confirming = false;
+}
+
+const baseCostAsETH = computed(() => {
+    return  Number(ethers.utils.formatEther(
+        sendInput.value.gasEstimation.baseCost
+    ));
+});
+
+const baseCostAsUSD = computed(() => {
+   return baseCostAsETH.value * sendInput.value.gasEstimation.ethPrice;
+});
+
+const maxCostAsETH = computed(() => {
+    return Number(ethers.utils.formatEther(
+        sendInput.value.gasEstimation.maxCost
+    ));
+});
+
+const maxCostAsUSD = computed(() => {
+    return maxCostAsETH.value * sendInput.value.gasEstimation.ethPrice
+});
 </script>
 

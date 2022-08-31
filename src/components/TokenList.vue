@@ -36,34 +36,52 @@
     <a-row justify="center" v-for="(token, index) in tokens">
         <a-card style="margin: 20px; width: 100%; max-width: 800px">
             <template #title>
-                <a-tooltip placement="top" title="Explore at Etherscan">
-                    <a :href="'https://goerli.etherscan.io/address/' + token.contract">
-                        <a-avatar src="/src/assets/token.png"/>
-                    </a>
-                </a-tooltip>
-                <span style="margin-left: 15px; padding: 0px;">{{token.balance}}</span>
-                <span style="margin-left: 5px; padding: 0px;">{{token.symbol}}</span>
+                <a-row align="middle">
+                    <a-col style="margin-right: 20px;">
+                        <a-tooltip placement="top" title="Explore at Etherscan">
+                            <a :href="'https://goerli.etherscan.io/address/' + token.contract">
+                                <a-avatar src="/src/assets/token.png"/>
+                            </a>
+                        </a-tooltip>
+                    </a-col>
+                    <a-col>
+                        <span>{{token.name}}</span>
+                        <br />
+                        <span>Price: ${{token.price || 1000}}</span>
+                    </a-col>
+                </a-row>
+
             </template>
             <template #extra>
-                <a-button
-                    shape="round"
-                    @click="handleSend(token)"
-                >
-                    <template #icon><send-outlined /></template>
-                    Send
-                </a-button>
-                <a-tooltip>
-                    <template #title>
-                        <span>Transaction History</span>
-                    </template>
-                    <a-button
-                        style="margin-left: 10px;"
-                        shape="round"
-                        href="'/transactions?tokenContract=' + token.contract"
-                    >
-                        <template #icon><transaction-outlined /></template>
-                    </a-button>
-                </a-tooltip>
+                <a-row>
+                    <a-col style="text-align: right;">
+                        <span>{{token.balance}} {{token.symbol}}</span>
+                        <br />
+                        <span>${{(token.price || 1000) * token.balance}}</span>
+                    </a-col>
+                    <a-col  style="margin-left: 10px; margin-right: 10px;">
+                        <a-button
+                            shape="round"
+                            @click="handleSend(token)"
+                        >
+                            <template #icon><send-outlined /></template>
+                            Send
+                        </a-button>
+                    </a-col>
+                    <a-col>
+                        <a-tooltip>
+                            <template #title>
+                                <span>Transaction History</span>
+                            </template>
+                            <a-button
+                                shape="round"
+                                href="'/transactions?tokenContract=' + token.contract"
+                            >
+                                <template #icon><transaction-outlined /></template>
+                            </a-button>
+                        </a-tooltip>
+                    </a-col>
+                </a-row>
             </template>
         </a-card>
     </a-row>
@@ -99,7 +117,7 @@
 import { ref, onMounted } from "vue";
 import { SendOutlined, DownloadOutlined, SwapOutlined, UploadOutlined, TransactionOutlined } from '@ant-design/icons-vue';
 import type { Rule } from 'ant-design-vue/es/form';
-import { message } from 'ant-design-vue';
+import { message, Row } from 'ant-design-vue';
 
 import {
     isContract,

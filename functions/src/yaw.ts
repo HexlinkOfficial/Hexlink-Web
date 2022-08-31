@@ -43,12 +43,23 @@ const genSalt = function(email: string) {
   return ethers.utils.keccak256(ethers.utils.toUtf8Bytes(`mailto:${email}`));
 };
 
-const walletAddress = function(email: string | null = null) {
-  const salt = email ? genSalt(email) : ethers.constants.HashZero;
+const walletImplAddress = function() {
   return ethers.utils.getCreate2Address(
       YawAdmin.address,
-      salt,
+      ethers.constants.HashZero,
       ethers.utils.keccak256(YawWallet.bytecode)
+  );
+};
+
+const walletAddress = async function(email: string) {
+  const contract = new ethers.Contract(
+      YawAdmin.address,
+      YawAdmin.abi,
+      getSigner()
+  );
+  return await contract.predictWalletAddress(
+      walletImplAddress(),
+      genSalt(email)
   );
 };
 
@@ -63,9 +74,9 @@ export const metadata = functions.https.onCall(async (_data, context) => {
     return {
       code: 200,
       admin: YawAdmin.address,
-      walletImpl: walletAddress(),
+      walletImpl: walletImplAddress(),
       token: YawToken.address,
-      wallet: walletAddress(user.email),
+      wallet: await walletAddress(user.email),
       abi: {
         admin: YawAdmin.abi,
         wallet: YawWallet.abi,
@@ -87,18 +98,18 @@ export const deployWallet = functions.https.onCall(async (_data, context) => {
   const user = await getAuth().getUser(uid);
   if (user.email) {
     const yawAdmin = adminContract();
-    const tx = await yawAdmin.clone(walletAddress(), genSalt(user.email));
+    const tx = await yawAdmin.clone(walletImplAddress(), genSalt(user.email));
     return {code: 200, txHash: tx.hash};
   } else {
     return {code: 400, message: "Email not set"};
   }
 });
 
-const genAddressIfNecessary = (receiver: string) => {
+const genAddressIfNecessary = async (receiver: string) => {
   if (ethers.utils.isAddress(receiver)) {
     return receiver;
   } else {
-    return walletAddress(receiver);
+    return await walletAddress(receiver);
   }
 };
 
@@ -129,7 +140,7 @@ const validateUser = async function(context: any) {
   }
   const user = await getAuth().getUser(uid);
   if (user.email) {
-    return {success: true, user};
+    return {success: true, email: user.email, user: user};
   } else {
     return {code: 400, message: "Email not set"};
   }
@@ -140,19 +151,19 @@ export const sendETH = functions.https.onCall(async (data, context) => {
   if (!result.success) {
     return {code: result.code, message: result.message};
   }
-  const {user} = result;
-  const yawWallet = walletContract(walletAddress(user.email));
-  const receiver = genAddressIfNecessary(data.receiver);
+  const {email, user} = result;
+  const yawWallet = walletContract(await walletAddress(email));
+  const receiver = await genAddressIfNecessary(data.receiver);
   const tx = await yawWallet.execute(
       receiver,
-      parseEther(data.amount),
+      parseEther(data.amount.toString()),
       50000,
-      "",
+      [],
   );
-  if (!ethers.utils.getAddress(receiver)) {
+  if (!ethers.utils.isAddress(data.receiver)) {
     await notify(
-        receiver,
-        "Token Received",
+        data.receiver,
+        "[YAW] Token Received",
         `${user.displayName} just sent you ${data.amount} ETH.`
     );
   }
@@ -164,9 +175,9 @@ export const sendERC20 = functions.https.onCall(async (data, context) => {
   if (!result.success) {
     return {code: result.code, message: result.message};
   }
-  const {user} = result;
-  const yawWallet = walletContract(walletAddress(user.email));
-  const receiver = genAddressIfNecessary(data.receiver);
+  const {email, user} = result;
+  const yawWallet = walletContract(await walletAddress(email));
+  const receiver = await genAddressIfNecessary(data.receiver);
   const amount = normalizeAmountToSend(data.amount, data.token.decimals);
   const tx = await yawWallet.execute(
       data.token.contract,
@@ -174,10 +185,10 @@ export const sendERC20 = functions.https.onCall(async (data, context) => {
       65000, // gas
       genERC20SendTxData(receiver, amount),
   );
-  if (!ethers.utils.getAddress(receiver)) {
+  if (!ethers.utils.isAddress(data.receiver)) {
     await notify(
-        receiver,
-        "Token Received",
+        data.receiver,
+        "[YAW] Token Received",
         // eslint-disable-next-line max-len
         `${user.displayName} just sent you ${data.amount} ${data.token.symbol}.`
     );
@@ -190,8 +201,8 @@ export const executeTx = functions.https.onCall(async (data, context) => {
   if (!result.success) {
     return {code: result.code, message: result.message};
   }
-  const {user} = result;
-  const yawWallet = walletContract(walletAddress(user.email));
+  const {email} = result;
+  const yawWallet = walletContract(await walletAddress(email));
   const tx = await yawWallet.execute(
       data.contract,
       data.amount,
@@ -207,13 +218,13 @@ export const estimateERC20Transfer = functions.https.onCall(
       if (!result.success) {
         return {code: result.code, message: result.message};
       }
-      const {user} = result;
+      const {email} = result;
 
       const provider = getProvider();
       const feeData = await provider.getFeeData();
 
-      const yawWallet = walletContract(walletAddress(user.email));
-      const receiver = genAddressIfNecessary(data.receiver);
+      const yawWallet = walletContract(await walletAddress(email));
+      const receiver = await genAddressIfNecessary(data.receiver);
       const amount = normalizeAmountToSend(data.amount, data.token.decimals);
       const gasCost = await yawWallet.estimateGas.execute(
           data.token.contract,

@@ -22,6 +22,12 @@ contract YawWallet is ReentrancyGuard {
         _;
     }
 
+    receive() external payable { 
+    }
+
+    fallback() external payable {
+    }
+
     function owner() public view virtual returns (address) {
         if (_owner.isContract()) {
             return Ownable(_owner).owner();

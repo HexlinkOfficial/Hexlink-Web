@@ -19,7 +19,7 @@
               {{ user?.email }}
           </a-typography-paragraph>
           <a-typography-paragraph :copyable="{ text: address }">
-              {{ prettyPrintAddress(address) }}
+              {{ addressText }}
           </a-typography-paragraph>
         </a-row>
       </a-col>
@@ -63,10 +63,9 @@
 </template>
   
 <script setup lang="ts">
-import { computed } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { signOutFirebase } from '@/services/auth';
 import { useRouter } from 'vue-router';
-import { useAuthStore } from '@/stores/auth';
 import {
   HistoryOutlined,
   DollarOutlined,
@@ -75,16 +74,26 @@ import {
   ContactsOutlined
 } from '@ant-design/icons-vue';
 import { prettyPrintAddress, genAddress } from '@/services/ethers';
+import { useAuthStore } from '@/stores/auth';
 import YawAdmin from "@/services/YawAdmin.json";
 import YawWallet from "@/services/YawWallet.json";
 
-const router = useRouter();
 const store = useAuthStore();
 const user = store.currentUser;
-const address = computed(() => {
-  return genAddress(user?.email, YawAdmin.address, YawWallet.bytecode);
+const address = ref<string>("");
+onMounted(async () => {
+  address.value = await genAddress(user?.email, YawAdmin, YawWallet);;
 });
 
+const addressText = computed(() => {
+  if (address.value) {
+    return prettyPrintAddress(address.value);
+  } else {
+    return "";
+  }
+})
+
+const router = useRouter();
 const logout = () => {
   signOutFirebase();
   router.push("/signin");

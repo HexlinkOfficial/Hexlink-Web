@@ -1,8 +1,9 @@
 import {expect} from "chai";
 import {ethers, deployments} from "hardhat";
-import type {Contract} from "ethers";
+import {Contract, providers} from "ethers";
 
-const email = "mailto:test@gmail.com";
+const sender = "mailto:sender@gmail.com";
+const receiver = "mailto:receiver@gmail.com";
 
 const getContract = async function(name: string) {
   const deployment = await deployments.get(name);
@@ -25,7 +26,7 @@ describe("Yaw", function() {
     const admin = await getContract("YawAdmin");
     const [deployer] = await ethers.getSigners();
 
-    const salt = ethers.utils.keccak256(ethers.utils.toUtf8Bytes(email));
+    const salt = ethers.utils.keccak256(ethers.utils.toUtf8Bytes(sender));
     const implAddr = await walletImplAddress(admin);
     const walletAddr = await admin.predictWalletAddress(implAddr, salt);
     await expect(admin.connect(deployer).clone(implAddr, salt))
@@ -44,10 +45,10 @@ describe("Yaw", function() {
 
     // deploy wallet contract implementation and compute target address
     const implAddr = await walletImplAddress(admin);
-    const salt = ethers.utils.keccak256(ethers.utils.toUtf8Bytes(email));
+    const salt = ethers.utils.keccak256(ethers.utils.toUtf8Bytes(sender));
     const walletAddr = await admin.predictWalletAddress(implAddr, salt);
 
-    // receive tokens before token created
+    // receive tokens before wallet created
     await expect(
         token.connect(deployer).transfer(walletAddr, 10000)
     ).to.emit(token, "Transfer")
@@ -65,9 +66,46 @@ describe("Yaw", function() {
         "transfer",
         [deployer.address, 5000]
     );
+    expect(await token.balanceOf(wallet.address)).to.eq(10000);
     await wallet.connect(deployer).execute(
         token.address, 0, 65000, txData
     );
     expect(await token.balanceOf(wallet.address)).to.eq(5000);
+  });
+
+  it("Should transfer eth successfully", async function() {
+    const token = await getContract("YawToken");
+    const admin = await getContract("YawAdmin");
+    const [deployer] = await ethers.getSigners();
+
+    // deploy wallet contract implementation and compute target address
+    const implAddr = await walletImplAddress(admin);
+    const salt = ethers.utils.keccak256(ethers.utils.toUtf8Bytes(sender));
+    const senderAddr = await admin.predictWalletAddress(implAddr, salt);
+
+    // receive eth before wallet created
+    const tx = await deployer.sendTransaction({
+      to: senderAddr,
+      value: ethers.utils.parseEther("1.0")
+    });
+    await tx.wait();
+    expect(
+      await ethers.provider.getBalance(senderAddr)
+    ).to.eq(ethers.utils.parseEther("1.0"));
+
+    // create new wallet contract
+    await admin.connect(deployer).clone(implAddr, salt);
+    const wallet = await ethers.getContractAt("YawWallet", senderAddr);
+
+    // send ETH
+    const receiverAddr = await admin.predictWalletAddress(
+        implAddr, ethers.utils.keccak256(ethers.utils.toUtf8Bytes(receiver))
+    );
+    await wallet.connect(deployer).execute(
+        receiverAddr, ethers.utils.parseEther("0.5"), 65000, []
+    );
+    expect(
+      await ethers.provider.getBalance(receiverAddr)
+    ).to.eq(ethers.utils.parseEther("0.5"));
   });
 });

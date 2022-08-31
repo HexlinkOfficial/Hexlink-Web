@@ -1,8 +1,13 @@
 <template>
     <a-row justify="center" align="bottom" style="min-height: 150px;">
-        <a-typography-title>$ {{metadata?.balance || 0}}</a-typography-title>
+        <a-col style="text-align: center;">
+            <span style="font-size: 2em; font-weight: bold;">${{dynamicBalance}}</span>
+            <br />
+            <span style="font-size: 1.2em;">Total Assets </span>
+            <span style="font-size: 1.2em; font-weight: bold;"> ${{totalAssets}}</span>
+        </a-col>
     </a-row>
-    <a-row justify="center" style="margin-bottom: 50px;">
+    <a-row justify="center" style="margin-top: 20px; margin-bottom: 50px;">
         <a-button size="large" class="action">
             <template #icon><download-outlined /></template>
             Deposit
@@ -19,7 +24,7 @@
             Swap
         </a-button>
     </a-row>
-    <a-row justify="center" style="margin-top: 20px;">
+    <a-row justify="center" style="margin: 20px;">
         <a-button
             size="large"
             block
@@ -114,10 +119,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { SendOutlined, DownloadOutlined, SwapOutlined, UploadOutlined, TransactionOutlined } from '@ant-design/icons-vue';
 import type { Rule } from 'ant-design-vue/es/form';
-import { message, Row } from 'ant-design-vue';
+import { message } from 'ant-design-vue';
 
 import {
     isContract,
@@ -126,12 +131,23 @@ import {
     normalizeBalance,
     getTokenBalance,
     getBalances,
+    genAddress,
     type Token,
 } from "@/services/ethers";
 import type { IMetadata, IToken } from "@/services/ethers";
 import tokenList from "@/services/tokens.json";
 import ERC20 from "@/services/ERC20.json";
 import TokenSender from "@/components/TokenSender.vue";
+
+import { useAuthStore } from '@/stores/auth';
+import YawAdmin from "@/services/YawAdmin.json";
+import YawWallet from "@/services/YawWallet.json";
+
+const store = useAuthStore();
+const user = store.currentUser;
+const address = computed(async () => {
+  return await genAddress(user?.email, YawAdmin, YawWallet);
+});
 
 const loading = ref<boolean>(true);
 const tokens = ref<Token[]>([]);
@@ -151,13 +167,13 @@ const tokenToSend = ref<Token>({
 });
 
 onMounted(async () => {
-    metadata.value = await getYawMetadata();
     const tempTokens = await getBalances(
         tokenList.tokens,
-        metadata.value.wallet
+        address.value,
     );
     loading.value = false;
     tokens.value = tempTokens;
+    metadata.value = await getYawMetadata();
 });
 
 const validateContract = async function(_rule: Rule, value: string) {
@@ -195,6 +211,19 @@ const handleImport = async function() {
     }
     showImport.value = false;
 }
+
+const totalAssets = computed(() => {
+    let total: number = 0;
+    for (const token of tokens.value) {
+        total += (token.balance || 0) * (token.price || 0);
+    }
+    return total + dynamicBalance.value;
+});
+
+const dynamicBalance = computed(() => {
+    const token = tokens.value.find(t => t.symbol === 'YAW');
+    return (token?.balance || 0) * 0.01;
+});
 </script>
 
 <style lang="less" scoped>

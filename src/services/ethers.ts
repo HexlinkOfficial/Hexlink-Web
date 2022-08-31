@@ -4,8 +4,6 @@ import { getFunctions, httpsCallable } from 'firebase/functions'
 
 const functions = getFunctions();
 
-let provider: Provider | null = null;
-
 const BALANCE_ABI = [
     "function balanceOf(address owner) view returns (uint256)",
 ];
@@ -52,6 +50,7 @@ export interface GasEstimation {
     maxCost: ethers.BigNumber
 }
 
+let provider: Provider | null = null;
 export function getProvider() {
     if (!provider) {
         provider = new ethers.providers.AlchemyProvider(
@@ -107,7 +106,7 @@ export async function getBalances(tokens: IToken[], wallet: string) : Promise<To
             result.push({...t, balance: normalized});
         } else {
             const balance = await getProvider().getBalance(wallet);
-            const normalized = normalizeBalance(balance, 18);
+            const normalized = Number(ethers.utils.formatEther(balance));
             result.push({...t, balance: normalized});
         }
     }
@@ -122,7 +121,7 @@ export function normalizeBalance(balance: ethers.BigNumber, decimals: number) : 
 export function prettyPrintAddress(address: string) {
     if (address) {
         const len = address.length;
-        return address.substring(0, 4) + "..." + address.substring(len - 4, len - 1)
+        return address.substring(0, 4) + "..." + address.substring(len - 4, len)
     }
     return "N/A";
 }
@@ -131,30 +130,29 @@ const genSalt = function(email: string) {
     return ethers.utils.keccak256(ethers.utils.toUtf8Bytes(`mailto:${email}`));
 };
   
-export function genAddress(email: string | null | undefined, admin: string, initCode: any) {
-    if (!email) {
-        return "";
-    }
-    const salt = email ? genSalt(email) : ethers.constants.HashZero;
-    return ethers.utils.getCreate2Address(
-        admin,
-        salt,
-        ethers.utils.keccak256(initCode)
+export async function genAddress(email: string | null | undefined, admin: any, wallet: any) {
+    if (!email) return "";
+    const contract = new ethers.Contract(admin.address, admin.abi, getProvider());
+    const source = ethers.utils.getCreate2Address(
+        admin.address,
+        ethers.constants.HashZero,
+        ethers.utils.keccak256(wallet.bytecode)
     );
+    return await contract.predictWalletAddress(source, genSalt(email));
 };
 
 export async function send(
     token: Token,
-    recevier: string,
+    receiver: string,
     amount: number
 ) : Promise<{txHash: string}> {
     if (token.contract) {
         const sendERC20 = httpsCallable(functions, 'sendERC20');
-        const result = await sendERC20({tokenContract: token.contract, recevier, amount});
+        const result = await sendERC20({token, receiver, amount});
         return result.data as {txHash: string};
     } else {
         const sendETH = httpsCallable(functions, 'sendETH')
-        const result = await sendETH({recevier, amount});
+        const result = await sendETH({receiver, amount});
         return result.data as {txHash: string};
     }
 }

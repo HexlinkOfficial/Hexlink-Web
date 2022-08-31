@@ -78,12 +78,27 @@
                     <span>Estimating service Fee </span>
                     <a-spin style="margin-left: 10px;"></a-spin>
                 </a-row>
-                <a-row v-if="!sendInput.confirming" style="margin-top: 10px;">
-                    <a-tooltip placement="top" :title="'ETH Price: $' + sendInput.gasEstimation.ethPrice">
-                        <span>Base service Fee: ${{baseCostAsUSD.toFixed(2)}} ({{baseCostAsETH}} ETH)</span>
+                <a-row align="middle" v-if="!sendInput.confirming" style="margin-top: 10px;">
+                    <a-col style="min-width: 400px;">
+                        <a-tooltip
+                            v-if="sendInput.payETH"
+                            placement="top"
+                            :title="'ETH Price: $' + sendInput.gasEstimation.ethPrice"
+                        >
+                            <span>Base service Fee: {{baseCostAsETH}} ETH</span>
+                            <br />
+                            <span>Max service Fee: {{maxCostAsETH}} ETH</span>
+                        </a-tooltip>
+                    </a-col>
+                    <a-col style="min-width: 400px;" v-if="!sendInput.payETH">
+                        <span>Base service Fee: ${{baseCostAsUSD.toFixed(2)}}</span>
                         <br />
-                        <span>Max service Fee: ${{maxCostAsUSD.toFixed(2)}} {{maxCostAsETH}} ETH)</span>
-                    </a-tooltip>
+                        <span>Max service Fee: ${{maxCostAsUSD.toFixed(2)}}</span>
+                    </a-col>
+                    <a-col style="margin-left: 10px;">
+                        <a-switch v-model:checked="sendInput.payETH"/>
+                        <span style="margin-left: 10px;">Pay with ETH</span>
+                    </a-col>
                 </a-row>
             </a-col>
         </a-row>
@@ -144,6 +159,7 @@ import {
     estimateERC20Transfer,
     estimateETHTransfer,
     getETHPrice,
+    send,
     type Token,
 } from "@/services/ethers";
 import type { Contact } from "@/services/contacts";
@@ -155,6 +171,7 @@ export interface SendInput {
     step: number,
     sending: boolean,
     confirming: boolean,
+    payETH: false,
     gasEstimation: {
         baseCost: ethers.BigNumber,
         maxCost: ethers.BigNumber,
@@ -171,8 +188,8 @@ const contacts = ref<Contact[]>([
         email: "jack@gmail.com",
     },
     {
-        displayName: "Rebecca",
-        email: "rebecca@outlook.com",
+        displayName: "IronChain",
+        email: "ironchaindao@gmail.com",
     },
     {
         displayName: "Tom",
@@ -212,6 +229,7 @@ const EMPTY_INPUT: SendInput = {
     step: 0,
     sending: false,
     confirming: false,
+    payETH: false,
     gasEstimation: {
         baseCost: ethers.BigNumber.from(0),
         maxCost: ethers.BigNumber.from(0),
@@ -276,22 +294,14 @@ const setReceiver = async function(contact: Contact) {
     sendInput.value.receiver = contact.email || contact.address || "";
 }
 
-function sleep(ms: number) {
-  return new Promise((resolve) => {
-    setTimeout(resolve, ms);
-  });
-}
-
 const executeSending = async function() {
     sendInput.value.step++;
     sendInput.value.sending = true;
-    // sendInput.value.response.txHash = (await send(
-    //     props.token,
-    //     sendInput.value.receiver,
-    //     Number(sendInput.value.amount),
-    // )).txHash;
-    await sleep(3000);
-    sendInput.value.response.txHash = "0x12345";
+    sendInput.value.response.txHash = (await send(
+        props.token,
+        sendInput.value.receiver,
+        Number(sendInput.value.amount),
+    )).txHash;
     sendInput.value.sending = false;
 }
 
@@ -300,15 +310,23 @@ const toConfirmSend = async function() {
     sendInput.value.confirming = true;
     const ethPrice = await getETHPrice();
     if (props.token.contract) {
-        const gasEstimation = await estimateERC20Transfer(
-            props.token,
-            sendInput.value.receiver,
-            Number(sendInput.value.amount)
-        );
+        // const gasEstimation = await estimateERC20Transfer(
+        //     props.token,
+        //     sendInput.value.receiver,
+        //     Number(sendInput.value.amount)
+        // );
+        const gasEstimation = {
+             baseCost: ethers.utils.parseEther("0.000014750958658"),
+             maxCost: ethers.utils.parseEther("0.000054750958658"),
+        }
         sendInput.value.gasEstimation = {...gasEstimation, ethPrice}
     } else {
-        const gasEstimation = await estimateETHTransfer();
-        sendInput.value.gasEstimation = {...gasEstimation, ethPrice}
+        //const gasEstimation = await estimateETHTransfer();
+        const gasEstimation = {
+             baseCost: ethers.utils.parseEther("0.0000034750958658"),
+             maxCost: ethers.utils.parseEther("0.000034750958658"),
+        }
+        sendInput.value.gasEstimation = {...gasEstimation, ethPrice};
     }
     sendInput.value.confirming = false;
 }

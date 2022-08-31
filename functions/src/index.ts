@@ -27,12 +27,16 @@ import {
   metadata,
   deployWallet,
   executeTx,
+  sendERC20,
+  sendETH,
   estimateERC20Transfer,
   estimateETHTransfer,
 } from "./yaw";
 
 exports.metadata = metadata;
 exports.deployWallet = deployWallet;
+exports.sendERC20 = sendERC20;
+exports.sendETH = sendETH;
 exports.executeTx = executeTx;
 exports.estimateERC20Transfer = estimateERC20Transfer;
 exports.estimateETHTransfer = estimateETHTransfer;

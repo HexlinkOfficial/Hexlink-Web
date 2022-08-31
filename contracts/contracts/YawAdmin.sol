@@ -17,7 +17,7 @@ contract YawAdmin is Ownable {
     }
 
     function clone(address source, bytes32 salt) external onlyOwner {
-        address cloned = Clones.cloneDeterministic(source, salt);
+        address payable cloned = payable(Clones.cloneDeterministic(source, salt));
         YawWallet(cloned).initOwner(address(this));
         emit CloneWallet(source, salt, cloned);
     }

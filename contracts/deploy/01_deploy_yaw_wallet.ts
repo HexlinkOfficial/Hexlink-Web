@@ -18,17 +18,28 @@ const parseDeployedWalletAddress = async function(
 const func: DeployFunction = async function(hre: HardhatRuntimeEnvironment) {
   const {deployments} = hre;
   const [deployer] = await ethers.getSigners();
-
   const deployment = await deployments.get("YawAdmin");
   const admin = await ethers.getContractAt("YawAdmin", deployment.address);
-  const tx = await admin.connect(deployer).deploy();
-  const receipt = await tx.wait();
-  const deployedAddress = await parseDeployedWalletAddress(hre, receipt);
 
   const artifact = await deployments.getArtifact("YawWallet");
   const initCodeHash = ethers.utils.keccak256(artifact.bytecode);
   const computedAddress = ethers.utils.getCreate2Address(
       admin.address, ethers.constants.HashZero, initCodeHash);
+  try {
+    const code = await ethers.provider.getCode(computedAddress);
+    if (code !== '0x') {
+      console.log(`reusing "YawWallet" at ${computedAddress}`);
+      return;
+    }
+  } catch (error) {
+    console.log("Got error when deploying...");
+    console.log(error);
+    return;
+  }
+
+  const tx = await admin.connect(deployer).deploy();
+  const receipt = await tx.wait();
+  const deployedAddress = await parseDeployedWalletAddress(hre, receipt);
 
   assert(deployedAddress == computedAddress, "Deployed address mismatch");
   const gas = receipt.gasUsed.mul(receipt.effectiveGasPrice).div(1000000000);

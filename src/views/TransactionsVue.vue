@@ -1,15 +1,15 @@
 <template>
-  <a-layout style="height: 100%;">
+<a-layout style="height: 100%;">
     <a-layout-sider theme="light">
-      <NavigationSide />
+        <NavigationSide />
     </a-layout-sider>
     <a-layout-content style="overflow: auto;">
-      <TokenList />
+        <TransactionsHistory />
     </a-layout-content>
-  </a-layout>
+</a-layout>
 </template>
 
 <script setup lang="ts">
 import NavigationSide from "@/components/NavigationSide.vue"
-import TokenList from "@/components/TokenList.vue"
+import TransactionsHistory from "@/components/TransactionsHistory.vue"
 </script>

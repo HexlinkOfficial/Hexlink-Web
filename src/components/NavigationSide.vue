@@ -3,7 +3,7 @@
     <a-col style="margin: 20px 10px 20px 10px;">
     <a-row justify="center">
       <img class="logo" src="/src/assets/logo.png" />
-      <span class="brandTitle">Yaw Wallet</span>
+      <span class="brandTitle">Yaw</span>
     </a-row>
     <a-row justify="center" style="margin-top: 100px;">
       <a-col align-self="center">
@@ -14,6 +14,14 @@
         <a-row justify="center">
           <span class="title">{{ user?.displayName }}</span>
         </a-row>
+        <a-row justify="center">
+          <a-typography-paragraph copyable>
+              {{ user?.email }}
+          </a-typography-paragraph>
+          <a-typography-paragraph :copyable="{ text: address }">
+              {{ prettyPrintAddress(address) }}
+          </a-typography-paragraph>
+        </a-row>
       </a-col>
     </a-row>
     <a-row justify="center" style="margin-top: 50px;">
@@ -23,7 +31,19 @@
           </template>
           Tokens
         </a-button>
-        <a-button block type="text" size="large" disabled>
+        <a-button block disabled type="text" size="large">
+          <template #icon>
+            <history-outlined />
+          </template>
+          Activities
+        </a-button>
+        <a-button block disabled type="text" size="large">
+          <template #icon>
+            <contacts-outlined />
+          </template>
+          Contacts
+        </a-button>
+        <a-button block disabled type="text" size="large">
           <template #icon>
             <AppstoreOutlined />
           </template>
@@ -43,14 +63,27 @@
 </template>
   
 <script setup lang="ts">
+import { computed } from "vue";
 import { signOutFirebase } from '@/services/auth';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
-import { DollarOutlined, AppstoreOutlined, LogoutOutlined } from '@ant-design/icons-vue';
+import {
+  HistoryOutlined,
+  DollarOutlined,
+  AppstoreOutlined,
+  LogoutOutlined,
+  ContactsOutlined
+} from '@ant-design/icons-vue';
+import { prettyPrintAddress, genAddress } from '@/services/ethers';
+import YawAdmin from "@/services/YawAdmin.json";
+import YawWallet from "@/services/YawWallet.json";
 
 const router = useRouter();
 const store = useAuthStore();
 const user = store.currentUser;
+const address = computed(() => {
+  return genAddress(user?.email, YawAdmin.address, YawWallet.bytecode);
+});
 
 const logout = () => {
   signOutFirebase();
@@ -60,13 +93,13 @@ const logout = () => {
   
 <style lang="less" scoped>
 .logo {
-  height: 30px;
-  width: 30px;
+  height: 40px;
+  width: 40px;
 }
 
 .brandTitle {
   font-family: system-ui;
-  font-size: 1.3em;
+  font-size: 1.8em;
   font-weight: bold;
 }
 
@@ -75,9 +108,5 @@ const logout = () => {
   font-family: system-ui;
   font-size: 1em;
   font-weight: bold;
-}
-
-.menu {
-  margin: 10px 0px 10px 0px;
 }
 </style>

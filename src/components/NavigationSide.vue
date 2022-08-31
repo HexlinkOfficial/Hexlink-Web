@@ -15,7 +15,7 @@
           <span class="title">{{ user?.displayName }}</span>
         </a-row>
         <a-row justify="center">
-          <a-typography-paragraph copyable>
+          <a-typography-paragraph>
               {{ user?.email }}
           </a-typography-paragraph>
           <a-typography-paragraph :copyable="{ text: address }">

@@ -126,6 +126,14 @@ export function prettyPrintAddress(address: string) {
     return "N/A";
 }
 
+export function prettyPrintTxHash(txHash: string) {
+    if (txHash) {
+        const len = txHash.length;
+        return txHash.substring(0, 6) + "..." + txHash.substring(len - 6, len)
+    }
+    return "N/A";
+}
+
 const genSalt = function(email: string) {
     return ethers.utils.keccak256(ethers.utils.toUtf8Bytes(`mailto:${email}`));
 };
@@ -155,6 +163,12 @@ export async function send(
         const result = await sendETH({receiver, amount});
         return result.data as {txHash: string};
     }
+}
+
+export async function deployWallet() : Promise<{txHash: string}> {
+    const deployWallet = httpsCallable(functions, 'deployWallet');
+    const result = await deployWallet();
+    return result.data as {txHash: string};
 }
 
 export async function estimateERC20Transfer(

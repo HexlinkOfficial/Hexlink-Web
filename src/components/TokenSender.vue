@@ -1,6 +1,6 @@
 <template>
     <a-modal
-        v-model:visible="showSend"
+        v-model:visible="props.showSend"
         @cancel="clearSendInput()"
         :title="'You have ' + token.balance + ' ' + token.symbol"
         style="width: 100%; max-width: 800px;"
@@ -156,8 +156,8 @@ import * as ethers from "ethers";
 
 import {
     prettyPrintAddress,
-    estimateERC20Transfer,
-    estimateETHTransfer,
+    // estimateERC20Transfer,
+    // estimateETHTransfer,
     getETHPrice,
     send,
     type Token,

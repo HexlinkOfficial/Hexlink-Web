@@ -7,7 +7,7 @@
             <span style="font-size: 1.2em; font-weight: bold;"> ${{totalAssets}}</span>
         </a-col>
     </a-row>
-    <a-row justify="center" style="margin-top: 20px; margin-bottom: 50px;">
+    <a-row justify="center" style="margin-top: 20px; margin-bottom: 20px;">
         <a-button size="large" class="action">
             <template #icon><download-outlined /></template>
             Deposit
@@ -19,12 +19,34 @@
             <template #icon><upload-outlined /></template>
             Withdraw
         </a-button>
-        <a-button size="large" class="action">
+        <a-button
+            size="large"
+            class="action"
+        >
+            <template #icon><shopping-cart-outlined /></template>
+            Buy Token
+        </a-button>
+        <a-button size="large" class="action" :disabled="!isWalletDeployed">
             <template #icon><swap-outlined /></template>
-            Swap
+            Swap Token
         </a-button>
     </a-row>
-    <a-row justify="center" style="margin: 20px;">
+    <a-row v-if="!isWalletDeployed" justify="center" align="middle" style="margin: 20px;">
+        <a-alert
+            message="You yaw account is not setup yet. To send or swap tokens, please setup your yaw account."
+            type="warning"
+        >
+        </a-alert>
+        <a-button
+            style="margin-left: 5px"
+            type="primary"
+            size="small"
+            @click="setupWallet()"
+        >
+            Setup
+        </a-button>
+    </a-row>
+    <a-row justify="center" style="margin: 50px 20px 20px 20px;">
         <a-button
             size="large"
             block
@@ -32,11 +54,11 @@
             style="width: 100%; max-width: 800px;"
             @click="() => showImport = true"
         >
-            Import Token
+            Add Token
         </a-button>
     </a-row>
-    <a-row justify="center" style="margin-top: 30px">
-        <a-spin v-if="loading" size="large" />
+    <a-row v-if="loading" justify="center" style="margin-top: 40px">
+        <a-spin size="large" />
     </a-row>
     <a-row justify="center" v-for="(token, index) in tokens">
         <a-card style="margin: 20px; width: 100%; max-width: 800px">
@@ -68,6 +90,7 @@
                         <a-button
                             shape="round"
                             @click="handleSend(token)"
+                            :disabled="!isWalletDeployed"
                         >
                             <template #icon><send-outlined /></template>
                             Send
@@ -91,6 +114,13 @@
         </a-card>
     </a-row>
     <TokenSender :token="tokenToSend" :showSend="showSend" @close="showSend = false"></TokenSender>
+    <WalletSetup
+        :showSetup="showSetup"
+        :email="user?.email || ''"
+        :address="address"
+        @close="showSetup = false"
+        @deployed="isWalletDeployed = true"
+    ></WalletSetup>
     <a-modal v-model:visible="showImport" title="Token List" @ok="handleImport">
         <a-form :model="importTokeInput">
             <a-form-item
@@ -120,7 +150,14 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from "vue";
-import { SendOutlined, DownloadOutlined, SwapOutlined, UploadOutlined, TransactionOutlined } from '@ant-design/icons-vue';
+import {
+    SendOutlined,
+    DownloadOutlined,
+    SwapOutlined,
+    UploadOutlined,
+    TransactionOutlined,
+    ShoppingCartOutlined,
+} from '@ant-design/icons-vue';
 import type { Rule } from 'ant-design-vue/es/form';
 import { message } from 'ant-design-vue';
 
@@ -138,6 +175,7 @@ import type { IMetadata, IToken } from "@/services/ethers";
 import tokenList from "@/services/tokens.json";
 import ERC20 from "@/services/ERC20.json";
 import TokenSender from "@/components/TokenSender.vue";
+import WalletSetup from "@/components/WalletSetup.vue";
 
 import { useAuthStore } from '@/stores/auth';
 import YawAdmin from "@/services/YawAdmin.json";
@@ -145,9 +183,6 @@ import YawWallet from "@/services/YawWallet.json";
 
 const store = useAuthStore();
 const user = store.currentUser;
-const address = computed(async () => {
-  return await genAddress(user?.email, YawAdmin, YawWallet);
-});
 
 const loading = ref<boolean>(true);
 const tokens = ref<Token[]>([]);
@@ -166,13 +201,18 @@ const tokenToSend = ref<Token>({
     symbol: "",
 });
 
+const showSetup = ref<boolean>(false);
+const setupWallet = function() {
+    showSetup.value = true;
+}
+
+const address = ref<string>("");
+const isWalletDeployed = ref<boolean>(true);
 onMounted(async () => {
-    const tempTokens = await getBalances(
-        tokenList.tokens,
-        address.value,
-    );
+    address.value = await genAddress(user?.email, YawAdmin, YawWallet);
+    isWalletDeployed.value = await isContract(address.value!);
+    tokens.value = await getBalances(tokenList.tokens, address.value!);
     loading.value = false;
-    tokens.value = tempTokens;
     metadata.value = await getYawMetadata();
 });
 

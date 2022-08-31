@@ -25,12 +25,13 @@
                     v-model:value="email"
                     placeholder="Input your email"
                     enter-button="Check Address"
-                    @search="onTranslate"
+                    @search="onTranslate()"
                     style="max-width: 500px;"
                 >
                 </a-input-search>
             </a-row>
             <a-row justify="center" style="margin-top: 10px; width: 100%;">
+                <a-spin v-if="translating"></a-spin>
                 <a-typography-paragraph
                     v-if="address"
                     :copyable="{ text: address }"
@@ -44,7 +45,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref } from "vue";
 import { useRouter } from 'vue-router'; 
 import { socialLogin } from '@/services/auth'
 import { useAuthStore } from '@/stores/auth'
@@ -58,13 +59,16 @@ const store = useAuthStore();
 const router = useRouter();
 const email = ref<string>("");
 const address = ref<string>("");
+const translating = ref<boolean>(false);
 
-const onTranslate = () => {
+const onTranslate = async () => {
+    translating.value = true
     if (validateEmail(email.value)) {
-        address.value = genAddress(email.value, YawAdmin.address, YawWallet.bytecode);
+        address.value = await genAddress(email.value, YawAdmin, YawWallet);
     } else {
         message.warning("Please input a valid email")
     }
+    translating.value = false;
 }
 
 const login = async () => {

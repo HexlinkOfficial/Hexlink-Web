@@ -63,48 +63,6 @@ const walletAddress = async function(email: string) {
   );
 };
 
-export const metadata = functions.https.onCall(async (_data, context) => {
-  const uid = context.auth?.uid;
-  if (!uid) {
-    return {code: 401, message: "Unauthorized"};
-  }
-
-  const user = await getAuth().getUser(uid);
-  if (user.email) {
-    return {
-      code: 200,
-      admin: YawAdmin.address,
-      walletImpl: walletImplAddress(),
-      token: YawToken.address,
-      wallet: await walletAddress(user.email),
-      abi: {
-        admin: YawAdmin.abi,
-        wallet: YawWallet.abi,
-        token: YawToken.abi,
-      },
-      balance: 0,
-    };
-  } else {
-    return {code: 400, message: "Email not set"};
-  }
-});
-
-export const deployWallet = functions.https.onCall(async (_data, context) => {
-  const uid = context.auth?.uid;
-  if (!uid) {
-    return {code: 401, message: "Unauthorized"};
-  }
-
-  const user = await getAuth().getUser(uid);
-  if (user.email) {
-    const yawAdmin = adminContract();
-    const tx = await yawAdmin.clone(walletImplAddress(), genSalt(user.email));
-    return {code: 200, txHash: tx.hash};
-  } else {
-    return {code: 400, message: "Email not set"};
-  }
-});
-
 const genAddressIfNecessary = async (receiver: string) => {
   if (ethers.utils.isAddress(receiver)) {
     return receiver;
@@ -145,6 +103,43 @@ const validateUser = async function(context: any) {
     return {code: 400, message: "Email not set"};
   }
 };
+
+export const metadata = functions.https.onCall(async (_data, context) => {
+  const uid = context.auth?.uid;
+  if (!uid) {
+    return {code: 401, message: "Unauthorized"};
+  }
+
+  const user = await getAuth().getUser(uid);
+  if (user.email) {
+    return {
+      code: 200,
+      admin: YawAdmin.address,
+      walletImpl: walletImplAddress(),
+      token: YawToken.address,
+      wallet: await walletAddress(user.email),
+      abi: {
+        admin: YawAdmin.abi,
+        wallet: YawWallet.abi,
+        token: YawToken.abi,
+      },
+      balance: 0,
+    };
+  } else {
+    return {code: 400, message: "Email not set"};
+  }
+});
+
+export const deployWallet = functions.https.onCall(async (_data, context) => {
+  const result = await validateUser(context);
+  if (!result.success) {
+    return {code: result.code, message: result.message};
+  }
+  const {email} = result;
+  const yawAdmin = adminContract();
+  const tx = await yawAdmin.clone(walletImplAddress(), genSalt(email));
+  return {code: 200, txHash: tx.hash};
+});
 
 export const sendETH = functions.https.onCall(async (data, context) => {
   const result = await validateUser(context);

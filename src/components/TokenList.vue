@@ -8,25 +8,19 @@
         </a-col>
     </a-row>
     <a-row justify="center" style="margin-top: 20px; margin-bottom: 20px;">
-        <a-button size="large" class="action">
+        <a-button size="large" class="action" disabled>
             <template #icon><download-outlined /></template>
             Deposit
         </a-button>
-        <a-button
-            size="large"
-            class="action"
-        >
+        <a-button size="large" class="action" disabled>
             <template #icon><upload-outlined /></template>
             Withdraw
         </a-button>
-        <a-button
-            size="large"
-            class="action"
-        >
-            <template #icon><shopping-cart-outlined /></template>
+        <a-button size="large" class="action" disabled>
+            <template #icon><shopping-cart-outlined  /></template>
             Buy Token
         </a-button>
-        <a-button size="large" class="action" :disabled="!isWalletDeployed">
+        <a-button size="large" class="action" disabled>
             <template #icon><swap-outlined /></template>
             Swap Token
         </a-button>
@@ -50,6 +44,7 @@
         <a-button
             size="large"
             block
+            disabled
             type="primary"
             style="width: 100%; max-width: 800px;"
             @click="() => showImport = true"
@@ -87,8 +82,8 @@
                     <a-col  style="margin-left: 10px; margin-right: 10px;">
                         <a-button
                             shape="round"
+                            :disabled="!isWalletDeployed || token.balance <= 0"
                             @click="handleSend(token)"
-                            :disabled="!isWalletDeployed"
                         >
                             <template #icon><send-outlined /></template>
                             Send
@@ -111,7 +106,12 @@
             </template>
         </a-card>
     </a-row>
-    <TokenSender :token="tokenToSend" :showSend="showSend" @close="showSend = false"></TokenSender>
+    <TokenSender
+        :token="tokenToSend"
+        :showSend="showSend"
+        @close="showSend = false"
+        :balance="dynamicBalance"
+    ></TokenSender>
     <WalletSetup
         :showSetup="showSetup"
         :email="user?.email || ''"
@@ -252,7 +252,7 @@ const handleImport = async function() {
             const normalized = normalizeBalance(balance, importTokeInput.value.decimals);
             tokens.value.push({...importTokeInput.value, balance: normalized});
         } else {
-
+            message.warning('Wallet address not found');
         }
     }
     showImport.value = false;

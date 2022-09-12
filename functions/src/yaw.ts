@@ -8,7 +8,7 @@ import * as ERC20 from "./ERC20.json";
 import * as nodemailer from "nodemailer";
 import {parseEther} from "ethers/lib/utils";
 
-const secrets = functions.config().doppler;
+const secrets = functions.config().doppler || {};
 
 const transporter = nodemailer.createTransport({
   service: "gmail",

@@ -220,6 +220,10 @@ const props = defineProps({
   token: {
     type: Object as () => Token,
     required: true,
+  },
+  balance: {
+    type: Number,
+    required: true
   }
 });
 

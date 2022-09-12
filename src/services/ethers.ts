@@ -82,6 +82,7 @@ export async function getERC20Metadata(contract: string, ERC20: any) : Promise<I
     const erc20 = new ethers.Contract(contract, ERC20.abi, getProvider());
     return {
         contract,
+        name: await erc20.name(),
         symbol: await erc20.symbol(),
         decimals: await erc20.decimals(),
     }

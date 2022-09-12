@@ -71,7 +71,7 @@
                         <a-avatar v-if="!token.contract" src="/images/token.png"/>
                     </a-col>
                     <a-col>
-                        <span>{{token.name}}</span>
+                        <span>{{token.name || token.symbol}}</span>
                         <br />
                         <span>Price: ${{token.price || 1000}}</span>
                     </a-col>
@@ -127,6 +127,13 @@
                 :rules="[{ validator: validateContract, trigger: 'change' }]"
             >
                 <a-input v-model:value="importTokeInput.contract"></a-input>
+            </a-form-item>
+            <a-form-item
+                label="Name"
+                name="name"
+                :rules="[{ message: 'Name not found' }]"
+            >
+                <a-input v-model:value="importTokeInput.name" disabled></a-input>
             </a-form-item>
             <a-form-item
                 label="Symbol"
@@ -219,6 +226,7 @@ const validateContract = async function(_rule: Rule, value: string) {
         return Promise.reject('Please input token contract address');
     } else if (await isContract(value)) {
         const tokenMetadata = await getERC20Metadata(value, ERC20);
+        importTokeInput.value.name = tokenMetadata.name;
         importTokeInput.value.symbol = tokenMetadata.symbol;
         importTokeInput.value.decimals = tokenMetadata.decimals;
         return Promise.resolve();

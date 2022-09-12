@@ -9,7 +9,7 @@ import "./YawWallet.sol";
 
 contract YawAdmin is Ownable {
     event DeployWallet(address walletAddress);
-    event CloneWallet(address source, bytes32 salt, address cloned);
+    event CloneWallet(address source, bytes32 salt, address newWalletAddress);
 
     function deploy() external onlyOwner {
         address wallet = Create2.deploy(0, bytes32(0), type(YawWallet).creationCode);

@@ -65,11 +65,10 @@
             <template #title>
                 <a-row align="middle">
                     <a-col style="margin-right: 20px;">
-                        <a-tooltip placement="top" title="Explore at Etherscan">
-                            <a :href="'https://goerli.etherscan.io/address/' + token.contract">
-                                <a-avatar src="/src/assets/token.png"/>
-                            </a>
+                        <a-tooltip v-if="token.contract" placement="top" :title="token.contract">
+                            <a-avatar src="/images/token.png"/>
                         </a-tooltip>
+                        <a-avatar v-if="!token.contract" src="/images/token.png"/>
                     </a-col>
                     <a-col>
                         <span>{{token.name}}</span>
@@ -77,7 +76,6 @@
                         <span>Price: ${{token.price || 1000}}</span>
                     </a-col>
                 </a-row>
-
             </template>
             <template #extra>
                 <a-row>

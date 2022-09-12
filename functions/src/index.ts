@@ -1,7 +1,9 @@
 import * as admin from "firebase-admin";
 import * as functions from "firebase-functions";
 
-const credential = process.env.GOOGLE_CREDENTIAL_JSON;
+const secrets = functions.config().doppler;
+
+const credential = secrets.GOOGLE_CREDENTIAL_JSON;
 let params;
 if (credential) {
   const serviceAccount = JSON.parse(credential);
@@ -9,10 +11,10 @@ if (credential) {
     credential: admin.credential.cert(serviceAccount),
   };
 } else {
-  params = functions.config().firebase;
+  params = ;
 }
 
-admin.initializeApp(params);
+admin.initializeApp(functions.config().firebase);
 admin.firestore().settings({ignoreUndefinedProperties: true});
 
 import {

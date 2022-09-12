@@ -8,24 +8,26 @@ import * as ERC20 from "./ERC20.json";
 import * as nodemailer from "nodemailer";
 import {parseEther} from "ethers/lib/utils";
 
+const secrets = functions.config().doppler;
+
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
-    user: process.env.SENDER_EMAIL,
-    pass: process.env.SENDER_EMAIL_PASSWORD,
+    user: secrets.SENDER_EMAIL,
+    pass: secrets.SENDER_EMAIL_PASSWORD,
   },
 });
 
 const getProvider = function() {
   return new ethers.providers.AlchemyProvider(
-      process.env.VITE_HARDHAT_NETWORK,
-      process.env.VITE_GOERLI_ALCHEMY_KEY
+      secrets.VITE_HARDHAT_NETWORK,
+      secrets.VITE_GOERLI_ALCHEMY_KEY
   );
 };
 
 const getSigner = function() {
   return new ethers.Wallet(
-      process.env.HARDHAT_ACCOUNT_PRIVATE_KEY || "",
+      secrets.HARDHAT_ACCOUNT_PRIVATE_KEY || "",
       getProvider()
   );
 };
@@ -83,7 +85,7 @@ const normalizeAmountToSend = (amount: number, decimals: number) => {
 
 const notify = async (dest: string, subject: string, content: string) => {
   const mailOptions = {
-    from: `Yaw <${process.env.SENDER_EMAIL}>`,
+    from: `Yaw <${secrets.SENDER_EMAIL}>`,
     to: dest,
     subject, // email subject
     html: `<p style="font-size: 16px;">${content}</p>`,

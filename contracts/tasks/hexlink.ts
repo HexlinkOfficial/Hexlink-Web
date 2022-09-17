@@ -49,7 +49,7 @@ const walletImplAddress = async function(
       admin.address, ethers.constants.HashZero, initCodeHash);
 };
 
-task("walletImplAddress", "Prints yaw wallet implementation contract address")
+task("walletImplAddress", "Prints wallet implementation contract address")
     .addFlag("print", "print wallet implementation address")
     .setAction(async (taskArgs, hre : HardhatRuntimeEnvironment) => {
       const {ethers, artifacts} = hre;
@@ -64,7 +64,7 @@ task("walletImplAddress", "Prints yaw wallet implementation contract address")
       return address;
     });
 
-task("walletAddress", "Prints yaw wallet address")
+task("walletAddress", "Prints wallet address")
     .addFlag("print", "print wallet address")
     .addParam("email", "the email address to generate the address")
     .setAction(async (taskArgs, hre : HardhatRuntimeEnvironment) => {
@@ -132,7 +132,7 @@ task("receiveETH", "receiveETH")
       return tx.hash;
     });
 
-task("sendETH", "sendETH")
+task("sendETH", "send ETH")
     .addParam("sender", "sender email")
     .addParam("receiver", "receiver email")
     .addParam("amount", "amount of ETH to send")
@@ -151,7 +151,7 @@ task("sendETH", "sendETH")
       return tx.hash;
     });
 
-task("sendYawToken", "send yaw token from sender to receiver")
+task("sendHexl", "send hexlink token")
     .addParam("sender", "sender email")
     .addParam("receiver", "receiver email")
     .addParam("amount", "amount of ETH to send")

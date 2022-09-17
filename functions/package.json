@@ -16,6 +16,7 @@
   },
   "main": "lib/index.js",
   "dependencies": {
+    "@sendgrid/mail": "^7.7.0",
     "@types/nodemailer": "^6.4.5",
     "ethers": "^5.7.0",
     "firebase-admin": "^10.0.2",

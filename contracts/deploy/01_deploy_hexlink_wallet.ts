@@ -8,9 +8,9 @@ const parseDeployedWalletAddress = async function(
     receipt: any,
 ) {
   const {ethers, deployments} = hre;
-  const artifact = await deployments.getArtifact("YawAdmin");
+  const artifact = await deployments.getArtifact("HexlinkAdmin");
   const iface = new ethers.utils.Interface(artifact.abi);
-  const topicHash = iface.getEventTopic("DeployWallet");
+  const topicHash = iface.getEventTopic("DeployWalletBase");
   const log = receipt.logs.find((log: any) => log.topics[0] == topicHash);
   return iface.parseLog(log).args.walletAddress;
 };
@@ -18,17 +18,17 @@ const parseDeployedWalletAddress = async function(
 const func: DeployFunction = async function(hre: HardhatRuntimeEnvironment) {
   const {deployments} = hre;
   const [deployer] = await ethers.getSigners();
-  const deployment = await deployments.get("YawAdmin");
-  const admin = await ethers.getContractAt("YawAdmin", deployment.address);
+  const deployment = await deployments.get("HexlinkAdmin");
+  const admin = await ethers.getContractAt("HexlinkAdmin", deployment.address);
 
-  const artifact = await deployments.getArtifact("YawWallet");
+  const artifact = await deployments.getArtifact("HexlinkWallet");
   const initCodeHash = ethers.utils.keccak256(artifact.bytecode);
   const computedAddress = ethers.utils.getCreate2Address(
       admin.address, ethers.constants.HashZero, initCodeHash);
   try {
     const code = await ethers.provider.getCode(computedAddress);
     if (code !== '0x') {
-      console.log(`reusing "YawWallet" at ${computedAddress}`);
+      console.log(`reusing "HexlinkWallet" at ${computedAddress}`);
       return;
     }
   } catch (error) {
@@ -45,9 +45,9 @@ const func: DeployFunction = async function(hre: HardhatRuntimeEnvironment) {
   const gas = receipt.gasUsed.mul(receipt.effectiveGasPrice).div(1000000000);
   console.log(
       // eslint-disable-next-line max-len
-      `Deploying "YawWallet" (tx: ${tx.hash})...: deployed at ${deployedAddress} with ${gas} gas`
+      `Deploying "HexlinkWallet" (tx: ${tx.hash})...: deployed at ${deployedAddress} with ${gas} gas`
   );
 };
 
 export default func;
-func.tags = ["YAW", "TEST"];
+func.tags = ["HEXL", "TEST"];

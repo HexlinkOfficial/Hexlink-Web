@@ -5,18 +5,12 @@ import * as YawAdmin from "./YawAdmin.json";
 import * as YawWallet from "./YawWallet.json";
 import * as YawToken from "./YawToken.json";
 import * as ERC20 from "./ERC20.json";
-import * as nodemailer from "nodemailer";
 import {parseEther} from "ethers/lib/utils";
 
 const secrets = functions.config().doppler || {};
 
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: secrets.SENDER_EMAIL,
-    pass: secrets.SENDER_EMAIL_PASSWORD,
-  },
-});
+import sgMail = require("@sendgrid/mail");
+sgMail.setApiKey(secrets.SENDGRID_API_KEY);
 
 const getProvider = function() {
   return new ethers.providers.AlchemyProvider(
@@ -83,14 +77,15 @@ const normalizeAmountToSend = (amount: number, decimals: number) => {
   return factor.mul(amount);
 };
 
-const notify = async (dest: string, subject: string, content: string) => {
-  const mailOptions = {
-    from: `Yaw <${secrets.SENDER_EMAIL}>`,
+const notify = async (dest: string, content: string) => {
+  const msg = {
     to: dest,
-    subject, // email subject
+    from: "info@hexlink.io",
+    subject: "[Hexlink] You just received some tokens",
+    text: content,
     html: `<p style="font-size: 16px;">${content}</p>`,
   };
-  await transporter.sendMail(mailOptions);
+  await sgMail.send(msg);
 };
 
 const validateUser = async function(context: any) {
@@ -140,7 +135,8 @@ export const deployWallet = functions.https.onCall(async (_data, context) => {
   const {email} = result;
   const yawAdmin = adminContract();
   const tx = await yawAdmin.clone(walletImplAddress(), genSalt(email));
-  return {code: 200, txHash: tx.hash};
+  const receipt = await tx.wait();
+  return {code: 200, txHash: tx.hash, receiptHash: receipt.hash};
 });
 
 export const sendETH = functions.https.onCall(async (data, context) => {
@@ -160,8 +156,7 @@ export const sendETH = functions.https.onCall(async (data, context) => {
   if (!ethers.utils.isAddress(data.receiver)) {
     await notify(
         data.receiver,
-        "[YAW] Token Received",
-        `${user.displayName} just sent you ${data.amount} ETH.`
+        `${user.email} just sent you ${data.amount} ETH.`
     );
   }
   return {code: 200, txHash: tx.hash};
@@ -185,7 +180,6 @@ export const sendERC20 = functions.https.onCall(async (data, context) => {
   if (!ethers.utils.isAddress(data.receiver)) {
     await notify(
         data.receiver,
-        "[YAW] Token Received",
         // eslint-disable-next-line max-len
         `${user.displayName} just sent you ${data.amount} ${data.token.symbol}.`
     );

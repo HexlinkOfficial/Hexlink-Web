@@ -11,36 +11,36 @@ const getContract = async function(name: string) {
 };
 
 const walletImplAddress = async function(admin: Contract) {
-  const artifact = await deployments.getArtifact("YawWallet");
+  const artifact = await deployments.getArtifact("HexlinkWallet");
   const initCodeHash = ethers.utils.keccak256(artifact.bytecode);
   return ethers.utils.getCreate2Address(
       admin.address, ethers.constants.HashZero, initCodeHash);
 };
 
-describe("Yaw", function() {
+describe("Hexlink", function() {
   beforeEach(async function() {
     await deployments.fixture(["TEST"]);
   });
 
   it("Should clone wallet contract", async function() {
-    const admin = await getContract("YawAdmin");
+    const admin = await getContract("HexlinkAdmin");
     const [deployer] = await ethers.getSigners();
 
     const salt = ethers.utils.keccak256(ethers.utils.toUtf8Bytes(sender));
     const implAddr = await walletImplAddress(admin);
     const walletAddr = await admin.predictWalletAddress(implAddr, salt);
     await expect(admin.connect(deployer).clone(implAddr, salt))
-        .to.emit(admin, "CloneWallet")
+        .to.emit(admin, "DeployWallet")
         .withArgs(implAddr, salt, walletAddr);
 
     // check owner
-    const wallet = await ethers.getContractAt("YawWallet", walletAddr);
+    const wallet = await ethers.getContractAt("HexlinkWallet", walletAddr);
     expect(await wallet.owner()).to.eq(deployer.address);
   });
 
   it("Should transfer token successfully", async function() {
-    const token = await getContract("YawToken");
-    const admin = await getContract("YawAdmin");
+    const token = await getContract("HexlinkToken");
+    const admin = await getContract("HexlinkAdmin");
     const [deployer] = await ethers.getSigners();
 
     // deploy wallet contract implementation and compute target address
@@ -57,10 +57,10 @@ describe("Yaw", function() {
 
     // create new wallet contract
     await admin.connect(deployer).clone(implAddr, salt);
-    const wallet = await ethers.getContractAt("YawWallet", walletAddr);
+    const wallet = await ethers.getContractAt("HexlinkWallet", walletAddr);
 
     // send tokens
-    const artifact = await deployments.getArtifact("YawToken");
+    const artifact = await deployments.getArtifact("HexlinkToken");
     const iface = new ethers.utils.Interface(artifact.abi);
     const txData = iface.encodeFunctionData(
         "transfer",
@@ -74,8 +74,8 @@ describe("Yaw", function() {
   });
 
   it("Should transfer eth successfully", async function() {
-    const token = await getContract("YawToken");
-    const admin = await getContract("YawAdmin");
+    const token = await getContract("HexlinkToken");
+    const admin = await getContract("HexlinkAdmin");
     const [deployer] = await ethers.getSigners();
 
     // deploy wallet contract implementation and compute target address
@@ -95,7 +95,7 @@ describe("Yaw", function() {
 
     // create new wallet contract
     await admin.connect(deployer).clone(implAddr, salt);
-    const wallet = await ethers.getContractAt("YawWallet", senderAddr);
+    const wallet = await ethers.getContractAt("HexlinkWallet", senderAddr);
 
     // send ETH
     const receiverAddr = await admin.predictWalletAddress(

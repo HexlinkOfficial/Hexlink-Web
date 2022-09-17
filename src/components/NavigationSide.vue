@@ -3,12 +3,12 @@
     <a-col style="margin: 20px 10px 20px 10px;">
     <a-row justify="center">
       <img class="logo" src="/src/assets/logo.png" />
-      <span class="brandTitle">Yaw</span>
+      <span class="brandTitle">Hexlink</span>
     </a-row>
     <a-row justify="center" style="margin-top: 100px;">
       <a-col align-self="center">
         <a-row justify="center">
-          <a-avatar :src="user?.photoURL!" :size="64">
+          <a-avatar :src="user?.photoURL!" :size="64" referrerpolicy="no-referrer">
           </a-avatar>
         </a-row>
         <a-row justify="center">
@@ -107,6 +107,7 @@ const logout = () => {
 }
 
 .brandTitle {
+  margin-left: 10px;
   font-family: system-ui;
   font-size: 1.8em;
   font-weight: bold;

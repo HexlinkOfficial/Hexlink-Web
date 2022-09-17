@@ -166,10 +166,10 @@ export async function send(
     }
 }
 
-export async function deployWallet() : Promise<{txHash: string}> {
+export async function deployWallet() : Promise<{txHash: string, receiptHash: string}> {
     const deployWallet = httpsCallable(functions, 'deployWallet');
     const result = await deployWallet();
-    return result.data as {txHash: string};
+    return result.data as {txHash: string, receiptHash: string};
 }
 
 export async function estimateERC20Transfer(

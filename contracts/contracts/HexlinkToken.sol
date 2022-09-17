@@ -3,8 +3,8 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
-contract YawToken is ERC20 {
-    constructor() ERC20("YawToken", "YAW") {
+contract HexlinkToken is ERC20 {
+    constructor() ERC20("Hexlink", "HEXL") {
         _mint(msg.sender, 1000000000000000000000000);
     }
 }

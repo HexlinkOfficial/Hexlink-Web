@@ -33,7 +33,7 @@ import {
   sendETH,
   estimateERC20Transfer,
   estimateETHTransfer,
-} from "./yaw";
+} from "./wallet";
 
 exports.metadata = metadata;
 exports.deployWallet = deployWallet;

@@ -184,8 +184,8 @@ export interface SendInput {
 
 const contacts = ref<Contact[]>([
     {
-        displayName: "Jack",
-        email: "jack@gmail.com",
+        displayName: "Shu",
+        email: "shudong2019@gmail.com",
     },
     {
         displayName: "IronChain",

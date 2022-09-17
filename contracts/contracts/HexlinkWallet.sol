@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/utils/Address.sol";
 
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
-contract YawWallet is ReentrancyGuard {
+contract HexlinkWallet is ReentrancyGuard {
     using Address for address;
 
     address private _owner;

@@ -1,9 +1,7 @@
 import {getAuth} from "firebase-admin/auth";
 import * as functions from "firebase-functions";
 import * as ethers from "ethers";
-import * as YawAdmin from "./YawAdmin.json";
-import * as YawWallet from "./YawWallet.json";
-import * as YawToken from "./YawToken.json";
+import * as HEXLINK from "./HEXLINK.json";
 import * as ERC20 from "./ERC20.json";
 import {parseEther} from "ethers/lib/utils";
 
@@ -27,12 +25,20 @@ const getSigner = function() {
 };
 
 const adminContract = function() {
-  return new ethers.Contract(YawAdmin.address, YawAdmin.abi, getSigner());
+  return new ethers.Contract(
+      HEXLINK.adminAddr,
+      HEXLINK.adminAbi,
+      getSigner()
+  );
 };
 
 const walletContract = function(contractAddress: string) {
   const signer = getSigner();
-  return new ethers.Contract(contractAddress, YawWallet.abi, signer);
+  return new ethers.Contract(
+      contractAddress,
+      HEXLINK.walletImplAbi,
+      signer
+  );
 };
 
 const genSalt = function(email: string) {
@@ -41,16 +47,16 @@ const genSalt = function(email: string) {
 
 const walletImplAddress = function() {
   return ethers.utils.getCreate2Address(
-      YawAdmin.address,
+      HEXLINK.adminAddr,
       ethers.constants.HashZero,
-      ethers.utils.keccak256(YawWallet.bytecode)
+      ethers.utils.keccak256(HEXLINK.walletImplBytecode)
   );
 };
 
 const walletAddress = async function(email: string) {
   const contract = new ethers.Contract(
-      YawAdmin.address,
-      YawAdmin.abi,
+      HEXLINK.adminAddr,
+      HEXLINK.adminAbi,
       getSigner()
   );
   return await contract.predictWalletAddress(
@@ -111,15 +117,6 @@ export const metadata = functions.https.onCall(async (_data, context) => {
   if (user.email) {
     return {
       code: 200,
-      admin: YawAdmin.address,
-      walletImpl: walletImplAddress(),
-      token: YawToken.address,
-      wallet: await walletAddress(user.email),
-      abi: {
-        admin: YawAdmin.abi,
-        wallet: YawWallet.abi,
-        token: YawToken.abi,
-      },
       balance: 0,
     };
   } else {

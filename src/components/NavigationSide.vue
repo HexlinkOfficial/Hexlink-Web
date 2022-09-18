@@ -73,16 +73,17 @@ import {
   LogoutOutlined,
   ContactsOutlined
 } from '@ant-design/icons-vue';
-import { prettyPrintAddress, genAddress } from '@/services/ethers';
+import {
+  prettyPrintAddress,
+  genWalletAddress
+} from '@/services/ethers';
 import { useAuthStore } from '@/stores/auth';
-import YawAdmin from "@/services/YawAdmin.json";
-import YawWallet from "@/services/YawWallet.json";
 
 const store = useAuthStore();
 const user = store.currentUser;
 const address = ref<string>("");
 onMounted(async () => {
-  address.value = await genAddress(user?.email, YawAdmin, YawWallet);;
+  address.value = await genWalletAddress(user?.email);;
 });
 
 const addressText = computed(() => {

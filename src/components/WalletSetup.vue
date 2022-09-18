@@ -1,7 +1,7 @@
 <template>
     <a-modal
         v-model:visible="props.showSetup"
-        title="Setup Yaw Account"
+        title="Wallet Setup"
         @cancel="clearSetupInput()"
         style="width: 100%; max-width: 600px; padding-left: 50px; padding-right: 50px;"
     >

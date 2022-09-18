@@ -9,7 +9,7 @@
                 />
             </a-row>
             <a-row justify="center" class="title">
-                <span>Yaw: start your path to web3</span>
+                <span>Hexlink: start your web3 path</span>
             </a-row>
             <a-row justify="center" style="margin-top: 30px;">
                 <a-button size="large" @click="login">
@@ -50,9 +50,7 @@ import { useRouter } from 'vue-router';
 import { socialLogin } from '@/services/auth'
 import { useAuthStore } from '@/stores/auth'
 import { validateEmail } from '@/services/validator';
-import { genAddress } from "@/services/ethers";
-import YawAdmin from "@/services/YawAdmin.json";
-import YawWallet from "@/services/YawWallet.json";
+import { genWalletAddress } from "@/services/ethers";
 import { message } from "ant-design-vue";
 
 const store = useAuthStore();
@@ -64,7 +62,7 @@ const translating = ref<boolean>(false);
 const onTranslate = async () => {
     translating.value = true
     if (validateEmail(email.value)) {
-        address.value = await genAddress(email.value, YawAdmin, YawWallet);
+        address.value = await genWalletAddress(email.value);
     } else {
         message.warning("Please input a valid email")
     }

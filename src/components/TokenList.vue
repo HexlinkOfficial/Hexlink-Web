@@ -27,7 +27,7 @@
     </a-row>
     <a-row v-if="!isWalletDeployed" justify="center" align="middle" style="margin: 20px;">
         <a-alert
-            message="You yaw account is not setup yet. To send or swap tokens, please setup your yaw account."
+            message="Your account is not setup yet. To send or swap tokens, please setup your account first."
             type="warning"
         >
         </a-alert>
@@ -168,23 +168,20 @@ import { message } from 'ant-design-vue';
 
 import {
     isContract,
-    getYawMetadata,
+    getHexlinkMetadata,
     getERC20Metadata,
     normalizeBalance,
     getTokenBalance,
     getBalances,
-    genAddress,
     type Token,
 } from "@/services/ethers";
 import type { IMetadata, IToken } from "@/services/ethers";
-import tokenList from "@/services/tokens.json";
+import tokenList from "@/services/TOKENS.json";
 import ERC20 from "@/services/ERC20.json";
 import TokenSender from "@/components/TokenSender.vue";
 import WalletSetup from "@/components/WalletSetup.vue";
 
 import { useAuthStore } from '@/stores/auth';
-import YawAdmin from "@/services/YawAdmin.json";
-import YawWallet from "@/services/YawWallet.json";
 
 const store = useAuthStore();
 const user = store.currentUser;
@@ -214,11 +211,11 @@ const setupWallet = function() {
 const address = ref<string>("");
 const isWalletDeployed = ref<boolean>(true);
 onMounted(async () => {
-    address.value = await genAddress(user?.email, YawAdmin, YawWallet);
+    metadata.value = await getHexlinkMetadata(user?.email);
+    address.value = metadata.value?.wallet;
     isWalletDeployed.value = await isContract(address.value!);
     tokens.value = await getBalances(tokenList.tokens, address.value!);
     loading.value = false;
-    metadata.value = await getYawMetadata();
 });
 
 const validateContract = async function(_rule: Rule, value: string) {

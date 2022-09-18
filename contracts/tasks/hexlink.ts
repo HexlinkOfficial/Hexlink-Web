@@ -2,6 +2,7 @@ import {task} from "hardhat/config";
 import {assert} from "console";
 import {Contract} from "ethers";
 import {HardhatRuntimeEnvironment} from "hardhat/types";
+import { AimOutlined } from "@ant-design/icons-vue";
 
 const genSalt = function(ethers: any, email: string) {
   return ethers.utils.keccak256(
@@ -11,8 +12,8 @@ const genSalt = function(ethers: any, email: string) {
 
 const getAdmin = async function(hre: HardhatRuntimeEnvironment) {
   const {ethers, deployments} = hre;
-  const deployment = await deployments.get("YawAdmin");
-  return await ethers.getContractAt("YawAdmin", deployment.address);
+  const deployment = await deployments.get("HexlinkAdmin");
+  return await ethers.getContractAt("HexlinkAdmin", deployment.address);
 };
 
 const genTopicHash = async function(
@@ -31,9 +32,9 @@ const parseClonedWalletAddress = async function(
     receipt: any,
 ) {
   const {ethers, deployments} = hre;
-  const topicHash = await genTopicHash(hre, "YawAdmin", "CloneWallet");
+  const topicHash = await genTopicHash(hre, "HexlinkAdmin", "CloneWallet");
   const log = receipt.logs.find((log: any) => log.topics[0] == topicHash);
-  const artifact = await deployments.getArtifact("YawAdmin");
+  const artifact = await deployments.getArtifact("HexlinkAdmin");
   const iface = new ethers.utils.Interface(artifact.abi);
   return iface.parseLog(log).args.cloned;
 };
@@ -43,7 +44,7 @@ const walletImplAddress = async function(
     admin: Contract,
 ) {
   const {ethers, artifacts} = hre;
-  const artifact = await artifacts.readArtifact("YawWallet");
+  const artifact = await artifacts.readArtifact("HexlinkWallet");
   const initCodeHash = ethers.utils.keccak256(artifact.bytecode);
   return ethers.utils.getCreate2Address(
       admin.address, ethers.constants.HashZero, initCodeHash);
@@ -54,7 +55,7 @@ task("walletImplAddress", "Prints wallet implementation contract address")
     .setAction(async (taskArgs, hre : HardhatRuntimeEnvironment) => {
       const {ethers, artifacts} = hre;
       const admin = await getAdmin(hre);
-      const artifact = await artifacts.readArtifact("YawWallet");
+      const artifact = await artifacts.readArtifact("HexlinkWallet");
       const initCodeHash = ethers.utils.keccak256(artifact.bytecode);
       const address = ethers.utils.getCreate2Address(
           admin.address, ethers.constants.HashZero, initCodeHash);
@@ -95,7 +96,7 @@ task("clone", "clone a new wallet per given email")
       const [deployer] = await ethers.getSigners();
       const tx = await admin.connect(deployer).clone(source, salt);
       if (taskArgs.async) {
-        console.log(`Cloning "YawWallet" (tx: ${tx.hash})...`);
+        console.log(`Cloning "HexlinkWallet" (tx: ${tx.hash})...`);
         return tx.hash;
       }
       const receipt = await tx.wait();
@@ -112,7 +113,7 @@ task("clone", "clone a new wallet per given email")
         ).div(1000000000);
         console.log(
             // eslint-disable-next-line max-len
-            `Cloning "YawWallet" (tx: ${tx.hash})...: cloned at ${deployedAddress} with ${gas} gas`
+            `Cloning "HexlinkWallet" (tx: ${tx.hash})...: cloned at ${deployedAddress} with ${gas} gas`
         );
       }
       return deployedAddress;
@@ -142,7 +143,7 @@ task("sendETH", "send ETH")
       const sender = await hre.run("walletAddress", {email: taskArgs.sender});
       const receiver = await hre.run("walletAddress", {email: taskArgs.receiver});
       const wallet = await ethers.getContractAt(
-          "YawWallet",
+          "HexlinkWallet",
           sender,
       );
       const tx = await wallet.connect(deployer).execute(
@@ -160,10 +161,10 @@ task("sendHexl", "send hexlink token")
       const [deployer] = await ethers.getSigners();
       const sender = await hre.run("walletAddress", {email: taskArgs.sender});
       const receiver = await hre.run("walletAddress", {email: taskArgs.receiver});
-      const token = (await hre.deployments.get("YawToken")).address;
+      const token = (await hre.deployments.get("HexlinkToken")).address;
 
       const wallet = await ethers.getContractAt(
-          "YawWallet",
+          "HexlinkWallet",
           sender,
       );
       const artifact = await hre.artifacts.readArtifact("ERC20");
@@ -187,11 +188,29 @@ task("execute", "execute abiratry transaction")
       const [deployer] = await ethers.getSigners();
       const destination = ethers.utils.getAddress(taskArgs.destination);
       const wallet = await ethers.getContractAt(
-          "YawWallet",
+          "HexlinkWallet",
           ethers.utils.getAddress(taskArgs.wallet)
       );
       const tx = await wallet.connect(deployer).execute(
           destination, 0, 65000, taskArgs.txData
       );
       return tx.hash;
+    });
+
+task("metadata", "generate metadata")
+    .setAction(async (_taskArgs, hre : HardhatRuntimeEnvironment) => {
+      const admin = await hre.deployments.get("HexlinkAdmin");
+      const token = await hre.deployments.get("HexlinkToken");
+      const walletArtifact = await hre.artifacts.readArtifact("HexlinkWallet");
+
+      const metadata = JSON.stringify({
+        adminAddr: admin.address,
+        adminAbi: admin.abi,
+        walletImplAbi: walletArtifact.abi,
+        walletImplAddr: await hre.run("walletImplAddress", {}),
+        walletImplBytecode: walletArtifact.bytecode,
+        tokenAddr: token.address,
+      });
+      console.log(metadata);
+      return metadata;
     });

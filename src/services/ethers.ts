@@ -1,6 +1,7 @@
 import * as ethers from "ethers";
 import type { Provider } from "@ethersproject/providers"
 import { getFunctions, httpsCallable } from 'firebase/functions'
+import * as HEXLINK from "@/services/HEXLINK.json";
 
 const functions = getFunctions();
 
@@ -17,10 +18,7 @@ export interface IMetadata {
         address: string,
         abi: any,
     },
-    token: {
-        address: string,
-        abi: any,
-    },
+    token: string,
     wallet: string,
     balance: number,
 }
@@ -61,10 +59,48 @@ export function getProvider() {
     return provider;
 }
 
-export async function getYawMetadata() : Promise<IMetadata> {
-    const getMetadata = httpsCallable(functions, 'metadata')
-    const result = await getMetadata();
-    return result.data as IMetadata;
+const walletImplAddress = function() {
+    return ethers.utils.getCreate2Address(
+        HEXLINK.adminAddr,
+        ethers.constants.HashZero,
+        ethers.utils.keccak256(HEXLINK.walletImplBytecode)
+    );
+};
+
+const genSalt = function(email: string) {
+    return ethers.utils.keccak256(ethers.utils.toUtf8Bytes(`mailto:${email}`));
+};
+  
+export async function genWalletAddress(email: string | null | undefined) {
+    if (!email) return "";
+    const contract = new ethers.Contract(
+        HEXLINK.adminAddr,
+        HEXLINK.adminAbi,
+        getProvider()
+    );
+    return await contract.predictWalletAddress(
+        HEXLINK.walletImplAddr,
+        genSalt(email)
+    );
+};
+
+export async function getHexlinkMetadata(email: string | null | undefined) : Promise<IMetadata> {
+    const getMetadata = httpsCallable(functions, 'metadata');
+    const {data} = await getMetadata();
+    const {balance} = data as {balance: number};
+    return {
+        balance,
+        admin: {
+            address: HEXLINK.adminAddr,
+            abi: HEXLINK.adminAbi,
+        },
+        walletImpl: {
+            address: walletImplAddress(),
+            abi: HEXLINK.walletImplAbi,
+        },
+        token: HEXLINK.tokenAddr,
+        wallet: await genWalletAddress(email),
+    }
 }
 
 export async function isContract(address: string): Promise<boolean> {
@@ -93,25 +129,25 @@ export async function getTokenBalance(contract: string, wallet: string) : Promis
     return await token.balanceOf(wallet);
 }
 
-export async function getBalances(tokens: IToken[], wallet: string) : Promise<Token[]> {
-    let result: Token[] = [];
+export async function getBalance(t: IToken, address: string) : Promise<Token> {
     const provider = getProvider();
-    for (let t of tokens) {
-        if (t.contract) {
-            const abi = [
-                "function balanceOf(address owner) view returns (uint256)",
-            ];
-            const token = new ethers.Contract(t.contract, abi, provider);
-            const balance = await token.balanceOf(wallet);
-            const normalized = normalizeBalance(balance, t.decimals);
-            result.push({...t, balance: normalized});
-        } else {
-            const balance = await getProvider().getBalance(wallet);
-            const normalized = Number(ethers.utils.formatEther(balance));
-            result.push({...t, balance: normalized});
-        }
+    if (t.contract) {
+        const abi = [
+            "function balanceOf(address owner) view returns (uint256)",
+        ];
+        const token = new ethers.Contract(t.contract, abi, provider);
+        const balance = await token.balanceOf(address);
+        const normalized = normalizeBalance(balance, t.decimals);
+        return {...t, balance: normalized};
+    } else {
+        const balance = await getProvider().getBalance(address);
+        const normalized = Number(ethers.utils.formatEther(balance));
+        return {...t, balance: normalized};
     }
-    return result;
+}
+
+export async function getBalances(tokens: IToken[], wallet: string) : Promise<Token[]> {
+    return await Promise.all(tokens.map(token => getBalance(token, wallet)));
 }
 
 export function normalizeBalance(balance: ethers.BigNumber, decimals: number) : number {
@@ -134,21 +170,6 @@ export function prettyPrintTxHash(txHash: string) {
     }
     return "N/A";
 }
-
-const genSalt = function(email: string) {
-    return ethers.utils.keccak256(ethers.utils.toUtf8Bytes(`mailto:${email}`));
-};
-  
-export async function genAddress(email: string | null | undefined, admin: any, wallet: any) {
-    if (!email) return "";
-    const contract = new ethers.Contract(admin.address, admin.abi, getProvider());
-    const source = ethers.utils.getCreate2Address(
-        admin.address,
-        ethers.constants.HashZero,
-        ethers.utils.keccak256(wallet.bytecode)
-    );
-    return await contract.predictWalletAddress(source, genSalt(email));
-};
 
 export async function send(
     token: Token,
@@ -243,7 +264,7 @@ export async function getETHPrice() : Promise<number> {
       },
     ];
     // The address of the contract which will provide the price of ETH
-    const addr = "0xD4a33860578De61DBAbDc8BFdb98FD742fA7028e";
+    const addr = import.meta.env.VITE_CHAINLINK_GOERLI_ADDRESS;
     // We create an instance of the contract which we can interact with
     const priceFeed = new ethers.Contract(addr, aggregatorV3InterfaceABI, getProvider());
     // We get the data from the last round of the contract

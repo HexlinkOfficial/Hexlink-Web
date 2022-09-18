@@ -1,5 +1,5 @@
 {
-  "name": "yaw-api",
+  "name": "HexlinkContract",
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.1.1",
     "@nomiclabs/hardhat-etherscan": "^2.1.8",

@@ -59,7 +59,8 @@
 import { ref, computed, onMounted } from "vue";
 import * as ethers from "ethers";
 
-import { getETHPrice, deployWallet, prettyPrintTxHash} from "@/services/ethers";
+import { getETHPrice } from "@/services/web3/price";
+import { deployWallet, prettyPrintTxHash} from "@/services/web3/wallet";
 
 export interface SetupInput {
     step: number,

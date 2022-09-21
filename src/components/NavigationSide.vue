@@ -76,7 +76,7 @@ import {
 import {
   prettyPrintAddress,
   genWalletAddress
-} from '@/services/ethers';
+} from '@/services/web3/wallet';
 import { useAuthStore } from '@/stores/auth';
 
 const store = useAuthStore();

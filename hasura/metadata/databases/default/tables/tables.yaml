@@ -1,1 +1,2 @@
+- "!include public_subscriptions.yaml"
 - "!include public_users.yaml"

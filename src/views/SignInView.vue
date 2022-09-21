@@ -50,7 +50,7 @@ import { useRouter } from 'vue-router';
 import { socialLogin } from '@/services/auth'
 import { useAuthStore } from '@/stores/auth'
 import { validateEmail } from '@/services/validator';
-import { genWalletAddress } from "@/services/ethers";
+import { genWalletAddress } from "@/services/web3/wallet";
 import { message } from "ant-design-vue";
 
 const store = useAuthStore();

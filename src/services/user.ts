@@ -1,10 +1,6 @@
 import type { User } from 'firebase/auth'
 import { gql } from '@urql/core'
-import { getAuth } from 'firebase/auth'
-import { app } from './firebase'
 import { setUrqlClientIfNecessary } from './urql'
-
-const auth = getAuth(app)
 
 export const GET_USERS = gql`
     query GetUsers(

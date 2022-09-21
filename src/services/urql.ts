@@ -1,4 +1,4 @@
-import { createClient, provideClient } from '@urql/vue';
+import { createClient } from '@urql/vue';
 import type { Client } from '@urql/vue';
 
 let urqlClient: Client | null;

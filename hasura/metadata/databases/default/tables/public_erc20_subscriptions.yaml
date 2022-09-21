@@ -1,39 +1,47 @@
 table:
-  name: users
+  name: erc20_subscriptions
   schema: public
 insert_permissions:
   - role: user
     permission:
       check:
-        id:
+        user_id:
           _eq: X-Hasura-User-Id
       columns:
+        - address
+        - chain_id
         - created_at
-        - display_name
-        - email
         - id
-        - photo_url
         - updated_at
+        - user_id
 select_permissions:
   - role: user
     permission:
       columns:
+        - address
+        - chain_id
         - created_at
-        - display_name
-        - email
         - id
-        - photo_url
         - updated_at
+        - user_id
       filter:
-        id:
+        user_id:
           _eq: X-Hasura-User-Id
 update_permissions:
   - role: user
     permission:
       columns:
-        - display_name
-        - photo_url
+        - address
+        - chain_id
+        - updated_at
       filter:
-        id:
+        user_id:
           _eq: X-Hasura-User-Id
       check: null
+delete_permissions:
+  - role: user
+    permission:
+      backend_only: false
+      filter:
+        user_id:
+          _eq: X-Hasura-User-Id

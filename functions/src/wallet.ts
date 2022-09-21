@@ -1,8 +1,8 @@
 import {getAuth} from "firebase-admin/auth";
 import * as functions from "firebase-functions";
 import * as ethers from "ethers";
-import * as HEXLINK from "./HEXLINK.json";
-import * as ERC20 from "./ERC20.json";
+import * as HEXLINK from "./data/HEXLINK.json";
+import * as ERC20 from "./data/ERC20.json";
 import {parseEther} from "ethers/lib/utils";
 
 const secrets = functions.config().doppler || {};

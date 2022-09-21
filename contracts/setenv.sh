@@ -1,7 +1,13 @@
 #!/bin/bash
 
-doppler run -- npx hardhat metadata --network goerli | cat > HEXLINK.json
+mv data/HEXLINK.json data/HEXLINK.json.archive
+mv data/CHAINS.json data/CHAINS.json.archive
 
-cp HEXLINK.json ../functions/src/
+doppler run -- npx hardhat metadata --network goerli | cat > data/HEXLINK.json
+wget -O data/CHAINS.JSON https://chainid.network/chains_mini.json 
 
-cp HEXLINK.json ../src/services/
+cp data/HEXLINK.json ../functions/src/
+cp data/CHAINS.json ../functions/src/
+
+cp data/CHAINS.json ../src/services/
+cp data/HEXLINK.json ../src/services/

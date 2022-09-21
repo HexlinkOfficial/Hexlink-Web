@@ -154,14 +154,14 @@ import { ref, computed } from "vue";
 import type { Rule } from 'ant-design-vue/es/form';
 import * as ethers from "ethers";
 
-import {
-    prettyPrintAddress,
+import { prettyPrintAddress } from "@/services/web3/wallet";
+import { getETHPrice } from "@/services/web3/price";
+import { 
     // estimateERC20Transfer,
     // estimateETHTransfer,
-    getETHPrice,
     send,
-    type Token,
-} from "@/services/ethers";
+    type Token
+} from "@/services/web3/tokens";
 import type { Contact } from "@/services/contacts";
 import { validateEmail } from '@/services/validator';
 
@@ -313,7 +313,7 @@ const toConfirmSend = async function() {
     sendInput.value.step++;
     sendInput.value.confirming = true;
     const ethPrice = await getETHPrice();
-    if (props.token.contract) {
+    if (props.token.address) {
         // const gasEstimation = await estimateERC20Transfer(
         //     props.token,
         //     sendInput.value.receiver,

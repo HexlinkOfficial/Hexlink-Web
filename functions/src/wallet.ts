@@ -169,7 +169,7 @@ export const sendERC20 = functions.https.onCall(async (data, context) => {
   const receiver = await genAddressIfNecessary(data.receiver);
   const amount = normalizeAmountToSend(data.amount, data.token.decimals);
   const tx = await yawWallet.execute(
-      data.token.contract,
+      data.token.address,
       0, // value
       65000, // gas
       genERC20SendTxData(receiver, amount),
@@ -192,7 +192,7 @@ export const executeTx = functions.https.onCall(async (data, context) => {
   const {email} = result;
   const yawWallet = walletContract(await walletAddress(email));
   const tx = await yawWallet.execute(
-      data.contract,
+      data.address,
       data.amount,
       data.txGas,
       data.txData,
@@ -215,7 +215,7 @@ export const estimateERC20Transfer = functions.https.onCall(
       const receiver = await genAddressIfNecessary(data.receiver);
       const amount = normalizeAmountToSend(data.amount, data.token.decimals);
       const gasCost = await yawWallet.estimateGas.execute(
-          data.token.contract,
+          data.token.address,
           0, // value
           65000, // gas
           genERC20SendTxData(receiver, amount),

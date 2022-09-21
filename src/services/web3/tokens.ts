@@ -1,6 +1,8 @@
 import { getFunctions, httpsCallable } from 'firebase/functions'
 import { Alchemy, Network } from "alchemy-sdk";
 import BigNumber from "bignumber.js";
+import { parseEther } from '@ethersproject/units';
+import type { ethers } from 'ethers';
 
 const functions = getFunctions();
 
@@ -44,7 +46,7 @@ export interface Token extends TokenMetadata {
 
 export interface GasEstimation {
     baseCost: BigNumber,
-    maxCost: BigNumber
+    maxCost: BigNumber,
 }
 
 export async function getERC20Metadata(token: string) : Promise<TokenMetadata> {

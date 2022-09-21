@@ -1,7 +1,8 @@
 import * as ethers from "ethers";
 import { getProvider } from "./provider";
+import BigNumber from "bignumber.js";
 
-export async function getETHPrice() : Promise<number> {
+export async function getETHPrice() : Promise<BigNumber> {
     const provider = getProvider();
     // This constant describes the ABI interface of the contract, which will provide the price of ETH
     // It looks like a lot, and it is, but this information is generated when we compile the contract
@@ -64,5 +65,5 @@ export async function getETHPrice() : Promise<number> {
     // Determine how many decimals the price feed has (10**decimals)
     const decimals = await priceFeed.decimals();
     // We convert the price to a number and return it
-    return Number((roundData.answer.toString() / Math.pow(10, decimals)).toFixed(2));
+    return BigNumber(roundData.answer.toString()).div(BigNumber(10).pow(decimals)).dp(2);
 }

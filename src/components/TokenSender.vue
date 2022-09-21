@@ -91,9 +91,9 @@
                         </a-tooltip>
                     </a-col>
                     <a-col style="min-width: 400px;" v-if="!sendInput.payETH">
-                        <span>Base service Fee: ${{baseCostAsUSD.toFixed(2)}}</span>
+                        <span>Base service Fee: ${{baseCostAsUSD}}</span>
                         <br />
-                        <span>Max service Fee: ${{maxCostAsUSD.toFixed(2)}}</span>
+                        <span>Max service Fee: ${{maxCostAsUSD}}</span>
                     </a-col>
                     <a-col style="margin-left: 10px;">
                         <a-switch v-model:checked="sendInput.payETH"/>
@@ -160,10 +160,16 @@ import {
     // estimateERC20Transfer,
     // estimateETHTransfer,
     send,
-    type Token
+    type Token,
+    type GasEstimation,
 } from "@/services/web3/tokens";
 import type { Contact } from "@/services/contacts";
 import { validateEmail } from '@/services/validator';
+import { BigNumber } from 'bignumber.js';
+
+export interface GasEstimationWithPrice extends GasEstimation {
+    ethPrice: BigNumber,
+}
 
 export interface SendInput {
     receiver: string,
@@ -172,11 +178,7 @@ export interface SendInput {
     sending: boolean,
     confirming: boolean,
     payETH: false,
-    gasEstimation: {
-        baseCost: ethers.BigNumber,
-        maxCost: ethers.BigNumber,
-        ethPrice: number,
-    }
+    gasEstimation: GasEstimationWithPrice,
     response: {
         txHash: string,
     },
@@ -235,9 +237,9 @@ const EMPTY_INPUT: SendInput = {
     confirming: false,
     payETH: false,
     gasEstimation: {
-        baseCost: ethers.BigNumber.from(0),
-        maxCost: ethers.BigNumber.from(0),
-        ethPrice: 0,
+        baseCost: BigNumber(0),
+        maxCost: BigNumber(0),
+        ethPrice: BigNumber(0),
     },
     response: {
         txHash: "",
@@ -252,12 +254,12 @@ const clearSendInput = function() {
 
 const validateSendAmount = function(value: string) {
     const amount = Number(value);
-    let maxAllowed = props.token.balance;
+    let maxAllowed = props.token.balance.normalized;
     if (isNaN(amount)) {
         return {message: 'Invalid amount, please input a valid number'};
     } if (amount <= 0) {
         return {message: 'Amount must be higher than 0'};
-    } else if (amount > maxAllowed) {
+    } else if (maxAllowed.lt(amount)) {
         return {message: 'Amount cannot be higher than your balance'};
     } else {
         return {success: true};
@@ -312,7 +314,7 @@ const executeSending = async function() {
 const toConfirmSend = async function() {
     sendInput.value.step++;
     sendInput.value.confirming = true;
-    const ethPrice = await getETHPrice();
+    const ethPrice: BigNumber = await getETHPrice();
     if (props.token.address) {
         // const gasEstimation = await estimateERC20Transfer(
         //     props.token,
@@ -320,15 +322,15 @@ const toConfirmSend = async function() {
         //     Number(sendInput.value.amount)
         // );
         const gasEstimation = {
-             baseCost: ethers.utils.parseEther("0.000014750958658"),
-             maxCost: ethers.utils.parseEther("0.000054750958658"),
+             baseCost: BigNumber("0.000014750958658"),
+             maxCost: BigNumber("0.000054750958658"),
         }
         sendInput.value.gasEstimation = {...gasEstimation, ethPrice}
     } else {
         //const gasEstimation = await estimateETHTransfer();
         const gasEstimation = {
-             baseCost: ethers.utils.parseEther("0.0000034750958658"),
-             maxCost: ethers.utils.parseEther("0.000034750958658"),
+             baseCost: BigNumber("0.0000034750958658"),
+             maxCost: BigNumber("0.000034750958658"),
         }
         sendInput.value.gasEstimation = {...gasEstimation, ethPrice};
     }
@@ -336,23 +338,23 @@ const toConfirmSend = async function() {
 }
 
 const baseCostAsETH = computed(() => {
-    return  Number(ethers.utils.formatEther(
-        sendInput.value.gasEstimation.baseCost
-    ));
+    return sendInput.value.gasEstimation.baseCost;
 });
 
 const baseCostAsUSD = computed(() => {
-   return baseCostAsETH.value * sendInput.value.gasEstimation.ethPrice;
+   return sendInput.value.gasEstimation.baseCost.times(
+        sendInput.value.gasEstimation.ethPrice
+    ).dp(2).toString();
 });
 
 const maxCostAsETH = computed(() => {
-    return Number(ethers.utils.formatEther(
-        sendInput.value.gasEstimation.maxCost
-    ));
+    return sendInput.value.gasEstimation.maxCost;
 });
 
 const maxCostAsUSD = computed(() => {
-    return maxCostAsETH.value * sendInput.value.gasEstimation.ethPrice
+    return sendInput.value.gasEstimation.maxCost.times(
+        sendInput.value.gasEstimation.ethPrice
+    ).dp(2).toString();
 });
 </script>
 

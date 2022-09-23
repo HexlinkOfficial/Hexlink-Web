@@ -49,6 +49,22 @@ export interface GasEstimation {
     maxCost: BigNumber,
 }
 
+export const DEFAULT_BALANCE = {
+    hex: "0x0",
+    normalized: BigNumber(0)
+}
+
+export const DEFAULT_TOKEN = {
+    address: "",
+    decimals: 18,
+    balance: DEFAULT_BALANCE,
+    normalizedBalance: "0",
+    symbol: "",
+    logo: "",
+    name: "",
+    price: 1,
+};
+
 export async function getERC20Metadata(token: string) : Promise<TokenMetadata> {
     return await alchemy.core.getTokenMetadata(token);
 }

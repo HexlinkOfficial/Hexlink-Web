@@ -35,7 +35,7 @@
             style="margin-left: 5px"
             type="primary"
             size="small"
-            @click="setupWallet()"
+            @click="showSetup = true"
         >
             Setup
         </a-button>
@@ -44,7 +44,6 @@
         <a-button
             size="large"
             block
-            disabled
             type="primary"
             style="width: 100%; max-width: 800px;"
             @click="() => showImport = true"
@@ -119,47 +118,7 @@
         @close="showSetup = false"
         @deployed="isWalletDeployed = true"
     ></WalletSetup>
-    <a-modal v-model:visible="showImport" title="Token List" @ok="handleImport">
-        <a-card
-            style="margin: 20px; width: 100%; max-width: 800px"
-            v-for="(token, index) in tokensToImport"
-            :key="token.address"
-        >
-            <a-form :model="token">
-                <a-form-item
-                    label="Contract Address"
-                    name="contract"
-                    :rules="[{ validator: validateContract, trigger: 'change' }]"
-                >
-                    <a-input
-                        v-model:value="token.address"
-                        :onChange="setTokensToImport(token.address, index)"
-                    ></a-input>
-                </a-form-item>
-                <a-form-item
-                    label="Name"
-                    name="name"
-                    :rules="[{ message: 'Name not found' }]"
-                >
-                    <a-input v-model:value="token.name" disabled></a-input>
-                </a-form-item>
-                <a-form-item
-                    label="Symbol"
-                    name="symbol"
-                    :rules="[{ required: true, message: 'Symbol not found' }]"
-                >
-                    <a-input v-model:value="token.symbol" disabled></a-input>
-                </a-form-item>
-                <a-form-item
-                    label="Decimals"
-                    name="decimals"
-                    :rules="[{ required: true, message: 'Decimals not found' }]"
-                >
-                    <a-input v-model:value="token.decimals" disabled></a-input>
-                </a-form-item>
-            </a-form>
-        </a-card>
-    </a-modal>
+    
 </template>
 
 <script setup lang="ts">
@@ -172,14 +131,13 @@ import {
     TransactionOutlined,
     ShoppingCartOutlined,
 } from '@ant-design/icons-vue';
-import type { Rule } from 'ant-design-vue/es/form';
 import { message } from 'ant-design-vue';
 
 import {
     loadTokenDetails,
-    getERC20Metadata,
-    getERC20Balances,
     getETHBalance,
+    DEFAULT_BALANCE,
+    DEFAULT_TOKEN,
     type Token,
 } from "@/services/web3/tokens";
 import {
@@ -192,22 +150,7 @@ import TokenSender from "@/components/TokenSender.vue";
 import WalletSetup from "@/components/WalletSetup.vue";
 import { useAuthStore } from '@/stores/auth';
 import { BigNumber } from "bignumber.js";
-
-const DEFAULT_BALANCE = {
-    hex: "0x0",
-    normalized: BigNumber(0)
-}
-
-const DEFAULT_TOKEN = {
-    address: "",
-    decimals: 18,
-    balance: DEFAULT_BALANCE,
-    normalizedBalance: "0",
-    symbol: "",
-    logo: "",
-    name: "",
-    price: 1,
-};
+import { subscribe, unsubscribe } from "@/services/subscriptions.js";
 
 const store = useAuthStore();
 const user = store.currentUser;
@@ -224,16 +167,10 @@ const tokens = ref<Token[]>([{
 }]);
 const metadata = ref<IMetadata | null>(null);
 
-const showImport = ref<boolean>(false);
-const tokensToImport = ref<Token[]>([DEFAULT_TOKEN]);
-
 const showSend = ref<boolean>(false);
-const tokenToSend = ref<Token>(DEFAULT_TOKEN);
+const tokenToSend = ref<Token>({...DEFAULT_TOKEN});
 
 const showSetup = ref<boolean>(false);
-const setupWallet = function() {
-    showSetup.value = true;
-}
 
 const address = ref<string>();
 const isWalletDeployed = ref<boolean>(true);
@@ -249,52 +186,9 @@ onMounted(async () => {
     loading.value = false;
 });
 
-const setTokensToImport = async function(address: string, index: number) {
-    const tokenMetadata = await getERC20Metadata(address);
-    tokensToImport.value[index] = {
-        address,
-        balance: DEFAULT_BALANCE,
-        ...tokenMetadata
-    }
-}
-
-const validateContract = async function(_rule: Rule, value: string) {
-    if (value === '') {
-        return Promise.reject('Please input token contract address');
-    } else if (tokensToImport.value.find(t => t.address == value)) {
-        return Promise.reject('Token already imported');
-    } else if (await isContract(value)) {
-        return Promise.resolve();
-    } else {
-        return Promise.reject('Invalid address');
-    }
-}
-
 const handleSend = async function(token: Token) {
     showSend.value = true;
     tokenToSend.value = token;
-}
-
-const handleImport = async function() {
-    if (metadata.value?.wallet) {
-        const balances = await getERC20Balances(
-            tokensToImport.value.map(t => t.address),
-            metadata.value.wallet
-        );
-        tokens.value.concat(
-            tokensToImport.value.map(
-                (t, i) => ({
-                    ...t,
-                    balance: balances[i].tokenBalance || balances[i].error,
-                })
-            )
-        );
-        // reset tokens to import
-        tokensToImport.value = [DEFAULT_TOKEN];
-    } else {
-        message.warning('Wallet address not found');
-    }
-    showImport.value = false;
 }
 
 const totalAssets = computed(() => {

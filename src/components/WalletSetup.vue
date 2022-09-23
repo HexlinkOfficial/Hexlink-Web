@@ -61,15 +61,16 @@ import * as ethers from "ethers";
 
 import { getETHPrice } from "@/services/web3/price";
 import { deployWallet, prettyPrintTxHash} from "@/services/web3/wallet";
+import BigNumber from "bignumber.js";
 
 export interface SetupInput {
     step: number,
     deploying: boolean,
     confirming: boolean,
     gasEstimation: {
-        baseCost: ethers.BigNumber,
-        maxCost: ethers.BigNumber,
-        ethPrice: number,
+        baseCost: BigNumber,
+        maxCost: BigNumber,
+        ethPrice: BigNumber,
     },
     response: {
         txHash: string,
@@ -97,8 +98,8 @@ const props = defineProps({
 const refreshServiceFee = async function() {
     const ethPrice = await getETHPrice();
     const gasEstimation = {
-        baseCost: ethers.utils.parseEther("0.000014750958658"),
-        maxCost: ethers.utils.parseEther("0.000054750958658"),
+        baseCost: BigNumber("0.000014750958658"),
+        maxCost: BigNumber("0.000054750958658"),
     }
     setupInput.value.gasEstimation = {...gasEstimation, ethPrice}
 }
@@ -114,9 +115,9 @@ const EMPTY_INPUT: SetupInput = {
     confirming: false,
     deploying: false,
     gasEstimation: {
-        baseCost: ethers.BigNumber.from(0),
-        maxCost: ethers.BigNumber.from(0),
-        ethPrice: 0,
+        baseCost: BigNumber(0),
+        maxCost: BigNumber(0),
+        ethPrice: BigNumber(0),
     },
     response: {
         txHash: "",
@@ -140,22 +141,22 @@ const executeDeploy = async function() {
 }
 
 const baseCostAsETH = computed(() => {
-    return  Number(ethers.utils.formatEther(
-        setupInput.value.gasEstimation.baseCost
-    ));
+    return setupInput.value.gasEstimation.baseCost;
 });
 
 const baseCostAsUSD = computed(() => {
-    return baseCostAsETH.value * setupInput.value.gasEstimation.ethPrice;
+    return baseCostAsETH.value.times(
+        setupInput.value.gasEstimation.ethPrice
+    );
 });
 
 const maxCostAsETH = computed(() => {
-    return Number(ethers.utils.formatEther(
-        setupInput.value.gasEstimation.maxCost
-    ));
+    return setupInput.value.gasEstimation.maxCost;
 });
 
 const maxCostAsUSD = computed(() => {
-    return maxCostAsETH.value * setupInput.value.gasEstimation.ethPrice
+    return maxCostAsETH.value.times(
+        setupInput.value.gasEstimation.ethPrice
+    );
 });
 </script>

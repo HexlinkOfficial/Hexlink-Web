@@ -1,4 +1,4 @@
-import type { User } from 'firebase/auth'
+import type { IUser } from '@/stores/auth'
 import { gql } from '@urql/core'
 import { setUrqlClientIfNecessary } from './urql'
 
@@ -74,7 +74,7 @@ export interface Subscription {
     created_at: string,
 }
 
-export async function getSubscriptions(user: User, protocol: Protocol, idToken: string) : Promise<Subscription[]> {
+export async function getSubscriptions(user: IUser, protocol: Protocol, idToken: string) : Promise<Subscription[]> {
     const client = setUrqlClientIfNecessary(idToken)
     const result = await client.query(
         GET_SUBSCRIPTIONS,
@@ -86,7 +86,7 @@ export async function getSubscriptions(user: User, protocol: Protocol, idToken: 
     return result.data.subscriptions;
 }
 
-export async function subscribe(user: User, idToken: string, token: Token) : Promise<Subscription | null> {
+export async function subscribe(user: IUser, idToken: string, token: Token) : Promise<Subscription | null> {
     const client = setUrqlClientIfNecessary(idToken)
     const result = await client.mutation(
         SUBSCRIBE,
@@ -103,7 +103,7 @@ export async function subscribe(user: User, idToken: string, token: Token) : Pro
     return result.data.subscribe;
 }
 
-export async function unsubscribeERC20(idToken: string, id: number) : Promise<Token | null> {
+export async function unsubscribe(idToken: string, id: number) : Promise<Token | null> {
     const client = setUrqlClientIfNecessary(idToken)
     const result = await client.query(UNSUBSCRIBE, {id}).toPromise();
     if (result?.data == undefined) {

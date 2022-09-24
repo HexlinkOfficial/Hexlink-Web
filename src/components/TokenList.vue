@@ -25,26 +25,16 @@
             Swap Token
         </a-button>
     </a-row>
-    <a-row v-if="!isWalletDeployed" justify="center" align="middle" style="margin: 20px;">
-        <a-alert
-            message="Your account is not setup yet. To send or swap tokens, please setup your account first."
-            type="warning"
-        >
-        </a-alert>
-        <a-button
-            style="margin-left: 5px"
-            type="primary"
-            size="small"
-            @click="setupWallet()"
-        >
-            Setup
-        </a-button>
+    <a-row v-if="!isDeployed" justify="center" align="middle" style="margin: 20px;">
+        <WalletSetup
+            :email="user?.email || ''"
+            :wallet="address!"
+        ></WalletSetup>
     </a-row>
     <a-row justify="center" style="margin: 50px 20px 20px 20px;">
         <a-button
             size="large"
             block
-            disabled
             type="primary"
             style="width: 100%; max-width: 800px;"
             @click="() => showImport = true"
@@ -52,134 +42,43 @@
             Add Token
         </a-button>
     </a-row>
-    <a-row justify="center" v-for="(token, index) in tokens">
-        <a-card style="margin: 20px; width: 100%; max-width: 800px">
-            <template #title>
-                <a-row align="middle">
-                    <a-col style="margin-right: 20px;">
-                        <a-tooltip v-if="token.address" placement="top" :title="token.address">
-                            <a-avatar :src="token.logo || '/images/token.png'"/>
-                        </a-tooltip>
-                        <a-avatar v-if="!token.address" :src="token.logo || '/images/token.png'"/>
-                    </a-col>
-                    <a-col>
-                        <span>{{token.name || token.symbol}}</span>
-                        <br />
-                        <span>Price: ${{token.price || 0}}</span>
-                    </a-col>
-                </a-row>
-            </template>
-            <template #extra>
-                <a-row>
-                    <a-col style="text-align: right;">
-                        <span>{{token.balance.normalized}} {{token.symbol}}</span>
-                        <br />
-                        <span>${{token.balance.normalized.times(token.price || 0).toString()}}</span>
-                    </a-col>
-                    <a-col  style="margin-left: 10px; margin-right: 10px;">
-                        <a-button
-                            shape="round"
-                            :disabled="!isWalletDeployed || token.balance.normalized.lte(0)"
-                            @click="handleSend(token as Token)"
-                        >
-                            <template #icon><send-outlined /></template>
-                            Send
-                        </a-button>
-                    </a-col>
-                    <a-col>
-                        <a-tooltip>
-                            <template #title>
-                                <span>Transaction History</span>
-                            </template>
-                            <a-button
-                                shape="round"
-                                href="'/activities?tokenContract=' + token.address"
-                            >
-                                <template #icon><transaction-outlined /></template>
-                            </a-button>
-                        </a-tooltip>
-                    </a-col>
-                </a-row>
-            </template>
-        </a-card>
+    <a-row justify="center" v-if="address" v-for="token in tokens">
+        <TokenListItem
+            :token="(token as Token)"
+            :wallet="address"
+            :balance="dynamicBalance.toNumber()"
+        ></TokenListItem>
     </a-row>
     <a-row v-if="loading" justify="center" style="margin-top: 40px">
         <a-spin size="large" />
     </a-row>
-    <TokenSender
-        :token="tokenToSend"
-        :showSend="showSend"
-        @close="showSend = false"
-        :balance="dynamicBalance.toNumber()"
-    ></TokenSender>
-    <WalletSetup
-        :showSetup="showSetup"
-        :email="user?.email || ''"
-        :address="address"
-        @close="showSetup = false"
-        @deployed="isWalletDeployed = true"
-    ></WalletSetup>
-    <a-modal v-model:visible="showImport" title="Token List" @ok="handleImport">
-        <a-card
-            style="margin: 20px; width: 100%; max-width: 800px"
-            v-for="(token, index) in tokensToImport"
-            :key="token.address"
-        >
-            <a-form :model="token">
-                <a-form-item
-                    label="Contract Address"
-                    name="contract"
-                    :rules="[{ validator: validateContract, trigger: 'change' }]"
-                >
-                    <a-input
-                        v-model:value="token.address"
-                        :onChange="setTokensToImport(token.address, index)"
-                    ></a-input>
-                </a-form-item>
-                <a-form-item
-                    label="Name"
-                    name="name"
-                    :rules="[{ message: 'Name not found' }]"
-                >
-                    <a-input v-model:value="token.name" disabled></a-input>
-                </a-form-item>
-                <a-form-item
-                    label="Symbol"
-                    name="symbol"
-                    :rules="[{ required: true, message: 'Symbol not found' }]"
-                >
-                    <a-input v-model:value="token.symbol" disabled></a-input>
-                </a-form-item>
-                <a-form-item
-                    label="Decimals"
-                    name="decimals"
-                    :rules="[{ required: true, message: 'Decimals not found' }]"
-                >
-                    <a-input v-model:value="token.decimals" disabled></a-input>
-                </a-form-item>
-            </a-form>
-        </a-card>
-    </a-modal>
+    <a-modal
+        v-if="address"
+        v-model:visible="showImport"
+        title="Add new token"
+    >
+        <TokenImporter
+            :tokens="tokens.map(t => t.address)"
+            :wallet="address"
+            @subscribed="subscribed"
+        ></TokenImporter>
+        <template #footer></template>
+    </a-modal> 
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from "vue";
 import {
-    SendOutlined,
     DownloadOutlined,
     SwapOutlined,
     UploadOutlined,
-    TransactionOutlined,
     ShoppingCartOutlined,
 } from '@ant-design/icons-vue';
-import type { Rule } from 'ant-design-vue/es/form';
-import { message } from 'ant-design-vue';
 
 import {
     loadTokenDetails,
-    getERC20Metadata,
-    getERC20Balances,
     getETHBalance,
+    DEFAULT_BALANCE,
     type Token,
 } from "@/services/web3/tokens";
 import {
@@ -188,26 +87,11 @@ import {
     type IMetadata,
 } from "@/services/web3/wallet";
 import TOKEN_LIST from "@/data/TOKENS.json";
-import TokenSender from "@/components/TokenSender.vue";
+import TokenListItem from "@/components/TokenListItem.vue";
 import WalletSetup from "@/components/WalletSetup.vue";
+import TokenImporter from "@/components/TokenImporter.vue";
 import { useAuthStore } from '@/stores/auth';
 import { BigNumber } from "bignumber.js";
-
-const DEFAULT_BALANCE = {
-    hex: "0x0",
-    normalized: BigNumber(0)
-}
-
-const DEFAULT_TOKEN = {
-    address: "",
-    decimals: 18,
-    balance: DEFAULT_BALANCE,
-    normalizedBalance: "0",
-    symbol: "",
-    logo: "",
-    name: "",
-    price: 1,
-};
 
 const store = useAuthStore();
 const user = store.currentUser;
@@ -223,25 +107,13 @@ const tokens = ref<Token[]>([{
     price: 1000,
 }]);
 const metadata = ref<IMetadata | null>(null);
-
 const showImport = ref<boolean>(false);
-const tokensToImport = ref<Token[]>([DEFAULT_TOKEN]);
-
-const showSend = ref<boolean>(false);
-const tokenToSend = ref<Token>(DEFAULT_TOKEN);
-
-const showSetup = ref<boolean>(false);
-const setupWallet = function() {
-    showSetup.value = true;
-}
-
 const address = ref<string>();
-const isWalletDeployed = ref<boolean>(true);
 onMounted(async () => {
     metadata.value = await getHexlinkMetadata(user?.email);
     address.value = metadata.value.wallet;
-    isWalletDeployed.value = await isContract(address.value!);
     tokens.value[0].balance = await getETHBalance(address.value!);
+    const loadedTokens = 
     tokens.value = tokens.value.concat(await loadTokenDetails(
         TOKEN_LIST.tokens.map(t => t.contract),
         address.value!
@@ -249,52 +121,9 @@ onMounted(async () => {
     loading.value = false;
 });
 
-const setTokensToImport = async function(address: string, index: number) {
-    const tokenMetadata = await getERC20Metadata(address);
-    tokensToImport.value[index] = {
-        address,
-        balance: DEFAULT_BALANCE,
-        ...tokenMetadata
-    }
-}
-
-const validateContract = async function(_rule: Rule, value: string) {
-    if (value === '') {
-        return Promise.reject('Please input token contract address');
-    } else if (tokensToImport.value.find(t => t.address == value)) {
-        return Promise.reject('Token already imported');
-    } else if (await isContract(value)) {
-        return Promise.resolve();
-    } else {
-        return Promise.reject('Invalid address');
-    }
-}
-
-const handleSend = async function(token: Token) {
-    showSend.value = true;
-    tokenToSend.value = token;
-}
-
-const handleImport = async function() {
-    if (metadata.value?.wallet) {
-        const balances = await getERC20Balances(
-            tokensToImport.value.map(t => t.address),
-            metadata.value.wallet
-        );
-        tokens.value.concat(
-            tokensToImport.value.map(
-                (t, i) => ({
-                    ...t,
-                    balance: balances[i].tokenBalance || balances[i].error,
-                })
-            )
-        );
-        // reset tokens to import
-        tokensToImport.value = [DEFAULT_TOKEN];
-    } else {
-        message.warning('Wallet address not found');
-    }
+const subscribed = async function(token: Token) {
     showImport.value = false;
+    tokens.value.push(token);
 }
 
 const totalAssets = computed(() => {
@@ -308,6 +137,10 @@ const totalAssets = computed(() => {
 const dynamicBalance = computed(() => {
     return BigNumber(Math.floor(Math.random() * 100));
 });
+
+const isDeployed = computed(async() => {
+    return await isContract(address.value);
+})
 </script>
 
 <style lang="less" scoped>

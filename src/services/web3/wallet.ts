@@ -71,8 +71,8 @@ export async function getHexlinkMetadata(email: string | null | undefined) : Pro
     }
 }
 
-export async function isContract(address: string): Promise<boolean> {
-    if (!ethers.utils.isAddress(address)) {
+export async function isContract(address: string | undefined | null): Promise<boolean> {
+    if (!address || !ethers.utils.isAddress(address)) {
         return false;
     }
     try {

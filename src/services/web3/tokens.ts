@@ -33,7 +33,7 @@ export interface TokenBalanceResponse {
 }
 
 export interface TokenBalance {
-    hex: any,
+    value: BigNumber,
     error?: any,
     normalized: BigNumber,
 }
@@ -50,7 +50,7 @@ export interface GasEstimation {
 }
 
 export const DEFAULT_BALANCE = {
-    hex: "0x0",
+    value: BigNumber(0),
     normalized: BigNumber(0)
 }
 
@@ -88,7 +88,7 @@ export async function getERC20Balances(tokens: string[], wallet: string) : Promi
 
 function getBalance(balance: TokenBalanceResponse, decimals: number | null) : TokenBalance {
     const base = {
-        hex: balance.tokenBalance,
+        value: BigNumber(balance.tokenBalance || 0),
         error: balance.error,
     }
     if (balance.error || balance.tokenBalance == null || decimals == null) {

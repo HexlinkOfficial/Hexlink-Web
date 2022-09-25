@@ -28,7 +28,7 @@
                     v-model:value="sendInput.amount"
                     placeholder="Amount to send"
                     enter-button="Max"
-                    @search="sendInput.amount = token.balance.toString()"
+                    @search="sendInput.amount = token.balance!.toString()"
                 />
             </a-form-item>
         </a-form>
@@ -66,7 +66,7 @@
             <a-typography-paragraph
                 style="margin-top: 10px;"
             >
-                New Balance: {{token.balance.normalized.minus(sendInput.amount)}}
+                New Balance: {{token.balance!.normalized.minus(sendInput.amount)}}
             </a-typography-paragraph>
             <a-row v-if="sendInput.confirming" style="margin-top: 10px;">
                 <span>Estimating service Fee </span>

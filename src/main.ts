@@ -13,8 +13,8 @@ import { app } from '@/services/firebase'
 
 import { useAuthStore } from "@/stores/auth"
 import { getIdTokenAndSetClaimsIfNecessary } from '@/services/auth'
-import { clearUrqlClient } from '@/services/urql'
-import { getUser } from "@/services/user"
+import { clearUrqlClient } from '@/services/graphql/urql'
+import { getUser } from "@/services/graphql/user"
 
 let vueApp: any;
 getAuth(app).onAuthStateChanged(async (user: any) => {

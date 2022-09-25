@@ -8,7 +8,7 @@ import {
 import type { User } from 'firebase/auth'
 import { getFunctions, httpsCallable } from 'firebase/functions'
 import { app } from '@/services/firebase'
-import { createInitialUser } from '@/services/user'
+import { createInitialUser } from '@/services/graphql/user'
 
 const auth = getAuth(app)
 const functions = getFunctions()

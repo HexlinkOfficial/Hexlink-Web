@@ -4,12 +4,12 @@
             <a-row align="middle">
                 <a-col style="margin-right: 20px;">
                     <a-tooltip v-if="token.address" placement="top" :title="token.address">
-                        <a-avatar :src="token.logo || '/images/token.png'"/>
+                        <a-avatar :src="metadata.logo || '/images/token.png'"/>
                     </a-tooltip>
-                    <a-avatar v-if="!token.address" :src="token.logo || '/images/token.png'"/>
+                    <a-avatar v-if="!token.address" :src="metadata.logo || '/images/token.png'"/>
                 </a-col>
                 <a-col>
-                    <span>{{token.name || token.symbol}}</span>
+                    <span>{{metadata.name || metadata.symbol}}</span>
                     <br />
                     <span>Price: ${{token.price || 0}}</span>
                 </a-col>
@@ -18,14 +18,14 @@
         <template #extra>
             <a-row>
                 <a-col style="text-align: right;">
-                    <span>{{token.balance.normalized}} {{token.symbol}}</span>
+                    <span>{{token.balance?.normalized || 0}} {{metadata.symbol}}</span>
                     <br />
-                    <span>${{token.balance.normalized.times(token.price || 0).toString()}}</span>
+                    <span>${{token.balance?.normalized.times(token.price || 0).toString() || 0}}</span>
                 </a-col>
                 <a-col  style="margin-left: 10px; margin-right: 10px;">
                     <a-button
                         shape="round"
-                        :disabled="!isDeployed || token.balance.normalized.lte(0)"
+                        :disabled="!isDeployed || token.balance?.normalized.lte(0)"
                         @click="showSend = true"
                     >
                         <template #icon><send-outlined /></template>
@@ -48,11 +48,11 @@
                 <a-modal
                     v-model:visible="showSend"
                     @cancel="showSend = false"
-                    :title="'You have ' + token.balance.normalized + ' ' + token.symbol"
+                    v-if="token.balance?.value.gt(0)"
+                    :title="'You have ' + token.balance!.normalized + ' ' + metadata.symbol"
                     style="width: 100%; max-width: 800px;"
                 >
                     <TokenSender
-                        v-if="wallet"
                         :token="token"
                         :balance="balance"
                     ></TokenSender>
@@ -88,6 +88,14 @@ const props = defineProps({
     required: true,
   }
 });
+
+const metadata = computed(() => {
+    return props.token.metadata || {
+        name: "",
+        symbol: "",
+        decimals: 18
+    };
+})
 
 const isDeployed = computed(async () => {
     return await isContract(props.wallet);

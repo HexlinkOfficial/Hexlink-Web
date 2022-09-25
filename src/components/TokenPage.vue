@@ -28,7 +28,7 @@
     <a-row v-if="!isDeployed" justify="center" align="middle" style="margin: 20px;">
         <WalletSetup
             :email="user?.email || ''"
-            :wallet="address!"
+            :wallet="wallet!"
         ></WalletSetup>
     </a-row>
     <a-row justify="center" style="margin: 50px 20px 20px 20px;">
@@ -37,15 +37,15 @@
             block
             type="primary"
             style="width: 100%; max-width: 800px;"
-            @click="() => showImport = true"
+            @click="() => showAddToken = true"
         >
             Add Token
         </a-button>
     </a-row>
-    <a-row justify="center" v-if="address" v-for="token in tokens">
+    <a-row justify="center" v-if="wallet" v-for="token in tokens">
         <TokenListItem
             :token="(token as Token)"
-            :wallet="address"
+            :wallet="wallet"
             :balance="dynamicBalance.toNumber()"
         ></TokenListItem>
     </a-row>
@@ -53,15 +53,14 @@
         <a-spin size="large" />
     </a-row>
     <a-modal
-        v-if="address"
-        v-model:visible="showImport"
+        v-if="wallet"
+        v-model:visible="showAddToken"
         title="Add new token"
     >
-        <TokenImporter
-            :tokens="tokens.map(t => t.address)"
-            :wallet="address"
-            @subscribed="subscribed"
-        ></TokenImporter>
+        <TokenInventory
+            :wallet="wallet!"
+            @subscribed="handleSubscribed"
+        ></TokenInventory>
         <template #footer></template>
     </a-modal> 
 </template>
@@ -76,60 +75,86 @@ import {
 } from '@ant-design/icons-vue';
 
 import {
-    loadTokenDetails,
+    loadAllERC20Tokens,
     getETHBalance,
-    DEFAULT_BALANCE,
-    type Token,
 } from "@/services/web3/tokens";
+import type { Token } from "@/services/web3/tokens";
 import {
     getHexlinkMetadata,
     isContract,
     type IMetadata,
 } from "@/services/web3/wallet";
-import TOKEN_LIST from "@/data/TOKENS.json";
 import TokenListItem from "@/components/TokenListItem.vue";
 import WalletSetup from "@/components/WalletSetup.vue";
-import TokenImporter from "@/components/TokenImporter.vue";
+import TokenInventory from "@/components/TokenInventory.vue";
 import { useAuthStore } from '@/stores/auth';
 import { BigNumber } from "bignumber.js";
+import TOKEN_LIST from '@/data/TOKENS.json';
+import { getERC20Preferences } from "@/services/graphql/preferences";
 
 const store = useAuthStore();
 const user = store.currentUser;
 
 const loading = ref<boolean>(true);
-const tokens = ref<Token[]>([{
-    address: "",
-    symbol: "ETH",
-    decimals: 18,
-    name: "Ethereum",
-    logo: "",
-    balance: DEFAULT_BALANCE,
-    price: 1000,
-}]);
+const tokens = ref<Token[]>([]);
+const visiableTokens = ref<Token[]>([]);
 const metadata = ref<IMetadata | null>(null);
-const showImport = ref<boolean>(false);
-const address = ref<string>();
+const showAddToken = ref<boolean>(false);
+const wallet = ref<string>();
+
+const loadTokenList = async (wallet: string) : Promise<Token[]> => {
+    const preferences = await getERC20Preferences(
+        store.currentUser!,
+        store.idToken!,
+        import.meta.env.VITE_CHAIN_ID,
+    );
+    const eth = {
+        address: "0x",
+        metadata: {
+            symbol: "ETH",
+            decimals: 18,
+            name: "Ethereum",
+            logo: "/images/eth.png"
+        },
+        balance: await getETHBalance(wallet),
+        price: 1000,
+    } as Token;
+    const erc20Tokens = await loadAllERC20Tokens(
+        TOKEN_LIST,
+        preferences,
+        wallet
+    );
+    return [eth].concat(erc20Tokens);
+}
+
 onMounted(async () => {
     metadata.value = await getHexlinkMetadata(user?.email);
-    address.value = metadata.value.wallet;
-    tokens.value[0].balance = await getETHBalance(address.value!);
-    const loadedTokens = 
-    tokens.value = tokens.value.concat(await loadTokenDetails(
-        TOKEN_LIST.tokens.map(t => t.contract),
-        address.value!
-    ));
+    wallet.value = metadata.value.wallet;
+
+    tokens.value = await loadTokenList(wallet.value!);
+    visiableTokens.value = tokens.value.filter(t => {
+        if (t.preference) {
+            return t.preference.display;
+        }
+        if (t.balance) {
+            return t.balance.value.gt(0);
+        }
+        return false;
+    })
     loading.value = false;
 });
 
-const subscribed = async function(token: Token) {
-    showImport.value = false;
-    tokens.value.push(token);
+const handleSubscribed = async function(event: any) {
+    showAddToken.value = false;
+    tokens.value.push(event);
 }
 
 const totalAssets = computed(() => {
     let total: BigNumber = BigNumber(0);
-    for (const token of tokens.value) {
-        total = total.plus(token.balance.normalized.times(token.price!));
+    for (const token of visiableTokens.value) {
+        if (token.balance && token.price) {
+            total = total.plus(token.balance.normalized.times(token.price));
+        }
     }
     return total.plus(BigNumber(dynamicBalance.value));
 });
@@ -139,7 +164,7 @@ const dynamicBalance = computed(() => {
 });
 
 const isDeployed = computed(async() => {
-    return await isContract(address.value);
+    return await isContract(wallet.value);
 })
 </script>
 

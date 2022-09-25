@@ -4,12 +4,12 @@
       <NavigationSide />
     </a-layout-sider>
     <a-layout-content style="overflow: auto;">
-      <TokenList />
+      <TokenPage />
     </a-layout-content>
   </a-layout>
 </template>
 
 <script setup lang="ts">
 import NavigationSide from "@/components/NavigationSide.vue"
-import TokenList from "@/components/TokenList.vue"
+import TokenPage from "@/components/TokenPage.vue"
 </script>

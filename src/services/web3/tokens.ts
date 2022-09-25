@@ -1,8 +1,7 @@
 import { getFunctions, httpsCallable } from 'firebase/functions'
-import { Alchemy, Network } from "alchemy-sdk";
+import { Alchemy, Network, type TokenBalancesResponse } from "alchemy-sdk";
 import BigNumber from "bignumber.js";
-import { parseEther } from '@ethersproject/units';
-import type { ethers } from 'ethers';
+import type { Preference } from "@/services/graphql/preferences";
 
 const functions = getFunctions();
 
@@ -23,7 +22,7 @@ export interface TokenMetadata {
     symbol: string | null;
     decimals: number | null;
     name: string | null;
-    logo: string | null,
+    logo?: string | null,
 }
 
 export interface TokenBalanceResponse {
@@ -38,9 +37,11 @@ export interface TokenBalance {
     normalized: BigNumber,
 }
 
-export interface Token extends TokenMetadata {
-    address: string,
-    balance: TokenBalance,
+export interface Token {
+    address: string;
+    metadata?: TokenMetadata;
+    balance?: TokenBalance;
+    preference?: Preference;
     price?: number;
 }
 
@@ -49,27 +50,15 @@ export interface GasEstimation {
     maxCost: BigNumber,
 }
 
-export const DEFAULT_BALANCE = {
-    value: BigNumber(0),
-    normalized: BigNumber(0)
+export async function getERC20Metadata(token: string) : Promise<Token> {
+    const metadata = await alchemy.core.getTokenMetadata(token);
+    return {
+        address: token,
+        metadata
+    }
 }
 
-export const DEFAULT_TOKEN = {
-    address: "",
-    decimals: 18,
-    balance: DEFAULT_BALANCE,
-    normalizedBalance: "0",
-    symbol: "",
-    logo: "",
-    name: "",
-    price: 1,
-};
-
-export async function getERC20Metadata(token: string) : Promise<TokenMetadata> {
-    return await alchemy.core.getTokenMetadata(token);
-}
-
-export async function getERC20Metadatas(tokens: string[]) : Promise<TokenMetadata[]> {
+export async function getERC20Metadatas(tokens: string[]) : Promise<Token[]> {
     return await Promise.all(tokens.map(t => getERC20Metadata(t)));
 }
 
@@ -86,12 +75,12 @@ export async function getERC20Balances(tokens: string[], wallet: string) : Promi
     return data.tokenBalances;
 }
 
-function getBalance(balance: TokenBalanceResponse, decimals: number | null) : TokenBalance {
+function getBalance(balance: TokenBalanceResponse | null, decimals: number | null) : TokenBalance {
     const base = {
-        value: BigNumber(balance.tokenBalance || 0),
-        error: balance.error,
+        value: BigNumber(balance?.tokenBalance || 0),
+        error: balance?.error,
     }
-    if (balance.error || balance.tokenBalance == null || decimals == null) {
+    if (!balance || balance.error || balance.tokenBalance == null || decimals == null) {
         return {
             ...base,
             normalized: BigNumber(0)
@@ -111,20 +100,60 @@ function getBalance(balance: TokenBalanceResponse, decimals: number | null) : To
     }
 }
 
-export async function loadTokenDetails(tokens: string[], wallet: string): Promise<Token[]> {
-    return await Promise.all([
-        getERC20Balances(tokens, wallet),
-        getERC20Metadatas(tokens)
-    ]).then(([balances, metadatas]) => {
-        return tokens.map((address, i) => (
-            {
-                ...(metadatas[i]),
-                balance: getBalance(balances[i], metadatas[i].decimals),
-                address,
-                price: 1
-            }
-        ));
+export async function loadAllERC20Tokens(
+    defaultTokens: {[key: string]: TokenMetadata},
+    preferences: Preference[],
+    wallet: string
+): Promise<Token[]> {
+    const pMap = preferences.reduce((prev, p) => {
+        prev[p.address] = p;
+        return prev;
+    }, {} as {[key: string]: Preference});
+
+    const balances = await alchemy.core.getTokenBalances(wallet, 'erc20');
+    const nonZeroBalances = balances.tokenBalances.reduce((prev, balance) => {
+        if (balance.tokenBalance !== "0") {
+            prev[balance.contractAddress.toLowerCase()] = balance;
+        }
+        return prev;
+    }, {} as {[key: string]: TokenBalanceResponse});
+
+    // get preferences not covered by default tokens
+    const customTokenAddresses = preferences.filter(
+        p => defaultTokens[p.address]
+    ).map(p => p.address.toLowerCase());
+    const customMetadatas = await getERC20Metadatas(customTokenAddresses);
+    const customTokens = customMetadatas.reduce((prev, token) => {
+        prev[token.address] = token
+        return prev;
+    }, {} as {[key: string]: Token});
+
+    const tokens = Object.keys(defaultTokens).concat(customTokenAddresses);
+    return tokens.map(address => {
+        const metadata = defaultTokens[address] || customTokens[address].metadata;
+        const token: Token = { address, metadata };
+        if (pMap[address]) {
+            token.preference = pMap[address];
+        }
+        if (nonZeroBalances[address]) {
+            token.balance = getBalance(
+                nonZeroBalances[address],
+                metadata.decimals
+            );
+        }   
+        return token;
     });
+}
+
+export async function loadERC20Token(
+    address: string,
+    wallet: string
+): Promise<Token> {
+    const token = await getERC20Metadata(address);
+    const balances = await alchemy.core.getTokenBalances(wallet, [address]);
+    const [balance] = balances.tokenBalances;
+    token.balance = getBalance(balance, token.metadata!.decimals);
+    return token;
 }
 
 export async function send(

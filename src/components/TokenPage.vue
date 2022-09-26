@@ -31,18 +31,15 @@
             :wallet="wallet!"
         ></WalletSetup>
     </a-row>
-    <a-row justify="center" style="margin: 50px 20px 20px 20px;">
-        <a-button
-            size="large"
-            block
-            type="primary"
-            style="width: 100%; max-width: 800px;"
-            @click="() => showAddToken = true"
-        >
-            Add Token
-        </a-button>
+    <a-row v-if="wallet" justify="center" style="margin: 50px 20px 20px 20px;">
+        <TokenPreference
+            :tokens="(tokens as Token[])"
+            :wallet="wallet!"
+            @tokenAdded="handleTokenAdded"
+            @preferenceUpdate="handlePreferenceUpdate"
+        ></TokenPreference>
     </a-row>
-    <a-row justify="center" v-if="wallet" v-for="token in tokens">
+    <a-row justify="center" v-if="wallet" v-for="token in visiableTokens">
         <TokenListItem
             :token="(token as Token)"
             :wallet="wallet"
@@ -52,17 +49,6 @@
     <a-row v-if="loading" justify="center" style="margin-top: 40px">
         <a-spin size="large" />
     </a-row>
-    <a-modal
-        v-if="wallet"
-        v-model:visible="showAddToken"
-        title="Add new token"
-    >
-        <TokenInventory
-            :wallet="wallet!"
-            @subscribed="handleSubscribed"
-        ></TokenInventory>
-        <template #footer></template>
-    </a-modal> 
 </template>
 
 <script setup lang="ts">
@@ -74,10 +60,7 @@ import {
     ShoppingCartOutlined,
 } from '@ant-design/icons-vue';
 
-import {
-    loadAllERC20Tokens,
-    getETHBalance,
-} from "@/services/web3/tokens";
+import { loadAllERC20Tokens } from "@/services/web3/tokens";
 import type { Token } from "@/services/web3/tokens";
 import {
     getHexlinkMetadata,
@@ -86,11 +69,14 @@ import {
 } from "@/services/web3/wallet";
 import TokenListItem from "@/components/TokenListItem.vue";
 import WalletSetup from "@/components/WalletSetup.vue";
-import TokenInventory from "@/components/TokenInventory.vue";
+import TokenPreference from "@/components/TokenPreference.vue";
 import { useAuthStore } from '@/stores/auth';
 import { BigNumber } from "bignumber.js";
 import TOKEN_LIST from '@/data/TOKENS.json';
-import { getERC20Preferences } from "@/services/graphql/preferences";
+import {
+    getERC20Preferences,
+    setERC20Preferences
+} from "@/services/graphql/preferences";
 
 const store = useAuthStore();
 const user = store.currentUser;
@@ -99,7 +85,6 @@ const loading = ref<boolean>(true);
 const tokens = ref<Token[]>([]);
 const visiableTokens = ref<Token[]>([]);
 const metadata = ref<IMetadata | null>(null);
-const showAddToken = ref<boolean>(false);
 const wallet = ref<string>();
 
 const loadTokenList = async (wallet: string) : Promise<Token[]> => {
@@ -108,23 +93,17 @@ const loadTokenList = async (wallet: string) : Promise<Token[]> => {
         store.idToken!,
         import.meta.env.VITE_CHAIN_ID,
     );
-    const eth = {
-        address: "0x",
-        metadata: {
-            symbol: "ETH",
-            decimals: 18,
-            name: "Ethereum",
-            logo: "/images/eth.png"
-        },
-        balance: await getETHBalance(wallet),
-        price: 1000,
-    } as Token;
-    const erc20Tokens = await loadAllERC20Tokens(
+    const tokens = await loadAllERC20Tokens(
         TOKEN_LIST,
         preferences,
         wallet
     );
-    return [eth].concat(erc20Tokens);
+    await setERC20Preferences(
+        store.currentUser!,
+        store.idToken!,
+        tokens.tokensToSetPreference
+    );
+    return tokens.tokens;
 }
 
 onMounted(async () => {
@@ -132,21 +111,20 @@ onMounted(async () => {
     wallet.value = metadata.value.wallet;
 
     tokens.value = await loadTokenList(wallet.value!);
-    visiableTokens.value = tokens.value.filter(t => {
-        if (t.preference) {
-            return t.preference.display;
-        }
-        if (t.balance) {
-            return t.balance.value.gt(0);
-        }
-        return false;
-    })
+    visiableTokens.value = tokens.value.filter(t => t.visibility);
     loading.value = false;
 });
 
-const handleSubscribed = async function(event: any) {
-    showAddToken.value = false;
-    tokens.value.push(event);
+const handlePreferenceUpdate = async function(token: any) {
+    tokens.value.forEach(t => {
+        if (t.address == token.address) {
+            t.preference = token.preference;
+        }
+    })
+}
+
+const handleTokenAdded = async function(token: Token) {
+    tokens.value.push(token);
 }
 
 const totalAssets = computed(() => {

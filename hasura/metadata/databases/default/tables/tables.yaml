@@ -1,2 +1,2 @@
-- "!include public_subscriptions.yaml"
+- "!include public_erc20_preferences.yaml"
 - "!include public_users.yaml"

@@ -1,7 +1,7 @@
 import { getFunctions, httpsCallable } from 'firebase/functions'
-import { Alchemy, Network, type TokenBalancesResponse } from "alchemy-sdk";
+import { Alchemy, Network } from "alchemy-sdk";
 import BigNumber from "bignumber.js";
-import type { Preference } from "@/services/graphql/preferences";
+import type { PreferenceOutput, PreferenceInput, Preference } from "@/services/graphql/preferences";
 
 const functions = getFunctions();
 
@@ -42,6 +42,7 @@ export interface Token {
     metadata?: TokenMetadata;
     balance?: TokenBalance;
     preference?: Preference;
+    visibility?: boolean,
     price?: number;
 }
 
@@ -62,9 +63,9 @@ export async function getERC20Metadatas(tokens: string[]) : Promise<Token[]> {
     return await Promise.all(tokens.map(t => getERC20Metadata(t)));
 }
 
-export async function getETHBalance(wallet: string): Promise<TokenBalance> {
+export async function getETHBalance(wallet: string): Promise<TokenBalanceResponse> {
     const result = await alchemy.core.getBalance(wallet);
-    return getBalance({tokenBalance: result.toHexString()}, 18);
+    return {tokenBalance: result.toHexString()};
 }
 
 export async function getERC20Balances(tokens: string[], wallet: string) : Promise<TokenBalanceResponse[]> {
@@ -102,23 +103,24 @@ function getBalance(balance: TokenBalanceResponse | null, decimals: number | nul
 
 export async function loadAllERC20Tokens(
     defaultTokens: {[key: string]: TokenMetadata},
-    preferences: Preference[],
+    preferences: PreferenceOutput[],
     wallet: string
-): Promise<Token[]> {
-    const pMap = preferences.reduce((prev, p) => {
-        prev[p.address] = p;
-        return prev;
-    }, {} as {[key: string]: Preference});
-
-    const balances = await alchemy.core.getTokenBalances(wallet, 'erc20');
-    const nonZeroBalances = balances.tokenBalances.reduce((prev, balance) => {
+): Promise<{
+    tokens: Token[],
+    tokensToSetPreference: PreferenceInput[],
+}> {
+    const nonZeroBalances : {[key: string]: TokenBalanceResponse} = {};
+    const ethBalance = await getETHBalance(wallet);
+    if (BigNumber(ethBalance.tokenBalance!).gt(0)) {
+        nonZeroBalances["0x"] = ethBalance;
+    }
+    const erc20Balances = await alchemy.core.getTokenBalances(wallet, 'erc20');
+    erc20Balances.tokenBalances.forEach(balance => {
         if (balance.tokenBalance !== "0") {
-            prev[balance.contractAddress.toLowerCase()] = balance;
+            nonZeroBalances[balance.contractAddress.toLowerCase()] = balance;
         }
-        return prev;
-    }, {} as {[key: string]: TokenBalanceResponse});
+    });
 
-    // get preferences not covered by default tokens
     const customTokenAddresses = preferences.filter(
         p => defaultTokens[p.address]
     ).map(p => p.address.toLowerCase());
@@ -128,21 +130,45 @@ export async function loadAllERC20Tokens(
         return prev;
     }, {} as {[key: string]: Token});
 
-    const tokens = Object.keys(defaultTokens).concat(customTokenAddresses);
-    return tokens.map(address => {
+    const pMap = preferences.reduce((prev, p) => {
+        prev[p.address] = {
+            id: p.id,
+            display: p.display,
+            displayName: p.displayName,
+        };
+        return prev;
+    }, {} as {[key: string]: Preference});
+
+    const tokenAddresses = Object.keys(defaultTokens).concat(customTokenAddresses);
+    const tokensToSetPreference : PreferenceInput[] = [];
+    const tokens = tokenAddresses.map(address => {
         const metadata = defaultTokens[address] || customTokens[address].metadata;
         const token: Token = { address, metadata };
-        if (pMap[address]) {
-            token.preference = pMap[address];
-        }
         if (nonZeroBalances[address]) {
             token.balance = getBalance(
                 nonZeroBalances[address],
                 metadata.decimals
             );
-        }   
+        }
+        if (pMap[address]) {
+            token.preference = pMap[address];
+            token.visibility = token.preference.display;
+        } else {
+            token.visibility = token.balance?.value.gt(0);
+            if (token.visibility) {
+                tokensToSetPreference.push({
+                    chainId: import.meta.env.VITE_CHAIN_ID,
+                    address: token.address,
+                    display: true,
+                });
+            }
+        }
         return token;
     });
+    return {
+        tokens,
+        tokensToSetPreference
+    }
 }
 
 export async function loadERC20Token(

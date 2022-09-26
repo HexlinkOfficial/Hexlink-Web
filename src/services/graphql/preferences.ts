@@ -19,22 +19,10 @@ export const GET_ERC20_PREFERENCES = gql`
     }
 `
 
-export const INSERT_ERC20_PREFERENCE = gql`
-    mutation (
-        $userId: String!
-        $chainId: Integer!
-        $address: String!
-        $displayName: String!
-        $display: Boolean!
-    ) {
-        insert_erc20_preferences_one (
-            objects: {
-                user_id: $userId
-                chain_id: $chainId
-                address: $address
-                display_name: $displayName
-                display: $display
-            }
+export const INSERT_ERC20_PREFERENCES = gql`
+    mutation ($objects: [erc20_preference_insert_input!]!) {
+        insert_erc20_preferences (
+            objects: $objects
         ) {
             id
         }
@@ -51,7 +39,6 @@ export const UPDATE_ERC20_PREFERENCE = gql`
             _set: { display: $display }
         ) {
             id
-            display
         }
     }
 `
@@ -64,9 +51,19 @@ export interface Token {
 
 export interface Preference {
     id: number;
-    address: string,
     displayName?: string;
     display: boolean;
+}
+
+export interface PreferenceOutput extends Preference {
+    address: string,
+}
+
+export interface PreferenceInput {
+    chainId: string,
+    address: String,
+    displayName?: string,
+    display: boolean,
 }
 
 export async function getERC20Preferences(
@@ -85,29 +82,26 @@ export async function getERC20Preferences(
     return result.data.erc20_preferences;
 }
 
-export async function setERC20Preference(
+export async function setERC20Preferences(
     user: IUser,
     idToken: string,
-    data: {
-        chainId: string,
-        address: String,
-        displayName: string,
-        display: boolean,
-    },
-) : Promise<{id: string} | null> {
+    data: PreferenceInput[],
+) : Promise<{id: string}[]> {
     const client = setUrqlClientIfNecessary(idToken)
-    data.address = data.address.toLowerCase()
     const result = await client.mutation(
-        INSERT_ERC20_PREFERENCE,
-        {
+        INSERT_ERC20_PREFERENCES,
+        data.map(d => ({
             userId: user.uid,
-            ...data
-        }
+            chainId: d.chainId,
+            address: d.address.toLowerCase(),
+            displayName: d.displayName,
+            display: d.display,
+        }))
     ).toPromise();
     if (result?.data == undefined) {
-        return null;
+        return [];
     }
-    return result.data.insert_erc20_preferences_one;
+    return result.data.insert_erc20_preferences;
 }
 
 export async function updateERC20Preference(

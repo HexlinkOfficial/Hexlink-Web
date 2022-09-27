@@ -5,11 +5,13 @@ import { setUrqlClientIfNecessary } from './urql'
 export const GET_ERC20_PREFERENCES = gql`
     query GetPreferences (
         $userId: String!
-        $chainId: Integer!
+        $chainId: Int!
     ) {
         erc20_preferences (
-            user_id: $userId
-            chain_id: $chainId
+            where: {
+                user_id: { _eq: $userId },
+                chain_id: { _eq: $chainId }
+            }
         ) {
             id
             address
@@ -20,11 +22,14 @@ export const GET_ERC20_PREFERENCES = gql`
 `
 
 export const INSERT_ERC20_PREFERENCES = gql`
-    mutation ($objects: [erc20_preference_insert_input!]!) {
+    mutation ($objects: [erc20_preferences_insert_input!]!) {
         insert_erc20_preferences (
             objects: $objects
         ) {
-            id
+            affected_rows
+            returning {
+                id
+            }
         }
     }
 `
@@ -32,22 +37,17 @@ export const INSERT_ERC20_PREFERENCES = gql`
 export const UPDATE_ERC20_PREFERENCE = gql`
     mutation (
         $id: Int!
-        $display: String!
+        $display: Boolean!
     ) {
         update_erc20_preferences_by_pk (
             pk_columns: {id: $id},
             _set: { display: $display }
         ) {
             id
+            display
         }
     }
 `
-
-export interface Token {
-    chainId: string,
-    address: string,
-    displayName: string,
-}
 
 export interface Preference {
     id: number;
@@ -60,8 +60,8 @@ export interface PreferenceOutput extends Preference {
 }
 
 export interface PreferenceInput {
-    chainId: string,
-    address: String,
+    chainId: number,
+    address: string,
     displayName?: string,
     display: boolean,
 }
@@ -69,15 +69,16 @@ export interface PreferenceInput {
 export async function getERC20Preferences(
     user: IUser,
     idToken: string,
-    chainId: string
-) : Promise<Preference[]> {
+    chainId: number
+) : Promise<PreferenceOutput[]> {
     const client = setUrqlClientIfNecessary(idToken)
     const result = await client.query(
         GET_ERC20_PREFERENCES,
         {userId: user.uid, chainId}
     ).toPromise();
     if (result?.data == undefined) {
-        return [];
+        console.log(result);
+        throw new Error("Failed to get erc20 preferences");
     }
     return result.data.erc20_preferences;
 }
@@ -86,22 +87,25 @@ export async function setERC20Preferences(
     user: IUser,
     idToken: string,
     data: PreferenceInput[],
-) : Promise<{id: string}[]> {
+) : Promise<{id: number}[]> {
     const client = setUrqlClientIfNecessary(idToken)
     const result = await client.mutation(
         INSERT_ERC20_PREFERENCES,
-        data.map(d => ({
-            userId: user.uid,
-            chainId: d.chainId,
-            address: d.address.toLowerCase(),
-            displayName: d.displayName,
-            display: d.display,
-        }))
+        {
+            objects: data.map(d => ({
+                user_id: user.uid,
+                chain_id: d.chainId,
+                address: d.address.toLowerCase(),
+                display_name: d.displayName,
+                display: d.display,
+            }))
+        }
     ).toPromise();
     if (result?.data == undefined) {
-        return [];
+        console.log(result);
+        throw new Error("Failed to set erc20 preference");
     }
-    return result.data.insert_erc20_preferences;
+    return result.data.insert_erc20_preferences.returning;
 }
 
 export async function updateERC20Preference(
@@ -110,14 +114,15 @@ export async function updateERC20Preference(
         id: number,
         display: boolean,
     },
-) : Promise<{id: string} | null> {
+) : Promise<{id: number, display: boolean}> {
     const client = setUrqlClientIfNecessary(idToken)
     const result = await client.mutation(
         UPDATE_ERC20_PREFERENCE,
         data
     ).toPromise();
     if (result?.data == undefined) {
-        return null;
+        console.log(result);
+        throw new Error("Failed to update erc20 preference");
     }
-    return result.data.erc20_preferences;
+    return result.data.update_erc20_preferences_by_pk;
 }

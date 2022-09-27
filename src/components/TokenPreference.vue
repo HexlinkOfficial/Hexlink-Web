@@ -27,12 +27,21 @@
                         <span>{{item.metadata.symbol}}</span>
                         <br/>
                         <a-typography-paragraph v-if="item.address == '0x'"></a-typography-paragraph>
-                        <a-typography-paragraph :copyable="{text: item.address}" style="font-size: 0.8em;" v-if="item.address != '0x'">
+                        <a-typography-paragraph
+                            :copyable="{text: item.address}"
+                            style="font-size: 0.8em;"
+                            v-if="item.address != '0x'"
+                        >
                             Contract Address: {{prettyPrintAddress(item.address)}}
                         </a-typography-paragraph>
                     </a-col>
                     <a-col>
-                        <a-switch v-model:checked="item.visibility" @change="handleChange(item)"/>
+                        <div @click="handleClick(item)">
+                            <a-switch
+                                :checked="item.preference?.display || false"
+                                :loading="updatingPreference[item.address]"
+                            />
+                        </div>
                     </a-col>
                 </a-row>
             </template>
@@ -75,7 +84,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from "vue";
+import { ref, watch } from "vue";
 import { useAuthStore } from '@/stores/auth';
 import {
     setERC20Preferences,
@@ -120,6 +129,7 @@ const searching = ref<boolean>(false);
 const showImport = ref<boolean>(false);
 const searchText = ref<string>("");
 const tokenListToShow = ref<Token[]>([]);
+const updatingPreference = ref<{[key: string]: boolean}>({});
 
 watch(
   () => props.tokens,
@@ -128,19 +138,19 @@ watch(
   }
 );
 
+const onSearch = async (text: string) => {
+    searching.value = true;
+    showImport.value = false;
+    await genTokenList(text, props.tokens);
+    searching.value = false;
+}
+
 const search = (token: Token, text: string) => {
     return [
         token.metadata?.name,
         token.metadata?.symbol,
         token.preference?.displayName
     ].filter(t => !!t).join(" ").toLowerCase().includes(text);
-}
-
-const onSearch = async (text: string) => {
-    searching.value = true;
-    showImport.value = false;
-    await genTokenList(text, props.tokens);
-    searching.value = false;
 }
 
 const genTokenList = async (text: string, tokenList: Token[]) => {
@@ -178,49 +188,69 @@ const genTokenList = async (text: string, tokenList: Token[]) => {
 
 const emit = defineEmits(['preferenceUpdate', 'tokenAdded']);
 const addToken = async () => {
-    const result = await setERC20Preferences(
-        store.currentUser!,
-        store.idToken!,
-        [{
-            address: tokenToImport.value.address,
-            chainId: import.meta.env.VITE_CHAIN_ID,
-            display: tokenToImport.value.preference!.display,
-            displayName: tokenToImport.value.preference!.displayName!
-        }]
-    );
-    if (result.length > 0) {
-        emit('tokenAdded', {
-            address: tokenToImport.value.address,
-            metadata: {
-                name: tokenToImport.value.metadata!.name,
-                symbol: tokenToImport.value.metadata!.symbol,
-                decimals: tokenToImport.value.metadata!.decimals,
-            },
-            preference: {
-                id: result[0].id,
+    try {
+        const [{id}] = await setERC20Preferences(
+            store.currentUser!,
+            store.idToken!,
+            [{
+                address: tokenToImport.value.address,
+                chainId: import.meta.env.VITE_CHAIN_ID,
                 display: tokenToImport.value.preference!.display,
                 displayName: tokenToImport.value.preference!.displayName!
-            },
-            balance: {
-
-            }
-        });
+            }]
+        );
+        tokenToImport.value.preference!.id = id;
+        emit('tokenAdded', tokenToImport);
         showAddToken.value = false;
         showImport.value = false;
         searchText.value = "";
         tokenToImport.value = {...DEFAULT_TOKEN};
-    } else {
+    } catch(err: any) {
         message.error("Failed to add the token");
     }
 }
 
-const handleChange = (token: Token) => async (display: boolean) => {
-    if (!!(token.preference?.display) == display) {
-        return;
+const handleClick = async (token: Token) => {
+    const prevPreference = token.preference;
+    updatingPreference.value[token.address] = true;
+    try {
+        if (token.preference) {
+            token.preference.display = !token.preference.display;
+            const preference = await updateERC20Preference(store.idToken!, {
+                id: token.preference!.id,
+                display: token.preference.display
+            });
+            emit(
+                'preferenceUpdate',
+                {
+                    address: token.address,
+                    preference
+                }
+            );
+        } else {
+            token.preference = {id: -1, display: true};
+            const [{id}] = await setERC20Preferences(
+                store.currentUser!,
+                store.idToken!,
+                [{
+                    address: token.address,
+                    chainId: Number(import.meta.env.VITE_CHAIN_ID),
+                    display: true
+                }]
+            );
+            token.preference = {id, display: true};
+            emit(
+                'preferenceUpdate',
+                {
+                    address: token.address,
+                    preference: { id, display: true }
+                }
+            );
+        }
+    } catch (err: any) {
+        token.preference = prevPreference;
+        message.error("Failed to connect error");
     }
-    await updateERC20Preference(store.idToken!, {
-        id: token.preference!.id,
-        display
-    });
+    updatingPreference.value[token.address] = false;
 }
 </script>

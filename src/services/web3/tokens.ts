@@ -22,19 +22,19 @@ export interface TokenMetadata {
     symbol: string | null;
     decimals: number | null;
     name: string | null;
-    logo?: string | null,
+    logo?: string | null;
 }
 
 export interface TokenBalanceResponse {
-    contractAddress?: string,
-    tokenBalance: string | null,
-    error?: any
+    contractAddress?: string;
+    tokenBalance: string | null;
+    error?: any;
 }
 
 export interface TokenBalance {
-    value: BigNumber,
-    error?: any,
-    normalized: BigNumber,
+    value: BigNumber;
+    error?: any;
+    normalized: BigNumber;
 }
 
 export interface Token {
@@ -42,13 +42,12 @@ export interface Token {
     metadata?: TokenMetadata;
     balance?: TokenBalance;
     preference?: Preference;
-    visibility?: boolean,
     price?: number;
 }
 
 export interface GasEstimation {
-    baseCost: BigNumber,
-    maxCost: BigNumber,
+    baseCost: BigNumber;
+    maxCost: BigNumber;
 }
 
 export async function getERC20Metadata(token: string) : Promise<Token> {
@@ -114,16 +113,20 @@ export async function loadAllERC20Tokens(
     if (BigNumber(ethBalance.tokenBalance!).gt(0)) {
         nonZeroBalances["0x"] = ethBalance;
     }
-    const erc20Balances = await alchemy.core.getTokenBalances(wallet, 'erc20');
+
+    const customTokenAddresses = preferences.filter(
+        p => !defaultTokens[p.address]
+    ).map(p => p.address.toLowerCase());
+    const toSearch = Object.keys(defaultTokens).filter(
+        addr => addr != '0x'
+    ).concat(customTokenAddresses);
+    const erc20Balances = await alchemy.core.getTokenBalances(wallet, toSearch);
     erc20Balances.tokenBalances.forEach(balance => {
         if (balance.tokenBalance !== "0") {
             nonZeroBalances[balance.contractAddress.toLowerCase()] = balance;
         }
     });
 
-    const customTokenAddresses = preferences.filter(
-        p => defaultTokens[p.address]
-    ).map(p => p.address.toLowerCase());
     const customMetadatas = await getERC20Metadatas(customTokenAddresses);
     const customTokens = customMetadatas.reduce((prev, token) => {
         prev[token.address] = token
@@ -152,12 +155,10 @@ export async function loadAllERC20Tokens(
         }
         if (pMap[address]) {
             token.preference = pMap[address];
-            token.visibility = token.preference.display;
         } else {
-            token.visibility = token.balance?.value.gt(0);
-            if (token.visibility) {
+            if (token.balance?.value.gt(0)) {
                 tokensToSetPreference.push({
-                    chainId: import.meta.env.VITE_CHAIN_ID,
+                    chainId: Number(import.meta.env.VITE_CHAIN_ID),
                     address: token.address,
                     display: true,
                 });

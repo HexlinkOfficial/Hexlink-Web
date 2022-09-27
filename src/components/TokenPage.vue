@@ -83,7 +83,6 @@ const user = store.currentUser;
 
 const loading = ref<boolean>(true);
 const tokens = ref<Token[]>([]);
-const visiableTokens = ref<Token[]>([]);
 const metadata = ref<IMetadata | null>(null);
 const wallet = ref<string>();
 
@@ -91,7 +90,7 @@ const loadTokenList = async (wallet: string) : Promise<Token[]> => {
     const preferences = await getERC20Preferences(
         store.currentUser!,
         store.idToken!,
-        import.meta.env.VITE_CHAIN_ID,
+        Number(import.meta.env.VITE_CHAIN_ID),
     );
     const tokens = await loadAllERC20Tokens(
         TOKEN_LIST,
@@ -111,16 +110,19 @@ onMounted(async () => {
     wallet.value = metadata.value.wallet;
 
     tokens.value = await loadTokenList(wallet.value!);
-    visiableTokens.value = tokens.value.filter(t => t.visibility);
     loading.value = false;
 });
 
-const handlePreferenceUpdate = async function(token: any) {
+const visiableTokens = computed(() => {
+    return tokens.value.filter(t => t.preference?.display || false);
+});
+
+const handlePreferenceUpdate = async function(params: any) {
     tokens.value.forEach(t => {
-        if (t.address == token.address) {
-            t.preference = token.preference;
+        if (t.address == params.address) {
+            t.preference = params.preference;
         }
-    })
+    });
 }
 
 const handleTokenAdded = async function(token: Token) {

@@ -236,7 +236,7 @@ const EMPTY_INPUT: SendInput = {
 const sendInput = ref<SendInput>({...EMPTY_INPUT});
 const validateSendAmount = function(value: string) {
     const amount = Number(value);
-    let maxAllowed = props.token.balance.normalized;
+    let maxAllowed = props.token.balance?.normalized || BigNumber(0);
     if (isNaN(amount)) {
         return {message: 'Invalid amount, please input a valid number'};
     } if (amount <= 0) {

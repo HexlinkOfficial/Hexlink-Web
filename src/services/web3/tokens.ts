@@ -30,10 +30,10 @@ function getNetwork() : Network {
 }
 
 export interface TokenMetadata {
-    symbol: string | null;
-    decimals: number | null;
-    name: string | null;
-    logo?: string | null;
+    symbol: string;
+    decimals: number;
+    name: string;
+    logo?: string;
 }
 
 export interface NormalizedTokenBalance {
@@ -57,9 +57,20 @@ export interface GasEstimation {
 
 export async function getERC20Metadata(token: string) : Promise<Token> {
     const metadata = await alchemy.core.getTokenMetadata(token);
+    if (metadata.name == null
+        || metadata.symbol == null
+        || metadata.decimals == null) {
+        throw new Error(
+            `Invalid ERC20 metadata for ${token}, got ${JSON.stringify(metadata)}`
+        )
+    }
     return {
         address: token,
-        metadata
+        metadata: {
+            name: metadata.name!,
+            symbol: metadata.symbol!,
+            decimals: metadata.decimals!
+        }
     }
 }
 
@@ -129,9 +140,15 @@ export async function loadAll(
     const customTokenAddresses : string[] = [];
     preferences.forEach(p => {
         const address = p.address.toLowerCase();
-        tokens[address].preference = p;
-        if (!TOKEN_LIST.hasOwnProperty(address)) {
+        if (tokens[address]) {
+            tokens[address].preference = p;
+        } else {
             customTokenAddresses.push(address)
+            tokens[address] = {
+                address,
+                metadata: {name: "", symbol: "", decimals: 0},
+                preference: p,
+            }
         }
     });
 

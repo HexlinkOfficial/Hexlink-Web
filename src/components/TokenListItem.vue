@@ -9,7 +9,7 @@
                     <a-avatar v-if="!token.address" :src="metadata.logo || '/images/token.png'"/>
                 </a-col>
                 <a-col>
-                    <span>{{metadata.name || metadata.symbol}}</span>
+                    <span>{{metadata.name}}</span>
                     <br />
                     <span>Price: ${{token.price || 0}}</span>
                 </a-col>
@@ -90,10 +90,11 @@ const props = defineProps({
 });
 
 const metadata = computed(() => {
-    return props.token.metadata || {
-        name: "",
-        symbol: "",
-        decimals: 18
+    return {
+        name: props.token.preference?.display_name || props.token.metadata.name,
+        symbol: props.token.metadata.symbol,
+        decimals: props.token.metadata.decimals,
+        logo: props.token.metadata.logo,
     };
 })
 

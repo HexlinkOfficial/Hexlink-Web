@@ -56,7 +56,7 @@ export const UPDATE_ERC20_PREFERENCE = gql`
 
 export interface Preference {
     id: number;
-    displayName?: string;
+    display_name?: string;
     display: boolean;
 }
 

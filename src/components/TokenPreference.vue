@@ -4,7 +4,7 @@
         block
         type="primary"
         style="width: 100%; max-width: 800px;"
-        @click="() => showAddToken = true"
+        @click="showAddToken = true"
     >
         Add Token
     </a-button>
@@ -16,6 +16,7 @@
             placeholder="search by name or address"
             enter-button
             style="margin-top: 10px; margin-bottom: 30px;"
+            v-model:value="searchText"
             @search="onSearch"
         />
         <a-spin v-if="searching"></a-spin>
@@ -23,7 +24,12 @@
             <template #renderItem="{ item }">
                 <a-row style="margin-top: 10px;" justify="space-between">
                     <a-col>
-                        <span style="font-weight: bold;">{{item.metadata.name}}&nbsp;&nbsp;</span>
+                        <span v-if="item.preference?.display_name && item.preference?.display_name !== item.metadata.name" style="font-weight: bold;">
+                            {{item.preference?.display_name}}&nbsp;({{item.metadata.name}})&nbsp;&nbsp;
+                        </span>
+                        <span v-if="!item.preference?.display_name || item.preference?.display_name == item.metadata.name" style="font-weight: bold;">
+                            {{item.metadata.name}}&nbsp;&nbsp;
+                        </span>
                         <span>{{item.metadata.symbol}}</span>
                         <br/>
                         <a-typography-paragraph v-if="item.address == '0x'"></a-typography-paragraph>
@@ -46,7 +52,7 @@
                 </a-row>
             </template>
         </a-list>
-        <a-form v-if="showImport" :model="tokenToImport">
+        <a-form v-if="showImport" :model="tokenToImport" @finish="addToken">
             <a-form-item
                 label="Contract Address"
                 name="address"
@@ -57,26 +63,26 @@
             <a-form-item
                 label="Name"
                 name="name"
-                :rules="[{ required: true, message: 'Name not found' }]"
+                :rules="[{ required: true, message: 'Name is not set' }]"
             >
-                <a-input v-model:value="tokenToImport.preference!.displayName"></a-input>
+                <a-input v-model:value="tokenToImport.name"></a-input>
             </a-form-item>
             <a-form-item
                 label="Symbol"
                 name="symbol"
                 :rules="[{ required: true, message: 'Symbol not found' }]"
             >
-                <a-input v-model:value="tokenToImport.metadata!.symbol" disabled></a-input>
+                <a-input v-model:value="tokenToImport.symbol" disabled></a-input>
             </a-form-item>
             <a-form-item
                 label="Decimals"
                 name="decimals"
-                :rules="[{ required: true, message: 'Decimals not found' }]"
+                :rules="[{ required: true, message: 'Decimals is found' }]"
             >
-                <a-input v-model:value="tokenToImport.metadata!.decimals" disabled></a-input>
+                <a-input v-model:value="tokenToImport.decimals" disabled></a-input>
             </a-form-item>
             <a-form-item>
-                <a-button type="primary" @click="addToken">Add</a-button>
+                <a-button type="primary" html-type="submit">Add</a-button>
             </a-form-item>
         </a-form>
         <template #footer></template>
@@ -91,11 +97,10 @@ import {
     updateERC20Preference
 } from '@/services/graphql/preferences';
 import { loadERC20Token } from "@/services/web3/tokens";
-import type { Token, TokenMetadata } from "@/services/web3/tokens";
+import type { Token } from "@/services/web3/tokens";
 import * as ethers from "ethers";
 import { isContract, prettyPrintAddress } from '@/services/web3/wallet';
 import { message } from "ant-design-vue";
-import type { Preference } from "@/services/graphql/preferences";
 
 const props = defineProps({
     tokens: {
@@ -110,21 +115,20 @@ const props = defineProps({
 
 const DEFAULT_TOKEN = {
     address: "",
-    metadata: {
-        name: "",
-        symbol: "",
-        decimals: 18,
-    } as TokenMetadata,
-    preference: {
-        id: 0,
-        displayName: "",
-        display: true
-    } as Preference,
+    name: "",
+    symbol: "",
+    decimals: 18,
 };
 
 const store = useAuthStore();
 const showAddToken = ref<boolean>(false);
-const tokenToImport = ref<Token>({...DEFAULT_TOKEN});
+const tokenToImport = ref<{
+    address?: string,
+    name?: string,
+    symbol?: string,
+    decimals?: number,
+    token?: Token
+}>({...DEFAULT_TOKEN});
 const searching = ref<boolean>(false);
 const showImport = ref<boolean>(false);
 const searchText = ref<string>("");
@@ -149,7 +153,7 @@ const search = (token: Token, text: string) => {
     return [
         token.metadata?.name,
         token.metadata?.symbol,
-        token.preference?.displayName
+        token.preference?.display_name
     ].filter(t => !!t).join(" ").toLowerCase().includes(text);
 }
 
@@ -172,15 +176,12 @@ const genTokenList = async (text: string, tokenMap: {[key: string]: Token}) => {
     } else if (await isContract(text)) {
         try {
             const token = await loadERC20Token(text, props.wallet);
+            tokenToImport.value.address = text;
+            tokenToImport.value.name = token.metadata.name!;
+            tokenToImport.value.decimals = token.metadata.decimals!;
+            tokenToImport.value.symbol = token.metadata.symbol!;
             showImport.value = true;
-            tokenToImport.value = {
-                ...token,
-                preference: {
-                    id: 0,
-                    displayName: token.metadata!.name!,
-                    display: true
-                }
-            }
+            tokenToImport.value.token = token;
         } catch (err: any) {
             console.log("Failed to load erc20 token details" + err);
         }
@@ -194,18 +195,23 @@ const addToken = async () => {
             store.currentUser!,
             store.idToken!,
             [{
-                address: tokenToImport.value.address,
+                address: tokenToImport.value.address!,
                 chainId: import.meta.env.VITE_CHAIN_ID,
-                display: tokenToImport.value.preference!.display,
-                displayName: tokenToImport.value.preference!.displayName!
+                display: true,
+                displayName: tokenToImport.value.name,
             }]
         );
-        tokenToImport.value.preference!.id = id;
-        emit('tokenAdded', tokenToImport);
+        tokenToImport.value.token!.preference = {
+            id,
+            display: true,
+            display_name: tokenToImport.value.name,
+        };
+        emit('tokenAdded', tokenToImport.value.token);
         showAddToken.value = false;
         showImport.value = false;
         searchText.value = "";
         tokenToImport.value = {...DEFAULT_TOKEN};
+        await genTokenList(searchText.value, props.tokens);
     } catch(err: any) {
         message.error("Failed to add the token");
     }

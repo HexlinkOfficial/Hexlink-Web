@@ -33,7 +33,7 @@
     </a-row>
     <a-row v-if="wallet" justify="center" style="margin: 50px 20px 20px 20px;">
         <TokenPreference
-            :tokens="(tokens as Token[])"
+            :tokens="tokens"
             :wallet="wallet!"
             @tokenAdded="handleTokenAdded"
             @preferenceUpdate="handlePreferenceUpdate"

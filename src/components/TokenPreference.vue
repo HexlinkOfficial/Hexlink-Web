@@ -99,7 +99,7 @@ import type { Preference } from "@/services/graphql/preferences";
 
 const props = defineProps({
     tokens: {
-        type: Object as () => Token[],
+        type: Object as () => {[key: string]: Token},
         required: true,
     },
     wallet: {
@@ -153,7 +153,8 @@ const search = (token: Token, text: string) => {
     ].filter(t => !!t).join(" ").toLowerCase().includes(text);
 }
 
-const genTokenList = async (text: string, tokenList: Token[]) => {
+const genTokenList = async (text: string, tokenMap: {[key: string]: Token}) => {
+    const tokenList = Object.values(tokenMap);
     text = text.trim().toLowerCase();
     if (!text) {
         tokenListToShow.value = tokenList;

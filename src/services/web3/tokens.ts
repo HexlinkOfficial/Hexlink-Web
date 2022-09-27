@@ -1,7 +1,18 @@
 import { getFunctions, httpsCallable } from 'firebase/functions'
 import { Alchemy, Network } from "alchemy-sdk";
 import BigNumber from "bignumber.js";
-import type { PreferenceOutput, PreferenceInput, Preference } from "@/services/graphql/preferences";
+import TOKEN_LIST from '@/data/TOKENS.json';
+import {
+    getERC20Preferences,
+    setERC20Preferences
+} from '@/services/graphql/preferences';
+import type {
+    PreferenceOutput,
+    PreferenceInput,
+    Preference
+} from "@/services/graphql/preferences";
+import type { IAuth } from '@/stores/auth';
+import type { TokenBalance } from "alchemy-sdk";
 
 const functions = getFunctions();
 
@@ -25,13 +36,7 @@ export interface TokenMetadata {
     logo?: string | null;
 }
 
-export interface TokenBalanceResponse {
-    contractAddress?: string;
-    tokenBalance: string | null;
-    error?: any;
-}
-
-export interface TokenBalance {
+export interface NormalizedTokenBalance {
     value: BigNumber;
     error?: any;
     normalized: BigNumber;
@@ -39,8 +44,8 @@ export interface TokenBalance {
 
 export interface Token {
     address: string;
-    metadata?: TokenMetadata;
-    balance?: TokenBalance;
+    metadata: TokenMetadata;
+    balance?: NormalizedTokenBalance;
     preference?: Preference;
     price?: number;
 }
@@ -62,12 +67,16 @@ export async function getERC20Metadatas(tokens: string[]) : Promise<Token[]> {
     return await Promise.all(tokens.map(t => getERC20Metadata(t)));
 }
 
-export async function getETHBalance(wallet: string): Promise<TokenBalanceResponse> {
+export async function getETHBalance(wallet: string): Promise<TokenBalance> {
     const result = await alchemy.core.getBalance(wallet);
-    return {tokenBalance: result.toHexString()};
+    return {
+        contractAddress: "0x",
+        tokenBalance: result.toHexString(),
+        error: null,
+    };
 }
 
-export async function getERC20Balances(tokens: string[], wallet: string) : Promise<TokenBalanceResponse[]> {
+export async function getERC20Balances(tokens: string[], wallet: string) : Promise<TokenBalance[]> {
     const data = await alchemy.core.getTokenBalances(
         wallet,
         tokens.map(t => t)
@@ -75,7 +84,7 @@ export async function getERC20Balances(tokens: string[], wallet: string) : Promi
     return data.tokenBalances;
 }
 
-function getBalance(balance: TokenBalanceResponse | null, decimals: number | null) : TokenBalance {
+function getBalance(balance: TokenBalance | null, decimals: number | null) : NormalizedTokenBalance {
     const base = {
         value: BigNumber(balance?.tokenBalance || 0),
         error: balance?.error,
@@ -100,76 +109,65 @@ function getBalance(balance: TokenBalanceResponse | null, decimals: number | nul
     }
 }
 
-export async function loadAllERC20Tokens(
-    defaultTokens: {[key: string]: TokenMetadata},
-    preferences: PreferenceOutput[],
+export async function loadAll(
+    store: IAuth,
     wallet: string
-): Promise<{
-    tokens: Token[],
-    tokensToSetPreference: PreferenceInput[],
-}> {
-    const nonZeroBalances : {[key: string]: TokenBalanceResponse} = {};
-    const ethBalance = await getETHBalance(wallet);
-    if (BigNumber(ethBalance.tokenBalance!).gt(0)) {
-        nonZeroBalances["0x"] = ethBalance;
-    }
+): Promise<{[key: string]: Token}> {
+    const tokens: {[key: string]: Token} = {};
+    Object.keys(TOKEN_LIST).forEach(address => {
+        tokens[address] = {
+            address,
+            metadata: (TOKEN_LIST as any)[address]
+        }
+    });
 
-    const customTokenAddresses = preferences.filter(
-        p => !defaultTokens[p.address]
-    ).map(p => p.address.toLowerCase());
-    const toSearch = Object.keys(defaultTokens).filter(
-        addr => addr != '0x'
-    ).concat(customTokenAddresses);
-    const erc20Balances = await alchemy.core.getTokenBalances(wallet, toSearch);
-    erc20Balances.tokenBalances.forEach(balance => {
-        if (balance.tokenBalance !== "0") {
-            nonZeroBalances[balance.contractAddress.toLowerCase()] = balance;
+    const preferences : PreferenceOutput[] = await getERC20Preferences(
+        store.currentUser!,
+        store.idToken!,
+        Number(import.meta.env.VITE_CHAIN_ID),
+    );
+    const customTokenAddresses : string[] = [];
+    preferences.forEach(p => {
+        const address = p.address.toLowerCase();
+        tokens[address].preference = p;
+        if (!TOKEN_LIST.hasOwnProperty(address)) {
+            customTokenAddresses.push(address)
         }
     });
 
     const customMetadatas = await getERC20Metadatas(customTokenAddresses);
-    const customTokens = customMetadatas.reduce((prev, token) => {
-        prev[token.address] = token
-        return prev;
-    }, {} as {[key: string]: Token});
+    customMetadatas.forEach(token => {
+        tokens[token.address].metadata = token.metadata;
+    });
 
-    const pMap = preferences.reduce((prev, p) => {
-        prev[p.address] = {
-            id: p.id,
-            display: p.display,
-            displayName: p.displayName,
-        };
-        return prev;
-    }, {} as {[key: string]: Preference});
-
-    const tokenAddresses = Object.keys(defaultTokens).concat(customTokenAddresses);
     const tokensToSetPreference : PreferenceInput[] = [];
-    const tokens = tokenAddresses.map(address => {
-        const metadata = defaultTokens[address] || customTokens[address].metadata;
-        const token: Token = { address, metadata };
-        if (nonZeroBalances[address]) {
-            token.balance = getBalance(
-                nonZeroBalances[address],
-                metadata.decimals
+    const ethBalance = await getETHBalance(wallet);
+    const erc20Balances = await alchemy.core.getTokenBalances(wallet, 'erc20');
+    erc20Balances.tokenBalances.concat([ethBalance as TokenBalance]).forEach(balance => {
+        if (BigNumber(balance.tokenBalance || 0).gt(0)) {
+            const address = balance.contractAddress.toLowerCase();
+            tokens[address].balance = getBalance(
+                balance,
+                tokens[address].metadata.decimals
             );
-        }
-        if (pMap[address]) {
-            token.preference = pMap[address];
-        } else {
-            if (token.balance?.value.gt(0)) {
+            if (!tokens[address].preference) {
                 tokensToSetPreference.push({
-                    chainId: Number(import.meta.env.VITE_CHAIN_ID),
-                    address: token.address,
-                    display: true,
+                    chainId: import.meta.env.VITE_CHAIN_ID,
+                    address,
+                    display: true
                 });
             }
         }
-        return token;
     });
-    return {
-        tokens,
+    const newPreferences = await setERC20Preferences(
+        store.currentUser!,
+        store.idToken!,
         tokensToSetPreference
-    }
+    );
+    newPreferences.forEach(p => {
+        tokens[p.address].preference = {id: p.id, display: p.display};
+    });
+    return tokens;
 }
 
 export async function loadERC20Token(

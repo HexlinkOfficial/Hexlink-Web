@@ -29,6 +29,9 @@ export const INSERT_ERC20_PREFERENCES = gql`
             affected_rows
             returning {
                 id
+                chain_id
+                address
+                display
             }
         }
     }
@@ -44,6 +47,8 @@ export const UPDATE_ERC20_PREFERENCE = gql`
             _set: { display: $display }
         ) {
             id
+            chain_id
+            address
             display
         }
     }
@@ -56,6 +61,7 @@ export interface Preference {
 }
 
 export interface PreferenceOutput extends Preference {
+    chain_id: number,
     address: string,
 }
 
@@ -87,7 +93,7 @@ export async function setERC20Preferences(
     user: IUser,
     idToken: string,
     data: PreferenceInput[],
-) : Promise<{id: number}[]> {
+) : Promise<PreferenceOutput[]> {
     const client = setUrqlClientIfNecessary(idToken)
     const result = await client.mutation(
         INSERT_ERC20_PREFERENCES,
@@ -114,7 +120,7 @@ export async function updateERC20Preference(
         id: number,
         display: boolean,
     },
-) : Promise<{id: number, display: boolean}> {
+) : Promise<PreferenceOutput> {
     const client = setUrqlClientIfNecessary(idToken)
     const result = await client.mutation(
         UPDATE_ERC20_PREFERENCE,

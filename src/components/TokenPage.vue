@@ -60,7 +60,7 @@ import {
     ShoppingCartOutlined,
 } from '@ant-design/icons-vue';
 
-import { loadAllERC20Tokens } from "@/services/web3/tokens";
+import { loadAll } from "@/services/web3/tokens";
 import type { Token } from "@/services/web3/tokens";
 import {
     getHexlinkMetadata,
@@ -72,61 +72,33 @@ import WalletSetup from "@/components/WalletSetup.vue";
 import TokenPreference from "@/components/TokenPreference.vue";
 import { useAuthStore } from '@/stores/auth';
 import { BigNumber } from "bignumber.js";
-import TOKEN_LIST from '@/data/TOKENS.json';
-import {
-    getERC20Preferences,
-    setERC20Preferences
-} from "@/services/graphql/preferences";
 
 const store = useAuthStore();
 const user = store.currentUser;
 
 const loading = ref<boolean>(true);
-const tokens = ref<Token[]>([]);
+const tokens = ref<{[key: string]: Token}>({});
 const metadata = ref<IMetadata | null>(null);
 const wallet = ref<string>();
-
-const loadTokenList = async (wallet: string) : Promise<Token[]> => {
-    const preferences = await getERC20Preferences(
-        store.currentUser!,
-        store.idToken!,
-        Number(import.meta.env.VITE_CHAIN_ID),
-    );
-    const tokens = await loadAllERC20Tokens(
-        TOKEN_LIST,
-        preferences,
-        wallet
-    );
-    await setERC20Preferences(
-        store.currentUser!,
-        store.idToken!,
-        tokens.tokensToSetPreference
-    );
-    return tokens.tokens;
-}
 
 onMounted(async () => {
     metadata.value = await getHexlinkMetadata(user?.email);
     wallet.value = metadata.value.wallet;
 
-    tokens.value = await loadTokenList(wallet.value!);
+    tokens.value = await loadAll(store, wallet.value);
     loading.value = false;
 });
 
 const visiableTokens = computed(() => {
-    return tokens.value.filter(t => t.preference?.display || false);
+    return Object.values(tokens.value).filter(t => t.preference?.display || false);
 });
 
 const handlePreferenceUpdate = async function(params: any) {
-    tokens.value.forEach(t => {
-        if (t.address == params.address) {
-            t.preference = params.preference;
-        }
-    });
+    tokens.value[params.address].preference = params.preference;
 }
 
 const handleTokenAdded = async function(token: Token) {
-    tokens.value.push(token);
+    tokens.value[token.address] = token;
 }
 
 const totalAssets = computed(() => {

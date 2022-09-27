@@ -39,16 +39,16 @@
             @preferenceUpdate="handlePreferenceUpdate"
         ></TokenPreference>
     </a-row>
-    <a-row justify="center" v-if="wallet" v-for="token in visiableTokens">
-        <TokenListItem
-            :token="(token as Token)"
+    <a-row justify="center" v-if="wallet">
+        <a-spin v-if="loading" size="large" style="margin-top: 40px;" />
+        <TokenList
+            v-if="!loading"
+            :tokens="visiableTokens"
             :wallet="wallet"
             :balance="dynamicBalance.toNumber()"
-        ></TokenListItem>
+        ></TokenList>
     </a-row>
-    <a-row v-if="loading" justify="center" style="margin-top: 40px">
-        <a-spin size="large" />
-    </a-row>
+
 </template>
 
 <script setup lang="ts">
@@ -67,7 +67,7 @@ import {
     isContract,
     type IMetadata,
 } from "@/services/web3/wallet";
-import TokenListItem from "@/components/TokenListItem.vue";
+import TokenList from "@/components/TokenList.vue";
 import WalletSetup from "@/components/WalletSetup.vue";
 import TokenPreference from "@/components/TokenPreference.vue";
 import { useAuthStore } from '@/stores/auth';

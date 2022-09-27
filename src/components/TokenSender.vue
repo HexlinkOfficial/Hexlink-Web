@@ -1,144 +1,160 @@
 <template>
-    <a-steps :current="sendInput.step">
-        <a-step v-for="item in sendSteps" :key="item.title" :title="item.title" />
-    </a-steps>
-    <a-row style="margin-top: 40px;">
-        <a-form
-            :model="sendInput"
-            v-if="sendInput.step <= 1"
-            style="width: 100%;"
-        >
-            <a-form-item
-                v-if="sendInput.step == 0"
-                has-feedback
-                label="Receiver"
-                name="receiver"
-                :rules="[{ validator: receiverValidator, trigger: 'change' }]"
+    <a-button
+        shape="round"
+        :disabled="disabled"
+        @click="showSend = true"
+    >
+        <template #icon><send-outlined /></template>
+        Send
+    </a-button>
+    <a-modal
+        v-model:visible="showSend"
+        v-if="token.balance?.value.gt(0)"
+        :title="'You have ' + token.balance!.normalized + ' ' + token.metadata.symbol"
+        style="width: 100%; max-width: 800px;"
+    >
+        <a-steps :current="sendInput.step">
+            <a-step v-for="item in sendSteps" :key="item.title" :title="item.title" />
+        </a-steps>
+        <a-row style="margin-top: 40px;">
+            <a-form
+                :model="sendInput"
+                v-if="sendInput.step <= 1"
+                style="width: 100%;"
             >
-                <a-input v-model:value="sendInput.receiver" style="width: 100%;"></a-input>
-            </a-form-item>
-            <a-form-item
-                v-if="sendInput.step == 1"
-                has-feedback
-                label="Amount"
-                name="amount"
-                :rules="[{ validator: sendAmountValidator, trigger: 'change' }]"
-            >
-                <a-input-search
-                    v-model:value="sendInput.amount"
-                    placeholder="Amount to send"
-                    enter-button="Max"
-                    @search="sendInput.amount = token.balance!.toString()"
-                />
-            </a-form-item>
-        </a-form>
-    </a-row>
-    <a-row justify="center" v-if="sendInput.step == 0">
-        <a-list item-layout="horizontal" :data-source="contacts" style="width: 100%;">
-            <template #renderItem="{ item }">
-            <a-list-item @click="setReceiver(item)">
-                <a-list-item-meta
-                    :description="item.email || prettyPrintAddress(item.address)"
+                <a-form-item
+                    v-if="sendInput.step == 0"
+                    has-feedback
+                    label="Receiver"
+                    name="receiver"
+                    :rules="[{ validator: receiverValidator, trigger: 'change' }]"
                 >
-                    <template #title>
-                        <a href="item.displayName">{{ item.displayName }}</a>
-                    </template>
-                    <template #avatar>
-                        <a-avatar src="https://joeschmoe.io/api/v1/random" />
-                    </template>
-                </a-list-item-meta>
-            </a-list-item>
-            </template>
-        </a-list>
-    </a-row>
-    <a-row justify="start" v-if="sendInput.step == 2">
-        <a-col>
-            <a-typography-paragraph
-                style="margin-top: 10px;"
-            >
-                Receiver: {{sendInput.receiver}}
-            </a-typography-paragraph>
-            <a-typography-paragraph
-                style="margin-top: 10px;"
-            >
-                Amount to send: {{sendInput.amount}}
-            </a-typography-paragraph>
-            <a-typography-paragraph
-                style="margin-top: 10px;"
-            >
-                New Balance: {{token.balance!.normalized.minus(sendInput.amount)}}
-            </a-typography-paragraph>
-            <a-row v-if="sendInput.confirming" style="margin-top: 10px;">
-                <span>Estimating service Fee </span>
-                <a-spin style="margin-left: 10px;"></a-spin>
-            </a-row>
-            <a-row align="middle" v-if="!sendInput.confirming" style="margin-top: 10px;">
-                <a-col style="min-width: 400px;">
-                    <a-tooltip
-                        v-if="sendInput.payETH"
-                        placement="top"
-                        :title="'ETH Price: $' + sendInput.gasEstimation.ethPrice"
+                    <a-input v-model:value="sendInput.receiver" style="width: 100%;"></a-input>
+                </a-form-item>
+                <a-form-item
+                    v-if="sendInput.step == 1"
+                    has-feedback
+                    label="Amount"
+                    name="amount"
+                    :rules="[{ validator: sendAmountValidator, trigger: 'change' }]"
+                >
+                    <a-input-search
+                        v-model:value="sendInput.amount"
+                        placeholder="Amount to send"
+                        enter-button="Max"
+                        @search="sendInput.amount = token.balance!.toString()"
+                    />
+                </a-form-item>
+            </a-form>
+        </a-row>
+        <a-row justify="center" v-if="sendInput.step == 0">
+            <a-list item-layout="horizontal" :data-source="contacts" style="width: 100%;">
+                <template #renderItem="{ item }">
+                <a-list-item @click="setReceiver(item)">
+                    <a-list-item-meta
+                        :description="item.email || prettyPrintAddress(item.address)"
                     >
-                        <span>Base service Fee: {{baseCostAsETH}} ETH</span>
+                        <template #title>
+                            <a href="item.displayName">{{ item.displayName }}</a>
+                        </template>
+                        <template #avatar>
+                            <a-avatar src="https://joeschmoe.io/api/v1/random" />
+                        </template>
+                    </a-list-item-meta>
+                </a-list-item>
+                </template>
+            </a-list>
+        </a-row>
+        <a-row justify="start" v-if="sendInput.step == 2">
+            <a-col>
+                <a-typography-paragraph
+                    style="margin-top: 10px;"
+                >
+                    Receiver: {{sendInput.receiver}}
+                </a-typography-paragraph>
+                <a-typography-paragraph
+                    style="margin-top: 10px;"
+                >
+                    Amount to send: {{sendInput.amount}}
+                </a-typography-paragraph>
+                <a-typography-paragraph
+                    style="margin-top: 10px;"
+                >
+                    New Balance: {{token.balance!.normalized.minus(sendInput.amount)}}
+                </a-typography-paragraph>
+                <a-row v-if="sendInput.confirming" style="margin-top: 10px;">
+                    <span>Estimating service Fee </span>
+                    <a-spin style="margin-left: 10px;"></a-spin>
+                </a-row>
+                <a-row align="middle" v-if="!sendInput.confirming" style="margin-top: 10px;">
+                    <a-col style="min-width: 400px;">
+                        <a-tooltip
+                            v-if="sendInput.payETH"
+                            placement="top"
+                            :title="'ETH Price: $' + sendInput.gasEstimation.ethPrice"
+                        >
+                            <span>Base service Fee: {{baseCostAsETH}} ETH</span>
+                            <br />
+                            <span>Max service Fee: {{maxCostAsETH}} ETH</span>
+                        </a-tooltip>
+                    </a-col>
+                    <a-col style="min-width: 400px;" v-if="!sendInput.payETH">
+                        <span>Base service Fee: ${{baseCostAsUSD}}</span>
                         <br />
-                        <span>Max service Fee: {{maxCostAsETH}} ETH</span>
-                    </a-tooltip>
-                </a-col>
-                <a-col style="min-width: 400px;" v-if="!sendInput.payETH">
-                    <span>Base service Fee: ${{baseCostAsUSD}}</span>
-                    <br />
-                    <span>Max service Fee: ${{maxCostAsUSD}}</span>
-                </a-col>
-                <a-col style="margin-left: 10px;">
-                    <a-switch v-model:checked="sendInput.payETH"/>
-                    <span style="margin-left: 10px;">Pay with ETH</span>
-                </a-col>
-            </a-row>
-        </a-col>
-    </a-row>
-    <a-row justify="center" v-if="sendInput.step == 3">
-        <a-spin v-if="sendInput.sending"></a-spin>
-        <a-typography-paragraph
-            v-if="!sendInput.sending"
-            :copyable="{ text: sendInput.response.txHash }"
-            style="margin-top: 10px;"
-        >
-            Transaction sent, transaction id is {{sendInput.response.txHash}}
-        </a-typography-paragraph>
-    </a-row>
-    <a-row justify="center" style="margin-top: 20px;">
-        <a-button
-            v-if="sendInput.step == 0"
-            type="primary"
-            @click="sendInput.step++"
-            :disabled="!validateReceiver(sendInput.receiver).success"
-        >
-            Next
-        </a-button>
-        <a-button
-            v-if="sendInput.step == 1"
-            type="primary"
-            @click="toConfirmSend()"
-            :disabled="!validateSendAmount(sendInput.amount).success"
-        >
-            Next
-        </a-button>
-        <a-button
-            v-if="sendInput.step == 2"
-            type="primary"
-            :disabled="sendInput.confirming"
-            @click="executeSending()"
-        >
-            Execute
-        </a-button>
-        <a-button
-            v-if="sendInput.step == 1"
-            style="margin-left: 8px"
-            @click="sendInput.step--"
-        >
-            Previous
-        </a-button>
-    </a-row>
+                        <span>Max service Fee: ${{maxCostAsUSD}}</span>
+                    </a-col>
+                    <a-col style="margin-left: 10px;">
+                        <a-switch v-model:checked="sendInput.payETH"/>
+                        <span style="margin-left: 10px;">Pay with ETH</span>
+                    </a-col>
+                </a-row>
+            </a-col>
+        </a-row>
+        <a-row justify="center" v-if="sendInput.step == 3">
+            <a-spin v-if="sendInput.sending"></a-spin>
+            <a-typography-paragraph
+                v-if="!sendInput.sending"
+                :copyable="{ text: sendInput.response.txHash }"
+                style="margin-top: 10px;"
+            >
+                Transaction sent, transaction id is {{sendInput.response.txHash}}
+            </a-typography-paragraph>
+        </a-row>
+        <a-row justify="center" style="margin-top: 20px;">
+            <a-button
+                v-if="sendInput.step == 0"
+                type="primary"
+                @click="sendInput.step++"
+                :disabled="!validateReceiver(sendInput.receiver).success"
+            >
+                Next
+            </a-button>
+            <a-button
+                v-if="sendInput.step == 1"
+                type="primary"
+                @click="toConfirmSend()"
+                :disabled="!validateSendAmount(sendInput.amount).success"
+            >
+                Next
+            </a-button>
+            <a-button
+                v-if="sendInput.step == 2"
+                type="primary"
+                :disabled="sendInput.confirming"
+                @click="executeSending()"
+            >
+                Execute
+            </a-button>
+            <a-button
+                v-if="sendInput.step == 1"
+                style="margin-left: 8px"
+                @click="sendInput.step--"
+            >
+                Previous
+            </a-button>
+        </a-row>
+        <template #footer></template>
+    </a-modal>
 </template>
 
 <script setup lang="ts">
@@ -158,6 +174,7 @@ import { prettyPrintAddress } from "@/services/web3/wallet";
 import type { Contact } from "@/services/contacts";
 import { validateEmail } from '@/services/validator';
 import { BigNumber } from 'bignumber.js';
+import { SendOutlined } from '@ant-design/icons-vue';
 
 export interface GasEstimationWithPrice extends GasEstimation {
     ethPrice: BigNumber,
@@ -175,6 +192,8 @@ export interface SendInput {
         txHash: string,
     },
 }
+
+const showSend = ref<boolean>(false);
 
 const contacts = ref<Contact[]>([
     {
@@ -214,6 +233,10 @@ const props = defineProps({
   balance: {
     type: Number,
     required: true
+  },
+  disabled: {
+    type: Boolean,
+    required: true,
   }
 });
 

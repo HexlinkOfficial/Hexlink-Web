@@ -4,12 +4,12 @@
         block
         type="primary"
         style="width: 100%; max-width: 800px;"
-        @click="showAddToken = true"
+        @click="onAddToken"
     >
         Add Token
     </a-button>
     <a-modal
-        v-model:visible="showAddToken"
+        v-model:visible="showPreference"
         title="Add new token"
     >
         <a-input-search
@@ -121,7 +121,7 @@ const DEFAULT_TOKEN = {
 };
 
 const store = useAuthStore();
-const showAddToken = ref<boolean>(false);
+const showPreference = ref<boolean>(false);
 const tokenToImport = ref<{
     address?: string,
     name?: string,
@@ -141,6 +141,11 @@ watch(
     await genTokenList(searchText.value, newValue);
   }
 );
+
+const onAddToken = async() => {
+    await genTokenList(searchText.value, props.tokens);
+    showPreference.value = true;
+}
 
 const onSearch = async (text: string) => {
     searching.value = true;
@@ -207,7 +212,7 @@ const addToken = async () => {
             display_name: tokenToImport.value.name,
         };
         emit('tokenAdded', tokenToImport.value.token);
-        showAddToken.value = false;
+        showPreference.value = false;
         showImport.value = false;
         searchText.value = "";
         tokenToImport.value = {...DEFAULT_TOKEN};

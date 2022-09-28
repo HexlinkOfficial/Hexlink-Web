@@ -28,7 +28,6 @@
                             <TokenSender
                                 :disabled="!isDeployed || item.balance?.normalized.lte(0)"
                                 :token="item"
-                                :balance="item.balance"
                             ></TokenSender>
                         </a-col>
                         <a-col>

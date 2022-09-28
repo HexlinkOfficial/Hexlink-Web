@@ -3,7 +3,7 @@ import * as functions from "firebase-functions";
 import * as ethers from "ethers";
 import * as HEXLINK from "./data/HEXLINK.json";
 import * as ERC20 from "./data/ERC20.json";
-import {parseEther} from "ethers/lib/utils";
+import BigNumber from "bignumber.js";
 
 const secrets = functions.config().doppler || {};
 
@@ -78,11 +78,6 @@ const genERC20SendTxData = (to: string, amount: ethers.BigNumber) => {
   return iface.encodeFunctionData("transfer", [to, amount]);
 };
 
-const normalizeAmountToSend = (amount: number, decimals: number) => {
-  const factor = ethers.BigNumber.from(10).pow(decimals);
-  return factor.mul(amount);
-};
-
 const notify = async (dest: string, content: string) => {
   const msg = {
     to: dest,
@@ -94,8 +89,7 @@ const notify = async (dest: string, content: string) => {
   await sgMail.send(msg);
 };
 
-const validateUser = async function(context: any) {
-  const uid = context.auth?.uid;
+const validateUser = async function(uid: string | undefined) {
   if (!uid) {
     return {code: 401, message: "Unauthorized"};
   }
@@ -125,7 +119,7 @@ export const metadata = functions.https.onCall(async (_data, context) => {
 });
 
 export const deployWallet = functions.https.onCall(async (_data, context) => {
-  const result = await validateUser(context);
+  const result = await validateUser(context.auth?.uid);
   if (!result.success) {
     return {code: result.code, message: result.message};
   }
@@ -137,7 +131,7 @@ export const deployWallet = functions.https.onCall(async (_data, context) => {
 });
 
 export const sendETH = functions.https.onCall(async (data, context) => {
-  const result = await validateUser(context);
+  const result = await validateUser(context.auth?.uid);
   if (!result.success) {
     return {code: result.code, message: result.message};
   }
@@ -146,53 +140,62 @@ export const sendETH = functions.https.onCall(async (data, context) => {
   const receiver = await genAddressIfNecessary(data.receiver);
   const tx = await yawWallet.execute(
       receiver,
-      parseEther(data.amount.toString()),
+      ethers.BigNumber.from(data.amount),
       50000,
       [],
   );
   if (!ethers.utils.isAddress(data.receiver)) {
+    const ethAmount = ethers.utils.formatEther(data.amount);
     await notify(
         data.receiver,
-        `${user.email} just sent you ${data.amount} ETH.`
+        `${user.displayName} just sent you ${ethAmount} ETH.`
     );
   }
   return {code: 200, txHash: tx.hash};
 });
 
 export const sendERC20 = functions.https.onCall(async (data, context) => {
-  const result = await validateUser(context);
+  const result = await validateUser(context.auth?.uid);
   if (!result.success) {
     return {code: result.code, message: result.message};
   }
   const {email, user} = result;
   const yawWallet = walletContract(await walletAddress(email));
   const receiver = await genAddressIfNecessary(data.receiver);
-  const amount = normalizeAmountToSend(data.amount, data.token.decimals);
   const tx = await yawWallet.execute(
       data.token.address,
       0, // value
       65000, // gas
-      genERC20SendTxData(receiver, amount),
+      genERC20SendTxData(receiver, ethers.BigNumber.from(data.amount)),
   );
   if (!ethers.utils.isAddress(data.receiver)) {
+    const tokenName = data.token.preference?.display_name ||
+        data.token.metadata.name;
+    let tokenDescription = data.token.metadata.symbol;
+    if (tokenName) {
+      tokenDescription += ` (${tokenName})`;
+    }
+    const normalizedAmount = new BigNumber(data.amount).div(
+        new BigNumber(10).pow(data.token.metadata.decimals)
+    );
     await notify(
         data.receiver,
         // eslint-disable-next-line max-len
-        `${user.displayName} just sent you ${data.amount} ${data.token.symbol}.`
+        `${user.displayName} just sent you ${normalizedAmount} ${tokenDescription}.`
     );
   }
   return {code: 200, txHash: tx.hash};
 });
 
 export const executeTx = functions.https.onCall(async (data, context) => {
-  const result = await validateUser(context);
+  const result = await validateUser(context.auth?.uid);
   if (!result.success) {
     return {code: result.code, message: result.message};
   }
   const {email} = result;
   const yawWallet = walletContract(await walletAddress(email));
   const tx = await yawWallet.execute(
-      data.address,
+      data.contractAddress,
       data.amount,
       data.txGas,
       data.txData,
@@ -202,7 +205,7 @@ export const executeTx = functions.https.onCall(async (data, context) => {
 
 export const estimateERC20Transfer = functions.https.onCall(
     async (data, context) => {
-      const result = await validateUser(context);
+      const result = await validateUser(context.auth?.uid);
       if (!result.success) {
         return {code: result.code, message: result.message};
       }
@@ -213,12 +216,11 @@ export const estimateERC20Transfer = functions.https.onCall(
 
       const yawWallet = walletContract(await walletAddress(email));
       const receiver = await genAddressIfNecessary(data.receiver);
-      const amount = normalizeAmountToSend(data.amount, data.token.decimals);
       const gasCost = await yawWallet.estimateGas.execute(
-          data.token.address,
+          data.tokenAddress,
           0, // value
           65000, // gas
-          genERC20SendTxData(receiver, amount),
+          genERC20SendTxData(receiver, ethers.BigNumber.from(data.amount)),
       );
       const baseFeePerGas = feeData.maxFeePerGas?.sub(
           feeData.maxPriorityFeePerGas || 0
@@ -232,7 +234,7 @@ export const estimateERC20Transfer = functions.https.onCall(
 
 export const estimateETHTransfer = functions.https.onCall(
     async (_data, context) => {
-      const result = await validateUser(context);
+      const result = await validateUser(context.auth?.uid);
       if (!result.success) {
         return {code: result.code, message: result.message};
       }

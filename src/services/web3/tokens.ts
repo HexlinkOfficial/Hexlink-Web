@@ -1,4 +1,5 @@
 import { getFunctions, httpsCallable } from 'firebase/functions'
+import * as ethers from 'ethers';
 import { Alchemy, Network } from "alchemy-sdk";
 import BigNumber from "bignumber.js";
 import TOKEN_LIST from '@/data/TOKENS.json';
@@ -201,15 +202,23 @@ export async function loadERC20Token(
 export async function send(
     token: Token,
     receiver: string,
-    amount: number
+    amount: string
 ) : Promise<{txHash: string}> {
-    if (token.address) {
-        const sendERC20 = httpsCallable(functions, 'sendERC20');
-        const result = await sendERC20({token, receiver, amount});
+    if (token.address == '0x') {
+        const amountToSend = ethers.utils.parseEther(amount);
+        console.log(amountToSend.toString());
+        const sendETH = httpsCallable(functions, 'sendETH')
+        const result = await sendETH({receiver, amount: amountToSend.toString()});
         return result.data as {txHash: string};
     } else {
-        const sendETH = httpsCallable(functions, 'sendETH')
-        const result = await sendETH({receiver, amount});
+        const sendERC20 = httpsCallable(functions, 'sendERC20');
+        const normalized = BigNumber(10).pow(token.metadata.decimals).times(amount);
+        console.log(normalized.toFixed(0, 1).toString());
+        const result = await sendERC20({
+            token,
+            receiver,
+            amount: normalized.toFixed(0, 1).toString(),
+        });
         return result.data as {txHash: string};
     }
 }
@@ -220,7 +229,11 @@ export async function estimateERC20Transfer(
     amount: number
 ) : Promise<GasEstimation> {
     const estimateFunc = httpsCallable(functions, 'estimateERC20Transfer')
-    const result = await estimateFunc({token, recevier, amount});
+    const result = await estimateFunc({
+        tokenAddress: token.address,
+        recevier,
+        amount
+    });
     return result.data as GasEstimation;
 }
 

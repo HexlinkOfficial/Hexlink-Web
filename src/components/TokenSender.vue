@@ -19,11 +19,11 @@
         <a-row style="margin-top: 40px;">
             <a-form
                 :model="sendInput"
-                v-if="sendInput.step <= 1"
+                v-if="sendInput.step == 0"
                 style="width: 100%;"
+                @finish="sendInput.step++"
             >
                 <a-form-item
-                    v-if="sendInput.step == 0"
                     has-feedback
                     label="Receiver"
                     name="receiver"
@@ -31,8 +31,39 @@
                 >
                     <a-input v-model:value="sendInput.receiver" style="width: 100%;"></a-input>
                 </a-form-item>
+                <a-form-item>
+                    <a-list item-layout="horizontal" :data-source="contacts" style="width: 100%;">
+                        <template #renderItem="{ item }">
+                        <a-list-item @click="setReceiver(item)">
+                            <a-list-item-meta
+                                :description="item.email || prettyPrintAddress(item.address)"
+                            >
+                                <template #title>
+                                    <a href="item.displayName">{{ item.displayName }}</a>
+                                </template>
+                                <template #avatar>
+                                    <a-avatar src="https://joeschmoe.io/api/v1/random" />
+                                </template>
+                            </a-list-item-meta>
+                        </a-list-item>
+                        </template>
+                    </a-list>
+                </a-form-item>
+                <a-form-item>
+                    <a-row justify="center" style="margin-top: 20px;">
+                        <a-button type="primary" html-type="submit">
+                            Next
+                        </a-button>
+                    </a-row>
+                </a-form-item>
+            </a-form>
+            <a-form
+                :model="sendInput"
+                v-if="sendInput.step == 1"
+                style="width: 100%;"
+                @finish="toConfirmSend()"
+            >
                 <a-form-item
-                    v-if="sendInput.step == 1"
                     has-feedback
                     label="Amount"
                     name="amount"
@@ -45,25 +76,20 @@
                         @search="sendInput.amount = token.balance!.toString()"
                     />
                 </a-form-item>
+                <a-form-item>
+                    <a-row justify="center" style="margin-top: 20px;">
+                        <a-button
+                            style="margin-right: 8px"
+                            @click="sendInput.step--"
+                        >
+                            Previous
+                        </a-button>
+                        <a-button type="primary" html-type="submit">
+                            Next
+                        </a-button>
+                    </a-row>
+                </a-form-item>
             </a-form>
-        </a-row>
-        <a-row justify="center" v-if="sendInput.step == 0">
-            <a-list item-layout="horizontal" :data-source="contacts" style="width: 100%;">
-                <template #renderItem="{ item }">
-                <a-list-item @click="setReceiver(item)">
-                    <a-list-item-meta
-                        :description="item.email || prettyPrintAddress(item.address)"
-                    >
-                        <template #title>
-                            <a href="item.displayName">{{ item.displayName }}</a>
-                        </template>
-                        <template #avatar>
-                            <a-avatar src="https://joeschmoe.io/api/v1/random" />
-                        </template>
-                    </a-list-item-meta>
-                </a-list-item>
-                </template>
-            </a-list>
         </a-row>
         <a-row justify="start" v-if="sendInput.step == 2">
             <a-col>
@@ -80,13 +106,19 @@
                 <a-typography-paragraph
                     style="margin-top: 10px;"
                 >
-                    New Balance: {{token.balance!.normalized.minus(sendInput.amount)}}
+                    Balance after sending: {{token.balance!.normalized.minus(sendInput.amount)}}
                 </a-typography-paragraph>
+                <a-row align="middle" v-if="sponsored" style="margin-top: 10px;">
+                    <a-col style="min-width: 400px;">
+                        <span>Service Fee: $0 </span>
+                        <span style="font-weight: bold; color: #1890ff;">(Sponsored by Hexlink)</span>
+                    </a-col>
+                </a-row>
                 <a-row v-if="sendInput.confirming" style="margin-top: 10px;">
                     <span>Estimating service Fee </span>
                     <a-spin style="margin-left: 10px;"></a-spin>
                 </a-row>
-                <a-row align="middle" v-if="!sendInput.confirming" style="margin-top: 10px;">
+                <a-row align="middle" v-if="!sendInput.confirming && !sponsored" style="margin-top: 10px;">
                     <a-col style="min-width: 400px;">
                         <a-tooltip
                             v-if="sendInput.payETH"
@@ -99,9 +131,9 @@
                         </a-tooltip>
                     </a-col>
                     <a-col style="min-width: 400px;" v-if="!sendInput.payETH">
-                        <span>Base service Fee: ${{baseCostAsUSD}}</span>
+                        <span>Base service Fee: {{baseCostAsUSD}}</span>
                         <br />
-                        <span>Max service Fee: ${{maxCostAsUSD}}</span>
+                        <span>Max service Fee: {{maxCostAsUSD}}</span>
                     </a-col>
                     <a-col style="margin-left: 10px;">
                         <a-switch v-model:checked="sendInput.payETH"/>
@@ -122,35 +154,12 @@
         </a-row>
         <a-row justify="center" style="margin-top: 20px;">
             <a-button
-                v-if="sendInput.step == 0"
-                type="primary"
-                @click="sendInput.step++"
-                :disabled="!validateReceiver(sendInput.receiver).success"
-            >
-                Next
-            </a-button>
-            <a-button
-                v-if="sendInput.step == 1"
-                type="primary"
-                @click="toConfirmSend()"
-                :disabled="!validateSendAmount(sendInput.amount).success"
-            >
-                Next
-            </a-button>
-            <a-button
                 v-if="sendInput.step == 2"
                 type="primary"
                 :disabled="sendInput.confirming"
                 @click="executeSending()"
             >
                 Execute
-            </a-button>
-            <a-button
-                v-if="sendInput.step == 1"
-                style="margin-left: 8px"
-                @click="sendInput.step--"
-            >
-                Previous
             </a-button>
         </a-row>
         <template #footer></template>
@@ -164,8 +173,8 @@ import * as ethers from "ethers";
 
 import { getETHPrice } from "@/services/web3/price";
 import { 
-    // estimateERC20Transfer,
-    // estimateETHTransfer,
+    estimateERC20Transfer,
+    estimateETHTransfer,
     send,
     type Token,
     type GasEstimation,
@@ -230,10 +239,6 @@ const props = defineProps({
     type: Object as () => Token,
     required: true,
   },
-  balance: {
-    type: Number,
-    required: true
-  },
   disabled: {
     type: Boolean,
     required: true,
@@ -256,48 +261,31 @@ const EMPTY_INPUT: SendInput = {
         txHash: "",
     }
 };
+
 const sendInput = ref<SendInput>({...EMPTY_INPUT});
-const validateSendAmount = function(value: string) {
+const sendAmountValidator = async function(_rule: Rule, value: string) {
     const amount = Number(value);
     let maxAllowed = props.token.balance?.normalized || BigNumber(0);
     if (isNaN(amount)) {
-        return {message: 'Invalid amount, please input a valid number'};
+        return Promise.reject('Invalid amount, please input a valid number');
     } if (amount <= 0) {
-        return {message: 'Amount must be higher than 0'};
+        return Promise.reject('Amount must be higher than 0');
     } else if (maxAllowed.lt(amount)) {
-        return {message: 'Amount cannot be higher than your balance'};
+        return Promise.reject('Amount cannot be higher than your balance');
     } else {
-        return {success: true};
-    }
-}
-
-const sendAmountValidator = async function(_rule: Rule, value: string) {
-    const result = validateSendAmount(value);
-    if (result.success) {
         return Promise.resolve();
-    } else {
-        return Promise.reject(result.message);
-    }
-}
-
-const validateReceiver = function(receiver: string) {
-    if (receiver == '') {
-        return {message: "Please input token contract address"};
-    } else if (ethers.utils.isAddress(receiver)) {
-        return {success: true};
-    } else if (validateEmail(receiver)) {
-        return {success: true};
-    } else {
-        return {message: "InvalidAddress"};
     }
 }
 
 const receiverValidator = async function(_rule: Rule, value: string) {
-    const result = validateReceiver(value);
-    if (result.success) {
+    if (value == '') {
+        return Promise.reject("Please input token contract address");
+    } else if (ethers.utils.isAddress(value)) {
+        return {success: true};
+    } else if (validateEmail(value)) {
         return Promise.resolve();
     } else {
-        return Promise.reject(result.message);
+        return Promise.reject("invalid email or address");
     }
 }
 
@@ -311,53 +299,54 @@ const executeSending = async function() {
     sendInput.value.response.txHash = (await send(
         props.token,
         sendInput.value.receiver,
-        Number(sendInput.value.amount),
+        sendInput.value.amount,
     )).txHash;
     sendInput.value.sending = false;
 }
 
 const toConfirmSend = async function() {
     sendInput.value.step++;
+    if (sponsored) {
+        return;
+    }
     sendInput.value.confirming = true;
     const ethPrice: BigNumber = await getETHPrice();
     if (props.token.address) {
-        // const gasEstimation = await estimateERC20Transfer(
-        //     props.token,
-        //     sendInput.value.receiver,
-        //     Number(sendInput.value.amount)
-        // );
-        const gasEstimation = {
-             baseCost: BigNumber("0.000014750958658"),
-             maxCost: BigNumber("0.000054750958658"),
-        }
+        const gasEstimation = await estimateERC20Transfer(
+            props.token,
+            sendInput.value.receiver,
+            Number(sendInput.value.amount)
+        );
         sendInput.value.gasEstimation = {...gasEstimation, ethPrice}
     } else {
-        //const gasEstimation = await estimateETHTransfer();
-        const gasEstimation = {
-             baseCost: BigNumber("0.0000034750958658"),
-             maxCost: BigNumber("0.000034750958658"),
-        }
+        const gasEstimation = await estimateETHTransfer();
         sendInput.value.gasEstimation = {...gasEstimation, ethPrice};
     }
     sendInput.value.confirming = false;
 }
 
+const sponsored = ref<boolean>(true);
+
 const baseCostAsETH = computed(() => {
+    if (sponsored.value) { return 0; }
     return sendInput.value.gasEstimation.baseCost;
 });
 
 const baseCostAsUSD = computed(() => {
-   return sendInput.value.gasEstimation.baseCost.times(
+   if (sponsored.value) { return "$0"; }
+   return "$" + sendInput.value.gasEstimation.baseCost.times(
         sendInput.value.gasEstimation.ethPrice
     ).dp(2).toString();
 });
 
 const maxCostAsETH = computed(() => {
+    if (sponsored.value) { return 0; }
     return sendInput.value.gasEstimation.maxCost;
 });
 
 const maxCostAsUSD = computed(() => {
-    return sendInput.value.gasEstimation.maxCost.times(
+    if (sponsored.value) { return "$0"; }
+    return "$" + sendInput.value.gasEstimation.maxCost.times(
         sendInput.value.gasEstimation.ethPrice
     ).dp(2).toString();
 });

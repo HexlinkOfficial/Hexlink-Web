@@ -1,6 +1,7 @@
 import {expect} from "chai";
 import {ethers, deployments} from "hardhat";
-import {Contract, providers} from "ethers";
+import {Contract} from "ethers";
+import BigNumber from "bignumber.js";
 
 const sender = "mailto:sender@gmail.com";
 const receiver = "mailto:receiver@gmail.com";

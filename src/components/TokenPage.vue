@@ -39,10 +39,11 @@
             @preferenceUpdate="handlePreferenceUpdate"
         ></TokenPreference>
     </a-row>
-    <a-row justify="center" v-if="wallet">
-        <a-spin v-if="loading" size="large" style="margin-top: 40px;" />
+    <a-row justify="center" v-if="loading">
+        <a-spin size="large" style="margin-top: 40px;" />
+    </a-row>
+    <a-row v-if="!loading && wallet" justify="center">
         <TokenList
-            v-if="!loading"
             :tokens="visiableTokens"
             :wallet="wallet"
             :balance="dynamicBalance.toNumber()"

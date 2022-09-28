@@ -169,19 +169,13 @@ export const sendERC20 = functions.https.onCall(async (data, context) => {
       genERC20SendTxData(receiver, ethers.BigNumber.from(data.amount)),
   );
   if (!ethers.utils.isAddress(data.receiver)) {
-    const tokenName = data.token.preference?.display_name ||
-        data.token.metadata.name;
-    let tokenDescription = data.token.metadata.symbol;
-    if (tokenName) {
-      tokenDescription += ` (${tokenName})`;
-    }
     const normalizedAmount = new BigNumber(data.amount).div(
         new BigNumber(10).pow(data.token.metadata.decimals)
     );
     await notify(
         data.receiver,
         // eslint-disable-next-line max-len
-        `${user.displayName} just sent you ${normalizedAmount} ${tokenDescription}.`
+        `${user.displayName} just sent you ${normalizedAmount} ${data.token.metadata.symbol}.`
     );
   }
   return {code: 200, txHash: tx.hash};

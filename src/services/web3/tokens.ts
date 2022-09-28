@@ -206,14 +206,12 @@ export async function send(
 ) : Promise<{txHash: string}> {
     if (token.address == '0x') {
         const amountToSend = ethers.utils.parseEther(amount);
-        console.log(amountToSend.toString());
         const sendETH = httpsCallable(functions, 'sendETH')
         const result = await sendETH({receiver, amount: amountToSend.toString()});
         return result.data as {txHash: string};
     } else {
         const sendERC20 = httpsCallable(functions, 'sendERC20');
         const normalized = BigNumber(10).pow(token.metadata.decimals).times(amount);
-        console.log(normalized.toFixed(0, 1).toString());
         const result = await sendERC20({
             token,
             receiver,

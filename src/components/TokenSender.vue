@@ -1,7 +1,6 @@
 <template>
     <a-button
         shape="round"
-        :disabled="disabled"
         @click="showSend = true"
     >
         <template #icon><send-outlined /></template>
@@ -9,8 +8,7 @@
     </a-button>
     <a-modal
         v-model:visible="showSend"
-        v-if="token.balance?.value.gt(0)"
-        :title="'You have ' + token.balance!.normalized + ' ' + token.metadata.symbol"
+        :title="'You have ' + (token.balance?.normalized || 0) + ' ' + token.metadata.symbol"
         style="width: 100%; max-width: 800px;"
     >
         <a-steps :current="sendInput.step">
@@ -239,10 +237,6 @@ const props = defineProps({
     type: Object as () => Token,
     required: true,
   },
-  disabled: {
-    type: Boolean,
-    required: true,
-  }
 });
 
 const EMPTY_INPUT: SendInput = {

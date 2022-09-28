@@ -24,11 +24,8 @@
                             <br />
                             <span>${{item.balance?.normalized.times(item.price || 0).toString() || 0}}</span>
                         </a-col>
-                        <a-col  style="margin-left: 10px; margin-right: 10px;">
-                            <TokenSender
-                                :disabled="!isDeployed || item.balance?.normalized.lte(0)"
-                                :token="item"
-                            ></TokenSender>
+                        <a-col style="margin-left: 10px; margin-right: 10px;">
+                            <TokenSender :token="item"></TokenSender>
                         </a-col>
                         <a-col>
                             <a-tooltip>
@@ -51,11 +48,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
 import { TransactionOutlined } from '@ant-design/icons-vue';
 import TokenSender from "@/components/TokenSender.vue";
 import type { Token } from "@/services/web3/tokens";
-import { isContract } from "@/services/web3/wallet";
 
 const props = defineProps({
   tokens: {
@@ -66,9 +61,5 @@ const props = defineProps({
     type: String,
     required: true,
   },
-});
-
-const isDeployed = computed(async () => {
-    return await isContract(props.wallet);
 });
 </script>

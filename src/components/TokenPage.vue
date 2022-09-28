@@ -25,10 +25,10 @@
             Swap Token
         </a-button>
     </a-row>
-    <a-row v-if="!isDeployed" justify="center" align="middle" style="margin: 20px;">
+    <a-row v-if="!isDeployed && wallet" justify="center" align="middle" style="margin: 20px;">
         <WalletSetup
             :email="user?.email || ''"
-            :wallet="wallet!"
+            :wallet="wallet"
         ></WalletSetup>
     </a-row>
     <a-row v-if="wallet" justify="center" style="margin: 50px 20px 20px 20px;">
@@ -81,12 +81,14 @@ const loading = ref<boolean>(true);
 const tokens = ref<{[key: string]: Token}>({});
 const metadata = ref<IMetadata | null>(null);
 const wallet = ref<string>();
+const isDeployed = ref<boolean>(true);
 
 onMounted(async () => {
     metadata.value = await getHexlinkMetadata(user?.email);
     wallet.value = metadata.value.wallet;
 
     tokens.value = await loadAll(store, wallet.value);
+    isDeployed.value = await isContract(wallet.value);
     loading.value = false;
 });
 
@@ -115,10 +117,6 @@ const totalAssets = computed(() => {
 const dynamicBalance = computed(() => {
     return BigNumber(Math.floor(Math.random() * 100));
 });
-
-const isDeployed = computed(async() => {
-    return await isContract(wallet.value);
-})
 </script>
 
 <style lang="less" scoped>

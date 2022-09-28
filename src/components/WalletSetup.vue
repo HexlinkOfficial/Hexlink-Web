@@ -32,11 +32,17 @@
                 >
                     Wallet address to setup: {{props.wallet}}
                 </a-typography-paragraph>
+                <a-row align="middle" v-if="sponsored" style="margin-top: 10px;">
+                    <a-col style="min-width: 400px;">
+                        <span>Service Fee: $0 </span>
+                        <span style="font-weight: bold; color: #1890ff;">(Sponsored by Hexlink)</span>
+                    </a-col>
+                </a-row>
                 <a-row v-if="setupInput.confirming" style="margin-top: 10px;">
                     <span>Estimating service Fee </span>
                     <a-spin style="margin-left: 10px;"></a-spin>
                 </a-row>
-                <a-row align="middle" v-if="!setupInput.confirming" style="margin-top: 10px;">
+                <a-row align="middle" v-if="!sponsored && !setupInput.confirming" style="margin-top: 10px;">
                     <a-col style="min-width: 400px;">
                         <span>Base service Fee: ${{baseCostAsUSD.toFixed(2)}}</span>
                         <br />
@@ -108,6 +114,7 @@ const props = defineProps({
     }
 });
 
+const sponsored = ref<boolean>(true);
 const showSetup = ref<boolean>(false);
 
 const refreshServiceFee = async function() {
@@ -120,9 +127,11 @@ const refreshServiceFee = async function() {
 }
 
 onMounted(async () => {
-    setupInput.value.confirming = true;
-    await refreshServiceFee();
-    setupInput.value.confirming = false;
+    if (!sponsored.value) {
+        setupInput.value.confirming = true;
+        await refreshServiceFee();
+        setupInput.value.confirming = false;
+    }
 });
 
 const EMPTY_INPUT: SetupInput = {

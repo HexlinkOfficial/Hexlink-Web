@@ -320,7 +320,6 @@ const toConfirmSend = async function() {
 }
 
 const sponsored = ref<boolean>(true);
-
 const baseCostAsETH = computed(() => {
     if (sponsored.value) { return 0; }
     return sendInput.value.gasEstimation.baseCost;

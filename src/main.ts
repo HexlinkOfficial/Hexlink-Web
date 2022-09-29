@@ -15,6 +15,7 @@ import { useAuthStore } from "@/stores/auth"
 import { getIdTokenAndSetClaimsIfNecessary } from '@/services/auth'
 import { clearUrqlClient } from '@/services/graphql/urql'
 import { getUser } from "@/services/graphql/user"
+import { genWalletAddress } from './services/web3/wallet'
 
 let vueApp: any;
 getAuth(app).onAuthStateChanged(async (user: any) => {
@@ -32,7 +33,8 @@ getAuth(app).onAuthStateChanged(async (user: any) => {
   const store = useAuthStore();
   if (user) {
     const idToken = await getIdTokenAndSetClaimsIfNecessary(user);
-    store.signIn(user, idToken);
+    const walletAddress = await genWalletAddress(user.email);
+    store.signIn(user, idToken, walletAddress);
     await getUser(user, idToken);
   } else {
     clearUrqlClient();

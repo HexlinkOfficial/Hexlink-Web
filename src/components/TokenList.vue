@@ -57,9 +57,5 @@ const props = defineProps({
     type: Object as () => Token[],
     required: true,
   },
-  wallet: {
-    type: String,
-    required: true,
-  },
 });
 </script>

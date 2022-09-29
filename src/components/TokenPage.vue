@@ -25,16 +25,12 @@
             Swap Token
         </a-button>
     </a-row>
-    <a-row v-if="!isDeployed && wallet" justify="center" align="middle" style="margin: 20px;">
-        <WalletSetup
-            :email="user?.email || ''"
-            :wallet="wallet"
-        ></WalletSetup>
+    <a-row v-if="!isDeployed" justify="center" align="middle" style="margin: 20px;">
+        <WalletSetup></WalletSetup>
     </a-row>
-    <a-row v-if="wallet" justify="center" style="margin: 50px 20px 20px 20px;">
+    <a-row justify="center" style="margin: 50px 20px 20px 20px;">
         <TokenPreference
             :tokens="tokens"
-            :wallet="wallet!"
             @tokenAdded="handleTokenAdded"
             @preferenceUpdate="handlePreferenceUpdate"
         ></TokenPreference>
@@ -42,10 +38,9 @@
     <a-row justify="center" v-if="loading">
         <a-spin size="large" style="margin-top: 40px;" />
     </a-row>
-    <a-row v-if="!loading && wallet" justify="center">
+    <a-row v-if="!loading" justify="center">
         <TokenList
             :tokens="visiableTokens"
-            :wallet="wallet"
             :balance="dynamicBalance.toNumber()"
         ></TokenList>
     </a-row>
@@ -80,15 +75,13 @@ const user = store.currentUser;
 const loading = ref<boolean>(true);
 const tokens = ref<{[key: string]: Token}>({});
 const metadata = ref<IMetadata | null>(null);
-const wallet = ref<string>();
 const isDeployed = ref<boolean>(true);
 
 onMounted(async () => {
     metadata.value = await getHexlinkMetadata(user?.email);
-    wallet.value = metadata.value.wallet;
-
-    tokens.value = await loadAll(store, wallet.value);
-    isDeployed.value = await isContract(wallet.value);
+    const walletAddress = store.currentUser!.walletAddress!;
+    tokens.value = await loadAll(store, walletAddress);
+    isDeployed.value = await isContract(walletAddress);
     loading.value = false;
 });
 

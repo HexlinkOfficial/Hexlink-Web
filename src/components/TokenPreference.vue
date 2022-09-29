@@ -107,10 +107,6 @@ const props = defineProps({
         type: Object as () => {[key: string]: Token},
         required: true,
     },
-    wallet: {
-        type: String,
-        required: true,
-    },
 });
 
 const DEFAULT_TOKEN = {
@@ -180,7 +176,7 @@ const genTokenList = async (text: string, tokenMap: {[key: string]: Token}) => {
         tokenListToShow.value =  filtered;
     } else if (await isContract(text)) {
         try {
-            const token = await loadERC20Token(text, props.wallet);
+            const token = await loadERC20Token(text, store.currentUser!.walletAddress!);
             tokenToImport.value.address = text;
             tokenToImport.value.name = token.metadata.name!;
             tokenToImport.value.decimals = token.metadata.decimals!;

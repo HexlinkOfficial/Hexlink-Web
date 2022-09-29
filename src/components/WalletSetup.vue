@@ -25,12 +25,12 @@
                 <a-typography-paragraph
                     style="margin-top: 10px;"
                 >
-                    Email: {{props.email}}
+                    Email: {{store.currentUser!.email!}}
                 </a-typography-paragraph>
                 <a-typography-paragraph
                     style="margin-top: 10px;"
                 >
-                    Wallet address to setup: {{props.wallet}}
+                    Wallet address to setup: {{store.currentUser!.walletAddress!}}
                 </a-typography-paragraph>
                 <a-row align="middle" v-if="sponsored" style="margin-top: 10px;">
                     <a-col style="min-width: 400px;">
@@ -79,6 +79,7 @@ import { ref, computed, onMounted } from "vue";
 import { getETHPrice } from "@/services/web3/price";
 import { deployWallet, prettyPrintTxHash} from "@/services/web3/wallet";
 import BigNumber from "bignumber.js";
+import { useAuthStore } from '@/stores/auth';
 
 export interface SetupInput {
     step: number,
@@ -94,6 +95,8 @@ export interface SetupInput {
     },
 };
 
+const store = useAuthStore();
+
 const sendSteps = [
     {
         title: 'Confirm',
@@ -102,17 +105,6 @@ const sendSteps = [
         title: 'Execute',
     }
 ];
-
-const props = defineProps({
-    email: {
-        type: String,
-        required: true,
-    },
-    wallet: {
-        type: String,
-        required: true,
-    }
-});
 
 const sponsored = ref<boolean>(true);
 const showSetup = ref<boolean>(false);

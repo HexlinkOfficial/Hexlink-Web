@@ -3,10 +3,11 @@ import type {  User } from 'firebase/auth'
 
 export interface IUser {
   emailVerified: boolean,
-  email: string | null
+  email: string | null,
   photoURL: string | null
   uid: string
-  displayName: string | null
+  displayName: string | null,
+  walletAddress: string | null,
 }
 
 export interface IAuth {
@@ -27,7 +28,7 @@ export const useAuthStore = defineStore({
     authenticated: (state) => state.currentUser !== null && state.idToken != null,
   },
   actions: {
-    signIn(user: User, idToken: string) {
+    signIn(user: User, idToken: string, walletAddress: string) {
       console.log("User logged in");
       this.idToken = idToken;
       this.currentUser = {
@@ -35,7 +36,8 @@ export const useAuthStore = defineStore({
         email: user.email,
         photoURL: user.photoURL,
         uid: user.uid,
-        displayName: user.displayName
+        displayName: user.displayName,
+        walletAddress
       }
     },
     signOut() {

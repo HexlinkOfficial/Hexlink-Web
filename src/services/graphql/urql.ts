@@ -24,9 +24,9 @@ export function setUrqlClientIfNecessary(idToken: string) {
         urqlClient = createUrqlClient(idToken)
         urqlClientIdToken = idToken
     }
-    return urqlClient
+    return urqlClient;
 }
 
-export function getUrqlClient() {
-    return urqlClient
+export function getUrqlClient(idToken: string) {
+    return urqlClient;
 }

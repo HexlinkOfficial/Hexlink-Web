@@ -1,6 +1,6 @@
 import { getFunctions, httpsCallable } from 'firebase/functions'
 import * as ethers from 'ethers';
-import { Alchemy, Network } from "alchemy-sdk";
+import { Alchemy, Network, type AssetTransfersWithMetadataParams, type AssetTransfersWithMetadataResult } from "alchemy-sdk";
 import BigNumber from "bignumber.js";
 import TOKEN_LIST from '@/data/TOKENS.json';
 import {
@@ -121,6 +121,37 @@ function getBalance(balance: TokenBalance | null, decimals: number | null) : Nor
     }
 }
 
+export async function getAllVisiableTokens(store: IAuth) {
+    const tokens: {[key: string]: Token} = {};
+    const preferences : PreferenceOutput[] = await getERC20Preferences(
+        store.currentUser!,
+        store.idToken!,
+        Number(import.meta.env.VITE_CHAIN_ID),
+    );
+    const customTokenAddresses : string[] = [];
+    preferences.forEach(preference => {
+        const address = preference.address.toLowerCase();
+        if (preference.display) {
+            const metadata = (TOKEN_LIST as any)[address];
+            if (metadata) {
+                tokens[address] = { address, metadata, preference }
+            } else {
+                customTokenAddresses.push(address);
+                tokens[address] = {
+                    address,
+                    metadata: {name: "", symbol: "", decimals: 18},
+                    preference
+                }
+            }
+        }
+    });
+    const customMetadatas = await getERC20Metadatas(customTokenAddresses);
+    customMetadatas.forEach(token => {
+        tokens[token.address].metadata = token.metadata;
+    });
+    return tokens;
+}
+
 export async function loadAll(
     store: IAuth,
     wallet: string
@@ -239,4 +270,90 @@ export async function estimateETHTransfer() : Promise<GasEstimation> {
     const estimateFunc = httpsCallable(functions, 'estimateETHTransfer')
     const result = await estimateFunc();
     return result.data as GasEstimation;
+}
+
+export interface Transaction {
+    hash: string;
+    blockNumber: number;
+    timestamp?: string;
+    position?: number;
+}
+
+export interface Action {
+    type: "send" | "receive" | "custom",
+    from?: string | null,
+    to?: string | null,
+}
+
+export interface AssetTransfer {
+    tx: Transaction;
+    asset: Token;
+    amount: {
+        value: BigNumber,
+        normalized: BigNumber,
+    };
+    action: Action;
+}
+
+const transferAction = (wallet: string, transfer: AssetTransfersWithMetadataResult) => {
+    if (transfer.from.toLowerCase() == wallet) {
+        return {
+            type: "send",
+            to: transfer.to,
+        } as Action;
+    } else if (transfer.to?.toLowerCase() == wallet) {
+        return {
+            type: "receive",
+            from: transfer.from,
+        } as Action;
+    } else {
+        throw new Error("Unknown transaction " + JSON.stringify(transfer));
+    }
+};
+
+const toAssetTransfers = (
+    wallet: string,
+    transfer: AssetTransfersWithMetadataResult
+) : AssetTransfer => {
+    return {
+        tx: {
+            hash: transfer.hash,
+            blockNumber: Number(transfer.blockNum),
+            timestamp: transfer.metadata?.blockTimestamp,
+        },
+        asset: {
+            address: transfer.rawContract.address || "",
+            metadata: {
+                decimals: Number(transfer.rawContract.decimal) || -1,
+                symbol: transfer.asset || "",
+                name: "",
+            }
+        } as Token,
+        amount: {
+            value: BigNumber(transfer.rawContract.value || 0),
+            normalized: BigNumber(transfer.value || 0),
+        },
+        action: transferAction(wallet, transfer),
+    }
+}
+
+export async function getAssetTransfers(input: {
+    wallet: string,
+    category: string[],
+    order?: string,
+    contractAddresses?: string[]
+}) : Promise<AssetTransfer[]> {
+    const order = input.order || 'desc';
+    const category = input.category || ['erc20', 'erc721'];
+    let params = { category, order} as AssetTransfersWithMetadataParams;
+    if (input.contractAddresses) {
+        params.contractAddresses = input.contractAddresses;
+    }
+    const [send, receive] = await Promise.all([
+        alchemy.core.getAssetTransfers({fromAddress: input.wallet, ...params}),
+        alchemy.core.getAssetTransfers({toAddress: input.wallet, ...params}),
+    ]);
+    return send.transfers.concat(receive.transfers).map(
+        t => toAssetTransfers(input.wallet, t)
+    );
 }

@@ -37,7 +37,7 @@ export const useAuthStore = defineStore({
         photoURL: user.photoURL,
         uid: user.uid,
         displayName: user.displayName,
-        walletAddress
+        walletAddress: walletAddress.toLowerCase()
       }
     },
     signOut() {

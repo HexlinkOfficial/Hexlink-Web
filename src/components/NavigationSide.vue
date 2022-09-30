@@ -18,20 +18,20 @@
           <a-typography-paragraph>
               {{ user?.email }}
           </a-typography-paragraph>
-          <a-typography-paragraph :copyable="{ text: address }">
+          <a-typography-paragraph :copyable="{ text: user.walletAddress! }">
               {{ addressText }}
           </a-typography-paragraph>
         </a-row>
       </a-col>
     </a-row>
     <a-row justify="center" style="margin-top: 50px;">
-        <a-button block type="text" size="large">
+        <a-button block type="text" size="large" href="/">
           <template #icon>
             <DollarOutlined />
           </template>
           Tokens
         </a-button>
-        <a-button block disabled type="text" size="large">
+        <a-button block type="text" size="large" href="/activities">
           <template #icon>
             <history-outlined />
           </template>
@@ -63,7 +63,7 @@
 </template>
   
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
+import { computed } from "vue";
 import { signOutFirebase } from '@/services/auth';
 import { useRouter } from 'vue-router';
 import {
@@ -73,22 +73,15 @@ import {
   LogoutOutlined,
   ContactsOutlined
 } from '@ant-design/icons-vue';
-import {
-  prettyPrintAddress,
-  genWalletAddress
-} from '@/services/web3/wallet';
+import { prettyPrintAddress } from '@/services/web3/wallet';
 import { useAuthStore } from '@/stores/auth';
 
 const store = useAuthStore();
-const user = store.currentUser;
-const address = ref<string>("");
-onMounted(async () => {
-  address.value = await genWalletAddress(user?.email);;
-});
+const user = store.currentUser!;
 
 const addressText = computed(() => {
-  if (address.value) {
-    return prettyPrintAddress(address.value);
+  if (user.walletAddress) {
+    return prettyPrintAddress(user.walletAddress!);
   } else {
     return "";
   }

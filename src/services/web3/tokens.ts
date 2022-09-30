@@ -346,7 +346,7 @@ export async function getAssetTransfers(input: {
     const order = input.order || 'desc';
     const category = input.category || ['erc20', 'erc721'];
     let params = { category, order} as AssetTransfersWithMetadataParams;
-    if (input.contractAddresses) {
+    if (input.contractAddresses && input.contractAddresses.length > 0) {
         params.contractAddresses = input.contractAddresses;
     }
     const [send, receive] = await Promise.all([

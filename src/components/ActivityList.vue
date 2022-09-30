@@ -2,12 +2,12 @@
     <a-row justify="center" style="margin-top: 100px;">
         <a-col flex="auto">
             <a-select
-                v-model:value="filter.tokens"
-                style="width: 100%; padding-right: 20px;"
+                v-model:value="selected"
+                style="width: 100%;"
                 size="large"
                 mode="multiple"
                 placeholder="Select tokens"
-                @change="handleTokeTypeChange"
+                @change="handleTokenSelection"
             >
                <a-select-option
                     v-for="token in tokens"
@@ -22,18 +22,7 @@
                     </a-tooltip>
                </a-select-option>
             </a-select>
-        </a-col> 
-        <a-select
-            v-model:value="filter.order"
-            style="width: 120px"
-            size="large"
-            @change="handleSortChange"
-        >
-            <a-select-option value="desc">
-                Latest
-            </a-select-option>
-            <a-select-option value="aesc">Oldest</a-select-option>
-        </a-select>
+        </a-col>
     </a-row>
     <a-row v-if="loading" justify="center">
         <a-spin style="margin-top: 100px"></a-spin>
@@ -45,7 +34,7 @@
                     
                 </template>
                 <template #extra>
-                    
+
                 </template>
             </a-card>
         </template>
@@ -53,35 +42,52 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted } from 'vue';
 import { getAssetTransfers, getAllVisiableTokens } from '@/services/web3/tokens';
 import type { AssetTransfer, Token } from '@/services/web3/tokens';
 import { useAuthStore } from '@/stores/auth';
 import { useRoute } from 'vue-router'
+import { useRouter } from 'vue-router'
 import { prettyPrintAddress } from '@/services/web3/wallet';
 
 const store = useAuthStore();
 const route = useRoute();
 const loading = ref<boolean>(true);
-    
-const query = computed(() => route.query)
-const filter = ref<{
-    action:  'all' | 'send' | 'receive' | 'all',
-    tokens: string[], // contract addresses
-    order: 'aesc' | 'desc',
-}>({tokens: [], action: 'all', order: 'desc'});
-
+const selected = ref<string[]>(
+    (route.query["tokens"] as string || "").split(',').filter(s => s.trim().length > 0)
+);
 const tokens = ref<Token[]>([]);
 const activities = ref<AssetTransfer[]>([]);
+
+const loadActivities = async (selected: string[]) => {
+    let params = {
+        wallet: store.currentUser!.walletAddress!,
+        order: 'desc',
+        category: [] as string[],
+        contractAddresses: [] as string[],
+    };
+    if (selected.length == 0) {
+        params.category = ['external', 'internal', 'erc20'];
+    }
+    selected.forEach(address => {
+        if (address == '0x') {
+            params.category.push('external');
+            params.category.push('internal');
+        } else {
+            if (!params.category.includes('erc20')) {
+                params.category.push('erc20');
+            }
+            params.contractAddresses.push(address);
+        }
+    })
+    return await getAssetTransfers(params);
+};
 
 onMounted(async () => {
     const visiableTokens = await getAllVisiableTokens(store);
     tokens.value = Object.values(visiableTokens);
-    activities.value = await getAssetTransfers({
-        wallet: store.currentUser!.walletAddress!,
-        category: ['erc20'],
-        order: 'desc'
-    });
+    activities.value = await loadActivities(selected.value);
+    console.log(activities.value);
     loading.value = false;
 });
 
@@ -92,11 +98,16 @@ const addressToShow = (address: string) => {
     return `(${prettyPrintAddress(address)})`;
 }
 
-const handleTokeTypeChange = () => {
-
-};
-
-const handleSortChange = () => {
-
+const router = useRouter();
+const handleTokenSelection = async () => {
+    loading.value = true;
+    activities.value = await loadActivities(selected.value);
+    console.log(activities.value);
+    loading.value = false;
+    if (selected.value.length > 0) {
+        router.push({path: "/activities", query: { tokens: selected.value.join(",")}});
+    } else {
+        router.push("/activities");
+    }
 };
 </script>

@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '@/views/HomeView.vue'
 import SignInView from '@/views/SignInView.vue'
 import ActivitiesView from '@/views/ActivitiesView.vue'
+import NFTView from '@/views/NFTView.vue'
 import { useAuthStore } from '@/stores/auth';
 
 const router = createRouter({
@@ -22,6 +23,11 @@ const router = createRouter({
       name: 'activities',
       component: ActivitiesView,
     },
+    {
+      path: '/nft',
+      name: 'nft',
+      component: NFTView
+    }
   ]
 });
 

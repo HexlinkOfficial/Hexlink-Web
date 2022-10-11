@@ -115,7 +115,6 @@ onMounted(async () => {
     const visiableTokens = await getAllVisiableTokens(store);
     tokens.value = Object.values(visiableTokens);
     activities.value = await loadActivities(selected.value);
-    console.log(activities.value);
     loading.value = false;
 });
 
@@ -130,7 +129,6 @@ const router = useRouter();
 const handleTokenSelection = async () => {
     loading.value = true;
     activities.value = await loadActivities(selected.value);
-    console.log(activities.value);
     loading.value = false;
     if (selected.value.length > 0) {
         router.push({path: "/activities", query: { tokens: selected.value.join(",")}});

@@ -96,18 +96,22 @@ const loadActivities = async (selected: string[]) => {
     };
     if (selected.length == 0) {
         params.category = ['external', 'internal', 'erc20'];
-    }
-    selected.forEach(address => {
-        if (address == '0x') {
-            params.category.push('external');
-            params.category.push('internal');
-        } else {
-            if (!params.category.includes('erc20')) {
-                params.category.push('erc20');
+        params.contractAddresses = tokens.value.map(
+            t => t.address
+        ).filter(t => t && t != '0x');
+    } else {
+        selected.forEach(address => {
+            if (address == '0x') {
+                params.category.push('external');
+                params.category.push('internal');
+            } else {
+                if (!params.category.includes('erc20')) {
+                    params.category.push('erc20');
+                }
+                params.contractAddresses.push(address);
             }
-            params.contractAddresses.push(address);
-        }
-    })
+        });
+    }
     return await getAssetTransfers(params);
 };
 

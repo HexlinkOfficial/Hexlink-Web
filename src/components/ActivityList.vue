@@ -31,11 +31,39 @@
         <template #renderItem="{ item }">
             <a-card style="margin-top: 20px;">
                 <template #title>
-                    
+                    <a-typography-text v-if="item.action.type == 'send'" :copyable="{ text: item.action.to! }">
+                        To
+                        <a :href="'https://goerli.etherscan.io/address/' + item.action.to">
+                            {{prettyPrintAddress(item.action.to!) }}
+                        </a>
+                    </a-typography-text>
+                    <a-typography-text v-if="item.action.type == 'receive'" :copyable="{ text: item.action.from! }">
+                        From
+                        <a :href="'https://goerli.etherscan.io/address/' + item.action.from">
+                            {{prettyPrintAddress(item.action.from!) }}
+                        </a>
+                    </a-typography-text>
                 </template>
                 <template #extra>
-
+                    <span v-if="item.action.type == 'send'">
+                        {{ '-' + item.amount.normalized.toString() }} {{ item.asset.metadata.symbol }}
+                    </span>
+                    <span v-if="item.action.type == 'receive'">
+                        {{ '+' + item.amount.normalized.toString() }} {{ item.asset.metadata.symbol }}
+                    </span>
                 </template>
+                <a-row justify="space-between">
+                    <a-typography-text :copyable="{ text: item.tx.hash }">
+                        Transaction:
+                        <a :href='"https://goerli.etherscan.io/tx/" + item.tx.hash'>
+                            {{ prettyPrintTxHash(item.tx.hash) }}
+                        </a>
+                    </a-typography-text>
+                    <a-typography-text>
+                        {{ prettyPrintTimestamp(item.tx.timestamp) }}
+                    </a-typography-text>
+                </a-row>
+
             </a-card>
         </template>
     </a-list>
@@ -48,7 +76,7 @@ import type { AssetTransfer, Token } from '@/services/web3/tokens';
 import { useAuthStore } from '@/stores/auth';
 import { useRoute } from 'vue-router'
 import { useRouter } from 'vue-router'
-import { prettyPrintAddress } from '@/services/web3/wallet';
+import { prettyPrintAddress, prettyPrintTxHash, prettyPrintTimestamp } from '@/services/web3/wallet';
 
 const store = useAuthStore();
 const route = useRoute();

@@ -280,7 +280,7 @@ export interface Transaction {
 }
 
 export interface Action {
-    type: "send" | "receive" | "custom",
+    type: "send" | "receive",
     from?: string | null,
     to?: string | null,
 }
@@ -311,7 +311,7 @@ const transferAction = (wallet: string, transfer: AssetTransfersWithMetadataResu
     }
 };
 
-const toAssetTransfers = (
+const toAssetTransfer = (
     wallet: string,
     transfer: AssetTransfersWithMetadataResult
 ) : AssetTransfer => {
@@ -319,7 +319,7 @@ const toAssetTransfers = (
         tx: {
             hash: transfer.hash,
             blockNumber: Number(transfer.blockNum),
-            timestamp: transfer.metadata?.blockTimestamp,
+            timestamp: transfer.metadata.blockTimestamp,
         },
         asset: {
             address: transfer.rawContract.address || "",
@@ -345,7 +345,7 @@ export async function getAssetTransfers(input: {
 }) : Promise<AssetTransfer[]> {
     const order = input.order || 'desc';
     const category = input.category || ['erc20', 'erc721'];
-    let params = { category, order} as AssetTransfersWithMetadataParams;
+    let params = { category, order, withMetadata: true} as AssetTransfersWithMetadataParams;
     if (input.contractAddresses && input.contractAddresses.length > 0) {
         params.contractAddresses = input.contractAddresses;
     }
@@ -354,6 +354,6 @@ export async function getAssetTransfers(input: {
         alchemy.core.getAssetTransfers({toAddress: input.wallet, ...params}),
     ]);
     return send.transfers.concat(receive.transfers).map(
-        t => toAssetTransfers(input.wallet, t)
+        t => toAssetTransfer(input.wallet, t)
     );
 }

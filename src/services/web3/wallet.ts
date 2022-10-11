@@ -103,3 +103,18 @@ export function prettyPrintTxHash(txHash: string) {
     }
     return "N/A";
 }
+
+export function prettyPrintTimestamp(ts: string) {
+    const now = new Date().valueOf();
+    const epoch = new Date(ts).valueOf();
+    const diff = now - epoch;
+    if (diff < 60) {
+        return now - epoch + " seconds ago";
+    } else if (diff < 3600) {
+        return Math.floor(diff/60) + " minutes ago";
+    } else if (diff < 3600 * 24) {
+        return Math.floor(diff/3600) + " hours ago";
+    } else {
+        return new Date(ts).toLocaleString();
+    }
+}

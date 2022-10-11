@@ -34,7 +34,7 @@
                                 </template>
                                 <a-button
                                     shape="round"
-                                    href="'/activities?tokenContract=' + token.address"
+                                    :href="'/activities?tokens=' + item.address"
                                 >
                                     <template #icon><transaction-outlined /></template>
                                 </a-button>

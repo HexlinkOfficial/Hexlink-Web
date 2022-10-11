@@ -8,12 +8,10 @@ insert_permissions:
         id:
           _eq: X-Hasura-User-Id
       columns:
-        - created_at
         - display_name
         - email
         - id
         - photo_url
-        - updated_at
 select_permissions:
   - role: user
     permission:
@@ -36,4 +34,13 @@ update_permissions:
       filter:
         id:
           _eq: X-Hasura-User-Id
-      check: null
+      check:
+        id:
+          _eq: X-Hasura-User-Id
+delete_permissions:
+  - role: user
+    permission:
+      backend_only: false
+      filter:
+        id:
+          _eq: X-Hasura-User-Id

@@ -39,6 +39,12 @@
         </a-button>
         <a-button block disabled type="text" size="large">
           <template #icon>
+            <PictureOutlined />
+          </template>
+          NFT
+        </a-button>
+        <a-button block disabled type="text" size="large">
+          <template #icon>
             <contacts-outlined />
           </template>
           Contacts
@@ -71,7 +77,8 @@ import {
   DollarOutlined,
   AppstoreOutlined,
   LogoutOutlined,
-  ContactsOutlined
+  ContactsOutlined,
+  PictureOutlined
 } from '@ant-design/icons-vue';
 import { prettyPrintAddress } from '@/services/web3/wallet';
 import { useAuthStore } from '@/stores/auth';

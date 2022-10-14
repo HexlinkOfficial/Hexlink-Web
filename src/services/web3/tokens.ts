@@ -353,7 +353,9 @@ export async function getAssetTransfers(input: {
         alchemy.core.getAssetTransfers({fromAddress: input.wallet, ...params}),
         alchemy.core.getAssetTransfers({toAddress: input.wallet, ...params}),
     ]);
-    return send.transfers.concat(receive.transfers).map(
+    const transfers = send.transfers.concat(receive.transfers).map(
         t => toAssetTransfer(input.wallet, t)
     );
+    transfers.sort((a, b) => a.tx.blockNumber - b.tx.blockNumber).slice(0, 1000);
+    return transfers;
 }

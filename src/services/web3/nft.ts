@@ -22,11 +22,6 @@ export interface NFTMetadata {
 export interface ContractMetadata {
   name?: string;
   symbol?: string;
-  collectionName?: string;
-  //collectionCover: string;
-  //externalUrl: string;
-  //discordUrl: string;
-  //twitterUsername: string;
 }
 
 export interface NFT {
@@ -76,7 +71,7 @@ export async function getNFTMetadata(address: string, tokenId: string) : Promise
   
   // Fetch contract metadata
   const contractMetadata = await getContractMetadata(address);
-  
+
   if (contractMetadata != null && contractMetadata.name == null) {
     console.warn("No contract metadata available for the address, %s", address);
     return nft;

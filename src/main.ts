@@ -8,7 +8,7 @@ import { createPinia } from 'pinia'
 import Antd from 'ant-design-vue';
 import 'ant-design-vue/dist/antd.css';
 
-import { getAuth } from 'firebase/auth'
+import { getAuth, type User } from 'firebase/auth'
 import { app } from '@/services/firebase'
 
 import { useAuthStore } from "@/stores/auth"
@@ -16,6 +16,7 @@ import { getIdTokenAndSetClaimsIfNecessary } from '@/services/auth'
 import { clearUrqlClient } from '@/services/graphql/urql'
 import { getUser } from "@/services/graphql/user"
 import { genWalletAddress } from './services/web3/wallet'
+import { createInitialUser } from '@/services/graphql/user'
 
 let vueApp: any;
 getAuth(app).onAuthStateChanged(async (user: any) => {
@@ -30,13 +31,10 @@ getAuth(app).onAuthStateChanged(async (user: any) => {
       .mount('#app');
   }
 
-  const store = useAuthStore();
   if (user) {
-    const idToken = await getIdTokenAndSetClaimsIfNecessary(user);
-    const walletAddress = await genWalletAddress(user.email);
-    store.signIn(user, idToken, walletAddress);
-    await getUser(user, idToken);
+    // no-op
   } else {
+    const store = useAuthStore();
     clearUrqlClient();
     store.signOut();
   }

@@ -39,8 +39,8 @@ export const GET_USER = gql`
 export const ADD_USER = gql`
     mutation (
         $id: String!
-        $displayName: String!
-        $email: String!
+        $displayName: String
+        $email: String
         $photoURL: String
     ) {
         insert_users(
@@ -76,6 +76,21 @@ export async function getUser(user: User, idToken: string) : Promise<User | null
     return result.data.users_by_pk;
 }
 
+export async function createUserIfNecessary(user: User, idToken: string) {
+    console.log("System log: Check if user was created")
+    const client = setUrqlClientIfNecessary(idToken)
+    const result = await client.query(GET_USER, {id: user.uid}).toPromise();
+    if (result?.data == undefined || result?.data?.users_by_pk == null) {
+        console.log("System log: Start to create user")
+        try {
+            await createInitialUser(user, idToken)
+        } catch (error) {
+            throw error
+        }
+    }
+    return true;
+}
+
 export async function createInitialUser(user: User, idToken: string) {
     const userToWrite = {
         id: user.uid,
@@ -84,6 +99,11 @@ export async function createInitialUser(user: User, idToken: string) {
         photoURL: user.photoURL,
     }
     const client = setUrqlClientIfNecessary(idToken)
-    const result = await client.mutation(ADD_USER, userToWrite).toPromise()
-    return result?.data.insert_users;
+    try {
+        await client.mutation(ADD_USER, userToWrite).toPromise()
+    } catch (error) {
+        console.log('"System log: Error trying to create user: ', error)
+        console.log(error)
+        throw error
+    }
 }

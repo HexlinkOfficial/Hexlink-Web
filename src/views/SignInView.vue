@@ -12,12 +12,21 @@
                 <span>Hexlink: start your web3 path</span>
             </a-row>
             <a-row justify="center" style="margin-top: 30px;">
-                <a-button size="large" @click="login">
+                <a-button size="large" @click="google_login">
                     <img
                         src="/images/google.svg"
                         style="height: 20px; width: 20px; margin-right: 10px;"
                     />
                     <span>Sign In with Google</span>
+                </a-button>
+            </a-row>
+            <a-row justify="center" style="margin-top: 5px;">
+                <a-button size="large" @click="twitter_login">
+                    <img
+                        src="/images/twitter.svg"                    
+                        style="height: 20px; width: 20px; margin-right: 10px;"
+                    />
+                    <span>Sign In with Twitter</span>
                 </a-button>
             </a-row>
             <a-row justify="center" style="margin-top: 30px; width: 100%;">
@@ -47,7 +56,7 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { useRouter } from 'vue-router'; 
-import { socialLogin } from '@/services/auth'
+import { googleSocialLogin, twitterSocialLogin } from '@/services/auth'
 import { useAuthStore } from '@/stores/auth'
 import { validateEmail } from '@/services/validator';
 import { genWalletAddress } from "@/services/web3/wallet";
@@ -69,8 +78,13 @@ const onTranslate = async () => {
     translating.value = false;
 }
 
-const login = async () => {
-    await socialLogin();
+const google_login = async () => {
+    await googleSocialLogin();
+    router.push(store.returnUrl || "/");
+}
+
+const twitter_login = async () => {
+    await twitterSocialLogin();
     router.push(store.returnUrl || "/");
 }
 </script>

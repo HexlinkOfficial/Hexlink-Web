@@ -24,8 +24,8 @@ const router = createRouter({
       component: ActivitiesView,
     },
     {
-      path: '/nft',
-      name: 'nft',
+      path: '/collectible',
+      name: 'collectible',
       component: NFTView
     }
   ]

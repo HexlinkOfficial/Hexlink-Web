@@ -1,7 +1,7 @@
 <template>
   <a-row>
     <a-col style="text-align: center;">
-      <a-button type="primary" block @click="showImportCard">Import NFT</a-button>
+      <a-button type="primary" block @click="showImportCard">Import Collectible</a-button>
     </a-col>
   </a-row>
   <div v-if="importCard" class="popup">
@@ -82,8 +82,10 @@ import type { IAuth } from "@/stores/auth";
 import { CloseOutlined } from '@ant-design/icons-vue';
 import { getNFTMetadata, isHolderOfCollection } from '@/services/web3/nft';
 import { queryNFT, saveNFTForUser } from '@/services/graphql/nft';
-import type { NFTInterface, NFTOutput } from '@/services/graphql/nft';
+import type { NFTInterface } from '@/services/graphql/nft';
+import { useAuthStore } from '@/stores/auth';
 
+const store = useAuthStore();
 const importCard = ref<boolean>(false);
 const searchText = ref<string>("");
 const showError = ref<boolean>(false);
@@ -99,13 +101,6 @@ const importNFT = ref<NFTInterface>({
   collection_address: "",
   token_id: "",
   nft_raw_url: ""
-});
-
-const props = defineProps({
-  store: {
-    type: Object as () => IAuth,
-    required: true,
-  },
 });
 
 const showImportCard = () => {
@@ -134,7 +129,7 @@ const onSearch = async (text: string) => {
   showWarning.value = false;
 
   try {
-    const isHolderOfAddress = await isHolderOfCollection(props.store.currentUser!.walletAddress!, text);
+    const isHolderOfAddress = await isHolderOfCollection(store.currentUser!.walletAddress!, text);
     if (isHolderOfAddress) {
       importNFT.value.collection_address = text;
       showSearchBar.value = false;
@@ -154,7 +149,7 @@ const onSearchTokenId = async (text: string) => {
   showDataExistedWarning.value = false;
 
   try {
-    const checkNFTExisted = await queryNFT(props.store.currentUser!, importNFT.value.collection_address, text, props.store.idToken!);
+    const checkNFTExisted = await queryNFT(store.currentUser!, importNFT.value.collection_address, text, store.idToken!);
     if (checkNFTExisted.length >0) {
       showDataExistedWarning.value = true;
       return;
@@ -181,7 +176,7 @@ const onSearchTokenId = async (text: string) => {
 const emit = defineEmits(['nftAdded']);
 const importNFTToken = (nft: NFTInterface) => {
   try {
-    saveNFTForUser(props.store.currentUser!, props.store.idToken!, [nft]);
+    saveNFTForUser(store.currentUser!, store.idToken!, [nft]);
   } catch (error: any) {
     console.error("Failed while storing imported NFT for user.");
   }

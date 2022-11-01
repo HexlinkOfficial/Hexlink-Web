@@ -52,7 +52,21 @@ export const INSERT_NFT = gql`
         id
         collection_address
         token_id
+        nft_raw_url
+        nft_title
+        nft_description
+        collection_name
+        collection_symbol
+        nft_external_url
       }
+    }
+  }
+`
+
+export const DELETE_NFT = gql`
+  mutation ($id: Int!) {
+    delete_nft (id: $id) {
+      id
     }
   }
 `
@@ -110,7 +124,7 @@ export async function saveNFTForUser(
   user: IUser,
   idToken: string,
   data: NFTInterface[]
-) {
+) : Promise<NFTOutput[]> {
   const client = setUrqlClientIfNecessary(idToken)
   const result = await client.mutation(
     INSERT_NFT,
@@ -133,4 +147,15 @@ export async function saveNFTForUser(
     throw new Error("Failed to save nft for user");
   }
   return result.data?.save_nft_for_user?.returning;
+}
+
+export async function deleteNFTForUser(
+  idToken: string,
+  id: number
+) {
+  const client = setUrqlClientIfNecessary(idToken)
+  const result = await client.mutation(
+    DELETE_NFT,
+    { id: id }
+  ).toPromise();
 }

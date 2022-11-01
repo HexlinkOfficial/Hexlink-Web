@@ -3,7 +3,7 @@
     <div class="image-container">
       <div v-if="nft.nft_raw_url">
         <div class="image-box">
-          <img :src="nft.nft_raw_url" @click="showPreview(nft.nft_raw_url, nft.collection_address, nft.token_id, nft.nft_title, nft.nft_description, nft.nft_external_url)"/>
+          <img :src="nft.nft_raw_url" @click="showPreview(nft.nft_raw_url, nft.collection_address, nft.token_id, nft.id, nft.nft_title, nft.nft_description, nft.nft_external_url)"/>
         </div>
         <div class="metadata">
           <div class="title">
@@ -13,18 +13,6 @@
           </div>
           <div class="collection-name" v-if="nft.collection_name">
             {{nft.collection_name}} - #{{nft.token_id}}
-          </div>
-        </div>
-      </div>
-      <div v-else>
-        <div style="border-style: solid; padding: 5px"> 
-          <div style="font-weight: bold;">{{nft.nft_title}}</div> 
-          <div style="padding-top: 5px; font-weight: bold;">Collection Address</div>
-          <div style="padding-top: 5px; overflow-wrap: break-word;">{{nft.collection_address}}</div>
-          <div style="padding-top: 5px; font-weight: bold;">Token ID</div>
-          <div style="padding-top: 5; overflow-wrap: break-word;">{{nft.token_id}}</div>
-          <div style="padding-top: 5px; padding-bottom: 5px">
-            <a-button type="primary" ghost>Transfer</a-button>
           </div>
         </div>
       </div>
@@ -42,18 +30,38 @@
       <div style="padding-top: 5px; overflow-wrap: break-word;">{{previewCollectionAddress}}</div>
       <div style="padding-top: 10px; font-weight: bold;">Token ID</div>
       <div style="padding-top: 5; overflow-wrap: break-word;">{{previewTokenId}}</div>
-      <div style="padding-top: 15px; padding-bottom: 15px">
-        <a-button type="primary">Transfer</a-button>
+      <div v-if="showReceiverBar">
+        <a-input style="margin-top: 5px" v-model:value="receiverAddress" placeholder="Please input receiver address here." />
+        <a-row style="margin-top: 5px" v-if="receiverValidatorError" class="alert">
+          <a-alert message="Please input valid receiver address here." type="error" banner />
+        </a-row>
+        <a-button type="primary" @click="executeTransfer" style="margin-top: 7px">Transfer</a-button>
+      </div>
+      <div v-if="!showReceiverBar" style="padding-top: 15px; padding-bottom: 15px">
+        <a-button type="primary" @click="initializeTransfer">Transfer</a-button>
       </div>
 		</div>
 	</div>
+  <div v-if="showTransferResponse" class="popup">
+    <div class="popup-inner">
+      <a-button class="close-button" @click="closeTransferResponse">
+        <template #icon><CloseOutlined /></template>
+      </a-button>
+      <div>Collectible sent. Transaction ID is: {{transferResponse}}</div>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import type { NFTInterface } from '@/services/graphql/nft';
+import * as ethers from "ethers";
+import type { NFTOutput } from '@/services/graphql/nft';
 import { CloseOutlined } from '@ant-design/icons-vue';
+import { transferNFT } from '@/services/web3/nft';
+import { validateEmail } from '@/services/validator';
+import { useAuthStore } from '@/stores/auth';
 
+const store = useAuthStore();
 const preview = ref<boolean>(false);
 const previewImageUrl = ref<string>("");
 const previewTitleName = ref<string>("");
@@ -62,15 +70,22 @@ const previewCollectionAddress = ref<string>("");
 const previewTokenId = ref<string>("");
 const previewTitleRedirectAvailable = ref<boolean>(false);
 const previewTitleRedirectUrl = ref<string>("");
+const previewNFTId = ref<number>(-1);
+const transferResponse = ref<string>("");
+const showReceiverBar = ref<boolean>(false);
+const receiverAddress = ref<string>("");
+const receiverValidatorError = ref<boolean>(false);
+const showTransferResponse = ref<boolean>(false);
+const showTransferFailue = ref<boolean>(false);
 
 const props = defineProps({
   nfts: {
-    type: Object as () => NFTInterface[],
+    type: Object as () => NFTOutput[],
     required: true,
   },
 });
 
-const showPreview = (url: string, collectionAddress: string, tokenId: string, title?: string, description?: string, redirectUrl?: string) => {
+const showPreview = (url: string, collectionAddress: string, tokenId: string, id: number, title?: string, description?: string, redirectUrl?: string) => {
   if (!!redirectUrl) {
     previewTitleRedirectAvailable.value = true;
     previewTitleRedirectUrl.value = redirectUrl;
@@ -80,11 +95,49 @@ const showPreview = (url: string, collectionAddress: string, tokenId: string, ti
   previewCollectionAddress.value = collectionAddress;
   previewTokenId.value = tokenId;
   previewImageUrl.value = url;
+  previewNFTId.value = id;
   preview.value = true;
 }
 
 const closePreview = () => {
   preview.value = false;
+  showReceiverBar.value = false;
+  receiverAddress.value = "";
+  receiverValidatorError.value = false;
+}
+
+const initializeTransfer = () => {
+  showReceiverBar.value = true;
+}
+
+const executeTransfer = async function() {
+  if (ethers.utils.isAddress(receiverAddress.value) || validateEmail(receiverAddress.value)) {
+    receiverValidatorError.value = false;
+
+    transferResponse.value = (await transferNFT(
+      store.currentUser!.walletAddress!,
+      receiverAddress.value,
+      previewCollectionAddress.value,
+      previewTokenId.value,
+      previewNFTId.value,
+      store.idToken!
+    )).txHash;
+    
+    if (transferResponse.value) {
+      closePreview();
+      showTransferResponse.value = true;
+    } else {
+      showTransferFailue.value = true;
+    }
+  } else {
+    receiverValidatorError.value = true;
+  }
+}
+
+const closeTransferResponse = () => {
+  transferResponse.value = "";
+  showTransferResponse.value = false;
+  showTransferFailue.value = false;
 }
 </script>
 

@@ -1,6 +1,9 @@
 import type { IAuth } from "@/stores/auth";
 import { Network, Alchemy, type Media, type OwnedNft } from "alchemy-sdk";
-import { getNFTForUser, saveNFTForUser, type NFTInterface, type NFTOutput } from "../graphql/nft";
+import { getFunctions, httpsCallable } from "firebase/functions";
+import { deleteNFTForUser, getNFTForUser, saveNFTForUser, type NFTInterface, type NFTOutput } from "../graphql/nft";
+
+const functions = getFunctions();
 
 const config = {
   apiKey: import.meta.env.VITE_GOERLI_ALCHEMY_KEY,
@@ -41,7 +44,7 @@ export async function getNFTs(owner: string) : Promise<OwnedNft[]> {
     return [];
   }
     
-  return nfts.ownedNfts;
+  return nfts.ownedNfts.filter(nft => (nft.title && nft.media));
 }
 
 export async function getNFTTokenMetadata(address: string, tokenId: string) {
@@ -52,7 +55,7 @@ export async function getContractMetadata(address: string) {
   return await alchemy.nft.getContractMetadata(address);
 }
 
-export async function getNFTMetadata(address: string, tokenId: string) : Promise<NFTInterface> {  
+export async function getNFTMetadata(address: string, tokenId: string) : Promise<NFTOutput> {  
   let nft = {} as NFTOutput;
   nft.collection_address = address;
   nft.token_id = tokenId;
@@ -85,7 +88,7 @@ export async function getNFTMetadata(address: string, tokenId: string) : Promise
   return nft;
 }
 
-export async function getAllOwnedNFT(store: IAuth) : Promise<NFTInterface[]> {
+export async function getAllOwnedNFT(store: IAuth) : Promise<NFTOutput[]> {
   let nftForUser : NFTOutput[] = [];
   try {
     nftForUser = await getNFTForUser(
@@ -101,14 +104,15 @@ export async function getAllOwnedNFT(store: IAuth) : Promise<NFTInterface[]> {
     const initializeNFTList = await getNFTs(store.currentUser?.walletAddress!);
     const initializeNFTListPromises = initializeNFTList.map(nft => getNFTMetadata(nft.contract.address, nft.tokenId));
     const initializeNFTListValue = await Promise.all(initializeNFTListPromises);
-    
+    let newNFTs : NFTOutput[] = [];
     try {
-      const newNFTs = await saveNFTForUser(store.currentUser!, store.idToken!, initializeNFTListValue);
+      newNFTs = await saveNFTForUser(store.currentUser!, store.idToken!, initializeNFTListValue);
     } catch (error) {
       console.log(error);
     }
 
-    return await Promise.all(initializeNFTListPromises);
+
+    return await Promise.all(newNFTs);
   }
     
   return await Promise.all(nftForUser);
@@ -116,4 +120,16 @@ export async function getAllOwnedNFT(store: IAuth) : Promise<NFTInterface[]> {
 
 export async function isHolderOfCollection(owner: string, address: string) : Promise<boolean> {
   return await alchemy.nft.verifyNftOwnership(owner, address);
+}
+
+export async function transferNFT(sender: string, receiver: string, collection_address: string, tokenId: string, id: number, idToken: string) {
+  const sendERC721 = httpsCallable(functions, 'sendERC721');
+  const result = await sendERC721({
+    collection_address: collection_address,
+    tokenId: tokenId,
+    sender: sender,
+    receiver: receiver
+  });
+  const tableUpdateResult = await deleteNFTForUser(idToken, id);
+  return result.data as {txHash: string};
 }

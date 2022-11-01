@@ -1,7 +1,6 @@
 <template>
   <a-row justify="center" style="margin-top: 20px; margin-bottom: 20px;">
     <NFTImportView
-      :store="store"
       @nftAdded="handleNFTAdded"
     ></NFTImportView>
   </a-row>
@@ -19,14 +18,14 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { getAllOwnedNFT } from '@/services/web3/nft';
-import type { NFTInterface } from '@/services/graphql/nft';
+import type { NFTOutput } from '@/services/graphql/nft';
 import { useAuthStore } from '@/stores/auth';
 import NFTList from './NFTList.vue';
 import NFTImportView from './NFTImportView.vue';
 
 const store = useAuthStore();
 const loading = ref<boolean>(true);
-const nfts = ref<NFTInterface[]>([]);
+const nfts = ref<NFTOutput[]>([]);
 
 const isCollectionViewType = ref<boolean>(false);
 const viewType = ref<string>("Switch to Collection View");
@@ -37,7 +36,7 @@ onMounted(async () => {
   loading.value = false;
 });
 
-const handleNFTAdded = async function(nft: NFTInterface) {
+const handleNFTAdded = async function(nft: NFTOutput) {
   nfts.value.push(nft);
 }
 

@@ -30,6 +30,7 @@ import {
   deployWallet,
   executeTx,
   sendERC20,
+  sendERC721,
   sendETH,
   estimateERC20Transfer,
   estimateETHTransfer,
@@ -38,6 +39,7 @@ import {
 exports.metadata = metadata;
 exports.deployWallet = deployWallet;
 exports.sendERC20 = sendERC20;
+exports.sendERC721 = sendERC721;
 exports.sendETH = sendETH;
 exports.executeTx = executeTx;
 exports.estimateERC20Transfer = estimateERC20Transfer;

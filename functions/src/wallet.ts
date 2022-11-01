@@ -3,6 +3,7 @@ import * as functions from "firebase-functions";
 import * as ethers from "ethers";
 import * as HEXLINK from "./data/HEXLINK.json";
 import * as ERC20 from "./data/ERC20.json";
+import * as ERC721Abi from "./data/ERC721.json";
 import BigNumber from "bignumber.js";
 
 const secrets = functions.config().doppler || {};
@@ -76,6 +77,11 @@ const genAddressIfNecessary = async (receiver: string) => {
 const genERC20SendTxData = (to: string, amount: ethers.BigNumber) => {
   const iface = new ethers.utils.Interface(ERC20.abi);
   return iface.encodeFunctionData("transfer", [to, amount]);
+};
+
+const genERC721SendTxData = (from: string, to: string, tokenId: ethers.BigNumber) => {
+  const iface = new ethers.utils.Interface(ERC721Abi);
+  return iface.encodeFunctionData("transferFrom", [from, to, tokenId]);
 };
 
 const notify = async (dest: string, content: string) => {
@@ -176,6 +182,30 @@ export const sendERC20 = functions.https.onCall(async (data, context) => {
         data.receiver,
         // eslint-disable-next-line max-len
         `${user.displayName} just sent you ${normalizedAmount} ${data.token.metadata.symbol}.`
+    );
+  }
+  return {code: 200, txHash: tx.hash};
+});
+
+export const sendERC721 = functions.https.onCall(async (data, context) => {
+  const result = await validateUser(context.auth?.uid);
+  if (!result.success) {
+    return {code: result.code, message: result.message};
+  }
+  const {email, user} = result;
+  const yawWallet = walletContract(await walletAddress(email));
+  const receiver = await genAddressIfNecessary(data.receiver);
+  const tx = await yawWallet.execute(
+      data.collection_address,
+      0, // value
+      65000, // gas
+      genERC721SendTxData(data.sender, receiver, ethers.BigNumber.from(data.tokenId)),
+  );
+  if (!ethers.utils.isAddress(data.receiver)) {
+    await notify(
+        data.receiver,
+        // eslint-disable-next-line max-len
+        `${user.displayName} just sent you a new collectible.`
     );
   }
   return {code: 200, txHash: tx.hash};

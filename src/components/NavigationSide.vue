@@ -37,11 +37,11 @@
           </template>
           Activities
         </a-button>
-        <a-button block disabled type="text" size="large">
+        <a-button block type="text" size="large" href="/collectible">
           <template #icon>
             <PictureOutlined />
           </template>
-          NFT
+          Collectibles
         </a-button>
         <a-button block disabled type="text" size="large">
           <template #icon>

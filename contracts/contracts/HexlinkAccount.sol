@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/utils/Address.sol";
 
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
-contract HexlinkWallet is ReentrancyGuard {
+contract HexlinkAccount is ReentrancyGuard {
     using Address for address;
 
     address private _owner;
@@ -18,14 +18,16 @@ contract HexlinkWallet is ReentrancyGuard {
     );
 
     modifier onlyOwner() {
-        _checkOwner();
+        require(owner() == msg.sender, "HEXL001");
         _;
     }
 
-    receive() external payable { 
+    receive() external payable {
     }
 
-    fallback() external payable {
+    fallback(bytes calldata) external returns (bytes memory) {
+        // for ERC1155 and ERC3525
+        return abi.encode(msg.sig);
     }
 
     function owner() public view virtual returns (address) {
@@ -36,17 +38,13 @@ contract HexlinkWallet is ReentrancyGuard {
         }
     }
 
-    function _checkOwner() internal view virtual {
-        require(owner() == msg.sender, "YAW001");
-    }
-
     function initOwner(address ownerAddr) external {
-        require(_owner == address(0) && ownerAddr != address(0), "YAW005");
+        require(_owner == address(0) && ownerAddr != address(0), "HEXL005");
         _owner = ownerAddr;
     }
 
     function transferOwnership(address newOwner) external onlyOwner {
-        require(newOwner != address(0), "YAW002");
+        require(newOwner != address(0), "HEXL002");
         address oldOwner = owner();
         _owner = newOwner;
         emit OwnershipTransferred(oldOwner, newOwner);
@@ -58,11 +56,11 @@ contract HexlinkWallet is ReentrancyGuard {
         uint256 txGas,
         bytes calldata txData
     ) external payable onlyOwner nonReentrant {
-        require(gasleft() > ((txGas * 64) / 63) + 500, "YAW003");
+        require(gasleft() > ((txGas * 64) / 63) + 500, "HEXL003");
         (
             bool success,
             /* bytes memory data */
         ) = destination.call{value: value, gas: txGas}(txData);
-        require(success, "YAW004");
+        require(success, "HEXL004");
     }
 }

@@ -6,11 +6,17 @@ const func: DeployFunction = async function(hre: HardhatRuntimeEnvironment) {
   const {deploy} = deployments;
   const {deployer} = await getNamedAccounts();
 
-  await deploy("HexlinkAdmin", {
+  await deploy("HexlinkToken", {
+    from: deployer,
+    log: true,
+    autoMine: true,
+  });
+
+  await deploy("TestHexlinkERC1155", {
     from: deployer,
     log: true,
     autoMine: true,
   });
 };
 export default func;
-func.tags = ["HEXL", "TEST"];
+func.tags = ["TEST"];

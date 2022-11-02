@@ -1,10 +1,7 @@
 import {task} from "hardhat/config";
-import {assert} from "console";
-import {Contract} from "ethers";
 import {HardhatRuntimeEnvironment} from "hardhat/types";
-import { AimOutlined } from "@ant-design/icons-vue";
 
-const genSalt = function(ethers: any, email: string) {
+const genNameHash = function(ethers: any, email: string) {
   return ethers.utils.keccak256(
       ethers.utils.toUtf8Bytes(`mailto:${email}`)
   );
@@ -12,111 +9,61 @@ const genSalt = function(ethers: any, email: string) {
 
 const getAdmin = async function(hre: HardhatRuntimeEnvironment) {
   const {ethers, deployments} = hre;
-  const deployment = await deployments.get("HexlinkAdmin");
-  return await ethers.getContractAt("HexlinkAdmin", deployment.address);
+  const deployment = await deployments.get("Hexlink");
+  return await ethers.getContractAt("Hexlink", deployment.address);
 };
 
-const genTopicHash = async function(
-    hre: HardhatRuntimeEnvironment,
-    contract: string,
-    func: string
-) {
-  const {ethers, deployments} = hre;
-  const artifact = await deployments.getArtifact(contract);
-  const iface = new ethers.utils.Interface(artifact.abi);
-  return iface.getEventTopic(func);
-};
-
-const parseClonedWalletAddress = async function(
-    hre: HardhatRuntimeEnvironment,
-    receipt: any,
-) {
-  const {ethers, deployments} = hre;
-  const topicHash = await genTopicHash(hre, "HexlinkAdmin", "CloneWallet");
-  const log = receipt.logs.find((log: any) => log.topics[0] == topicHash);
-  const artifact = await deployments.getArtifact("HexlinkAdmin");
-  const iface = new ethers.utils.Interface(artifact.abi);
-  return iface.parseLog(log).args.cloned;
-};
-
-const walletImplAddress = async function(
-    hre: HardhatRuntimeEnvironment,
-    admin: Contract,
-) {
-  const {ethers, artifacts} = hre;
-  const artifact = await artifacts.readArtifact("HexlinkWallet");
-  const initCodeHash = ethers.utils.keccak256(artifact.bytecode);
-  return ethers.utils.getCreate2Address(
-      admin.address, ethers.constants.HashZero, initCodeHash);
-};
-
-task("walletImplAddress", "Prints wallet implementation contract address")
-    .addFlag("print", "print wallet implementation address")
-    .setAction(async (taskArgs, hre : HardhatRuntimeEnvironment) => {
-      const {ethers, artifacts} = hre;
-      const admin = await getAdmin(hre);
-      const artifact = await artifacts.readArtifact("HexlinkWallet");
-      const initCodeHash = ethers.utils.keccak256(artifact.bytecode);
-      const address = ethers.utils.getCreate2Address(
-          admin.address, ethers.constants.HashZero, initCodeHash);
-      if (taskArgs.print) {
-        console.log("Wallet Implementation address is " + address);
-      }
-      return address;
-    });
-
-task("walletAddress", "Prints wallet address")
-    .addFlag("print", "print wallet address")
+task("accountBase", "Prints account base address")
+    .addFlag("print", "print account base address")
     .addParam("email", "the email address to generate the address")
     .setAction(async (taskArgs, hre : HardhatRuntimeEnvironment) => {
-      const {ethers} = hre;
+      const nameHash = genNameHash(hre.ethers, taskArgs.email);
       const admin = await getAdmin(hre);
-      const source = await walletImplAddress(hre, admin);
-      const address = await admin.predictWalletAddress(
-          source, genSalt(ethers, taskArgs.email)
-      );
-      console.log(admin.address);
+      const account = await admin.addressOfName(nameHash);
       if (taskArgs.print) {
-        console.log("Wallet address is " + address);
+        console.log("account base address is " + account);
       }
-      return address;
+      return account;
     });
 
-task("clone", "clone a new wallet per given email")
-    .addFlag("print", "print cloned wallet address")
+task("accountAddress", "Prints account address")
+    .addFlag("print", "print account address")
+    .setAction(async (taskArgs, hre : HardhatRuntimeEnvironment) => {
+      const admin = await getAdmin(hre);
+      const base = await admin.accountBase();
+      if (taskArgs.print) {
+        console.log("account address is " + base);
+      }
+      return base;
+    });
+
+task("deployAccount", "deploy a new account per given email")
+    .addFlag("print", "print cloned account address")
     .addFlag("async", "do not wait for transaction to finish")
     .addParam("email", "the email address to generate the address")
     .setAction(async (taskArgs, hre : HardhatRuntimeEnvironment) => {
       const {ethers} = hre;
       const admin = await getAdmin(hre);
-      const source = await walletImplAddress(hre, admin);
-      const salt = genSalt(ethers, taskArgs.email);
-      const computedAddress = await admin.predictWalletAddress(source, salt);
+      const nameHash = genNameHash(ethers, taskArgs.email);
 
       const [deployer] = await ethers.getSigners();
-      const tx = await admin.connect(deployer).clone(source, salt);
+      const tx = await admin.connect(deployer).deploy(nameHash);
       if (taskArgs.async) {
-        console.log(`Cloning "HexlinkWallet" (tx: ${tx.hash})...`);
+        console.log(`Cloning "HexlinkAccount" (tx: ${tx.hash})...`);
         return tx.hash;
       }
       const receipt = await tx.wait();
-      const deployedAddress = await parseClonedWalletAddress(hre, receipt);
-      assert(
-          computedAddress == deployedAddress,
-          // eslint-disable-next-line max-len
-          `Wallet address mismatch, expected ${computedAddress} but got ${deployedAddress}`
-      );
-
+      const account = await admin.addressOfName(nameHash);
       if (taskArgs.print) {
         const gas = receipt.gasUsed.mul(
             receipt.effectiveGasPrice
         ).div(1000000000);
         console.log(
             // eslint-disable-next-line max-len
-            `Cloning "HexlinkWallet" (tx: ${tx.hash})...: cloned at ${deployedAddress} with ${gas} gas`
+            `Cloning "HexlinkAccount" (tx: ${tx.hash})...: cloned at ${account} with ${gas} gas`
         );
       }
-      return deployedAddress;
+      return account;
     });
 
 task("receiveETH", "receiveETH")
@@ -124,7 +71,7 @@ task("receiveETH", "receiveETH")
     .setAction(async (taskArgs, hre : HardhatRuntimeEnvironment) => {
       const {ethers} = hre;
       const [deployer] = await ethers.getSigners();
-      const receiver: string = await hre.run("walletAddress", {email: taskArgs.receiver});
+      const receiver: string = await hre.run("accountAddress", {email: taskArgs.receiver});
       const amount = ethers.utils.parseEther("0.01")
       const tx = await deployer.sendTransaction({
         to: receiver,
@@ -140,13 +87,13 @@ task("sendETH", "send ETH")
     .setAction(async (taskArgs, hre : HardhatRuntimeEnvironment) => {
       const {ethers} = hre;
       const [deployer] = await ethers.getSigners();
-      const sender = await hre.run("walletAddress", {email: taskArgs.sender});
-      const receiver = await hre.run("walletAddress", {email: taskArgs.receiver});
-      const wallet = await ethers.getContractAt(
-          "HexlinkWallet",
+      const sender = await hre.run("account", {email: taskArgs.sender});
+      const receiver = await hre.run("account", {email: taskArgs.receiver});
+      const account = await ethers.getContractAt(
+          "HexlinkAccount",
           sender,
       );
-      const tx = await wallet.connect(deployer).execute(
+      const tx = await account.connect(deployer).execute(
         receiver, ethers.utils.parseEther(taskArgs.amount), 23000, []
       );
       return tx.hash;
@@ -159,12 +106,12 @@ task("sendHexl", "send hexlink token")
     .setAction(async (taskArgs, hre : HardhatRuntimeEnvironment) => {
       const {ethers} = hre;
       const [deployer] = await ethers.getSigners();
-      const sender = await hre.run("walletAddress", {email: taskArgs.sender});
-      const receiver = await hre.run("walletAddress", {email: taskArgs.receiver});
+      const sender = await hre.run("account", {email: taskArgs.sender});
+      const receiver = await hre.run("account", {email: taskArgs.receiver});
       const token = (await hre.deployments.get("HexlinkToken")).address;
 
-      const wallet = await ethers.getContractAt(
-          "HexlinkWallet",
+      const account = await ethers.getContractAt(
+          "HexlinkAccount",
           sender,
       );
       const artifact = await hre.artifacts.readArtifact("ERC20");
@@ -173,25 +120,25 @@ task("sendHexl", "send hexlink token")
           "transfer",
           [receiver, ethers.utils.parseEther(taskArgs.amount)]
       );
-      const tx = await wallet.connect(deployer).execute(
+      const tx = await account.connect(deployer).execute(
           token, 0, 65000, txData
       );
       return tx.hash;
     });
 
 task("execute", "execute abiratry transaction")
-    .addParam("wallet", "wallet address to exectute")
+    .addParam("account", "account address to exectute")
     .addParam("contract", "address of contract to call")
     .addParam("txData", "transaction data to exectute")
     .setAction(async (taskArgs, hre : HardhatRuntimeEnvironment) => {
       const {ethers} = hre;
       const [deployer] = await ethers.getSigners();
       const destination = ethers.utils.getAddress(taskArgs.destination);
-      const wallet = await ethers.getContractAt(
-          "HexlinkWallet",
-          ethers.utils.getAddress(taskArgs.wallet)
+      const account = await ethers.getContractAt(
+          "HexlinkAccount",
+          ethers.utils.getAddress(taskArgs.account)
       );
-      const tx = await wallet.connect(deployer).execute(
+      const tx = await account.connect(deployer).execute(
           destination, 0, 65000, taskArgs.txData
       );
       return tx.hash;
@@ -199,16 +146,18 @@ task("execute", "execute abiratry transaction")
 
 task("metadata", "generate metadata")
     .setAction(async (_taskArgs, hre : HardhatRuntimeEnvironment) => {
-      const admin = await hre.deployments.get("HexlinkAdmin");
+      const admin = await hre.deployments.get("Hexlink");
+      const adminContract = await hre.ethers.getContractAt("Hexlink", admin.address);
+      const base = await adminContract.accountBase();
       const token = await hre.deployments.get("HexlinkToken");
-      const walletArtifact = await hre.artifacts.readArtifact("HexlinkWallet");
+      const accountArtifact = await hre.artifacts.readArtifact("HexlinkAccount");
 
       const metadata = JSON.stringify({
         adminAddr: admin.address,
         adminAbi: admin.abi,
-        walletImplAbi: walletArtifact.abi,
-        walletImplAddr: await hre.run("walletImplAddress", {}),
-        walletImplBytecode: walletArtifact.bytecode,
+        accountAbi: accountArtifact.abi,
+        accountBase: base,
+        accountBaseBytecode: accountArtifact.bytecode,
         tokenAddr: token.address,
       });
       console.log(metadata);

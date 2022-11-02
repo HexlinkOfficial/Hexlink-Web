@@ -14,6 +14,8 @@ import type {
 } from "@/services/graphql/preferences";
 import type { IAuth } from '@/stores/auth';
 import type { TokenBalance } from "alchemy-sdk";
+import { TokenBalanceType } from "alchemy-sdk";
+import type { TokenBalancesOptionsErc20 } from "alchemy-sdk";
 
 const functions = getFunctions();
 
@@ -191,7 +193,8 @@ export async function loadAll(
 
     const tokensToSetPreference : PreferenceInput[] = [];
     const ethBalance = await getETHBalance(wallet);
-    const erc20Balances = await alchemy.core.getTokenBalances(wallet, 'erc20');
+    const option: TokenBalancesOptionsErc20 = {type : TokenBalanceType.ERC20};
+    const erc20Balances = await alchemy.core.getTokenBalances(wallet, option);
     erc20Balances.tokenBalances.concat([ethBalance as TokenBalance]).forEach(balance => {
         if (BigNumber(balance.tokenBalance || 0).gt(0)) {
             const address = balance.contractAddress.toLowerCase();

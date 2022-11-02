@@ -2,13 +2,16 @@ import {
     getAuth,
     getAdditionalUserInfo,
     GoogleAuthProvider,
+    TwitterAuthProvider,
     signInWithPopup,
     signOut,
 } from 'firebase/auth'
 import type { User } from 'firebase/auth'
 import { getFunctions, httpsCallable } from 'firebase/functions'
 import { app } from '@/services/firebase'
-import { createInitialUser } from '@/services/graphql/user'
+import { createUserIfNecessary, getUser } from '@/services/graphql/user'
+import { useAuthStore } from "@/stores/auth"
+import { genWalletAddress } from '@/services/web3/wallet'
 
 const auth = getAuth(app)
 const functions = getFunctions()
@@ -32,19 +35,46 @@ export async function getIdTokenAndSetClaimsIfNecessary(user: User) {
     return idToken
 }
 
-export async function socialLogin() {
+export async function googleSocialLogin() {
     const provider = new GoogleAuthProvider();
     try {
         const result = await signInWithPopup(auth, provider)
-        const { isNewUser } = getAdditionalUserInfo(result)!
-        if (isNewUser) {
-            const idToken = await getIdTokenAndSetClaimsIfNecessary(result.user)
-            await createInitialUser(result.user, idToken)
+        const idToken = await getIdTokenAndSetClaimsIfNecessary(result.user)
+        try {
+            await createUserIfNecessary(result.user, idToken);
+        } catch (error) {
+            console.log("System log: Have trouble with login user")
+            console.log(error)
+            return
         }
+
+        const store = useAuthStore();
+        const walletAddress = await genWalletAddress(result.user.email);
+        store.signIn(result.user, idToken, walletAddress);
     } catch (error: any) {
         if (error.code == 'auth/popup-closed-by-user') {
             return
         }
+    }
+}
+
+export async function twitterSocialLogin() {
+    const provider = new TwitterAuthProvider();
+    try {
+        const result = await signInWithPopup(auth, provider)
+        const idToken = await getIdTokenAndSetClaimsIfNecessary(result.user)
+        try {
+            await createUserIfNecessary(result.user, idToken);
+        } catch (error) {
+            console.log("System log: Have trouble with initializing user")
+            console.log(error)
+            return
+        }
+        const store = useAuthStore();
+        const walletAddress = await genWalletAddress(result.user.providerId);
+        store.signIn(result.user, idToken, walletAddress);
+    } catch (error) {
+        console.log(error);
     }
 }
 

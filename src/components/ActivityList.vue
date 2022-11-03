@@ -76,7 +76,7 @@ import type { AssetTransfer, Token } from '@/services/web3/tokens';
 import { useAuthStore } from '@/stores/auth';
 import { useRoute } from 'vue-router'
 import { useRouter } from 'vue-router'
-import { prettyPrintAddress, prettyPrintTxHash, prettyPrintTimestamp } from '@/services/web3/wallet';
+import { prettyPrintAddress, prettyPrintTxHash, prettyPrintTimestamp } from '@/services/web3/account';
 
 const store = useAuthStore();
 const route = useRoute();

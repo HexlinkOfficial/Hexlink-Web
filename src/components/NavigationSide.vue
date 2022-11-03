@@ -80,7 +80,7 @@ import {
   ContactsOutlined,
   PictureOutlined
 } from '@ant-design/icons-vue';
-import { prettyPrintAddress } from '@/services/web3/wallet';
+import { prettyPrintAddress } from '@/services/web3/account';
 import { useAuthStore } from '@/stores/auth';
 
 const store = useAuthStore();

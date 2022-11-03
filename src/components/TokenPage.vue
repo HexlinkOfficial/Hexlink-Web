@@ -58,13 +58,9 @@ import {
 
 import { loadAll } from "@/services/web3/tokens";
 import type { Token } from "@/services/web3/tokens";
-import {
-    getHexlinkMetadata,
-    isContract,
-    type IMetadata,
-} from "@/services/web3/wallet";
+import { getBalance, isContract } from "@/services/web3/account";
 import TokenList from "@/components/TokenList.vue";
-import WalletSetup from "@/components/WalletSetup.vue";
+import WalletSetup from "@/components/AccountSetup.vue";
 import TokenPreference from "@/components/TokenPreference.vue";
 import { useAuthStore } from '@/stores/auth';
 import { BigNumber } from "bignumber.js";
@@ -74,14 +70,14 @@ const user = store.currentUser;
 
 const loading = ref<boolean>(true);
 const tokens = ref<{[key: string]: Token}>({});
-const metadata = ref<IMetadata | null>(null);
+const balance = ref<number>(0);
 const isDeployed = ref<boolean>(true);
 
 onMounted(async () => {
-    metadata.value = await getHexlinkMetadata(user?.email);
-    const walletAddress = store.currentUser!.walletAddress!;
-    tokens.value = await loadAll(store, walletAddress);
-    isDeployed.value = await isContract(walletAddress);
+    balance.value = await getBalance(user?.email);
+    const accountAddress = store.currentUser!.walletAddress!;
+    tokens.value = await loadAll(store, accountAddress);
+    isDeployed.value = await isContract(accountAddress);
     loading.value = false;
 });
 

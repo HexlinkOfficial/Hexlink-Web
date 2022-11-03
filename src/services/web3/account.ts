@@ -1,23 +1,9 @@
 import * as ethers from "ethers";
 import { getFunctions, httpsCallable } from 'firebase/functions';
 import { getProvider } from "./provider";
-import * as HEXLINK from "@/data/HEXLINK.json";
+import * as config from "@/services/config";
 
 const functions = getFunctions();
-
-export interface IMetadata {
-    admin: {
-        address: string,
-        abi: any,
-    },
-    walletImpl: {
-        address: string,
-        abi: any,
-    },
-    token: string,
-    wallet: string,
-    balance: number,
-}
 
 export interface Transaction {
     hash: string,
@@ -27,48 +13,25 @@ export interface Transaction {
     state: "Executing" | "Success" | "Error",
 }
 
-const walletImplAddress = function() {
-    return ethers.utils.getCreate2Address(
-        HEXLINK.adminAddr,
-        ethers.constants.HashZero,
-        ethers.utils.keccak256(HEXLINK.walletImplBytecode)
-    );
-};
-
-const genSalt = function(email: string) {
+const genNameHash = function(email: string) {
     return ethers.utils.keccak256(ethers.utils.toUtf8Bytes(`mailto:${email}`));
 };
   
-export async function genWalletAddress(email: string | null | undefined) {
+export async function accountAddress(email: string | null | undefined) {
     if (!email) return "";
-    const contract = new ethers.Contract(
-        HEXLINK.adminAddr,
-        HEXLINK.adminAbi,
+    const admin = new ethers.Contract(
+        config.ADMIN,
+        config.ADMIN_ABI,
         getProvider()
     );
-    return await contract.predictWalletAddress(
-        HEXLINK.walletImplAddr,
-        genSalt(email)
-    );
+    return await admin.addressOfName(genNameHash(email));
 };
 
-export async function getHexlinkMetadata(email: string | null | undefined) : Promise<IMetadata> {
-    const getMetadata = httpsCallable(functions, 'metadata');
-    const {data} = await getMetadata();
+export async function getBalance(email: string | null | undefined) : Promise<number> {
+    const getBalance = httpsCallable(functions, 'balance');
+    const {data} = await getBalance();
     const {balance} = data as {balance: number};
-    return {
-        balance,
-        admin: {
-            address: HEXLINK.adminAddr,
-            abi: HEXLINK.adminAbi,
-        },
-        walletImpl: {
-            address: walletImplAddress(),
-            abi: HEXLINK.walletImplAbi,
-        },
-        token: HEXLINK.tokenAddr,
-        wallet: await genWalletAddress(email),
-    }
+    return balance;
 }
 
 export async function isContract(address: string | undefined | null): Promise<boolean> {

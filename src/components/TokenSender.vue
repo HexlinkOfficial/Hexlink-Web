@@ -177,7 +177,7 @@ import {
     type Token,
     type GasEstimation,
 } from "@/services/web3/tokens";
-import { prettyPrintAddress } from "@/services/web3/wallet";
+import { prettyPrintAddress } from "@/services/web3/account";
 import type { Contact } from "@/services/contacts";
 import { validateEmail } from '@/services/validator';
 import { BigNumber } from 'bignumber.js';

@@ -59,7 +59,7 @@ import { useRouter } from 'vue-router';
 import { googleSocialLogin, twitterSocialLogin } from '@/services/auth'
 import { useAuthStore } from '@/stores/auth'
 import { validateEmail } from '@/services/validator';
-import { genWalletAddress } from "@/services/web3/wallet";
+import { accountAddress } from "@/services/web3/account";
 import { message } from "ant-design-vue";
 
 const store = useAuthStore();
@@ -71,7 +71,7 @@ const translating = ref<boolean>(false);
 const onTranslate = async () => {
     translating.value = true
     if (validateEmail(email.value)) {
-        address.value = await genWalletAddress(email.value);
+        address.value = await accountAddress(email.value);
     } else {
         message.warning("Please input a valid email")
     }

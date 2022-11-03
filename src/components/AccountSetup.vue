@@ -77,7 +77,7 @@
 import { ref, computed, onMounted } from "vue";
 
 import { getETHPrice } from "@/services/web3/price";
-import { deployWallet, prettyPrintTxHash} from "@/services/web3/wallet";
+import { deployWallet, prettyPrintTxHash} from "@/services/web3/account";
 import BigNumber from "bignumber.js";
 import { useAuthStore } from '@/stores/auth';
 

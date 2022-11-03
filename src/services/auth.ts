@@ -11,7 +11,7 @@ import { getFunctions, httpsCallable } from 'firebase/functions'
 import { app } from '@/services/firebase'
 import { createUserIfNecessary, getUser } from '@/services/graphql/user'
 import { useAuthStore } from "@/stores/auth"
-import { genWalletAddress } from '@/services/web3/wallet'
+import { accountAddress } from '@/services/web3/account'
 
 const auth = getAuth(app)
 const functions = getFunctions()

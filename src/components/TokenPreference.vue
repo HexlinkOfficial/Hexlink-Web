@@ -99,7 +99,7 @@ import {
 import { loadERC20Token } from "@/services/web3/tokens";
 import type { Token } from "@/services/web3/tokens";
 import * as ethers from "ethers";
-import { isContract, prettyPrintAddress } from '@/services/web3/wallet';
+import { isContract, prettyPrintAddress } from '@/services/web3/account';
 import { message } from "ant-design-vue";
 
 const props = defineProps({

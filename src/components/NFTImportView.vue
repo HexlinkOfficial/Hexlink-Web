@@ -78,7 +78,6 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import type { IAuth } from "@/stores/auth";
 import { CloseOutlined } from '@ant-design/icons-vue';
 import { getNFTMetadata, isHolderOfCollection } from '@/services/web3/nft';
 import { queryNFT, saveNFTForUser } from '@/services/graphql/nft';

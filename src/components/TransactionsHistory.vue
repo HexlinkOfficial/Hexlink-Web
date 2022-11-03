@@ -14,7 +14,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
-import type { Transaction } from "@/services/web3/wallet";
+import type { Transaction } from "@/services/web3/account";
 
 const txes = ref<Transaction[]>([]);
 

@@ -35,7 +35,7 @@ describe("Hexlink", function() {
     const nameHash = ethers.utils.keccak256(ethers.utils.toUtf8Bytes(sender));
 
     // deploy account contract
-    expect(await admin.nonce(nameHash)).to.eq(0);
+    expect(await admin.version(nameHash)).to.eq(0);
     const account1 = await admin.addressOfName(nameHash)
     await expect(admin.connect(deployer).deploy(nameHash))
         .to.emit(admin, "SetAccount")
@@ -56,7 +56,7 @@ describe("Hexlink", function() {
     const args = receipt.events[0].args;
     expect(nameHash).to.eq(args.nameHash);
     expect(await admin.addressOfName(nameHash)).to.eq(args.account);
-    expect(await admin.nonce(nameHash)).to.eq(1);
+    expect(await admin.version(nameHash)).to.eq(1);
     // check owner
     const accountContract2 = await ethers.getContractAt("HexlinkAccount", args.account);
     expect(await accountContract2.owner()).to.eq(deployer.address);

@@ -14,24 +14,24 @@ contract Hexlink is Ownable {
     event SetAccount(bytes32 indexed nameHash, address indexed account);
 
     address immutable accountBase_;
-    mapping(bytes32 => uint256) private nonces_;
+    mapping(bytes32 => uint256) private version_;
 
     constructor() {
         accountBase_ = Create2.deploy(0, bytes32(0), type(HexlinkAccount).creationCode);
     }
 
-    function deploy(bytes32 nameHash) public onlyOwner {
-        deployImpl(nameHash, nonces_[nameHash]);
+    function deploy(bytes32 nameHash) external onlyOwner {
+        deployImpl(nameHash, 0);
     }
 
-    function reset(bytes32 nameHash) public onlyOwner {
-        uint256 n = nonces_[nameHash] + 1;
-        nonces_[nameHash] = n;
+    function reset(bytes32 nameHash) external onlyOwner {
+        uint256 n = version_[nameHash] + 1;
+        version_[nameHash] = n;
         deployImpl(nameHash, n);
     }
 
     function addressOfName(bytes32 nameHash) external view returns(address) {
-        bytes32 salt = genSalt(nameHash, nonces_[nameHash]);
+        bytes32 salt = genSalt(nameHash, version_[nameHash]);
         return Clones.predictDeterministicAddress(accountBase_, salt);
     }
 
@@ -39,8 +39,8 @@ contract Hexlink is Ownable {
         return accountBase_;
     }
 
-    function nonce(bytes32 nameHash) external view returns(uint256) {
-        return nonces_[nameHash];
+    function version(bytes32 nameHash) external view returns(uint256) {
+        return version_[nameHash];
     }
 
     function deployImpl(bytes32 nameHash, uint256 n) internal {

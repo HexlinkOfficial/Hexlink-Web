@@ -26,18 +26,18 @@ exports.processSignUp = processSignUp;
 exports.refreshToken = refreshToken;
 
 import {
-  metadata,
-  deployWallet,
+  getBalance,
+  deployAccount,
   executeTx,
   sendERC20,
   sendERC721,
   sendETH,
   estimateERC20Transfer,
   estimateETHTransfer,
-} from "./wallet";
+} from "./account";
 
-exports.metadata = metadata;
-exports.deployWallet = deployWallet;
+exports.getBalance = getBalance;
+exports.deployAccount = deployAccount;
 exports.sendERC20 = sendERC20;
 exports.sendERC721 = sendERC721;
 exports.sendETH = sendETH;

@@ -1,9 +1,7 @@
 import {getAuth} from "firebase-admin/auth";
 import * as functions from "firebase-functions";
 import * as ethers from "ethers";
-import * as HEXLINK from "./data/HEXLINK.json";
-import * as ERC20 from "./data/ERC20.json";
-import * as ERC721Abi from "./data/ERC721.json";
+import * as config from "./config";
 import BigNumber from "bignumber.js";
 
 const secrets = functions.config().doppler || {};
@@ -26,61 +24,41 @@ const getSigner = function() {
 };
 
 const adminContract = function() {
-  return new ethers.Contract(
-      HEXLINK.adminAddr,
-      HEXLINK.adminAbi,
-      getSigner()
-  );
+  return new ethers.Contract(config.ADMIN, config.ADMIN_ABI, getSigner());
 };
 
-const walletContract = function(contractAddress: string) {
+const accountContract = function(contractAddress: string) {
   const signer = getSigner();
-  return new ethers.Contract(
-      contractAddress,
-      HEXLINK.walletImplAbi,
-      signer
-  );
+  return new ethers.Contract(contractAddress, config.ACCOUNT_ABI, signer);
 };
 
-const genSalt = function(email: string) {
+const nameHash = function(email: string) {
   return ethers.utils.keccak256(ethers.utils.toUtf8Bytes(`mailto:${email}`));
 };
 
-const walletImplAddress = function() {
-  return ethers.utils.getCreate2Address(
-      HEXLINK.adminAddr,
-      ethers.constants.HashZero,
-      ethers.utils.keccak256(HEXLINK.walletImplBytecode)
-  );
-};
-
-const walletAddress = async function(email: string) {
-  const contract = new ethers.Contract(
-      HEXLINK.adminAddr,
-      HEXLINK.adminAbi,
-      getSigner()
-  );
-  return await contract.predictWalletAddress(
-      walletImplAddress(),
-      genSalt(email)
-  );
+const accountAddress = async function(email: string) {
+  const admin = await adminContract();
+  return await admin.addressOfName(nameHash(email));
 };
 
 const genAddressIfNecessary = async (receiver: string) => {
   if (ethers.utils.isAddress(receiver)) {
     return receiver;
   } else {
-    return await walletAddress(receiver);
+    return await accountAddress(receiver);
   }
 };
 
 const genERC20SendTxData = (to: string, amount: ethers.BigNumber) => {
-  const iface = new ethers.utils.Interface(ERC20.abi);
+  const iface = new ethers.utils.Interface(config.ERC20_ABI);
   return iface.encodeFunctionData("transfer", [to, amount]);
 };
 
-const genERC721SendTxData = (from: string, to: string, tokenId: ethers.BigNumber) => {
-  const iface = new ethers.utils.Interface(ERC721Abi);
+const genERC721SendTxData = (
+    from: string, to: string,
+    tokenId: ethers.BigNumber
+) => {
+  const iface = new ethers.utils.Interface(config.ERC721_ABI);
   return iface.encodeFunctionData("transferFrom", [from, to, tokenId]);
 };
 
@@ -107,7 +85,7 @@ const validateUser = async function(uid: string | undefined) {
   }
 };
 
-export const metadata = functions.https.onCall(async (_data, context) => {
+export const getBalance = functions.https.onCall(async (_data, context) => {
   const uid = context.auth?.uid;
   if (!uid) {
     return {code: 401, message: "Unauthorized"};
@@ -124,14 +102,14 @@ export const metadata = functions.https.onCall(async (_data, context) => {
   }
 });
 
-export const deployWallet = functions.https.onCall(async (_data, context) => {
+export const deployAccount = functions.https.onCall(async (_data, context) => {
   const result = await validateUser(context.auth?.uid);
   if (!result.success) {
     return {code: result.code, message: result.message};
   }
   const {email} = result;
-  const yawAdmin = adminContract();
-  const tx = await yawAdmin.clone(walletImplAddress(), genSalt(email));
+  const admin = adminContract();
+  const tx = await admin.deploy(nameHash(email));
   const receipt = await tx.wait();
   return {code: 200, txHash: tx.hash, receiptHash: receipt.hash};
 });
@@ -142,9 +120,9 @@ export const sendETH = functions.https.onCall(async (data, context) => {
     return {code: result.code, message: result.message};
   }
   const {email, user} = result;
-  const yawWallet = walletContract(await walletAddress(email));
+  const account = accountContract(await accountAddress(email));
   const receiver = await genAddressIfNecessary(data.receiver);
-  const tx = await yawWallet.execute(
+  const tx = await account.execute(
       receiver,
       ethers.BigNumber.from(data.amount),
       50000,
@@ -166,9 +144,9 @@ export const sendERC20 = functions.https.onCall(async (data, context) => {
     return {code: result.code, message: result.message};
   }
   const {email, user} = result;
-  const yawWallet = walletContract(await walletAddress(email));
+  const account = accountContract(await accountAddress(email));
   const receiver = await genAddressIfNecessary(data.receiver);
-  const tx = await yawWallet.execute(
+  const tx = await account.execute(
       data.token.address,
       0, // value
       65000, // gas
@@ -193,13 +171,16 @@ export const sendERC721 = functions.https.onCall(async (data, context) => {
     return {code: result.code, message: result.message};
   }
   const {email, user} = result;
-  const yawWallet = walletContract(await walletAddress(email));
+  const account = accountContract(await accountAddress(email));
   const receiver = await genAddressIfNecessary(data.receiver);
-  const tx = await yawWallet.execute(
+  const tx = await account.execute(
       data.collection_address,
       0, // value
       65000, // gas
-      genERC721SendTxData(data.sender, receiver, ethers.BigNumber.from(data.tokenId)),
+      genERC721SendTxData(
+          data.sender, receiver,
+          ethers.BigNumber.from(data.tokenId)
+      ),
   );
   if (!ethers.utils.isAddress(data.receiver)) {
     await notify(
@@ -217,8 +198,8 @@ export const executeTx = functions.https.onCall(async (data, context) => {
     return {code: result.code, message: result.message};
   }
   const {email} = result;
-  const yawWallet = walletContract(await walletAddress(email));
-  const tx = await yawWallet.execute(
+  const account = accountContract(await accountAddress(email));
+  const tx = await account.execute(
       data.contractAddress,
       data.amount,
       data.txGas,
@@ -238,9 +219,9 @@ export const estimateERC20Transfer = functions.https.onCall(
       const provider = getProvider();
       const feeData = await provider.getFeeData();
 
-      const yawWallet = walletContract(await walletAddress(email));
+      const account = accountContract(await accountAddress(email));
       const receiver = await genAddressIfNecessary(data.receiver);
-      const gasCost = await yawWallet.estimateGas.execute(
+      const gasCost = await account.estimateGas.execute(
           data.tokenAddress,
           0, // value
           65000, // gas

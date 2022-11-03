@@ -77,7 +77,7 @@
 import { ref, computed, onMounted } from "vue";
 
 import { getETHPrice } from "@/services/web3/price";
-import { deployWallet, prettyPrintTxHash} from "@/services/web3/account";
+import { deployAccount, prettyPrintTxHash} from "@/services/web3/account";
 import BigNumber from "bignumber.js";
 import { useAuthStore } from '@/stores/auth';
 
@@ -143,7 +143,7 @@ const setupInput = ref<SetupInput>({...EMPTY_INPUT});
 const executeDeploy = async function() {
     setupInput.value.step++;
     setupInput.value.deploying = true;
-    setupInput.value.response.txHash = (await deployWallet()).txHash;
+    setupInput.value.response.txHash = (await deployAccount()).txHash;
     setupInput.value.deploying = false;
 }
 

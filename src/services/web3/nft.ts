@@ -112,7 +112,7 @@ export async function getAllOwnedNFT(store: IAuth) : Promise<NFTOutput[]> {
     }
 
 
-    return await Promise.all(newNFTs);
+    return await Promise.all(newNFTs || []);
   }
     
   return await Promise.all(nftForUser);

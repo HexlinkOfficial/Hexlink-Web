@@ -28,7 +28,7 @@ export async function accountAddress(email: string | null | undefined) {
 };
 
 export async function getBalance(email: string | null | undefined) : Promise<number> {
-    const getBalance = httpsCallable(functions, 'balance');
+    const getBalance = httpsCallable(functions, 'getBalance');
     const {data} = await getBalance();
     const {balance} = data as {balance: number};
     return balance;
@@ -53,9 +53,9 @@ export function prettyPrintAddress(address: string) {
     return "N/A";
 }
 
-export async function deployWallet() : Promise<{txHash: string, receiptHash: string}> {
-    const deployWallet = httpsCallable(functions, 'deployWallet');
-    const result = await deployWallet();
+export async function deployAccount() : Promise<{txHash: string, receiptHash: string}> {
+    const deployAccount = httpsCallable(functions, 'deployAccount');
+    const result = await deployAccount();
     return result.data as {txHash: string, receiptHash: string};
 }
 

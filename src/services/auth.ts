@@ -49,7 +49,7 @@ export async function googleSocialLogin() {
         }
 
         const store = useAuthStore();
-        const walletAddress = await genWalletAddress(result.user.email);
+        const walletAddress = await accountAddress(result.user.email);
         store.signIn(result.user, idToken, walletAddress);
     } catch (error: any) {
         if (error.code == 'auth/popup-closed-by-user') {
@@ -71,7 +71,7 @@ export async function twitterSocialLogin() {
             return
         }
         const store = useAuthStore();
-        const walletAddress = await genWalletAddress(result.user.providerId);
+        const walletAddress = await accountAddress(result.user.providerId);
         store.signIn(result.user, idToken, walletAddress);
     } catch (error) {
         console.log(error);

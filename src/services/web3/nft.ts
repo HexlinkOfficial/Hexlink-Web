@@ -122,14 +122,18 @@ export async function isHolderOfCollection(owner: string, address: string) : Pro
   return await alchemy.nft.verifyNftOwnership(owner, address);
 }
 
-export async function transferNFT(sender: string, receiver: string, collection_address: string, tokenId: string, id: number, idToken: string) {
+export async function transferNFT(sender: string, receiver: string, collectionAddress: string, tokenId: string, id: number, idToken: string) {
   const sendERC721 = httpsCallable(functions, 'sendERC721');
   const result = await sendERC721({
-    collection_address: collection_address,
+    collectionAddress: collectionAddress,
     tokenId: tokenId,
     sender: sender,
     receiver: receiver
   });
-  const tableUpdateResult = await deleteNFTForUser(idToken, id);
+  try {
+    const tableUpdateResult = await deleteNFTForUser(idToken, id);
+  } catch (error) {
+    console.log(error);
+  }
   return result.data as {txHash: string};
 }

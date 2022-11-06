@@ -174,7 +174,7 @@ export const sendERC721 = functions.https.onCall(async (data, context) => {
   const account = accountContract(await accountAddress(email));
   const receiver = await genAddressIfNecessary(data.receiver);
   const tx = await account.execute(
-      data.collection_address,
+      data.collectionAddress,
       0, // value
       65000, // gas
       genERC721SendTxData(

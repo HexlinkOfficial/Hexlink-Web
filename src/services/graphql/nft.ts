@@ -65,8 +65,8 @@ export const INSERT_NFT = gql`
 
 export const DELETE_NFT = gql`
   mutation ($id: Int!) {
-    delete_nft (id: $id) {
-      id
+    delete_nft (where: {id: {_eq: $id}}) {
+      affected_rows
     }
   }
 `

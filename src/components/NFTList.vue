@@ -110,6 +110,7 @@ const initializeTransfer = () => {
   showReceiverBar.value = true;
 }
 
+const emit = defineEmits(['nftTransfered']);
 const executeTransfer = async function() {
   if (ethers.utils.isAddress(receiverAddress.value) || validateEmail(receiverAddress.value)) {
     receiverValidatorError.value = false;
@@ -124,6 +125,7 @@ const executeTransfer = async function() {
     )).txHash;
     
     if (transferResponse.value) {
+      emit('nftTransfered', previewNFTId.value);
       closePreview();
       showTransferResponse.value = true;
     } else {

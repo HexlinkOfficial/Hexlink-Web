@@ -11,6 +11,7 @@
   <a-row v-if="!loading && isCollectionViewType == false" justify="center" style="margin-top: 5px; margin-bottom: 20px;">
     <NFTList
       :nfts="nfts"
+      @nftTransfered="handleNFTTransfered"
     ></NFTList>
   </a-row>
 </template>
@@ -38,6 +39,10 @@ onMounted(async () => {
 
 const handleNFTAdded = async function(nft: NFTOutput) {
   nfts.value.push(nft);
+}
+
+const handleNFTTransfered = async function(id: number) {
+  nfts.value = nfts.value.filter(nft => nft.id != id);
 }
 
 const switchType = () => {

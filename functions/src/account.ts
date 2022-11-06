@@ -59,7 +59,7 @@ const genERC721SendTxData = (
     tokenId: ethers.BigNumber
 ) => {
   const iface = new ethers.utils.Interface(config.ERC721_ABI);
-  return iface.encodeFunctionData("transferFrom", [from, to, tokenId]);
+  return iface.encodeFunctionData("safeTransferFrom", [from, to, tokenId]);
 };
 
 const notify = async (dest: string, content: string) => {

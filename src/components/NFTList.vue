@@ -47,7 +47,8 @@
       <a-button class="close-button" @click="closeTransferResponse">
         <template #icon><CloseOutlined /></template>
       </a-button>
-      <div style="break-word">Collectible sent. Transaction ID is: {{transferResponse}}</div>
+      <div>Collectible has been sent successfully.</div>
+      <div style="word-wrap:break-word;">Transaction ID is: {{transferResponse}}</div>
     </div>
   </div>
 </template>

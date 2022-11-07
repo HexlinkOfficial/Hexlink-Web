@@ -229,7 +229,7 @@ task("sendNFT", "send NFT")
       const artifact = await hre.artifacts.readArtifact("ERC721");
       const iface = new ethers.utils.Interface(artifact.abi);
       const txData = iface.encodeFunctionData(
-          "safeTransferFrom",
+          "transferFrom",
           [sender, receiver, taskArgs.token_id]
       );
       const tx = await account.connect(deployer).execute(

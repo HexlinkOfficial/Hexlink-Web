@@ -16,7 +16,7 @@
                 >
                     <a-tooltip>
                         <template #title>
-                            {{token.preference?.display_name || token.metadata.name}} {{addressToShow(token.address)}}
+                            {{token.preference?.token_alias || token.metadata.name}} {{addressToShow(token.address)}}
                         </template>
                         {{token.metadata.symbol}}
                     </a-tooltip>
@@ -116,7 +116,8 @@ const loadActivities = async (selected: string[]) => {
 };
 
 onMounted(async () => {
-    const visiableTokens = await getAllVisiableTokens(store);
+    const chain = "GOERLI";
+    const visiableTokens = await getAllVisiableTokens(store, chain);
     tokens.value = Object.values(visiableTokens);
     activities.value = await loadActivities(selected.value);
     loading.value = false;

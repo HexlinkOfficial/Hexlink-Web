@@ -72,11 +72,12 @@ const loading = ref<boolean>(true);
 const tokens = ref<{[key: string]: Token}>({});
 const balance = ref<number>(0);
 const isDeployed = ref<boolean>(true);
+const chain = "GOERLI";
 
 onMounted(async () => {
     balance.value = await getBalance(user?.email);
     const accountAddress = store.currentUser!.walletAddress!;
-    tokens.value = await loadAll(store, accountAddress);
+    tokens.value = await loadAll(store, accountAddress, chain);
     isDeployed.value = await isContract(accountAddress);
     loading.value = false;
 });
@@ -86,7 +87,7 @@ const visiableTokens = computed(() => {
 });
 
 const handlePreferenceUpdate = async function(params: any) {
-    tokens.value[params.address].preference = params.preference;
+    tokens.value[params.address].preference!.display = params.preference.display;
 }
 
 const handleTokenAdded = async function(token: Token) {

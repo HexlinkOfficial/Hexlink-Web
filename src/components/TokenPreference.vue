@@ -24,10 +24,10 @@
             <template #renderItem="{ item }">
                 <a-row style="margin-top: 10px;" justify="space-between">
                     <a-col>
-                        <span v-if="item.preference?.display_name && item.preference?.display_name !== item.metadata.name" style="font-weight: bold;">
-                            {{item.preference?.display_name}}&nbsp;({{item.metadata.name}})&nbsp;&nbsp;
+                        <span v-if="item.preference?.token_alias && item.preference?.token_alias !== item.metadata.name" style="font-weight: bold;">
+                            {{item.preference?.token_alias}}&nbsp;({{item.metadata.name}})&nbsp;&nbsp;
                         </span>
-                        <span v-if="!item.preference?.display_name || item.preference?.display_name == item.metadata.name" style="font-weight: bold;">
+                        <span v-if="!item.preference?.token_alias || item.preference?.token_alias == item.metadata.name" style="font-weight: bold;">
                             {{item.metadata.name}}&nbsp;&nbsp;
                         </span>
                         <span>{{item.metadata.symbol}}</span>
@@ -93,9 +93,9 @@
 import { ref, watch } from "vue";
 import { useAuthStore } from '@/stores/auth';
 import {
-    setERC20Preferences,
-    updateERC20Preference
-} from '@/services/graphql/preferences';
+    insertTokenPreferences,
+    updateTokenPreference
+} from '@/services/graphql/preference';
 import { loadERC20Token } from "@/services/web3/tokens";
 import type { Token } from "@/services/web3/tokens";
 import * as ethers from "ethers";
@@ -108,6 +108,8 @@ const props = defineProps({
         required: true,
     },
 });
+
+const chain = "GOERLI";
 
 const DEFAULT_TOKEN = {
     address: "",
@@ -154,7 +156,7 @@ const search = (token: Token, text: string) => {
     return [
         token.metadata?.name,
         token.metadata?.symbol,
-        token.preference?.display_name
+        token.preference?.token_alias
     ].filter(t => !!t).join(" ").toLowerCase().includes(text);
 }
 
@@ -192,20 +194,19 @@ const genTokenList = async (text: string, tokenMap: {[key: string]: Token}) => {
 const emit = defineEmits(['preferenceUpdate', 'tokenAdded']);
 const addToken = async () => {
     try {
-        const [{id}] = await setERC20Preferences(
-            store.currentUser!,
-            store.idToken!,
+        const [id] = await insertTokenPreferences(
+            store,
             [{
-                address: tokenToImport.value.address!,
-                chainId: import.meta.env.VITE_CHAIN_ID,
+                token_address: tokenToImport.value.address!,
+                chain,
                 display: true,
-                displayName: tokenToImport.value.name,
+                token_alias: tokenToImport.value.name,
             }]
         );
         tokenToImport.value.token!.preference = {
             id,
             display: true,
-            display_name: tokenToImport.value.name,
+            token_alias: tokenToImport.value.name,
         };
         emit('tokenAdded', tokenToImport.value.token);
         showPreference.value = false;
@@ -224,25 +225,25 @@ const handleClick = async (token: Token) => {
     try {
         if (token.preference) {
             token.preference.display = !token.preference.display;
-            const preference = await updateERC20Preference(store.idToken!, {
+            const updated = {
                 id: token.preference!.id,
                 display: token.preference.display
-            });
+            };
+            await updateTokenPreference(store, updated);
             emit(
                 'preferenceUpdate',
                 {
                     address: token.address,
-                    preference
+                    preference: updated
                 }
             );
         } else {
             token.preference = {id: -1, display: true};
-            const [{id}] = await setERC20Preferences(
-                store.currentUser!,
-                store.idToken!,
+            const [{id}] = await insertTokenPreferences(
+                store,
                 [{
-                    address: token.address,
-                    chainId: Number(import.meta.env.VITE_CHAIN_ID),
+                    token_address: token.address,
+                    chain,
                     display: true
                 }]
             );

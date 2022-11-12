@@ -40,6 +40,9 @@ export const useAuthStore = defineStore({
         walletAddress: walletAddress.toLowerCase()
       }
     },
+    refreshIdToken(idToken: string) {
+      this.idToken = idToken;
+    },
     signOut() {
       console.log("User logged out");
       this.currentUser =  null;

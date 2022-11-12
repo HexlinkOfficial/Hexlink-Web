@@ -1,17 +1,18 @@
 import { getFunctions, httpsCallable } from 'firebase/functions'
 import * as ethers from 'ethers';
-import { Alchemy, Network, type AssetTransfersWithMetadataParams, type AssetTransfersWithMetadataResult } from "alchemy-sdk";
+import { Alchemy, Network } from "alchemy-sdk";
+import type { AssetTransfersWithMetadataParams, AssetTransfersWithMetadataResult } from "alchemy-sdk";
 import BigNumber from "bignumber.js";
 import TOKEN_LIST from '@/data/TOKENS.json';
 import {
-    getERC20Preferences,
-    setERC20Preferences
-} from '@/services/graphql/preferences';
+    getTokenPreferences,
+    insertTokenPreferences
+} from '@/services/graphql/preference';
 import type {
     PreferenceOutput,
     PreferenceInput,
     Preference
-} from "@/services/graphql/preferences";
+} from "@/services/graphql/preference";
 import type { IAuth } from '@/stores/auth';
 import type { TokenBalance } from "alchemy-sdk";
 import { TokenBalanceType } from "alchemy-sdk";
@@ -123,16 +124,12 @@ function getBalance(balance: TokenBalance | null, decimals: number | null) : Nor
     }
 }
 
-export async function getAllVisiableTokens(store: IAuth) {
+export async function getAllVisiableTokens(store: IAuth, chain: string) {
     const tokens: {[key: string]: Token} = {};
-    const preferences : PreferenceOutput[] = await getERC20Preferences(
-        store.currentUser!,
-        store.idToken!,
-        Number(import.meta.env.VITE_CHAIN_ID),
-    );
+    const preferences : PreferenceOutput[] = await getTokenPreferences(store, chain);
     const customTokenAddresses : string[] = [];
     preferences.forEach(preference => {
-        const address = preference.address.toLowerCase();
+        const address = preference.token_address.toLowerCase();
         if (preference.display) {
             const metadata = (TOKEN_LIST as any)[address];
             if (metadata) {
@@ -156,7 +153,8 @@ export async function getAllVisiableTokens(store: IAuth) {
 
 export async function loadAll(
     store: IAuth,
-    wallet: string
+    wallet: string,
+    chain: string,
 ): Promise<{[key: string]: Token}> {
     const tokens: {[key: string]: Token} = {};
     Object.keys(TOKEN_LIST).forEach(address => {
@@ -166,14 +164,10 @@ export async function loadAll(
         }
     });
 
-    const preferences : PreferenceOutput[] = await getERC20Preferences(
-        store.currentUser!,
-        store.idToken!,
-        Number(import.meta.env.VITE_CHAIN_ID),
-    );
+    const preferences : PreferenceOutput[] = await getTokenPreferences(store, chain);
     const customTokenAddresses : string[] = [];
     preferences.forEach(p => {
-        const address = p.address.toLowerCase();
+        const address = p.token_address.toLowerCase();
         if (tokens[address]) {
             tokens[address].preference = p;
         } else {
@@ -204,20 +198,16 @@ export async function loadAll(
             );
             if (!tokens[address].preference) {
                 tokensToSetPreference.push({
-                    chainId: import.meta.env.VITE_CHAIN_ID,
-                    address,
+                    chain,
+                    token_address: address,
                     display: true
                 });
             }
         }
     });
-    const newPreferences = await setERC20Preferences(
-        store.currentUser!,
-        store.idToken!,
-        tokensToSetPreference
-    );
-    newPreferences.forEach(p => {
-        tokens[p.address].preference = {id: p.id, display: p.display};
+    const inserted = await insertTokenPreferences(store, tokensToSetPreference);
+    tokensToSetPreference.forEach((p, i) => {
+        tokens[p.token_address].preference = {id: inserted[i], display: p.display};
     });
     return tokens;
 }

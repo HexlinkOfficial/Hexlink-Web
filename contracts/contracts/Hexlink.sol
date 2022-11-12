@@ -20,7 +20,7 @@ contract Hexlink is Ownable {
         accountBase_ = Create2.deploy(0, bytes32(0), type(HexlinkAccount).creationCode);
     }
 
-    function deploy(bytes32 nameHash) external onlyOwner {
+    function deploy(bytes32 nameHash, address operator, bytes memory authProof) external onlyOwner {
         deployImpl(nameHash, 0);
     }
 

@@ -1,5 +1,5 @@
 table:
-  name: erc20_preferences
+  name: nft
   schema: public
 insert_permissions:
   - role: user
@@ -8,32 +8,38 @@ insert_permissions:
         user_id:
           _eq: X-Hasura-User-Id
       columns:
-        - address
-        - chain_id
-        - display
-        - display_name
+        - collection_address
+        - collection_name
+        - collection_symbol
+        - nft_description
+        - nft_external_url
+        - nft_raw_url
+        - nft_title
+        - token_id
         - user_id
 select_permissions:
   - role: user
     permission:
       columns:
-        - address
-        - chain_id
-        - created_at
-        - display
-        - display_name
         - id
-        - updated_at
+        - collection_address
+        - collection_name
+        - collection_symbol
+        - nft_description
+        - nft_external_url
+        - nft_raw_url
+        - nft_title
+        - token_id
         - user_id
+        - created_at
+        - updated_at
       filter:
         user_id:
           _eq: X-Hasura-User-Id
 update_permissions:
   - role: user
     permission:
-      columns:
-        - display
-        - display_name
+      columns: []
       filter:
         user_id:
           _eq: X-Hasura-User-Id

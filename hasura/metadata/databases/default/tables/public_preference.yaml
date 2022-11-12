@@ -1,5 +1,5 @@
 table:
-  name: erc20_preferences
+  name: preference
   schema: public
 insert_permissions:
   - role: user
@@ -8,21 +8,20 @@ insert_permissions:
         user_id:
           _eq: X-Hasura-User-Id
       columns:
-        - address
-        - chain_id
+        - chain
+        - created_at
         - display
-        - display_name
+        - token_address
+        - updated_at
         - user_id
 select_permissions:
   - role: user
     permission:
       columns:
-        - address
-        - chain_id
+        - chain
         - created_at
         - display
-        - display_name
-        - id
+        - token_address
         - updated_at
         - user_id
       filter:
@@ -33,16 +32,8 @@ update_permissions:
     permission:
       columns:
         - display
-        - display_name
+        - updated_at
       filter:
         user_id:
           _eq: X-Hasura-User-Id
-      check:
-        user_id:
-          _eq: X-Hasura-User-Id
-delete_permissions:
-  - role: user
-    permission:
-      filter:
-        user_id:
-          _eq: X-Hasura-User-Id
+      check: null

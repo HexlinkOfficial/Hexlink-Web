@@ -1,2 +1,4 @@
 - "!include public_erc20_preferences.yaml"
+- "!include public_nft.yaml"
+- "!include public_preference.yaml"
 - "!include public_users.yaml"

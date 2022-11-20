@@ -161,7 +161,7 @@ const facebook_login = async () => {
 
 .login-wrapper .bottom-privacy {
     color: #fff;
-    font-size: 1vw;
+    font-size: 0.8vw;
     font-weight: 600;
     line-height: 1.5;
 }

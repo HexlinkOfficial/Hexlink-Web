@@ -3,6 +3,7 @@ import HomeView from '@/views/HomeView.vue'
 import SignInView from '@/views/SignInView.vue'
 import ActivitiesView from '@/views/ActivitiesView.vue'
 import NFTView from '@/views/NFTView.vue'
+import Error404 from '@/views/Error404.vue'
 import { useAuthStore } from '@/stores/auth';
 
 const router = createRouter({
@@ -11,22 +12,27 @@ const router = createRouter({
     {
       path: '/',
       name: 'home',
-      component: HomeView,
+      component: HomeView
     },
     {
       path: '/signin',
       name: 'signIn',
-      component: SignInView,
+      component: SignInView
     },
     {
       path: '/activities',
       name: 'activities',
-      component: ActivitiesView,
+      component: ActivitiesView
     },
     {
       path: '/collectible',
       name: 'collectible',
       component: NFTView
+    },
+    {
+      path: '/:pathMatch(.*)*',
+      name: 'error404',
+      component: Error404
     }
   ]
 });

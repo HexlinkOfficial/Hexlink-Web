@@ -7,6 +7,7 @@ import { createPinia } from 'pinia'
 
 import Antd from 'ant-design-vue';
 import 'ant-design-vue/dist/antd.css';
+import '@/assets/main.css'
 
 import { getAuth} from 'firebase/auth'
 import { app } from '@/services/firebase'

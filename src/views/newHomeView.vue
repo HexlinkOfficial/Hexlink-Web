@@ -9,6 +9,7 @@ let menuToggle = ref(false)
 
 <template>
   <div id="main-wrapper" className="show">
-
+    This is the homepage
   </div>
 </template>
+

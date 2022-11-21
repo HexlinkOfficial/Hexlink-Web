@@ -1,6 +1,4 @@
 @import url("../assets/font-awesome/css/font-awesome.min.css");
-@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@500;700&display=swap');
 /* color palette from <https://github.com/vuejs/theme> */
 :root {
   --vt-c-white: #ffffff;

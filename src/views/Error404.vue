@@ -39,17 +39,17 @@ import { useRouter } from 'vue-router';
   width: 100%;
 }
 .error-text {
-  font-family: 'Cairo: wght@700', sans-serif;
+  font-family: 'Cairo', sans-serif;
 }
 .text-warning {
-  font-family: 'Cairo: wght@500', sans-serif;
+  font-family: 'Cairo', sans-serif;
   line-height: 1.2;
   color: #000;
 }
 .error-page .error-text {
   font-size: 150px;
   line-height: 1;
-  margin-bottom: 0;
+  // margin-bottom: 0;
 }
 @media only screen and (max-width: 575px) {
   .error-page .error-text {

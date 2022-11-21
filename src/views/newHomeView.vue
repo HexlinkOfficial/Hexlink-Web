@@ -2,15 +2,13 @@
 import NavigationSide from "@/components/NavigationSide.vue"
 import TokenPage from "@/components/TokenPage.vue"
 import Navheader from '@/components/nav/NavHeader.vue'
+import { ref, watch } from "vue";
+
+let menuToggle = ref(false)
 </script>
 
 <template>
-  <a-layout style="height: 100%;">
-    <a-layout-sider theme="light">
-      <NavigationSide />
-    </a-layout-sider>
-    <a-layout-content style="overflow: auto;">
-      <TokenPage />
-    </a-layout-content>
-  </a-layout>
+  <div id="main-wrapper" className="show">
+
+  </div>
 </template>

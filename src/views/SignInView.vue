@@ -79,327 +79,327 @@
 </template>
 
 <script setup lang="ts">
-import { useRouter } from 'vue-router'; 
-import { googleSocialLogin, twitterSocialLogin, githubSocialLogin, facebookSocialLogin } from '@/services/auth'
-import { useAuthStore } from '@/stores/auth'
-import logo from "../assets/hori-white-logo.svg"
-import loginbg from "../assets/bg-login.jpg"
+    import { useRouter } from 'vue-router'; 
+    import { googleSocialLogin, twitterSocialLogin, githubSocialLogin, facebookSocialLogin } from '@/services/auth'
+    import { useAuthStore } from '@/stores/auth'
+    import logo from "../assets/hori-white-logo.svg"
+    import loginbg from "../assets/bg-login.jpg"
 
-const store = useAuthStore();
-const router = useRouter();
+    const store = useAuthStore();
+    const router = useRouter();
 
-const google_login = async () => {
-    await googleSocialLogin();
-    router.push(store.returnUrl || "/");
-}
+    const google_login = async () => {
+        await googleSocialLogin();
+        router.push(store.returnUrl || "/");
+    }
 
-const twitter_login = async () => {
-    await twitterSocialLogin();
-    router.push(store.returnUrl || "/");
-}
+    const twitter_login = async () => {
+        await twitterSocialLogin();
+        router.push(store.returnUrl || "/");
+    }
 
-const github_login = async () => {
-    await githubSocialLogin();
-    router.push(store.returnUrl || "/");
-}
+    const github_login = async () => {
+        await githubSocialLogin();
+        router.push(store.returnUrl || "/");
+    }
 
-const facebook_login = async () => {
-    await facebookSocialLogin();
-    router.push(store.returnUrl || "/");
-}
+    const facebook_login = async () => {
+        await facebookSocialLogin();
+        router.push(store.returnUrl || "/");
+    }
 </script>
 
 <style lang="less" scoped>
-.title {
-    margin: 10px 0px 40px 0px;
-    font-family: system-ui;
-    font-size: 1.5em;
-    font-weight: bold;
-}
+    .title {
+        margin: 10px 0px 40px 0px;
+        font-family: system-ui;
+        font-size: 1.5em;
+        font-weight: bold;
+    }
 
-.login-main-page {
-    /* padding: 300px; */
-    padding-top: 20vh;
-    padding-bottom: 20vh;
-    background-size: cover;
-    background-position: center;
-    position: relative;
-    height: 100vh;
-    z-index: 1;
-}
+    .login-main-page {
+        /* padding: 300px; */
+        padding-top: 20vh;
+        padding-bottom: 20vh;
+        background-size: cover;
+        background-position: center;
+        position: relative;
+        height: 100vh;
+        z-index: 1;
+    }
 
-.login-main-page .login-wrapper {
-    background: #fff;
-    max-width: 65vw;
-    margin-left: auto;
-    margin-right: auto;
-}
+    .login-main-page .login-wrapper {
+        background: #fff;
+        max-width: 65vw;
+        margin-left: auto;
+        margin-right: auto;
+    }
 
-.login-main-page .main-title {
-    color: #fff;
-    font-size: 2.5vw;
-    line-height: 1.3;
-    font-weight: 700;
-}
+    .login-main-page .main-title {
+        color: #fff;
+        font-size: 2.5vw;
+        line-height: 1.3;
+        font-weight: 700;
+    }
 
-.login-main-page:after {
-    content: "";
-    position: absolute;
-    height: 100%;
-    width: 100%;
-    left: 0;
-    top: 0;
-    background: rgba(0, 0, 0, 0.2);
-    z-index: -1;
-}
-.login-wrapper {
-    display: flex;
-    min-height: 600px;
-    height: calc(100vh - 600px);
-    box-shadow: 0 0 60px 10px rgba(85, 44, 44, 0.2);
-}
+    .login-main-page:after {
+        content: "";
+        position: absolute;
+        height: 100%;
+        width: 100%;
+        left: 0;
+        top: 0;
+        background: rgba(0, 0, 0, 0.2);
+        z-index: -1;
+    }
+    .login-wrapper {
+        display: flex;
+        min-height: 600px;
+        height: calc(100vh - 600px);
+        box-shadow: 0 0 60px 10px rgba(85, 44, 44, 0.2);
+    }
 
-.login-wrapper .bottom-privacy {
-    color: #fff;
-    font-size: 0.8vw;
-    font-weight: 600;
-    line-height: 1.5;
-}
-.login-wrapper .bottom-privacy a {
-    color: inherit;
-}
+    .login-wrapper .bottom-privacy {
+        color: #fff;
+        font-size: 0.8vw;
+        font-weight: 600;
+        line-height: 1.5;
+    }
+    .login-wrapper .bottom-privacy a {
+        color: inherit;
+    }
 
-.login-wrapper .login-aside-left {
-    max-width: 60%;
-    flex: 0 0 60%;
-    position: relative;
-    display: table;
-    padding: 50px;
-    z-index: 1;
-    background-size: 100%;
-    background-repeat: no-repeat;
-    background-position: bottom;
-    background: linear-gradient(to right, #5bcfc5 25%, #3197b7 100%);
-    overflow: hidden;
-}
+    .login-wrapper .login-aside-left {
+        max-width: 60%;
+        flex: 0 0 60%;
+        position: relative;
+        display: table;
+        padding: 50px;
+        z-index: 1;
+        background-size: 100%;
+        background-repeat: no-repeat;
+        background-position: bottom;
+        background: linear-gradient(to right, #5bcfc5 25%, #3197b7 100%);
+        overflow: hidden;
+    }
 
-.login-wrapper .login-aside-left:before,
-.login-wrapper .login-aside-left:after {
-    position: absolute;
-    z-index: -1;
-    content: "";
-    box-shadow: 0 0 0 60px rgba(255, 255, 255, 0.1);
-}
+    .login-wrapper .login-aside-left:before,
+    .login-wrapper .login-aside-left:after {
+        position: absolute;
+        z-index: -1;
+        content: "";
+        box-shadow: 0 0 0 60px rgba(255, 255, 255, 0.1);
+    }
 
-.login-wrapper .login-aside-left:before {
-    background: #759dd9;
-    width: 150px;
-    height: 150px;
-    border-radius: 35px;
-    left: -35px;
-    top: 30%;
-    transform: rotate(45deg);
-    animation: dzMove1 5s linear infinite;
-}
+    .login-wrapper .login-aside-left:before {
+        background: #759dd9;
+        width: 150px;
+        height: 150px;
+        border-radius: 35px;
+        left: -35px;
+        top: 30%;
+        transform: rotate(45deg);
+        animation: dzMove1 5s linear infinite;
+    }
 
-.login-wrapper .login-aside-left:after {
-    background: #ffa755;
-    width: 150px;
-    height: 150px;
-    border-radius: 35px;
-    right: -30px;
-    top: -30px;
-    transform: rotate(45deg);
-    animation: dzMove1 8s linear infinite;
-}
+    .login-wrapper .login-aside-left:after {
+        background: #ffa755;
+        width: 150px;
+        height: 150px;
+        border-radius: 35px;
+        right: -30px;
+        top: -30px;
+        transform: rotate(45deg);
+        animation: dzMove1 8s linear infinite;
+    }
 
-.login-wrapper .login-aside-left .login-description {
-    display: table-cell;
-    vertical-align: bottom;
-}
+    .login-wrapper .login-aside-left .login-description {
+        display: table-cell;
+        vertical-align: bottom;
+    }
 
-.login-wrapper .login-aside-left .login-description p {
-    font-size: 1vw;
-    font-weight: 600;
-    color: rgba(255, 255, 255, 0.8);
-    line-height: 1.5;
-}
-.login-wrapper .dz-title {
-    color: #000;
-    font-weight: 700;
-    font-size: 1.75vw;
-}
+    .login-wrapper .login-aside-left .login-description p {
+        font-size: 1vw;
+        font-weight: 600;
+        color: rgba(255, 255, 255, 0.8);
+        line-height: 1.5;
+    }
+    .login-wrapper .dz-title {
+        color: #000;
+        font-weight: 700;
+        font-size: 1.75vw;
+    }
 
-.login-wrapper p {
-    font-size: 0.8vw;
-    color: #666;
-}
+    .login-wrapper p {
+        font-size: 0.8vw;
+        color: #666;
+    }
 
-.login-wrapper .login-aside-right {
-    max-width: 40%;
-    flex: 0 0 40%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
+    .login-wrapper .login-aside-right {
+        max-width: 40%;
+        flex: 0 0 40%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
 
-.login-wrapper .social-icons {
-    display: flex;
-}
+    .login-wrapper .social-icons {
+        display: flex;
+    }
 
-.login-wrapper .social-icons li {
-    margin-right: 10px;
-}
+    .login-wrapper .social-icons li {
+        margin-right: 10px;
+    }
 
-.login-wrapper .social-icons li a {
-    height: 45px;
-    width: 45px;
-    color: #fff;
-    border-radius: 12px;
-    line-height: 45px;
-    font-size: 18px;
-    display: inline-block;
-    text-align: center;
-    border: 0;
-    background: rgba(255, 255, 255, 0.2);
-    -webkit-transition: all 0.5s;
-    -ms-transition: all 0.5s;
-    transition: all 0.5s;
-}
+    .login-wrapper .social-icons li a {
+        height: 45px;
+        width: 45px;
+        color: #fff;
+        border-radius: 12px;
+        line-height: 45px;
+        font-size: 18px;
+        display: inline-block;
+        text-align: center;
+        border: 0;
+        background: rgba(255, 255, 255, 0.2);
+        -webkit-transition: all 0.5s;
+        -ms-transition: all 0.5s;
+        transition: all 0.5s;
+    }
 
-.login-wrapper .social-icons li a:hover {
-    background: #fff;
-    color: #000;
-}
+    .login-wrapper .social-icons li a:hover {
+        background: #fff;
+        color: #000;
+    }
 
-.login-wrapper .login-logo {
-    position: absolute;
-}
+    .login-wrapper .login-logo {
+        position: absolute;
+    }
 
-.login-wrapper .authincation-content {
-    background-color: transparent;
-    box-shadow: none;
-}
+    .login-wrapper .authincation-content {
+        background-color: transparent;
+        box-shadow: none;
+    }
 
-.login-wrapper .form-group {
-    margin-bottom: 15px;
-}
+    .login-wrapper .form-group {
+        margin-bottom: 15px;
+    }
 
-.login-wrapper .form-group label {
-    font-size: 14px;
-    color: #666;
-}
+    .login-wrapper .form-group label {
+        font-size: 14px;
+        color: #666;
+    }
 
-.login-wrapper .custom-checkbox .custom-control-input {
-    margin-right: 10px;
-    top: 2px;
-    position: relative;
-}
+    .login-wrapper .custom-checkbox .custom-control-input {
+        margin-right: 10px;
+        top: 2px;
+        position: relative;
+    }
 
-.login-wrapper .form-control {
-    background: transparent;
-    border: 0;
-    border-bottom: 2px solid #000;
-    border-radius: 0 !important;
-    padding: 0;
-    color: #000;
-}
+    .login-wrapper .form-control {
+        background: transparent;
+        border: 0;
+        border-bottom: 2px solid #000;
+        border-radius: 0 !important;
+        padding: 0;
+        color: #000;
+    }
 
-.login-wrapper .form-control::placeholder {
-    color: #999;
-    opacity: 0.7;
-}
+    .login-wrapper .form-control::placeholder {
+        color: #999;
+        opacity: 0.7;
+    }
 
-.login-wrapper .form-control:-ms-input-placeholder {
-    color: #999;
-    opacity: 0.7;
-}
+    .login-wrapper .form-control:-ms-input-placeholder {
+        color: #999;
+        opacity: 0.7;
+    }
 
-.login-wrapper .form-control::-ms-input-placeholder {
-    color: #999;
-    opacity: 0.7;
-}
+    .login-wrapper .form-control::-ms-input-placeholder {
+        color: #999;
+        opacity: 0.7;
+    }
 
-.login-wrapper .form-control,
-.login-wrapper .btn {
-    border-radius: 8px;
-}
+    .login-wrapper .form-control,
+    .login-wrapper .btn {
+        border-radius: 8px;
+    }
 
-.facebook__btn,
-.twitter__btn,
-.google__btn,
-.github__btn {
-    display: block;
-    width: 90%;
-    max-width: 680px;
-    margin: 5px auto;
-    height: 50px;
-    cursor: pointer;
-    font-size: 14px;
-    font-family: 'Montserrat', sans-serif;
-    border-radius: 8px;
-    border: none;
-    line-height: 20px;
+    .facebook__btn,
+    .twitter__btn,
+    .google__btn,
+    .github__btn {
+        display: block;
+        width: 90%;
+        max-width: 680px;
+        margin: 5px auto;
+        height: 50px;
+        cursor: pointer;
+        font-size: 14px;
+        font-family: 'Montserrat', sans-serif;
+        border-radius: 8px;
+        border: none;
+        line-height: 20px;
 
-    &.google__btn {
-        background: #DB4437;
-        color: white;
-        box-shadow: 0 15px 30px rgba(#DB4437, .36);
-        transition: .2s linear;
+        &.google__btn {
+            background: #DB4437;
+            color: white;
+            box-shadow: 0 15px 30px rgba(#DB4437, .36);
+            transition: .2s linear;
 
-        .fa {
-            font-size: 20px;
-            // padding: 0 5px 0 0;
+            .fa {
+                font-size: 20px;
+                // padding: 0 5px 0 0;
+            }
+
+            &:hover {
+                box-shadow: 0 0 0 rgba(#DB4437, .0);
+            }
         }
+        &.github__btn {
+            background: #25282d;
+            color: white;
+            box-shadow: 0 15px 30px rgba(#25282d, .36);
+            transition: .2s linear;
 
-        &:hover {
-            box-shadow: 0 0 0 rgba(#DB4437, .0);
+            .fa {
+                font-size: 20px;
+                // padding: 0 5px 0 0;
+            }
+
+            &:hover {
+                box-shadow: 0 0 0 rgba(#25282d, .0);
+            }
+        }
+        &.twitter__btn {
+            background: #1DA1F2;
+            color: white;
+            box-shadow: 0 15px 30px rgba(#1DA1F2, .36);
+            transition: .2s linear;
+
+            .fa {
+                font-size: 20px;
+                // padding: 0 5px 0 0;
+            }
+
+            &:hover {
+                box-shadow: 0 0 0 rgba(#1DA1F2, .0);
+            }
+        }
+        &.facebook__btn {
+            background: #4267B2;
+            color: white;
+            box-shadow: 0 15px 30px rgba(#4267B2, .36);
+            transition: .2s linear;
+
+            .fa {
+                font-size: 20px;
+                // padding: 0 5px 0 0;
+            }
+
+            &:hover {
+                box-shadow: 0 0 0 rgba(#4267B2, .0);
+            }
         }
     }
-    &.github__btn {
-        background: #25282d;
-        color: white;
-        box-shadow: 0 15px 30px rgba(#25282d, .36);
-        transition: .2s linear;
-
-        .fa {
-            font-size: 20px;
-            // padding: 0 5px 0 0;
-        }
-
-        &:hover {
-            box-shadow: 0 0 0 rgba(#25282d, .0);
-        }
-    }
-    &.twitter__btn {
-        background: #1DA1F2;
-        color: white;
-        box-shadow: 0 15px 30px rgba(#1DA1F2, .36);
-        transition: .2s linear;
-
-        .fa {
-            font-size: 20px;
-            // padding: 0 5px 0 0;
-        }
-
-        &:hover {
-            box-shadow: 0 0 0 rgba(#1DA1F2, .0);
-        }
-    }
-    &.facebook__btn {
-        background: #4267B2;
-        color: white;
-        box-shadow: 0 15px 30px rgba(#4267B2, .36);
-        transition: .2s linear;
-
-        .fa {
-            font-size: 20px;
-            // padding: 0 5px 0 0;
-        }
-
-        &:hover {
-            box-shadow: 0 0 0 rgba(#4267B2, .0);
-        }
-    }
-}
 </style>

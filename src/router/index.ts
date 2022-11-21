@@ -4,6 +4,7 @@ import SignInView from '@/views/SignInView.vue'
 import ActivitiesView from '@/views/ActivitiesView.vue'
 import NFTView from '@/views/NFTView.vue'
 import Error404 from '@/views/Error404.vue'
+import newHomeView from '@/views/newHomeView.vue'
 import { useAuthStore } from '@/stores/auth';
 
 const router = createRouter({
@@ -28,6 +29,11 @@ const router = createRouter({
       path: '/collectible',
       name: 'collectible',
       component: NFTView
+    },
+    {
+      path: '/test',
+      name: 'test homepage',
+      component: newHomeView
     },
     {
       path: '/:pathMatch(.*)*',

@@ -8,7 +8,7 @@
     <a-row justify="center" style="margin-top: 100px;">
       <a-col align-self="center">
         <a-row justify="center">
-          <a-avatar :src="user?.photoURL!" :size="64" referrerpolicy="no-referrer">
+          <a-avatar :src="user?.photoURL" :size="64" referrerpolicy="no-referrer">
           </a-avatar>
         </a-row>
         <a-row justify="center">
@@ -18,7 +18,7 @@
           <a-typography-paragraph>
               {{ user?.email }}
           </a-typography-paragraph>
-          <a-typography-paragraph :copyable="{ text: user.walletAddress! }">
+          <a-typography-paragraph :copyable="{ text: user.walletAddress }">
               {{ addressText }}
           </a-typography-paragraph>
         </a-row>

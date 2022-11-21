@@ -36,7 +36,7 @@ export async function getIdTokenAndSetClaimsIfNecessary(user: User, refresh: boo
 }
 
 export async function refreshToken() {
-    const idToken = await getIdTokenAndSetClaimsIfNecessary(auth.currentUser, true);
+    const idToken = await getIdTokenAndSetClaimsIfNecessary(auth.currentUser!, true);
     const store = useAuthStore();
     store.refreshIdToken(idToken);
 }

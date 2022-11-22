@@ -2,6 +2,8 @@ import {
     getAuth,
     GoogleAuthProvider,
     TwitterAuthProvider,
+    GithubAuthProvider,
+    FacebookAuthProvider,
     signInWithPopup,
     signOut,
 } from 'firebase/auth'
@@ -34,7 +36,7 @@ export async function getIdTokenAndSetClaimsIfNecessary(user: User, refresh: boo
 }
 
 export async function refreshToken() {
-    const idToken = await getIdTokenAndSetClaimsIfNecessary(auth.currentUser, true);
+    const idToken = await getIdTokenAndSetClaimsIfNecessary(auth.currentUser!, true);
     const store = useAuthStore();
     store.refreshIdToken(idToken);
 }
@@ -56,6 +58,32 @@ export async function googleSocialLogin() {
 
 export async function twitterSocialLogin() {
     const provider = new TwitterAuthProvider();
+    try {
+        const result = await signInWithPopup(auth, provider)
+        const idToken = await getIdTokenAndSetClaimsIfNecessary(result.user)
+        const walletAddress = await accountAddress(result.user.providerId);
+        const store = useAuthStore();
+        store.signIn(result.user, idToken, walletAddress);
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+export async function githubSocialLogin() {
+    const provider = new GithubAuthProvider();
+    try {
+        const result = await signInWithPopup(auth, provider)
+        const idToken = await getIdTokenAndSetClaimsIfNecessary(result.user)
+        const walletAddress = await accountAddress(result.user.providerId);
+        const store = useAuthStore();
+        store.signIn(result.user, idToken, walletAddress);
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+export async function facebookSocialLogin() {
+    const provider = new FacebookAuthProvider();
     try {
         const result = await signInWithPopup(auth, provider)
         const idToken = await getIdTokenAndSetClaimsIfNecessary(result.user)

@@ -1,3 +1,9 @@
+<script setup lang="ts">
+import NavigationSide from "@/components/NavigationSide.vue"
+import TokenPage from "@/components/TokenPage.vue"
+import Navheader from '@/components/nav/NavHeader.vue'
+</script>
+
 <template>
   <a-layout style="height: 100%;">
     <a-layout-sider theme="light">
@@ -8,8 +14,3 @@
     </a-layout-content>
   </a-layout>
 </template>
-
-<script setup lang="ts">
-import NavigationSide from "@/components/NavigationSide.vue"
-import TokenPage from "@/components/TokenPage.vue"
-</script>

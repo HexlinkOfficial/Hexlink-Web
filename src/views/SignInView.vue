@@ -292,7 +292,7 @@
     // @media only screen and (max-width: 991px) {
     //     .login-wrapper {
     //         height: calc(100vh - 100px); } }
-    @media only screen and (max-width: 991px) {
+    @media only screen and (max-width: 767px) {
         .login-wrapper {
             display: block;
             height: auto; }

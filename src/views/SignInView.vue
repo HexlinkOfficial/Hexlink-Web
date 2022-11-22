@@ -118,9 +118,7 @@
     }
 
     .login-main-page {
-        /* padding: 300px; */
-        padding-top: 20vh;
-        padding-bottom: 20vh;
+        padding: 200px;
         background-size: cover;
         background-position: center;
         position: relative;
@@ -130,18 +128,16 @@
 
     .login-main-page .login-wrapper {
         background: #fff;
-        max-width: 1300px;
+        max-width: 65vw;
         margin-left: auto;
         margin-right: auto;
     }
-
     .login-main-page .main-title {
         color: #fff;
         font-size: 50px;
         line-height: 1.3;
         font-weight: 700;
     }
-
     .login-main-page:after {
         content: "";
         position: absolute;
@@ -152,10 +148,20 @@
         background: rgba(0, 0, 0, 0.2);
         z-index: -1;
     }
+    // @media only screen and (max-width: 991px) {
+    // .login-main-page {
+    //     padding: 100px 0px 100px 0px;
+    // .login-wrapper {
+    //     max-width: 90vw; } } }
+    @media only screen and (max-width: 991px) {
+        // .login-main-page {
+        //     padding: 0px; }
+            .login-main-page .main-title {
+                font-size: 30px; } }
     .login-wrapper {
         display: flex;
         min-height: 600px;
-        height: calc(100vh - 600px);
+        height: calc(100vh - 400px);
         box-shadow: 0 0 60px 10px rgba(85, 44, 44, 0.2); }
         .login-wrapper .bottom-privacy {
             color: #fff;

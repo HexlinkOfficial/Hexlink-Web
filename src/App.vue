@@ -1,9 +1,12 @@
-<template>
+<!-- <template>
   <div className="app">
     <sidebar />
     <router-view />
   </div>
-  
+</template> -->
+
+<template>
+  <router-view />
 </template>
 
 <script setup>
@@ -12,7 +15,7 @@
 
 <style lang="scss">
 #app {
-  height: 100%;
+  height: 100vh;
 }
 
 :root {

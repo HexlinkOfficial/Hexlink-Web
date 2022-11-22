@@ -51,7 +51,7 @@
 aside {
   display: flex;
   flex-direction: column;
-  width: calc(2rem + 32px);
+  width: calc(5.25rem);
   min-height: 100vh;
   overflow: hidden;
   padding: 1rem;
@@ -145,7 +145,15 @@ aside {
   }
 
   &.is_expanded {
-    width: var(--sidebar-width);
+    width: 20.5rem;
+    padding-bottom: 0;
+    height: calc(100% - 135px);
+    // position: absolute;
+    // left: 1.25rem;
+    // padding-top: 10vh;
+    z-index: 2;
+    transition: all .2s ease;
+    box-shadow: 0px 15px 30px 0px rgba(0, 0, 0, 0.02);
 
     .menu-toggle-wrap {
       top: -3rem;

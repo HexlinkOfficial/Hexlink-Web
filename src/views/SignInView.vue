@@ -283,9 +283,9 @@
     @media only screen and (max-width: 1199px) {
         .login-wrapper .login-aside-left {
             width: 470px; } }
-    @media only screen and (max-width: 991px) {
-        .login-wrapper {
-            height: calc(100vh - 100px); } }
+    // @media only screen and (max-width: 991px) {
+    //     .login-wrapper {
+    //         height: calc(100vh - 100px); } }
     @media only screen and (max-width: 767px) {
         .login-wrapper {
             display: block;

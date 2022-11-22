@@ -21,7 +21,7 @@
                             <router-link to="#"><i className="fa fa-linkedin"></i></router-link>
                         </li>
                     </ul>
-                    <div className="mt-5 bottom-privacy">
+                    <div className="bottom-privacy">
                         <router-link to="#" className="mr-4">Privacy Policy</router-link>
                         <router-link to="#" className="mr-4">Contact</router-link>
                         <router-link to="#" className="">© 2022 Hexlink</router-link>
@@ -156,14 +156,14 @@
                 max-width: 80vw; } } }
     @media only screen and (max-width: 1245px) {
     .login-main-page {
-        padding: 350px 0px 350px 0px;
+        padding: 350px 0px 350px 0px; }
     .login-wrapper {
-        max-width: 90vw; } } }
+        max-width: 90vw; } }
     @media only screen and (max-width: 991px) {
-        // .login-main-page {
-        //     padding: 0px; }
+        .login-main-page {
+            padding: 250px 0px 250px 0px; }
         .login-main-page .main-title {
-            font-size: 45px; } }
+            font-size: 40px; } }
     @media only screen and (max-width: 767px) {
         .login-main-page {
         padding: 100px 0px 100px 0px; } }
@@ -185,17 +185,26 @@
         @media only screen and (max-width: 1245px) {
             .login-wrapper {
                 height: calc(100vh - 700px); } }
+        @media only screen and (max-width: 991px) {
+            .login-wrapper {
+                height: calc(100vh - 500px); } }
         @media only screen and (max-width: 767px) {
             .login-wrapper {
                 height: calc(100vh - 200px); } }
         @media only screen and (max-width: 575px) {
             .login-wrapper {
-                height: calc(100vh - 100px); } }
+                height: auto }
+            .login-main-page {
+                height: auto; } }
         .login-wrapper .bottom-privacy {
             color: #fff;
             font-size: 16px;
             font-weight: 600;
+            margin-top: 3rem !important;
             line-height: 1.5; }
+            @media only screen and (max-width: 991px) {
+            .login-wrapper .bottom-privacy {
+                margin-top: 0rem !important; } }
             .login-wrapper .bottom-privacy a {
                 color: inherit; }
 

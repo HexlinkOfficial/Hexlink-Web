@@ -7,7 +7,7 @@
                 </router-link>
                 <div className="login-description">
                     <h2 className="main-title mb-2">Welcome To HexLink</h2>
-                    <p className="">Hexlink transforms your email or any social account to wallet address. Now you can
+                    <p className="main-description">Hexlink transforms your email or any social account to wallet address. Now you can
                         simply share your email to receive tokens without downloading or signing up anything. It's as easy
                         as using Zelle!</p>
                     <ul className="social-icons mt-4" style="list-style-type:none; padding: 0;">
@@ -21,7 +21,7 @@
                             <router-link to="#"><i className="fa fa-linkedin"></i></router-link>
                         </li>
                     </ul>
-                    <div className="mt-5 bottom-privacy">
+                    <div className="bottom-privacy">
                         <router-link to="#" className="mr-4">Privacy Policy</router-link>
                         <router-link to="#" className="mr-4">Contact</router-link>
                         <router-link to="#" className="">© 2022 Hexlink</router-link>
@@ -30,12 +30,12 @@
             </div>
             <div className="login-aside-right">
                 <div className="row m-0 justify-content-center h-100 align-items-center">
-                    <div className="p-5">
+                    <div className="login-right-wrapper">
                         <div className="authincation-content">
                             <div className="row no-gutters">
                                 <div className="col-xl-12">
                                     <div className="auth-form-1">
-                                        <div className="mb-4">
+                                        <div className="mb-4" style="padding-left: 20px;">
                                             <h3 className="dz-title mb-1">Hexlink: start your web3 journey</h3>
                                             <p className="">Sign in with options below</p>
                                         </div>
@@ -148,26 +148,63 @@
         background: rgba(0, 0, 0, 0.2);
         z-index: -1;
     }
-    // @media only screen and (max-width: 991px) {
-    // .login-main-page {
-    //     padding: 100px 0px 100px 0px;
-    // .login-wrapper {
-    //     max-width: 90vw; } } }
+    @media only screen and (max-width: 1600px) {
+        .login-main-page {
+            padding: 300px 0px 300px 0px;
+
+            .login-wrapper {
+                max-width: 80vw; } } }
+    @media only screen and (max-width: 1245px) {
+    .login-main-page {
+        padding: 350px 0px 350px 0px; }
+    .login-wrapper {
+        max-width: 90vw; } }
     @media only screen and (max-width: 991px) {
+        .login-main-page {
+            padding: 250px 0px 250px 0px; }
+        .login-main-page .main-title {
+            font-size: 40px; } }
+    @media only screen and (max-width: 767px) {
+        .login-main-page {
+        padding: 100px 0px 100px 0px; } }
+    @media only screen and (max-width: 575px) {
         // .login-main-page {
         //     padding: 0px; }
-            .login-main-page .main-title {
-                font-size: 30px; } }
+        .login-main-page .main-title {
+            font-size: 30px; }
+        .login-main-page {
+        padding: 50px 0px 50px 0px; } }
     .login-wrapper {
         display: flex;
         min-height: 600px;
         height: calc(100vh - 400px);
         box-shadow: 0 0 60px 10px rgba(85, 44, 44, 0.2); }
+        @media only screen and (max-width: 1600px) {
+            .login-wrapper {
+                height: calc(100vh - 600px); } }
+        @media only screen and (max-width: 1245px) {
+            .login-wrapper {
+                height: calc(100vh - 700px); } }
+        @media only screen and (max-width: 991px) {
+            .login-wrapper {
+                height: calc(100vh - 500px); } }
+        @media only screen and (max-width: 767px) {
+            .login-wrapper {
+                height: calc(100vh - 200px); } }
+        @media only screen and (max-width: 575px) {
+            .login-wrapper {
+                height: auto }
+            .login-main-page {
+                height: auto; } }
         .login-wrapper .bottom-privacy {
             color: #fff;
             font-size: 16px;
             font-weight: 600;
+            margin-top: 3rem !important;
             line-height: 1.5; }
+            @media only screen and (max-width: 991px) {
+            .login-wrapper .bottom-privacy {
+                margin-top: 0rem !important; } }
             .login-wrapper .bottom-privacy a {
                 color: inherit; }
 
@@ -212,13 +249,13 @@
                 display: table-cell;
                 vertical-align: bottom; }
                 .login-wrapper .login-aside-left .login-description p {
-                    font-size: 0.85vw;
+                    font-size: 18px;
                     font-weight: 600;
                     color: rgba(255, 255, 255, 0.8);
                     line-height: 1.5; }
                 @media only screen and (max-width: 575px) {
                     .login-wrapper .login-aside-left .login-description p {
-                        font-size: 0.7vw; } }
+                        font-size: 16px; } }
     .login-wrapper .dz-title {
         color: #000;
         font-weight: 700;
@@ -232,6 +269,15 @@
         display: flex;
         align-items: center;
         justify-content: center; }
+    .login-right-wrapper {
+        padding: 3rem !important;
+    }
+    @media only screen and (max-width: 1245px) {
+        .login-wrapper .dz-title {
+            font-weight: 700;
+            font-size: 30px; }
+        .login-right-wrapper {
+            padding: 1.5rem !important; } }
     .login-wrapper .social-icons {
         display: flex; }
         .login-wrapper .social-icons li {

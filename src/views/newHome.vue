@@ -258,8 +258,8 @@
                 <div class="invite-content">
                   <h4>Invite a friend and get $30</h4>
                   <p>
-                    You will receive up to $30 when they： 1.Buy Crypto 2.
-                    Deposit 3. Finish Trading Tasks <br />
+                    You will receive up to $30 when they 1.Buy Crypto 2.
+                    Deposit 3. Launch their FIRST airdrop 🔥.
                     <router-link to="#">Learn more</router-link>
                   </p>
     
@@ -267,7 +267,8 @@
                     <form action="#">
                       <div class="input-group">
                         <input type="text" class="form-control" v-bind:value="message" />
-                        <span class="input-group-text c-pointer" @click="doCopy">Copy</span>
+                        <!-- <span class="input-group-text c-pointer" @click="doCopy">Copy</span> -->
+                        <span class="btn btn-primary" @click="doCopy">Copy</span>
                       </div>
                     </form>
                   </div>
@@ -281,8 +282,8 @@
                 <div class="invite-content">
                   <h4>Get free BTC every day</h4>
                   <p>
-                    Earn free bitcoins in rewards by completing a learning
-                    mission daily or inviting friends to Qash.
+                    Earn free Sui in rewards by completing a learning
+                    mission daily or inviting friends to Hexlink 🚀.
                     <router-link to="#">Learn more</router-link>
                   </p>
     
@@ -460,7 +461,7 @@ export default {
   },
   data() {
     return {
-      message: "https://www.Qash.io/join/12345",
+      message: "https://play.hexlink.io/join/12345",
     };
   },
   methods: {

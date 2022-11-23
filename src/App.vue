@@ -1,21 +1,21 @@
-<!-- <template>
+<template>
   <div className="app">
-    <sidebar />
+    <!-- <sidebar /> -->
     <router-view />
   </div>
-</template> -->
-
-<template>
-  <router-view />
 </template>
+
+<!-- <template>
+  <router-view />
+</template> -->
 
 <script setup>
   import Sidebar from "@/components/Sidebar.vue"
 </script>
 
-<style lang="scss">
+<style lang="less">
 #app {
-  height: 100vh;
+  max-height: 100vh;
 }
 
 :root {
@@ -44,19 +44,6 @@ button {
   border: none;
   outline: none;
   background: none;
-}
-
-.app {
-  display: flex;
-
-  main {
-    flex: 1 1 0;
-    padding: 2rem;
-
-    @media (max-width: 768px) {
-      padding-left: 6rem;
-    }
-  }
 }
 
 .login {

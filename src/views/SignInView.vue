@@ -36,8 +36,8 @@
                                 <div className="col-xl-12">
                                     <div className="auth-form-1">
                                         <div className="mb-4" style="padding-left: 20px;">
-                                            <h3 className="dz-title mb-1">Hexlink: start your web3 journey</h3>
-                                            <p className="">Sign in with options below</p>
+                                            <!-- <h3 className="dz-title mb-1">Hexlink: start your web3 journey</h3> -->
+                                            <h3 className="">Sign in with options below</h3>
                                         </div>
                                         <!-- Sign in with Google -->
                                         <a-row justify="center" style="margin-top: 30px;">
@@ -118,13 +118,16 @@
     }
 
     .login-main-page {
-        padding: 200px;
+        padding: 10vh;
         background-size: cover;
         background-position: center;
         position: relative;
         height: 100vh;
         z-index: 1;
     }
+    @media only screen and (max-height: 780px) {
+        .login-main-page {
+            height: 100%; } }
 
     .login-main-page .login-wrapper {
         background: #fff;
@@ -149,51 +152,52 @@
         z-index: -1;
     }
     @media only screen and (max-width: 1600px) {
-        .login-main-page {
-            padding: 300px 0px 300px 0px;
-
             .login-wrapper {
-                max-width: 80vw; } } }
+                max-width: 80vw; } } 
     @media only screen and (max-width: 1245px) {
-    .login-main-page {
-        padding: 350px 0px 350px 0px; }
-    .login-wrapper {
-        max-width: 90vw; } }
+        .login-main-page {
+            padding: 7vh 0px 7vh 0px; }
+        .login-wrapper {
+            max-width: 80vw; }
+        .login-main-page .main-title {
+            font-size: 2.3rem; } } 
     @media only screen and (max-width: 991px) {
         .login-main-page {
-            padding: 250px 0px 250px 0px; }
+            padding: 5vh 0px 5vh 0px; }
         .login-main-page .main-title {
-            font-size: 40px; } }
+            font-size: 2rem; } }
     @media only screen and (max-width: 767px) {
         .login-main-page {
-        padding: 100px 0px 100px 0px; } }
+        padding: 2.5vh 0px 2.5vh 0px; } }
     @media only screen and (max-width: 575px) {
         // .login-main-page {
         //     padding: 0px; }
         .login-main-page .main-title {
             font-size: 30px; }
         .login-main-page {
-        padding: 50px 0px 50px 0px; } }
+        padding: 2.5vh 0px 2.5vh 0px; }
+        .login-main-page .login-wrapper{
+            max-width: 90vw; } }
     .login-wrapper {
         display: flex;
         min-height: 600px;
-        height: calc(100vh - 400px);
+        height: 80vh;
         box-shadow: 0 0 60px 10px rgba(85, 44, 44, 0.2); }
-        @media only screen and (max-width: 1600px) {
-            .login-wrapper {
-                height: calc(100vh - 600px); } }
+        // @media only screen and (max-width: 1600px) {
+        //     .login-wrapper {
+        //         height: calc(100vh - 600px); } }
         @media only screen and (max-width: 1245px) {
             .login-wrapper {
-                height: calc(100vh - 700px); } }
+                height: 86vh; } }
         @media only screen and (max-width: 991px) {
             .login-wrapper {
-                height: calc(100vh - 500px); } }
+                height: 90vh; } }
         @media only screen and (max-width: 767px) {
             .login-wrapper {
-                height: calc(100vh - 200px); } }
+                height: 95vh; } }
         @media only screen and (max-width: 575px) {
             .login-wrapper {
-                height: auto }
+                height: calc(95vh); }
             .login-main-page {
                 height: auto; } }
         .login-wrapper .bottom-privacy {

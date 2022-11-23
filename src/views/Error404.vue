@@ -29,7 +29,7 @@
 import { useRouter } from 'vue-router'; 
 </script>
 
-<style lang="scss" scoped>
+<style lang="less" scoped>
 .p-meddle {
   margin: 0;
   position: absolute;

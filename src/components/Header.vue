@@ -22,10 +22,10 @@
             </div>
 
             <div class="header-right">
-              <div class="dark-light-toggle" @click="themeToggle()">
+              <!-- <div class="dark-light-toggle" @click="themeToggle()">
                 <span class="dark"><i class="icofont-moon"></i></span>
                 <span class="light"><i class="icofont-sun-alt"></i></span>
-              </div>
+              </div> -->
               <div class="notification dropdown" @click="activeDropDown('notification')"
                 :class="active_ === 'notification' && 'show'">
                 <div class="notify-bell" data-toggle="dropdown">
@@ -82,16 +82,16 @@
 
               <div class="profile_log dropdown" @click="activeDropDown('profile')" :class="active_ && 'show'">
                 <div class="user" data-toggle="dropdown">
-                  <span class="thumb"><img src="../assets/logo/blue-logo.svg" alt="" /></span>
+                  <span class="thumb"><img :src="user?.photoURL" :size="64" referrerpolicy="no-referrer" /></span>
                   <span class="arrow"><i class="icofont-angle-down"></i></span>
                 </div>
                 <div class="dropdown-menu dropdown-menu-right mt-3" :class="active_ === 'profile' && 'show'">
                   <div class="user-email">
                     <div class="user">
-                      <span class="thumb"><img src="../assets/logo/blue-logo.svg" alt="" /></span>
+                      <span class="thumb"><img :src="user?.photoURL" :size="64" referrerpolicy="no-referrer" /></span>
                       <div class="user-info">
-                        <h5>Peter Chen</h5>
-                        <span>Qash.inc@gmail.com</span>
+                        <h5>{{ user?.displayName }}</h5>
+                        <span>{{ user?.email }}</span>
                       </div>
                     </div>
                   </div>
@@ -112,15 +112,15 @@
                   <router-link to="wallet" class="dropdown-item">
                     <i class="icofont-wallet"></i>Wallet
                   </router-link>
-                  <router-link to="settings-profile" class="dropdown-item">
+                  <!-- <router-link to="settings-profile" class="dropdown-item">
                     <i class="icofont-ui-settings"></i> Setting
-                  </router-link>
-                  <router-link to="settings-activity" class="dropdown-item">
+                  </router-link> -->
+                  <router-link to="/activities" class="dropdown-item">
                     <i class="icofont-history"></i> Activity
                   </router-link>
-                  <router-link to="lock" class="dropdown-item">
+                  <!-- <router-link to="lock" class="dropdown-item">
                     <i class="icofont-lock"></i>Lock
-                  </router-link>
+                  </router-link> -->
                   <router-link to="signin" class="dropdown-item logout">
                     <i class="icofont-logout"></i> Logout
                   </router-link>
@@ -134,20 +134,25 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
+import { useAuthStore } from '@/stores/auth';
+
 export default {
   name: "Header",
   data() {
+    const store = useAuthStore();
+    const user = store.currentUser!;
     return {
+      user,
       active_: "",
       themes: "",
     };
   },
   methods: {
-    activeDropDown(value) {
+    activeDropDown(value: any) {
       this.active_ = this.active_ === value ? "" : value;
     },
-    themeToggle(value) {
+    themeToggle(value: { isOk: any; theme: string; }) {
       let element = document.body;
       let value_ = value && value.isOk;
       this.themes = this.themes !== "" ? "" : "dark-theme";
@@ -235,10 +240,11 @@ cursor: pointer; }
   .profile_log .user .thumb {
     height: 35px;
     width: 35px;
-    border-radius: 50px;
+    // border-radius: 50px;
     color: #fff;
     text-align: center; }
     .profile_log .user .thumb img {
+      border-radius: 50px;
       max-width: 35px; }
   .profile_log .user .arrow i {
     font-weight: bold;

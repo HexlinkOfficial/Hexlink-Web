@@ -9,30 +9,30 @@
         <li>
           <router-link to="/testhome" data-toggle="tooltip" data-placement="right" title="Home"
             :class="active === 1 && 'active'">
-            <span><i class="icofont-ui-home"></i></span>
+            <span class="icon-grey"><i class="icofont-ui-home"></i></span>
           </router-link>
         </li>
         <li>
           <router-link to="/testabout" data-toggle="tooltip" data-placement="right" title="Trade"
             :class="active === 2 && 'active'">
-            <span><i class="icofont-stack-exchange"></i></span>
+            <span class="icon-grey"><i class="icofont-stack-exchange"></i></span>
           </router-link>
         </li>
         <li>
-          <router-link to="/collections" data-toggle="tooltip" data-placement="right" title="Wallet"
+          <router-link to="/collectible" data-toggle="tooltip" data-placement="right" title="Wallet"
             :class="active === 3 && 'active'">
-            <span><i class="icofont-wallet"></i></span>
+            <span class="icon-grey"><i class="icofont-wallet"></i></span>
           </router-link>
         </li>
         <li>
-          <router-link to="/testhome" data-toggle="tooltip" data-placement="right" title="Price"
+          <router-link to="/activities" data-toggle="tooltip" data-placement="right" title="Price"
             :class="active === 4 && 'active'">
-            <span><i class="icofont-price"></i></span>
+            <span class="icon-grey"><i class="icofont-price"></i></span>
           </router-link>
         </li>
         <li class="logout">
-          <router-link to="/testabout" data-toggle="tooltip" data-placement="right" title="Signout">
-            <span><i class="icofont-power"></i></span>
+          <router-link to="/signin" data-toggle="tooltip" data-placement="right" title="Signout">
+            <span class="icon-grey"><i class="icofont-power"></i></span>
           </router-link>
         </li>
       </ul>
@@ -54,7 +54,7 @@ export default {
 
 <style lang="less" scoped>
 .sidebar {
-  background: #5BCFC5;
+  background: #fff;
   position: fixed;
   left: 20px;
   height: calc(95%);
@@ -62,7 +62,7 @@ export default {
   top: 2.5%;
   z-index: 3;
   bottom: 20px;
-  border-radius: 15px; }
+  border-radius: 25px; }
   // @media only screen and (max-width: 1023px) {
   //   .sidebar {
   //     width: 5rem;
@@ -73,14 +73,14 @@ export default {
       top: auto;
       bottom: 0;
       width: 100%;
-      height: 50px;
+      height: 7vh;
       left: 0;
       border-radius: 0px; } }
 .menu {
   margin-top: 100px; }
   @media only screen and (max-width: 767px) {
     .menu {
-      margin-top: 0px; } }
+      margin-top: 1.5vh; } }
   @media only screen and (max-width: 767px) {
     .menu ul {
       display: flex;
@@ -93,18 +93,23 @@ export default {
       padding: 12px 15px;
       display: inline-block;
       margin-bottom: 20px;
-      border-radius: 10px; }
-      .menu ul li a:hover, .menu ul li a:focus, .menu ul li a:active {
-        background: rgba(255, 255, 255, 0.1);
-        color: #fff;
-        opacity: 1; }
-      .menu ul li a .active {
-        background: rgba(255, 255, 255, 0.15); }
-        .menu ul li a .active i {
-          color: #fff;
+      border-radius: 15px; }
+      .menu ul li a:hover, 
+      .menu ul li a:focus, 
+      .menu ul li a:active {
+        background: rgba(91, 207, 197, 0.1);
+        .menu ul li:hover a:hover i {
+          color: #5BCFC5;
+          font-size: 24px;
+          opacity: 1; } }
+      .menu ul li a.router-link-active {
+        background: rgba(91,207,197,0.15); }
+        .menu ul li a.router-link-active i {
+          color: #5BCFC5;
+          font-size: 24px;
           opacity: 1; }
       .menu ul li a i {
-        color: #fff;
+        color: #9fa4a6;
         font-size: 24px;
         opacity: 0.75; }
     .menu ul li.logout {
@@ -125,9 +130,9 @@ export default {
   right: 0;
   text-align: center;
   font-size: 14px;
-  color: #fff; }
+  color: #000; }
   .copyright a {
-    color: #fff;
+    color: #000;
     font-size: 12px; }
   @media only screen and (max-width: 767px) {
     .copyright {

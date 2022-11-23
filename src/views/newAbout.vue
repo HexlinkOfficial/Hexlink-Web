@@ -267,7 +267,21 @@
 }
 
 .welcome-profile {
-  background: #556ee6 !important;
+  background: linear-gradient(to right, #5bcfc5 25%, #3197b7 100%);
+  color: #fff;
+  transition: all .5s ease-in-out;
+  box-shadow: 0px 5px 5px 0px rgb(82 63 105 / 5%);
+}
+
+.welcome-profile:after {
+  background: linear-gradient(to right, rgba(255, 255, 255, 0.1) 0%, rgba(49, 151, 183, 0) 100%);
+  transform: rotate(45deg);
+  height: 90px;
+  width: 90px;
+  content: "";
+  position: absolute;
+  bottom: -20px;
+  right: 0;
 }
 
 .welcome-profile .card-body img {
@@ -387,8 +401,8 @@
                 <div class="invite-content">
                   <h4>Invite a friend and get $30</h4>
                   <p>
-                    You will receive up to $30 when they： 1.Buy Crypto 2.
-                    Deposit 3. Finish Trading Tasks <br />
+                    You will receive up to $30 when they 1.Buy Crypto 2.
+                    Deposit 3. Launch their FIRST airdrop 🔥.
                     <router-link to="#">Learn more</router-link>
                   </p>
 
@@ -396,7 +410,8 @@
                     <form action="#">
                       <div class="input-group">
                         <input type="text" class="form-control" v-bind:value="message" />
-                        <span class="input-group-text c-pointer" @click="doCopy">Copy</span>
+                        <!-- <span class="input-group-text c-pointer" @click="doCopy">Copy</span> -->
+                        <span class="btn btn-primary" @click="doCopy">Copy</span>
                       </div>
                     </form>
                   </div>
@@ -410,8 +425,8 @@
                 <div class="invite-content">
                   <h4>Get free BTC every day</h4>
                   <p>
-                    Earn free bitcoins in rewards by completing a learning
-                    mission daily or inviting friends to Qash.
+                    Earn free Sui in rewards by completing a learning
+                    mission daily or inviting friends to Hexlink 🚀.
                     <router-link to="#">Learn more</router-link>
                   </p>
 
@@ -420,54 +435,11 @@
               </div>
             </div>
           </div>
-          <div class="col-xxl-4 col-xl-4 col-lg-6">
-            <div class="price-widget bg-btc">
-              <router-link to="price-details">
-                <div class="price-content">
-                  <div class="icon-title">
-                    <i class="cc BTC-alt"></i>
-                    <span>Bitcoin</span>
-                  </div>
-                  <h5>$ 11,785.10</h5>
-                </div>
-                <!-- <div id="chart"></div> -->
-                <currency-chart />
-              </router-link>
-            </div>
-          </div>
-          <div class="col-xxl-4 col-xl-4 col-lg-6">
-            <div class="price-widget bg-eth">
-              <router-link to="price-details">
-                <div class="price-content">
-                  <div class="icon-title">
-                    <i class="cc ETH-alt"></i>
-                    <span>Ethereum</span>
-                  </div>
-                  <h5>$ 11,785.10</h5>
-                </div>
-                <currency-chart />
-              </router-link>
-            </div>
-          </div>
-          <div class="col-xxl-4 col-xl-4 col-lg-6">
-            <div class="price-widget bg-usdt">
-              <router-link to="price-details">
-                <div class="price-content">
-                  <div class="icon-title">
-                    <i class="cc USDT-alt"></i>
-                    <span>Tether</span>
-                  </div>
-                  <h5>$ 11,785.10</h5>
-                </div>
-                <currency-chart />
-              </router-link>
-            </div>
-          </div>
           <div class="col-xxl-3 col-xl-6 col-lg-6">
             <div class="card welcome-profile">
               <div class="card-body">
-                <img src="../assets/logo/blue-logo.svg" alt="" />
-                <h4>Welcome, Jannatul Maowa!</h4>
+                <img :src="user?.photoURL" :size="64" referrerpolicy="no-referrer" />
+                <h4>Welcome, {{ user?.displayName }}!</h4>
                 <p>
                   Looks like you are not verified yet. Verify yourself to use
                   the full potential of Qash.
@@ -496,71 +468,32 @@
               </div>
             </div>
           </div>
-          <div class="col-xxl-3 col-xl-6 col-lg-6">
-            <div class="card">
-              <div class="card-header">
-                <h4 class="card-title">Quick Trade</h4>
-              </div>
-              <div class="card-body">
-                <form method="post" name="myform" class="currency_validate trade-form row g-3" @submit.prevent="">
-                  <div class="col-12">
-                    <label class="form-label">You Send</label>
-                    <div class="input-group">
-                      <select class="form-select" name="method">
-                        <option value="bank">USD</option>
-                        <option value="master">Euro</option>
-                      </select>
-                      <input type="text" name="currency_amount" class="form-control" placeholder="0.0214 BTC" />
-                    </div>
-                  </div>
-
-                  <div class="col-12">
-                    <label class="form-label">You get</label>
-                    <div class="input-group">
-                      <select class="form-select" name="method">
-                        <option value="bank">BTC</option>
-                        <option value="master">ETH</option>
-                      </select>
-                      <input type="text" name="currency_amount" class="form-control" placeholder="0.0214 BTC" />
-                    </div>
-                  </div>
-
-                  <p class="mb-0">
-                    1 USD ~ 0.000088 BTC
-                    <router-link to="#">Expected rate <br />No extra fees</router-link>
-                  </p>
-
-                  <button type="submit" name="submit" class="btn btn-success btn-block">
-                    Exchange Now
-                  </button>
-                </form>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>
   </layout>
 </template>
 
-<script>
+<script lang="ts">
 // import BalanceChart from "../../components/qCash/BalanceChart.vue";
 // import AnalyticsChart from "../../components/qCash/home/AnalyticsChart.vue";
-// import CurrencyChart from "../../components/qCash/CurrencyChart.vue";
 import Layout from "../components/Layout.vue";
 // import { PerfectScrollbar } from "vue2-perfect-scrollbar";
+import { useAuthStore } from '@/stores/auth';
 
 export default {
   components: {
     Layout,
-    // CurrencyChart,
     // BalanceChart,
     // AnalyticsChart,
     // PerfectScrollbar,
   },
   data() {
+    const store = useAuthStore();
+    const user = store.currentUser!;
     return {
-      message: "https://www.Qash.io/join/12345",
+      user,
+      message: "https://play.hexlink.io/join/12345",
     };
   },
   methods: {

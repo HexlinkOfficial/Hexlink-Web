@@ -88,7 +88,7 @@ const user = store.currentUser!;
 
 const addressText = computed(() => {
   if (user.walletAddress) {
-    return prettyPrintAddress(user.walletAddress!);
+    return prettyPrintAddress(user.walletAddress!,3,3);
   } else {
     return "";
   }

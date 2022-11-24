@@ -45,10 +45,10 @@ export async function isContract(address: string | undefined | null): Promise<bo
     return false;
 }
 
-export function prettyPrintAddress(address: string) {
+export function prettyPrintAddress(address: string, start: number, stop: number) {
     if (address) {
         const len = address.length;
-        return address.substring(0, 4) + "..." + address.substring(len - 4, len)
+        return address.substring(0, start) + "..." + address.substring(len - stop, len)
     }
     return "N/A";
 }

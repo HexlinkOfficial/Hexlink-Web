@@ -380,7 +380,7 @@ img, svg {
       <div class="container">
         <div class="row">
           <div className="row invoice-card-row">
-            <div className="col-xl-3 col-xxl-6 col-sm-6">
+            <div className="col-xxl-4 col-xl-4 col-lg-6">
               <div className="card bg-hexlink invoice-card">
                 <div className="card-body d-flex">
                   <div className="icon me-3">
@@ -391,12 +391,30 @@ img, svg {
                   </div>
                   <div>
                     <h2 className="text-white invoice-num">2478</h2>
-                    <span className="text-white fs-18">Total Invoices</span>
+                    <span className="text-white fs-18">Total Txn</span>
                   </div>
                 </div>
               </div>
             </div>
-            <div className="col-xl-3 col-xxl-6 col-sm-6">
+            <div className="col-xxl-4 col-xl-4 col-lg-6">
+              <div className="card bg-secondary invoice-card">
+                <div className="card-body d-flex">
+                  <div className="icon me-3">
+                    <svg width="35px" height="34px">
+                      <path fill="rgb(255, 255, 255)"
+                        d="M33.002,9.728 C31.612,6.787 29.411,4.316 26.638,2.583 C22.781,0.179 18.219,-0.584 13.784,0.438 C9.356,1.454 5.585,4.137 3.178,7.989 C0.764,11.840 -0.000,16.396 1.023,20.825 C2.048,25.247 4.734,29.013 8.584,31.417 C11.297,33.110 14.409,34.006 17.594,34.006 L17.800,34.006 C20.973,33.967 24.058,33.050 26.731,31.363 C27.509,30.872 27.735,29.849 27.243,29.072 C26.751,28.296 25.727,28.070 24.949,28.561 C22.801,29.922 20.314,30.660 17.761,30.693 C15.141,30.726 12.581,30.002 10.346,28.614 C7.241,26.675 5.080,23.647 4.262,20.088 C3.444,16.515 4.056,12.850 5.997,9.748 C10.001,3.353 18.473,1.401 24.876,5.399 C27.110,6.793 28.879,8.779 29.996,11.143 C31.087,13.447 31.513,16.004 31.227,18.527 C31.126,19.437 31.778,20.260 32.696,20.360 C33.607,20.459 34.432,19.809 34.531,18.892 C34.884,15.765 34.352,12.591 33.002,9.728 L33.002,9.728 Z" />
+                      <path fill="rgb(255, 255, 255)"
+                        d="M23.380,11.236 C22.728,10.585 21.678,10.585 21.026,11.236 L17.608,14.656 L14.190,11.243 C13.539,10.592 12.488,10.592 11.836,11.243 C11.184,11.893 11.184,12.942 11.836,13.593 L15.254,17.006 L11.836,20.420 C11.184,21.071 11.184,22.120 11.836,22.770 C12.162,23.096 12.588,23.255 13.014,23.255 C13.438,23.255 13.864,23.096 14.190,22.770 L17.608,19.357 L21.026,22.770 C21.352,23.096 21.777,23.255 22.203,23.255 C22.629,23.255 23.054,23.096 23.380,22.770 C24.031,22.120 24.031,21.071 23.380,20.420 L19.962,17.000 L23.380,13.587 C24.031,12.936 24.031,11.887 23.380,11.236 L23.380,11.236 Z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h2 className="text-white invoice-num">1256</h2>
+                    <span className="text-white fs-18">Pending Txn</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="col-xxl-4 col-xl-4 col-lg-6">
               <div className="card bg-success invoice-card">
                 <div className="card-body d-flex">
                   <div className="icon me-3">
@@ -409,30 +427,12 @@ img, svg {
                   </div>
                   <div>
                     <h2 className="text-white invoice-num">983</h2>
-                    <span className="text-white fs-18">Paid Invoices</span>
+                    <span className="text-white fs-18">Success Txn</span>
                   </div>
                 </div>
               </div>
             </div>
-            <div className="col-xl-3 col-xxl-6 col-sm-6">
-              <div className="card bg-info invoice-card">
-                <div className="card-body d-flex">
-                  <div className="icon me-3">
-                    <svg width="35px" height="34px">
-                      <path fill="rgb(255, 255, 255)"
-                        d="M33.002,9.728 C31.612,6.787 29.411,4.316 26.638,2.583 C22.781,0.179 18.219,-0.584 13.784,0.438 C9.356,1.454 5.585,4.137 3.178,7.989 C0.764,11.840 -0.000,16.396 1.023,20.825 C2.048,25.247 4.734,29.013 8.584,31.417 C11.297,33.110 14.409,34.006 17.594,34.006 L17.800,34.006 C20.973,33.967 24.058,33.050 26.731,31.363 C27.509,30.872 27.735,29.849 27.243,29.072 C26.751,28.296 25.727,28.070 24.949,28.561 C22.801,29.922 20.314,30.660 17.761,30.693 C15.141,30.726 12.581,30.002 10.346,28.614 C7.241,26.675 5.080,23.647 4.262,20.088 C3.444,16.515 4.056,12.850 5.997,9.748 C10.001,3.353 18.473,1.401 24.876,5.399 C27.110,6.793 28.879,8.779 29.996,11.143 C31.087,13.447 31.513,16.004 31.227,18.527 C31.126,19.437 31.778,20.260 32.696,20.360 C33.607,20.459 34.432,19.809 34.531,18.892 C34.884,15.765 34.352,12.591 33.002,9.728 L33.002,9.728 Z" />
-                      <path fill="rgb(255, 255, 255)"
-                        d="M23.380,11.236 C22.728,10.585 21.678,10.585 21.026,11.236 L17.608,14.656 L14.190,11.243 C13.539,10.592 12.488,10.592 11.836,11.243 C11.184,11.893 11.184,12.942 11.836,13.593 L15.254,17.006 L11.836,20.420 C11.184,21.071 11.184,22.120 11.836,22.770 C12.162,23.096 12.588,23.255 13.014,23.255 C13.438,23.255 13.864,23.096 14.190,22.770 L17.608,19.357 L21.026,22.770 C21.352,23.096 21.777,23.255 22.203,23.255 C22.629,23.255 23.054,23.096 23.380,22.770 C24.031,22.120 24.031,21.071 23.380,20.420 L19.962,17.000 L23.380,13.587 C24.031,12.936 24.031,11.887 23.380,11.236 L23.380,11.236 Z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h2 className="text-white invoice-num">1256</h2>
-                    <span className="text-white fs-18">Unpaid Invoices</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="col-xl-3 col-xxl-6 col-sm-6">
+            <!-- <div className="col-xl-3 col-xxl-6 col-sm-6">
               <div className="card bg-secondary invoice-card">
                 <div className="card-body d-flex">
                   <div className="icon me-3">
@@ -447,7 +447,7 @@ img, svg {
                   </div>
                 </div>
               </div>
-            </div>
+            </div> -->
             <div class="col-xxl-6 col-xl-6 col-lg-12">
               <div class="card">
                 <div class="card-body">
@@ -486,49 +486,6 @@ img, svg {
                     <router-link to="#" class="btn btn-primary">Invite friends to join</router-link>
                   </div>
                 </div>
-              </div>
-            </div>
-            <div class="col-xxl-4 col-xl-4 col-lg-6">
-              <div class="price-widget bg-btc">
-                <router-link to="">
-                  <div class="price-content">
-                    <div class="icon-title">
-                      <i class="cc BTC-alt"></i>
-                      <span>Bitcoin</span>
-                    </div>
-                    <h5>$ 11,785.10</h5>
-                  </div>
-                  <!-- <div id="chart"></div> -->
-                  <currency-chart />
-                </router-link>
-              </div>
-            </div>
-            <div class="col-xxl-4 col-xl-4 col-lg-6">
-              <div class="price-widget bg-eth">
-                <router-link to="">
-                  <div class="price-content">
-                    <div class="icon-title">
-                      <i class="cc ETH-alt"></i>
-                      <span>Ethereum</span>
-                    </div>
-                    <h5>$ 11,785.10</h5>
-                  </div>
-                  <currency-chart />
-                </router-link>
-              </div>
-            </div>
-            <div class="col-xxl-4 col-xl-4 col-lg-6">
-              <div class="price-widget bg-usdt">
-                <router-link to="">
-                  <div class="price-content">
-                    <div class="icon-title">
-                      <i class="cc USDT-alt"></i>
-                      <span>Tether</span>
-                    </div>
-                    <h5>$ 11,785.10</h5>
-                  </div>
-                  <currency-chart />
-                </router-link>
               </div>
             </div>
             <div class="col-xxl-6">

@@ -14,17 +14,23 @@ import { app } from '@/services/firebase'
 
 import { useAuthStore } from "@/stores/auth"
 import { clearUrqlClient } from '@/services/graphql/urql'
+import Toaster from '@meforma/vue-toaster';
+import VueClipboard from 'vue-clipboard2'
 
 let vueApp: any;
 getAuth(app).onAuthStateChanged(async (user: any) => {
   
   const pinia = createPinia();
   pinia.use(piniaPluginPersistedstate);
+  
+  VueClipboard.config.autoSetContainer = true
   if (!vueApp) {
     vueApp = createApp(AppVue)
       .use(router)
       .use(pinia)
       .use(Antd)
+      .use(Toaster)
+      .use(VueClipboard)
       .mount('#app');
   }
 

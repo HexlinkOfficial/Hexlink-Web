@@ -603,6 +603,7 @@ import BalanceChart from "../components/BalanceChart.vue";
 // import AnalyticsChart from "../../components/qCash/home/AnalyticsChart.vue";
 import CurrencyChart from "../components/CurrencyChart.vue";
 import Layout from "../components/Layout.vue";
+import { createToaster } from "@meforma/vue-toaster";
 // import { PerfectScrollbar } from "vue3-perfect-scrollbar";
 
 export default {
@@ -622,10 +623,14 @@ export default {
     doCopy: function () {
       this.$copyText(this.message).then(
         function () {
-          alert("Copied");
+          // alert("Copied");
+          const toaster = createToaster({ position: "top", duration: 2000});
+          toaster.success(`Copied`);
         },
         function () {
-          alert("Can not copy");
+          // alert("Can not copy");
+          const toaster = createToaster({ position: "top", duration: 2000 });
+          toaster.error(`Can not copy`);
         }
       );
     },

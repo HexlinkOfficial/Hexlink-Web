@@ -100,32 +100,47 @@
                         </div>
                       </div>
                     </div>
-
-                    <div class="user-balance">
-                      <div class="address">
+                    
+                    <div class="user-balance" style="border-bottom-width: 1px; border-color: #E5E7EB; border-style: dashed; ">
+                      <h5><b>Your Smart Contact Wallet: </b></h5>
+                      <!-- <div class="address">
                         <span style="color: #4B5563; font-size: 0.875rem; line-height: 1.25rem; font-weight: 500;">Address: </span>
-                        <span :copyable="{ text: user.walletAddress }" style="padding-top: 0.25rem; padding-bottom: 0.25rem; padding-left: 0.5rem; padding-right: 0.5rem; background-color: #F3F4F6; font-size: 0.875rem; line-height: 1.25rem; border-radius: 0.5rem; ">
+                        <span @click="doCopy" style="margin-bottom: 0; padding-top: 0.25rem; padding-bottom: 0.25rem; padding-left: 0.5rem; padding-right: 0.5rem; background-color: #F3F4F6; font-size: 0.875rem; line-height: 1.25rem; border-radius: 0.5rem; ">
                           {{ addressText }}
-                          <div role="button" tabindex="0" class="ant-typography-copy" aria-label="Copy" style="border: 0px; background: transparent; padding: 0px; line-height: inherit; display: inline-block;"><span role="img" aria-label="copy" class="anticon anticon-copy"><svg focusable="false" class="" data-icon="copy" width="1em" height="1em" fill="currentColor" aria-hidden="true" viewBox="64 64 896 896"><path d="M832 64H296c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h496v688c0 4.4 3.6 8 8 8h56c4.4 0 8-3.6 8-8V96c0-17.7-14.3-32-32-32zM704 192H192c-17.7 0-32 14.3-32 32v530.7c0 8.5 3.4 16.6 9.4 22.6l173.3 173.3c2.2 2.2 4.7 4 7.4 5.5v1.9h4.2c3.5 1.3 7.2 2 11 2H704c17.7 0 32-14.3 32-32V224c0-17.7-14.3-32-32-32zM350 856.2L263.9 770H350v86.2zM664 888H414V746c0-22.1-17.9-40-40-40H232V264h432v624z"></path></svg></span></div>
                         </span>
                       </div>
-                      <!-- <div class="total">
-                        <p>Total</p>
-                        <span>0.00 USD</span>
+                      <div class="balance">
+                        <span style="color: #4B5563; font-size: 0.875rem; line-height: 1.25rem; font-weight: 500;">Balance: </span>
+                        <span @click="doCopy">
+                          $1990.89
+                        </span>
                       </div> -->
+                      <div class="user-wallet">
+                        <div class="user">
+                          <span class="thumb"></span>
+                          <div class="user-info">
+                            <span>
+                              <h5 @click="doCopy" style="margin-bottom: 0; padding-top: 0.25rem; padding-bottom: 0.25rem; padding-left: 0.5rem; padding-right: 0.5rem; background-color: #F3F4F6; font-size: 0.875rem; line-height: 1.25rem; border-radius: 0.5rem; ">
+                                {{ addressTextLong }}
+                              </h5>
+                            </span>
+                            <span>$200.45</span>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                    <router-link to="profile" class="dropdown-item">
+                    <!-- <router-link to="profile" class="dropdown-item">
                       <i class="icofont-ui-user"></i>Profile
                     </router-link>
                     <router-link to="wallet" class="dropdown-item">
                       <i class="icofont-wallet"></i>Wallet
-                    </router-link>
+                    </router-link> -->
                     <!-- <router-link to="settings-profile" class="dropdown-item">
                       <i class="icofont-ui-settings"></i> Setting
                     </router-link> -->
-                    <router-link to="/activities" class="dropdown-item">
+                    <!-- <router-link to="/activities" class="dropdown-item">
                       <i class="icofont-history"></i> Activity
-                    </router-link>
+                    </router-link> -->
                     <!-- <router-link to="lock" class="dropdown-item">
                       <i class="icofont-lock"></i>Lock
                     </router-link> -->
@@ -148,21 +163,32 @@
 import { computed } from "vue";
 import { useAuthStore } from '@/stores/auth';
 import { prettyPrintAddress } from '@/services/web3/account';
+import { createToaster } from "@meforma/vue-toaster";
 
 export default {
   name: "Header",
   data() {
     const store = useAuthStore();
     const user = store.currentUser!;
-    const addressText = computed(() => {
+    const actualAddress = user.walletAddress;
+    const addressTextLong = computed(() => {
       if (user.walletAddress) {
-        return prettyPrintAddress(user.walletAddress!);
+        return prettyPrintAddress(user.walletAddress!, 5, 6);
+      } else {
+        return "";
+      }
+    })
+    const addressTextNormal = computed(() => {
+      if (user.walletAddress) {
+        return prettyPrintAddress(user.walletAddress!, 4, 4);
       } else {
         return "";
       }
     })
     return {
-      addressText,
+      actualAddress,
+      addressTextLong,
+      addressTextNormal,
       user,
       active_: "",
       themes: "",
@@ -178,6 +204,20 @@ export default {
       this.themes = this.themes !== "" ? "" : "dark-theme";
       element.classList = value_ ? value.theme : this.themes;
       localStorage.setItem("theme", value_ ? value.theme : this.themes);
+    },
+    doCopy: function () {
+      this.$copyText(this.actualAddress).then(
+        function () {
+          // alert("Copied");
+          const toaster = createToaster({ position: "top", duration: 2000 });
+          toaster.success(`Copied`);
+        },
+        function () {
+          // alert("Can not copy");
+          const toaster = createToaster({ position: "top", duration: 2000 });
+          toaster.error(`Can not copy`);
+        }
+      );
     },
   },
   created() {
@@ -308,6 +348,24 @@ cursor: pointer; }
       margin-bottom: 0px; }
     .profile_log .dropdown-menu .user-email span {
       font-size: 14px; }
+  .profile_log .dropdown-menu .user-wallet {
+    border: 0 solid #e5e7eb;
+    padding: 10px 0px 0px 0px; }
+    .profile_log .dropdown-menu .user-wallet .thumb {
+      background-image: linear-gradient(to right, #6366f1,#a855f7,#ec4899); 
+      background-color: #6366F1; 
+      background-color: #8B5CF6; 
+      background-color: #EC4899; 
+      transition-property: all; 
+      width: 55px;
+      height: 40px;
+      margin-right: 15px; }
+    .profile_log .dropdown-menu .user-wallet .user-info {
+      margin: 0px; }
+    .profile_log .dropdown-menu .user-wallet h5, .profile_log .dropdown-menu .user-email .h5 {
+      margin-bottom: 0px; }
+    .profile_log .dropdown-menu .user-wallet span {
+      font-size: 14px; }
   .profile_log .dropdown-menu .user-balance {
     // display: flex;
     // justify-content: space-around;
@@ -325,6 +383,15 @@ cursor: pointer; }
       justify-content: space-between;
       align-items: center;
       gap: 0.75rem;
+      color: #64748B;
+    }
+    .profile_log .dropdown-menu .user-balance .balance {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.75rem;
+      margin-top: 10px;
+      color: #64748B;
     }
     // .profile_log .dropdown-menu .user-balance p {
     //   margin-bottom: 0px;

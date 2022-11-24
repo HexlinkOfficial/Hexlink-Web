@@ -89,46 +89,52 @@
                   </div>
                   <span class="arrow"><i class="icofont-angle-down"></i></span>
                 </div>
-                <div class="dropdown-menu dropdown-menu-right mt-3" :class="active_ === 'profile' && 'show'">
-                  <div class="user-email">
-                    <div class="user">
-                      <span class="thumb"><img :src="user?.photoURL" :size="64" referrerpolicy="no-referrer" /></span>
-                      <div class="user-info">
-                        <h5>{{ user?.displayName }}</h5>
-                        <span>{{ user?.email }}</span>
+                <div style="opacity: 1; transform: translateY(0);">
+                  <div class="dropdown-menu dropdown-menu-right mt-3" :class="active_ === 'profile' && 'show'">
+                    <div class="user-email" style="border-bottom-width: 1px; border-color: #E5E7EB; border-style: dashed; ">
+                      <div class="user">
+                        <span class="thumb"><img :src="user?.photoURL" :size="64" referrerpolicy="no-referrer" /></span>
+                        <div class="user-info">
+                          <h5>{{ user?.displayName }}</h5>
+                          <span>{{ user?.email }}</span>
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  <div class="user-balance">
-                    <div class="available">
-                      <p>Available</p>
-                      <span>0.00 BTC</span>
+                    <div class="user-balance">
+                      <div class="address">
+                        <span style="color: #4B5563; font-size: 0.875rem; line-height: 1.25rem; font-weight: 500;">Address: </span>
+                        <span :copyable="{ text: user.walletAddress }" style="padding-top: 0.25rem; padding-bottom: 0.25rem; padding-left: 0.5rem; padding-right: 0.5rem; background-color: #F3F4F6; font-size: 0.875rem; line-height: 1.25rem; border-radius: 0.5rem; ">
+                          {{ addressText }}
+                          <div role="button" tabindex="0" class="ant-typography-copy" aria-label="Copy" style="border: 0px; background: transparent; padding: 0px; line-height: inherit; display: inline-block;"><span role="img" aria-label="copy" class="anticon anticon-copy"><svg focusable="false" class="" data-icon="copy" width="1em" height="1em" fill="currentColor" aria-hidden="true" viewBox="64 64 896 896"><path d="M832 64H296c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h496v688c0 4.4 3.6 8 8 8h56c4.4 0 8-3.6 8-8V96c0-17.7-14.3-32-32-32zM704 192H192c-17.7 0-32 14.3-32 32v530.7c0 8.5 3.4 16.6 9.4 22.6l173.3 173.3c2.2 2.2 4.7 4 7.4 5.5v1.9h4.2c3.5 1.3 7.2 2 11 2H704c17.7 0 32-14.3 32-32V224c0-17.7-14.3-32-32-32zM350 856.2L263.9 770H350v86.2zM664 888H414V746c0-22.1-17.9-40-40-40H232V264h432v624z"></path></svg></span></div>
+                        </span>
+                      </div>
+                      <!-- <div class="total">
+                        <p>Total</p>
+                        <span>0.00 USD</span>
+                      </div> -->
                     </div>
-                    <div class="total">
-                      <p>Total</p>
-                      <span>0.00 USD</span>
-                    </div>
+                    <router-link to="profile" class="dropdown-item">
+                      <i class="icofont-ui-user"></i>Profile
+                    </router-link>
+                    <router-link to="wallet" class="dropdown-item">
+                      <i class="icofont-wallet"></i>Wallet
+                    </router-link>
+                    <!-- <router-link to="settings-profile" class="dropdown-item">
+                      <i class="icofont-ui-settings"></i> Setting
+                    </router-link> -->
+                    <router-link to="/activities" class="dropdown-item">
+                      <i class="icofont-history"></i> Activity
+                    </router-link>
+                    <!-- <router-link to="lock" class="dropdown-item">
+                      <i class="icofont-lock"></i>Lock
+                    </router-link> -->
+                    <router-link to="signin" class="dropdown-item logout">
+                      <i class="icofont-logout"></i> Logout
+                    </router-link>
                   </div>
-                  <router-link to="profile" class="dropdown-item">
-                    <i class="icofont-ui-user"></i>Profile
-                  </router-link>
-                  <router-link to="wallet" class="dropdown-item">
-                    <i class="icofont-wallet"></i>Wallet
-                  </router-link>
-                  <!-- <router-link to="settings-profile" class="dropdown-item">
-                    <i class="icofont-ui-settings"></i> Setting
-                  </router-link> -->
-                  <router-link to="/activities" class="dropdown-item">
-                    <i class="icofont-history"></i> Activity
-                  </router-link>
-                  <!-- <router-link to="lock" class="dropdown-item">
-                    <i class="icofont-lock"></i>Lock
-                  </router-link> -->
-                  <router-link to="signin" class="dropdown-item logout">
-                    <i class="icofont-logout"></i> Logout
-                  </router-link>
                 </div>
+                
               </div>
             </div>
           </div>
@@ -139,14 +145,24 @@
 </template>
 
 <script lang="ts">
+import { computed } from "vue";
 import { useAuthStore } from '@/stores/auth';
+import { prettyPrintAddress } from '@/services/web3/account';
 
 export default {
   name: "Header",
   data() {
     const store = useAuthStore();
     const user = store.currentUser!;
+    const addressText = computed(() => {
+      if (user.walletAddress) {
+        return prettyPrintAddress(user.walletAddress!);
+      } else {
+        return "";
+      }
+    })
     return {
+      addressText,
       user,
       active_: "",
       themes: "",
@@ -172,7 +188,7 @@ export default {
 };
 </script>
 
-<style lang="less" scoped>
+<style lang="scss" scoped>
 .header {
   background: #f0f0f0;
   padding: 30px 0px 20px 0px;
@@ -260,9 +276,6 @@ cursor: pointer; }
     // border-radius: 50px;
     color: #fff;
     text-align: center;
-    // @media (min-width: 640px) {
-    //     width: 3rem;
-    //     height: 3rem; }
     &:hover {
       transform: translateY(-0.125rem); } }
     .profile_log .user .thumb img {
@@ -278,16 +291,15 @@ cursor: pointer; }
     .profile_log .user .arrow {
       display: none; } }
 .profile_log .dropdown-menu {
-  border: 0px;
-  padding: 0px;
-  margin: 0px;
+  // border: 0px;
+  // padding: 0px;
+  // margin: 0px;
   // top: 25px !important;
-  box-shadow: 0 1.5rem 4rem rgba(22, 28, 45, 0.15);
-  border-radius: 5px;
-  background-color: #fff;
-  min-width: 240px; }
+  margin-top: 0.75rem;
+  box-shadow: 0 1.5rem 4rem rgba(22, 28, 45, 0.15); }
   .profile_log .dropdown-menu .user-email {
-    padding: 20px 20px 10px; }
+    border: 0 solid #e5e7eb;
+    padding: 30px 20px 20px 20px; }
     .profile_log .dropdown-menu .user-email .thumb {
       margin-right: 10px; }
     .profile_log .dropdown-menu .user-email .user-info {
@@ -297,13 +309,27 @@ cursor: pointer; }
     .profile_log .dropdown-menu .user-email span {
       font-size: 14px; }
   .profile_log .dropdown-menu .user-balance {
-    display: flex;
-    justify-content: space-around;
-    margin-bottom: 15px; }
-    .profile_log .dropdown-menu .user-balance p {
-      margin-bottom: 0px;
-      font-weight: 500;
-      color: #495057; }
+    // display: flex;
+    // justify-content: space-around;
+    // margin-bottom: 15px;
+    padding-top: 1.25rem;
+    padding-bottom: 1.25rem;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+    border-bottom-width: 1px;
+    border-color: #E5E7EB;
+    border-style: dashed;
+    border: 0 solid #e5e7eb; }
+    .profile_log .dropdown-menu .user-balance .address {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    // .profile_log .dropdown-menu .user-balance p {
+    //   margin-bottom: 0px;
+    //   font-weight: 500;
+    //   color: #495057; }
   .profile_log .dropdown-menu .dropdown-item {
     padding: 10px 20px;
     border-top: 1px solid #f1f1f1;
@@ -331,7 +357,7 @@ cursor: pointer; }
   z-index: 1000;
   display: none;
   min-width: 10rem;
-  padding: 0.5rem 0;
+  // padding: 0.5rem 0;
   margin: 0;
   font-size: 0.8125rem;
   color: #495057;
@@ -339,8 +365,9 @@ cursor: pointer; }
   list-style: none;
   background-color: #fff;
   background-clip: padding-box;
-  border: 1px solid rgba(0, 0, 0, 0.15);
-  border-radius: 0.25rem; }
+  border: 0px solid rgba(0, 0, 0, 0.15);
+  width: 18rem;
+  border-radius: 0.5rem; }
   .dropdown-menu[data-bs-popper] {
     top: 100%;
     left: 0;
@@ -399,10 +426,6 @@ cursor: pointer; }
     margin-right: 30px; }
     .notification .notify-bell:hover {
       transform: translateY(-0.125rem);
-    }
-    @media (min-width: 640px) {
-      width: 3rem;
-      height: 3rem;
     }
     @media only screen and (max-width: 880px) {
       .notification .notify-bell {

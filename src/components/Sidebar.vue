@@ -73,14 +73,14 @@ export default {
       top: auto;
       bottom: 0;
       width: 100%;
-      height: 7vh;
+      height: 60px;
       left: 0;
       border-radius: 0px; } }
 .menu {
   margin-top: 100px; }
   @media only screen and (max-width: 767px) {
     .menu {
-      margin-top: 1.5vh; } }
+      margin-top: 4px; } }
   @media only screen and (max-width: 767px) {
     .menu ul {
       display: flex;
@@ -90,7 +90,7 @@ export default {
     list-style-type: none;
     text-align: center; }
     .menu ul li a {
-      padding: 15.5px 18px;
+      padding: 13px 18px;
       display: inline-block;
       margin-bottom: 20px;
       border-radius: 15px; }

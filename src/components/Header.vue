@@ -170,7 +170,7 @@ export default {
 
 <style lang="less" scoped>
 .header {
-  background: #f8f8fb;
+  background: #f0f0f0;
   padding: 20px 0px;
   position: fixed;
   top: 0;

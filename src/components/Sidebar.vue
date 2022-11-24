@@ -97,7 +97,7 @@ export default {
       .menu ul li a:hover, 
       .menu ul li a:focus, 
       .menu ul li a:active {
-        background: rgba(91, 207, 197, 0.1);
+        background: rgba(7,106,224,0.1);
         .menu ul li:hover a:hover i {
           color: #076AE0;
           font-size: 24px;

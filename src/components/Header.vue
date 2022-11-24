@@ -5,10 +5,10 @@
         <div class="col-xxl-12">
           <div class="header-content">
             <div class="header-left">
-              <div class="brand-logo">
+              <div class="brand-logo header-logo">
                 <router-link to="/">
-                  <img src="../assets/logo/blue-logo.svg" alt="" />
-                  <span>Hexlink</span>
+                  <img src="../assets/logo/blue2-logo.svg" alt="" />
+                  <!-- <span>Hexlink</span> -->
                 </router-link>
               </div>
               <!-- <div class="search">
@@ -171,23 +171,23 @@ export default {
 <style lang="less" scoped>
 .header {
   background: #f0f0f0;
-  padding: 20px 0px;
+  padding: 30px 0px 20px 0px;
   position: fixed;
   top: 0;
-  left: 100px;
+  left: 9.5rem;
   right: 0;
-  z-index: 02; }
-  @media only screen and (max-width: 767px) {
+  z-index: 2; }
+  @media only screen and (max-width: 880px) {
     .header {
       left: 0;
-      padding: 10px 0px; } }
+      padding: 30px 0px 20px 0px; } }
   .header .brand-logo {
     margin-top: 0px;
     padding-right: 20px;
     border-radius: 5px; }
     .header .brand-logo img {
       filter: none;
-      width: 22px;
+      max-width: 180px;
       margin-right: 5px; }
     .header .brand-logo span {
       font-weight: bold;
@@ -197,7 +197,7 @@ export default {
       position: relative;
       top: 3px;
       font-size: 20px; }
-    @media only screen and (max-width: 767px) {
+    @media only screen and (max-width: 880px) {
       .header .brand-logo {
         display: block; }
         .header .brand-logo span {
@@ -224,7 +224,7 @@ export default {
 .dark-light-toggle {
 margin-right: 20px;
 cursor: pointer; }
-@media only screen and (max-width: 767px) {
+@media only screen and (max-width: 880px) {
   .dark-light-toggle {
     margin-right: 0px;
     margin-left: 15px; } }
@@ -363,7 +363,7 @@ cursor: pointer; }
   cursor: pointer; }
   .notification .notify-bell {
     margin-right: 30px; }
-    @media only screen and (max-width: 767px) {
+    @media only screen and (max-width: 880px) {
       .notification .notify-bell {
         margin-right: 15px;
         margin-left: 15px; } }

@@ -68,7 +68,7 @@ export default {
   //     width: 5rem;
   //     transition: 0.4s ease-in-out;
   //     overflow: hidden; } }
-  @media only screen and (max-width: 767px) {
+  @media only screen and (max-width: 880px) {
     .sidebar {
       top: auto;
       bottom: 0;
@@ -78,10 +78,10 @@ export default {
       border-radius: 0px; } }
 .menu {
   margin-top: 100px; }
-  @media only screen and (max-width: 767px) {
+  @media only screen and (max-width: 880px) {
     .menu {
       margin-top: 4px; } }
-  @media only screen and (max-width: 767px) {
+  @media only screen and (max-width: 880px) {
     .menu ul {
       display: flex;
       justify-content: space-around;
@@ -99,13 +99,13 @@ export default {
       .menu ul li a:active {
         background: rgba(91, 207, 197, 0.1);
         .menu ul li:hover a:hover i {
-          color: #5BCFC5;
+          color: #076AE0;
           font-size: 24px;
           opacity: 1; } }
       .menu ul li a.router-link-active {
-        background: rgba(91,207,197,0.15); }
+        background: rgba(7,106,224,0.15); }
         .menu ul li a.router-link-active i {
-          color: #5BCFC5;
+          color: #076AE0;
           font-size: 24px;
           opacity: 1; }
       .menu ul li a i {
@@ -116,7 +116,7 @@ export default {
       bottom: 50px;
       left: 0;
       right: 0; }
-      @media only screen and (max-width: 767px) {
+      @media only screen and (max-width: 880px) {
         .menu ul li.logout {
           position: relative;
           bottom: 0;
@@ -133,7 +133,7 @@ export default {
   .copyright a {
     color: #000;
     font-size: 12px; }
-  @media only screen and (max-width: 767px) {
+  @media only screen and (max-width: 880px) {
     .copyright {
       display: none; } }
 </style>

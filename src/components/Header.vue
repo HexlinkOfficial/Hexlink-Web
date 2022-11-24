@@ -124,7 +124,7 @@
                                 {{ addressTextLong }}
                               </h5>
                             </span>
-                            <span>$200.45</span>
+                            <span style="padding-left: 9px;">$200.45</span>
                           </div>
                         </div>
                       </div>
@@ -357,7 +357,7 @@ cursor: pointer; }
       background-color: #8B5CF6; 
       background-color: #EC4899; 
       transition-property: all; 
-      width: 55px;
+      width: 40px;
       height: 40px;
       margin-right: 15px; }
     .profile_log .dropdown-menu .user-wallet .user-info {

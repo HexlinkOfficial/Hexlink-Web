@@ -58,7 +58,7 @@ export default {
   position: fixed;
   left: 20px;
   height: calc(95%);
-  width: 5rem;
+  width: 6.5rem;
   top: 2.5%;
   z-index: 3;
   bottom: 20px;
@@ -90,7 +90,7 @@ export default {
     list-style-type: none;
     text-align: center; }
     .menu ul li a {
-      padding: 12px 15px;
+      padding: 15.5px 18px;
       display: inline-block;
       margin-bottom: 20px;
       border-radius: 15px; }
@@ -110,8 +110,7 @@ export default {
           opacity: 1; }
       .menu ul li a i {
         color: #9fa4a6;
-        font-size: 24px;
-        opacity: 0.75; }
+        font-size: 24px; }
     .menu ul li.logout {
       position: absolute;
       bottom: 50px;

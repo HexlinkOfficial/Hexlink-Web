@@ -1126,7 +1126,7 @@ button,
   text-align: center;
   margin-top: 30px; }
   .brand-logo img {
-    max-width: 35px; }
+    max-width: 47px; }
   @media only screen and (max-width: 767px) {
     .brand-logo {
       display: none; } }
@@ -5759,6 +5759,9 @@ p {
 }
 
 @media only screen and (max-width: 767px) {
+    .row {
+      justify-content: center;
+    }
     .login-wrapper {
         display: block;
         height: auto;

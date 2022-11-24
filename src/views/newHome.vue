@@ -1,9 +1,7 @@
 <style lang="less" scoped>
-
-
 .content-body {
-  margin-left: 100px; }
-  @media only screen and (max-width: 767px) {
+  margin-left: 9.5rem; }
+  @media only screen and (max-width: 880px) {
     .content-body {
       margin-left: 0px;
       margin-bottom: 50px; } }
@@ -225,7 +223,7 @@
     z-index: 3; }
   .input-group .btn {
     position: relative;
-    z-index: 2; }
+    z-index: 1; }
     .input-group .btn:focus {
       z-index: 3; }
 .price-widget {
@@ -383,7 +381,7 @@ img, svg {
         <div class="row">
           <div className="row invoice-card-row">
             <div className="col-xl-3 col-xxl-6 col-sm-6">
-              <div className="card bg-warning invoice-card">
+              <div className="card bg-hexlink invoice-card">
                 <div className="card-body d-flex">
                   <div className="icon me-3">
                     <svg width="33px" height="32px">

@@ -72,7 +72,7 @@
     overflow-x: auto;
     -webkit-overflow-scrolling: touch; } }
 
-@media (max-width: 767.98px) {
+@media (max-width: 880px) {
   .table-responsive-md {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch; } }
@@ -243,7 +243,7 @@
     overflow-x: auto;
     -webkit-overflow-scrolling: touch; } }
 
-@media (max-width: 767.98px) {
+@media (max-width: 880px) {
   .table-responsive-md {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch; } }
@@ -1127,7 +1127,7 @@ button,
   margin-top: 30px; }
   .brand-logo img {
     max-width: 47px; }
-  @media only screen and (max-width: 767px) {
+  @media only screen and (max-width: 880px) {
     .brand-logo {
       display: none; } }
 
@@ -2844,7 +2844,8 @@ p {
 
 .bg-success {
   background-color: #68e365 !important; }
-
+.bg-hexlink {
+  background-color: #076AE0 !important; }
 .bg-info {
   background-color: #b48dd3 !important; }
 
@@ -5758,7 +5759,7 @@ p {
     }
 }
 
-@media only screen and (max-width: 767px) {
+@media only screen and (max-width: 880px) {
     .row {
       justify-content: center;
     }
@@ -6852,8 +6853,8 @@ p {
 
 .btn-primary {
   color: white;
-  background-color: #5bcfc5;
-  border-color: #5bcfc5; }
+  background-color: #076AE0;
+  border-color: #076AE0; }
   .btn-primary:hover {
     color: #000;
     background-color: #74d6ce;

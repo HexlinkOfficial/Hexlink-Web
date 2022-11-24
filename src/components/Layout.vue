@@ -25,7 +25,7 @@ export default {
   overflow: hidden;
   position: relative;
   z-index: 1;
-  padding-top: 120px;
+  padding-top: 100px;
 }
 
 #main-wrapper.show {

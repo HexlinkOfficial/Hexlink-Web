@@ -84,25 +84,20 @@
     import { useAuthStore } from '@/stores/auth'
     import logo from "../assets/hori-white-logo.svg"
     import loginbg from "../assets/bg-login.jpg"
-
     const store = useAuthStore();
     const router = useRouter();
-
     const google_login = async () => {
         await googleSocialLogin();
         router.push(store.returnUrl || "/");
     }
-
     const twitter_login = async () => {
         await twitterSocialLogin();
         router.push(store.returnUrl || "/");
     }
-
     const github_login = async () => {
         await githubSocialLogin();
         router.push(store.returnUrl || "/");
     }
-
     const facebook_login = async () => {
         await facebookSocialLogin();
         router.push(store.returnUrl || "/");
@@ -116,7 +111,6 @@
         font-size: 1.5em;
         font-weight: bold;
     }
-
     .login-main-page {
         padding: 10vh;
         background-size: cover;
@@ -128,7 +122,6 @@
     @media only screen and (max-height: 780px) {
         .login-main-page {
             height: 100%; } }
-
     .login-main-page .login-wrapper {
         background: #fff;
         max-width: 65vw;
@@ -211,7 +204,6 @@
                 margin-top: 0rem !important; } }
             .login-wrapper .bottom-privacy a {
                 color: inherit; }
-
         .login-wrapper .login-aside-left {
             max-width: 60%;
             flex: 0 0 60%;
@@ -224,7 +216,6 @@
             background-position: bottom;
             background: linear-gradient(to right, #5bcfc5 25%, #3197b7 100%);
             overflow: hidden; }
-
             .login-wrapper .login-aside-left:before, .login-wrapper .login-aside-left:after {
                 position: absolute;
                 z-index: -1;
@@ -248,7 +239,6 @@
                 top: -30px;
                 transform: rotate(45deg);
                 animation: dzMove1 8s linear infinite; }
-
             .login-wrapper .login-aside-left .login-description {
                 display: table-cell;
                 vertical-align: bottom; }
@@ -374,7 +364,6 @@
                 font-size: 1.5rem; }
             .login-wrapper h4, .login-wrapper .h4, .login-wrapper .h4 {
                 font-size: 0.8rem; } }
-
     .facebook__btn,
     .twitter__btn,
     .google__btn,
@@ -390,18 +379,15 @@
         border-radius: 8px;
         border: none;
         line-height: 20px;
-
         &.google__btn {
             background: #DB4437;
             color: white;
             box-shadow: 0 15px 30px rgba(#DB4437, .36);
             transition: .2s linear;
-
             .fa {
                 font-size: 20px;
                 // padding: 0 5px 0 0;
             }
-
             &:hover {
                 box-shadow: 0 0 0 rgba(#DB4437, .0);
             }
@@ -411,12 +397,10 @@
             color: white;
             box-shadow: 0 15px 30px rgba(#25282d, .36);
             transition: .2s linear;
-
             .fa {
                 font-size: 20px;
                 // padding: 0 5px 0 0;
             }
-
             &:hover {
                 box-shadow: 0 0 0 rgba(#25282d, .0);
             }
@@ -426,12 +410,10 @@
             color: white;
             box-shadow: 0 15px 30px rgba(#1DA1F2, .36);
             transition: .2s linear;
-
             .fa {
                 font-size: 20px;
                 // padding: 0 5px 0 0;
             }
-
             &:hover {
                 box-shadow: 0 0 0 rgba(#1DA1F2, .0);
             }
@@ -441,12 +423,10 @@
             color: white;
             box-shadow: 0 15px 30px rgba(#4267B2, .36);
             transition: .2s linear;
-
             .fa {
                 font-size: 20px;
                 // padding: 0 5px 0 0;
             }
-
             &:hover {
                 box-shadow: 0 0 0 rgba(#4267B2, .0);
             }

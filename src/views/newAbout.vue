@@ -1,9 +1,9 @@
 <style lang="less" scoped>
 .content-body {
-  margin-left: 100px;
+  margin-left: 9.5rem;
 }
 
-@media only screen and (max-width: 767px) {
+@media only screen and (max-width: 880px) {
   .content-body {
     margin-left: 0px;
     margin-bottom: 50px;
@@ -101,6 +101,184 @@
   color: #fff;
 }
 
+.card {
+  margin-bottom: 1.875rem;
+  background-color: #fff;
+  transition: all .5s ease-in-out;
+  position: relative;
+  border: 0px solid transparent;
+  border-radius: 1.75rem;
+  box-shadow: 0px 5px 5px 0px rgba(82, 63, 105, 0.05);
+  height: calc(100% - 30px);
+}
+
+@media only screen and (max-width: 575px) {
+  .card {
+    margin-bottom: 0.938rem;
+    height: calc(100% - 0.938rem);
+  }
+}
+
+.card-body {
+  padding: 1.875rem;
+}
+
+@media only screen and (max-width: 575px) {
+  .card-body {
+    padding: 1rem;
+  }
+}
+
+.card-title {
+  font-size: 20px;
+  font-weight: 500;
+  color: #000;
+  text-transform: capitalize;
+}
+
+.card-title--large {
+  font-size: 1.5rem;
+}
+
+.card-title--medium {
+  font-size: 1rem;
+}
+
+.card-title--small {
+  font-size: 0.875rem;
+}
+
+.card-header {
+  border-color: #f5f5f5;
+  position: relative;
+  background: transparent;
+  padding: 1.5rem 1.875rem 1.25rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+@media only screen and (max-width: 575px) {
+  .card-header {
+    padding: 1.25rem 1rem 1.25rem;
+  }
+}
+
+[data-theme-version="dark"] .card-header {
+  border-color: #2e2e42;
+}
+
+.card-header .card-title {
+  margin-bottom: 0px;
+}
+
+.card-header .subtitle {
+  padding-top: 5px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.card-footer {
+  border-color: #f5f5f5;
+  background: transparent;
+  padding: 1.25rem 1.875rem 1.25rem;
+}
+
+[data-theme-version="dark"] .card-footer {
+  border-color: #2e2e42;
+}
+
+// dashboard card
+.invoice-card-row .invoice-card {
+  overflow: hidden;
+  position: relative;
+}
+
+.invoice-card-row .invoice-card .icon {
+  height: 60px;
+  width: 60px;
+  line-height: 54px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.4);
+  text-align: center;
+}
+
+.invoice-card-row .invoice-card .card-body {
+  padding: 35px 30px 45px 30px;
+}
+
+.invoice-card-row .invoice-card .invoice-num {
+  font-size: 38px;
+  margin-bottom: 5px;
+}
+
+.invoice-card-row .invoice-card:after {
+  position: absolute;
+  content: "";
+}
+
+@media only screen and (max-width: 575px) {
+  .invoice-card-row .invoice-card .card-body {
+    padding: 20px 20px 25px 20px;
+  }
+
+  .invoice-card-row .invoice-card .invoice-num {
+    font-size: 30px;
+  }
+}
+
+.invoice-card-row>div:nth-child(1) .invoice-card:after {
+  height: 120px;
+  width: 120px;
+  transform: rotate(40deg);
+  top: -35px;
+  right: -35px;
+  border-radius: 1.75rem;
+  background: -moz-linear-gradient(left, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0) 100%);
+  background: -webkit-linear-gradient(left, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0) 100%);
+  background: linear-gradient(to right, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0) 100%);
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#26ffffff', endColorstr='#00ffffff', GradientType=1);
+}
+
+.invoice-card-row>div:nth-child(2) .invoice-card:after {
+  height: 150px;
+  width: 150px;
+  transform: rotate(40deg);
+  bottom: -40px;
+  right: -30px;
+  border-radius: 1.75rem;
+  background: -moz-linear-gradient(left, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 100%);
+  background: -webkit-linear-gradient(left, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 100%);
+  background: linear-gradient(to right, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 100%);
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#26ffffff', endColorstr='#00ffffff', GradientType=1);
+}
+
+.invoice-card-row>div:nth-child(3) .invoice-card:after {
+  height: 100px;
+  width: 100px;
+  transform: rotate(-45deg);
+  top: -35px;
+  right: 30px;
+  border-radius: 1.75rem;
+  background: -moz-linear-gradient(left, rgba(0, 0, 0, 0.05) 0%, rgba(0, 0, 0, 0) 100%);
+  background: -webkit-linear-gradient(left, rgba(0, 0, 0, 0.05) 0%, rgba(0, 0, 0, 0) 100%);
+  background: linear-gradient(to right, rgba(0, 0, 0, 0.05) 0%, rgba(0, 0, 0, 0) 100%);
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#26ffffff', endColorstr='#00ffffff', GradientType=1);
+}
+
+.invoice-card-row>div:nth-child(4) .invoice-card:after {
+  height: 100px;
+  width: 100px;
+  transform: rotate(145deg);
+  bottom: -45px;
+  right: 0px;
+  border-radius: 1.75rem;
+  background: -moz-linear-gradient(left, rgba(0, 0, 0, 0.05) 0%, rgba(0, 0, 0, 0) 100%);
+  background: -webkit-linear-gradient(left, rgba(0, 0, 0, 0.05) 0%, rgba(0, 0, 0, 0) 100%);
+  background: linear-gradient(to right, rgba(0, 0, 0, 0.05) 0%, rgba(0, 0, 0, 0) 100%);
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#26ffffff', endColorstr='#00ffffff', GradientType=1);
+}
+
 .invite-content .social-share-link {
   margin-top: 15px;
 }
@@ -153,7 +331,7 @@
 
 .input-group .btn {
   position: relative;
-  z-index: 2;
+  z-index: 1;
 }
 
 .input-group .btn:focus {
@@ -267,21 +445,7 @@
 }
 
 .welcome-profile {
-  background: linear-gradient(to right, #5bcfc5 25%, #3197b7 100%);
-  color: #fff;
-  transition: all .5s ease-in-out;
-  box-shadow: 0px 5px 5px 0px rgb(82 63 105 / 5%);
-}
-
-.welcome-profile:after {
-  background: linear-gradient(to right, rgba(255, 255, 255, 0.1) 0%, rgba(49, 151, 183, 0) 100%);
-  transform: rotate(45deg);
-  height: 90px;
-  width: 90px;
-  content: "";
-  position: absolute;
-  bottom: -20px;
-  right: 0;
+  background: #556ee6 !important;
 }
 
 .welcome-profile .card-body img {
@@ -389,82 +553,49 @@
   font-size: 20px;
   margin-right: 5px;
 }
+
+img,
+svg {
+  vertical-align: middle;
+}
 </style>
 <template>
   <layout :active="1">
     <div class="content-body">
       <div class="container">
         <div class="row">
-          <div class="col-xxl-6 col-xl-6 col-lg-12">
-            <div class="card">
-              <div class="card-body">
-                <div class="invite-content">
-                  <h4>Invite a friend and get $30</h4>
+          <div className="row invoice-card-row">
+            <div class="col-xxl-3 col-xl-6 col-lg-6">
+              <div class="card welcome-profile">
+                <div class="card-body">
+                  <img :src="user?.photoURL" :size="64" referrerpolicy="no-referrer" />
+                  <h4>Welcome, {{ user?.displayName }}!</h4>
                   <p>
-                    You will receive up to $30 when they 1.Buy Crypto 2.
-                    Deposit 3. Launch their FIRST airdrop 🔥.
-                    <router-link to="#">Learn more</router-link>
+                    Looks like you are not verified yet. Verify yourself to use
+                    the full potential of Qash.
                   </p>
-
-                  <div class="copy-link">
-                    <form action="#">
-                      <div class="input-group">
-                        <input type="text" class="form-control" v-bind:value="message" />
-                        <!-- <span class="input-group-text c-pointer" @click="doCopy">Copy</span> -->
-                        <span class="btn btn-primary" @click="doCopy">Copy</span>
-                      </div>
-                    </form>
-                  </div>
+            
+                  <ul>
+                    <li>
+                      <router-link to="#">
+                        <span class="verified"><i class="icofont-check-alt"></i></span>
+                        Verify account
+                      </router-link>
+                    </li>
+                    <li>
+                      <router-link to="#">
+                        <span class="not-verified"><i class="icofont-close-line"></i></span>
+                        Two-factor authentication (2FA)
+                      </router-link>
+                    </li>
+                    <li>
+                      <router-link to="#">
+                        <span class="not-verified"><i class="icofont-close-line"></i></span>
+                        Deposit money
+                      </router-link>
+                    </li>
+                  </ul>
                 </div>
-              </div>
-            </div>
-          </div>
-          <div class="col-xxl-6 col-xl-6 col-lg-12">
-            <div class="card">
-              <div class="card-body">
-                <div class="invite-content">
-                  <h4>Get free BTC every day</h4>
-                  <p>
-                    Earn free Sui in rewards by completing a learning
-                    mission daily or inviting friends to Hexlink 🚀.
-                    <router-link to="#">Learn more</router-link>
-                  </p>
-
-                  <router-link to="#" class="btn btn-primary">Invite friends to join</router-link>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="col-xxl-3 col-xl-6 col-lg-6">
-            <div class="card welcome-profile">
-              <div class="card-body">
-                <img :src="user?.photoURL" :size="64" referrerpolicy="no-referrer" />
-                <h4>Welcome, {{ user?.displayName }}!</h4>
-                <p>
-                  Looks like you are not verified yet. Verify yourself to use
-                  the full potential of Qash.
-                </p>
-
-                <ul>
-                  <li>
-                    <router-link to="#">
-                      <span class="verified"><i class="icofont-check-alt"></i></span>
-                      Verify account
-                    </router-link>
-                  </li>
-                  <li>
-                    <router-link to="#">
-                      <span class="not-verified"><i class="icofont-close-line"></i></span>
-                      Two-factor authentication (2FA)
-                    </router-link>
-                  </li>
-                  <li>
-                    <router-link to="#">
-                      <span class="not-verified"><i class="icofont-close-line"></i></span>
-                      Deposit money
-                    </router-link>
-                  </li>
-                </ul>
               </div>
             </div>
           </div>
@@ -475,18 +606,12 @@
 </template>
 
 <script lang="ts">
-// import BalanceChart from "../../components/qCash/BalanceChart.vue";
-// import AnalyticsChart from "../../components/qCash/home/AnalyticsChart.vue";
 import Layout from "../components/Layout.vue";
-// import { PerfectScrollbar } from "vue2-perfect-scrollbar";
 import { useAuthStore } from '@/stores/auth';
 
 export default {
   components: {
     Layout,
-    // BalanceChart,
-    // AnalyticsChart,
-    // PerfectScrollbar,
   },
   data() {
     const store = useAuthStore();

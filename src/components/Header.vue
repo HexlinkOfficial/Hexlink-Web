@@ -100,10 +100,10 @@
                     </div>
                     <div>
                       <!-- ethereum -->
-                      <div class="network-items">
+                      <div class="network-items" @click="eth = !eth">
                         <button>
-                          <div style="display: flex; margin-right: 0.75rem; align-items: center; height: 1.25rem; ">
-                            <svg width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <div style="display: flex; margin-right: 0.75rem; align-items: center; height: 1.25rem; width: 1.25rem;">
+                            <svg v-if="eth" width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg">
                               <path d="M17 1L6 12L1 7" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                             </svg>
                           </div>
@@ -119,10 +119,10 @@
                         </button>
                       </div>
                       <!-- Sui -->
-                      <div class="network-items">
+                      <div class="network-items" @click="sui = !sui">
                         <button>
                           <div style="display: flex; margin-right: 0.75rem; align-items: center; height: 1.25rem; width: 1.25rem;">
-                            <svg width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: none;">
+                            <svg v-if="sui" width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg">
                               <path d="M17 1L6 12L1 7" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                             </svg>
                           </div>
@@ -138,11 +138,10 @@
                         </button>
                       </div>
                       <!-- Optimism -->
-                      <div class="network-items">
+                      <div class="network-items" @click="op = !op">
                         <button>
                           <div style="display: flex; margin-right: 0.75rem; align-items: center; height: 1.25rem; width: 1.25rem;">
-                            <svg width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg"
-                              style="display: none;">
+                            <svg v-if="op" width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg">
                               <path d="M17 1L6 12L1 7" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                             </svg>
                           </div>
@@ -158,11 +157,10 @@
                         </button>
                       </div>
                       <!-- Polygon -->
-                      <div class="network-items">
+                      <div class="network-items" @click="poly = !poly">
                         <button>
                           <div style="display: flex; margin-right: 0.75rem; align-items: center; height: 1.25rem; width: 1.25rem;">
-                            <svg width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg"
-                              style="display: none;">
+                            <svg v-if="poly" width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg">
                               <path d="M17 1L6 12L1 7" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                             </svg>
                           </div>
@@ -179,11 +177,10 @@
                         </button>
                       </div>
                       <!-- Fantom -->
-                      <div class="network-items">
+                      <div class="network-items" @click="fan = !fan">
                         <button>
                           <div style="display: flex; margin-right: 0.75rem; align-items: center; height: 1.25rem; width: 1.25rem;">
-                            <svg width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg"
-                              style="display: none;">
+                            <svg v-if="fan" width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg">
                               <path d="M17 1L6 12L1 7" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                             </svg>
                           </div>
@@ -200,11 +197,10 @@
                         </button>
                       </div>
                       <!-- Avalanche -->
-                      <div class="network-items">
+                      <div class="network-items" @click="aval = !aval">
                         <button>
                           <div style="display: flex; margin-right: 0.75rem; align-items: center; height: 1.25rem; width: 1.25rem;">
-                            <svg width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg"
-                              style="display: none;">
+                            <svg v-if="aval" width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg">
                               <path d="M17 1L6 12L1 7" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                             </svg>
                           </div>
@@ -221,11 +217,10 @@
                         </button>
                       </div>
                       <!-- BNB Smart Chain -->
-                      <div class="network-items">
+                      <div class="network-items" @click="bnb = !bnb">
                         <button>
                           <div style="display: flex; margin-right: 0.75rem; align-items: center; height: 1.25rem; width: 1.25rem;">
-                            <svg width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg"
-                              style="display: none;">
+                            <svg v-if="bnb" width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg">
                               <path d="M17 1L6 12L1 7" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                             </svg>
                           </div>
@@ -242,11 +237,10 @@
                         </button>
                       </div>
                       <!-- Arbitrum -->
-                      <div class="network-items">
+                      <div class="network-items" @click="arbi = !arbi">
                         <button>
                           <div style="display: flex; margin-right: 0.75rem; align-items: center; height: 1.25rem; width: 1.25rem;">
-                            <svg width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg"
-                              style="display: none;">
+                            <svg v-if="arbi" width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg">
                               <path d="M17 1L6 12L1 7" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                             </svg>
                           </div>
@@ -380,6 +374,14 @@ export default {
       addressTextNormal,
       user,
       active_: "",
+      eth: true,
+      sui: false,
+      op: false,
+      poly: false,
+      fan: false,
+      aval: false,
+      bnb: false,
+      arbi: false
     };
   },
   methods: {

@@ -492,6 +492,13 @@ cursor: pointer; }
   border-color: #F3F4F6;
   cursor: pointer;
   margin-right: 1rem; }
+  .profile_log .user:hover {
+      transform: translateY(-0.125rem);
+      fill: #076AE0;
+      background-color: rgb(221,220,251);
+      border-color: rgb(48,138,245);
+      color: rgb(7,106,224);
+    }
   @media only screen and (max-width: 768px) {
     .profile_log .user {
       margin-right: 0.5rem;
@@ -642,6 +649,7 @@ cursor: pointer; }
   background-clip: padding-box;
   border: 0px solid rgba(0, 0, 0, 0.15);
   width: 20rem;
+  transition: 0.2s ease-in-out;
   border-radius: 0.5rem; }
   .dropdown-menu[data-bs-popper] {
     top: 100%;
@@ -705,6 +713,10 @@ cursor: pointer; }
     margin-right: 1rem; }
     .notification .notify-bell:hover {
       transform: translateY(-0.125rem);
+      fill: #1d4ed8;
+      background-color: rgb(221,220,251);
+      border-color: rgb(73,108,233);
+      color: rgb(29,78,216);
     }
     @media only screen and (max-width: 880px) {
       .notification .notify-bell {
@@ -727,6 +739,13 @@ cursor: pointer; }
     border-color: #F3F4F6;
     cursor: pointer;
     margin-right: 1rem; }
+    .selectnetwork .network:hover {
+      transform: translateY(-0.125rem);
+      fill: #076AE0;
+      background-color: rgb(221,220,251);
+      border-color: rgb(48,138,245);
+      color: rgb(7,106,224);
+    }
     @media only screen and (max-width: 768px) {
       .selectnetwork .network {
         margin-right: 0.5rem;
@@ -755,6 +774,7 @@ cursor: pointer; }
       background-clip: padding-box;
       border: 0px solid rgba(0, 0, 0, 0.15);
       border-radius: 0.5rem;
+      transition: 0.2s ease-in-out;
       @media (min-width: 640px) {
         position: absolute;
         left: 0;

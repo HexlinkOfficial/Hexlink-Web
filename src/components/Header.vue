@@ -29,15 +29,69 @@
               <div class="notification dropdown" @click="activeDropDown('notification')"
                 :class="active_ === 'notification' && 'show'">
                 <div class="notify-bell" data-toggle="dropdown">
-                  <svg width="15" height="20" viewBox="0 0 15 20" fill="none" xmlns="http://www.w3.org/2000/svg" class="h-auto w-3 sm:w-auto"><path fill-rule="evenodd" clip-rule="evenodd" d="M9.61379 0.309937C9.89044 0.427717 10.07 0.699327 10.07 1V7.99819H14C14.2667 7.99819 14.5133 8.13982 14.6478 8.37018C14.7822 8.60053 14.7842 8.88494 14.653 9.11714L14.1609 9.988C12.2948 13.2906 9.9149 16.2752 7.11058 18.8298L6.31506 19.5544C6.0955 19.7545 5.7786 19.8061 5.50693 19.686C5.23526 19.566 5.06 19.297 5.06 19V12.0611H1C0.585786 12.0611 0.25 11.7254 0.25 11.3111C0.25 11.177 0.285225 11.051 0.346932 10.9421C2.10572 7.69064 4.3575 4.73117 7.02222 2.16895L8.80017 0.459375C9.0169 0.250976 9.33715 0.192157 9.61379 0.309937ZM2.28458 10.5611H5.81C6.22421 10.5611 6.56 10.8969 6.56 11.3111V17.2945C8.9786 15.009 11.0517 12.3827 12.7134 9.49819H9.32C8.90579 9.49819 8.57 9.1624 8.57 8.74819V2.76162L8.06188 3.25019C5.8111 5.4144 3.86782 7.87442 2.28458 10.5611Z" fill="currentColor"></path></svg>
+                  <svg width="15" height="20" viewBox="0 0 15 20" fill="none" xmlns="http://www.w3.org/2000/svg"
+                    class="h-auto w-3 sm:w-auto">
+                    <path fill-rule="evenodd" clip-rule="evenodd"
+                      d="M9.61379 0.309937C9.89044 0.427717 10.07 0.699327 10.07 1V7.99819H14C14.2667 7.99819 14.5133 8.13982 14.6478 8.37018C14.7822 8.60053 14.7842 8.88494 14.653 9.11714L14.1609 9.988C12.2948 13.2906 9.9149 16.2752 7.11058 18.8298L6.31506 19.5544C6.0955 19.7545 5.7786 19.8061 5.50693 19.686C5.23526 19.566 5.06 19.297 5.06 19V12.0611H1C0.585786 12.0611 0.25 11.7254 0.25 11.3111C0.25 11.177 0.285225 11.051 0.346932 10.9421C2.10572 7.69064 4.3575 4.73117 7.02222 2.16895L8.80017 0.459375C9.0169 0.250976 9.33715 0.192157 9.61379 0.309937ZM2.28458 10.5611H5.81C6.22421 10.5611 6.56 10.8969 6.56 11.3111V17.2945C8.9786 15.009 11.0517 12.3827 12.7134 9.49819H9.32C8.90579 9.49819 8.57 9.1624 8.57 8.74819V2.76162L8.06188 3.25019C5.8111 5.4144 3.86782 7.87442 2.28458 10.5611Z"
+                      fill="currentColor"></path>
+                  </svg>
                   <!-- <span><i class="icofont-alarm"></i></span> -->
                   <span class="notify-dot"></span>
                 </div>
-                <div class="
-                    dropdown-menu dropdown-menu-right
-                    notification-list
-                    mt-3
-                  " :class="active_ === 'notification' && 'show'">
+                <div class="dropdown-menu dropdown-menu-right notification-list mt-3" :class="active_ === 'notification' && 'show'">
+                  <h4>Announcements</h4>
+                  <div class="lists">
+                    <router-link to="#" class="">
+                      <div class="d-flex align-items-center">
+                        <span class="me-3 icon success"><i class="icofont-check"></i></span>
+                        <div>
+                          <p>Account created successfully</p>
+                          <span>2020-11-04 12:00:23</span>
+                        </div>
+                      </div>
+                    </router-link>
+                    <router-link to="#" class="">
+                      <div class="d-flex align-items-center">
+                        <span class="me-3 icon fail"><i class="icofont-close"></i></span>
+                        <div>
+                          <p>2FA verification failed</p>
+                          <span>2020-11-04 12:00:23</span>
+                        </div>
+                      </div>
+                    </router-link>
+                    <router-link to="#" class="">
+                      <div class="d-flex align-items-center">
+                        <span class="me-3 icon success"><i class="icofont-check"></i></span>
+                        <div>
+                          <p>Device confirmation completed</p>
+                          <span>2020-11-04 12:00:23</span>
+                        </div>
+                      </div>
+                    </router-link>
+                    <router-link to="#" class="">
+                      <div class="d-flex align-items-center">
+                        <span class="me-3 icon pending"><i class="icofont-warning"></i></span>
+                        <div>
+                          <p>Phone verification pending</p>
+                          <span>2020-11-04 12:00:23</span>
+                        </div>
+                      </div>
+                    </router-link>
+              
+                    <router-link to="./settings-activity">More <i class="icofont-simple-right"></i></router-link>
+                  </div>
+                </div>
+              </div>
+              <div class="notification dropdown" @click="activeDropDown('notification')"
+                :class="active_ === 'notification' && 'show'">
+                <div class="network" data-toggle="dropdown">
+                  <img src="https://token.metaswap.codefi.network/assets/networkLogos/ethereum.svg" height=25 style="margin-left: 0.5rem; margin-right: 0.5rem;" />
+                  <span>Ethereum</span>
+                  <svg width="14" height="8" viewBox="0 0 14 8" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 0.5rem;">
+                    <path d="M1 1L7 7L13 1" stroke="#475569" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                </div>
+                <div class="dropdown-menu dropdown-menu-right notification-list mt-3" :class="active_ === 'notification' && 'show'">
                   <h4>Announcements</h4>
                   <div class="lists">
                     <router-link to="#" class="">
@@ -260,9 +314,14 @@ export default {
       font-size: 20px; }
     @media only screen and (max-width: 880px) {
       .header .brand-logo {
-        display: block; }
+        display: block;
+        padding-right: 0; }
         .header .brand-logo span {
-          display: none; } }
+          display: none; }
+        .header .brand-logo img {
+          filter: none;
+          max-width: 165px;
+          margin-right: 5px; } }
   .header.landing {
     left: 0px; }
     .header.landing a {
@@ -433,7 +492,7 @@ cursor: pointer; }
   background-color: #fff;
   background-clip: padding-box;
   border: 0px solid rgba(0, 0, 0, 0.15);
-  width: 18rem;
+  width: 20rem;
   border-radius: 0.5rem; }
   .dropdown-menu[data-bs-popper] {
     top: 100%;
@@ -490,17 +549,43 @@ cursor: pointer; }
     border-width: 1px;
     border-color: #F3F4F6;
     cursor: pointer;
-    margin-right: 30px; }
+    margin-right: 1rem; }
     .notification .notify-bell:hover {
       transform: translateY(-0.125rem);
     }
     @media only screen and (max-width: 880px) {
       .notification .notify-bell {
-        margin-right: 15px;
-        margin-left: 15px; } }
+        margin-right: 0.5rem;
+        margin-left: 0.5rem; } }
     .notification .notify-bell i {
       font-size: 22px;
       color: #343a40; }
+  .notification .network {
+    display: flex;
+    position: relative;
+    background-color: #ffffff;
+    transition-property: all;
+    justify-content: center;
+    align-items: center;
+    width: auto;
+    height: 2.5rem;
+    border-radius: 9999px;
+    border-width: 1px;
+    border-color: #F3F4F6;
+    cursor: pointer;
+    margin-right: 1rem; }
+    @media only screen and (max-width: 880px) {
+      .notification .network {
+        margin-right: 0.5rem;
+        margin-left: 0rem; } }
+  .notification .network span {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    margin-right: 0.5rem;
+    color: rgb(71,85,105); }
+    @media only screen and (max-width: 880px) {
+      .notification .network span {
+        display: none; } }
   .notification .notify-dot {
     position: absolute;
     top: 0;

@@ -86,7 +86,7 @@
                 :class="active_ === 'selectnetwork' && 'show'">
                 <div class="network" data-toggle="dropdown">
                   <img src="https://token.metaswap.codefi.network/assets/networkLogos/ethereum.svg" height=25 style="margin-left: 0.5rem; margin-right: 0.5rem;" />
-                  <span>Ethereum</span>
+                  <span>{{ networkCount }} Networks</span>
                   <svg width="14" height="8" viewBox="0 0 14 8" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 0.5rem; width: 1rem">
                     <path d="M1 1L7 7L13 1" stroke="#475569" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                   </svg>
@@ -100,7 +100,7 @@
                     </div>
                     <div>
                       <!-- ethereum -->
-                      <div class="network-items" @click="eth = !eth">
+                      <div class="network-items" @click="eth = !eth; countNetworks()">
                         <button>
                           <div style="display: flex; margin-right: 0.75rem; align-items: center; height: 1.25rem; width: 1.25rem;">
                             <svg v-if="eth" width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -119,7 +119,7 @@
                         </button>
                       </div>
                       <!-- Sui -->
-                      <div class="network-items" @click="sui = !sui">
+                      <div class="network-items" @click="sui = !sui; countNetworks()">
                         <button>
                           <div style="display: flex; margin-right: 0.75rem; align-items: center; height: 1.25rem; width: 1.25rem;">
                             <svg v-if="sui" width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -138,7 +138,7 @@
                         </button>
                       </div>
                       <!-- Optimism -->
-                      <div class="network-items" @click="op = !op">
+                      <div class="network-items" @click="op = !op; countNetworks()">
                         <button>
                           <div style="display: flex; margin-right: 0.75rem; align-items: center; height: 1.25rem; width: 1.25rem;">
                             <svg v-if="op" width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -157,7 +157,7 @@
                         </button>
                       </div>
                       <!-- Polygon -->
-                      <div class="network-items" @click="poly = !poly">
+                      <div class="network-items" @click="poly = !poly; countNetworks()">
                         <button>
                           <div style="display: flex; margin-right: 0.75rem; align-items: center; height: 1.25rem; width: 1.25rem;">
                             <svg v-if="poly" width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -177,7 +177,7 @@
                         </button>
                       </div>
                       <!-- Fantom -->
-                      <div class="network-items" @click="fan = !fan">
+                      <div class="network-items" @click="fan = !fan; countNetworks()">
                         <button>
                           <div style="display: flex; margin-right: 0.75rem; align-items: center; height: 1.25rem; width: 1.25rem;">
                             <svg v-if="fan" width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -197,7 +197,7 @@
                         </button>
                       </div>
                       <!-- Avalanche -->
-                      <div class="network-items" @click="aval = !aval">
+                      <div class="network-items" @click="aval = !aval; countNetworks()">
                         <button>
                           <div style="display: flex; margin-right: 0.75rem; align-items: center; height: 1.25rem; width: 1.25rem;">
                             <svg v-if="aval" width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -217,7 +217,7 @@
                         </button>
                       </div>
                       <!-- BNB Smart Chain -->
-                      <div class="network-items" @click="bnb = !bnb">
+                      <div class="network-items" @click="bnb = !bnb; countNetworks()">
                         <button>
                           <div style="display: flex; margin-right: 0.75rem; align-items: center; height: 1.25rem; width: 1.25rem;">
                             <svg v-if="bnb" width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -237,7 +237,7 @@
                         </button>
                       </div>
                       <!-- Arbitrum -->
-                      <div class="network-items" @click="arbi = !arbi">
+                      <div class="network-items" @click="arbi = !arbi; countNetworks()">
                         <button>
                           <div style="display: flex; margin-right: 0.75rem; align-items: center; height: 1.25rem; width: 1.25rem;">
                             <svg v-if="arbi" width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -381,10 +381,32 @@ export default {
       fan: false,
       aval: false,
       bnb: false,
-      arbi: false
+      arbi: false,
+      networkCount: 1
     };
   },
   methods: {
+    countNetworks() {
+      var test = 0;
+      if (this.eth) {
+        test += 1;
+      } if (this.sui) {
+        test += 1;
+      } if (this.op) {
+        test += 1;
+      } if (this.poly) {
+        test += 1;
+      } if (this.fan) {
+        test += 1;
+      } if (this.aval) {
+        test += 1;
+      } if (this.bnb) {
+        test += 1;
+      } if (this.arbi) {
+        test += 1;
+      }
+      this.networkCount = test;
+    },
     activeDropDown(value: any) {
       this.active_ = this.active_ === value ? "" : value;
     },

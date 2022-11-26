@@ -91,7 +91,7 @@
                     <path d="M1 1L7 7L13 1" stroke="#475569" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                   </svg>
                 </div>
-                <div class="dropdown-menu dropdown-menu-right network-list mt-3" :class="active_ === 'selectnetwork' && 'show'">
+                <div class="dropdown-menu dropdown-menu-right network-list mt-3" onclick="event.stopPropagation()" :class="active_ === 'selectnetwork' && 'show'">
                   <div class="box">
                     <div class="title">
                       <div class="title-header">
@@ -99,8 +99,8 @@
                       </div>
                     </div>
                     <div>
+                      <!-- ethereum -->
                       <div class="network-items">
-                        <!-- ethereum -->
                         <button>
                           <div style="display: flex; margin-right: 0.75rem; align-items: center; height: 1.25rem; ">
                             <svg width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -117,7 +117,9 @@
                             </div>
                           </div>
                         </button>
-                        <!-- Sui -->
+                      </div>
+                      <!-- Sui -->
+                      <div class="network-items">
                         <button>
                           <div style="display: flex; margin-right: 0.75rem; align-items: center; height: 1.25rem; width: 1.25rem;">
                             <svg width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: none;">
@@ -134,7 +136,9 @@
                             </div>
                           </div>
                         </button>
-                        <!-- Optimism -->
+                      </div>
+                      <!-- Optimism -->
+                      <div class="network-items">
                         <button>
                           <div style="display: flex; margin-right: 0.75rem; align-items: center; height: 1.25rem; width: 1.25rem;">
                             <svg width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg"
@@ -152,7 +156,9 @@
                             </div>
                           </div>
                         </button>
-                        <!-- Polygon -->
+                      </div>
+                      <!-- Polygon -->
+                      <div class="network-items">
                         <button>
                           <div style="display: flex; margin-right: 0.75rem; align-items: center; height: 1.25rem; width: 1.25rem;">
                             <svg width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg"
@@ -171,7 +177,9 @@
                             </div>
                           </div>
                         </button>
-                        <!-- Fantom -->
+                      </div>
+                      <!-- Fantom -->
+                      <div class="network-items">
                         <button>
                           <div style="display: flex; margin-right: 0.75rem; align-items: center; height: 1.25rem; width: 1.25rem;">
                             <svg width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg"
@@ -190,7 +198,9 @@
                             </div>
                           </div>
                         </button>
-                        <!-- Avalanche -->
+                      </div>
+                      <!-- Avalanche -->
+                      <div class="network-items">
                         <button>
                           <div style="display: flex; margin-right: 0.75rem; align-items: center; height: 1.25rem; width: 1.25rem;">
                             <svg width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg"
@@ -209,7 +219,9 @@
                             </div>
                           </div>
                         </button>
-                        <!-- BNB Smart Chain -->
+                      </div>
+                      <!-- BNB Smart Chain -->
+                      <div class="network-items">
                         <button>
                           <div style="display: flex; margin-right: 0.75rem; align-items: center; height: 1.25rem; width: 1.25rem;">
                             <svg width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg"
@@ -228,7 +240,9 @@
                             </div>
                           </div>
                         </button>
-                        <!-- Arbitrum -->
+                      </div>
+                      <!-- Arbitrum -->
+                      <div class="network-items">
                         <button>
                           <div style="display: flex; margin-right: 0.75rem; align-items: center; height: 1.25rem; width: 1.25rem;">
                             <svg width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg"
@@ -366,19 +380,19 @@ export default {
       addressTextNormal,
       user,
       active_: "",
-      themes: "",
     };
   },
   methods: {
     activeDropDown(value: any) {
       this.active_ = this.active_ === value ? "" : value;
     },
-    themeToggle(value: { isOk: any; theme: string; }) {
-      let element = document.body;
-      let value_ = value && value.isOk;
-      this.themes = this.themes !== "" ? "" : "dark-theme";
-      element.classList = value_ ? value.theme : this.themes;
-      localStorage.setItem("theme", value_ ? value.theme : this.themes);
+    closeDropDown(e) {
+      if (!this.$el.contains(e.target)) {
+        this.active_ = "";
+      }
+    },
+    selectNetwork(value: any) {
+      this.active_ = this.active_ === value ? "" : value;
     },
     doCopy: function () {
       this.$copyText(this.actualAddress).then(
@@ -395,10 +409,13 @@ export default {
       );
     },
   },
+  mounted() {
+    document.addEventListener('click', this.closeDropDown)
+  },
+  beforeDestroy() {
+    document.removeEventListener('click', this.closeDropDown)
+  },
   created() {
-    let theme = localStorage.getItem("theme");
-    this.themeToggle({ theme, isOk: true });
-    this.themes = theme;
   },
 };
 </script>
@@ -502,7 +519,8 @@ cursor: pointer; }
   @media only screen and (max-width: 768px) {
     .profile_log .user {
       margin-right: 0.5rem;
-      margin-left: 0rem; } }
+      margin-left: 0rem; 
+      transition: 0.2s ease-in-out; } }
   .profile_log .user span {
     font-size: 0.875rem;
     line-height: 1.25rem;
@@ -547,6 +565,7 @@ cursor: pointer; }
   // margin: 0px;
   // top: 25px !important;
   margin-top: 0.75rem;
+  transition: 0.2s ease-in-out;
   box-shadow: 0 1.5rem 4rem rgba(22, 28, 45, 0.15); }
   .profile_log .dropdown-menu .user {
     display: flex;
@@ -649,13 +668,15 @@ cursor: pointer; }
   background-clip: padding-box;
   border: 0px solid rgba(0, 0, 0, 0.15);
   width: 20rem;
-  transition: 0.2s ease-in-out;
+  z-index: 1;
+  transition: height 0.3s ease-in-out;
   border-radius: 0.5rem; }
-  .dropdown-menu[data-bs-popper] {
-    top: 100%;
-    left: 0;
-    margin-top: 0.125rem; }
+  // .dropdown-menu[data-bs-popper] {
+  //   top: 100%;
+  //   left: 0;
+  //   margin-top: 0.125rem; }
 .dropdown-menu.show {
+  transition: 0.2s ease-in-out;
   display: block; }
 .user-info {
   margin: 15px 0px; }
@@ -673,6 +694,7 @@ cursor: pointer; }
   text-decoration: none;
   white-space: nowrap;
   background-color: transparent;
+  transition: 0.2s ease-in-out;
   border: 0; }
   .dropdown-item:hover, .dropdown-item:focus {
     color: #1e2125;
@@ -687,15 +709,19 @@ cursor: pointer; }
     background-color: transparent; }
 .dropdown-menu.dropdown-menu-right.notification-list.mt-3.show {
   position: absolute;
-  right: 1rem; }
+  right: 1rem;
+  transition: 0.2s ease-in-out; }
 .dropdown-menu.dropdown-menu-right.network-list.mt-3.show {
   position: absolute;
   right: -3.5rem;
-  max-height: 100vh; }
+  max-height: 100vh;
+  transition: 0.2s ease-in-out; }
 .dropdown-menu.dropdown-menu-right.mt-3.show {
   position: absolute;
-  right: 1rem; }
+  right: 1rem;
+  transition: 0.2s ease-in-out; }
 .notification {
+  transition: 0.2s ease-in-out;
   cursor: pointer; }
   .notification .notify-bell {
     display: flex;
@@ -738,6 +764,7 @@ cursor: pointer; }
     border-width: 1px;
     border-color: #F3F4F6;
     cursor: pointer;
+    transition: 0.2s ease-in-out;
     margin-right: 1rem; }
     .selectnetwork .network:hover {
       transform: translateY(-0.125rem);
@@ -774,7 +801,6 @@ cursor: pointer; }
       background-clip: padding-box;
       border: 0px solid rgba(0, 0, 0, 0.15);
       border-radius: 0.5rem;
-      transition: 0.2s ease-in-out;
       @media (min-width: 640px) {
         position: absolute;
         left: 0;
@@ -810,6 +836,15 @@ cursor: pointer; }
       margin-right: 0.75rem;
       padding-left: 0.75rem;
       padding-right: 0.75rem;
+      
+      &:hover {
+        // border-bottom: 1px solid rgb(48, 138, 245);
+        // border-top: 1px solid rgb(48, 138, 245);
+        // border-left: 1px solid rgb(48, 138, 245);
+        // border-right: 1px solid rgb(48, 138, 245);
+        background-color: rgba(48, 138, 245,0.2);
+      }
+
       @media (min-width: 640px) {
         padding-left: 1rem;
         padding-right: 1rem; } }

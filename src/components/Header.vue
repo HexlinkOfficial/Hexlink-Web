@@ -91,47 +91,164 @@
                     <path d="M1 1L7 7L13 1" stroke="#475569" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                   </svg>
                 </div>
-                <div class="dropdown-menu dropdown-menu-right notification-list mt-3" :class="active_ === 'selectnetwork' && 'show'">
-                  <h4>Announcements</h4>
-                  <div class="lists">
-                    <router-link to="#" class="">
-                      <div class="d-flex align-items-center">
-                        <span class="me-3 icon success"><i class="icofont-check"></i></span>
-                        <div>
-                          <p>Account created successfully</p>
-                          <span>2020-11-04 12:00:23</span>
-                        </div>
+                <div class="dropdown-menu dropdown-menu-right network-list mt-3" :class="active_ === 'selectnetwork' && 'show'">
+                  <div class="box">
+                    <div class="title">
+                      <div class="title-header">
+                        <div class="title-text">Networks</div>
                       </div>
-                    </router-link>
-                    <router-link to="#" class="">
-                      <div class="d-flex align-items-center">
-                        <span class="me-3 icon fail"><i class="icofont-close"></i></span>
-                        <div>
-                          <p>2FA verification failed</p>
-                          <span>2020-11-04 12:00:23</span>
-                        </div>
+                    </div>
+                    <div>
+                      <div class="network-items">
+                        <!-- ethereum -->
+                        <button>
+                          <div style="display: flex; margin-right: 0.75rem; align-items: center; height: 1.25rem; ">
+                            <svg width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M17 1L6 12L1 7" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                          </div>
+                          <div style="display: flex; white-space: nowrap; align-items: center; width: 100%; ">
+                            <div style="position: relative; margin-right: 0.75rem; min-width: max-content; ">
+                              <img src="https://token.metaswap.codefi.network/assets/networkLogos/ethereum.svg" height=25 style="margin-left: 0.5rem; margin-right: 0.5rem;" />
+                            </div>
+                            <div class="items-name">
+                              <span class="item-title">Ethereum</span>
+                              <span class="item-balance">$11.39</span>
+                            </div>
+                          </div>
+                        </button>
+                        <!-- Sui -->
+                        <button>
+                          <div style="display: flex; margin-right: 0.75rem; align-items: center; height: 1.25rem; width: 1.25rem;">
+                            <svg width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: none;">
+                              <path d="M17 1L6 12L1 7" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                          </div>
+                          <div style="display: flex; white-space: nowrap; align-items: center; width: 100%; ">
+                            <div style="position: relative; margin-right: 0.75rem; min-width: max-content; ">
+                              <img src="https://svgshare.com/i/oQ6.svg" height=25 style="margin-left: 0.5rem; margin-right: 0.5rem;" />
+                            </div>
+                            <div class="items-name">
+                              <span class="item-title">Sui</span>
+                              <span class="item-balance">$76.47</span>
+                            </div>
+                          </div>
+                        </button>
+                        <!-- Optimism -->
+                        <button>
+                          <div style="display: flex; margin-right: 0.75rem; align-items: center; height: 1.25rem; width: 1.25rem;">
+                            <svg width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg"
+                              style="display: none;">
+                              <path d="M17 1L6 12L1 7" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                          </div>
+                          <div style="display: flex; white-space: nowrap; align-items: center; width: 100%; ">
+                            <div style="position: relative; margin-right: 0.75rem; min-width: max-content; ">
+                              <img src="https://token.metaswap.codefi.network/assets/networkLogos/optimism.svg" height=25 style="margin-left: 0.5rem; margin-right: 0.5rem;" />
+                            </div>
+                            <div class="items-name">
+                              <span class="item-title">Optimism</span>
+                              <span class="item-balance">$0.00</span>
+                            </div>
+                          </div>
+                        </button>
+                        <!-- Polygon -->
+                        <button>
+                          <div style="display: flex; margin-right: 0.75rem; align-items: center; height: 1.25rem; width: 1.25rem;">
+                            <svg width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg"
+                              style="display: none;">
+                              <path d="M17 1L6 12L1 7" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                          </div>
+                          <div style="display: flex; white-space: nowrap; align-items: center; width: 100%; ">
+                            <div style="position: relative; margin-right: 0.75rem; min-width: max-content; ">
+                              <img src="https://token.metaswap.codefi.network/assets/networkLogos/polygon.svg" height=25
+                                style="margin-left: 0.5rem; margin-right: 0.5rem;" />
+                            </div>
+                            <div class="items-name">
+                              <span class="item-title">Polygon</span>
+                              <span class="item-balance">$0.00</span>
+                            </div>
+                          </div>
+                        </button>
+                        <!-- Fantom -->
+                        <button>
+                          <div style="display: flex; margin-right: 0.75rem; align-items: center; height: 1.25rem; width: 1.25rem;">
+                            <svg width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg"
+                              style="display: none;">
+                              <path d="M17 1L6 12L1 7" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                          </div>
+                          <div style="display: flex; white-space: nowrap; align-items: center; width: 100%; ">
+                            <div style="position: relative; margin-right: 0.75rem; min-width: max-content; ">
+                              <img src="https://token.metaswap.codefi.network/assets/networkLogos/ftm.svg" height=25
+                                style="margin-left: 0.5rem; margin-right: 0.5rem;" />
+                            </div>
+                            <div class="items-name">
+                              <span class="item-title">Fantom</span>
+                              <span class="item-balance">$0.00</span>
+                            </div>
+                          </div>
+                        </button>
+                        <!-- Avalanche -->
+                        <button>
+                          <div style="display: flex; margin-right: 0.75rem; align-items: center; height: 1.25rem; width: 1.25rem;">
+                            <svg width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg"
+                              style="display: none;">
+                              <path d="M17 1L6 12L1 7" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                          </div>
+                          <div style="display: flex; white-space: nowrap; align-items: center; width: 100%; ">
+                            <div style="position: relative; margin-right: 0.75rem; min-width: max-content; ">
+                              <img src="https://token.metaswap.codefi.network/assets/networkLogos/avalanche.svg" height=25
+                                style="margin-left: 0.5rem; margin-right: 0.5rem;" />
+                            </div>
+                            <div class="items-name">
+                              <span class="item-title">Avalanche</span>
+                              <span class="item-balance">$0.00</span>
+                            </div>
+                          </div>
+                        </button>
+                        <!-- BNB Smart Chain -->
+                        <button>
+                          <div style="display: flex; margin-right: 0.75rem; align-items: center; height: 1.25rem; width: 1.25rem;">
+                            <svg width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg"
+                              style="display: none;">
+                              <path d="M17 1L6 12L1 7" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                          </div>
+                          <div style="display: flex; white-space: nowrap; align-items: center; width: 100%; ">
+                            <div style="position: relative; margin-right: 0.75rem; min-width: max-content; ">
+                              <img src="https://token.metaswap.codefi.network/assets/networkLogos/bsc.svg" height=25
+                                style="margin-left: 0.5rem; margin-right: 0.5rem;" />
+                            </div>
+                            <div class="items-name">
+                              <span class="item-title">BNB Smart Chain</span>
+                              <span class="item-balance">$0.00</span>
+                            </div>
+                          </div>
+                        </button>
+                        <!-- Arbitrum -->
+                        <button>
+                          <div style="display: flex; margin-right: 0.75rem; align-items: center; height: 1.25rem; width: 1.25rem;">
+                            <svg width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg"
+                              style="display: none;">
+                              <path d="M17 1L6 12L1 7" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                          </div>
+                          <div style="display: flex; white-space: nowrap; align-items: center; width: 100%; ">
+                            <div style="position: relative; margin-right: 0.75rem; min-width: max-content; ">
+                              <img src="https://token.metaswap.codefi.network/assets/networkLogos/arbitrum.svg" height=25
+                                style="margin-left: 0.5rem; margin-right: 0.5rem;" />
+                            </div>
+                            <div class="items-name">
+                              <span class="item-title">Arbitrum</span>
+                              <span class="item-balance">$0.00</span>
+                            </div>
+                          </div>
+                        </button>
                       </div>
-                    </router-link>
-                    <router-link to="#" class="">
-                      <div class="d-flex align-items-center">
-                        <span class="me-3 icon success"><i class="icofont-check"></i></span>
-                        <div>
-                          <p>Device confirmation completed</p>
-                          <span>2020-11-04 12:00:23</span>
-                        </div>
-                      </div>
-                    </router-link>
-                    <router-link to="#" class="">
-                      <div class="d-flex align-items-center">
-                        <span class="me-3 icon pending"><i class="icofont-warning"></i></span>
-                        <div>
-                          <p>Phone verification pending</p>
-                          <span>2020-11-04 12:00:23</span>
-                        </div>
-                      </div>
-                    </router-link>
-
-                    <router-link to="./settings-activity">More <i class="icofont-simple-right"></i></router-link>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -563,9 +680,13 @@ cursor: pointer; }
 .dropdown-menu.dropdown-menu-right.notification-list.mt-3.show {
   position: absolute;
   right: 1rem; }
+.dropdown-menu.dropdown-menu-right.network-list.mt-3.show {
+  position: absolute;
+  right: -3.5rem;
+  max-height: 100vh; }
 .dropdown-menu.dropdown-menu-right.mt-3.show {
   position: absolute;
-  right: 0rem; }
+  right: 1rem; }
 .notification {
   cursor: pointer; }
   .notification .notify-bell {
@@ -618,6 +739,99 @@ cursor: pointer; }
     @media only screen and (max-width: 768px) {
       .selectnetwork .network span {
         display: none; } }
+  .selectnetwork .dropdown-menu {
+    margin-top: 0.75rem;
+    box-shadow: 0 1.5rem 4rem rgba(22, 28, 45, 0.15); }
+    .selectnetwork .dropdown-menu .box {
+      overflow-y: auto;
+      position: fixed;
+      padding-top: 1.5rem;
+      padding-bottom: 1.5rem;
+      right: 1.5rem;
+      left: 4rem;
+      max-height: 20rem;
+      background-color: white;
+      box-shadow: 0 1.5rem 4rem rgba(22, 28, 45, 0.15);
+      background-clip: padding-box;
+      border: 0px solid rgba(0, 0, 0, 0.15);
+      border-radius: 0.5rem;
+      @media (min-width: 640px) {
+        position: absolute;
+        left: 0;
+        transform-origin: top left;
+        max-height: 100vh;
+        padding-top: 1.5rem;
+        padding-bottom: 1.5rem;
+        box-shadow: 0 1.5rem 4rem rgba(22, 28, 45, 0.15);
+        background-clip: padding-box;
+        border: 0px solid rgba(0, 0, 0, 0.15);
+        border-radius: 0.5rem;
+      }
+    }
+    .selectnetwork .dropdown-menu .box .title {
+      padding-left: 1rem;
+      padding-right: 1rem;
+      padding-bottom: 0.5rem;
+      @media (min-width: 640px) { 
+      padding-left: 1.5rem;
+      padding-right: 1.5rem; } }
+      .selectnetwork .dropdown-menu .box .title .title-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;}
+        .selectnetwork .dropdown-menu .box .title .title-header .title-text {
+          font-size: 0.875rem;
+          line-height: 1.25rem;
+          color: rgb(100,116,139);
+          font-weight: 600; }
+    .selectnetwork .dropdown-menu .box .network-items {
+      border-radius: 0.5rem;
+      margin-left: 0.75rem;
+      margin-right: 0.75rem;
+      padding-left: 0.75rem;
+      padding-right: 0.75rem;
+      @media (min-width: 640px) {
+        padding-left: 1rem;
+        padding-right: 1rem; } }
+      .selectnetwork .dropdown-menu .box .network-items button {
+        display: flex;
+        padding-top: 0.5rem;
+        padding-bottom: 0.5rem;
+        font-size: 0.875rem;
+        line-height: 1.25rem;
+        align-items: center;
+        width: 100%; 
+        @media (max-width: 768px) {
+        padding-left: 0.5rem;
+        padding-right: 1rem; } }
+      .selectnetwork .dropdown-menu .box .network-items .items-name {
+        display: flex;
+        font-size: 0.875rem;
+        line-height: 1.25rem;
+        font-weight: 500;
+        text-align: left;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        flex-direction: column;
+        @media (min-width: 640px) {
+          font-size: 1rem;
+          line-height: 1.3rem; } }
+        .selectnetwork .dropdown-menu .box .network-items .items-name .item-title {
+          color: black;
+          font-size: 0.875rem;
+          font-weight: 500;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap; }
+        .selectnetwork .dropdown-menu .box .network-items .items-name .item-balance {
+          color: #6a6d7c;
+          font-size: 0.875rem;
+          font-weight: 400;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
   .notification .notify-dot {
     position: absolute;
     top: 0;

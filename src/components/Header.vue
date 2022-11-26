@@ -82,16 +82,16 @@
                   </div>
                 </div>
               </div>
-              <div class="notification dropdown" @click="activeDropDown('notification')"
-                :class="active_ === 'notification' && 'show'">
+              <div class="selectnetwork dropdown" @click="activeDropDown('selectnetwork')"
+                :class="active_ === 'selectnetwork' && 'show'">
                 <div class="network" data-toggle="dropdown">
                   <img src="https://token.metaswap.codefi.network/assets/networkLogos/ethereum.svg" height=25 style="margin-left: 0.5rem; margin-right: 0.5rem;" />
                   <span>Ethereum</span>
-                  <svg width="14" height="8" viewBox="0 0 14 8" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 0.5rem;">
+                  <svg width="14" height="8" viewBox="0 0 14 8" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 0.5rem; width: 1rem">
                     <path d="M1 1L7 7L13 1" stroke="#475569" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                   </svg>
                 </div>
-                <div class="dropdown-menu dropdown-menu-right notification-list mt-3" :class="active_ === 'notification' && 'show'">
+                <div class="dropdown-menu dropdown-menu-right notification-list mt-3" :class="active_ === 'selectnetwork' && 'show'">
                   <h4>Announcements</h4>
                   <div class="lists">
                     <router-link to="#" class="">
@@ -138,11 +138,16 @@
 
               <div class="profile_log dropdown" @click="activeDropDown('profile')" :class="active_ && 'show'">
                 <div class="user" data-toggle="dropdown">
-                  <div style="position: relative;">
+                  <!-- <div style="position: relative;">
                     <span class="thumb"><img :src="user?.photoURL" :size="64" referrerpolicy="no-referrer" /></span>
-                  </div>
-                  <span class="arrow"><i class="icofont-angle-down"></i></span>
+                  </div> -->
+                  <img class="profile" :src="user?.photoURL" :size="64" referrerpolicy="no-referrer"/>
+                  <span>{{ addressTextNormal }}</span>
+                  <svg width="14" height="8" viewBox="0 0 14 8" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 0.5rem; width: 1rem">
+                    <path d="M1 1L7 7L13 1" stroke="#475569" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
                 </div>
+                <!-- dropdown menu -->
                 <div style="opacity: 1; transform: translateY(0);">
                   <div class="dropdown-menu dropdown-menu-right mt-3" :class="active_ === 'profile' && 'show'">
                     <div class="user-email" style="border-bottom-width: 1px; border-color: #E5E7EB; border-style: dashed; ">
@@ -203,7 +208,6 @@
                     </router-link>
                   </div>
                 </div>
-                
               </div>
             </div>
           </div>
@@ -234,7 +238,7 @@ export default {
     })
     const addressTextNormal = computed(() => {
       if (user.walletAddress) {
-        return prettyPrintAddress(user.walletAddress!, 4, 4);
+        return prettyPrintAddress(user.walletAddress!, 3, 3);
       } else {
         return "";
       }
@@ -322,6 +326,9 @@ export default {
           filter: none;
           max-width: 165px;
           margin-right: 5px; } }
+    @media only screen and (max-width: 768px) {
+      .header .brand-logo img {
+        max-width: 150px; } }
   .header.landing {
     left: 0px; }
     .header.landing a {
@@ -356,23 +363,44 @@ cursor: pointer; }
 cursor: pointer; }
 .profile_log .user {
   display: flex;
-  align-items: center; }
+  position: relative;
+  background-color: #ffffff;
+  transition-property: all;
+  justify-content: center;
+  align-items: center;
+  width: auto;
+  height: 2.5rem;
+  border-radius: 9999px;
+  border-width: 1px;
+  border-color: #F3F4F6;
+  cursor: pointer;
+  margin-right: 1rem; }
+  @media only screen and (max-width: 768px) {
+    .profile_log .user {
+      margin-right: 0.5rem;
+      margin-left: 0rem; } }
+  .profile_log .user span {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    margin-right: 0.5rem;
+    color: rgb(71, 85, 105); }
+  @media only screen and (max-width: 768px) {
+    .profile_log .user span {
+      display: none; } }
+  .profile_log .user .profile {
+    height: 25px;
+    margin-left: 0.5rem;
+    margin-right: 0.5rem;
+    border-radius: 50px;
+  }
   .profile_log .user .thumb {
     display: block;
     overflow: hidden;
-    // background-image: linear-gradient(to right, var(--tw-gradient-stops));
-    // background-color: #6366F1;
-    // background-color: #8B5CF6;
-    // background-color: #EC4899;
-    // transition-property: all;
     width: 40px;
     height: 40px;
     border-radius: 50px;
     border-color: #ffffff;
     border-style: solid;
-    // height: 40px;
-    // width: 40px;
-    // border-radius: 50px;
     color: #fff;
     text-align: center;
     &:hover {
@@ -396,6 +424,10 @@ cursor: pointer; }
   // top: 25px !important;
   margin-top: 0.75rem;
   box-shadow: 0 1.5rem 4rem rgba(22, 28, 45, 0.15); }
+  .profile_log .dropdown-menu .user {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start; }
   .profile_log .dropdown-menu .user-email {
     border: 0 solid #e5e7eb;
     padding: 30px 20px 20px 20px; }
@@ -560,7 +592,7 @@ cursor: pointer; }
     .notification .notify-bell i {
       font-size: 22px;
       color: #343a40; }
-  .notification .network {
+  .selectnetwork .network {
     display: flex;
     position: relative;
     background-color: #ffffff;
@@ -574,17 +606,17 @@ cursor: pointer; }
     border-color: #F3F4F6;
     cursor: pointer;
     margin-right: 1rem; }
-    @media only screen and (max-width: 880px) {
-      .notification .network {
+    @media only screen and (max-width: 768px) {
+      .selectnetwork .network {
         margin-right: 0.5rem;
         margin-left: 0rem; } }
-  .notification .network span {
+  .selectnetwork .network span {
     font-size: 0.875rem;
     line-height: 1.25rem;
     margin-right: 0.5rem;
     color: rgb(71,85,105); }
-    @media only screen and (max-width: 880px) {
-      .notification .network span {
+    @media only screen and (max-width: 768px) {
+      .selectnetwork .network span {
         display: none; } }
   .notification .notify-dot {
     position: absolute;

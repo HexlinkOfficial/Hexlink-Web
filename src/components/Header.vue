@@ -85,19 +85,10 @@
               <div class="selectnetwork dropdown" @click="activeDropDown('selectnetwork')"
                 :class="active_ === 'selectnetwork' && 'show'">
                 <div class="network" data-toggle="dropdown">
-                  <div v-for="(component) in selectedChains" :key="component">
-                    <img src="https://token.metaswap.codefi.network/assets/networkLogos/ethereum.svg" height=25 style="margin-left: 0.5rem; margin-right: -0.5rem;">
-                    <!-- <img v-if="index != 0 && component === 'eth'" src="https://token.metaswap.codefi.network/assets/networkLogos/ethereum.svg" height=25 style="margin-left: -0.5rem; margin-right: -0.5rem;"> -->
-                  </div>
-                  <!-- <img v-if="networkCount > 0 && eth === true && selectedCahins[0] === 'eth'" src="https://token.metaswap.codefi.network/assets/networkLogos/ethereum.svg" height=25 style="margin-left: 0.5rem; margin-right: -0.5rem;" />
-                  <img v-if="networkCount > 0 && eth === true && selectedCahins[0] != 'eth'" src="https://token.metaswap.codefi.network/assets/networkLogos/ethereum.svg" height=25 style="margin-left: -0.5rem; margin-right: -0.5rem;" />
-                  <img v-if="networkCount > 0 && sui === true" src="https://svgshare.com/i/oQ6.svg" height=25 style="margin-left: 0.5rem; margin-right: -0.5rem;" />
-                  <img v-if="networkCount > 0 && op === true" src="https://token.metaswap.codefi.network/assets/networkLogos/optimism.svg" height=25 style="margin-left: 0.5rem; margin-right: -0.5rem;" />
-                  <img v-if="networkCount > 0 && poly === true" src="https://token.metaswap.codefi.network/assets/networkLogos/polygon.svg" height=25 style="margin-left: 0.5rem; margin-right: -0.5rem;" />
-                  <img v-if="networkCount > 0 && fan === true" src="https://token.metaswap.codefi.network/assets/networkLogos/ftm.svg" height=25 style="margin-left: 0.5rem; margin-right: -0.5rem;" />
-                  <img v-if="networkCount > 0 && aval===true" src="https://token.metaswap.codefi.network/assets/networkLogos/avalanche.svg" height=25 style="margin-left: 0.5rem; margin-right: -0.5rem;" />
-                  <img v-if="networkCount > 0 && bnb===true" src="https://token.metaswap.codefi.network/assets/networkLogos/bsc.svg" height=25 style="margin-left: 0.5rem; margin-right: -0.5rem;" />
-                  <img v-if="networkCount > 0 && arbi===true" src="https://token.metaswap.codefi.network/assets/networkLogos/arbitrum.svg" height=25 style="margin-left: 0.5rem; margin-right: -0.5rem;" /> -->
+                  <template v-for="(component, index) in selectedChains" :key="index">
+                    <img v-if="index === 0" :src="component" height=25 style="margin-left: 0.5rem; margin-right: -0.5rem;">
+                    <img v-if="index != 0" :src="component" height=25 style="margin-left: -0.5rem; margin-right: -0.5rem;">
+                  </template>
                   <span>{{ networkCount }} Networks</span>
                   <svg width="14" height="8" viewBox="0 0 14 8" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 0.5rem; width: 1rem">
                     <path d="M1 1L7 7L13 1" stroke="#475569" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
@@ -395,61 +386,56 @@ export default {
       bnb: false,
       arbi: false,
       networkCount: 1,
-      selectedChains: ['eth']
+      selectedChains: ['https://token.metaswap.codefi.network/assets/networkLogos/ethereum.svg'],
+      index: 0
     };
   },
   methods: {
+    forceRerender() {
+      this.index += 1;
+    },
     countNetworks() {
-      var test = 0;
       if (this.eth) {
-        test += 1;
-        !this.selectedChains.includes('eth') && this.selectedChains.push('eth');
+        !this.selectedChains.includes('https://token.metaswap.codefi.network/assets/networkLogos/ethereum.svg') && this.selectedChains.push('https://token.metaswap.codefi.network/assets/networkLogos/ethereum.svg');
       } else {
-        this.selectedChains.splice(this.selectedChains.indexOf('eth'),1);
+        this.selectedChains.includes('https://token.metaswap.codefi.network/assets/networkLogos/ethereum.svg') && this.selectedChains.splice(this.selectedChains.indexOf('https://token.metaswap.codefi.network/assets/networkLogos/ethereum.svg'),1);
       }
       if (this.sui) {
-        test += 1;
-        !this.selectedChains.includes('sui') && this.selectedChains.push('sui');
+        !this.selectedChains.includes('https://svgshare.com/i/oQ6.svg') && this.selectedChains.push('https://svgshare.com/i/oQ6.svg');
       } else {
-        this.selectedChains.splice(this.selectedChains.indexOf('sui'), 1);
+        this.selectedChains.includes('https://svgshare.com/i/oQ6.svg') && this.selectedChains.splice(this.selectedChains.indexOf('https://svgshare.com/i/oQ6.svg'), 1);
       }
       if (this.op) {
-        test += 1;
-        !this.selectedChains.includes('op') && this.selectedChains.push('op');
+        !this.selectedChains.includes('https://token.metaswap.codefi.network/assets/networkLogos/optimism.svg') && this.selectedChains.push('https://token.metaswap.codefi.network/assets/networkLogos/optimism.svg');
       } else {
-        this.selectedChains.splice(this.selectedChains.indexOf('op'), 1);
+        this.selectedChains.includes('https://token.metaswap.codefi.network/assets/networkLogos/optimism.svg') && this.selectedChains.splice(this.selectedChains.indexOf('https://token.metaswap.codefi.network/assets/networkLogos/optimism.svg'), 1);
       }
       if (this.poly) {
-        test += 1;
-        !this.selectedChains.includes('poly') && this.selectedChains.push('poly');
+        !this.selectedChains.includes('https://token.metaswap.codefi.network/assets/networkLogos/polygon.svg') && this.selectedChains.push('https://token.metaswap.codefi.network/assets/networkLogos/polygon.svg');
       } else {
-        this.selectedChains.splice(this.selectedChains.indexOf('poly'), 1);
+        this.selectedChains.includes('https://token.metaswap.codefi.network/assets/networkLogos/polygon.svg') && this.selectedChains.splice(this.selectedChains.indexOf('https://token.metaswap.codefi.network/assets/networkLogos/polygon.svg'), 1);
       }
       if (this.fan) {
-        test += 1;
-        !this.selectedChains.includes('fan') && this.selectedChains.push('fan');
+        !this.selectedChains.includes('https://token.metaswap.codefi.network/assets/networkLogos/ftm.svg') && this.selectedChains.push('https://token.metaswap.codefi.network/assets/networkLogos/ftm.svg');
       } else {
-        this.selectedChains.splice(this.selectedChains.indexOf('fan'), 1);
+        this.selectedChains.includes('https://token.metaswap.codefi.network/assets/networkLogos/ftm.svg') && this.selectedChains.splice(this.selectedChains.indexOf('https://token.metaswap.codefi.network/assets/networkLogos/ftm.svg'), 1);
       }
       if (this.aval) {
-        test += 1;
-        !this.selectedChains.includes('aval') && this.selectedChains.push('aval');
+        !this.selectedChains.includes('https://token.metaswap.codefi.network/assets/networkLogos/avalanche.svg') && this.selectedChains.push('https://token.metaswap.codefi.network/assets/networkLogos/avalanche.svg');
       } else {
-        this.selectedChains.splice(this.selectedChains.indexOf('aval'), 1);
+        this.selectedChains.includes('https://token.metaswap.codefi.network/assets/networkLogos/avalanche.svg') && this.selectedChains.splice(this.selectedChains.indexOf('https://token.metaswap.codefi.network/assets/networkLogos/avalanche.svg'), 1);
       }
       if (this.bnb) {
-        test += 1;
-        !this.selectedChains.includes('bnb') && this.selectedChains.push('bnb');
+        !this.selectedChains.includes('https://token.metaswap.codefi.network/assets/networkLogos/bsc.svg') && this.selectedChains.push('https://token.metaswap.codefi.network/assets/networkLogos/bsc.svg');
       } else {
-        this.selectedChains.splice(this.selectedChains.indexOf('bnb'), 1);
+        this.selectedChains.includes('https://token.metaswap.codefi.network/assets/networkLogos/bsc.svg') && this.selectedChains.splice(this.selectedChains.indexOf('https://token.metaswap.codefi.network/assets/networkLogos/bsc.svg'), 1);
       }
       if (this.arbi) {
-        test += 1;
-        !this.selectedChains.includes('arbi') && this.selectedChains.push('arbi');
+        !this.selectedChains.includes('https://token.metaswap.codefi.network/assets/networkLogos/arbitrum.svg') && this.selectedChains.push('https://token.metaswap.codefi.network/assets/networkLogos/arbitrum.svg');
       } else {
-        this.selectedChains.splice(this.selectedChains.indexOf('arbi'), 1);
+        this.selectedChains.includes('https://token.metaswap.codefi.network/assets/networkLogos/arbitrum.svg') && this.selectedChains.splice(this.selectedChains.indexOf('https://token.metaswap.codefi.network/assets/networkLogos/arbitrum.svg'), 1);
       }
-      this.networkCount = test;
+      this.networkCount = this.selectedChains.length;
     },
     activeDropDown(value: any) {
       this.active_ = this.active_ === value ? "" : value;

@@ -86,8 +86,8 @@
                 :class="active_ === 'selectnetwork' && 'show'">
                 <div class="network" data-toggle="dropdown">
                   <template v-for="(component, index) in selectedChains" :key="index">
-                    <img v-if="index === 0" :src="component" height=25 style="margin-left: 0.5rem; margin-right: -0.5rem;">
-                    <img v-if="index != 0" :src="component" height=25 style="margin-left: -0.5rem; margin-right: -0.5rem;">
+                    <img v-if="index === 0" :src="component" height=25 style="margin-left: 0.5rem;">
+                    <img v-if="index != 0" :src="component" height=25 style="margin-left: -0.5rem;">
                   </template>
                   <span v-if="selectedChains.length === 1">{{ currentNetwork }}</span>
                   <span v-if="selectedChains.length != 1">{{ networkCount }} Networks</span>
@@ -589,8 +589,8 @@ cursor: pointer; }
   margin-right: 1rem; }
   .profile_log .user:hover {
       transform: translateY(-0.125rem);
-      fill: #076AE0;
-      background-color: rgb(221,220,251);
+      fill: rgb(7, 106, 224);
+      background-color: rgba(7, 106, 224, 0.15);
       border-color: rgb(48,138,245);
       color: rgb(7,106,224);
     }
@@ -817,10 +817,10 @@ cursor: pointer; }
     margin-right: 1rem; }
     .notification .notify-bell:hover {
       transform: translateY(-0.125rem);
-      fill: #1d4ed8;
-      background-color: rgb(221,220,251);
+      fill: rgb(7, 106, 224);
+      background-color: rgba(7, 106, 224, 0.15);
       border-color: rgb(73,108,233);
-      color: rgb(29,78,216);
+      color: rgb(7,106,224);
     }
     @media only screen and (max-width: 880px) {
       .notification .notify-bell {
@@ -847,7 +847,7 @@ cursor: pointer; }
     .selectnetwork .network:hover {
       transform: translateY(-0.125rem);
       fill: #076AE0;
-      background-color: rgb(221,220,251);
+      background-color: rgba(7, 106, 224, 0.15);
       border-color: rgb(48,138,245);
       color: rgb(7,106,224);
     }
@@ -855,6 +855,11 @@ cursor: pointer; }
       .selectnetwork .network {
         margin-right: 0.5rem;
         margin-left: 0rem; } }
+  .selectnetwork .network img {
+    margin-right: -0.5rem; }
+    @media only screen and (max-width: 768px) {
+      .selectnetwork .network img {
+        margin-right: 0.5rem; } }
   .selectnetwork .network span {
     font-size: 0.875rem;
     line-height: 1.25rem;

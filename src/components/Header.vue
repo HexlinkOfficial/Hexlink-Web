@@ -89,7 +89,8 @@
                     <img v-if="index === 0" :src="component" height=25 style="margin-left: 0.5rem; margin-right: -0.5rem;">
                     <img v-if="index != 0" :src="component" height=25 style="margin-left: -0.5rem; margin-right: -0.5rem;">
                   </template>
-                  <span>{{ networkCount }} Networks</span>
+                  <span v-if="selectedChains.length === 1">{{ currentNetwork }}</span>
+                  <span v-if="selectedChains.length != 1">{{ networkCount }} Networks</span>
                   <svg width="14" height="8" viewBox="0 0 14 8" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 0.5rem; width: 1rem">
                     <path d="M1 1L7 7L13 1" stroke="#475569" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                   </svg>
@@ -103,7 +104,7 @@
                     </div>
                     <div>
                       <!-- ethereum -->
-                      <div class="network-items" @click="eth = !eth; countNetworks()">
+                      <div class="network-items" @click="eth = !eth; countNetworks(); showNetworks()">
                         <button>
                           <div style="display: flex; margin-right: 0.75rem; align-items: center; height: 1.25rem; width: 1.25rem;">
                             <svg v-if="eth" width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -122,7 +123,7 @@
                         </button>
                       </div>
                       <!-- Sui -->
-                      <div class="network-items" @click="sui = !sui; countNetworks()">
+                      <div class="network-items" @click="sui = !sui; countNetworks(); showNetworks()">
                         <button>
                           <div style="display: flex; margin-right: 0.75rem; align-items: center; height: 1.25rem; width: 1.25rem;">
                             <svg v-if="sui" width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -141,7 +142,7 @@
                         </button>
                       </div>
                       <!-- Optimism -->
-                      <div class="network-items" @click="op = !op; countNetworks()">
+                      <div class="network-items" @click="op = !op; countNetworks(); showNetworks()">
                         <button>
                           <div style="display: flex; margin-right: 0.75rem; align-items: center; height: 1.25rem; width: 1.25rem;">
                             <svg v-if="op" width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -160,7 +161,7 @@
                         </button>
                       </div>
                       <!-- Polygon -->
-                      <div class="network-items" @click="poly = !poly; countNetworks()">
+                      <div class="network-items" @click="poly = !poly; countNetworks(); showNetworks()">
                         <button>
                           <div style="display: flex; margin-right: 0.75rem; align-items: center; height: 1.25rem; width: 1.25rem;">
                             <svg v-if="poly" width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -180,7 +181,7 @@
                         </button>
                       </div>
                       <!-- Fantom -->
-                      <div class="network-items" @click="fan = !fan; countNetworks()">
+                      <div class="network-items" @click="fan = !fan; countNetworks(); showNetworks()">
                         <button>
                           <div style="display: flex; margin-right: 0.75rem; align-items: center; height: 1.25rem; width: 1.25rem;">
                             <svg v-if="fan" width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -200,7 +201,7 @@
                         </button>
                       </div>
                       <!-- Avalanche -->
-                      <div class="network-items" @click="aval = !aval; countNetworks()">
+                      <div class="network-items" @click="aval = !aval; countNetworks(); showNetworks()">
                         <button>
                           <div style="display: flex; margin-right: 0.75rem; align-items: center; height: 1.25rem; width: 1.25rem;">
                             <svg v-if="aval" width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -220,7 +221,7 @@
                         </button>
                       </div>
                       <!-- BNB Smart Chain -->
-                      <div class="network-items" @click="bnb = !bnb; countNetworks()">
+                      <div class="network-items" @click="bnb = !bnb; countNetworks(); showNetworks()">
                         <button>
                           <div style="display: flex; margin-right: 0.75rem; align-items: center; height: 1.25rem; width: 1.25rem;">
                             <svg v-if="bnb" width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -240,7 +241,7 @@
                         </button>
                       </div>
                       <!-- Arbitrum -->
-                      <div class="network-items" @click="arbi = !arbi; countNetworks()">
+                      <div class="network-items" @click="arbi = !arbi; countNetworks(); showNetworks()">
                         <button>
                           <div style="display: flex; margin-right: 0.75rem; align-items: center; height: 1.25rem; width: 1.25rem;">
                             <svg v-if="arbi" width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -387,10 +388,30 @@ export default {
       arbi: false,
       networkCount: 1,
       selectedChains: ['https://token.metaswap.codefi.network/assets/networkLogos/ethereum.svg'],
-      index: 0
+      index: 0,
+      currentNetwork: "Ethereum Network",
     };
   },
   methods: {
+    showNetworks() {
+      if (this.eth) {
+        this.selectedChains.length === 1 ? this.currentNetwork = "Ethereum Network" : this.currentNetwork = "";
+      } else if (this.sui) {
+        this.selectedChains.length === 1 ? this.currentNetwork = "Sui Network" : this.currentNetwork = "";
+      } else if (this.op) {
+        this.selectedChains.length === 1 ? this.currentNetwork = "Optimism Network" : this.currentNetwork = "";
+      } else if (this.poly) {
+        this.selectedChains.length === 1 ? this.currentNetwork = "Polygon Network" : this.currentNetwork = "";
+      } else if (this.fan) {
+        this.selectedChains.length === 1 ? this.currentNetwork = "Fantom Network" : this.currentNetwork = "";
+      } else if (this.aval) {
+        this.selectedChains.length === 1 ? this.currentNetwork = "Avalanche Network" : this.currentNetwork = "";
+      } else if (this.bnb) {
+        this.selectedChains.length === 1 ? this.currentNetwork = "BNB Smart Chain" : this.currentNetwork = "";
+      } else if (this.arbi) {
+        this.selectedChains.length === 1 ? this.currentNetwork = "Arbitrum Network" : this.currentNetwork = "";
+      }
+    },
     forceRerender() {
       this.index += 1;
     },
@@ -407,6 +428,7 @@ export default {
       }
       if (this.op) {
         !this.selectedChains.includes('https://token.metaswap.codefi.network/assets/networkLogos/optimism.svg') && this.selectedChains.push('https://token.metaswap.codefi.network/assets/networkLogos/optimism.svg');
+        this.selectedChains.length === 1 ? this.currentNetwork = "Optimism Network" : this.currentNetwork = "";
       } else {
         this.selectedChains.includes('https://token.metaswap.codefi.network/assets/networkLogos/optimism.svg') && this.selectedChains.splice(this.selectedChains.indexOf('https://token.metaswap.codefi.network/assets/networkLogos/optimism.svg'), 1);
       }
@@ -436,6 +458,8 @@ export default {
         this.selectedChains.includes('https://token.metaswap.codefi.network/assets/networkLogos/arbitrum.svg') && this.selectedChains.splice(this.selectedChains.indexOf('https://token.metaswap.codefi.network/assets/networkLogos/arbitrum.svg'), 1);
       }
       this.networkCount = this.selectedChains.length;
+      console.log(this.selectedChains.length);
+      console.log(this.currentNetwork);
     },
     activeDropDown(value: any) {
       this.active_ = this.active_ === value ? "" : value;

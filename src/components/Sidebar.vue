@@ -19,7 +19,7 @@
           </router-link>
         </li>
         <li>
-          <router-link to="/collectible" data-toggle="tooltip" data-placement="right" title="Wallet"
+          <router-link to="/testwallet" data-toggle="tooltip" data-placement="right" title="Wallet"
             :class="active === 3 && 'active'">
             <span class="icon-grey"><i class="icofont-wallet"></i></span>
           </router-link>

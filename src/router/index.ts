@@ -41,6 +41,11 @@ const router = createRouter({
       component: () => import('@/views/newAbout.vue')
     },
     {
+      path: '/testwallet',
+      name: 'test walletpage',
+      component: () => import('@/views/newWallet.vue')
+    },
+    {
       path: '/:pathMatch(.*)*',
       name: 'error404',
       component: Error404

@@ -132,7 +132,7 @@
                           </div>
                           <div style="display: flex; white-space: nowrap; align-items: center; width: 100%; ">
                             <div style="position: relative; margin-right: 0.75rem; min-width: max-content; ">
-                              <img src="https://svgshare.com/i/oQ6.svg" height=25 style="margin-left: 0.5rem; margin-right: 0.5rem;" />
+                              <img src="https://i.postimg.cc/5tfSHpjg/sui.png" height=25 style="margin-left: 0.5rem; margin-right: 0.5rem;" />
                             </div>
                             <div class="items-name">
                               <span class="item-title">Sui</span>
@@ -422,9 +422,9 @@ export default {
         this.selectedChains.includes('https://token.metaswap.codefi.network/assets/networkLogos/ethereum.svg') && this.selectedChains.splice(this.selectedChains.indexOf('https://token.metaswap.codefi.network/assets/networkLogos/ethereum.svg'),1);
       }
       if (this.sui) {
-        !this.selectedChains.includes('https://svgshare.com/i/oQ6.svg') && this.selectedChains.push('https://svgshare.com/i/oQ6.svg');
+        !this.selectedChains.includes('https://i.postimg.cc/5tfSHpjg/sui.png') && this.selectedChains.push('https://i.postimg.cc/5tfSHpjg/sui.png');
       } else {
-        this.selectedChains.includes('https://svgshare.com/i/oQ6.svg') && this.selectedChains.splice(this.selectedChains.indexOf('https://svgshare.com/i/oQ6.svg'), 1);
+        this.selectedChains.includes('https://i.postimg.cc/5tfSHpjg/sui.png') && this.selectedChains.splice(this.selectedChains.indexOf('https://i.postimg.cc/5tfSHpjg/sui.png'), 1);
       }
       if (this.op) {
         !this.selectedChains.includes('https://token.metaswap.codefi.network/assets/networkLogos/optimism.svg') && this.selectedChains.push('https://token.metaswap.codefi.network/assets/networkLogos/optimism.svg');

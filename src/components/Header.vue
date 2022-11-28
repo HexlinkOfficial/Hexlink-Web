@@ -86,8 +86,8 @@
                 :class="active_ === 'selectnetwork' && 'show'">
                 <div class="network" data-toggle="dropdown">
                   <template v-for="(component, index) in selectedChains" :key="index">
-                    <img v-if="index === 0" :src="component" height=25 style="margin-left: 0.5rem; margin-right: -0.5rem;">
-                    <img v-if="index != 0" :src="component" height=25 style="margin-left: -0.5rem; margin-right: -0.5rem;">
+                    <img v-if="index === 0" :src="component" height=25 style="margin-left: 0.5rem;">
+                    <img v-if="index != 0" :src="component" height=25 style="margin-left: -0.5rem;">
                   </template>
                   <span v-if="selectedChains.length === 1">{{ currentNetwork }}</span>
                   <span v-if="selectedChains.length != 1">{{ networkCount }} Networks</span>
@@ -132,7 +132,7 @@
                           </div>
                           <div style="display: flex; white-space: nowrap; align-items: center; width: 100%; ">
                             <div style="position: relative; margin-right: 0.75rem; min-width: max-content; ">
-                              <img src="https://svgshare.com/i/oQ6.svg" height=25 style="margin-left: 0.5rem; margin-right: 0.5rem;" />
+                              <img src="https://i.postimg.cc/5tfSHpjg/sui.png" height=25 style="margin-left: 0.5rem; margin-right: 0.5rem;" />
                             </div>
                             <div class="items-name">
                               <span class="item-title">Sui</span>
@@ -422,9 +422,9 @@ export default {
         this.selectedChains.includes('https://token.metaswap.codefi.network/assets/networkLogos/ethereum.svg') && this.selectedChains.splice(this.selectedChains.indexOf('https://token.metaswap.codefi.network/assets/networkLogos/ethereum.svg'),1);
       }
       if (this.sui) {
-        !this.selectedChains.includes('https://svgshare.com/i/oQ6.svg') && this.selectedChains.push('https://svgshare.com/i/oQ6.svg');
+        !this.selectedChains.includes('https://i.postimg.cc/5tfSHpjg/sui.png') && this.selectedChains.push('https://i.postimg.cc/5tfSHpjg/sui.png');
       } else {
-        this.selectedChains.includes('https://svgshare.com/i/oQ6.svg') && this.selectedChains.splice(this.selectedChains.indexOf('https://svgshare.com/i/oQ6.svg'), 1);
+        this.selectedChains.includes('https://i.postimg.cc/5tfSHpjg/sui.png') && this.selectedChains.splice(this.selectedChains.indexOf('https://i.postimg.cc/5tfSHpjg/sui.png'), 1);
       }
       if (this.op) {
         !this.selectedChains.includes('https://token.metaswap.codefi.network/assets/networkLogos/optimism.svg') && this.selectedChains.push('https://token.metaswap.codefi.network/assets/networkLogos/optimism.svg');
@@ -589,8 +589,8 @@ cursor: pointer; }
   margin-right: 1rem; }
   .profile_log .user:hover {
       transform: translateY(-0.125rem);
-      fill: #076AE0;
-      background-color: rgb(221,220,251);
+      fill: rgb(7, 106, 224);
+      background-color: rgba(7, 106, 224, 0.15);
       border-color: rgb(48,138,245);
       color: rgb(7,106,224);
     }
@@ -817,10 +817,10 @@ cursor: pointer; }
     margin-right: 1rem; }
     .notification .notify-bell:hover {
       transform: translateY(-0.125rem);
-      fill: #1d4ed8;
-      background-color: rgb(221,220,251);
+      fill: rgb(7, 106, 224);
+      background-color: rgba(7, 106, 224, 0.15);
       border-color: rgb(73,108,233);
-      color: rgb(29,78,216);
+      color: rgb(7,106,224);
     }
     @media only screen and (max-width: 880px) {
       .notification .notify-bell {
@@ -847,7 +847,7 @@ cursor: pointer; }
     .selectnetwork .network:hover {
       transform: translateY(-0.125rem);
       fill: #076AE0;
-      background-color: rgb(221,220,251);
+      background-color: rgba(7, 106, 224, 0.15);
       border-color: rgb(48,138,245);
       color: rgb(7,106,224);
     }
@@ -855,6 +855,11 @@ cursor: pointer; }
       .selectnetwork .network {
         margin-right: 0.5rem;
         margin-left: 0rem; } }
+  .selectnetwork .network img {
+    margin-right: -0.5rem; }
+    @media only screen and (max-width: 768px) {
+      .selectnetwork .network img {
+        margin-right: 0.5rem; } }
   .selectnetwork .network span {
     font-size: 0.875rem;
     line-height: 1.25rem;

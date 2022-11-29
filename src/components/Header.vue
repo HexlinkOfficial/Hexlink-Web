@@ -26,8 +26,7 @@
                 <span class="dark"><i class="icofont-moon"></i></span>
                 <span class="light"><i class="icofont-sun-alt"></i></span>
               </div> -->
-              <div class="notification dropdown" @click="activeDropDown('notification')"
-                :class="active_ === 'notification' && 'show'">
+              <div class="notification dropdown" @click="activeDropDown('notification')" :class="active_ === 'notification' && 'show'">
                 <div class="notify-bell" data-toggle="dropdown">
                   <svg width="15" height="20" viewBox="0 0 15 20" fill="none" xmlns="http://www.w3.org/2000/svg"
                     class="h-auto w-3 sm:w-auto">

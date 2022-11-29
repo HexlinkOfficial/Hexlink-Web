@@ -142,7 +142,7 @@
   margin-left: auto;
   background: white;
   border-radius: 6px;
-  box-shadow: 0 14px 26px -12px, 0 4px 23px 0 rgb(0 0 0 / 12%), 0 8px 10px -5px hsl(213 75% 57% / 20%) !important;
+  box-shadow: rgba(17, 17, 26, 0.1) 0px 0px 16px;
   @media only screen and (max-width: 767px) {
     margin-left: 0;
   } }
@@ -192,8 +192,97 @@
     line-height: 1.33;
     color: black;
     margin-right: auto;
-    word-break: keep-all;
-  }
+    word-break: keep-all; }
+.token-list {
+  display: grid;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+  @media (min-width: 640px) {
+    display: flex; } }
+  .token-list .title {
+    display: grid;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.75rem;
+  
+    @media (min-width: 640px) {
+      display: flex; } }
+    .token-list .title .title-col {
+      display: flex; 
+      justify-content: space-between; 
+      grid-column: span 4 / span 4; }
+      .token-list .title .title-col .content {
+        display: flex;
+        margin-left: 0.75rem;
+        margin-left: 0.875rem;
+        align-items: center; }
+        .token-list .title .title-col .content .text {
+          font-size: 1.25rem;
+          line-height: 1.75rem;
+          font-weight: 600; }
+        .token-list .title .title-col .content svg {
+          display: inline-flex;
+          transition-property: background-color, border-color, color, fill, stroke;
+          justify-content: center;
+          align-items: center;
+          width: 1rem;
+          height: 1rem;
+          margin-left: 0.75rem; }
+  .token-list .views {
+    margin-top: 0.75rem;
+    grid-column: span 4 / span 4;
+  
+    @media (min-width: 640px) {
+      display: flex;
+      margin-top: 0; } }
+    .token-list .views .detail-view {
+      display: flex;
+      padding: 0.125rem;
+      transition-property: background-color, border-color, color, fill, stroke;
+      border-radius: 50px;
+      border-style: solid;
+      border-width: 1px;
+      border-color: rgb(71, 85, 105);
+    
+      @media (min-width: 640px) {
+        margin-left: 0.75rem;
+        margin-left: 0.875rem;
+        max-width: 28rem; } }
+      .token-list .views .detail-view button {
+        padding-top: 0.5rem;
+        padding-bottom: 0.5rem;
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+        color: #000;
+        font-size: 0.875rem;
+        line-height: 1.25rem;
+        font-weight: 800;
+        line-height: 1.25rem;
+        width: 50%;
+        border-radius: 50px;
+        @media (min-width: 640px) {
+          padding-left: 1.5rem;
+          padding-right: 1.5rem;
+          width: 150px; }
+        @media (min-width: 768px) {
+          padding-left: 1.5rem;
+          padding-right: 1.5rem;
+          width: 150px; } }
+      .token-list .views .detail-view .listView-button {
+        opacity: 1;
+        background-color: rgba(7, 106, 224,0);
+        color: rgb(71, 85, 105);
+      }
+      .token-list .views .detail-view .listView-button.show {
+        opacity: 1;
+        background-color: rgb(7, 106, 224);
+        color: white;
+      }
 img,
 svg {
   vertical-align: middle; }
@@ -220,7 +309,6 @@ svg {
                     </svg>
                   </a>
                 </div>
-                <!-- <a class="cta-link">View Details</a> -->
               </div>
             </div>
             <div class="price">$281.98</div>
@@ -231,6 +319,32 @@ svg {
             <div class="col-xxl-6">
               <div class="card">
                 <div class="card-body">
+                  <div class="token-list">
+                    <div class="title">
+                      <div class="title-col">
+                        <div class="content">
+                          <div class="text">Assets</div>
+                          <svg width="4" height="16" viewBox="0 0 4 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M2 9C2.55228 9 3 8.55228 3 8C3 7.44772 2.55228 7 2 7C1.44772 7 1 7.44772 1 8C1 8.55228 1.44772 9 2 9Z"
+                              fill="black" stroke="black" stroke-linecap="round" stroke-linejoin="round" />
+                            <path d="M2 3C2.55228 3 3 2.55228 3 2C3 1.44772 2.55228 1 2 1C1.44772 1 1 1.44772 1 2C1 2.55228 1.44772 3 2 3Z"
+                              fill="black" stroke="black" stroke-linecap="round" stroke-linejoin="round" />
+                            <path
+                              d="M2 15C2.55228 15 3 14.5523 3 14C3 13.4477 2.55228 13 2 13C1.44772 13 1 13.4477 1 14C1 14.5523 1.44772 15 2 15Z"
+                              fill="black" stroke="black" stroke-linecap="round" stroke-linejoin="round" />
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="views">
+                      <div class="detail-view">
+                        <button class="listView-button" @click="accountView = false; listView = !listView" :class="listView && 'show'">
+                          List View
+                        </button>
+                        <button class="listView-button" @click="listView = false; accountView = !accountView" :class="accountView && 'show'">Account View</button>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -260,6 +374,9 @@ export default {
       firstName,
       lastName,
       goerliScan,
+      listView: true,
+      accountView: false,
+      active_: ""
     };
   },
   methods: {

@@ -76,3 +76,26 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+thead tr {
+  color: #6a6d7c;
+  font-size: .875rem;
+  line-height: 1.25rem; }
+
+td {
+  display: table-cell;
+  padding: 1rem; }
+
+th {
+  font-weight: 500;
+  vertical-align: middle;
+  padding: 1rem;
+  text-align: left; }
+
+@media (min-width: 640px) {
+  th {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem; }
+  td {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem; } }

@@ -276,13 +276,75 @@
       .token-list .views .detail-view .listView-button {
         opacity: 1;
         background-color: rgba(7, 106, 224,0);
-        color: rgb(71, 85, 105);
-      }
+        color: rgb(71, 85, 105); }
       .token-list .views .detail-view .listView-button.show {
         opacity: 1;
         background-color: rgb(7, 106, 224);
-        color: white;
-      }
+        color: white; }
+.token-listDetail {
+  border-radius: 0.75rem;
+  margin-top: 1.75rem; }
+  .token-listDetail .token-table {
+    display: flex;
+    margin-left: -1rem;
+    margin-right: -1rem;
+    flex-direction: column;
+  
+    @media (min-width: 640px) {
+      margin-left: 0;
+      margin-right: 0; } }
+    .token-listDetail .token-table table {
+      min-width: 100%;
+      table-layout: auto;
+      border-color: inherit;
+      text-indent: 0; }
+      .token-listDetail .token-table .table-thread {
+        display: none;
+        border-bottom: 1px solid #e5e7eb;
+        // border-bottom-width: 1px;
+        @media (min-width: 640px) {
+          display: table-header-group; } }
+        .token-listDetail .token-table .table-thread .toke-header {
+          font-weight: 400;
+          cursor: pointer; }
+          .token-listDetail .token-table .table-thread .toke-header .token-header-data {
+            display: flex;
+            align-items: center; }
+        .token-listDetail .token-table .table-thread .portfolio-percentage-header {
+          display: none;
+          font-weight: 400;
+          cursor: pointer;
+
+          @media (min-width: 1024px) {
+            display: table-cell; } }
+          .token-listDetail .token-table .table-thread .portfolio-percentage-header .portfolio-percentage-header-data {
+            display: flex;
+            align-items: center; }
+          .token-listDetail .token-table .table-thread .portfolio-percentage-header .portfolio-percentage-header-sign {
+            display: flex;
+            margin-left: 0.5rem;
+            flex-direction: column;
+            align-items: center; }
+        .token-listDetail .token-table .table-thread .price-header {
+          display: none;
+          font-weight: 400;
+          cursor: pointer;
+        
+          @media (min-width: 768px) {
+            display: table-cell; } }
+          .token-listDetail .token-table .table-thread .price-header .price-header-data {
+            display: flex;
+            align-items: center; }
+        .token-listDetail .token-table .table-thread .balance-header {
+          font-weight: 400;
+          text-align: right;
+          cursor: pointer;
+        
+          @media (min-width: 768px) {
+            text-align: left; } }
+          .token-listDetail .token-table .table-thread .balance-header .balance-header-data {
+            display: flex;
+            align-items: center; }
 img,
 svg {
   vertical-align: middle; }
@@ -338,10 +400,15 @@ svg {
                     </div>
                     <div class="views">
                       <div class="detail-view">
-                        <button class="listView-button" @click="accountView = false; listView = !listView" :class="listView && 'show'">
-                          List View
-                        </button>
-                        <button class="listView-button" @click="listView = false; accountView = !accountView" :class="accountView && 'show'">Account View</button>
+                        <button class="listView-button" @click="tokenView = false; nftView = !nftView" :class="nftView && 'show'">Tokens</button>
+                        <button class="listView-button" @click="nftView = false; tokenView = !tokenView" :class="tokenView && 'show'">NFTs</button>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="token-listDetail">
+                    <div class="token-table">
+                      <div style="overflow: visible; border-radius: 0.75rem;">
+                        <WalletTokenList></WalletTokenList>
                       </div>
                     </div>
                   </div>
@@ -357,11 +424,13 @@ svg {
 
 <script lang="ts">
 import Layout from "../components/Layout.vue";
+import WalletTokenList from "../components/WalletTokenList.vue";
 import { useAuthStore } from '@/stores/auth';
 
 export default {
   components: {
     Layout,
+    WalletTokenList,
   },
   data() {
     const store = useAuthStore();
@@ -374,8 +443,8 @@ export default {
       firstName,
       lastName,
       goerliScan,
-      listView: true,
-      accountView: false,
+      nftView: true,
+      tokenView: false,
       active_: ""
     };
   },

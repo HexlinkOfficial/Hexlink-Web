@@ -1123,7 +1123,7 @@ button,
   margin-top: 30px; }
   .brand-logo img {
     max-width: 47px; }
-  @media only screen and (max-width: 880px) {
+  @media only screen and (max-width: 990px) {
     .brand-logo {
       display: none; } }
 

@@ -68,7 +68,7 @@ export default {
   //     width: 5rem;
   //     transition: 0.4s ease-in-out;
   //     overflow: hidden; } }
-  @media only screen and (max-width: 880px) {
+  @media only screen and (max-width: 990px) {
     .sidebar {
       top: auto;
       bottom: 0;
@@ -76,12 +76,20 @@ export default {
       height: 60px;
       left: 0;
       border-radius: 0px; } }
+.brand-logo {
+  text-align: center;
+  margin-top: 30px; }
+  .brand-logo img {
+    max-width: 47px; }
+  @media only screen and (max-width: 990px) {
+    .brand-logo {
+      display: none; } }
 .menu {
   margin-top: 100px; }
-  @media only screen and (max-width: 880px) {
+  @media only screen and (max-width: 990px) {
     .menu {
       margin-top: 4px; } }
-  @media only screen and (max-width: 880px) {
+  @media only screen and (max-width: 990px) {
     .menu ul {
       display: flex;
       justify-content: space-around;
@@ -116,7 +124,7 @@ export default {
       bottom: 50px;
       left: 0;
       right: 0; }
-      @media only screen and (max-width: 880px) {
+      @media only screen and (max-width: 990px) {
         .menu ul li.logout {
           position: relative;
           bottom: 0;
@@ -133,7 +141,7 @@ export default {
   .copyright a {
     color: #000;
     font-size: 12px; }
-  @media only screen and (max-width: 880px) {
+  @media only screen and (max-width: 990px) {
     .copyright {
       display: none; } }
 </style>

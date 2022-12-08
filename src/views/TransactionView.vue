@@ -1,7 +1,7 @@
 <style lang="less" scoped>
 .content-body {
   margin-left: 9.5rem; }
-  @media only screen and (max-width: 880px) {
+  @media only screen and (max-width: 990px) {
     .content-body {
       margin-left: 0px;
       margin-bottom: 50px; } }

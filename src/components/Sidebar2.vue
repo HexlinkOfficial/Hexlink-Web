@@ -24,7 +24,7 @@
         <span class="material-icons">grid_on</span>
         <span className="text">NFT</span>
       </router-link>
-      <router-link to="/testhome" class="button">
+      <router-link to="/transaction" class="button">
         <span class="material-icons">home</span>
         <span className="text">Home</span>
       </router-link>

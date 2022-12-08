@@ -4,7 +4,7 @@ import SignInView from '@/views/SignInView.vue'
 import ActivitiesView from '@/views/ActivitiesView.vue'
 import NFTView from '@/views/NFTView.vue'
 import Error404 from '@/views/Error404.vue'
-import newHome from '@/views/newHome.vue'
+import Transaction from '@/views/TransactionView.vue'
 import { useAuthStore } from '@/stores/auth';
 
 const router = createRouter({
@@ -31,9 +31,9 @@ const router = createRouter({
       component: NFTView
     },
     {
-      path: '/testhome',
-      name: 'test homepage',
-      component: newHome
+      path: '/transactions',
+      name: 'transaction page',
+      component: Transaction
     },
     {
       path: '/testabout',

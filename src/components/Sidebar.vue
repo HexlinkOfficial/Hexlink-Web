@@ -7,7 +7,7 @@
     <div class="menu">
       <ul>
         <li>
-          <router-link to="/testhome" data-toggle="tooltip" data-placement="right" title="Home"
+          <router-link to="/transactions" data-toggle="tooltip" data-placement="right" title="Home"
             :class="active === 1 && 'active'">
             <span class="icon-grey"><i class="icofont-ui-home"></i></span>
           </router-link>

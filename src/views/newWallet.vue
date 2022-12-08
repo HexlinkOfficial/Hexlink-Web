@@ -345,6 +345,40 @@
           .token-listDetail .token-table .table-thread .balance-header .balance-header-data {
             display: flex;
             align-items: center; }
+.progress {
+  display: flex;
+  height: 1rem;
+  overflow: hidden;
+  font-size: 0.65625rem;
+  background-color: #e9ecef;
+  border-radius: 0.75rem; }
+.default-progress {
+  height: 20px; }
+.progress-bar {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
+  color: #fff;
+  width: 50%;
+  height: 20px;
+  text-align: center;
+  white-space: nowrap;
+  background-color: #5bcfc5;
+  transition: width 0.6s ease; }
+  @media (prefers-reduced-motion: reduce) {
+    .progress-bar {
+      transition: none; } }
+.bg-gradient-5 {
+  background: #496ecc;
+  background: -moz-linear-gradient(left, #496ecc 0%, #33b7e0 100%);
+  background: -webkit-linear-gradient(left, #496ecc 0%, #33b7e0 100%);
+  background: linear-gradient(to right, #496ecc 0%, #33b7e0 100%);
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#496ecc', endColorstr='#33b7e0',GradientType=1 ); }
+.progress-animated {
+  animation-duration: 5s;
+  animation-name: myanimation;
+  transition: all 5s ease 0s; }
 img,
 svg {
   vertical-align: middle; }
@@ -354,6 +388,14 @@ svg {
     <div class="content-body">
       <div class="container">
         <h1 style="margin-bottom: 1rem;;">Tokens</h1>
+        <a-row v-if="!isDeployed" justify="center" align="middle" style="margin: 20px;">
+          <WalletSetup></WalletSetup>
+        </a-row>
+        <div class="progress default-progress">
+          <div class="progress-bar bg-gradient-5 progress-animated" role="progressbar">
+            <span className="sr-only">50% Complete</span>
+          </div>
+        </div>
         <div class="token-worth">
           <div>
             <div class="title">
@@ -422,33 +464,59 @@ svg {
   </layout>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
+import { ref, onMounted, computed } from "vue";
+import type { Token } from "@/services/web3/tokens";
+import { loadAll } from "@/services/web3/tokens";
+import { getBalance, isContract } from "@/services/web3/account";
 import Layout from "../components/Layout.vue";
 import WalletTokenList from "../components/WalletTokenList.vue";
 import { useAuthStore } from '@/stores/auth';
+import WalletSetup from "@/components/AccountSetup.vue";
 
-export default {
-  components: {
-    Layout,
-    WalletTokenList,
-  },
-  data() {
-    const store = useAuthStore();
-    const user = store.currentUser!;
-    const firstName = user?.displayName!.split(" ")[0];
-    const lastName = user?.displayName!.split(" ")[-1];
-    const goerliScan = `https://goerli.etherscan.io/address/${user.walletAddress}`
-    return {
-      user,
-      firstName,
-      lastName,
-      goerliScan,
-      nftView: true,
-      tokenView: false,
-      active_: ""
-    };
-  },
-  methods: {
-  },
-};
+const store = useAuthStore();
+const user = store.currentUser;
+const firstName = user?.displayName!.split(" ")[0];
+const lastName = user?.displayName!.split(" ")[-1];
+const goerliScan = `https://goerli.etherscan.io/address/${user!.walletAddress}`;
+const nftView = ref<boolean>(true);
+const tokenView = ref<boolean>(false);
+const active_ = ref<string>("");
+// const isDeployed = ref<boolean>(true);
+const loading = ref<boolean>(true);
+const tokens = ref<{ [key: string]: Token }>({});
+const balance = ref<number>(0);
+
+onMounted(async () => {
+  balance.value = await getBalance(user?.email);
+  const accountAddress = store.currentUser!.walletAddress!;
+  tokens.value = await loadAll(store, accountAddress, chain);
+  isDeployed.value = await isContract(accountAddress);
+  loading.value = false;
+});
+
+// export default {
+//   components: {
+//     Layout,
+//     WalletTokenList,
+//   },
+//   data() {
+//     const store = useAuthStore();
+//     const user = store.currentUser!;
+//     const firstName = user?.displayName!.split(" ")[0];
+//     const lastName = user?.displayName!.split(" ")[-1];
+//     const goerliScan = `https://goerli.etherscan.io/address/${user.walletAddress}`
+//     return {
+//       user,
+//       firstName,
+//       lastName,
+//       goerliScan,
+//       nftView: true,
+//       tokenView: false,
+//       active_: ""
+//     };
+//   },
+//   methods: {
+//   },
+// };
 </script>

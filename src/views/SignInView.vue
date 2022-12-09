@@ -11,14 +11,14 @@
                         simply share your email to receive tokens without downloading or signing up anything. It's as easy
                         as using Zelle!</p>
                     <ul className="social-icons mt-4" style="list-style-type:none; padding: 0;">
-                        <li>
+                        <!-- <li>
                             <router-link to="#"><i className="fa fa-facebook"></i></router-link>
-                        </li>
+                        </li> -->
                         <li>
                             <router-link to="#"><i className="fa fa-twitter"></i></router-link>
                         </li>
                         <li>
-                            <router-link to="#"><i className="fa fa-linkedin"></i></router-link>
+                            <router-link to="#"><i class="fa fa-discord"></i></router-link>
                         </li>
                     </ul>
                     <div className="bottom-privacy">
@@ -54,19 +54,19 @@
                                             </button>
                                         </a-row>
                                         <!-- Sign in with facebook -->
-                                        <a-row justify="center" style="margin-top: 5px;">
+                                        <!-- <a-row justify="center" style="margin-top: 5px;">
                                             <button size="large" @click="github_login" className="facebook__btn">
                                                 <i class="fa fa-facebook"></i>&nbsp;&nbsp;
                                                 Sign in with Facebook
                                             </button>
-                                        </a-row>
+                                        </a-row> -->
                                         <!-- Sign in with Github -->
-                                        <a-row justify="center" style="margin-top: 5px;">
+                                        <!-- <a-row justify="center" style="margin-top: 5px;">
                                             <button size="large" @click="github_login" className="github__btn">
                                                 <i class="fa fa-github"></i>&nbsp;&nbsp;
                                                 Sign in with GitHub
                                             </button>
-                                        </a-row>
+                                        </a-row> -->
                                     </div>
                                 </div>
                             </div>

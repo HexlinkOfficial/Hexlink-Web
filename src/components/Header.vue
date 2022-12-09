@@ -26,8 +26,7 @@
                 <span class="dark"><i class="icofont-moon"></i></span>
                 <span class="light"><i class="icofont-sun-alt"></i></span>
               </div> -->
-              <div class="notification dropdown" @click="activeDropDown('notification')"
-                :class="active_ === 'notification' && 'show'">
+              <div class="notification dropdown" @click="activeDropDown('notification')" :class="active_ === 'notification' && 'show'">
                 <div class="notify-bell" data-toggle="dropdown">
                   <svg width="15" height="20" viewBox="0 0 15 20" fill="none" xmlns="http://www.w3.org/2000/svg"
                     class="h-auto w-3 sm:w-auto">
@@ -90,7 +89,7 @@
                     <img v-if="index != 0" :src="component" height=25 style="margin-left: -0.5rem;">
                   </template>
                   <span v-if="selectedChains.length === 1">{{ currentNetwork }}</span>
-                  <span v-if="selectedChains.length != 1">{{ networkCount }} Networks</span>
+                  <span v-if="selectedChains.length != 1">{{ networkCount }} <span class="network-word">Networks</span></span>
                   <svg width="14" height="8" viewBox="0 0 14 8" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 0.5rem; width: 1rem">
                     <path d="M1 1L7 7L13 1" stroke="#475569" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                   </svg>
@@ -271,7 +270,7 @@
                     <span class="thumb"><img :src="user?.photoURL" :size="64" referrerpolicy="no-referrer" /></span>
                   </div> -->
                   <img class="profile" :src="user?.photoURL" :size="64" referrerpolicy="no-referrer"/>
-                  <span>{{ addressTextNormal }}</span>
+                  <span>{{ user?.email }}</span>
                   <svg width="14" height="8" viewBox="0 0 14 8" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 0.5rem; width: 1rem">
                     <path d="M1 1L7 7L13 1" stroke="#475569" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                   </svg>
@@ -507,7 +506,7 @@ export default {
   left: 9.5rem;
   right: 3rem;
   z-index: 2; }
-  @media only screen and (max-width: 880px) {
+  @media only screen and (max-width: 990px) {
     .header {
       left: 0;
       right: 0;
@@ -528,7 +527,7 @@ export default {
       position: relative;
       top: 3px;
       font-size: 20px; }
-    @media only screen and (max-width: 880px) {
+    @media only screen and (max-width: 990px) {
       .header .brand-logo {
         display: block;
         padding-right: 0; }
@@ -563,7 +562,7 @@ export default {
 .dark-light-toggle {
 margin-right: 20px;
 cursor: pointer; }
-@media only screen and (max-width: 880px) {
+@media only screen and (max-width: 990px) {
   .dark-light-toggle {
     margin-right: 0px;
     margin-left: 15px; } }
@@ -585,8 +584,7 @@ cursor: pointer; }
   border-radius: 9999px;
   border-width: 1px;
   border-color: #F3F4F6;
-  cursor: pointer;
-  margin-right: 1rem; }
+  cursor: pointer; }
   .profile_log .user:hover {
       transform: translateY(-0.125rem);
       fill: rgb(7, 106, 224);
@@ -822,7 +820,7 @@ cursor: pointer; }
       border-color: rgb(73,108,233);
       color: rgb(7,106,224);
     }
-    @media only screen and (max-width: 880px) {
+    @media only screen and (max-width: 990px) {
       .notification .notify-bell {
         margin-right: 0.5rem;
         margin-left: 0.5rem; } }
@@ -869,6 +867,10 @@ cursor: pointer; }
     @media only screen and (max-width: 768px) {
       .selectnetwork .network span {
         display: none; } }
+  .selectnetwork .network .network-word {
+    @media only screen and (max-width: 992px) {
+      .selectnetwork .network .network-word {
+        display: none; } } }
   .selectnetwork .dropdown-menu {
     margin-top: 0.75rem;
     box-shadow: 0 1.5rem 4rem rgba(22, 28, 45, 0.15); }

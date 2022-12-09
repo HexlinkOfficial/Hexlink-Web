@@ -11,7 +11,10 @@ import '@/assets/main.css'
 
 import { getAuth} from 'firebase/auth'
 import { app } from '@/services/firebase'
-
+/* import the fontawesome core */
+import { library } from '@fortawesome/fontawesome-svg-core'
+/* import font awesome icon component */
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { useAuthStore } from "@/stores/auth"
 import { clearUrqlClient } from '@/services/graphql/urql'
 import Toaster from '@meforma/vue-toaster';
@@ -31,6 +34,7 @@ getAuth(app).onAuthStateChanged(async (user: any) => {
       .use(Antd)
       .use(Toaster)
       .use(VueClipboard)
+      .component('font-awesome-icon', FontAwesomeIcon)
       .mount('#app');
   }
 

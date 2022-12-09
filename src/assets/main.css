@@ -33,8 +33,8 @@
     display: inherit; }
 
 .table th {
-  color: #495057;
-  border-bottom: 1px solid #f1f1f1 !important; }
+  color: #e5e7eb;
+  border-bottom: 1px solid #e5e7eb !important; }
 
 .table-responsive-sm {
   min-width: 48rem; }
@@ -1123,7 +1123,7 @@ button,
   margin-top: 30px; }
   .brand-logo img {
     max-width: 47px; }
-  @media only screen and (max-width: 880px) {
+  @media only screen and (max-width: 990px) {
     .brand-logo {
       display: none; } }
 
@@ -5490,7 +5490,7 @@ p {
     max-width: 1140px; } }
 @media (min-width: 1440px) {
   .container, .container-sm, .container-md, .container-lg, .container-xl, .container-xxl {
-    max-width: 1320px; } }
+    max-width: 80%; } }
 .row {
   --bs-gutter-x: 30px;
   --bs-gutter-y: 0;

@@ -1,7 +1,7 @@
 <style lang="less" scoped>
 .content-body {
   margin-left: 9.5rem; }
-  @media only screen and (max-width: 880px) {
+  @media only screen and (max-width: 990px) {
     .content-body {
       margin-left: 0px;
       margin-bottom: 50px; } }
@@ -378,7 +378,7 @@ img, svg {
   <layout :active="1">
     <div class="content-body">
       <div class="container">
-        <h1 style="margin-bottom: 1rem;;">Dashboard</h1>
+        <h1 style="margin-bottom: 1rem;;">Transaction</h1>
         <div class="row">
           <div className="row invoice-card-row">
             <div className="col-xxl-4 col-xl-4 col-lg-6">

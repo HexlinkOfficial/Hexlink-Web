@@ -72,7 +72,7 @@
   transition: all .5s ease-in-out;
   position: relative;
   border: 0px solid transparent;
-  border-radius: 1.75rem;
+  border-radius: 1rem;
   box-shadow: 0px 5px 5px 0px rgba(82, 63, 105, 0.05);
   height: calc(100% - 30px); }
 @media only screen and (max-width: 575px) {
@@ -345,6 +345,32 @@
           .token-listDetail .token-table .table-thread .balance-header .balance-header-data {
             display: flex;
             align-items: center; }
+.account-setup {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between; }
+  .account-setup h4 {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0;
+    margin-left: 0.875rem; }
+    .account-setup .icon-grey {
+      color: #076AE0;
+    }
+  .account-setup .cta-button {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    font-weight: 800;
+    line-height: 1.25rem;
+    width: 100px;
+    border-radius: 50px;
+    opacity: 1;
+    background-color: rgb(7, 106, 224);
+    color: white; }
 img,
 svg {
   vertical-align: middle; }
@@ -358,6 +384,16 @@ svg {
           <div className="row invoice-card-row">
             <div class="col-xxl-6">
               <div class="card">
+                <div class="card-body" style="padding: 10px 20px;">
+                  <div class="account-setup">
+                    <h4><span class="icon-grey"><i class="fa-solid fa-circle-exclamation"></i></span>&nbsp;&nbsp;Your account is not setup yet, please setup your account first.</h4>
+                    <button class="cta-button">Set Up</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- <div class="col-xxl-6">
+              <div class="card">
                 <div class="card-body">
                   <a-row v-if="!isDeployed" justify="center" align="middle" style="margin: 20px;">
                     <WalletSetup></WalletSetup>
@@ -370,7 +406,7 @@ svg {
                   </div>
                 </div>
               </div>
-            </div>
+            </div> -->
             <div class="col-xxl-6">
               <div class="token-worth">
                 <div>

@@ -20,40 +20,39 @@
       </tr>
     </thead>
     <tbody>
-      <tr v-for="(token, i) in [1,2,3,4,5]" :key="i" class="token-detail">
+      <tr v-for="(token, i) in props.tokens" :key="i" class="token-detail">
         <td>
           <div class="token-description">
             <div class="token-logo">
               <div class="network-logo">
-                <img src="https://token.metaswap.codefi.network/assets/networkLogos/polygon.svg" alt="" />
+                <img :src="token.metadata.logo || 'https://token.metaswap.codefi.network/assets/networkLogos/ethereum.svg'" alt={{token.address}} />
               </div>
-              <img class="logo" src="https://token.metaswap.codefi.network/assets/nativeCurrencyLogos/matic.svg"
-                alt="MATIC" />
+              <img class="logo" :src="token.metadata.logo || logo" alt={{token.address}} />
             </div>
             <div class="token-name">
               <div class="name">
                 <div class="symbol">
-                  <div class="symbol-text">MATIC</div>
+                  <div class="symbol-text">{{token.metadata.symbol}}</div>
                 </div>
-                <div class="fullname">Matic</div>
+                <div class="fullname">{{token.metadata.name}}</div>
               </div>
             </div>
           </div>
         </td>
         <td class="portfolio-percentage-detail">
-          <div>56.44%</div>
+          <div>{{ balance > 0 ? (token.balance?.normalized.times(token.price || 0) / balance) : 0}} %</div>
         </td>
         <td class="price-detail">
           <div class="detail">
-            <div class="token-market-price">$1,294.06</div>
-            <p :class='isGreen ? "token-price-change-positive" : "token-price-change-negative"'>+2.64%</p>
+            <div class="token-market-price">$ {{token.price ? token.price : 0}}</div>
+            <p v-if="token.price" :class='isGreen ? "token-price-change-positive" : "token-price-change-negative"'>+2.64%</p>
           </div>
         </td>
         <td class="balance-detail">
           <div class="detail">
-            <div class="balance">$9.40</div>
-            <p class="crypto-balance">10.0578 MATIC</p>
-            <button id="gettingStarted" @click="() => { $el.ownerDocument.defaultView.console.log(props.tokens) }">Getting started</button>
+            <div class="balance">$ {{token.balance?.normalized.times(token.price || 0).toString() || 0}}</div>
+            <p class="crypto-balance">{{token.balance?.normalized || 0}} {{token.metadata.symbol}}</p>
+            <!-- <button id="gettingStarted" @click="() => { $el.ownerDocument.defaultView.console.log(props.tokens) }">Getting started</button> -->
           </div>
         </td>
       </tr>
@@ -249,6 +248,8 @@ tbody tr {
 <script lang="ts" setup>
 import { ref } from 'vue'
 import type { Token } from "@/services/web3/tokens";
+import { BigNumber } from "bignumber.js";
+import logo from "../assets/network-icons/hexlink.svg";
 
 const isGreen = ref(true)
 const props = defineProps({
@@ -256,5 +257,9 @@ const props = defineProps({
     type: Object as () => Token[],
     required: true,
   },
+  balance: {
+    type: Object as () => BigNumber,
+    required: false,
+  }
 });
 </script>

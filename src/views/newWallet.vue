@@ -382,6 +382,7 @@ svg {
         <h1 style="margin-bottom: 1rem;;">Tokens</h1>
         <div class="row">
           <div className="row invoice-card-row">
+            <!-- account set up notification -->
             <div class="col-xxl-6">
               <div class="card">
                 <div class="card-body" style="padding: 10px 20px;">
@@ -407,6 +408,7 @@ svg {
                 </div>
               </div>
             </div> -->
+            <!-- account balance and title -->
             <div class="col-xxl-6">
               <div class="token-worth">
                 <div>
@@ -461,7 +463,10 @@ svg {
                   <div class="token-listDetail">
                     <div class="token-table">
                       <div style="overflow: visible; border-radius: 0.75rem;">
-                        <WalletTokenList></WalletTokenList>
+                        <WalletTokenList 
+                          :tokens="visiableTokens" 
+                          :balance="dynamicBalance.toNumber()"
+                        ></WalletTokenList>
                       </div>
                     </div>
                   </div>
@@ -484,6 +489,7 @@ import Layout from "../components/Layout.vue";
 import WalletTokenList from "../components/WalletTokenList.vue";
 import { useAuthStore } from '@/stores/auth';
 import WalletSetup from "@/components/AccountSetup.vue";
+import { BigNumber } from "bignumber.js";
 
 const store = useAuthStore();
 const user = store.currentUser;
@@ -493,22 +499,41 @@ const goerliScan = `https://goerli.etherscan.io/address/${user!.walletAddress}`;
 const nftView = ref<boolean>(true);
 const tokenView = ref<boolean>(false);
 const active_ = ref<string>("");
-// const isDeployed = ref<boolean>(true);
+const isDeployed = ref<boolean>(true);
 const loading = ref<boolean>(true);
 const tokens = ref<{ [key: string]: Token }>({});
 const balance = ref<number>(0);
-const progress = document.querySelector(".js-completed-bar");
-if (progress) {
-  progress.style.width = progress.getAttribute("data-complete") + "%";
-  progress.style.opacity = 1;
-}
+const chain = "GOERLI";
+// const progress = document.querySelector(".js-completed-bar");
+// if (progress) {
+//   progress.style.width = progress.getAttribute("data-complete") + "%";
+//   progress.style.opacity = 1;
+// }
 
 onMounted(async () => {
   balance.value = await getBalance(user?.email);
   const accountAddress = store.currentUser!.walletAddress!;
   tokens.value = await loadAll(store, accountAddress, chain);
-  // isDeployed.value = await isContract(accountAddress);
+  isDeployed.value = await isContract(accountAddress);
   loading.value = false;
+});
+
+const visiableTokens = computed(() => {
+  return Object.values(tokens.value).filter(t => t.preference?.display || false);
+});
+
+const totalAssets = computed(() => {
+  let total: BigNumber = BigNumber(0);
+  for (const token of visiableTokens.value) {
+    if (token.balance && token.price) {
+      total = total.plus(token.balance.normalized.times(token.price));
+    }
+  }
+  return total.plus(BigNumber(dynamicBalance.value));
+});
+
+const dynamicBalance = computed(() => {
+  return BigNumber(Math.floor(Math.random() * 100));
 });
 
 // export default {

@@ -1,4 +1,6 @@
 <template>
+  <!-- <a-list>
+<template #renderItem="{ item }"> -->
   <table>
     <thead class="table-thread">
       <tr>
@@ -18,42 +20,7 @@
       </tr>
     </thead>
     <tbody>
-      <tr class="token-detail">
-        <td>
-          <div class="token-description">
-            <div class="token-logo">
-              <div class="network-logo">
-                <img src="https://token.metaswap.codefi.network/assets/networkLogos/polygon.svg" alt="" />
-              </div>
-              <img class="logo" src="https://token.metaswap.codefi.network/assets/nativeCurrencyLogos/matic.svg" alt="MATIC" />
-            </div>
-            <div class="token-name">
-              <div class="name">
-                <div class="symbol">
-                  <div class="symbol-text">MATIC</div>
-                </div>
-                <div class="fullname">Matic</div>
-              </div>
-            </div>
-          </div>
-        </td>
-        <td class="portfolio-percentage-detail">
-          <div>56.44%</div>
-        </td>
-        <td class="price-detail">
-          <div class="detail">
-            <div class="token-market-price">$1,294.06</div>
-            <p :class='isGreen ? "token-price-change-positive" : "token-price-change-negative"'>+2.64%</p>
-          </div>
-        </td>
-        <td class="balance-detail">
-          <div class="detail">
-            <div class="balance">$9.40</div>
-            <p class="crypto-balance">10.0578 MATIC</p>
-          </div>
-        </td>
-      </tr>
-      <tr class="token-detail">
+      <tr v-for="(token, i) in [1,2,3,4,5]" :key="i" class="token-detail">
         <td>
           <div class="token-description">
             <div class="token-logo">
@@ -86,12 +53,15 @@
           <div class="detail">
             <div class="balance">$9.40</div>
             <p class="crypto-balance">10.0578 MATIC</p>
+            <button id="gettingStarted" @click="() => { $el.ownerDocument.defaultView.console.log(props.tokens) }">Getting started</button>
           </div>
         </td>
       </tr>
     </tbody>
   </table>
 </template>
+  <!-- </a-list>
+</template> -->
 
 <style lang="less" scoped>
 img {
@@ -278,6 +248,13 @@ tbody tr {
 
 <script lang="ts" setup>
 import { ref } from 'vue'
+import type { Token } from "@/services/web3/tokens";
 
 const isGreen = ref(true)
+const props = defineProps({
+  tokens: {
+    type: Object as () => Token[],
+    required: true,
+  },
+});
 </script>

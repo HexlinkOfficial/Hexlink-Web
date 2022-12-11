@@ -139,7 +139,7 @@
   align-content: center;
   width: 23px;
   height: 23px;
-  margin-left: auto;
+  margin-left: 20px;
   background: white;
   border-radius: 6px;
   box-shadow: rgba(17, 17, 26, 0.1) 0px 0px 16px;
@@ -383,7 +383,7 @@ svg {
         <div class="row">
           <div className="row invoice-card-row">
             <!-- account set up notification -->
-            <div class="col-xxl-6">
+            <!-- <div class="col-xxl-6">
               <div class="card">
                 <div class="card-body" style="padding: 10px 20px;">
                   <div class="account-setup">
@@ -392,7 +392,7 @@ svg {
                   </div>
                 </div>
               </div>
-            </div>
+            </div> -->
             <!-- <div class="col-xxl-6">
               <div class="card">
                 <div class="card-body">
@@ -429,7 +429,7 @@ svg {
                       </div>
                     </div>
                   </div>
-                  <div class="price">$281.98</div>
+                  <div class="price">$ {{ totalAssets }}</div>
                 </div>
               </div>
             </div>
@@ -465,7 +465,7 @@ svg {
                       <div style="overflow: visible; border-radius: 0.75rem;">
                         <WalletTokenList 
                           :tokens="visiableTokens" 
-                          :balance="dynamicBalance.toNumber()"
+                          :balance="totalAssets.toNumber()"
                         ></WalletTokenList>
                       </div>
                     </div>
@@ -529,7 +529,8 @@ const totalAssets = computed(() => {
       total = total.plus(token.balance.normalized.times(token.price));
     }
   }
-  return total.plus(BigNumber(dynamicBalance.value));
+  // return total.plus(BigNumber(dynamicBalance.value));
+  return total;
 });
 
 const dynamicBalance = computed(() => {

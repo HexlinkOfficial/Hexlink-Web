@@ -30,6 +30,7 @@
     "apexcharts": "^3.36.3",
     "bignumber.js": "^9.1.0",
     "buffer": "^6.0.3",
+    "coingecko-api": "^1.0.10",
     "crypto-js": "^4.1.1",
     "ethers": "^5.7.1",
     "firebase": "^9.11.0",

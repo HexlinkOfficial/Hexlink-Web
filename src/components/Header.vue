@@ -26,8 +26,7 @@
                 <span class="dark"><i class="icofont-moon"></i></span>
                 <span class="light"><i class="icofont-sun-alt"></i></span>
               </div> -->
-              <div class="notification dropdown" @click="activeDropDown('notification')"
-                :class="active_ === 'notification' && 'show'">
+              <!-- <div class="notification dropdown" @click="activeDropDown('notification')" :class="active_ === 'notification' && 'show'">
                 <div class="notify-bell" data-toggle="dropdown">
                   <svg width="15" height="20" viewBox="0 0 15 20" fill="none" xmlns="http://www.w3.org/2000/svg"
                     class="h-auto w-3 sm:w-auto">
@@ -35,7 +34,6 @@
                       d="M9.61379 0.309937C9.89044 0.427717 10.07 0.699327 10.07 1V7.99819H14C14.2667 7.99819 14.5133 8.13982 14.6478 8.37018C14.7822 8.60053 14.7842 8.88494 14.653 9.11714L14.1609 9.988C12.2948 13.2906 9.9149 16.2752 7.11058 18.8298L6.31506 19.5544C6.0955 19.7545 5.7786 19.8061 5.50693 19.686C5.23526 19.566 5.06 19.297 5.06 19V12.0611H1C0.585786 12.0611 0.25 11.7254 0.25 11.3111C0.25 11.177 0.285225 11.051 0.346932 10.9421C2.10572 7.69064 4.3575 4.73117 7.02222 2.16895L8.80017 0.459375C9.0169 0.250976 9.33715 0.192157 9.61379 0.309937ZM2.28458 10.5611H5.81C6.22421 10.5611 6.56 10.8969 6.56 11.3111V17.2945C8.9786 15.009 11.0517 12.3827 12.7134 9.49819H9.32C8.90579 9.49819 8.57 9.1624 8.57 8.74819V2.76162L8.06188 3.25019C5.8111 5.4144 3.86782 7.87442 2.28458 10.5611Z"
                       fill="currentColor"></path>
                   </svg>
-                  <!-- <span><i class="icofont-alarm"></i></span> -->
                   <span class="notify-dot"></span>
                 </div>
                 <div class="dropdown-menu dropdown-menu-right notification-list mt-3" :class="active_ === 'notification' && 'show'">
@@ -81,7 +79,7 @@
                     <router-link to="./settings-activity">More <i class="icofont-simple-right"></i></router-link>
                   </div>
                 </div>
-              </div>
+              </div> -->
               <div class="selectnetwork dropdown" @click="activeDropDown('selectnetwork')"
                 :class="active_ === 'selectnetwork' && 'show'">
                 <div class="network" data-toggle="dropdown">
@@ -90,7 +88,7 @@
                     <img v-if="index != 0" :src="component" height=25 style="margin-left: -0.5rem;">
                   </template>
                   <span v-if="selectedChains.length === 1">{{ currentNetwork }}</span>
-                  <span v-if="selectedChains.length != 1">{{ networkCount }} Networks</span>
+                  <span v-if="selectedChains.length != 1">{{ networkCount }} <span class="network-word">Networks</span></span>
                   <svg width="14" height="8" viewBox="0 0 14 8" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 0.5rem; width: 1rem">
                     <path d="M1 1L7 7L13 1" stroke="#475569" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                   </svg>
@@ -271,7 +269,7 @@
                     <span class="thumb"><img :src="user?.photoURL" :size="64" referrerpolicy="no-referrer" /></span>
                   </div> -->
                   <img class="profile" :src="user?.photoURL" :size="64" referrerpolicy="no-referrer"/>
-                  <span>{{ addressTextNormal }}</span>
+                  <span>{{ user?.email }}</span>
                   <svg width="14" height="8" viewBox="0 0 14 8" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 0.5rem; width: 1rem">
                     <path d="M1 1L7 7L13 1" stroke="#475569" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                   </svg>
@@ -507,7 +505,7 @@ export default {
   left: 9.5rem;
   right: 3rem;
   z-index: 2; }
-  @media only screen and (max-width: 880px) {
+  @media only screen and (max-width: 990px) {
     .header {
       left: 0;
       right: 0;
@@ -528,7 +526,7 @@ export default {
       position: relative;
       top: 3px;
       font-size: 20px; }
-    @media only screen and (max-width: 880px) {
+    @media only screen and (max-width: 990px) {
       .header .brand-logo {
         display: block;
         padding-right: 0; }
@@ -563,7 +561,7 @@ export default {
 .dark-light-toggle {
 margin-right: 20px;
 cursor: pointer; }
-@media only screen and (max-width: 880px) {
+@media only screen and (max-width: 990px) {
   .dark-light-toggle {
     margin-right: 0px;
     margin-left: 15px; } }
@@ -585,8 +583,7 @@ cursor: pointer; }
   border-radius: 9999px;
   border-width: 1px;
   border-color: #F3F4F6;
-  cursor: pointer;
-  margin-right: 1rem; }
+  cursor: pointer; }
   .profile_log .user:hover {
       transform: translateY(-0.125rem);
       fill: rgb(7, 106, 224);
@@ -822,7 +819,7 @@ cursor: pointer; }
       border-color: rgb(73,108,233);
       color: rgb(7,106,224);
     }
-    @media only screen and (max-width: 880px) {
+    @media only screen and (max-width: 990px) {
       .notification .notify-bell {
         margin-right: 0.5rem;
         margin-left: 0.5rem; } }
@@ -869,6 +866,10 @@ cursor: pointer; }
     @media only screen and (max-width: 768px) {
       .selectnetwork .network span {
         display: none; } }
+  .selectnetwork .network .network-word {
+    @media only screen and (max-width: 992px) {
+      .selectnetwork .network .network-word {
+        display: none; } } }
   .selectnetwork .dropdown-menu {
     margin-top: 0.75rem;
     box-shadow: 0 1.5rem 4rem rgba(22, 28, 45, 0.15); }

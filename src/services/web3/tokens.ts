@@ -73,7 +73,8 @@ export async function getERC20Metadata(token: string) : Promise<Token> {
         metadata: {
             name: metadata.name!,
             symbol: metadata.symbol!,
-            decimals: metadata.decimals!
+            decimals: metadata.decimals!,
+            logo: metadata.logo!
         }
     }
 }
@@ -138,7 +139,7 @@ export async function getAllVisiableTokens(store: IAuth, chain: string) {
                 customTokenAddresses.push(address);
                 tokens[address] = {
                     address,
-                    metadata: {name: "", symbol: "", decimals: 18},
+                    metadata: { name: "", symbol: "", decimals: 18, logo: "" },
                     preference
                 }
             }
@@ -174,7 +175,7 @@ export async function loadAll(
             customTokenAddresses.push(address)
             tokens[address] = {
                 address,
-                metadata: {name: "", symbol: "", decimals: 0},
+                metadata: {name: "", symbol: "", decimals: 0, logo: ""},
                 preference: p,
             }
         }

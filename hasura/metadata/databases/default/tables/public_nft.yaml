@@ -22,6 +22,7 @@ select_permissions:
     permission:
       columns:
         - id
+        - token_id
         - collection_address
         - collection_name
         - collection_symbol
@@ -29,7 +30,6 @@ select_permissions:
         - nft_external_url
         - nft_raw_url
         - nft_title
-        - token_id
         - user_id
         - created_at
         - updated_at

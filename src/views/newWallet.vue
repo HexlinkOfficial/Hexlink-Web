@@ -374,6 +374,9 @@
 img,
 svg {
   vertical-align: middle; }
+.nft-gridDetail {
+  border-radius: 0.75rem;
+  margin-top: 1.75rem; }
 </style>
 <template>
   <layout :active="1">
@@ -455,12 +458,12 @@ svg {
                     </div>
                     <div class="views">
                       <div class="detail-view">
-                        <button class="listView-button" @click="tokenView = false; nftView = !nftView" :class="nftView && 'show'">Tokens</button>
-                        <button class="listView-button" @click="nftView = false; tokenView = !tokenView" :class="tokenView && 'show'">NFTs</button>
+                        <button class="listView-button" @click="nftView = false; tokenView = !tokenView" :class="tokenView && 'show'">Tokens</button>
+                        <button class="listView-button" @click="tokenView = false; nftView = !nftView" :class="nftView && 'show'">NFTs</button>
                       </div>
                     </div>
                   </div>
-                  <div class="token-listDetail">
+                  <div v-if="tokenView" class="token-listDetail">
                     <div class="token-table">
                       <div style="overflow: visible; border-radius: 0.75rem;">
                         <WalletTokenList 
@@ -469,6 +472,9 @@ svg {
                         ></WalletTokenList>
                       </div>
                     </div>
+                  </div>
+                  <div v-if="nftView" class="nft-gridDetail">
+                    <WalletNFTGrid></WalletNFTGrid>
                   </div>
                 </div>
               </div>
@@ -487,6 +493,7 @@ import { loadAll } from "@/services/web3/tokens";
 import { getBalance, isContract } from "@/services/web3/account";
 import Layout from "../components/Layout.vue";
 import WalletTokenList from "../components/WalletTokenList.vue";
+import WalletNFTGrid from "../components/WalletNFTGrid.vue";
 import { useAuthStore } from '@/stores/auth';
 import WalletSetup from "@/components/AccountSetup.vue";
 import { BigNumber } from "bignumber.js";
@@ -496,8 +503,8 @@ const user = store.currentUser;
 const firstName = user?.displayName!.split(" ")[0];
 const lastName = user?.displayName!.split(" ")[-1];
 const goerliScan = `https://goerli.etherscan.io/address/${user!.walletAddress}`;
-const nftView = ref<boolean>(true);
-const tokenView = ref<boolean>(false);
+const nftView = ref<boolean>(false);
+const tokenView = ref<boolean>(true);
 const active_ = ref<string>("");
 const isDeployed = ref<boolean>(true);
 const loading = ref<boolean>(true);
@@ -536,29 +543,4 @@ const totalAssets = computed(() => {
 const dynamicBalance = computed(() => {
   return BigNumber(Math.floor(Math.random() * 100));
 });
-
-// export default {
-//   components: {
-//     Layout,
-//     WalletTokenList,
-//   },
-//   data() {
-//     const store = useAuthStore();
-//     const user = store.currentUser!;
-//     const firstName = user?.displayName!.split(" ")[0];
-//     const lastName = user?.displayName!.split(" ")[-1];
-//     const goerliScan = `https://goerli.etherscan.io/address/${user.walletAddress}`
-//     return {
-//       user,
-//       firstName,
-//       lastName,
-//       goerliScan,
-//       nftView: true,
-//       tokenView: false,
-//       active_: ""
-//     };
-//   },
-//   methods: {
-//   },
-// };
 </script>

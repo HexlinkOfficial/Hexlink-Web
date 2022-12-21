@@ -11,6 +11,7 @@ insert_permissions:
         - chain
         - display
         - token_address
+        - token_alias
         - user_id
 select_permissions:
   - role: user
@@ -19,7 +20,9 @@ select_permissions:
         - chain
         - created_at
         - display
+        - id
         - token_address
+        - token_alias
         - updated_at
         - user_id
       filter:
@@ -30,6 +33,7 @@ update_permissions:
     permission:
       columns:
         - display
+        - token_alias
         - updated_at
       filter:
         user_id:

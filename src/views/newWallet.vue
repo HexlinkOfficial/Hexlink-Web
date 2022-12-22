@@ -458,8 +458,8 @@ svg {
                     </div>
                     <div class="views">
                       <div class="detail-view">
-                        <button class="listView-button" @click="nftView = false; tokenView = !tokenView" :class="tokenView && 'show'">Tokens</button>
-                        <button class="listView-button" @click="tokenView = false; nftView = !nftView" :class="nftView && 'show'">NFTs</button>
+                        <button class="listView-button" @click="nftView = false; tokenView = true" :class="tokenView && 'show'">Tokens</button>
+                        <button class="listView-button" @click="tokenView = false; nftView = true" :class="nftView && 'show'">NFTs</button>
                       </div>
                     </div>
                   </div>

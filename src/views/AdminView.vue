@@ -47,18 +47,18 @@
         </div>
         <table class="table" v-if="resultItems.length > 0">
             <thead>
-            <tr>
-                <th v-for="itemKey in tableItemKeys">
-                {{columns[itemKey]}}
-                </th>
-            </tr>
+                <tr>
+                    <th v-for="itemKey in tableItemKeys">
+                        {{columns[itemKey]}}
+                    </th>
+                </tr>
             </thead>
             <tbody>
-            <tr v-for="item in resultItems">
-                <td v-for="itemKey in tableItemKeys">
-                {{item[itemKey]}}
-                </td>
-            </tr>
+                <tr v-for="item in resultItems">
+                    <td v-for="itemKey in tableItemKeys">
+                        {{item[itemKey]}}
+                    </td>
+                </tr>
             </tbody>
         </table>
     </div>
@@ -93,6 +93,7 @@ export default {
         e.target.style.height = `${e.target.scrollHeight}px`
     },
     checkResult: function() {
+        this.resultItems = []
         for (var i = 0; i < this.receiverAddrItems.length; i ++) {
             this.resultItems.push({userhandle: this.receiverAddrItems[i].addr, addr: '0x1234', lastHistory: '10pm'})
         }
@@ -114,6 +115,13 @@ export default {
 
 .table {
     text-align: left; 
+    width: 80%;
+    margin-top: 20px;
+}
+
+.table > thead > tr > th{
+    color: black;
+    background-color: rgb(19, 205, 215);
 }
 
 .input {
@@ -162,6 +170,7 @@ export default {
 
 .receiverAddressCard {
     margin-top: 10px;
+    width: 80%;
 }
 
 .receiverAddressCell {

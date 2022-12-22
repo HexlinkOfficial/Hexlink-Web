@@ -9,10 +9,9 @@ insert_permissions:
           _eq: X-Hasura-User-Id
       columns:
         - chain
-        - created_at
         - display
         - token_address
-        - updated_at
+        - token_alias
         - user_id
 select_permissions:
   - role: user
@@ -21,7 +20,9 @@ select_permissions:
         - chain
         - created_at
         - display
+        - id
         - token_address
+        - token_alias
         - updated_at
         - user_id
       filter:
@@ -32,8 +33,17 @@ update_permissions:
     permission:
       columns:
         - display
+        - token_alias
         - updated_at
       filter:
         user_id:
           _eq: X-Hasura-User-Id
-      check: null
+      check:
+        user_id:
+          _eq: X-Hasura-User-Id
+delete_permissions:
+  - role: user
+    permission:
+      filter:
+        user_id:
+          _eq: X-Hasura-User-Id

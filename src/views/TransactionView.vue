@@ -599,7 +599,7 @@ svg {
     <div class="content-body">
       <div class="container">
         <h1 style="margin-bottom: 1rem;">Transactions</h1>
-        <div class="row">
+        <div class="row" style="padding-top: 16px;">
           <div className="row invoice-card-row">
             <div class="col-xxl-6">
               <div class="card">

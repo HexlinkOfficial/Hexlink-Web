@@ -13,7 +13,7 @@ const router = createRouter({
     {
       path: '/',
       name: 'home',
-      component: HomeView
+      component: () => import('@/views/newWallet.vue')
     },
     {
       path: '/signin',
@@ -41,9 +41,9 @@ const router = createRouter({
       component: () => import('@/views/newAbout.vue')
     },
     {
-      path: '/testwallet',
-      name: 'test walletpage',
-      component: () => import('@/views/newWallet.vue')
+      path: '/oldhome',
+      name: 'old homepage',
+      component: HomeView
     },
     {
       path: '/adminView',

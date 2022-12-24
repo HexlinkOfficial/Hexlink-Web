@@ -8,7 +8,7 @@
       <ul>
         <!-- testwallet -->
         <li>
-          <router-link to="/testwallet" data-toggle="tooltip" data-placement="right" title="Wallet"
+          <router-link to="/" data-toggle="tooltip" data-placement="right" title="Wallet"
             :class="active === 1 && 'active'">
             <span class="icon-grey"><i class="icofont-wallet"></i></span>
           </router-link>
@@ -21,19 +21,19 @@
           </router-link>
         </li>
         <!-- testabout -->
-        <li>
+        <!-- <li>
           <router-link to="/testabout" data-toggle="tooltip" data-placement="right" title="Trade"
             :class="active === 3 && 'active'">
             <span class="icon-grey"><i class="icofont-stack-exchange"></i></span>
           </router-link>
-        </li>
+        </li> -->
         <!-- activities -->
-        <li>
+        <!-- <li>
           <router-link to="/activities" data-toggle="tooltip" data-placement="right" title="Price"
             :class="active === 4 && 'active'">
             <span class="icon-grey"><i class="icofont-price"></i></span>
           </router-link>
-        </li>
+        </li> -->
         <!-- signout -->
         <li class="logout">
           <router-link to="/signin" data-toggle="tooltip" data-placement="right" title="Signout">

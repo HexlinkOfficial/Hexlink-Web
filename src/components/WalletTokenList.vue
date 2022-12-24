@@ -127,8 +127,7 @@ tbody tr {
   border-radius: 1.75rem;
   cursor: pointer; }
   .token-detail:hover {
-    background: #e5e7eb;
-  }
+    background: #e5e7eb; }
   .token-detail .token-description {
     display: flex;
     position: relative;

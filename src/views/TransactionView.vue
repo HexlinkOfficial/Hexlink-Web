@@ -1,10 +1,10 @@
 <style lang="less" scoped>
 .content-body {
   margin-left: 9.5rem; }
-  @media only screen and (max-width: 990px) {
-    .content-body {
-      margin-left: 0px;
-      margin-bottom: 50px; } }
+@media only screen and (max-width: 990px) {
+  .content-body {
+    margin-left: 0px;
+    margin-bottom: 50px; } }
 .card {
   position: relative;
   display: flex;
@@ -15,182 +15,278 @@
   background-clip: border-box;
   border: 1px solid rgba(0, 0, 0, 0.125);
   border-radius: 0.25rem; }
-  .card > hr {
-    margin-right: 0;
-    margin-left: 0; }
-  .card > .list-group {
-    border-top: inherit;
-    border-bottom: inherit; }
-    .card > .list-group:first-child {
-      border-top-width: 0;
-      border-top-left-radius: calc(0.25rem - 1px);
-      border-top-right-radius: calc(0.25rem - 1px); }
-    .card > .list-group:last-child {
-      border-bottom-width: 0;
-      border-bottom-right-radius: calc(0.25rem - 1px);
-      border-bottom-left-radius: calc(0.25rem - 1px); }
-  .card > .card-header + .list-group,
-  .card > .list-group + .card-footer {
-    border-top: 0; }
+.card>hr {
+  margin-right: 0;
+  margin-left: 0; } 
+.card>.list-group {
+  border-top: inherit;
+  border-bottom: inherit; }
+.card>.list-group:first-child {
+  border-top-width: 0;
+  border-top-left-radius: calc(0.25rem - 1px);
+  border-top-right-radius: calc(0.25rem - 1px); }
+.card>.list-group:last-child {
+  border-bottom-width: 0;
+  border-bottom-right-radius: calc(0.25rem - 1px);
+  border-bottom-left-radius: calc(0.25rem - 1px); }
+.card>.card-header+.list-group,
+.card>.list-group+.card-footer {
+  border-top: 0; }
 .card {
   margin-bottom: 30px;
   height: calc(100% - 30px);
   border: 0;
   box-shadow: 0px 0px 40px 0px rgba(82, 63, 105, 0.12); }
-  .card.h-unset {
-    height: unset; }
-  .card.no-shadow {
-    box-shadow: 0 0.75rem 1.5rem rgba(68, 63, 75, 0.1); }
-  .card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid #f1f1f1;
-    background: transparent;
-    padding: 20px; }
-  .card-title {
-    font-size: 16px;
-    margin-bottom: 0px;
-    color: #495057;
-    font-weight: 600; }
-  .card .card-body {
-    padding: 20px;
-    background: transparent;
-    border-radius: 15px; }
-  .card .card-footer {
-    padding: 20px;
-    background: #fff; }
+.card.h-unset {
+  height: unset; }
+.card.no-shadow {
+  box-shadow: 0 0.75rem 1.5rem rgba(68, 63, 75, 0.1); }
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #f1f1f1;
+  background: transparent;
+  padding: 20px; }
+.card-title {
+  font-size: 16px;
+  margin-bottom: 0px;
+  color: #495057;
+  font-weight: 600; }
+.card .card-body {
+  padding: 20px;
+  background: transparent;
+  border-radius: 15px; }
+.card .card-footer {
+  padding: 20px;
+  background: #fff; }
 .card-body {
   flex: 1 1 auto;
   padding: 1rem 1rem; }
 .invite-content .input-group-text {
   background: #556ee6;
   color: #fff; }
-
 .card {
   margin-bottom: 1.875rem;
   background-color: #fff;
   transition: all .5s ease-in-out;
   position: relative;
   border: 0px solid transparent;
-  border-radius: 1.75rem;
+  border-radius: 1rem;
   box-shadow: 0px 5px 5px 0px rgba(82, 63, 105, 0.05);
   height: calc(100% - 30px); }
-  @media only screen and (max-width: 575px) {
-    .card {
-      margin-bottom: 0.938rem;
-      height: calc(100% - 0.938rem); } }
+@media only screen and (max-width: 575px) {
+  .card {
+    margin-bottom: 0.938rem;
+    height: calc(100% - 0.938rem); } }
+.card-body {
+  padding: 1.875rem; }
+@media only screen and (max-width: 575px) {
   .card-body {
-    padding: 1.875rem; }
-    @media only screen and (max-width: 575px) {
-      .card-body {
-        padding: 1rem; } }
-  .card-title {
-    font-size: 20px;
-    font-weight: 500;
-    color: #000;
-    text-transform: capitalize; }
-    .card-title--large {
-      font-size: 1.5rem; }
-    .card-title--medium {
-      font-size: 1rem; }
-    .card-title--small {
-      font-size: 0.875rem; }
-  .card-header {
-    border-color: #f5f5f5;
+    padding: 1rem; } }
+
+.dashboard-header {
+  flex: 1;
+  display: inline-block;
+  width: 100%;
+  background-color: var(--white);
+  border-radius: var(--radius-large);
+  border: 1px solid var(--fade-grey-dark-3);
+  transition: all .3s;
+  display: flex;
+  align-items: center;
+  padding: 20px; }
+  .dashboard-header .profile-pic {
     position: relative;
-    background: transparent;
-    padding: 1.5rem 1.875rem 1.25rem;
-    display: flex;
+    display: inline-block;
+    vertical-align: bottom;
+    max-width: 80px;
+    min-width: 80px;
+    max-height: 80px; }
+    .dashboard-header .profile-pic img {
+      border-radius: 50px;
+      height: 80px;
+      width: 80px;
+    }
+  .dashboard-header .welcome {
+    padding: 0 2rem; }
+    .dashboard-header .welcome .title {
+      font-size: 1rem;
+      margin-bottom: 0;
+      font-weight: 500; }
+    .dashboard-header .welcome .sub-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin: 0;
+      padding: 0;
+      color: black; }
+  .dashboard-header .user-balance {
+    padding: 0 2rem; }
+    .dashboard-header .user-balance .title {
+      font-size: 1rem;
+      margin-bottom: 0;
+      font-weight: 500; }
+    .dashboard-header .user-balance .sub-title {
+      font-size: 2rem;
+      font-weight: 600;
+      margin: 0;
+      padding: 0;
+      color: black; }
+.cta {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  align-content: center;
+  width: 23px;
+  height: 23px;
+  margin-left: 20px;
+  background: white;
+  border-radius: 6px;
+  box-shadow: rgba(17, 17, 26, 0.1) 0px 0px 16px;
+  @media only screen and (max-width: 767px) {
+    margin-left: 0;
+  } }
+  .cta .cta-title {
+    display: flex; }
+    .cta .cta-title svg {
+      width: 15px;
+      opacity: .8; }
+    .cta .cta-title .white-text {
+      color: #fff;
+      line-height: 1.5;
+      font-size: 1em;
+      font-weight: 300;
+      margin: 0;
+      padding: 0; }
+  .cta .cta-link {
+    display: block;
+    font-weight: 500;
+    margin-top: 0.5rem;
+    cursor: pointer;
+    text-decoration: none;
+    line-height: 1.5;
+    font-size: 1em;
+    color: hsl(0 0% 99%); }
+.token-list {
+  display: grid;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+  @media (min-width: 640px) {
+    display: flex; } }
+  .token-list .title {
+    display: grid;
+    flex-wrap: wrap;
     justify-content: space-between;
-    align-items: center; }
-    @media only screen and (max-width: 575px) {
-      .card-header {
-        padding: 1.25rem 1rem 1.25rem; } }
-    [data-theme-version="dark"] .card-header {
-      border-color: #2e2e42; }
-    .card-header .card-title {
-      margin-bottom: 0px; }
-    .card-header .subtitle {
-      padding-top: 5px;
-      font-size: 14px;
-      line-height: 1.5; }
-  .card-footer {
-    border-color: #f5f5f5;
-    background: transparent;
-    padding: 1.25rem 1.875rem 1.25rem; }
-    [data-theme-version="dark"] .card-footer {
-      border-color: #2e2e42; }
-
-// dashboard card
-.invoice-card-row .invoice-card {
-  overflow: hidden;
-  position: relative; }
-  .invoice-card-row .invoice-card .icon {
-    height: 60px;
-    width: 60px;
-    line-height: 54px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.4);
-    text-align: center; }
-  .invoice-card-row .invoice-card .card-body {
-    padding: 35px 30px 45px 30px; }
-  .invoice-card-row .invoice-card .invoice-num {
-    font-size: 38px;
-    margin-bottom: 5px; }
-  .invoice-card-row .invoice-card:after {
-    position: absolute;
-    content: ""; }
-  @media only screen and (max-width: 575px) {
-    .invoice-card-row .invoice-card .card-body {
-      padding: 20px 20px 25px 20px; }
-    .invoice-card-row .invoice-card .invoice-num {
-      font-size: 30px; } }
-.invoice-card-row > div:nth-child(1) .invoice-card:after {
-  height: 120px;
-  width: 120px;
-  transform: rotate(40deg);
-  top: -35px;
-  right: -35px;
-  border-radius: 1.75rem;
-  background: -moz-linear-gradient(left, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0) 100%);
-  background: -webkit-linear-gradient(left, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0) 100%);
-  background: linear-gradient(to right, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0) 100%);
-  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#26ffffff', endColorstr='#00ffffff',GradientType=1 ); }
-.invoice-card-row > div:nth-child(2) .invoice-card:after {
-  height: 150px;
-  width: 150px;
-  transform: rotate(40deg);
-  bottom: -40px;
-  right: -30px;
-  border-radius: 1.75rem;
-  background: -moz-linear-gradient(left, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 100%);
-  background: -webkit-linear-gradient(left, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 100%);
-  background: linear-gradient(to right, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 100%);
-  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#26ffffff', endColorstr='#00ffffff',GradientType=1 ); }
-.invoice-card-row > div:nth-child(3) .invoice-card:after {
-  height: 100px;
-  width: 100px;
-  transform: rotate(-45deg);
-  top: -35px;
-  right: 30px;
-  border-radius: 1.75rem;
-  background: -moz-linear-gradient(left, rgba(0, 0, 0, 0.05) 0%, rgba(0, 0, 0, 0) 100%);
-  background: -webkit-linear-gradient(left, rgba(0, 0, 0, 0.05) 0%, rgba(0, 0, 0, 0) 100%);
-  background: linear-gradient(to right, rgba(0, 0, 0, 0.05) 0%, rgba(0, 0, 0, 0) 100%);
-  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#26ffffff', endColorstr='#00ffffff',GradientType=1 ); }
-.invoice-card-row > div:nth-child(4) .invoice-card:after {
-  height: 100px;
-  width: 100px;
-  transform: rotate(145deg);
-  bottom: -45px;
-  right: 0px;
-  border-radius: 1.75rem;
-  background: -moz-linear-gradient(left, rgba(0, 0, 0, 0.05) 0%, rgba(0, 0, 0, 0) 100%);
-  background: -webkit-linear-gradient(left, rgba(0, 0, 0, 0.05) 0%, rgba(0, 0, 0, 0) 100%);
-  background: linear-gradient(to right, rgba(0, 0, 0, 0.05) 0%, rgba(0, 0, 0, 0) 100%);
-  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#26ffffff', endColorstr='#00ffffff',GradientType=1 ); }
-
+    align-items: center;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.75rem;
+  
+    @media (min-width: 640px) {
+      display: flex; } }
+    .token-list .title .title-col {
+      display: flex; 
+      justify-content: space-between; 
+      grid-column: span 4 / span 4; }
+      .token-list .title .title-col .content {
+        display: flex;
+        margin-left: 0.75rem;
+        margin-left: 0.875rem;
+        align-items: center; }
+        .token-list .title .title-col .content .text {
+          font-size: 1.25rem;
+          line-height: 1.75rem;
+          font-weight: 600; }
+        .token-list .title .title-col .content svg {
+          display: inline-flex;
+          transition-property: background-color, border-color, color, fill, stroke;
+          justify-content: center;
+          align-items: center;
+          width: 1rem;
+          height: 1rem;
+          margin-left: 0.75rem; }
+  .token-list .views {
+    margin-top: 0.75rem;
+    grid-column: span 4 / span 4;
+  
+    @media (min-width: 640px) {
+      display: flex;
+      margin-top: 0; } }
+    .token-list .views .detail-view {
+      display: flex;
+      padding: 0.125rem;
+      transition-property: background-color, border-color, color, fill, stroke;
+      border-radius: 50px;
+      border-style: solid;
+      border-width: 1px;
+      border-color: rgb(71, 85, 105);
+    
+      @media (min-width: 640px) {
+        margin-left: 0.75rem;
+        margin-left: 0.875rem;
+        max-width: 28rem; } }
+      .token-list .views .detail-view button {
+        padding-top: 0.5rem;
+        padding-bottom: 0.5rem;
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+        color: #000;
+        font-size: 0.875rem;
+        line-height: 1.25rem;
+        font-weight: 800;
+        line-height: 1.25rem;
+        width: 50%;
+        border-radius: 50px;
+        @media (min-width: 640px) {
+          padding-left: 1.5rem;
+          padding-right: 1.5rem;
+          width: 150px; }
+        @media (min-width: 768px) {
+          padding-left: 1.5rem;
+          padding-right: 1.5rem;
+          width: 150px; } }
+      .token-list .views .detail-view .listView-button {
+        opacity: 1;
+        background-color: rgba(7, 106, 224,0);
+        color: rgb(71, 85, 105); }
+      .token-list .views .detail-view .listView-button.show {
+        opacity: 1;
+        background-color: rgb(7, 106, 224);
+        color: white; }
+.account-setup {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between; }
+  .account-setup h4 {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0;
+    margin-left: 0.875rem; }
+    .account-setup .icon-grey {
+      color: #076AE0;
+    }
+  .account-setup .cta-button {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    font-weight: 800;
+    line-height: 1.25rem;
+    width: 100px;
+    border-radius: 50px;
+    opacity: 1;
+    background-color: rgb(7, 106, 224);
+    color: white; }
+img,
+svg {
+  vertical-align: middle; }
+.invite-content .input-group-text {
+  background: #556ee6;
+  color: #fff; }
 .invite-content .social-share-link {
   margin-top: 15px; }
   .invite-content .social-share-link a {
@@ -206,348 +302,463 @@
         color: #25d366; }
       .invite-content .social-share-link a i.icofont-telegram {
         color: #0088cc; }
-.input-group {
-  position: relative;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: stretch;
-  width: 100%; }
-  .input-group > .form-control,
-  .input-group > .form-select {
+.info {
+  display: none; }
+.transaction-history {
+  padding-bottom: 0.5rem;
+  padding-top: 0.5rem;
+  border-radius: 1rem; }
+.transaction-box {
+  position: relative; }
+  .transaction-box .transaction-date {
+    top: 0;
+    font-weight: 500;
+    font-size: .875rem;
+    line-height: 1.25rem;
+    padding-bottom: 1rem;
+    padding-top: 1rem; }
+    .transaction-box .transaction-date .date-text {
+      font-size: .875rem;
+      line-height: 1.25rem;
+      color: #6a6d7c; }
+  .transaction-box .transaction-details {
     position: relative;
-    flex: 1 1 auto;
-    width: 1%;
-    min-width: 0; }
-  .input-group > .form-control:focus,
-  .input-group > .form-select:focus {
-    z-index: 3; }
-  .input-group .btn {
-    position: relative;
-    z-index: 1; }
-    .input-group .btn:focus {
-      z-index: 3; }
-.price-widget {
-  border-radius: 10px;
-  margin: 0px 0px 30px; }
-  .price-widget a {
-    display: block; }
-.bg-btc {
-  background: #F7931A; }
-.bg-eth {
-  background: #282828; }
-
-.bg-usdt {
-  background: #2CA07A; }
-
-.bg-xrp {
-  background: #346AA9; }
-
-.bg-ltc {
-  background: #838383; }
-
-.bg-ada {
-  background: #3CC8C8; }
-
-.bg-eos {
-  background: #19191A; }
-
-.bg-xmr {
-  background: #FF6600; }
-
-.bg-xtz {
-  background: #A6DF00; }
-
-.bg-xem {
-  background: #41bf76; }
-
-.bg-neo {
-  background: #58BF00; }
-
-.bg-dash {
-  background: #1c75bc; }
-
-.bg-etc {
-  background: #669073; }
-
-.bg-dgb {
-  background: #0066cc; }
-
-.bg-dcr {
-  background: #3b7cfb; }
-
-.bg-rep {
-  background: #40a2cb; }
-.price-content {
-  position: absolute;
-  left: 15px;
-  top: 10px; }
-  .price-content i {
-    padding: 5px 7px;
-    border-radius: 100px;
-    margin-right: 5px;
-    margin-top: 11px;
-    position: relative;
-    top: 13px;
-    font-size: 32px;
-    color: #fff;
-    line-height: 40px; }
-  .price-content span {
-    color: #fff;
-    font-size: 20px;
-    font-weight: 500; }
-  .price-content h5, .price-content .h5 {
-    margin-top: 0px;
-    color: #fff;
-    margin-left: 55px;
-    opacity: 0.85;
-    font-weight: normal; }
-.welcome-profile {
-  background: #556ee6 !important; }
-  .welcome-profile .card-body img {
-    border: 4px solid #fff;
-    border-radius: 100px;
-    width: 60px; }
-  .welcome-profile .card-body h4, .welcome-profile .card-body .h4 {
-    color: #fff;
-    margin-top: 10px;
-    font-size: 18px; }
-  .welcome-profile .card-body p {
-    color: #fff;
-    opacity: 0.75; }
-  .welcome-profile .card-body ul {
-    text-align: left; }
-    .welcome-profile .card-body ul li {
-      padding: 15px 0px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.15); }
-      .welcome-profile .card-body ul li:last-child {
-        border: 0px; }
-      .welcome-profile .card-body ul li a {
-        color: #f2f2f2;
+    border-top: 1px solid rgb(226 232 240);
+    border-bottom: 1px solid rgb(226 232 240); }
+    .transaction-box .transaction-details .record {
+      padding-bottom: 1rem;
+      padding-top: 1rem;
+      margin-left: -0.5rem;
+      margin-right: -0.5rem;
+      cursor: pointer;
+      @media (min-width: 640px) {
+        padding-left: 1.5rem;
+        padding-right: 1.5rem; } }
+    .transaction-box .transaction-details .record:hover {
+      background: #e5e7eb; }
+      .transaction-box .transaction-details .record .record-info {
         display: flex;
-        align-items: center;
-        transition: all 0.25 ease-in-out; }
-        .welcome-profile .card-body ul li a span {
-          background: #fff;
-          padding: 5px;
-          border-radius: 50px;
-          width: 30px;
-          height: 30px;
-          display: inline-flex;
+        align-items: center; }
+        .transaction-box .transaction-details .record .record-info .action {
+          display: none;
+          position: relative;
+          @media (min-width: 640px) {
+            display: block; } }
+          .transaction-box .transaction-details .record .record-info .action .action-chain {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            top: -0.25rem;
+            left: -0.25rem;
+            width: 1rem;
+            height: 1rem;
+            border-radius: 50px;
+            object-fit: cover;
+            position: absolute;
+            box-shadow: 0 0 0 1px rgb(241 245 249); }
+            .transaction-box .transaction-details .record .record-info .action .action-chain img {
+              height: 1rem; }
+          .transaction-box .transaction-details .record .record-info .action .action-itself {
+            border-radius: 50px;
+            background-color: #ecedef;
+            border: 1px solid #d9d9d9;
+            display: flex;
+            width: 2rem;
+            height: 2rem;
+            align-items: center;
+            justify-content: center; }
+            .transaction-box .transaction-details .record .record-info .action .action-itself svg {
+              display: block;
+              vertical-align: middle;
+              height: 1rem;
+              width: 1rem;
+              color: #6a6d7c; }
+        .transaction-box .transaction-details .record .record-info .display-info {
+          overflow-y: visible;
+          overflow-x: auto;
+          white-space: nowrap;
+          text-overflow: ellipsis;
+          flex-wrap: wrap;
+          flex: 1 1;
+          width: 100%;
+          gap: 1rem;
           align-items: center;
-          justify-content: center;
-          margin-right: 10px;
-          transition: all 0.25 ease-in-out; }
-          .welcome-profile .card-body ul li a span.verified {
-            color: #34c38f; }
-          .welcome-profile .card-body ul li a span.not-verified {
-            color: #f46a6a; }
-.trade-form p {
-  font-size: 13px;
-  color: #495057; }
-  .trade-form p a {
-    color: #556ee6; }
-.form-label {
-  margin-bottom: 0.5rem;
-  font-weight: 600; }
-.home-chart .form-select {
-  width: 150px;
-  height: auto;
-  border: 0px;
-  padding: 0px;
-  background: transparent; }
-.chart-price-value {
-  text-align: center; }
-  .chart-price-value span {
-    display: inline-block;
-    margin-bottom: 5px;
-    font-size: 14px; }
-.trade-balance {
-  position: relative;
-  height: 380px; }
-.position-value {
-  position: relative;
-  height: 480px; }
-.coin-name i {
-  font-size: 20px;
-  margin-right: 5px; }
-img, svg {
-  vertical-align: middle;
-}
+          @media (min-width: 1280px) {
+            gap: 1.5rem; }
+          @media (min-width: 1024px) {
+            display: grid;
+            gap: 1.25rem; }
+          @media (min-width: 768px) {
+            display: flex; }
+          @media (min-width: 640px) {
+            padding-left: 1rem;
+            overflow-x: visible; } }
+          .transaction-box .transaction-details .record .record-info .display-info .action-detail {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.25rem;
+            grid-column: span 4/span 4;
+            @media (min-width: 1280px) {
+              grid-column: span 3/span 3; }
+            @media (min-width: 640px) {
+              margin-bottom: 0;} }
+            .transaction-box .transaction-details .record .record-info .display-info .action-detail .text {
+              display: flex;
+              margin-bottom: 0.25rem;
+              @media (min-width: 768px) {
+                display: block; }
+              @media (min-width: 640px) {
+                margin-bottom: 0; } }
+              .transaction-box .transaction-details .record .record-info .display-info .action-detail .text .top {
+                display: flex; }
+                .transaction-box .transaction-details .record .record-info .display-info .action-detail .text .top .mobile {
+                  display: flex;
+                  align-items: center;
+                  padding-right: 0.5rem;
+                  @media (min-width: 1280px) {
+                    display: none; } }
+                  .transaction-box .transaction-details .record .record-info .display-info .action-detail .text .top .mobile canvas {
+                    display: block;
+                    vertical-align: middle;
+                    border-radius: 50px;
+                    flex-shrink: 0;
+                    box-shadow: 0 0 0 1px rgb(241 245 249); }
+                  .transaction-box .transaction-details .record .record-info .display-info .action-detail .text .top .mobile image {
+                    display: block;
+                    width: 1rem;
+                    height: 1rem;
+                    border-radius: 50px;
+                    object-fit: cover;
+                    box-shadow: 0 0 0 1px rgb(241 245 249);
+                    transition-property: transform;
+                    @media (min-width: 640px) {
+                      display: none; } }
+                .transaction-box .transaction-details .record .record-info .display-info .action-detail .text .top .desktop {
+                  font-weight: 600;
+                  white-space: nowrap;
+                  flex-shrink: 1; }
+                  .transaction-box .transaction-details .record .record-info .display-info .action-detail .text .top .desktop span {
+                    margin-left: 0.25rem;
+                    font-weight: 400;
+                    text-overflow: ellipsis;
+                    overflow: hidden;
+                    white-space: nowrap;
+                    color: #6a6d7c;
+                    display: none;
+                    @media (min-width: 640px) {
+                      display: inline-flex; } }
+              .transaction-box .transaction-details .record .record-info .display-info .action-detail .text .time {
+                margin-left: 1rem;
+                white-space: nowrap;
+                color: #6a6d7c;
+                @media (min-width: 640px) {
+                  margin-left: 0; } }
+                .transaction-box .transaction-details .record .record-info .display-info .action-detail .text .time .time-text {
+                  display: flex; }
+.account {
+  overflow: visible;
+  justify-content: flex-start;
+  align-items: center;
+  grid-column: span 3/span 3;
+  display: none;
+  @media (min-width: 1536px) {
+    grid-column: span 2/span 2; }
+  @media (min-width: 1280px) {
+    display: flex; } }
+  .account .group {
+    position: relative; }
+  .account .group .account-details {
+    display: flex;
+    align-items: center;
+    background-color: rgb(241 245 249);
+    border-radius: 50px;
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+    padding-bottom: 0.5rem;
+    padding-top: 0.5rem;
+    font-weight: 500; }
+    .account .group .account-details .text-sm {
+      font-size: .875rem;
+      line-height: 1.25rem; }
+  .account .group .account-hidden {
+    display: none; }
+    .account .group .account-hidden .hidden-content {
+      display: flex;
+      align-items: center;
+      position: absolute;
+      left: 50%;
+      z-index: 10;
+      transform: translateX(-50%);
+      border-radius: 0.375rem;
+      padding: 1rem;
+      background-color: #fff;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); }
+      .account .group .account-hidden .hidden-content .hidden-text {
+        font-size: .875rem;
+        line-height: 1.25rem;
+        margin-left: 0.75rem; }
+        .account .group .account-hidden .hidden-content .hidden-text .text1 {
+          display: flex;
+          align-items: center;
+          font-weight: 500;
+          white-space: nowrap; }
+        .account .group .account-hidden .hidden-content .hidden-text .text2 {
+          font-size: .875rem;
+          line-height: 1.25rem; }
+.transaction-action-details {
+  grid-column: span 7/span 7;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  @media (min-width: 640px) {
+    display: flex;
+    flex: 1 1; }
+  @media (min-width: 1280px) {
+    grid-column: span 5/span 5; } }
+  .transaction-action-details .details {
+    display: flex;
+    align-items: center;
+    @media (min-width: 640px) {
+      flex: 1 1;
+      justify-content: flex-start; } }
+    .transaction-action-details .details .from {
+      display: flex;
+      align-items: center; }
+      .transaction-action-details .details .from canvas {
+        height: 2rem;
+        width: 2rem;
+        border-radius: 50px;
+        flex-shrink: 0;
+        @media (min-width: 640px) {
+          width: 2.5rem;
+          height: 2.5rem; } }
+      .transaction-action-details .details .from .text-info {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        margin-left: 0.75rem; }
+        .transaction-action-details .details .from .text-info .info1 {
+          color: rgb(15,23,42);
+          font-weight: 500;
+          overflow: hidden;
+          white-space: nowrap;
+          text-overflow: ellipsis; }
+        .transaction-action-details .details .from .text-info .info2 {
+          color: rgb(100,116,139);
+          font-size: .875rem;
+          line-height: 1.25rem; }
+    .transaction-action-details .details .sign {
+      margin-left: 0.25rem;
+      margin-right: 0.25rem;
+      font-size: .875rem;
+      line-height: 1.25rem;
+      margin-left: 1rem;
+      @media (min-width: 640px) {
+        margin-left: 0.5rem;
+        margin-right: 0.5rem; } }
+    .transaction-action-details .details .to {
+      display: flex;
+      align-items: center;
+      overflow-y: visible;
+      overflow-x: hidden;
+      margin-left: 1rem;
+      @media (min-width: 640px) {
+        overflow-x: visible; } }
+      .transaction-action-details .details .to .text-top {
+        display: flex;
+        font-weight: 500;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        color: #0d8838;
+        @media (min-width: 415px) {
+          text-overflow: clip; } }
+      .transaction-action-details .details .to .text-bottom {
+        font-size: .875rem;
+        line-height: 1.25rem;
+        color: rgb(100,116,139);
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        max-width: 7rem;
+        @media (min-width: 640px) {
+          max-width: 10rem; } }
+      .transaction-action-details .details .to .hidden {
+        visibility: hidden;
+        overflow: visible;
+        margin-left: 0.75rem; }
+        .transaction-action-details .details .to .hidden .hidden-content {
+          position: absolute;
+          margin: auto;
+          margin-top: -0.75rem;
+          margin-bottom: 0; }
 </style>
 <template>
   <layout :active="1">
     <div class="content-body">
       <div class="container">
-        <h1 style="margin-bottom: 1rem;;">Transaction</h1>
+        <h1 style="margin-bottom: 1rem;">Transactions</h1>
         <div class="row">
           <div className="row invoice-card-row">
-            <div className="col-xxl-4 col-xl-4 col-lg-6">
-              <div className="card bg-hexlink invoice-card">
-                <div className="card-body d-flex">
-                  <div className="icon me-3">
-                    <svg width="33px" height="32px">
-                      <path fill="rgb(255, 255, 255)"
-                        d="M31.963,30.931 C31.818,31.160 31.609,31.342 31.363,31.455 C31.175,31.538 30.972,31.582 30.767,31.583 C30.429,31.583 30.102,31.463 29.845,31.243 L25.802,27.786 L21.758,31.243 C21.502,31.463 21.175,31.583 20.837,31.583 C20.498,31.583 20.172,31.463 19.915,31.243 L15.872,27.786 L11.829,31.243 C11.622,31.420 11.370,31.534 11.101,31.572 C10.832,31.609 10.558,31.569 10.311,31.455 C10.065,31.342 9.857,31.160 9.710,30.931 C9.565,30.703 9.488,30.437 9.488,30.167 L9.488,17.416 L2.395,17.416 C2.019,17.416 1.658,17.267 1.392,17.001 C1.126,16.736 0.976,16.375 0.976,16.000 L0.976,6.083 C0.976,4.580 1.574,3.139 2.639,2.076 C3.703,1.014 5.146,0.417 6.651,0.417 L26.511,0.417 C28.016,0.417 29.459,1.014 30.524,2.076 C31.588,3.139 32.186,4.580 32.186,6.083 L32.186,30.167 C32.186,30.437 32.109,30.703 31.963,30.931 ZM9.488,6.083 C9.488,5.332 9.189,4.611 8.657,4.080 C8.125,3.548 7.403,3.250 6.651,3.250 C5.898,3.250 5.177,3.548 4.645,4.080 C4.113,4.611 3.814,5.332 3.814,6.083 L3.814,14.583 L9.488,14.583 L9.488,6.083 ZM29.348,6.083 C29.348,5.332 29.050,4.611 28.517,4.080 C27.985,3.548 27.263,3.250 26.511,3.250 L11.559,3.250 C12.059,4.111 12.324,5.088 12.325,6.083 L12.325,27.092 L14.950,24.840 C15.207,24.620 15.534,24.500 15.872,24.500 C16.210,24.500 16.537,24.620 16.794,24.840 L20.837,28.296 L24.880,24.840 C25.137,24.620 25.463,24.500 25.802,24.500 C26.140,24.500 26.467,24.620 26.724,24.840 L29.348,27.092 L29.348,6.083 ZM25.092,20.250 L16.581,20.250 C16.205,20.250 15.844,20.101 15.578,19.835 C15.312,19.569 15.162,19.209 15.162,18.833 C15.162,18.457 15.312,18.097 15.578,17.831 C15.844,17.566 16.205,17.416 16.581,17.416 L25.092,17.416 C25.469,17.416 25.829,17.566 26.096,17.831 C26.362,18.097 26.511,18.457 26.511,18.833 C26.511,19.209 26.362,19.569 26.096,19.835 C25.829,20.101 25.469,20.250 25.092,20.250 ZM25.092,14.583 L16.581,14.583 C16.205,14.583 15.844,14.434 15.578,14.168 C15.312,13.903 15.162,13.542 15.162,13.167 C15.162,12.791 15.312,12.430 15.578,12.165 C15.844,11.899 16.205,11.750 16.581,11.750 L25.092,11.750 C25.469,11.750 25.829,11.899 26.096,12.165 C26.362,12.430 26.511,12.791 26.511,13.167 C26.511,13.542 26.362,13.903 26.096,14.168 C25.829,14.434 25.469,14.583 25.092,14.583 ZM25.092,8.916 L16.581,8.916 C16.205,8.916 15.844,8.767 15.578,8.501 C15.312,8.236 15.162,7.875 15.162,7.500 C15.162,7.124 15.312,6.764 15.578,6.498 C15.844,6.232 16.205,6.083 16.581,6.083 L25.092,6.083 C25.469,6.083 25.829,6.232 26.096,6.498 C26.362,6.764 26.511,7.124 26.511,7.500 C26.511,7.875 26.362,8.236 26.096,8.501 C25.829,8.767 25.469,8.916 25.092,8.916 Z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h2 className="text-white invoice-num">2478</h2>
-                    <span className="text-white fs-18">Total Txn</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="col-xxl-4 col-xl-4 col-lg-6">
-              <div className="card bg-secondary invoice-card">
-                <div className="card-body d-flex">
-                  <div className="icon me-3">
-                    <svg width="35px" height="34px">
-                      <path fill="rgb(255, 255, 255)"
-                        d="M33.002,9.728 C31.612,6.787 29.411,4.316 26.638,2.583 C22.781,0.179 18.219,-0.584 13.784,0.438 C9.356,1.454 5.585,4.137 3.178,7.989 C0.764,11.840 -0.000,16.396 1.023,20.825 C2.048,25.247 4.734,29.013 8.584,31.417 C11.297,33.110 14.409,34.006 17.594,34.006 L17.800,34.006 C20.973,33.967 24.058,33.050 26.731,31.363 C27.509,30.872 27.735,29.849 27.243,29.072 C26.751,28.296 25.727,28.070 24.949,28.561 C22.801,29.922 20.314,30.660 17.761,30.693 C15.141,30.726 12.581,30.002 10.346,28.614 C7.241,26.675 5.080,23.647 4.262,20.088 C3.444,16.515 4.056,12.850 5.997,9.748 C10.001,3.353 18.473,1.401 24.876,5.399 C27.110,6.793 28.879,8.779 29.996,11.143 C31.087,13.447 31.513,16.004 31.227,18.527 C31.126,19.437 31.778,20.260 32.696,20.360 C33.607,20.459 34.432,19.809 34.531,18.892 C34.884,15.765 34.352,12.591 33.002,9.728 L33.002,9.728 Z" />
-                      <path fill="rgb(255, 255, 255)"
-                        d="M23.380,11.236 C22.728,10.585 21.678,10.585 21.026,11.236 L17.608,14.656 L14.190,11.243 C13.539,10.592 12.488,10.592 11.836,11.243 C11.184,11.893 11.184,12.942 11.836,13.593 L15.254,17.006 L11.836,20.420 C11.184,21.071 11.184,22.120 11.836,22.770 C12.162,23.096 12.588,23.255 13.014,23.255 C13.438,23.255 13.864,23.096 14.190,22.770 L17.608,19.357 L21.026,22.770 C21.352,23.096 21.777,23.255 22.203,23.255 C22.629,23.255 23.054,23.096 23.380,22.770 C24.031,22.120 24.031,21.071 23.380,20.420 L19.962,17.000 L23.380,13.587 C24.031,12.936 24.031,11.887 23.380,11.236 L23.380,11.236 Z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h2 className="text-white invoice-num">1256</h2>
-                    <span className="text-white fs-18">Pending Txn</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="col-xxl-4 col-xl-4 col-lg-6">
-              <div className="card bg-success invoice-card">
-                <div className="card-body d-flex">
-                  <div className="icon me-3">
-                    <svg width="35px" height="34px">
-                      <path fill="rgb(255, 255, 255)"
-                        d="M32.482,9.730 C31.092,6.789 28.892,4.319 26.120,2.586 C22.265,0.183 17.698,-0.580 13.271,0.442 C8.843,1.458 5.074,4.140 2.668,7.990 C0.255,11.840 -0.509,16.394 0.514,20.822 C1.538,25.244 4.224,29.008 8.072,31.411 C10.785,33.104 13.896,34.000 17.080,34.000 L17.286,34.000 C20.456,33.960 23.541,33.044 26.213,31.358 C26.991,30.866 27.217,29.844 26.725,29.067 C26.234,28.291 25.210,28.065 24.432,28.556 C22.285,29.917 19.799,30.654 17.246,30.687 C14.627,30.720 12.067,29.997 9.834,28.609 C6.730,26.671 4.569,23.644 3.752,20.085 C2.934,16.527 3.546,12.863 5.486,9.763 C9.488,3.370 17.957,1.418 24.359,5.414 C26.592,6.808 28.360,8.793 29.477,11.157 C30.568,13.460 30.993,16.016 30.707,18.539 C30.607,19.448 31.259,20.271 32.177,20.371 C33.087,20.470 33.911,19.820 34.011,18.904 C34.363,15.764 33.832,12.591 32.482,9.730 L32.482,9.730 Z" />
-                      <path fill="rgb(255, 255, 255)"
-                        d="M22.593,11.237 L14.575,19.244 L11.604,16.277 C10.952,15.626 9.902,15.626 9.250,16.277 C8.599,16.927 8.599,17.976 9.250,18.627 L13.399,22.770 C13.725,23.095 14.150,23.254 14.575,23.254 C15.001,23.254 15.427,23.095 15.753,22.770 L24.940,13.588 C25.592,12.937 25.592,11.888 24.940,11.237 C24.289,10.593 23.238,10.593 22.593,11.237 L22.593,11.237 Z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h2 className="text-white invoice-num">983</h2>
-                    <span className="text-white fs-18">Success Txn</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <!-- <div className="col-xl-3 col-xxl-6 col-sm-6">
-              <div className="card bg-secondary invoice-card">
-                <div className="card-body d-flex">
-                  <div className="icon me-3">
-                    <svg width="33px" height="32px">
-                      <path fill="rgb(255, 255, 255)"
-                        d="M31.963,30.931 C31.818,31.160 31.609,31.342 31.363,31.455 C31.175,31.538 30.972,31.582 30.767,31.583 C30.429,31.583 30.102,31.463 29.845,31.243 L25.802,27.786 L21.758,31.243 C21.502,31.463 21.175,31.583 20.837,31.583 C20.498,31.583 20.172,31.463 19.915,31.243 L15.872,27.786 L11.829,31.243 C11.622,31.420 11.370,31.534 11.101,31.572 C10.832,31.609 10.558,31.569 10.311,31.455 C10.065,31.342 9.857,31.160 9.710,30.931 C9.565,30.703 9.488,30.437 9.488,30.167 L9.488,17.416 L2.395,17.416 C2.019,17.416 1.658,17.267 1.392,17.001 C1.126,16.736 0.976,16.375 0.976,16.000 L0.976,6.083 C0.976,4.580 1.574,3.139 2.639,2.076 C3.703,1.014 5.146,0.417 6.651,0.417 L26.511,0.417 C28.016,0.417 29.459,1.014 30.524,2.076 C31.588,3.139 32.186,4.580 32.186,6.083 L32.186,30.167 C32.186,30.437 32.109,30.703 31.963,30.931 ZM9.488,6.083 C9.488,5.332 9.189,4.611 8.657,4.080 C8.125,3.548 7.403,3.250 6.651,3.250 C5.898,3.250 5.177,3.548 4.645,4.080 C4.113,4.611 3.814,5.332 3.814,6.083 L3.814,14.583 L9.488,14.583 L9.488,6.083 ZM29.348,6.083 C29.348,5.332 29.050,4.611 28.517,4.080 C27.985,3.548 27.263,3.250 26.511,3.250 L11.559,3.250 C12.059,4.111 12.324,5.088 12.325,6.083 L12.325,27.092 L14.950,24.840 C15.207,24.620 15.534,24.500 15.872,24.500 C16.210,24.500 16.537,24.620 16.794,24.840 L20.837,28.296 L24.880,24.840 C25.137,24.620 25.463,24.500 25.802,24.500 C26.140,24.500 26.467,24.620 26.724,24.840 L29.348,27.092 L29.348,6.083 ZM25.092,20.250 L16.581,20.250 C16.205,20.250 15.844,20.101 15.578,19.835 C15.312,19.569 15.162,19.209 15.162,18.833 C15.162,18.457 15.312,18.097 15.578,17.831 C15.844,17.566 16.205,17.416 16.581,17.416 L25.092,17.416 C25.469,17.416 25.829,17.566 26.096,17.831 C26.362,18.097 26.511,18.457 26.511,18.833 C26.511,19.209 26.362,19.569 26.096,19.835 C25.829,20.101 25.469,20.250 25.092,20.250 ZM25.092,14.583 L16.581,14.583 C16.205,14.583 15.844,14.434 15.578,14.168 C15.312,13.903 15.162,13.542 15.162,13.167 C15.162,12.791 15.312,12.430 15.578,12.165 C15.844,11.899 16.205,11.750 16.581,11.750 L25.092,11.750 C25.469,11.750 25.829,11.899 26.096,12.165 C26.362,12.430 26.511,12.791 26.511,13.167 C26.511,13.542 26.362,13.903 26.096,14.168 C25.829,14.434 25.469,14.583 25.092,14.583 ZM25.092,8.916 L16.581,8.916 C16.205,8.916 15.844,8.767 15.578,8.501 C15.312,8.236 15.162,7.875 15.162,7.500 C15.162,7.124 15.312,6.764 15.578,6.498 C15.844,6.232 16.205,6.083 16.581,6.083 L25.092,6.083 C25.469,6.083 25.829,6.232 26.096,6.498 C26.362,6.764 26.511,7.124 26.511,7.500 C26.511,7.875 26.362,8.236 26.096,8.501 C25.829,8.767 25.469,8.916 25.092,8.916 Z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h2 className="text-white invoice-num">652</h2>
-                    <span className="text-white fs-18">Total Invoices Sent</span>
-                  </div>
-                </div>
-              </div>
-            </div> -->
             <div class="col-xxl-6">
               <div class="card">
-                <div class="card-header">
-                  <h4 class="card-title">Transaction</h4>
-                </div>
                 <div class="card-body">
-                  <div class="table-responsive transaction-table">
-                    <table class="table table-striped responsive-table">
-                      <thead>
-                        <tr>
-                          <th>Ledger ID</th>
-                          <th>Date</th>
-                          <th>Type</th>
-                          <th>Currency</th>
-                          <th>Amount</th>
-                          <th>Fee</th>
-                          <th>Balance</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr>
-                          <td>523640</td>
-                          <td>January 15</td>
-                          <td>
-                            <span class="danger-arrow"><i class="icofont-arrow-down"></i> Sell</span>
-                          </td>
-                          <td class="coin-name">
-                            <i class="cc BTC"></i>
-                            Bitcoin
-                          </td>
-                          <td class="text-danger">-0.000242 BTC</td>
-                          <td>0.02%</td>
-                          <td>
-                            <strong>0.25484 BTC</strong>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>523640</td>
-                          <td>January 15</td>
-                          <td>
-                            <span class="success-arrow"><i class="icofont-arrow-up"></i>Buy</span>
-                          </td>
-                          <td class="coin-name">
-                            <i class="cc LTC"></i>
-                            Litecoin
-                          </td>
-                          <td class="text-success">-0.000242 BTC</td>
-                          <td>0.02%</td>
-                          <td>
-                            <strong> 0.25484 LTC</strong>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>523640</td>
-                          <td>January 15</td>
-                          <td>
-                            <span class="success-arrow"><i class="icofont-arrow-up"></i>Buy</span>
-                          </td>
-                          <td class="coin-name">
-                            <i class="cc XRP"></i>
-                            Ripple
-                          </td>
-                          <td class="text-success">-0.000242 BTC</td>
-                          <td>0.02%</td>
-                          <td>
-                            <strong> 0.25484 LTC</strong>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>523640</td>
-                          <td>January 15</td>
-                          <td>
-                            <span class="success-arrow"><i class="icofont-arrow-up"></i>Buy</span>
-                          </td>
-                          <td class="coin-name"><i class="cc DASH"></i> Dash</td>
-                          <td class="text-success">-0.000242 BTC</td>
-                          <td>0.02%</td>
-                          <td>
-                            <strong> 0.25484 LTC</strong>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>523640</td>
-                          <td>January 15</td>
-                          <td>
-                            <span class="success-arrow"><i class="icofont-arrow-up"></i>Buy</span>
-                          </td>
-                          <td class="coin-name">
-                            <i class="cc LTC"></i>
-                            Litecoin
-                          </td>
-                          <td class="text-success">-0.000242 BTC</td>
-                          <td>0.02%</td>
-                          <td>
-                            <strong> 0.25484 LTC</strong>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
+                  <div class="token-list">
+                    <div class="title">
+                      <div class="title-col">
+                        <div class="content">
+                          <div class="text">History</div>
+                          <svg width="4" height="16" viewBox="0 0 4 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M2 9C2.55228 9 3 8.55228 3 8C3 7.44772 2.55228 7 2 7C1.44772 7 1 7.44772 1 8C1 8.55228 1.44772 9 2 9Z"
+                              fill="black" stroke="black" stroke-linecap="round" stroke-linejoin="round" />
+                            <path d="M2 3C2.55228 3 3 2.55228 3 2C3 1.44772 2.55228 1 2 1C1.44772 1 1 1.44772 1 2C1 2.55228 1.44772 3 2 3Z"
+                              fill="black" stroke="black" stroke-linecap="round" stroke-linejoin="round" />
+                            <path
+                              d="M2 15C2.55228 15 3 14.5523 3 14C3 13.4477 2.55228 13 2 13C1.44772 13 1 13.4477 1 14C1 14.5523 1.44772 15 2 15Z"
+                              fill="black" stroke="black" stroke-linecap="round" stroke-linejoin="round" />
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="views">
+                      <div class="detail-view">
+                        <button class="listView-button" @click="completed = false; pending = false; canceled = false; all = true" :class="all && 'show'">All</button>
+                        <button class="listView-button" @click="all = false; pending = false; canceled = false; completed = true" :class="completed && 'show'">Completed</button>
+                        <button class="listView-button" @click="all = false; completed = false; canceled = false; pending = true" :class="pending && 'show'">Pending</button>
+                        <button class="listView-button" @click="all = false; completed = false; pending = false; canceled = true" :class="canceled && 'show'">Canceled</button>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="transaction-history">
+                    <div>
+                      <div class="transaction-box">
+                        <div class="transaction-date">
+                          <div class="date-text">December 21, 2022</div>
+                        </div>
+                        <div class="transaction-details">
+                          <div class="record">
+                            <div class="record-info">
+                              <div class="action">
+                                <div class="action-chain">
+                                  <!-- ethereum logo -->
+                                  <img src="https://token.metaswap.codefi.network/assets/networkLogos/ethereum.svg"/>
+                                </div>
+                                <div class="action-itself">
+                                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 text-subdued">
+                                    <line x1="7" y1="17" x2="17" y2="7"></line>
+                                    <polyline points="7 7 17 7 17 17"></polyline>
+                                  </svg>
+                                </div>
+                              </div>
+                              <div class="display-info">
+                                <div class="action-detail">
+                                  <div class="text">
+                                    <div class="top">
+                                      <div class="mobile">
+                                        <canvas width="16" height="16" style="width: 16px; height: 16px;"></canvas>
+                                        <img src="https://token.metaswap.codefi.network/assets/networkLogos/ethereum.svg" alt="">
+                                      </div>
+                                      <div class="desktop">
+                                        Receive
+                                        <span></span>
+                                      </div>
+                                    </div>
+                                    <div class="time">
+                                      <div class="time-text">11:56 pm</div>
+                                    </div>
+                                  </div>
+                                </div>
+                                <div class="account">
+                                  <div class="group">
+                                    <div class="account-details">
+                                      <div>
+                                        <canvas width="24" height="24" style="width: 24px; height: 24px; border-radius: 50px; flex-shrink: 0;"></canvas>
+                                      </div>
+                                      <div class="text-sm">0x271...fed9</div>
+                                    </div>
+                                    <div class="account-hidden">
+                                      <div class="hidden-content">
+                                        <div>
+                                          <canvas width="24" height="24" style="width: 24px; height: 24px; display: block; vertical-align: middle; flex-shrink: 0; border-radius: 50px;"></canvas>
+                                        </div>
+                                        <div class="hidden-text">
+                                          <div class="text1">
+                                            <div>0x271...fed9</div>
+                                            <div>
+                                              <a href="https://etherscan.io/address/0x271f70ed8b8154010d06ce809d78f8a2665efed9" target="_blank" style="padding: 0.25rem; border-radius: 50px; display: flex; ">
+                                                <svg
+                                                  xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                  stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 1rem; height: 1rem; color: #6a6d7c;">
+                                                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                                                  <polyline points="15 3 21 3 21 9"></polyline>
+                                                  <line x1="10" y1="14" x2="21" y2="3"></line>
+                                                </svg>
+                                              </a>
+                                            </div>
+                                          </div>
+                                          <div class="text2">0x271f70ed8b8154010d06ce809d78f8a2665efed9</div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                                <div class="transaction-action-details">
+                                  <div class="details">
+                                    <div class="from">
+                                      <canvas width="32" height="32" style="width: 32px; height: 32px;"></canvas>
+                                      <span class="text-info">
+                                        <span class="info1">From</span>
+                                        <span class="info2">0xa3f5...5e679e</span>
+                                      </span>
+                                    </div>
+                                    <div class="sign">
+                                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="9 18 15 12 9 6"></polyline>
+                                      </svg>
+                                    </div>
+                                    <div class="to">
+                                      <div style="position: relative;">
+                                        <img src="https://token.metaswap.codefi.network/assets/networkLogos/ethereum.svg" style="height: 2rem; width: 2rem; min-width: 2rem; object-fit: cover; border-radius: 50px;"/>
+                                      </div>
+                                      <div>
+                                        <div class="text-top">
+                                          <div>
+                                            <span>+</span>
+                                            0.030
+                                            <span style="margin-left: 0.25rem;">ETH</span>
+                                          </div>
+                                          <div></div>
+                                        </div>
+                                        <div class="text-bottom">
+                                          <span>ETH</span>
+                                        </div>
+                                      </div>
+                                      <div class="hidden">
+                                        <div class="hidden-content">
+                                          <button class="inline-flex justify-center items-center w-6 h-6 text-slate-500 dark:text-slate-400 transition-colors"
+                                            data-tip="true" data-for="token-more-1-0x0000000000000000000000000000000000000000"><svg
+                                              xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                              stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
+                                              <circle cx="12" cy="12" r="1"></circle>
+                                              <circle cx="12" cy="5" r="1"></circle>
+                                              <circle cx="12" cy="19" r="1"></circle>
+                                            </svg>
+                                            <div id="token-more-1-0x0000000000000000000000000000000000000000-hidden"></div>
+                                          </button>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                                <div class="more-details"></div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -559,42 +770,65 @@ img, svg {
   </layout>
 </template>
 
-<script>
-import BalanceChart from "../components/BalanceChart.vue";
-// import AnalyticsChart from "../../components/qCash/home/AnalyticsChart.vue";
-import CurrencyChart from "../components/CurrencyChart.vue";
+<script setup lang="ts">
+import { ref, onMounted, computed } from "vue";
+import type { Token } from "@/services/web3/tokens";
+import { loadAll } from "@/services/web3/tokens";
+import { getBalance, isContract } from "@/services/web3/account";
 import Layout from "../components/Layout.vue";
-import { createToaster } from "@meforma/vue-toaster";
-// import { PerfectScrollbar } from "vue3-perfect-scrollbar";
+import WalletTokenList from "../components/WalletTokenList.vue";
+import WalletNFTGrid from "../components/WalletNFTGrid.vue";
+import { useAuthStore } from '@/stores/auth';
+import WalletSetup from "@/components/AccountSetup.vue";
+import { BigNumber } from "bignumber.js";
 
-export default {
-  components: {
-    Layout,
-    CurrencyChart,
-    BalanceChart,
-    // AnalyticsChart,
-    // PerfectScrollbar,
-  },
-  data() {
-    return {
-      message: "https://play.hexlink.io/join/12345",
-    };
-  },
-  methods: {
-    doCopy: function () {
-      this.$copyText(this.message).then(
-        function () {
-          // alert("Copied");
-          const toaster = createToaster({ position: "top", duration: 2000});
-          toaster.success(`Copied`);
-        },
-        function () {
-          // alert("Can not copy");
-          const toaster = createToaster({ position: "top", duration: 2000 });
-          toaster.error(`Can not copy`);
-        }
-      );
-    },
-  },
-};
+const store = useAuthStore();
+const user = store.currentUser;
+const firstName = user?.displayName!.split(" ")[0];
+const lastName = user?.displayName!.split(" ")[-1];
+const goerliScan = `https://goerli.etherscan.io/address/${user!.walletAddress}`;
+const active_ = ref<string>("");
+const isDeployed = ref<boolean>(true);
+const loading = ref<boolean>(true);
+const tokens = ref<{ [key: string]: Token }>({});
+const balance = ref<number>(0);
+const chain = "GOERLI";
+const nftView = ref<boolean>(false);
+const tokenView = ref<boolean>(true);
+const all = ref<boolean>(true);
+const completed = ref<boolean>(false);
+const pending = ref<boolean>(false);
+const canceled = ref<boolean>(false);
+// const progress = document.querySelector(".js-completed-bar");
+// if (progress) {
+//   progress.style.width = progress.getAttribute("data-complete") + "%";
+//   progress.style.opacity = 1;
+// }
+
+onMounted(async () => {
+  balance.value = await getBalance(user?.email);
+  const accountAddress = store.currentUser!.walletAddress!;
+  tokens.value = await loadAll(store, accountAddress, chain);
+  isDeployed.value = await isContract(accountAddress);
+  loading.value = false;
+});
+
+const visiableTokens = computed(() => {
+  return Object.values(tokens.value).filter(t => t.preference?.display || false);
+});
+
+const totalAssets = computed(() => {
+  let total: BigNumber = BigNumber(0);
+  for (const token of visiableTokens.value) {
+    if (token.balance && token.price) {
+      total = total.plus(token.balance.normalized.times(token.price));
+    }
+  }
+  // return total.plus(BigNumber(dynamicBalance.value));
+  return total;
+});
+
+const dynamicBalance = computed(() => {
+  return BigNumber(Math.floor(Math.random() * 100));
+});
 </script>

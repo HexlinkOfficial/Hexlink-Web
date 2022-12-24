@@ -382,17 +382,18 @@ svg {
           flex: 1 1;
           width: 100%;
           gap: 1rem;
+          grid-template-columns: repeat(12, minmax(0, 1fr));
           align-items: center;
-          @media (min-width: 1280px) {
-            gap: 1.5rem; }
+          @media (min-width: 640px) {
+            padding-left: 1rem;
+            overflow-x: visible; }
+          @media (min-width: 768px) {
+            display: flex; }
           @media (min-width: 1024px) {
             display: grid;
             gap: 1.25rem; }
-          @media (min-width: 768px) {
-            display: flex; }
-          @media (min-width: 640px) {
-            padding-left: 1rem;
-            overflow-x: visible; } }
+          @media (min-width: 1280px) {
+            gap: 1.5rem; } }
           .transaction-box .transaction-details .record .record-info .display-info .action-detail {
             display: flex;
             align-items: center;
@@ -722,7 +723,7 @@ svg {
                                       <div style="position: relative;">
                                         <img src="https://token.metaswap.codefi.network/assets/networkLogos/ethereum.svg" style="height: 2rem; width: 2rem; min-width: 2rem; object-fit: cover; border-radius: 50px;"/>
                                       </div>
-                                      <div>
+                                      <div style="margin-left: 0.75rem;">
                                         <div class="text-top">
                                           <div>
                                             <span>+</span>

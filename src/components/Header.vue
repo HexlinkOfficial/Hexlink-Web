@@ -288,7 +288,7 @@
                     </div>
                     
                     <div class="user-balance" style="border-bottom-width: 1px; border-color: #E5E7EB; border-style: dashed; ">
-                      <h5><b>Your Smart Contact Wallet: </b></h5>
+                      <h5><b>Your Wallet Address: </b></h5>
                       <!-- <div class="address">
                         <span style="color: #4B5563; font-size: 0.875rem; line-height: 1.25rem; font-weight: 500;">Address: </span>
                         <span @click="doCopy" style="margin-bottom: 0; padding-top: 0.25rem; padding-bottom: 0.25rem; padding-left: 0.5rem; padding-right: 0.5rem; background-color: #F3F4F6; font-size: 0.875rem; line-height: 1.25rem; border-radius: 0.5rem; ">

@@ -449,46 +449,6 @@ img, svg {
                 </div>
               </div>
             </div> -->
-            <div class="col-xxl-6 col-xl-6 col-lg-12">
-              <div class="card">
-                <div class="card-body">
-                  <div class="invite-content">
-                    <h4>Invite a friend and get $30</h4>
-                    <p>
-                      You will receive up to $30 when they 1.Buy Crypto 2.
-                      Deposit 3. Launch their FIRST airdrop 🔥.
-                      <router-link to="#">Learn more</router-link>
-                    </p>
-            
-                    <div class="copy-link">
-                      <form action="#">
-                        <div class="input-group">
-                          <input type="text" class="form-control" v-bind:value="message" />
-                          <!-- <span class="input-group-text c-pointer" @click="doCopy">Copy</span> -->
-                          <span class="btn btn-primary" @click="doCopy">Copy</span>
-                        </div>
-                      </form>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="col-xxl-6 col-xl-6 col-lg-12">
-              <div class="card">
-                <div class="card-body">
-                  <div class="invite-content">
-                    <h4>Get free BTC every day</h4>
-                    <p>
-                      Earn free Sui in rewards by completing a learning
-                      mission daily or inviting friends to Hexlink 🚀.
-                      <router-link to="#">Learn more</router-link>
-                    </p>
-            
-                    <router-link to="#" class="btn btn-primary">Invite friends to join</router-link>
-                  </div>
-                </div>
-              </div>
-            </div>
             <div class="col-xxl-6">
               <div class="card">
                 <div class="card-header">

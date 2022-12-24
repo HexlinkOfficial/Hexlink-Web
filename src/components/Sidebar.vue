@@ -6,33 +6,38 @@
     </div>
     <div class="menu">
       <ul>
-        <li>
-          <router-link to="/transactions" data-toggle="tooltip" data-placement="right" title="Home"
-            :class="active === 1 && 'active'">
-            <span class="icon-grey"><i class="icofont-ui-home"></i></span>
-          </router-link>
-        </li>
-        <li>
-          <router-link to="/testabout" data-toggle="tooltip" data-placement="right" title="Trade"
-            :class="active === 2 && 'active'">
-            <span class="icon-grey"><i class="icofont-stack-exchange"></i></span>
-          </router-link>
-        </li>
+        <!-- testwallet -->
         <li>
           <router-link to="/testwallet" data-toggle="tooltip" data-placement="right" title="Wallet"
-            :class="active === 3 && 'active'">
+            :class="active === 1 && 'active'">
             <span class="icon-grey"><i class="icofont-wallet"></i></span>
           </router-link>
         </li>
+        <!-- transactions -->
+        <li>
+          <router-link to="/transactions" data-toggle="tooltip" data-placement="right" title="Home"
+            :class="active === 2 && 'active'">
+            <span class="icon-grey"><i class="icofont-page"></i></span>
+          </router-link>
+        </li>
+        <!-- testabout -->
+        <li>
+          <router-link to="/testabout" data-toggle="tooltip" data-placement="right" title="Trade"
+            :class="active === 3 && 'active'">
+            <span class="icon-grey"><i class="icofont-stack-exchange"></i></span>
+          </router-link>
+        </li>
+        <!-- activities -->
         <li>
           <router-link to="/activities" data-toggle="tooltip" data-placement="right" title="Price"
             :class="active === 4 && 'active'">
             <span class="icon-grey"><i class="icofont-price"></i></span>
           </router-link>
         </li>
+        <!-- signout -->
         <li class="logout">
           <router-link to="/signin" data-toggle="tooltip" data-placement="right" title="Signout">
-            <span class="icon-grey"><i class="icofont-power"></i></span>
+            <span class="icon-grey"><i class="icofont-logout"></i></span>
           </router-link>
         </li>
       </ul>

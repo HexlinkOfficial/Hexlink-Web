@@ -170,12 +170,14 @@
 .token-worth {
   display: flex;
   flex-direction: row;
-  padding: 16px;
+  padding: 16px 16px 16px 6px;
   border-radius: 5px;
   width: 100%;
   min-height: 70px;
   justify-content: space-between;
-  align-items: center; }
+  align-items: center;
+  @media (min-width: 640px) {
+    padding: 16px 16px 16px 25px; } }
   .token-worth .title {
     display: flex;
     justify-content: space-between;
@@ -377,13 +379,73 @@ svg {
 .nft-gridDetail {
   border-radius: 0.75rem;
   margin-top: 1.75rem; }
+.invite-content .input-group-text {
+  background: #556ee6;
+  color: #fff; }
+.invite-content .social-share-link {
+  margin-top: 15px; }
+  .invite-content .social-share-link a {
+    display: inline-block;
+    margin-right: 10px; }
+    .invite-content .social-share-link a i {
+      font-size: 20px; }
+      .invite-content .social-share-link a i.icofont-facebook {
+        color: #3b5998; }
+      .invite-content .social-share-link a i.icofont-twitter {
+        color: #1da1f2; }
+      .invite-content .social-share-link a i.icofont-whatsapp {
+        color: #25d366; }
+      .invite-content .social-share-link a i.icofont-telegram {
+        color: #0088cc; }
+.info {
+  display: none;
+}
 </style>
 <template>
   <layout :active="1">
     <div class="content-body">
       <div class="container">
-        <h1 style="margin-bottom: 1rem;;">Tokens</h1>
+        <h1 @click="showInfo = !showInfo;" style="margin-bottom: 1rem;">Tokens</h1>
         <div class="row">
+          <!-- <div v-if="showInfo" class="col-xxl-6 col-xl-6 col-lg-12">
+            <div class="card">
+              <div class="card-body">
+                <div class="invite-content">
+                  <h4>Invite a friend and get $30</h4>
+                  <p>
+                    You will receive up to $30 when they 1.Buy Crypto 2.
+                    Deposit 3. Launch their FIRST airdrop 🔥.
+                    <router-link to="#">Learn more</router-link>
+                  </p>
+          
+                  <div class="copy-link">
+                    <form action="#">
+                      <div class="input-group">
+                        <input type="text" class="form-control" v-bind:value="message" />
+                        <span class="btn btn-primary" @click="doCopy">Copy</span>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div> -->
+          <!-- <div v-if="showInfo" class="col-xxl-6 col-xl-6 col-lg-12">
+            <div class="card">
+              <div class="card-body">
+                <div class="invite-content">
+                  <h4>Get free BTC every day</h4>
+                  <p>
+                    Earn free Sui in rewards by completing a learning
+                    mission daily or inviting friends to Hexlink 🚀.
+                    <router-link to="#">Learn more</router-link>
+                  </p>
+          
+                  <router-link to="#" class="btn btn-primary">Invite friends to join</router-link>
+                </div>
+              </div>
+            </div>
+          </div> -->
           <div className="row invoice-card-row">
             <!-- account set up notification -->
             <!-- <div class="col-xxl-6">
@@ -511,6 +573,8 @@ const loading = ref<boolean>(true);
 const tokens = ref<{ [key: string]: Token }>({});
 const balance = ref<number>(0);
 const chain = "GOERLI";
+const message = "https://play.hexlink.io/join/12345";
+const showInfo = ref<boolean>(true);
 // const progress = document.querySelector(".js-completed-bar");
 // if (progress) {
 //   progress.style.width = progress.getAttribute("data-complete") + "%";

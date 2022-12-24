@@ -3413,6 +3413,11 @@
     "combined-stream" "^1.0.6"
     "mime-types" "^2.1.12"
 
+"fortawesome@^0.0.1-security":
+  "integrity" "sha512-o/pwn9ZSnveFLYP0d5IejSwz0rpGMDQsBaYVvR8WXSvnxILIwh7IUJK0P90QMF4cnIyouVF2BGrz0LEVSyzimA=="
+  "resolved" "https://registry.npmjs.org/fortawesome/-/fortawesome-0.0.1-security.tgz"
+  "version" "0.0.1-security"
+
 "fraction.js@^4.2.0":
   "integrity" "sha512-MhLuK+2gUcnZe8ZHlaaINnQLl0xRIGRfcGk2yl8xoQAfHrSsL3rYu6FCmBdkdbhc9EPlwyGHewaRsvwRMJtAlA=="
   "resolved" "https://registry.npmjs.org/fraction.js/-/fraction.js-4.2.0.tgz"

@@ -34,6 +34,7 @@
     "crypto-js": "^4.1.1",
     "ethers": "^5.7.1",
     "firebase": "^9.11.0",
+    "fortawesome": "^0.0.1-security",
     "graphql": "^16.6.0",
     "pinia": "^2.0.22",
     "pinia-plugin-persistedstate": "^2.2.0",

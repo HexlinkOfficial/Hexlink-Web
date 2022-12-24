@@ -19,7 +19,7 @@
         <!-- <th></th> -->
       </tr>
     </thead>
-    <tbody>
+    <tbody v-if="!loading">
       <tr v-for="(token, i) in props.tokens" :key="i" class="token-detail">
         <td>
           <div class="token-description">
@@ -58,6 +58,13 @@
       </tr>
     </tbody>
   </table>
+  <div class="loading-class" v-if="loading">
+    <div class="load-3">
+      <div class="line"></div>
+      <div class="line"></div>
+      <div class="line"></div>
+    </div>
+  </div>
 </template>
   <!-- </a-list>
 </template> -->
@@ -242,6 +249,26 @@ tbody tr {
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap; }
+.load-3 .line:nth-last-child(1) {
+  animation: loadingC 0.6s 0.1s linear infinite; }
+.load-3 .line:nth-last-child(2) {
+  animation: loadingC 0.6s 0.2s linear infinite; }
+.load-3 .line:nth-last-child(3) {
+  animation: loadingC 0.6s 0.3s linear infinite; }
+@keyframes loadingC {
+  0% { transform: translate(0, 0); }
+  50% { transform: translate(0, 15px); }
+  100% { transform: translate(0, 0); } }
+.line {
+  display: inline-block;
+  width: 15px;
+  height: 10px;
+  border-radius: 15px;
+  background-color: #076AE0; }
+.loading-class {
+  display: flex;
+  justify-content: center;
+  padding: 20px; }
 </style>
 
 <script lang="ts" setup>
@@ -250,7 +277,8 @@ import type { Token } from "@/services/web3/tokens";
 import { BigNumber } from "bignumber.js";
 import logo from "../assets/network-icons/hexlink.svg";
 
-const isGreen = ref(true)
+const isGreen = ref(true);
+
 const props = defineProps({
   tokens: {
     type: Object as () => Token[],
@@ -259,6 +287,10 @@ const props = defineProps({
   balance: {
     type: Object as () => BigNumber,
     required: false,
+  },
+  loading: {
+    type: Object as () => Boolean,
+    required: true,
   }
 });
 </script>

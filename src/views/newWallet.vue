@@ -531,6 +531,7 @@ svg {
                         <WalletTokenList 
                           :tokens="visiableTokens" 
                           :balance="totalAssets.toNumber()"
+                          :loading="loading"
                         ></WalletTokenList>
                       </div>
                     </div>

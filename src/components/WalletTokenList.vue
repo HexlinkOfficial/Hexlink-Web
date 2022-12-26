@@ -58,6 +58,7 @@
       </tr>
     </tbody>
   </table>
+  <!-- loading -->
   <div class="loading-class" v-if="loading">
     <div class="load-3">
       <div class="line"></div>
@@ -261,14 +262,14 @@ tbody tr {
   100% { transform: translate(0, 0); } }
 .line {
   display: inline-block;
-  width: 15px;
-  height: 10px;
+  width: 20px;
+  height: 5px;
   border-radius: 15px;
   background-color: #076AE0; }
 .loading-class {
   display: flex;
   justify-content: center;
-  padding: 20px; }
+  padding: 30px; }
 </style>
 
 <script lang="ts" setup>

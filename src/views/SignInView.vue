@@ -40,12 +40,12 @@
                                             <h3 className="">Sign in with options below</h3>
                                         </div>
                                         <!-- Sign in with Google -->
-                                        <a-row justify="center" style="margin-top: 30px;">
+                                        <!-- <a-row justify="center" style="margin-top: 30px;">
                                             <button size="large" @click="google_login" className="google__btn">
                                                 <i class="fa fa-google"></i>&nbsp;&nbsp;
                                                 Sign in with Google
                                             </button>
-                                        </a-row>
+                                        </a-row> -->
                                         <!-- Sign in with Twitter -->
                                         <a-row justify="center" style="margin-top: 5px;">
                                             <button size="large" @click="twitter_login" className="twitter__btn">

@@ -26,13 +26,12 @@
                 <span class="dark"><i class="icofont-moon"></i></span>
                 <span class="light"><i class="icofont-sun-alt"></i></span>
               </div> -->
-              <!-- <div class="notification dropdown" @click="activeDropDown('notification')" :class="active_ === 'notification' && 'show'">
+              <div class="notification dropdown" @click="activeDropDown('notification')" :class="active_ === 'notification' && 'show'">
                 <div class="notify-bell" data-toggle="dropdown">
-                  <svg width="15" height="20" viewBox="0 0 15 20" fill="none" xmlns="http://www.w3.org/2000/svg"
-                    class="h-auto w-3 sm:w-auto">
-                    <path fill-rule="evenodd" clip-rule="evenodd"
-                      d="M9.61379 0.309937C9.89044 0.427717 10.07 0.699327 10.07 1V7.99819H14C14.2667 7.99819 14.5133 8.13982 14.6478 8.37018C14.7822 8.60053 14.7842 8.88494 14.653 9.11714L14.1609 9.988C12.2948 13.2906 9.9149 16.2752 7.11058 18.8298L6.31506 19.5544C6.0955 19.7545 5.7786 19.8061 5.50693 19.686C5.23526 19.566 5.06 19.297 5.06 19V12.0611H1C0.585786 12.0611 0.25 11.7254 0.25 11.3111C0.25 11.177 0.285225 11.051 0.346932 10.9421C2.10572 7.69064 4.3575 4.73117 7.02222 2.16895L8.80017 0.459375C9.0169 0.250976 9.33715 0.192157 9.61379 0.309937ZM2.28458 10.5611H5.81C6.22421 10.5611 6.56 10.8969 6.56 11.3111V17.2945C8.9786 15.009 11.0517 12.3827 12.7134 9.49819H9.32C8.90579 9.49819 8.57 9.1624 8.57 8.74819V2.76162L8.06188 3.25019C5.8111 5.4144 3.86782 7.87442 2.28458 10.5611Z"
-                      fill="currentColor"></path>
+                  <svg width="16" height="18" viewBox="0 0 16 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                      d="M14.999 6.16705C14.5498 2.64215 11.5494 0 7.99562 0C4.44182 0 1.43623 2.64565 0.990476 6.17493L0 14.012H3.70794C4.11341 16.0105 5.88068 17.5151 7.99912 17.5151C10.1176 17.5151 11.8848 16.0105 12.2903 14.012H16L14.999 6.16705ZM7.99912 15.7635C6.85539 15.7635 5.88243 15.0323 5.52162 14.012H10.4766C10.1158 15.0323 9.14286 15.7635 7.99912 15.7635ZM1.98621 12.2605L2.72797 6.39475C3.06338 3.74122 5.3202 1.75151 7.99562 1.75151C10.671 1.75151 12.9235 3.73771 13.2615 6.38862L14.0103 12.2605H1.98621Z"
+                      fill="#414141" />
                   </svg>
                   <span class="notify-dot"></span>
                 </div>
@@ -75,11 +74,10 @@
                         </div>
                       </div>
                     </router-link>
-              
                     <router-link to="./settings-activity">More <i class="icofont-simple-right"></i></router-link>
                   </div>
                 </div>
-              </div> -->
+              </div>
               <div class="selectnetwork dropdown" @click="activeDropDown('selectnetwork')"
                 :class="active_ === 'selectnetwork' && 'show'">
                 <div class="network" data-toggle="dropdown">
@@ -88,7 +86,7 @@
                     <img v-if="index != 0" :src="component" height=25 style="margin-left: -0.5rem;">
                   </template>
                   <span v-if="selectedChains.length === 1">{{ currentNetwork }}</span>
-                  <span v-if="selectedChains.length != 1">{{ networkCount }} <span class="network-word">Networks</span></span>
+                  <span v-if="selectedChains.length != 1">{{ networkCount }} <span class="network-word" style="margin-left: 0rem;">Networks</span></span>
                   <svg width="14" height="8" viewBox="0 0 14 8" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 0.5rem; width: 1rem">
                     <path d="M1 1L7 7L13 1" stroke="#475569" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                   </svg>
@@ -140,7 +138,7 @@
                         </button>
                       </div>
                       <!-- Optimism -->
-                      <div class="network-items" @click="op = !op; countNetworks(); showNetworks()">
+                      <!-- <div class="network-items" @click="op = !op; countNetworks(); showNetworks()">
                         <button>
                           <div style="display: flex; margin-right: 0.75rem; align-items: center; height: 1.25rem; width: 1.25rem;">
                             <svg v-if="op" width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -157,7 +155,7 @@
                             </div>
                           </div>
                         </button>
-                      </div>
+                      </div> -->
                       <!-- Polygon -->
                       <div class="network-items" @click="poly = !poly; countNetworks(); showNetworks()">
                         <button>
@@ -179,7 +177,7 @@
                         </button>
                       </div>
                       <!-- Fantom -->
-                      <div class="network-items" @click="fan = !fan; countNetworks(); showNetworks()">
+                      <!-- <div class="network-items" @click="fan = !fan; countNetworks(); showNetworks()">
                         <button>
                           <div style="display: flex; margin-right: 0.75rem; align-items: center; height: 1.25rem; width: 1.25rem;">
                             <svg v-if="fan" width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -197,9 +195,9 @@
                             </div>
                           </div>
                         </button>
-                      </div>
+                      </div> -->
                       <!-- Avalanche -->
-                      <div class="network-items" @click="aval = !aval; countNetworks(); showNetworks()">
+                      <!-- <div class="network-items" @click="aval = !aval; countNetworks(); showNetworks()">
                         <button>
                           <div style="display: flex; margin-right: 0.75rem; align-items: center; height: 1.25rem; width: 1.25rem;">
                             <svg v-if="aval" width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -217,9 +215,9 @@
                             </div>
                           </div>
                         </button>
-                      </div>
+                      </div> -->
                       <!-- BNB Smart Chain -->
-                      <div class="network-items" @click="bnb = !bnb; countNetworks(); showNetworks()">
+                      <!-- <div class="network-items" @click="bnb = !bnb; countNetworks(); showNetworks()">
                         <button>
                           <div style="display: flex; margin-right: 0.75rem; align-items: center; height: 1.25rem; width: 1.25rem;">
                             <svg v-if="bnb" width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -237,9 +235,9 @@
                             </div>
                           </div>
                         </button>
-                      </div>
+                      </div> -->
                       <!-- Arbitrum -->
-                      <div class="network-items" @click="arbi = !arbi; countNetworks(); showNetworks()">
+                      <!-- <div class="network-items" @click="arbi = !arbi; countNetworks(); showNetworks()">
                         <button>
                           <div style="display: flex; margin-right: 0.75rem; align-items: center; height: 1.25rem; width: 1.25rem;">
                             <svg v-if="arbi" width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -257,7 +255,7 @@
                             </div>
                           </div>
                         </button>
-                      </div>
+                      </div> -->
                     </div>
                   </div>
                 </div>
@@ -269,7 +267,7 @@
                     <span class="thumb"><img :src="user?.photoURL" :size="64" referrerpolicy="no-referrer" /></span>
                   </div> -->
                   <img class="profile" :src="user?.photoURL" :size="64" referrerpolicy="no-referrer"/>
-                  <span>{{ user?.email }}</span>
+                  <span>@{{ user?.provider?.includes("twitter") && user.screenName }}</span>
                   <svg width="14" height="8" viewBox="0 0 14 8" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 0.5rem; width: 1rem">
                     <path d="M1 1L7 7L13 1" stroke="#475569" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                   </svg>
@@ -281,8 +279,8 @@
                       <div class="user">
                         <span class="thumb"><img :src="user?.photoURL" :size="64" referrerpolicy="no-referrer" /></span>
                         <div class="user-info">
-                          <h5>{{ user?.displayName }}</h5>
-                          <span>{{ user?.email }}</span>
+                          <h5>{{ user?.provider?.includes("twitter") && user?.displayName }}</h5>
+                          <span>@{{ user?.provider?.includes("twitter") && user?.screenName }}</span>
                         </div>
                       </div>
                     </div>
@@ -355,6 +353,7 @@ export default {
   data() {
     const store = useAuthStore();
     const user = store.currentUser!;
+    console.log(user)
     const actualAddress = user.walletAddress;
     const addressTextLong = computed(() => {
       if (user.walletAddress) {

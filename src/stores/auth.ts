@@ -4,10 +4,12 @@ import type {  User } from 'firebase/auth'
 export interface IUser {
   emailVerified: boolean,
   email: string | null,
-  photoURL: string | null
-  uid: string
+  photoURL: string | null,
+  uid: string,
   displayName: string | null,
   walletAddress: string | null,
+  screenName: string | null,
+  provider: string | null,
 }
 
 export interface IAuth {
@@ -37,7 +39,9 @@ export const useAuthStore = defineStore({
         photoURL: user.photoURL,
         uid: user.uid,
         displayName: user.displayName,
-        walletAddress: walletAddress.toLowerCase()
+        walletAddress: walletAddress.toLowerCase(),
+        screenName: user.reloadUserInfo.screenName,
+        provider: user.providerData[0].providerId,
       }
     },
     refreshIdToken(idToken: string) {

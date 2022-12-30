@@ -65,8 +65,8 @@ router.beforeEach(async (to) => {
   const auth = useAuthStore();
 
   if (authRequired && !auth.authenticated) {
-      auth.setReturnUrl(to.fullPath);
-      return '/signin';
+    auth.setReturnUrl(to.fullPath);
+    return '/signin';
   }
 });
 

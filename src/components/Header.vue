@@ -94,7 +94,7 @@
                         </button>
                       </div>
                       <!-- Sui -->
-                      <div class="network-items" @click="sui = !sui; countNetworks(); showNetworks()">
+                      <div class="network-items" style="pointer-events: none;" @click="sui = !sui; countNetworks(); showNetworks()">
                         <button>
                           <div style="display: flex; margin-right: 0.75rem; align-items: center; height: 1.25rem; width: 1.25rem;">
                             <svg v-if="sui" width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -103,11 +103,11 @@
                           </div>
                           <div style="display: flex; white-space: nowrap; align-items: center; width: 100%; ">
                             <div style="position: relative; margin-right: 0.75rem; min-width: max-content; ">
-                              <img src="https://i.postimg.cc/5tfSHpjg/sui.png" height=25 style="margin-left: 0.5rem; margin-right: 0.5rem;" />
+                              <img src="https://i.postimg.cc/02226CL6/coming-soon.png" height=25 style="margin-left: 0.5rem; margin-right: 0.5rem;" />
                             </div>
                             <div class="items-name">
-                              <span class="item-title">Sui</span>
-                              <span class="item-balance">$76.47</span>
+                              <span class="item-title" style="color: #D1D1D1;">Sui</span>
+                              <span class="item-balance" style="color: #D1D1D1;">$76.47</span>
                             </div>
                           </div>
                         </button>
@@ -132,7 +132,7 @@
                         </button>
                       </div> -->
                       <!-- Polygon -->
-                      <div class="network-items" @click="poly = !poly; countNetworks(); showNetworks()">
+                      <div class="network-items" style="pointer-events: none;"  @click="poly = !poly; countNetworks(); showNetworks()">
                         <button>
                           <div style="display: flex; margin-right: 0.75rem; align-items: center; height: 1.25rem; width: 1.25rem;">
                             <svg v-if="poly" width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -141,12 +141,12 @@
                           </div>
                           <div style="display: flex; white-space: nowrap; align-items: center; width: 100%; ">
                             <div style="position: relative; margin-right: 0.75rem; min-width: max-content; ">
-                              <img src="https://token.metaswap.codefi.network/assets/networkLogos/polygon.svg" height=25
+                              <img src="https://i.postimg.cc/vHqqMQr1/polygon.png" height=25
                                 style="margin-left: 0.5rem; margin-right: 0.5rem;" />
                             </div>
                             <div class="items-name">
-                              <span class="item-title">Polygon</span>
-                              <span class="item-balance">$0.00</span>
+                              <span class="item-title" style="color: #D1D1D1;">Polygon</span>
+                              <span class="item-balance" style="color: #D1D1D1;">$0.00</span>
                             </div>
                           </div>
                         </button>

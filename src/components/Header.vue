@@ -36,40 +36,15 @@
                   <span class="notify-dot"></span>
                 </div>
                 <div class="dropdown-menu dropdown-menu-right notification-list mt-3" :class="active_ === 'notification' && 'show'">
-                  <h4>Announcements</h4>
+                  <h4>Notification</h4>
                   <div class="lists">
                     <router-link to="#" class="">
                       <div class="d-flex align-items-center">
-                        <span class="me-3 icon success"><i class="icofont-check"></i></span>
+                        <span class="me-3">
+                          <img src="../assets/redpocket.svg" alt="" />
+                        </span>
                         <div>
-                          <p>Account created successfully</p>
-                          <span>2020-11-04 12:00:23</span>
-                        </div>
-                      </div>
-                    </router-link>
-                    <router-link to="#" class="">
-                      <div class="d-flex align-items-center">
-                        <span class="me-3 icon fail"><i class="icofont-close"></i></span>
-                        <div>
-                          <p>2FA verification failed</p>
-                          <span>2020-11-04 12:00:23</span>
-                        </div>
-                      </div>
-                    </router-link>
-                    <router-link to="#" class="">
-                      <div class="d-flex align-items-center">
-                        <span class="me-3 icon success"><i class="icofont-check"></i></span>
-                        <div>
-                          <p>Device confirmation completed</p>
-                          <span>2020-11-04 12:00:23</span>
-                        </div>
-                      </div>
-                    </router-link>
-                    <router-link to="#" class="">
-                      <div class="d-flex align-items-center">
-                        <span class="me-3 icon pending"><i class="icofont-warning"></i></span>
-                        <div>
-                          <p>Phone verification pending</p>
+                          <p>Hexpocket - From XXXX</p>
                           <span>2020-11-04 12:00:23</span>
                         </div>
                       </div>

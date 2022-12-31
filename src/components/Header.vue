@@ -104,6 +104,7 @@
                           <div style="display: flex; white-space: nowrap; align-items: center; width: 100%; ">
                             <div style="position: relative; margin-right: 0.75rem; min-width: max-content; ">
                               <img src="https://i.postimg.cc/02226CL6/coming-soon.png" height=25 style="margin-left: 0.5rem; margin-right: 0.5rem;" />
+                              <span class="notify-dot"></span>
                             </div>
                             <div class="items-name">
                               <span class="item-title" style="color: #D1D1D1;">Sui</span>
@@ -946,19 +947,19 @@ cursor: pointer; }
           text-overflow: ellipsis;
           white-space: nowrap;
         }
-  .notification .notify-dot {
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 0.625rem;
-    height: 0.625rem;
-    border-radius: 9999px;
-    opacity: 1;
-    background-color: rgb(250, 62, 62);
-    // @media (min-width: 640px) {
-    //   width: 0.75rem;
-    //   height: 0.75rem; }
-  }
+.notify-dot {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 0.625rem;
+  height: 0.625rem;
+  border-radius: 9999px;
+  opacity: 1;
+  background-color: rgb(250, 62, 62);
+  // @media (min-width: 640px) {
+  //   width: 0.75rem;
+  //   height: 0.75rem; }
+}
   .notification .dropdown-menu {
     border: 0px;
     padding: 15px 20px 10px;

@@ -316,6 +316,173 @@ margin: 16px; }
   display: block;
   min-width: 0px;
   width: 100%; }
+.red-packet .total-amount {
+  display: flex;
+  gap: 16px;
+  margin: 16px; }
+.red-packet .total-amount .box {
+  position: relative;
+  height: 66px;
+  padding: 10px 12px;
+  padding-right: 12px;
+  padding-left: 12px;
+  font-weight: 400;
+  line-height: 1.4375em;
+  color: rgb(7, 16, 27);
+  box-sizing: border-box;
+  position: relative;
+  cursor: text;
+  display: inline-flex;
+  -webkit-box-align: center;
+  align-items: center;
+  width: 100%;
+  border-radius: 8px;
+  background-color: rgb(242, 246, 250);
+  font-size: 14px;
+  overflow: unset !important; 
+  p {
+    font-size: 13px;
+    line-height: 18px;
+    color: rgb(118, 127, 141);
+    white-space: nowrap;
+    position: absolute;
+    top: 10px;
+    left: 12px; } }
+.red-packet .total-amount .box .amount-input {
+  flex: 2 1 0%;
+  font-size: 18px;
+  font-weight: 700;
+  padding-top: 22px !important;
+  padding-bottom: 0px !important;
+  padding-left: 0px !important;
+  padding: 11px 12px;
+  height: 18px;
+  border: 0px;
+  box-sizing: content-box;
+  background: none;
+  margin: 0px;
+  -webkit-tap-highlight-color: transparent;
+  display: block;
+  min-width: 0px;
+  width: 100%; }
+.red-packet .total-amount .box .input-info-show {
+  display: flex;
+  flex: 1 1 0%;
+  height: 100%;
+  flex-direction: column;
+  align-items: flex-end;
+  row-gap: 4px; 
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 1.4375em;
+  color: rgb(7, 16, 27);
+  cursor: text; 
+  .available-balance {
+    display: flex;
+    -webkit-box-align: center;
+    align-items: center;
+    font-size: 13px;
+    line-height: 18px;
+    color: rgb(118, 127, 141);
+    white-space: nowrap;
+    margin: 0px;
+    font-weight: 400;
+    span {
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      color: rgb(7, 16, 27);
+      line-height: 18px;
+      font-weight: 700;
+      margin-left: 4px;
+      margin: 0px;
+      font-size: 14px; } }
+    .total-choose-token {
+      display: flex;
+      -webkit-box-align: center;
+      align-items: center;
+      font-size: 14px;
+      column-gap: 12px;
+      font-weight: 400;
+      line-height: 1.4375em;
+      color: rgb(7, 16, 27);
+      cursor: text;
+      .max-amount-button {
+        position: relative;
+        margin: 0px;
+        appearance: none;
+        max-width: 100%;
+        background-color: rgba(28, 104, 243, 0.1);
+        color: rgb(28, 104, 243);
+        border-radius: 4px;
+        font-size: 14px;
+        line-height: 18px;
+        padding: 3px 12px;
+        cursor: pointer;
+        display: inline-flex;
+        -webkit-box-align: center;
+        align-items: center;
+        -webkit-box-pack: center;
+        justify-content: center;
+        height: 24px;
+        white-space: nowrap;
+        transition: background-color 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms, box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+        outline: 0px;
+        text-decoration: none;
+        border: 0px;
+        vertical-align: middle;
+        box-sizing: border-box;
+        user-select: none;
+        -webkit-tap-highlight-color: transparent;
+        .button-text {
+          padding: 0px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          color: rgb(28, 104, 243);
+          font-size: 14px;
+          line-height: 18px;
+          cursor: pointer;
+          user-select: none;
+          -webkit-tap-highlight-color: transparent;
+          font-weight: 400; }
+        .button-outline {
+          overflow: hidden;
+          pointer-events: none;
+          position: absolute;
+          z-index: 0;
+          inset: 0px;
+          color: rgb(28, 104, 243);
+          font-size: 14px;
+          line-height: 18px;
+          cursor: pointer;
+          white-space: nowrap;
+          user-select: none;
+          -webkit-tap-highlight-color: transparent; } }
+      .token-select {
+        position: relative;
+        margin: 0px;
+        appearance: none;
+        max-width: 100%;
+        font-family: -apple-system, system-ui, sans-serif;
+        display: inline-flex;
+        -webkit-box-align: center;
+        align-items: center;
+        -webkit-box-pack: center;
+        justify-content: center;
+        height: 24px;
+        border-radius: 16px;
+        white-space: nowrap;
+        transition: background-color 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms, box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+        outline: 0px;
+        text-decoration: none;
+        border: 0px;
+        padding: 0px;
+        vertical-align: middle;
+        box-sizing: border-box;
+        user-select: none;
+        -webkit-tap-highlight-color: transparent;
+      } } }
 </style>
 
 <template>
@@ -418,6 +585,25 @@ margin: 16px; }
                         </div>
                       </div>
                     </div>
+                    <div class="total-amount">
+                      <div class="box">
+                        <p>Total Amount</p>
+                        <input class="amount-input" autocomplete="off" placeholder="0.0" required="true" type="text" autocorrect="off" title="Token Amount" inputmode="decimal" min="0" minlength="1" maxlength="79" pattern="^[0-9]*[.,]?[0-9]*$" spellcheck="false" value="0">
+                        <div class="input-info-show">
+                          <p class="available-balance">
+                            Available Balance
+                            <span>xxxxxx</span>
+                          </p>
+                          <div class="total-choose-token">
+                            <div class="max-amount-button">
+                              <span class="button-text">MAX</span>
+                              <span class="button-outline"></span>
+                            </div>
+                            <div class="token-select"></div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -437,7 +623,6 @@ import { BigNumber } from "bignumber.js";
 import Web3Model from "web3modal";
 import { ethers } from "ethers";
 import { providerOptions } from "../services/web3/providerOptions";
-import { CheckCircleIcon, WarningIcon } from "@chakra-ui/icons";
 import { truncateAddress } from "@/services/web3/account";
 // import { configureChains, createClient } from "@wagmi/core";
 // import { arbitrum, mainnet, polygon } from "@wagmi/core/chains";

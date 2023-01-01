@@ -199,10 +199,11 @@ const connectWallet = async () => {
     const library = new ethers.providers.Web3Provider(provider);
     const accounts = await library.listAccounts();
     network.value = await library.getNetwork();
-    console.log(network.value);
     if (accounts) account.value = accounts[0];
-    console.log("Account: ", account.value)
     chainId.value = network.value.chainId;
+    console.log("Network: ", network.value);
+    console.log("Account: ", account.value);
+    console.log(library);
   } catch (error) {
     console.log(error);
   }

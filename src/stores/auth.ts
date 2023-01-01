@@ -12,10 +12,17 @@ export interface IUser {
   provider: string | null,
 }
 
+export interface OAccount {
+  Oaccount: string | null,
+  Onetwork: string | null,
+  OchainId: number | null,
+}
+
 export interface IAuth {
   currentUser: IUser | null,
   idToken: string | null,
-  returnUrl: string | null;
+  returnUrl: string | null,
+  Owallet: OAccount | null,
 }
 
 export const useAuthStore = defineStore({
@@ -24,12 +31,21 @@ export const useAuthStore = defineStore({
     idToken: null as string | null,
     currentUser: null as IUser | null,
     returnUrl: null as string | null,
+    Owallet: null as OAccount | null,
   }),
   persist: true,
   getters: {
     authenticated: (state) => state.currentUser !== null && state.idToken != null,
   },
   actions: {
+    connectOwallet(account: string, network: string, chianId: number ) {
+      console.log("External account connected");
+      this.Owallet = {
+        Oaccount: account,
+        Onetwork: network,
+        OchainId: chianId,
+      }
+    },
     signIn(user: User, idToken: string, walletAddress: string) {
       console.log("User logged in");
       this.idToken = idToken;

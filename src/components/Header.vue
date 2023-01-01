@@ -262,7 +262,6 @@
                     </div>
                     
                     <div class="user-balance" style="border-bottom-width: 1px; border-color: #E5E7EB; border-style: dashed; ">
-                      <h5><b>Your Wallet Address: </b></h5>
                       <!-- <div class="address">
                         <span style="color: #4B5563; font-size: 0.875rem; line-height: 1.25rem; font-weight: 500;">Address: </span>
                         <span @click="doCopy" style="margin-bottom: 0; padding-top: 0.25rem; padding-bottom: 0.25rem; padding-left: 0.5rem; padding-right: 0.5rem; background-color: #F3F4F6; font-size: 0.875rem; line-height: 1.25rem; border-radius: 0.5rem; ">
@@ -275,16 +274,48 @@
                           $1990.89
                         </span>
                       </div> -->
-                      <div class="user-wallet">
-                        <div class="user">
-                          <span class="thumb"></span>
-                          <div class="user-info">
-                            <span>
-                              <h5 @click="doCopy" style="margin-bottom: 0; padding-top: 0.25rem; padding-bottom: 0.25rem; padding-left: 0.5rem; padding-right: 0.5rem; background-color: #F3F4F6; font-size: 0.875rem; line-height: 1.25rem; border-radius: 0.5rem; ">
-                                {{ addressTextLong }}
-                              </h5>
-                            </span>
-                            <span style="padding-left: 9px;">$200.45</span>
+                      <div class="wallet-info">
+                        <h5>Your Wallet Address: </h5>
+                        <div class="user-wallet">
+                          <div class="user">
+                            <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <circle cx="15" cy="15" r="15" fill="#076AE0" />
+                              <path
+                                d="M12.9544 8.0197C11.966 8.15381 11.1676 8.81988 10.9158 9.72287C10.8778 9.85698 10.8445 10.1207 10.8445 10.313C10.8445 10.9701 11.0964 11.5155 11.6048 11.9714C12.3984 12.6733 13.4343 12.8163 14.4084 12.3559C14.5653 12.2843 14.7031 12.2218 14.7173 12.2218C14.7363 12.2218 17.3451 15.2705 17.4164 15.3778C17.4307 15.4046 17.3594 15.5342 17.2501 15.6683C16.7939 16.2316 16.5563 16.9826 16.6133 17.68C16.6418 18.0287 16.6371 18.0778 16.5611 18.1136C16.5135 18.1359 15.6059 18.4533 14.5415 18.8154L12.6075 19.477L12.2748 19.1418C11.7521 18.6143 11.2104 18.3907 10.4644 18.3907C9.59951 18.3907 8.87721 18.7528 8.40202 19.4279C7.4754 20.7421 8.2262 22.5258 9.87987 22.9281C11.3862 23.2991 12.9021 22.186 12.9116 20.7064V20.3174L14.9074 19.6335C16.0051 19.258 16.9175 18.9495 16.9412 18.9495C16.9602 18.9495 17.098 19.1015 17.2501 19.2848C17.8963 20.0716 18.785 20.4918 19.8066 20.4918C20.3436 20.4918 20.7475 20.4024 21.2369 20.1744C22.2634 19.6961 22.9381 18.7215 22.9952 17.6308C23.0237 17.0675 22.9286 16.6518 22.6483 16.1109C22.3584 15.5611 21.8832 15.1051 21.3177 14.8279C20.7523 14.5508 20.4624 14.4837 19.8256 14.4837C19.2411 14.4793 18.9418 14.5418 18.4571 14.7564C18.2432 14.8503 18.191 14.8592 18.1434 14.8101C17.8868 14.5463 15.4063 11.587 15.4063 11.5423C15.4063 11.5155 15.4491 11.4037 15.5061 11.2964C16.0241 10.2951 15.6487 9.0121 14.665 8.39967C14.1708 8.09122 13.5151 7.9437 12.9544 8.0197ZM11.1106 19.401C11.4005 19.5307 11.7141 19.8346 11.8567 20.1252C11.9327 20.2817 11.9612 20.4247 11.9612 20.6706C11.9612 20.9612 11.9422 21.0461 11.8044 21.3098C11.5193 21.8552 11.0013 22.1324 10.3503 22.0921C9.79433 22.0564 9.34765 21.7747 9.10055 21.3054C8.98651 21.0863 8.9675 20.9969 8.9675 20.6706C8.9675 20.3443 8.98651 20.2593 9.10055 20.0582C9.49972 19.3384 10.3503 19.0613 11.1106 19.401Z"
+                                fill="white" />
+                            </svg>
+                            <div class="user-info">
+                              <span style="margin-bottom: 0;" class="smart-contract-address">
+                                <h5 @click="doCopy">
+                                  {{ addressTextLong }}
+                                </h5>
+                              </span>
+                              <!-- <span style="padding-left: 9px;">$200.45</span> -->
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div>
+                        <h5>Your Wallet Address: </h5>
+                        <div class="user_wallet" style="border: 0 solid #e5e7eb; padding: 10px 0px 0px 0px;">
+                          <div class="user">
+                            <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <circle cx="15" cy="15" r="15" fill="white" />
+                              <path
+                                d="M17.7734 15.5C17.7734 14.1875 16.7187 13.1328 15.4062 13.1328C14.0938 13.1328 13.0625 14.1875 13.0625 15.5C13.0625 16.8125 14.1172 17.8672 15.4297 17.8672C16.7422 17.8672 17.7734 16.8125 17.7734 15.5ZM15.1719 14.3281V13.6953H15.6641V14.3281H15.1719ZM15.1719 15.8281V15.1953H15.6641V15.8281H15.1719V15.8281ZM15.1719 17.3047V16.6719H15.6641V17.3047H15.1719Z"
+                                fill="#076AE0" />
+                              <path
+                                d="M12.6172 8L10.5312 10.5312H11.5859V18.6406H13.6484V17.75C12.9922 17.2344 12.5703 16.4141 12.5703 15.5234C12.5703 14.6094 12.9922 13.8125 13.6484 13.2969V10.5781H14.7031L12.6172 8ZM18.2656 15.5C18.2656 16.3203 17.9141 17.0703 17.3516 17.5859V20.4687H16.2969L18.3828 23L20.4687 20.4687H19.4141V12.3828H17.3516V13.4375C17.9141 13.9297 18.2656 14.6797 18.2656 15.5Z"
+                                fill="#076AE0" />
+                            </svg>
+                            <div class="user-info">
+                              <span style="margin-bottom: 0;" class="smart-contract-address">
+                                <h5 @click="doCopy">
+                                  {{ addressTextLong }}
+                                </h5>
+                              </span>
+                              <!-- <span style="padding-left: 9px;">$200.45</span> -->
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -620,12 +651,14 @@ cursor: pointer; }
   .profile_log .dropdown-menu .user {
     display: flex;
     align-items: center;
-    justify-content: flex-start; }
+    justify-content: flex-start;
+    svg {
+      margin-right: 1rem; } }
   .profile_log .dropdown-menu .user-email {
     border: 0 solid #e5e7eb;
     padding: 30px 20px 20px 20px; }
     .profile_log .dropdown-menu .user-email .thumb {
-      margin-right: 10px; }
+      margin-right: 0.5rem; }
     .profile_log .dropdown-menu .user-email .user-info {
       margin: 0px; }
     .profile_log .dropdown-menu .user-email h5, .profile_log .dropdown-menu .user-email .h5 {
@@ -661,7 +694,10 @@ cursor: pointer; }
     border-bottom-width: 1px;
     border-color: #E5E7EB;
     border-style: dashed;
-    border: 0 solid #e5e7eb; }
+    border: 0 solid #e5e7eb;
+    h5 {
+      margin-bottom: 0; 
+      font-weight: 350;} }
     .profile_log .dropdown-menu .user-balance .address {
       display: flex;
       justify-content: space-between;
@@ -1009,4 +1045,17 @@ cursor: pointer; }
         background: #f46a6a; }
       .notification .dropdown-menu a span.pending {
         background: #f1b44c; }
+.smart-contract-address h5 {
+  margin-bottom: 0;
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+  background-color: #F3F4F6;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  border-radius: 0.5rem; }
+.wallet-info {
+  margin-bottom: 1rem;
+}
 </style>

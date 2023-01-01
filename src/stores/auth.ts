@@ -46,6 +46,10 @@ export const useAuthStore = defineStore({
         OchainId: chianId,
       }
     },
+    disconnectOwallet() {
+      console.log("External account disconnected");
+      this.Owallet = null;
+    },
     signIn(user: User, idToken: string, walletAddress: string) {
       console.log("User logged in");
       this.idToken = idToken;

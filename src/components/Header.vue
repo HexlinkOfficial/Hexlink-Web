@@ -295,7 +295,7 @@
                           </div>
                         </div>
                       </div>
-                      <div>
+                      <div v-if="Owallet!==null">
                         <h5>Your Wallet Address: </h5>
                         <div class="user_wallet" style="border: 0 solid #e5e7eb; padding: 10px 0px 0px 0px;">
                           <div class="user">
@@ -311,7 +311,7 @@
                             <div class="user-info">
                               <span style="margin-bottom: 0;" class="smart-contract-address">
                                 <h5 @click="doCopy">
-                                  {{ addressTextLong }}
+                                  {{ externalWallet }}
                                 </h5>
                               </span>
                               <!-- <span style="padding-left: 9px;">$200.45</span> -->
@@ -354,13 +354,23 @@ import { computed } from "vue";
 import { useAuthStore } from '@/stores/auth';
 import { prettyPrintAddress } from '@/services/web3/account';
 import { createToaster } from "@meforma/vue-toaster";
+import { truncateAddress } from "@/services/web3/account";
 
 export default {
   name: "Header",
   data() {
     const store = useAuthStore();
     const user = store.currentUser!;
+    const Owallet = store.Owallet!;
     console.log(user)
+    console.log("External Wallet: ", Owallet);
+    const externalWallet = computed(() => {
+      if (Owallet.Oaccount !== null) {
+        return Owallet.Oaccount;
+      } else {
+        return "";
+      }
+    })
     const actualAddress = user.walletAddress;
     const addressTextLong = computed(() => {
       if (user.walletAddress) {
@@ -381,6 +391,7 @@ export default {
       addressTextLong,
       addressTextNormal,
       user,
+      Owallet,
       active_: "",
       eth: true,
       sui: false,
@@ -493,6 +504,9 @@ export default {
   },
   mounted() {
     document.addEventListener('click', this.closeDropDown)
+    const store = useAuthStore();
+    const Owallet = store.Owallet!;
+    console.log("External Wallet: ", Owallet);
   },
   beforeDestroy() {
     document.removeEventListener('click', this.closeDropDown)

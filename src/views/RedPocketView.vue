@@ -8,7 +8,8 @@
 .wallet-bar {
   display: flex;
   align-items: center;
-  justify-content: space-between; }
+  justify-content: space-between;
+  margin-top: 1rem; }
 .connect-wallet-button {
   display: flex;
   justify-content: center;
@@ -104,44 +105,323 @@
 @keyframes stroke {
   100% {
     stroke-dashoffset: 0; } }
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  word-wrap: break-word;
+  background-color: #fff;
+  background-clip: border-box;
+  height: calc(100% - 30px);
+  margin-bottom: 1.875rem;
+  transition: all .5s ease-in-out;
+  border: 0px solid transparent;
+  border-radius: 1rem;
+  box-shadow: 0px 5px 5px 0px rgba(82, 63, 105, 0.05); }
+.card-body {
+  flex: 1 1 auto;
+  padding: 20px;
+  background: transparent;
+  border-radius: 15px; }
+@media only screen and (max-width: 575px) {
+  .card {
+    margin-bottom: 0.938rem;
+    height: calc(100% - 0.938rem); }
+  .card-body {
+    padding: 1rem; } }
+.token-list {
+  display: grid;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+  @media (min-width: 640px) {
+    display: flex; } }
+  .token-list .title {
+    display: grid;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.75rem;
+  
+    @media (min-width: 640px) {
+      display: flex; } }
+    .token-list .title .title-col {
+      display: flex; 
+      justify-content: space-between; 
+      grid-column: span 4 / span 4; }
+      .token-list .title .title-col .content {
+        display: flex;
+        margin-left: 0.75rem;
+        margin-left: 0.875rem;
+        align-items: center; }
+        .token-list .title .title-col .content .text {
+          font-size: 1.25rem;
+          line-height: 1.75rem;
+          font-weight: 600; }
+        .token-list .title .title-col .content svg {
+          display: inline-flex;
+          transition-property: background-color, border-color, color, fill, stroke;
+          justify-content: center;
+          align-items: center;
+          width: 1rem;
+          height: 1rem;
+          margin-left: 0.75rem; }
+  .token-list .views {
+    margin-top: 0.75rem;
+    grid-column: span 4 / span 4;
+  
+    @media (min-width: 640px) {
+      display: flex;
+      margin-top: 0; } }
+    .token-list .views .detail-view {
+      display: flex;
+      padding: 0.125rem;
+      transition-property: background-color, border-color, color, fill, stroke;
+      border-radius: 50px;
+      border-style: solid;
+      border-width: 1px;
+      border-color: rgb(71, 85, 105);
+    
+      @media (min-width: 640px) {
+        margin-left: 0.75rem;
+        margin-left: 0.875rem;
+        max-width: 28rem; } }
+      .token-list .views .detail-view button {
+        padding-top: 0.5rem;
+        padding-bottom: 0.5rem;
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+        color: #000;
+        font-size: 0.875rem;
+        line-height: 1.25rem;
+        font-weight: 800;
+        line-height: 1.25rem;
+        width: 50%;
+        border-radius: 50px;
+        @media (min-width: 640px) {
+          padding-left: 1.5rem;
+          padding-right: 1.5rem;
+          width: 150px; }
+        @media (min-width: 768px) {
+          padding-left: 1.5rem;
+          padding-right: 1.5rem;
+          width: 150px; } }
+      .token-list .views .detail-view .listView-button {
+        opacity: 1;
+        background-color: rgba(7, 106, 224,0);
+        color: rgb(71, 85, 105); }
+      .token-list .views .detail-view .listView-button.show {
+        opacity: 1;
+        background-color: rgb(7, 106, 224);
+        color: white; }
+.red-packet {
+  visibility: visible;
+  height: auto;
+  display: block;
+  padding: 0px; }
+.red-packet .mode-and-share {
+display: flex;
+gap: 16px;
+margin: 16px; }
+.red-packet .mode-and-share .game-mode {
+  display: block;
+  flex: 1 1 0%;
+  p {
+    margin: 0px;
+    font-weight: 400;
+    line-height: 1.5;
+    font-size: 14px; } }
+.mode-dropdown {
+  flex: 1 1 0%;
+  font-weight: 400;
+  line-height: 1.4375em;
+  color: rgb(7, 16, 27);
+  box-sizing: border-box;
+  position: relative;
+  cursor: text;
+  display: inline-flex;
+  -webkit-box-align: center;
+  align-items: center;
+  width: 100%;
+  border-radius: 8px;
+  background-color: rgb(242, 246, 250);
+  font-size: 14px;
+  overflow: unset !important; }
+.mode-text {
+  padding-right: 32px;
+  padding: 11px 12px;
+  height: 18px;
+  min-height: unset;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  appearance: none;
+  user-select: none;
+  border-radius: 15px;
+  cursor: pointer;
+  // padding: 4px 0px 5px;
+  border: 0px;
+  box-sizing: content-box;
+  background: none;
+  margin: 0px;
+  -webkit-tap-highlight-color: transparent;
+  display: block;
+  min-width: 0px;
+  width: 100%; }
+.mode-input {
+  bottom: 0px;
+  left: 0px;
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  width: 100%;
+  box-sizing: border-box; }
+.mode-drop-tri {
+  font-size: 0px;
+  display: inline-block;
+  background-repeat: no-repeat;
+  background-position: center center;
+  flex-shrink: 0;
+  aspect-ratio: 1 / 1;
+  position: absolute;
+  right: 7px;
+  pointer-events: none;
+  width: 22.5px;
+  height: 22.5px;
+  top: calc(50% - 11.25px);
+  color: rgb(118, 127, 141);
+  font-weight: 400;
+  line-height: 1.4375em;
+  cursor: text; }
+.red-packet .mode-and-share .share-number {
+  display: block;
+  flex: 1 1 0%; 
+  p {
+    margin: 0px;
+    font-weight: 400;
+    line-height: 1.5;
+    font-size: 14px; } }
+.shares-input {
+  padding: 11px 12px;
+  height: 18px;
+  border: 0px;
+  box-sizing: content-box;
+  background: none;
+  margin: 0px;
+  -webkit-tap-highlight-color: transparent;
+  display: block;
+  min-width: 0px;
+  width: 100%; }
 </style>
 
 <template>
   <layout :active="1">
     <div class="content-body">
       <div class="container">
-        <h1 style="margin-bottom: 1rem;">Red Pocket</h1>
-        <div class="wallet-bar">
-          <button v-if='account==""' class="connect-wallet-button" @click="connectWallet">
-            <svg style="margin-right: 10px;" width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path
-                d="M16 2.50025V3.51125C16.5304 3.51125 17.0391 3.72196 17.4142 4.09703C17.7893 4.47211 18 4.98081 18 5.51125V15.5112C18 16.0416 17.7893 16.5504 17.4142 16.9254C17.0391 17.3005 16.5304 17.5112 16 17.5112H2C1.46957 17.5112 0.96086 17.3005 0.58579 16.9254C0.21071 16.5504 0 16.0416 0 15.5112V5.51125C0 4.46625 0.835 3.51825 1.813 3.23925L12.813 0.0962511C13.1851 -0.0100989 13.5768 -0.0286089 13.9573 0.0421711C14.3377 0.112951 14.6966 0.271091 15.0055 0.504141C15.3145 0.737191 15.5651 1.03878 15.7377 1.38516C15.9102 1.73154 16 2.11326 16 2.50025ZM12.5 9.01123C12.1022 9.01123 11.7206 9.16933 11.4393 9.45063C11.158 9.73193 11 10.1134 11 10.5112C11 10.909 11.158 11.2906 11.4393 11.5719C11.7206 11.8532 12.1022 12.0112 12.5 12.0112C12.8978 12.0112 13.2794 11.8532 13.5607 11.5719C13.842 11.2906 14 10.909 14 10.5112C14 10.1134 13.842 9.73193 13.5607 9.45063C13.2794 9.16933 12.8978 9.01123 12.5 9.01123ZM14 2.50025C14.0001 2.42966 13.9852 2.35986 13.9563 2.29544C13.9274 2.23102 13.8853 2.17345 13.8326 2.1265C13.7798 2.07955 13.7178 2.04429 13.6505 2.02305C13.5832 2.00181 13.5121 1.99506 13.442 2.00325L13.362 2.01925L8.14 3.51125H14V2.50025Z"
-                fill="white" />
-            </svg>
-            Connect Wallet
-          </button>
-          <button v-if='account!=""' class="connect-wallet-button" @click="disconnect">
-            <svg style="margin-right: 10px;" width="18" height="18" viewBox="0 0 18 18" fill="none"
-              xmlns="http://www.w3.org/2000/svg">
-              <path
-                d="M16 2.50025V3.51125C16.5304 3.51125 17.0391 3.72196 17.4142 4.09703C17.7893 4.47211 18 4.98081 18 5.51125V15.5112C18 16.0416 17.7893 16.5504 17.4142 16.9254C17.0391 17.3005 16.5304 17.5112 16 17.5112H2C1.46957 17.5112 0.96086 17.3005 0.58579 16.9254C0.21071 16.5504 0 16.0416 0 15.5112V5.51125C0 4.46625 0.835 3.51825 1.813 3.23925L12.813 0.0962511C13.1851 -0.0100989 13.5768 -0.0286089 13.9573 0.0421711C14.3377 0.112951 14.6966 0.271091 15.0055 0.504141C15.3145 0.737191 15.5651 1.03878 15.7377 1.38516C15.9102 1.73154 16 2.11326 16 2.50025ZM12.5 9.01123C12.1022 9.01123 11.7206 9.16933 11.4393 9.45063C11.158 9.73193 11 10.1134 11 10.5112C11 10.909 11.158 11.2906 11.4393 11.5719C11.7206 11.8532 12.1022 12.0112 12.5 12.0112C12.8978 12.0112 13.2794 11.8532 13.5607 11.5719C13.842 11.2906 14 10.909 14 10.5112C14 10.1134 13.842 9.73193 13.5607 9.45063C13.2794 9.16933 12.8978 9.01123 12.5 9.01123ZM14 2.50025C14.0001 2.42966 13.9852 2.35986 13.9563 2.29544C13.9274 2.23102 13.8853 2.17345 13.8326 2.1265C13.7798 2.07955 13.7178 2.04429 13.6505 2.02305C13.5832 2.00181 13.5121 1.99506 13.442 2.00325L13.362 2.01925L8.14 3.51125H14V2.50025Z"
-                fill="white" />
-            </svg>
-            Disconnect
-          </button>
-          <p style="margin-bottom: 0rem;">Account: <b>{{ truncateAddress(account) }}</b></p>
-          <p style="margin-bottom: 0rem;">Network ID: <b>{{ chainId>0 ? chainId : "No Network" }}</b></p>
-          <div class="connection-status">
-            <p>Connection Status:</p>
-            <svg v-if='account!=""' class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
-              <circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none" />
-              <path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8" />
-            </svg>
-            <svg v-if='account==""' class="crossmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
-              <circle class="crossmark__circle" cx="26" cy="26" r="25" fill="none" />
-              <path class="cross__path cross__path--right" fill="none" d="M16,16 l20,20" />
-              <path class="cross__path cross__path--left" fill="none" d="M16,36 l20,-20" />
-            </svg>
+        <h1 style="margin-bottom: 1rem;">Red Packet</h1>
+        <div class="row">
+          <div className="row invoice-card-row">
+            <div class="col-xxl-6">
+              <div class="card">
+                <div class="card-body">
+                  <div class="token-list">
+                    <div class="title">
+                      <div class="title-col">
+                        <div class="content">
+                          <div class="text">Put Lucky in the packet</div>
+                          <svg width="4" height="16" viewBox="0 0 4 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                              d="M2 9C2.55228 9 3 8.55228 3 8C3 7.44772 2.55228 7 2 7C1.44772 7 1 7.44772 1 8C1 8.55228 1.44772 9 2 9Z"
+                              fill="black" stroke="black" stroke-linecap="round" stroke-linejoin="round" />
+                            <path
+                              d="M2 3C2.55228 3 3 2.55228 3 2C3 1.44772 2.55228 1 2 1C1.44772 1 1 1.44772 1 2C1 2.55228 1.44772 3 2 3Z"
+                              fill="black" stroke="black" stroke-linecap="round" stroke-linejoin="round" />
+                            <path
+                              d="M2 15C2.55228 15 3 14.5523 3 14C3 13.4477 2.55228 13 2 13C1.44772 13 1 13.4477 1 14C1 14.5523 1.44772 15 2 15Z"
+                              fill="black" stroke="black" stroke-linecap="round" stroke-linejoin="round" />
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="views">
+                      <div class="detail-view">
+                        <button class="listView-button" @click="sendLuck = true; luckHistory = false"
+                          :class="sendLuck && 'show'">Send Luck</button>
+                        <button class="listView-button" @click="luckHistory = true; sendLuck = false"
+                          :class="luckHistory && 'show'">Luck History</button>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="wallet-bar">
+                    <p v-if='account!=""' style="margin-bottom: 0rem; margin-left: 0.875rem;">
+                      <img style="width: 25px; height: 25px; margin-right: 0.5rem;" v-bind:src="walletIcon">
+                      <b>{{ wallet }}</b>
+                    </p>
+                    <p v-if='account==""' style="margin-bottom: 0rem; margin-left: 0.875rem;">Wallet: <b>No wallet</b></p>
+                    <p style="margin-bottom: 0rem; margin-left: 0.875rem;">Account: <b>{{ truncateAddress(account) }}</b></p>
+                    <p style="margin-bottom: 0rem;">Network ID: <b>{{ chainId>0 ? chainId : "No Network" }}</b></p>
+                    <div class="connection-status">
+                      <p>Connection Status:</p>
+                      <svg v-if='account!=""' class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+                        <circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none" />
+                        <path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8" />
+                      </svg>
+                      <svg v-if='account==""' class="crossmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+                        <circle class="crossmark__circle" cx="26" cy="26" r="25" fill="none" />
+                        <path class="cross__path cross__path--right" fill="none" d="M16,16 l20,20" />
+                        <path class="cross__path cross__path--left" fill="none" d="M16,36 l20,-20" />
+                      </svg>
+                    </div>
+                    <button v-if='account==""' class="connect-wallet-button" @click="connectWallet">
+                      <svg style="margin-right: 10px;" width="18" height="18" viewBox="0 0 18 18" fill="none"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <path
+                          d="M16 2.50025V3.51125C16.5304 3.51125 17.0391 3.72196 17.4142 4.09703C17.7893 4.47211 18 4.98081 18 5.51125V15.5112C18 16.0416 17.7893 16.5504 17.4142 16.9254C17.0391 17.3005 16.5304 17.5112 16 17.5112H2C1.46957 17.5112 0.96086 17.3005 0.58579 16.9254C0.21071 16.5504 0 16.0416 0 15.5112V5.51125C0 4.46625 0.835 3.51825 1.813 3.23925L12.813 0.0962511C13.1851 -0.0100989 13.5768 -0.0286089 13.9573 0.0421711C14.3377 0.112951 14.6966 0.271091 15.0055 0.504141C15.3145 0.737191 15.5651 1.03878 15.7377 1.38516C15.9102 1.73154 16 2.11326 16 2.50025ZM12.5 9.01123C12.1022 9.01123 11.7206 9.16933 11.4393 9.45063C11.158 9.73193 11 10.1134 11 10.5112C11 10.909 11.158 11.2906 11.4393 11.5719C11.7206 11.8532 12.1022 12.0112 12.5 12.0112C12.8978 12.0112 13.2794 11.8532 13.5607 11.5719C13.842 11.2906 14 10.909 14 10.5112C14 10.1134 13.842 9.73193 13.5607 9.45063C13.2794 9.16933 12.8978 9.01123 12.5 9.01123ZM14 2.50025C14.0001 2.42966 13.9852 2.35986 13.9563 2.29544C13.9274 2.23102 13.8853 2.17345 13.8326 2.1265C13.7798 2.07955 13.7178 2.04429 13.6505 2.02305C13.5832 2.00181 13.5121 1.99506 13.442 2.00325L13.362 2.01925L8.14 3.51125H14V2.50025Z"
+                          fill="white" />
+                      </svg>
+                      Connect Wallet
+                    </button>
+                    <button v-if='account!=""' class="connect-wallet-button" @click="disconnect">
+                      <svg style="margin-right: 10px;" width="18" height="18" viewBox="0 0 18 18" fill="none"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <path
+                          d="M16 2.50025V3.51125C16.5304 3.51125 17.0391 3.72196 17.4142 4.09703C17.7893 4.47211 18 4.98081 18 5.51125V15.5112C18 16.0416 17.7893 16.5504 17.4142 16.9254C17.0391 17.3005 16.5304 17.5112 16 17.5112H2C1.46957 17.5112 0.96086 17.3005 0.58579 16.9254C0.21071 16.5504 0 16.0416 0 15.5112V5.51125C0 4.46625 0.835 3.51825 1.813 3.23925L12.813 0.0962511C13.1851 -0.0100989 13.5768 -0.0286089 13.9573 0.0421711C14.3377 0.112951 14.6966 0.271091 15.0055 0.504141C15.3145 0.737191 15.5651 1.03878 15.7377 1.38516C15.9102 1.73154 16 2.11326 16 2.50025ZM12.5 9.01123C12.1022 9.01123 11.7206 9.16933 11.4393 9.45063C11.158 9.73193 11 10.1134 11 10.5112C11 10.909 11.158 11.2906 11.4393 11.5719C11.7206 11.8532 12.1022 12.0112 12.5 12.0112C12.8978 12.0112 13.2794 11.8532 13.5607 11.5719C13.842 11.2906 14 10.909 14 10.5112C14 10.1134 13.842 9.73193 13.5607 9.45063C13.2794 9.16933 12.8978 9.01123 12.5 9.01123ZM14 2.50025C14.0001 2.42966 13.9852 2.35986 13.9563 2.29544C13.9274 2.23102 13.8853 2.17345 13.8326 2.1265C13.7798 2.07955 13.7178 2.04429 13.6505 2.02305C13.5832 2.00181 13.5121 1.99506 13.442 2.00325L13.362 2.01925L8.14 3.51125H14V2.50025Z"
+                          fill="white" />
+                      </svg>
+                      Disconnect
+                    </button>
+                  </div>
+                  <div class="red-packet">
+                    <div class="mode-and-share">
+                      <div class="game-mode">
+                        <p>Split Mode</p>
+                        <div class="mode-dropdown">
+                          <div class="mode-text">Random</div>
+                          <input class="mode-input">
+                          <span class="mode-drop-tri">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                              <path fill="currentColor"
+                                d="m11.434 15.434-5.068-5.068A.8.8 0 0 1 6.93 9h10.14a.8.8 0 0 1 .565 1.366l-5.068 5.068a.8.8 0 0 1-1.132 0Z">
+                              </path>
+                            </svg>
+                          </span>
+                        </div>
+                      </div>
+                      <div class="share-number">
+                        <p>Shares</p>
+                        <div class="mode-dropdown">
+                          <input class="shares-input" autocomplete="off" placeholder="0" type="text" autocorrect="off" inputmode="decimal" pattern="^[0-9]$" spellcheck="false">
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -160,11 +440,8 @@ import { providerOptions } from "../services/web3/providerOptions";
 import { CheckCircleIcon, WarningIcon } from "@chakra-ui/icons";
 import { truncateAddress } from "@/services/web3/account";
 // import { configureChains, createClient } from "@wagmi/core";
-
 // import { arbitrum, mainnet, polygon } from "@wagmi/core/chains";
-
 // import { Web3Modal } from "@web3modal/html";
-
 // import {
 //   EthereumClient,
 //   modalConnectors,
@@ -181,6 +458,10 @@ const chain = "GOERLI";
 const chainId = ref<number>(-1);
 const account = ref<string>("");
 const network = ref<any>();
+const sendLuck = ref<boolean>(false);
+const luckHistory = ref<boolean>(true);
+const wallet = ref<string>("");
+const walletIcon = ref<string>("");
 // TODO: Implement Web3Model V2
 
 const web3Modal = new Web3Model({
@@ -204,6 +485,18 @@ const connectWallet = async () => {
     console.log("Network: ", network.value);
     console.log("Account: ", account.value);
     console.log(library);
+    if (library.connection.url == "metamask") {
+      wallet.value = "metamask";
+      walletIcon.value = "https://i.postimg.cc/7PMD1BN4/metamask-icon.png";
+    } else if (library.connection.url == "eip-1193:") {
+      wallet.value = library.provider.wc._peerMeta.name;
+      if (library.provider.wc._peerMeta.icons != null) {
+        walletIcon.value = library.provider.wc._peerMeta.icons[0];
+      } else {
+        walletIcon.value = "https://i.postimg.cc/j29hn62F/9035092-wallet-icon.png";
+      }
+    }
+    store.connectOwallet(account.value, network.value, chainId.value);
   } catch (error) {
     console.log(error);
   }
@@ -214,6 +507,7 @@ const refreshState = () => {
   chainId.value = -1;
   network.value = "";
   console.log("Logged out!")
+  store.disconnectOwallet();
 };
 
 const disconnect = async () => {

@@ -330,7 +330,6 @@ margin: 16px; }
   line-height: 1.4375em;
   color: rgb(7, 16, 27);
   box-sizing: border-box;
-  position: relative;
   cursor: text;
   display: inline-flex;
   -webkit-box-align: center;
@@ -339,15 +338,17 @@ margin: 16px; }
   border-radius: 8px;
   background-color: rgb(242, 246, 250);
   font-size: 14px;
-  overflow: unset !important; 
-  p {
-    font-size: 13px;
-    line-height: 18px;
-    color: rgb(118, 127, 141);
-    white-space: nowrap;
-    position: absolute;
-    top: 10px;
-    left: 12px; } }
+  overflow: unset !important; }
+.total-amount-text {
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 18px;
+  color: rgb(118, 127, 141);
+  white-space: nowrap;
+  margin-bottom: 0rem;
+  position: absolute;
+  top: 10px;
+  left: 12px; }
 .red-packet .total-amount .box .amount-input {
   flex: 2 1 0%;
   font-size: 18px;
@@ -365,6 +366,12 @@ margin: 16px; }
   display: block;
   min-width: 0px;
   width: 100%; }
+.red-packet .total-amount .box .amount-input:focus {
+  outline: none;
+  .red-packet .total-amount .box {
+    outline: rgba(28, 104, 243, 0.2) solid 2px;
+    border: 1px solid rgba(28, 104, 243, 0.5);
+    background-color: #fff; } }
 .red-packet .total-amount .box .input-info-show {
   display: flex;
   flex: 1 1 0%;
@@ -482,7 +489,58 @@ margin: 16px; }
         box-sizing: border-box;
         user-select: none;
         -webkit-tap-highlight-color: transparent;
-      } } }
+        .token-icon {
+          margin-left: 4px;
+          font-size: 18px;
+          margin-top: 0px;
+          margin-bottom: 0px;
+          border-radius: 50%;
+          background-size: cover;
+          width: 20px;
+          height: 20px;
+          color: rgb(7, 16, 27) !important;
+          margin-right: 0px !important;
+          position: relative;
+          display: flex;
+          -webkit-box-align: center;
+          align-items: center;
+          -webkit-box-pack: center;
+          justify-content: center;
+          flex-shrink: 0;
+          line-height: 1;
+          overflow: hidden;
+          user-select: none;
+          background-color: rgb(255, 255, 255);
+          font-weight: 700; }
+        .token-name {
+          overflow: hidden;
+          text-overflow: ellipsis;
+          padding-left: 8px;
+          padding-right: 8px;
+          white-space: nowrap;
+          cursor: pointer;
+          font-size: 14px;
+          line-height: 18px;
+          font-weight: 700;
+          color: rgb(7, 16, 27);
+          user-select: none;
+          -webkit-tap-highlight-color: transparent; }
+        .token-dropdown {
+          -webkit-tap-highlight-color: transparent;
+          font-size: 16px;
+          cursor: pointer;
+          margin: 0px 4px 0px -4px;
+          color: rgb(118, 127, 141) !important;
+          display: inline-block;
+          background-repeat: no-repeat;
+          background-position: center center;
+          flex-shrink: 0;
+          aspect-ratio: 1 / 1;
+          height: 24px;
+          width: 24px;
+          line-height: 18px;
+          font-weight: 700;
+          user-select: none; } } } }
 </style>
 
 <template>
@@ -531,6 +589,7 @@ margin: 16px; }
                     <p v-if='account==""' style="margin-bottom: 0rem; margin-left: 0.875rem;">Wallet: <b>No wallet</b></p>
                     <p style="margin-bottom: 0rem; margin-left: 0.875rem;">Account: <b>{{ truncateAddress(account) }}</b></p>
                     <p style="margin-bottom: 0rem;">Network ID: <b>{{ chainId>0 ? chainId : "No Network" }}</b></p>
+                    <p style="margin-bottom: 0rem;">Network ID: <b>{{ chainId>0 ? chainId : "No Network" }}</b></p>
                     <div class="connection-status">
                       <p>Connection Status:</p>
                       <svg v-if='account!=""' class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
@@ -563,6 +622,49 @@ margin: 16px; }
                     </button>
                   </div>
                   <div class="red-packet">
+                    <div class="total-amount">
+                      <div class="box">
+                        <p class="total-amount-text">Total Amount</p>
+                        <input class="amount-input" autocomplete="off" placeholder="0.0" required="true" type="text" autocorrect="off"
+                          title="Token Amount" inputmode="decimal" min="0" minlength="1" maxlength="79" pattern="^[0-9]*[.,]?[0-9]*$"
+                          spellcheck="false" value="0">
+                        <div class="input-info-show">
+                          <p class="available-balance">
+                            Available Balance:&nbsp;
+                            <span>{{ accountBalance.toFixed(2) }}</span>
+                          </p>
+                          <div class="total-choose-token">
+                            <div class="max-amount-button">
+                              <span class="button-text">MAX</span>
+                              <span class="button-outline"></span>
+                            </div>
+                            <div class="token-select">
+                              <div class="token-icon">
+                                <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                  <path
+                                    d="M16 32C24.8366 32 32 24.8366 32 16C32 7.16344 24.8366 0 16 0C7.16344 0 0 7.16344 0 16C0 24.8366 7.16344 32 16 32Z"
+                                    fill="#627EEA" />
+                                  <path d="M16.1069 7L16 7.39592V18.8837L16.1069 19L21 15.848L16.1069 7Z" fill="#C0CBF6" />
+                                  <path d="M16 7L11 15.848L16 19V13.4241V7Z" fill="white" />
+                                  <path d="M16.0608 20.354L16 20.4392V24.7958L16.0608 25L21 17L16.0608 20.354Z" fill="#C0CBF6" />
+                                  <path d="M16 25V20.354L11 17L16 25Z" fill="white" />
+                                  <path d="M16 19L21 16.1735L16 14V19Z" fill="#8197EE" />
+                                  <path d="M11 16.1735L16 19V14L11 16.1735Z" fill="#C0CBF6" />
+                                </svg>
+                              </div>
+                              <span class="token-name">ETH</span>
+                              <span class="token-dropdown">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                                  <path fill="currentColor"
+                                    d="m11.434 15.434-5.068-5.068A.8.8 0 0 1 6.93 9h10.14a.8.8 0 0 1 .565 1.366l-5.068 5.068a.8.8 0 0 1-1.132 0Z">
+                                  </path>
+                                </svg>
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                     <div class="mode-and-share">
                       <div class="game-mode">
                         <p>Split Mode</p>
@@ -582,25 +684,6 @@ margin: 16px; }
                         <p>Shares</p>
                         <div class="mode-dropdown">
                           <input class="shares-input" autocomplete="off" placeholder="0" type="text" autocorrect="off" inputmode="decimal" pattern="^[0-9]$" spellcheck="false">
-                        </div>
-                      </div>
-                    </div>
-                    <div class="total-amount">
-                      <div class="box">
-                        <p>Total Amount</p>
-                        <input class="amount-input" autocomplete="off" placeholder="0.0" required="true" type="text" autocorrect="off" title="Token Amount" inputmode="decimal" min="0" minlength="1" maxlength="79" pattern="^[0-9]*[.,]?[0-9]*$" spellcheck="false" value="0">
-                        <div class="input-info-show">
-                          <p class="available-balance">
-                            Available Balance
-                            <span>xxxxxx</span>
-                          </p>
-                          <div class="total-choose-token">
-                            <div class="max-amount-button">
-                              <span class="button-text">MAX</span>
-                              <span class="button-outline"></span>
-                            </div>
-                            <div class="token-select"></div>
-                          </div>
                         </div>
                       </div>
                     </div>
@@ -643,10 +726,12 @@ const chain = "GOERLI";
 const chainId = ref<number>(-1);
 const account = ref<string>("");
 const network = ref<any>();
-const sendLuck = ref<boolean>(false);
-const luckHistory = ref<boolean>(true);
+const sendLuck = ref<boolean>(true);
+const luckHistory = ref<boolean>(false);
 const wallet = ref<string>("");
 const walletIcon = ref<string>("");
+const accountBalance = ref<number>(0);
+const mode = ref<number>(0); // 0 for random, 1 for average
 // TODO: Implement Web3Model V2
 
 const web3Modal = new Web3Model({
@@ -682,6 +767,11 @@ const connectWallet = async () => {
       }
     }
     store.connectOwallet(account.value, network.value, chainId.value);
+    const etherProvider = ethers.getDefaultProvider(network.value);
+    etherProvider.getBalance(account.value).then((balance) => {
+      // convert a currency unit from wei to ether
+      accountBalance.value = Number(ethers.utils.formatEther(balance));
+    })
   } catch (error) {
     console.log(error);
   }

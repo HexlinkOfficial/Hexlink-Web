@@ -311,7 +311,7 @@
                             <div class="user-info">
                               <span style="margin-bottom: 0;" class="smart-contract-address">
                                 <h5 @click="doCopy">
-                                  {{ externalWallet }}
+                                  {{  }}
                                 </h5>
                               </span>
                               <!-- <span style="padding-left: 9px;">$200.45</span> -->
@@ -364,13 +364,13 @@ export default {
     const Owallet = store.Owallet!;
     console.log(user)
     console.log("External Wallet: ", Owallet);
-    const externalWallet = computed(() => {
-      if (Owallet.Oaccount !== null) {
-        return Owallet.Oaccount;
-      } else {
-        return "";
-      }
-    })
+    // const externalWallet = computed(() => {
+    //   if (Owallet.Oaccount !== null) {
+    //     return Owallet.Oaccount;
+    //   } else {
+    //     return "";
+    //   }
+    // })
     const actualAddress = user.walletAddress;
     const addressTextLong = computed(() => {
       if (user.walletAddress) {

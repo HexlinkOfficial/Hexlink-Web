@@ -44,3 +44,10 @@ exports.sendETH = sendETH;
 exports.executeTx = executeTx;
 exports.estimateERC20Transfer = estimateERC20Transfer;
 exports.estimateETHTransfer = estimateETHTransfer;
+
+import {
+  isFollowing,
+  hasRetweeted} from "./twitter/twitter";
+
+exports.isFollowing = isFollowing;
+exports.hasRetweeted = hasRetweeted;

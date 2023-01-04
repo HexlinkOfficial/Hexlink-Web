@@ -26,6 +26,7 @@ const oauth = new OAuth.OAuth(
 );
 
 /**
+ * In-Progress
  * The function will take the user names of source user and target user,
  * and will check whether the source is a validate follower of the target.
  */
@@ -36,8 +37,6 @@ export const isFollowing = functions.https.onCall(
         return {code: 401, message: "Unauthorized Call"};
       }
 
-      // check in the table
-      // if not call API
       return await getFriendshipsFromTwitter(data.source, data.target);
     });
 

@@ -46,7 +46,7 @@ export async function googleSocialLogin() {
     try {
         const result = await signInWithPopup(auth, provider)
         const idToken = await getIdTokenAndSetClaimsIfNecessary(result.user)
-        const walletAddress = await accountAddress(result.user.email);
+        const walletAddress = await accountAddress("mailto", result.user.email);
         const store = useAuthStore();
         store.signIn(result.user, idToken, walletAddress);
     } catch (error: any) {
@@ -61,7 +61,11 @@ export async function twitterSocialLogin() {
     try {
         const result = await signInWithPopup(auth, provider)
         const idToken = await getIdTokenAndSetClaimsIfNecessary(result.user)
-        const walletAddress = await accountAddress(result.user.providerId);
+        console.log(result.user);
+        const walletAddress = await accountAddress(
+            "twitter.com",
+            result.user.providerData[0].uid
+        );
         const store = useAuthStore();
         store.signIn(result.user, idToken, walletAddress);
     } catch (error) {
@@ -74,7 +78,7 @@ export async function githubSocialLogin() {
     try {
         const result = await signInWithPopup(auth, provider)
         const idToken = await getIdTokenAndSetClaimsIfNecessary(result.user)
-        const walletAddress = await accountAddress(result.user.providerId);
+        const walletAddress = await accountAddress("github.com", result.user.providerId);
         const store = useAuthStore();
         store.signIn(result.user, idToken, walletAddress);
     } catch (error) {
@@ -87,7 +91,7 @@ export async function facebookSocialLogin() {
     try {
         const result = await signInWithPopup(auth, provider)
         const idToken = await getIdTokenAndSetClaimsIfNecessary(result.user)
-        const walletAddress = await accountAddress(result.user.providerId);
+        const walletAddress = await accountAddress("facebook.com", result.user.providerId);
         const store = useAuthStore();
         store.signIn(result.user, idToken, walletAddress);
     } catch (error) {

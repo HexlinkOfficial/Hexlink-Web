@@ -366,12 +366,6 @@ margin: 16px; }
   display: block;
   min-width: 0px;
   width: 100%; }
-.red-packet .total-amount .box .amount-input:focus {
-  outline: none;
-  .red-packet .total-amount .box {
-    outline: rgba(28, 104, 243, 0.2) solid 2px;
-    border: 1px solid rgba(28, 104, 243, 0.5);
-    background-color: #fff; } }
 .red-packet .total-amount .box .input-info-show {
   display: flex;
   flex: 1 1 0%;
@@ -541,6 +535,8 @@ margin: 16px; }
           line-height: 18px;
           font-weight: 700;
           user-select: none; } } } }
+input:hover {
+  outline: none; }
 </style>
 
 <template>
@@ -557,7 +553,7 @@ margin: 16px; }
                     <div class="title">
                       <div class="title-col">
                         <div class="content">
-                          <div class="text">Put Lucky in the packet</div>
+                          <div class="text">Put Luck in the packet</div>
                           <svg width="4" height="16" viewBox="0 0 4 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path
                               d="M2 9C2.55228 9 3 8.55228 3 8C3 7.44772 2.55228 7 2 7C1.44772 7 1 7.44772 1 8C1 8.55228 1.44772 9 2 9Z"
@@ -589,7 +585,7 @@ margin: 16px; }
                     <p v-if='account==""' style="margin-bottom: 0rem; margin-left: 0.875rem;">Wallet: <b>No wallet</b></p>
                     <p style="margin-bottom: 0rem; margin-left: 0.875rem;">Account: <b>{{ truncateAddress(account) }}</b></p>
                     <p style="margin-bottom: 0rem;">Network ID: <b>{{ chainId>0 ? chainId : "No Network" }}</b></p>
-                    <p style="margin-bottom: 0rem;">Network ID: <b>{{ chainId>0 ? chainId : "No Network" }}</b></p>
+                    <p style="margin-bottom: 0rem;">Network: <b>{{ chainId > 0 ? networkName : "No Network" }}</b></p>
                     <div class="connection-status">
                       <p>Connection Status:</p>
                       <svg v-if='account!=""' class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
@@ -622,6 +618,29 @@ margin: 16px; }
                     </button>
                   </div>
                   <div class="red-packet">
+                    <div class="mode-and-share">
+                      <div class="game-mode">
+                        <p>Split Mode</p>
+                        <div class="mode-dropdown">
+                          <div class="mode-text">Random</div>
+                          <input class="mode-input">
+                          <span class="mode-drop-tri">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                              <path fill="currentColor"
+                                d="m11.434 15.434-5.068-5.068A.8.8 0 0 1 6.93 9h10.14a.8.8 0 0 1 .565 1.366l-5.068 5.068a.8.8 0 0 1-1.132 0Z">
+                              </path>
+                            </svg>
+                          </span>
+                        </div>
+                      </div>
+                      <div class="share-number">
+                        <p>Quantity</p>
+                        <div class="mode-dropdown">
+                          <input class="shares-input" autocomplete="off" placeholder="0" type="text" autocorrect="off" inputmode="decimal"
+                            pattern="^[0-9]$" spellcheck="false">
+                        </div>
+                      </div>
+                    </div>
                     <div class="total-amount">
                       <div class="box">
                         <p class="total-amount-text">Total Amount</p>
@@ -665,28 +684,6 @@ margin: 16px; }
                         </div>
                       </div>
                     </div>
-                    <div class="mode-and-share">
-                      <div class="game-mode">
-                        <p>Split Mode</p>
-                        <div class="mode-dropdown">
-                          <div class="mode-text">Random</div>
-                          <input class="mode-input">
-                          <span class="mode-drop-tri">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                              <path fill="currentColor"
-                                d="m11.434 15.434-5.068-5.068A.8.8 0 0 1 6.93 9h10.14a.8.8 0 0 1 .565 1.366l-5.068 5.068a.8.8 0 0 1-1.132 0Z">
-                              </path>
-                            </svg>
-                          </span>
-                        </div>
-                      </div>
-                      <div class="share-number">
-                        <p>Shares</p>
-                        <div class="mode-dropdown">
-                          <input class="shares-input" autocomplete="off" placeholder="0" type="text" autocorrect="off" inputmode="decimal" pattern="^[0-9]$" spellcheck="false">
-                        </div>
-                      </div>
-                    </div>
                   </div>
                 </div>
               </div>
@@ -726,6 +723,7 @@ const chain = "GOERLI";
 const chainId = ref<number>(-1);
 const account = ref<string>("");
 const network = ref<any>();
+const networkName = ref<string>("");
 const sendLuck = ref<boolean>(true);
 const luckHistory = ref<boolean>(false);
 const wallet = ref<string>("");
@@ -743,7 +741,6 @@ const connectWallet = async () => {
   // check if metamask is installed
   if (typeof window.ethereum == 'undefined') {
     console.log('MetaMask is not installed!');
-    return;
   }
   try {
     const provider = await web3Modal.connect();
@@ -752,7 +749,8 @@ const connectWallet = async () => {
     network.value = await library.getNetwork();
     if (accounts) account.value = accounts[0];
     chainId.value = network.value.chainId;
-    console.log("Network: ", network.value);
+    networkName.value = network.value.name;
+    console.log("Network: ", network.value.name);
     console.log("Account: ", account.value);
     console.log(library);
     if (library.connection.url == "metamask") {

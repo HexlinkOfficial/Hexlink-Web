@@ -1,9 +1,7 @@
-export const ADMIN = "0x3E4daF49356B097E73D042d565eBC1e2Bb017d42";
+export const ADMIN = "0xbad6a7948a1d3031ee7236d0180b6271fa569148";
 
 export const ADMIN_ABI = [
-  "event SetAccount(bytes32 indexed, address indexed)",
   "function addressOfName(bytes32) external view returns(address)",
-  "function deploy(bytes32) external",
 ];
 
 export const ACCOUNT_ABI = [

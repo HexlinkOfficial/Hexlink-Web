@@ -22,16 +22,9 @@ const functions = getFunctions();
 
 const config = {
     apiKey: import.meta.env.VITE_GOERLI_ALCHEMY_KEY,
-    network: getNetwork(),
+    network: Network.ETH_GOERLI,
 };
 const alchemy = new Alchemy(config);
-
-function getNetwork() : Network {
-    if (import.meta.env.VITE_HARDHAT_NETWORK == 'goerli') {
-        return Network.ETH_GOERLI; 
-    }
-    return Network.ETH_MAINNET;
-}
 
 export interface TokenMetadata {
     symbol: string;
@@ -190,6 +183,7 @@ export async function loadAll(
     const ethBalance = await getETHBalance(wallet);
     const option: TokenBalancesOptionsErc20 = {type : TokenBalanceType.ERC20};
     const erc20Balances = await alchemy.core.getTokenBalances(wallet, option);
+
     erc20Balances.tokenBalances.concat([ethBalance as TokenBalance]).forEach(balance => {
         if (BigNumber(balance.tokenBalance || 0).gt(0)) {
             const address = balance.contractAddress.toLowerCase();
@@ -210,6 +204,7 @@ export async function loadAll(
     tokensToSetPreference.forEach((p, i) => {
         tokens[p.token_address].preference = {id: inserted[i], display: p.display};
     });
+    console.log(tokens);
     return tokens;
 }
 

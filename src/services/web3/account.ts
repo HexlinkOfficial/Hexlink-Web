@@ -13,18 +13,20 @@ export interface Transaction {
     state: "Executing" | "Success" | "Error",
 }
 
-const genNameHash = function(email: string) {
-    return ethers.utils.keccak256(ethers.utils.toUtf8Bytes(`mailto:${email}`));
+const genNameHash = function(prefix: string, name: string) {
+    return ethers.utils.keccak256(ethers.utils.toUtf8Bytes(`${prefix}:${name}`));
 };
-  
-export async function accountAddress(email: string | null | undefined) {
-    if (!email) return "";
+
+export async function accountAddress(prefix: string, name: string | null | undefined) {
+    if (!name) return "";
     const admin = new ethers.Contract(
         config.ADMIN,
         config.ADMIN_ABI,
         getProvider()
     );
-    return await admin.addressOfName(genNameHash(email));
+    console.log(prefix, name);
+    console.log(genNameHash(prefix, name));
+    return await admin.addressOfName(genNameHash(prefix, name));
 };
 
 export async function getBalance(email: string | null | undefined) : Promise<number> {

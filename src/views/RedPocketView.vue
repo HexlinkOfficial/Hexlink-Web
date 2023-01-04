@@ -314,6 +314,22 @@ margin: 16px; }
   font-weight: 400;
   line-height: 1.4375em;
   cursor: text; }
+.share-input-div {
+  flex: 1 1 0%;
+  font-weight: 400;
+  line-height: 1.4375em;
+  color: rgb(7, 16, 27);
+  box-sizing: border-box;
+  position: relative;
+  cursor: text;
+  display: inline-flex;
+  -webkit-box-align: center;
+  align-items: center;
+  width: 100%;
+  border-radius: 8px;
+  background-color: rgb(242, 246, 250);
+  font-size: 14px;
+  overflow: unset !important; }
 .red-packet .mode-and-share .share-number {
   display: block;
   flex: 1 1 0%; 
@@ -339,7 +355,6 @@ margin: 16px; }
   margin: 16px; }
 .red-packet .total-amount .box {
   position: relative;
-  height: 66px;
   padding: 10px 12px;
   padding-right: 12px;
   padding-left: 12px;
@@ -476,84 +491,91 @@ margin: 16px; }
           cursor: pointer;
           white-space: nowrap;
           user-select: none;
-          -webkit-tap-highlight-color: transparent; } }
-      .token-select {
-        position: relative;
-        margin: 0px;
-        appearance: none;
-        max-width: 100%;
-        font-family: -apple-system, system-ui, sans-serif;
-        display: inline-flex;
-        -webkit-box-align: center;
-        align-items: center;
-        -webkit-box-pack: center;
-        justify-content: center;
-        height: 24px;
-        border-radius: 16px;
-        white-space: nowrap;
-        transition: background-color 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms, box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
-        outline: 0px;
-        text-decoration: none;
-        border: 0px;
-        padding: 0px;
-        vertical-align: middle;
-        box-sizing: border-box;
-        user-select: none;
-        -webkit-tap-highlight-color: transparent;
-        .token-icon {
-          margin-left: 4px;
-          font-size: 18px;
-          margin-top: 0px;
-          margin-bottom: 0px;
-          border-radius: 50%;
-          background-size: cover;
-          width: 20px;
-          height: 20px;
-          color: rgb(7, 16, 27) !important;
-          margin-right: 0px !important;
-          position: relative;
-          display: flex;
-          -webkit-box-align: center;
-          align-items: center;
-          -webkit-box-pack: center;
-          justify-content: center;
-          flex-shrink: 0;
-          line-height: 1;
-          overflow: hidden;
-          user-select: none;
-          background-color: rgb(255, 255, 255);
-          font-weight: 700; }
-        .token-name {
-          overflow: hidden;
-          text-overflow: ellipsis;
-          padding-left: 8px;
-          padding-right: 8px;
-          white-space: nowrap;
-          cursor: pointer;
-          font-size: 14px;
-          line-height: 18px;
-          font-weight: 700;
-          color: rgb(7, 16, 27);
-          user-select: none;
-          -webkit-tap-highlight-color: transparent; }
-        .token-dropdown {
-          -webkit-tap-highlight-color: transparent;
-          font-size: 16px;
-          cursor: pointer;
-          margin: 0px 4px 0px -4px;
-          color: rgb(118, 127, 141) !important;
-          display: inline-block;
-          background-repeat: no-repeat;
-          background-position: center center;
-          flex-shrink: 0;
-          aspect-ratio: 1 / 1;
-          height: 24px;
-          width: 24px;
-          line-height: 18px;
-          font-weight: 700;
-          user-select: none; } } } }
+          -webkit-tap-highlight-color: transparent; } } } }
+.token-select {
+  position: relative;
+  margin: 0px;
+  appearance: none;
+  max-width: 100%;
+  font-family: -apple-system, system-ui, sans-serif;
+  display: inline-flex;
+  -webkit-box-align: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  justify-content: center;
+  height: 24px;
+  border-radius: 16px;
+  white-space: nowrap;
+  transition: background-color 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms, box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+  outline: 0px;
+  text-decoration: none;
+  border: 0px;
+  padding: 0px;
+  vertical-align: middle;
+  box-sizing: border-box;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  .token-icon {
+    margin-left: 4px;
+    font-size: 18px;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    border-radius: 50%;
+    background-size: cover;
+    width: 20px;
+    height: 20px;
+    color: rgb(7, 16, 27) !important;
+    margin-right: 0px !important;
+    position: relative;
+    display: flex;
+    -webkit-box-align: center;
+    align-items: center;
+    -webkit-box-pack: center;
+    justify-content: center;
+    flex-shrink: 0;
+    line-height: 1;
+    overflow: hidden;
+    user-select: none;
+    background-color: rgb(255, 255, 255);
+    font-weight: 700; }
+  .token-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-left: 8px;
+    padding-right: 8px;
+    white-space: nowrap;
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 18px;
+    font-weight: 700;
+    color: rgb(7, 16, 27);
+    user-select: none;
+    -webkit-tap-highlight-color: transparent; }
+  .token-dropdown {
+    -webkit-tap-highlight-color: transparent;
+    font-size: 16px;
+    cursor: pointer;
+    margin: 0px 4px 0px -4px;
+    color: rgb(118, 127, 141) !important;
+    display: inline-block;
+    background-repeat: no-repeat;
+    background-position: center center;
+    flex-shrink: 0;
+    aspect-ratio: 1 / 1;
+    height: 24px;
+    width: 24px;
+    line-height: 18px;
+    font-weight: 700;
+    user-select: none; } }
 input:focus {
   outline: none; }
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;}
+/* Firefox */
+input[type=number] {
+  -moz-appearance: textfield; }
 .mode-options {
   position: absolute;
   top: 50px;
@@ -572,6 +594,31 @@ input:focus {
 .mode-dropdown .mode-options div:hover {
   background: rgb(242, 246, 250);
   color: #999; }
+.token-wallet-icon {
+  margin-left: 4px;
+  font-size: 18px;
+  margin-top: 0px;
+  margin-bottom: 0px;
+  background-size: cover;
+  width: 20px;
+  height: 20px;
+  color: rgb(7, 16, 27) !important;
+  margin-right: 0px !important;
+  position: relative;
+  display: flex;
+  -webkit-box-align: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  justify-content: center;
+  flex-shrink: 0;
+  line-height: 1;
+  overflow: hidden;
+  user-select: none;
+  background-color: rgb(255, 255, 255);
+  font-weight: 700; }
+.red-packet-button {
+  display: flex;
+  flex-direction: row-reverse; }
 </style>
 
 <template>
@@ -674,8 +721,8 @@ input:focus {
                       </div>
                       <div class="share-number">
                         <p>Quantity</p>
-                        <div class="mode-dropdown">
-                          <input class="shares-input" autocomplete="off" placeholder="0" type="text" autocorrect="off" inputmode="decimal"
+                        <div class="share-input-div">
+                          <input v-model="quantity" id="red-packet-share" class="shares-input" autocomplete="off" placeholder="0" type="number" autocorrect="off" inputmode="decimal"
                             pattern="^[0-9]$" spellcheck="false">
                         </div>
                       </div>
@@ -683,14 +730,23 @@ input:focus {
                     <div class="total-amount">
                       <div class="box">
                         <p class="total-amount-text">Total Amount</p>
-                        <input class="amount-input" autocomplete="off" placeholder="0.0" required="true" type="text" autocorrect="off"
+                        <input v-model="total_amount" id="red-packet-amount" class="amount-input" autocomplete="off" placeholder="0.0" required="true" type="number" autocorrect="off"
                           title="Token Amount" inputmode="decimal" min="0" minlength="1" maxlength="79" pattern="^[0-9]*[.,]?[0-9]*$"
-                          spellcheck="false" value="0">
+                          spellcheck="false">
                         <div class="input-info-show">
-                          <p class="available-balance">
-                            Available Balance:&nbsp;
-                            <span>{{ accountBalance.toFixed(2) }}</span>
-                          </p>
+                          <div class="token-select">
+                            <div class="token-wallet-icon">
+                              <img style="width: 20px; height: 20px;" v-bind:src="walletIcon">
+                            </div>
+                            <span class="token-name">{{ wallet }}</span>
+                            <span class="token-dropdown">
+                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                                <path fill="currentColor"
+                                  d="m11.434 15.434-5.068-5.068A.8.8 0 0 1 6.93 9h10.14a.8.8 0 0 1 .565 1.366l-5.068 5.068a.8.8 0 0 1-1.132 0Z">
+                                </path>
+                              </svg>
+                            </span>
+                          </div>
                           <div class="total-choose-token">
                             <div class="max-amount-button">
                               <span class="button-text">MAX</span>
@@ -724,6 +780,12 @@ input:focus {
                       </div>
                     </div>
                   </div>
+                  <div class="red-packet-button">
+                    <button class="connect-wallet-button" @click="connectWallet">
+                      {{ returnButtonTest() }}
+                    </button>
+                  </div>
+                  
                 </div>
               </div>
             </div>
@@ -770,7 +832,16 @@ const walletIcon = ref<string>("");
 const accountBalance = ref<number>(0);
 const mode = ref<string>("Random"); // 0 for random, 1 for average
 const openDropdown = ref<boolean>(false);
+const quantity = ref<number>(0);
+const total_amount = ref<number>(0.0);
+const red_packet_button_text = ref<string>("");
 // TODO: Implement Web3Model V2
+
+const returnButtonTest = () => {
+  if (quantity.value === 0) return "Enter Quantity";
+  else if (total_amount.value === 0.0) return "Enter Total Amount";
+  else return "Next";
+}
 
 const modeChoose = (gameMode: "Random" | "Average") => {
   mode.value = gameMode;

@@ -9,9 +9,9 @@
         <li>
           <router-link to="/redPocket" data-toggle="tooltip" data-placement="right" title="Wallet" :class="active === 1 && 'active'">
             <span class="icon-grey">
-              <svg width="25" height="25" viewBox="0 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg"
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
                 xmlns:xlink="http://www.w3.org/1999/xlink">
-                <rect width="25" height="25" fill="url(#pattern0)" />
+                <rect width="24" height="24" fill="url(#pattern0)" />
                 <defs>
                   <pattern id="pattern0" patternContentUnits="objectBoundingBox" width="1" height="1">
                     <use xlink:href="#image0_224_35" transform="scale(0.00195312)" />
@@ -120,7 +120,7 @@ export default {
     list-style-type: none;
     text-align: center; }
     .menu ul li a {
-      padding: 13px 18px;
+      padding: 10px 15px;
       display: inline-block;
       margin-bottom: 20px;
       border-radius: 15px; }

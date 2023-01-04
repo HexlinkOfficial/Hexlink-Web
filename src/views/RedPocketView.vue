@@ -251,6 +251,23 @@ margin: 16px; }
   background-color: rgb(242, 246, 250);
   font-size: 14px;
   overflow: unset !important; }
+.mode-dropdown::before {
+  content: '';
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border: 2px solid #333;
+  border-top: 2px solid rgb(242, 246, 250);
+  border-right: 2px solid rgb(242, 246, 250);
+  transform: rotate(-45deg);
+  right: 20px;
+  top: 15px;
+  z-index: 10000;
+  transition: 0.5s;
+  pointer-events: none; }
+.mode-dropdown.active::before {
+  top: 22px;
+  transform: rotate(-225deg); }
 .mode-text {
   padding-right: 32px;
   padding: 11px 12px;
@@ -535,8 +552,26 @@ margin: 16px; }
           line-height: 18px;
           font-weight: 700;
           user-select: none; } } } }
-input:hover {
+input:focus {
   outline: none; }
+.mode-options {
+  position: absolute;
+  top: 50px;
+  width: 100%;
+  background: #fff;
+  box-shadow: 0 30px 30px rgba(0, 0, 0, 0.05);
+  border-radius: 10px;
+  overflow: hidden;
+  display: none; }
+.mode-dropdown.active .mode-options{
+  display: block;
+  z-index: 50; }
+.mode-dropdown .mode-options div {
+  padding: 12px 20px;
+  cursor: pointer; }
+.mode-dropdown .mode-options div:hover {
+  background: rgb(242, 246, 250);
+  color: #999; }
 </style>
 
 <template>
@@ -621,16 +656,20 @@ input:hover {
                     <div class="mode-and-share">
                       <div class="game-mode">
                         <p>Split Mode</p>
-                        <div class="mode-dropdown">
-                          <div class="mode-text">Random</div>
-                          <input class="mode-input">
-                          <span class="mode-drop-tri">
+                        <div class="mode-dropdown" :class="openDropdown && 'active'" @click="openDropdown = !openDropdown;">
+                          <div class="mode-text">{{ mode }}</div>
+                          <input class="mode-input" type="text" placeholder="select" readonly>
+                          <div class="mode-options">
+                            <div @click="modeChoose('Random')">Random</div>
+                            <div @click="modeChoose('Average')">Average</div>
+                          </div>
+                          <!-- <span class="mode-drop-tri">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                               <path fill="currentColor"
                                 d="m11.434 15.434-5.068-5.068A.8.8 0 0 1 6.93 9h10.14a.8.8 0 0 1 .565 1.366l-5.068 5.068a.8.8 0 0 1-1.132 0Z">
                               </path>
                             </svg>
-                          </span>
+                          </span> -->
                         </div>
                       </div>
                       <div class="share-number">
@@ -729,8 +768,13 @@ const luckHistory = ref<boolean>(false);
 const wallet = ref<string>("");
 const walletIcon = ref<string>("");
 const accountBalance = ref<number>(0);
-const mode = ref<number>(0); // 0 for random, 1 for average
+const mode = ref<string>("Random"); // 0 for random, 1 for average
+const openDropdown = ref<boolean>(false);
 // TODO: Implement Web3Model V2
+
+const modeChoose = (gameMode: "Random" | "Average") => {
+  mode.value = gameMode;
+}
 
 const web3Modal = new Web3Model({
   cacheProvider: true,

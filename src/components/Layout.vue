@@ -3,8 +3,9 @@
     <Header />
     <SideBar :active="active" />
     <div class="content-body">
-      <h1 style="margin-bottom: 1rem;">Red Packet</h1>
-      <slot />
+      <div class="container">
+        <slot />
+      </div>
     </div>
   </div>
 </template>

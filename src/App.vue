@@ -1,14 +1,9 @@
 <template>
   <div className="app">
     <div id="preloader" v-show="isLoading"><i>.</i><i>.</i><i>.</i></div>
-    <!-- <sidebar /> -->
     <router-view />
   </div>
 </template>
-
-<!-- <template>
-  <router-view />
-</template> -->
 
 <script>
 export default {

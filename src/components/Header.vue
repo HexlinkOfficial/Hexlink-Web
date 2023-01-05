@@ -113,25 +113,6 @@
                           </div>
                         </button>
                       </div>
-                      <!-- Optimism -->
-                      <!-- <div class="network-items" @click="op = !op; countNetworks(); showNetworks()">
-                        <button>
-                          <div style="display: flex; margin-right: 0.75rem; align-items: center; height: 1.25rem; width: 1.25rem;">
-                            <svg v-if="op" width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <path d="M17 1L6 12L1 7" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                            </svg>
-                          </div>
-                          <div style="display: flex; white-space: nowrap; align-items: center; width: 100%; ">
-                            <div style="position: relative; margin-right: 0.75rem; min-width: max-content; ">
-                              <img src="https://token.metaswap.codefi.network/assets/networkLogos/optimism.svg" height=25 style="margin-left: 0.5rem; margin-right: 0.5rem;" />
-                            </div>
-                            <div class="items-name">
-                              <span class="item-title">Optimism</span>
-                              <span class="item-balance">$0.00</span>
-                            </div>
-                          </div>
-                        </button>
-                      </div> -->
                       <!-- Polygon -->
                       <div class="network-items" style="pointer-events: none;"  @click="poly = !poly; countNetworks(); showNetworks()">
                         <button>
@@ -152,86 +133,6 @@
                           </div>
                         </button>
                       </div>
-                      <!-- Fantom -->
-                      <!-- <div class="network-items" @click="fan = !fan; countNetworks(); showNetworks()">
-                        <button>
-                          <div style="display: flex; margin-right: 0.75rem; align-items: center; height: 1.25rem; width: 1.25rem;">
-                            <svg v-if="fan" width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <path d="M17 1L6 12L1 7" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                            </svg>
-                          </div>
-                          <div style="display: flex; white-space: nowrap; align-items: center; width: 100%; ">
-                            <div style="position: relative; margin-right: 0.75rem; min-width: max-content; ">
-                              <img src="https://token.metaswap.codefi.network/assets/networkLogos/ftm.svg" height=25
-                                style="margin-left: 0.5rem; margin-right: 0.5rem;" />
-                            </div>
-                            <div class="items-name">
-                              <span class="item-title">Fantom</span>
-                              <span class="item-balance">$0.00</span>
-                            </div>
-                          </div>
-                        </button>
-                      </div> -->
-                      <!-- Avalanche -->
-                      <!-- <div class="network-items" @click="aval = !aval; countNetworks(); showNetworks()">
-                        <button>
-                          <div style="display: flex; margin-right: 0.75rem; align-items: center; height: 1.25rem; width: 1.25rem;">
-                            <svg v-if="aval" width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <path d="M17 1L6 12L1 7" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                            </svg>
-                          </div>
-                          <div style="display: flex; white-space: nowrap; align-items: center; width: 100%; ">
-                            <div style="position: relative; margin-right: 0.75rem; min-width: max-content; ">
-                              <img src="https://token.metaswap.codefi.network/assets/networkLogos/avalanche.svg" height=25
-                                style="margin-left: 0.5rem; margin-right: 0.5rem;" />
-                            </div>
-                            <div class="items-name">
-                              <span class="item-title">Avalanche</span>
-                              <span class="item-balance">$0.00</span>
-                            </div>
-                          </div>
-                        </button>
-                      </div> -->
-                      <!-- BNB Smart Chain -->
-                      <!-- <div class="network-items" @click="bnb = !bnb; countNetworks(); showNetworks()">
-                        <button>
-                          <div style="display: flex; margin-right: 0.75rem; align-items: center; height: 1.25rem; width: 1.25rem;">
-                            <svg v-if="bnb" width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <path d="M17 1L6 12L1 7" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                            </svg>
-                          </div>
-                          <div style="display: flex; white-space: nowrap; align-items: center; width: 100%; ">
-                            <div style="position: relative; margin-right: 0.75rem; min-width: max-content; ">
-                              <img src="https://token.metaswap.codefi.network/assets/networkLogos/bsc.svg" height=25
-                                style="margin-left: 0.5rem; margin-right: 0.5rem;" />
-                            </div>
-                            <div class="items-name">
-                              <span class="item-title">BNB Smart Chain</span>
-                              <span class="item-balance">$0.00</span>
-                            </div>
-                          </div>
-                        </button>
-                      </div> -->
-                      <!-- Arbitrum -->
-                      <!-- <div class="network-items" @click="arbi = !arbi; countNetworks(); showNetworks()">
-                        <button>
-                          <div style="display: flex; margin-right: 0.75rem; align-items: center; height: 1.25rem; width: 1.25rem;">
-                            <svg v-if="arbi" width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <path d="M17 1L6 12L1 7" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                            </svg>
-                          </div>
-                          <div style="display: flex; white-space: nowrap; align-items: center; width: 100%; ">
-                            <div style="position: relative; margin-right: 0.75rem; min-width: max-content; ">
-                              <img src="https://token.metaswap.codefi.network/assets/networkLogos/arbitrum.svg" height=25
-                                style="margin-left: 0.5rem; margin-right: 0.5rem;" />
-                            </div>
-                            <div class="items-name">
-                              <span class="item-title">Arbitrum</span>
-                              <span class="item-balance">$0.00</span>
-                            </div>
-                          </div>
-                        </button>
-                      </div> -->
                     </div>
                   </div>
                 </div>

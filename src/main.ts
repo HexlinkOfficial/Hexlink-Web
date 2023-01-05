@@ -25,7 +25,7 @@ getAuth(app).onAuthStateChanged(async (user: any) => {
   
   const pinia = createPinia();
   pinia.use(piniaPluginPersistedstate);
-  
+
   VueClipboard.config.autoSetContainer = true
   if (!vueApp) {
     vueApp = createApp(AppVue)

@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import type {  User } from 'firebase/auth'
+import type { Connection } from "@/interfaces/connection";
 
 export interface IUser {
   emailVerified: boolean,
@@ -38,12 +39,12 @@ export const useAuthStore = defineStore({
     authenticated: (state) => state.currentUser !== null && state.idToken != null,
   },
   actions: {
-    connectOwallet(account: string, network: string, chianId: number ) {
+    connectOwallet(connection: Connection) {
       console.log("External account connected");
       this.Owallet = {
-        Oaccount: account,
-        Onetwork: network,
-        OchainId: chianId,
+        Oaccount: connection.address!,
+        Onetwork: connection.network!.name,
+        OchainId: connection.network!.chainId,
       }
     },
     disconnectOwallet() {

@@ -618,7 +618,64 @@ input[type=number] {
   font-weight: 700; }
 .red-packet-button {
   display: flex;
-  flex-direction: row-reverse; }
+  justify-content: space-between;
+  align-items: center;
+  margin: 16px; }
+.red-packet-button p {
+  margin-bottom: 0; }
+.submit-redPacket-grey {
+  display: flex;
+  justify-content: center;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+  color: #000;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 800;
+  line-height: 1.25rem;
+  width: 50%;
+  border-radius: 50px;
+  @media (min-width: 640px) {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+    width: 200px; }
+  @media (min-width: 768px) {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+    width: 200px; }
+  opacity: 1;
+  background-color: #999;
+  color: white; }
+.submit-redPacket-blue {
+  display: flex;
+  justify-content: center;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+  color: #000;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 800;
+  line-height: 1.25rem;
+  width: 50%;
+  border-radius: 50px;
+  @media (min-width: 640px) {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+    width: 200px; }
+  @media (min-width: 768px) {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+    width: 200px; }
+  opacity: 1;
+  background-color: rgb(7, 106, 224);
+  color: white; }
+.red-packet-model {
+  margin: 16px;
+}
 </style>
 
 <template>
@@ -781,11 +838,20 @@ input[type=number] {
                     </div>
                   </div>
                   <div class="red-packet-button">
-                    <button class="connect-wallet-button" @click="connectWallet">
-                      {{ returnButtonTest() }}
+                    <p>{{ inputReminder() }}</p>
+                    <button :class="checkInput() ? 'submit-redPacket-blue' : 'submit-redPacket-grey'" @click="checkInput() && sendRedPacket()">
+                      Next
                     </button>
                   </div>
-                  
+                  <div class="red-packet-model">
+                    <div class="red-packet-title">
+                      <div class="title">Red Packet</div>
+                      <div class="amount">{{ quantity }} ETH</div>
+                    </div>
+                    <div class="red-packet-account">
+                    </div>
+                    <div class="red-packet-confirmation"></div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -834,13 +900,28 @@ const mode = ref<string>("Random"); // 0 for random, 1 for average
 const openDropdown = ref<boolean>(false);
 const quantity = ref<number>(0);
 const total_amount = ref<number>(0.0);
-const red_packet_button_text = ref<string>("");
 // TODO: Implement Web3Model V2
 
-const returnButtonTest = () => {
-  if (quantity.value === 0) return "Enter Quantity";
-  else if (total_amount.value === 0.0) return "Enter Total Amount";
-  else return "Next";
+const sendRedPacket = () => {
+  console.log({
+    mode: mode.value,
+    quantity: quantity.value,
+    amount: total_amount.value
+  })
+}
+
+const inputReminder = () => {
+  if (quantity.value == 0 || quantity.value.toString() == "") return "Enter Quantity";
+  else if (total_amount.value == 0.0 || total_amount.value.toString() == "") return "Enter Total Amount";
+  else return "";
+}
+
+const checkInput = () => {
+  if (inputReminder() == "") {
+    return true;
+  } else {
+    return false;
+  }
 }
 
 const modeChoose = (gameMode: "Random" | "Average") => {

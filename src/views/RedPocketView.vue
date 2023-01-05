@@ -251,6 +251,23 @@ margin: 16px; }
   background-color: rgb(242, 246, 250);
   font-size: 14px;
   overflow: unset !important; }
+.mode-dropdown::before {
+  content: '';
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border: 2px solid #333;
+  border-top: 2px solid rgb(242, 246, 250);
+  border-right: 2px solid rgb(242, 246, 250);
+  transform: rotate(-45deg);
+  right: 20px;
+  top: 15px;
+  z-index: 10000;
+  transition: 0.5s;
+  pointer-events: none; }
+.mode-dropdown.active::before {
+  top: 22px;
+  transform: rotate(-225deg); }
 .mode-text {
   padding-right: 32px;
   padding: 11px 12px;
@@ -297,6 +314,22 @@ margin: 16px; }
   font-weight: 400;
   line-height: 1.4375em;
   cursor: text; }
+.share-input-div {
+  flex: 1 1 0%;
+  font-weight: 400;
+  line-height: 1.4375em;
+  color: rgb(7, 16, 27);
+  box-sizing: border-box;
+  position: relative;
+  cursor: text;
+  display: inline-flex;
+  -webkit-box-align: center;
+  align-items: center;
+  width: 100%;
+  border-radius: 8px;
+  background-color: rgb(242, 246, 250);
+  font-size: 14px;
+  overflow: unset !important; }
 .red-packet .mode-and-share .share-number {
   display: block;
   flex: 1 1 0%; 
@@ -322,7 +355,6 @@ margin: 16px; }
   margin: 16px; }
 .red-packet .total-amount .box {
   position: relative;
-  height: 66px;
   padding: 10px 12px;
   padding-right: 12px;
   padding-left: 12px;
@@ -459,84 +491,191 @@ margin: 16px; }
           cursor: pointer;
           white-space: nowrap;
           user-select: none;
-          -webkit-tap-highlight-color: transparent; } }
-      .token-select {
-        position: relative;
-        margin: 0px;
-        appearance: none;
-        max-width: 100%;
-        font-family: -apple-system, system-ui, sans-serif;
-        display: inline-flex;
-        -webkit-box-align: center;
-        align-items: center;
-        -webkit-box-pack: center;
-        justify-content: center;
-        height: 24px;
-        border-radius: 16px;
-        white-space: nowrap;
-        transition: background-color 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms, box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
-        outline: 0px;
-        text-decoration: none;
-        border: 0px;
-        padding: 0px;
-        vertical-align: middle;
-        box-sizing: border-box;
-        user-select: none;
-        -webkit-tap-highlight-color: transparent;
-        .token-icon {
-          margin-left: 4px;
-          font-size: 18px;
-          margin-top: 0px;
-          margin-bottom: 0px;
-          border-radius: 50%;
-          background-size: cover;
-          width: 20px;
-          height: 20px;
-          color: rgb(7, 16, 27) !important;
-          margin-right: 0px !important;
-          position: relative;
-          display: flex;
-          -webkit-box-align: center;
-          align-items: center;
-          -webkit-box-pack: center;
-          justify-content: center;
-          flex-shrink: 0;
-          line-height: 1;
-          overflow: hidden;
-          user-select: none;
-          background-color: rgb(255, 255, 255);
-          font-weight: 700; }
-        .token-name {
-          overflow: hidden;
-          text-overflow: ellipsis;
-          padding-left: 8px;
-          padding-right: 8px;
-          white-space: nowrap;
-          cursor: pointer;
-          font-size: 14px;
-          line-height: 18px;
-          font-weight: 700;
-          color: rgb(7, 16, 27);
-          user-select: none;
-          -webkit-tap-highlight-color: transparent; }
-        .token-dropdown {
-          -webkit-tap-highlight-color: transparent;
-          font-size: 16px;
-          cursor: pointer;
-          margin: 0px 4px 0px -4px;
-          color: rgb(118, 127, 141) !important;
-          display: inline-block;
-          background-repeat: no-repeat;
-          background-position: center center;
-          flex-shrink: 0;
-          aspect-ratio: 1 / 1;
-          height: 24px;
-          width: 24px;
-          line-height: 18px;
-          font-weight: 700;
-          user-select: none; } } } }
-input:hover {
+          -webkit-tap-highlight-color: transparent; } } } }
+.token-select {
+  position: relative;
+  margin: 0px;
+  appearance: none;
+  max-width: 100%;
+  font-family: -apple-system, system-ui, sans-serif;
+  display: inline-flex;
+  -webkit-box-align: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  justify-content: center;
+  height: 24px;
+  border-radius: 16px;
+  white-space: nowrap;
+  transition: background-color 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms, box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+  outline: 0px;
+  text-decoration: none;
+  border: 0px;
+  padding: 0px;
+  vertical-align: middle;
+  box-sizing: border-box;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  .token-icon {
+    margin-left: 4px;
+    font-size: 18px;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    border-radius: 50%;
+    background-size: cover;
+    width: 20px;
+    height: 20px;
+    color: rgb(7, 16, 27) !important;
+    margin-right: 0px !important;
+    position: relative;
+    display: flex;
+    -webkit-box-align: center;
+    align-items: center;
+    -webkit-box-pack: center;
+    justify-content: center;
+    flex-shrink: 0;
+    line-height: 1;
+    overflow: hidden;
+    user-select: none;
+    background-color: rgb(255, 255, 255);
+    font-weight: 700; }
+  .token-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-left: 8px;
+    padding-right: 8px;
+    white-space: nowrap;
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 18px;
+    font-weight: 700;
+    color: rgb(7, 16, 27);
+    user-select: none;
+    -webkit-tap-highlight-color: transparent; }
+  .token-dropdown {
+    -webkit-tap-highlight-color: transparent;
+    font-size: 16px;
+    cursor: pointer;
+    margin: 0px 4px 0px -4px;
+    color: rgb(118, 127, 141) !important;
+    display: inline-block;
+    background-repeat: no-repeat;
+    background-position: center center;
+    flex-shrink: 0;
+    aspect-ratio: 1 / 1;
+    height: 24px;
+    width: 24px;
+    line-height: 18px;
+    font-weight: 700;
+    user-select: none; } }
+input:focus {
   outline: none; }
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;}
+/* Firefox */
+input[type=number] {
+  -moz-appearance: textfield; }
+.mode-options {
+  position: absolute;
+  top: 50px;
+  width: 100%;
+  background: #fff;
+  box-shadow: 0 30px 30px rgba(0, 0, 0, 0.05);
+  border-radius: 10px;
+  overflow: hidden;
+  display: none; }
+.mode-dropdown.active .mode-options{
+  display: block;
+  z-index: 50; }
+.mode-dropdown .mode-options div {
+  padding: 12px 20px;
+  cursor: pointer; }
+.mode-dropdown .mode-options div:hover {
+  background: rgb(242, 246, 250);
+  color: #999; }
+.token-wallet-icon {
+  margin-left: 4px;
+  font-size: 18px;
+  margin-top: 0px;
+  margin-bottom: 0px;
+  background-size: cover;
+  width: 20px;
+  height: 20px;
+  color: rgb(7, 16, 27) !important;
+  margin-right: 0px !important;
+  position: relative;
+  display: flex;
+  -webkit-box-align: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  justify-content: center;
+  flex-shrink: 0;
+  line-height: 1;
+  overflow: hidden;
+  user-select: none;
+  background-color: rgb(255, 255, 255);
+  font-weight: 700; }
+.red-packet-button {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 16px; }
+.red-packet-button p {
+  margin-bottom: 0; }
+.submit-redPacket-grey {
+  display: flex;
+  justify-content: center;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+  color: #000;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 800;
+  line-height: 1.25rem;
+  width: 50%;
+  border-radius: 50px;
+  @media (min-width: 640px) {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+    width: 200px; }
+  @media (min-width: 768px) {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+    width: 200px; }
+  opacity: 1;
+  background-color: #999;
+  color: white; }
+.submit-redPacket-blue {
+  display: flex;
+  justify-content: center;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+  color: #000;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 800;
+  line-height: 1.25rem;
+  width: 50%;
+  border-radius: 50px;
+  @media (min-width: 640px) {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+    width: 200px; }
+  @media (min-width: 768px) {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+    width: 200px; }
+  opacity: 1;
+  background-color: rgb(7, 106, 224);
+  color: white; }
+.red-packet-model {
+  margin: 16px;
+}
 </style>
 
 <template>
@@ -621,22 +760,26 @@ input:hover {
                     <div class="mode-and-share">
                       <div class="game-mode">
                         <p>Split Mode</p>
-                        <div class="mode-dropdown">
-                          <div class="mode-text">Random</div>
-                          <input class="mode-input">
-                          <span class="mode-drop-tri">
+                        <div class="mode-dropdown" :class="openDropdown && 'active'" @click="openDropdown = !openDropdown;">
+                          <div class="mode-text">{{ mode }}</div>
+                          <input class="mode-input" type="text" placeholder="select" readonly>
+                          <div class="mode-options">
+                            <div @click="modeChoose('Random')">Random</div>
+                            <div @click="modeChoose('Average')">Average</div>
+                          </div>
+                          <!-- <span class="mode-drop-tri">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                               <path fill="currentColor"
                                 d="m11.434 15.434-5.068-5.068A.8.8 0 0 1 6.93 9h10.14a.8.8 0 0 1 .565 1.366l-5.068 5.068a.8.8 0 0 1-1.132 0Z">
                               </path>
                             </svg>
-                          </span>
+                          </span> -->
                         </div>
                       </div>
                       <div class="share-number">
                         <p>Quantity</p>
-                        <div class="mode-dropdown">
-                          <input class="shares-input" autocomplete="off" placeholder="0" type="text" autocorrect="off" inputmode="decimal"
+                        <div class="share-input-div">
+                          <input v-model="quantity" id="red-packet-share" class="shares-input" autocomplete="off" placeholder="0" type="number" autocorrect="off" inputmode="decimal"
                             pattern="^[0-9]$" spellcheck="false">
                         </div>
                       </div>
@@ -644,14 +787,23 @@ input:hover {
                     <div class="total-amount">
                       <div class="box">
                         <p class="total-amount-text">Total Amount</p>
-                        <input class="amount-input" autocomplete="off" placeholder="0.0" required="true" type="text" autocorrect="off"
+                        <input v-model="total_amount" id="red-packet-amount" class="amount-input" autocomplete="off" placeholder="0.0" required="true" type="number" autocorrect="off"
                           title="Token Amount" inputmode="decimal" min="0" minlength="1" maxlength="79" pattern="^[0-9]*[.,]?[0-9]*$"
-                          spellcheck="false" value="0">
+                          spellcheck="false">
                         <div class="input-info-show">
-                          <p class="available-balance">
-                            Available Balance:&nbsp;
-                            <span>{{ accountBalance.toFixed(2) }}</span>
-                          </p>
+                          <div class="token-select">
+                            <div class="token-wallet-icon">
+                              <img style="width: 20px; height: 20px;" v-bind:src="walletIcon">
+                            </div>
+                            <span class="token-name">{{ wallet }}</span>
+                            <span class="token-dropdown">
+                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                                <path fill="currentColor"
+                                  d="m11.434 15.434-5.068-5.068A.8.8 0 0 1 6.93 9h10.14a.8.8 0 0 1 .565 1.366l-5.068 5.068a.8.8 0 0 1-1.132 0Z">
+                                </path>
+                              </svg>
+                            </span>
+                          </div>
                           <div class="total-choose-token">
                             <div class="max-amount-button">
                               <span class="button-text">MAX</span>
@@ -684,6 +836,21 @@ input:hover {
                         </div>
                       </div>
                     </div>
+                  </div>
+                  <div class="red-packet-button">
+                    <p>{{ inputReminder() }}</p>
+                    <button :class="checkInput() ? 'submit-redPacket-blue' : 'submit-redPacket-grey'" @click="checkInput() && sendRedPacket()">
+                      Next
+                    </button>
+                  </div>
+                  <div class="red-packet-model">
+                    <div class="red-packet-title">
+                      <div class="title">Red Packet</div>
+                      <div class="amount">{{ quantity }} ETH</div>
+                    </div>
+                    <div class="red-packet-account">
+                    </div>
+                    <div class="red-packet-confirmation"></div>
                   </div>
                 </div>
               </div>
@@ -729,8 +896,37 @@ const luckHistory = ref<boolean>(false);
 const wallet = ref<string>("");
 const walletIcon = ref<string>("");
 const accountBalance = ref<number>(0);
-const mode = ref<number>(0); // 0 for random, 1 for average
+const mode = ref<string>("Random"); // 0 for random, 1 for average
+const openDropdown = ref<boolean>(false);
+const quantity = ref<number>(0);
+const total_amount = ref<number>(0.0);
 // TODO: Implement Web3Model V2
+
+const sendRedPacket = () => {
+  console.log({
+    mode: mode.value,
+    quantity: quantity.value,
+    amount: total_amount.value
+  })
+}
+
+const inputReminder = () => {
+  if (quantity.value == 0 || quantity.value.toString() == "") return "Enter Quantity";
+  else if (total_amount.value == 0.0 || total_amount.value.toString() == "") return "Enter Total Amount";
+  else return "";
+}
+
+const checkInput = () => {
+  if (inputReminder() == "") {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+const modeChoose = (gameMode: "Random" | "Average") => {
+  mode.value = gameMode;
+}
 
 const web3Modal = new Web3Model({
   cacheProvider: true,

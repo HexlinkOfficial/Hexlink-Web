@@ -984,13 +984,6 @@ const showGasToken = () => {
   return true;
 }
 
-const authStore = useAuthStore();
-const user = authStore.user;
-const walletStore = useWalletStore();
-if (walletStore.connected) {
-  walletStore.wallet;
-}
-
 const sendLuck = ref<boolean>(false);
 const luckHistory = ref<boolean>(true);
 const openDropdown = ref<boolean>(false);

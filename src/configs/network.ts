@@ -10,7 +10,7 @@ export const GOERLI : Network = {
         symbol: "Goerli ETH",
         decimals: 18
     },
-    blockExplorerUrls: ["https://goerli.etherscan.io/"]
+    blockExplorerUrls: ["https://goerli.etherscan.io"]
 };
 
 export const POLYGON : Network = {
@@ -22,5 +22,5 @@ export const POLYGON : Network = {
         symbol: "MATIC",
         decimals: 18
     },
-    blockExplorerUrls: ["https://polygonscan.com/"]
+    blockExplorerUrls: ["https://polygonscan.com"]
 };

@@ -29,6 +29,7 @@ export interface Wallet {
 export interface IUser {
     provider: string,
     uid: string,
+    providerUid: string,
     handle: string,
     displayName?: string,
     photoURL?: string,

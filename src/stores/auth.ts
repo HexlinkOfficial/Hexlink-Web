@@ -1,10 +1,13 @@
-import { defineStore } from 'pinia'
-import type { IAuth, IUser, Account } from "@/types";
+import { defineStore } from 'pinia';
+import type { IAuth, IUser } from "@/types";
 
 export const useAuthStore = defineStore({
     id: 'auth',
     state: (): IAuth => ({
         authenticated: false,
+        user: undefined,
+        idToken: undefined,
+        returnUrl: undefined,
     }),
     persist: true,
     actions: {

@@ -147,7 +147,6 @@ export async function getAllVisiableTokens(store: IAuth, chain: string) {
 
 export async function loadAll(
     store: IAuth,
-    wallet: string,
     chain: string,
 ): Promise<{[key: string]: Token}> {
     const tokens: {[key: string]: Token} = {};
@@ -180,9 +179,10 @@ export async function loadAll(
     });
 
     const tokensToSetPreference : PreferenceInput[] = [];
-    const ethBalance = await getETHBalance(wallet);
+    const account = store.user!.account.address;
+    const ethBalance = await getETHBalance(account);
     const option: TokenBalancesOptionsErc20 = {type : TokenBalanceType.ERC20};
-    const erc20Balances = await alchemy.core.getTokenBalances(wallet, option);
+    const erc20Balances = await alchemy.core.getTokenBalances(account, option);
 
     erc20Balances.tokenBalances.concat([ethBalance as TokenBalance]).forEach(balance => {
         if (BigNumber(balance.tokenBalance || 0).gt(0)) {
@@ -202,9 +202,8 @@ export async function loadAll(
     });
     const inserted = await insertTokenPreferences(store, tokensToSetPreference);
     tokensToSetPreference.forEach((p, i) => {
-        tokens[p.token_address].preference = {id: inserted[i], display: p.display};
+        tokens[p.token_address].preference = {id: inserted[i].id, display: p.display};
     });
-    console.log(tokens);
     return tokens;
 }
 

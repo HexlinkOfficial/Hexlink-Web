@@ -1,5 +1,7 @@
 import { gql } from '@urql/core'
 import type { IAuth } from '@/types';
+import { useAuthStore } from '@/stores/auth';
+import { useNetworkStore } from '@/stores/network';
 import { handleUrqlResponse, setUrqlClientIfNecessary } from './urql'
 
 export const GET_TOKEN_PREFERENCES = gql`

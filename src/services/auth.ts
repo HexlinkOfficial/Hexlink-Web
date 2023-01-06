@@ -50,6 +50,7 @@ export async function googleSocialLogin() {
         const user : IUser = {
             provider: "google",
             uid: result.user.uid,
+            providerUid: result.user.uid, // TODO: ensure this is google uid
             handle: result.user.email!,
             displayName: result.user.displayName || undefined,
             photoURL: result.user.photoURL || undefined,
@@ -70,12 +71,13 @@ export async function twitterSocialLogin() {
     try {
         const result = await signInWithPopup(auth, provider);
         const idToken = await getIdTokenAndSetClaimsIfNecessary(result.user);
-        const uid = result.user.providerData[0].uid;
-        const nameHash = await genNameHash("twitter.com", uid);
+        const providerUid = result.user.providerData[0].uid;
+        const nameHash = await genNameHash("twitter.com", providerUid);
         const account = await buildAccount(nameHash);
         const user : IUser = {
             provider: "twitter.com",
-            uid,
+            uid: result.user.uid,
+            providerUid,
             handle: result.user.reloadUserInfo.screenName,
             displayName: result.user.displayName || undefined,
             photoURL: result.user.photoURL || undefined,

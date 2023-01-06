@@ -6,7 +6,10 @@ export const useWalletStore = defineStore({
     state: (): {
         connected: boolean,
         wallet?: Wallet
-    } => ({ connected: false }),
+    } => ({
+        connected: false,
+        wallet: undefined,
+    }),
     persist: true,
     actions: {
         connectWallet(wallet: Wallet) {

@@ -906,10 +906,9 @@ input[type=number] {
 <script setup lang="ts">
 import { ref } from "vue";
 import Layout from "../components/Layout.vue";
-import { useAuthStore } from '@/stores/auth';
-import { useWalletStore } from '@/stores/wallet';
 import { connectWallet, disconnectWallet, web3Modal } from "@/services/web3/wallet";
 import { ethers } from "ethers";
+import { useWalletStore } from '@/stores/wallet';
 
 interface RedPacket {
   mode: "random" | "equal";
@@ -946,6 +945,7 @@ const tokens = [{
   value: ethers.constants.AddressZero
 }];
 
+const walletStore = useWalletStore();
 const connectOrDisconnectWallet = async function () {
   if (walletStore.connected) {
     await disconnectWallet();
@@ -969,13 +969,6 @@ const modeChoose = (gameMode: "random" | "equal") => {
 const createRedPacket = async function () {
 
 };
-
-const authStore = useAuthStore();
-const user = authStore.user;
-const walletStore = useWalletStore();
-if (walletStore.connected) {
-  walletStore.wallet;
-}
 
 const sendLuck = ref<boolean>(true);
 const luckHistory = ref<boolean>(false);

@@ -219,11 +219,11 @@ export default {
   data() {
     const authStore = useAuthStore();
     const user = authStore.user!;
-    
+
     const walletStore = useWalletStore();
     const wallet = walletStore.wallet!;
     const addressTextLong = computed(() => {
-      if (user?.account.address) {
+    if (user?.account.address) {
         return prettyPrintAddress(user.account.address, 5, 6);
       } else {
         return "";
@@ -322,8 +322,6 @@ export default {
         this.selectedChains.includes('https://token.metaswap.codefi.network/assets/networkLogos/arbitrum.svg') && this.selectedChains.splice(this.selectedChains.indexOf('https://token.metaswap.codefi.network/assets/networkLogos/arbitrum.svg'), 1);
       }
       this.networkCount = this.selectedChains.length;
-      console.log(this.selectedChains.length);
-      console.log(this.currentNetwork);
     },
     activeDropDown(value: any) {
       this.active_ = this.active_ === value ? "" : value;
@@ -353,9 +351,6 @@ export default {
   },
   mounted() {
     document.addEventListener('click', this.closeDropDown)
-    const store = useWalletStore();
-    const wallet = store.wallet;
-    console.log("External Wallet: ", wallet);
   },
   beforeDestroy() {
     document.removeEventListener('click', this.closeDropDown)

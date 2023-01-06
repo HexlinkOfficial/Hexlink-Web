@@ -229,13 +229,16 @@ display: flex;
 gap: 16px;
 margin: 16px; }
 .red-packet .mode-and-share .game-mode {
-  display: block;
+  display: flex;
   flex: 1 1 0%;
   p {
-    margin: 0px;
-    font-weight: 400;
+    display: flex;
+    align-items: center;
+    margin-left: 1rem;
+    margin-bottom: 0rem;
+    font-weight: 600;
     line-height: 1.5;
-    font-size: 14px; } }
+    font-size: 16px; } }
 .mode-dropdown {
   flex: 1 1 0%;
   font-weight: 400;
@@ -337,14 +340,17 @@ margin: 16px; }
     margin-right: 1rem;
     width: 50%; } }
 .red-packet .mode-and-share .share-number {
-  display: block;
   flex: 1 1 0%; 
+  display: flex;
   p {
-    margin: 0px;
-    margin-right: 1rem;
-    font-weight: 400;
+    margin-left: 1rem;
+    margin-right: 0rem;
+    margin-bottom: 0rem;
+    font-weight: 600;
     line-height: 1.5;
-    font-size: 14px; } }
+    font-size: 16px;
+    display: flex;
+    align-items: center; } }
 .shares-input {
   padding: 11px 12px;
   height: 18px;
@@ -446,59 +452,59 @@ margin: 16px; }
       font-weight: 400;
       line-height: 1.4375em;
       color: rgb(7, 16, 27);
-      cursor: text;
-      .max-amount-button {
-        position: relative;
-        margin: 0px;
-        appearance: none;
-        max-width: 100%;
-        background-color: rgba(28, 104, 243, 0.1);
-        color: rgb(28, 104, 243);
-        border-radius: 4px;
-        font-size: 14px;
-        line-height: 18px;
-        padding: 3px 12px;
-        cursor: pointer;
-        display: inline-flex;
-        -webkit-box-align: center;
-        align-items: center;
-        -webkit-box-pack: center;
-        justify-content: center;
-        height: 24px;
-        white-space: nowrap;
-        transition: background-color 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms, box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
-        outline: 0px;
-        text-decoration: none;
-        border: 0px;
-        vertical-align: middle;
-        box-sizing: border-box;
-        user-select: none;
-        -webkit-tap-highlight-color: transparent;
-        .button-text {
-          padding: 0px;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-          color: rgb(28, 104, 243);
-          font-size: 14px;
-          line-height: 18px;
-          cursor: pointer;
-          user-select: none;
-          -webkit-tap-highlight-color: transparent;
-          font-weight: 400; }
-        .button-outline {
-          overflow: hidden;
-          pointer-events: none;
-          position: absolute;
-          z-index: 0;
-          inset: 0px;
-          color: rgb(28, 104, 243);
-          font-size: 14px;
-          line-height: 18px;
-          cursor: pointer;
-          white-space: nowrap;
-          user-select: none;
-          -webkit-tap-highlight-color: transparent; } } } }
+      cursor: text; } }
+.max-amount-button {
+  position: relative;
+  margin: 0px;
+  appearance: none;
+  max-width: 100%;
+  background-color: rgba(28, 104, 243, 0.1);
+  color: rgb(28, 104, 243);
+  border-radius: 4px;
+  font-size: 14px;
+  line-height: 18px;
+  padding: 3px 12px;
+  cursor: pointer;
+  display: inline-flex;
+  -webkit-box-align: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  justify-content: center;
+  height: 24px;
+  white-space: nowrap;
+  transition: background-color 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms, box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+  outline: 0px;
+  text-decoration: none;
+  border: 0px;
+  vertical-align: middle;
+  box-sizing: border-box;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  .button-text {
+    padding: 0px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: rgb(28, 104, 243);
+    font-size: 14px;
+    line-height: 18px;
+    cursor: pointer;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    font-weight: 400; }
+  .button-outline {
+    overflow: hidden;
+    pointer-events: none;
+    position: absolute;
+    z-index: 0;
+    inset: 0px;
+    color: rgb(28, 104, 243);
+    font-size: 14px;
+    line-height: 18px;
+    cursor: pointer;
+    white-space: nowrap;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent; } }
 .token-select {
   position: relative;
   margin: 0px;
@@ -522,6 +528,7 @@ margin: 16px; }
   box-sizing: border-box;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
+  margin-bottom: 0.2rem;
   .token-icon {
     margin-left: 4px;
     font-size: 18px;
@@ -700,10 +707,21 @@ input[type=number] {
     height: 1rem;
     margin-left: 0.75rem; } }
 .accounts {
+  display: flex; }
+.gas-estimation {
   display: flex;
-}
+  align-items: center;
+  p {
+    margin-bottom: 0rem; } }
+.connectWallet {
+  display: flex;
+  width: 100%;
+  height: 500px;
+  align-items: center;
+  justify-content: center; }
 .enable-switch {
   display: flex;
+  align-items: center;
   p {
     margin-left: 1rem;
     margin-bottom: 0rem;
@@ -764,93 +782,7 @@ input[type=number] {
                   </div>
                 </div>
               </div>
-              <div class="red-packet">
-                <div class="mode-and-share">
-                  <div class="share-number">
-                    <div class="share-input-div">
-                      <input v-model="redpacket.split" id="red-packet-share" class="shares-input" autocomplete="off" placeholder="0"
-                        type="number" autocorrect="off" inputmode="decimal" pattern="^[0-9]$" spellcheck="false">
-                      <p>People share</p>
-                    </div>
-                  </div>
-                  <div class="game-mode">
-                    <div class="mode-dropdown" :class="openDropdown && 'active'" @click="openDropdown = !openDropdown;">
-                      <div class="mode-text">{{ redpacket.mode }}</div>
-                      <input class="mode-input" type="text" placeholder="select" readonly>
-                      <div class="mode-options">
-                        <div @click="modeChoose('random')">Random</div>
-                        <div @click="modeChoose('average')">Average</div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div class="total-amount">
-                  <div class="box">
-                    <p class="total-amount-text">Total Amount</p>
-                    <input v-model="redpacket.balance" id="red-packet-amount" class="amount-input" autocomplete="off"
-                      placeholder="0.0" required="true" type="number" autocorrect="off" title="Token Amount"
-                      inputmode="decimal" min="0" minlength="1" maxlength="79" pattern="^[0-9]*[.,]?[0-9]*$"
-                      spellcheck="false">
-                    <div class="input-info-show">
-                      <div class="token-select">
-                        <p> </p>
-                      </div>
-                      <div class="total-choose-token">
-                        <div class="max-amount-button">
-                          <span class="button-text">MAX</span>
-                          <span class="button-outline"></span>
-                        </div>
-                        <div class="token-select">
-                          <a-select v-model:value="redpacket.token" style="width: 120px" :options="tokens"></a-select>
-                          <!-- <div class="token-icon">
-                            <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <path
-                                d="M16 32C24.8366 32 32 24.8366 32 16C32 7.16344 24.8366 0 16 0C7.16344 0 0 7.16344 0 16C0 24.8366 7.16344 32 16 32Z"
-                                fill="#627EEA" />
-                              <path d="M16.1069 7L16 7.39592V18.8837L16.1069 19L21 15.848L16.1069 7Z" fill="#C0CBF6" />
-                              <path d="M16 7L11 15.848L16 19V13.4241V7Z" fill="white" />
-                              <path d="M16.0608 20.354L16 20.4392V24.7958L16.0608 25L21 17L16.0608 20.354Z"
-                                fill="#C0CBF6" />
-                              <path d="M16 25V20.354L11 17L16 25Z" fill="white" />
-                              <path d="M16 19L21 16.1735L16 14V19Z" fill="#8197EE" />
-                              <path d="M11 16.1735L16 19V14L11 16.1735Z" fill="#C0CBF6" />
-                            </svg>
-                          </div>
-                          <span class="token-name">ETH</span>
-                          <span class="token-dropdown">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                              <path fill="currentColor"
-                                d="m11.434 15.434-5.068-5.068A.8.8 0 0 1 6.93 9h10.14a.8.8 0 0 1 .565 1.366l-5.068 5.068a.8.8 0 0 1-1.132 0Z">
-                              </path>
-                            </svg>
-                          </span> -->
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class="wallet-bar">
-                <!-- <p v-if='account!=""' style="margin-bottom: 0rem; margin-left: 0.875rem;">
-                  <img style="width: 25px; height: 25px; margin-right: 0.5rem;" v-bind:src="walletIcon">
-                  <b>{{ wallet }}</b>
-                </p>
-                <p v-if='account==""' style="margin-bottom: 0rem; margin-left: 0.875rem;">Wallet: <b>No wallet</b></p>
-                <p style="margin-bottom: 0rem; margin-left: 0.875rem;">Account: <b>{{ truncateAddress(account) }}</b></p>
-                <p style="margin-bottom: 0rem;">Network ID: <b>{{ chainId>0 ? chainId : "No Network" }}</b></p>
-                <p style="margin-bottom: 0rem;">Network: <b>{{ chainId > 0 ? networkName : "No Network" }}</b></p> -->
-                <div class="connection-status">
-                  <p>Connection Status:</p>
-                  <svg v-if="connection.connected" class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
-                    <circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none" />
-                    <path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8" />
-                  </svg>
-                  <svg v-if="connection.connected == false" class="crossmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
-                    <circle class="crossmark__circle" cx="26" cy="26" r="25" fill="none" />
-                    <path class="cross__path cross__path--right" fill="none" d="M16,16 l20,20" />
-                    <path class="cross__path cross__path--left" fill="none" d="M16,36 l20,-20" />
-                  </svg>
-                </div>
+              <div v-if="!connection.connected" class="connectWallet">
                 <button v-if="connection.connected == false" class="connect-wallet-button" @click="connectOrDisconnectWallet">
                   <svg style="margin-right: 10px;" width="18" height="18" viewBox="0 0 18 18" fill="none"
                     xmlns="http://www.w3.org/2000/svg">
@@ -860,66 +792,134 @@ input[type=number] {
                   </svg>
                   Connect Wallet
                 </button>
-                <button v-if="connection.connected" class="connect-wallet-button" @click="connectOrDisconnectWallet">
-                  <svg style="margin-right: 10px;" width="18" height="18" viewBox="0 0 18 18" fill="none"
-                    xmlns="http://www.w3.org/2000/svg">
-                    <path
-                      d="M16 2.50025V3.51125C16.5304 3.51125 17.0391 3.72196 17.4142 4.09703C17.7893 4.47211 18 4.98081 18 5.51125V15.5112C18 16.0416 17.7893 16.5504 17.4142 16.9254C17.0391 17.3005 16.5304 17.5112 16 17.5112H2C1.46957 17.5112 0.96086 17.3005 0.58579 16.9254C0.21071 16.5504 0 16.0416 0 15.5112V5.51125C0 4.46625 0.835 3.51825 1.813 3.23925L12.813 0.0962511C13.1851 -0.0100989 13.5768 -0.0286089 13.9573 0.0421711C14.3377 0.112951 14.6966 0.271091 15.0055 0.504141C15.3145 0.737191 15.5651 1.03878 15.7377 1.38516C15.9102 1.73154 16 2.11326 16 2.50025ZM12.5 9.01123C12.1022 9.01123 11.7206 9.16933 11.4393 9.45063C11.158 9.73193 11 10.1134 11 10.5112C11 10.909 11.158 11.2906 11.4393 11.5719C11.7206 11.8532 12.1022 12.0112 12.5 12.0112C12.8978 12.0112 13.2794 11.8532 13.5607 11.5719C13.842 11.2906 14 10.909 14 10.5112C14 10.1134 13.842 9.73193 13.5607 9.45063C13.2794 9.16933 12.8978 9.01123 12.5 9.01123ZM14 2.50025C14.0001 2.42966 13.9852 2.35986 13.9563 2.29544C13.9274 2.23102 13.8853 2.17345 13.8326 2.1265C13.7798 2.07955 13.7178 2.04429 13.6505 2.02305C13.5832 2.00181 13.5121 1.99506 13.442 2.00325L13.362 2.01925L8.14 3.51125H14V2.50025Z"
-                      fill="white" />
-                  </svg>
-                  Disconnect
-                </button>
               </div>
-              <div class="gas-station">
-                <div class="enable-switch">
-                  <a-switch v-model:checked="checked1" />
-                  <p>Enable Gas sponsorship</p>
+              <div v-if="connection.connected">
+                <div class="red-packet">
+                  <div class="total-amount">
+                    <div class="box">
+                      <p class="total-amount-text">Total Amount</p>
+                      <input v-model="redpacket.balance" id="red-packet-amount" class="amount-input" autocomplete="off"
+                        placeholder="0.0" required="true" type="number" autocorrect="off" title="Token Amount"
+                        inputmode="decimal" min="0" minlength="1" maxlength="79" pattern="^[0-9]*[.,]?[0-9]*$"
+                        spellcheck="false">
+                      <div class="input-info-show">
+                        <div class="token-select">
+                          <div class="max-amount-button">
+                            <span class="button-text">MAX</span>
+                            <span class="button-outline"></span>
+                          </div>
+                        </div>
+                        <div class="total-choose-token">
+                          <div class="token-select">
+                            <a-select v-model:value="redpacket.token" style="width: 120px" :options="tokens"></a-select>
+                            <!-- <div class="token-icon">
+                              <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                  d="M16 32C24.8366 32 32 24.8366 32 16C32 7.16344 24.8366 0 16 0C7.16344 0 0 7.16344 0 16C0 24.8366 7.16344 32 16 32Z"
+                                  fill="#627EEA" />
+                                <path d="M16.1069 7L16 7.39592V18.8837L16.1069 19L21 15.848L16.1069 7Z" fill="#C0CBF6" />
+                                <path d="M16 7L11 15.848L16 19V13.4241V7Z" fill="white" />
+                                <path d="M16.0608 20.354L16 20.4392V24.7958L16.0608 25L21 17L16.0608 20.354Z"
+                                  fill="#C0CBF6" />
+                                <path d="M16 25V20.354L11 17L16 25Z" fill="white" />
+                                <path d="M16 19L21 16.1735L16 14V19Z" fill="#8197EE" />
+                                <path d="M11 16.1735L16 19V14L11 16.1735Z" fill="#C0CBF6" />
+                              </svg>
+                            </div>
+                            <span class="token-name">ETH</span>
+                            <span class="token-dropdown">
+                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                                <path fill="currentColor"
+                                  d="m11.434 15.434-5.068-5.068A.8.8 0 0 1 6.93 9h10.14a.8.8 0 0 1 .565 1.366l-5.068 5.068a.8.8 0 0 1-1.132 0Z">
+                                </path>
+                              </svg>
+                            </span> -->
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="mode-and-share">
+                    <div class="game-mode">
+                      <div class="mode-dropdown" :class="openDropdown && 'active'" @click="openDropdown = !openDropdown;">
+                        <div class="mode-text">{{ redpacket.mode }}</div>
+                        <input class="mode-input" type="text" placeholder="select" readonly>
+                        <div class="mode-options">
+                          <div @click="modeChoose('random')">Random</div>
+                          <div @click="modeChoose('average')">Average</div>
+                        </div>
+                      </div>
+                      <p>Shared among</p>
+                    </div>
+                    <div class="share-number">
+                      <div class="share-input-div">
+                        <input v-model="redpacket.split" id="red-packet-share" class="shares-input" autocomplete="off" placeholder="0"
+                          type="number" autocorrect="off" inputmode="decimal" pattern="^[0-9]$" spellcheck="false">
+                      </div>
+                      <p>People</p>
+                    </div>
+                  </div>
                 </div>
-                <a-form-item label="Enable gas sponsorship">
-                  <a-select v-model:value="redpacket.gasToken" style="width: 120px" :options="gasTokens">
-                  </a-select>
-                </a-form-item>
-                <div class="gas-estimation">
-                  <p>Gas Estimation: XXXXXX</p>
-                </div>
-              </div>
-              <div class="choose-account">
-                <p>Choose Your Account</p>
-                <svg width="4" height="16" viewBox="0 0 4 16" fill="none" xmlns="http://www.w3.org/2000/svg" data-v-5f63f68a="">
-                  <path d="M2 9C2.55228 9 3 8.55228 3 8C3 7.44772 2.55228 7 2 7C1.44772 7 1 7.44772 1 8C1 8.55228 1.44772 9 2 9Z"
-                    fill="black" stroke="black" stroke-linecap="round" stroke-linejoin="round" data-v-5f63f68a=""></path>
-                  <path d="M2 3C2.55228 3 3 2.55228 3 2C3 1.44772 2.55228 1 2 1C1.44772 1 1 1.44772 1 2C1 2.55228 1.44772 3 2 3Z"
-                    fill="black" stroke="black" stroke-linecap="round" stroke-linejoin="round" data-v-5f63f68a=""></path>
-                  <path
-                    d="M2 15C2.55228 15 3 14.5523 3 14C3 13.4477 2.55228 13 2 13C1.44772 13 1 13.4477 1 14C1 14.5523 1.44772 15 2 15Z"
-                    fill="black" stroke="black" stroke-linecap="round" stroke-linejoin="round" data-v-5f63f68a=""></path>
-                </svg>
-                <div class="accounts">
-                  <a-card title="Hexlink Account" :bordered="false" style="width: 200px; margin: 20px;">
-                    <p>Balance:</p>
-                    <p>{{ redpacket.token.label }}: 0</p>
-                    <p v-if="redpacket.gasToken !== 'undefined'">{{ redpacket.gasToken.label }}: 0</p>
-                  </a-card>
-                  <a-card title="External Account" :bordered="false" style="width: 200px; margin: 20px;">
-                    <p>Balance:</p>
-                    <p>{{ redpacket.token.label }}: 0</p>
-                    <p v-if="redpacket.gasToken !== 'undefined'">{{ redpacket.gasToken.label }}: 0</p>
-                  </a-card>
-                  <!-- <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
-                    <a-button type="primary" @click="createRedPacket">Create</a-button>
+                <div class="gas-station">
+                  <div class="enable-switch">
+                    <a-switch v-model:checked="enableGas" />
+                    <p>Enable Gas sponsorship</p>
+                  </div>
+                  <!-- <a-form-item label="Enable gas sponsorship">
+                    <a-select v-model:value="redpacket.gasToken" style="width: 120px" :options="gasTokens">
+                    </a-select>
                   </a-form-item> -->
+                  <div class="gas-estimation">
+                    <p>Gas Estimation: XXXXXX</p>
+                    <a-select v-model:value="redpacket.gasToken" style=" margin-left: 1rem; width: 120px" :options="gasTokens">
+                    </a-select>
+                    <svg style="margin-left: 1rem; width: 16px;" width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path
+                        d="M11 21C16.5228 21 21 16.5228 21 11C21 5.47715 16.5228 1 11 1C5.47715 1 1 5.47715 1 11C1 16.5228 5.47715 21 11 21Z"
+                        stroke="#898989" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                      <path d="M11 15V11" stroke="#898989" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                      <path d="M11 8V7" stroke="#898989" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                  </div>
                 </div>
-              </div>
-              <div class="create">
-                <button class="connect-wallet-button" @click="createRedPacket" style="width: auto;">
-                  <svg style="margin-right: 10px;" width="18" height="18" viewBox="0 0 18 18" fill="none"
-                    xmlns="http://www.w3.org/2000/svg">
+                <div class="choose-account">
+                  <p>Choose Your Account</p>
+                  <svg width="4" height="16" viewBox="0 0 4 16" fill="none" xmlns="http://www.w3.org/2000/svg" data-v-5f63f68a="">
+                    <path d="M2 9C2.55228 9 3 8.55228 3 8C3 7.44772 2.55228 7 2 7C1.44772 7 1 7.44772 1 8C1 8.55228 1.44772 9 2 9Z"
+                      fill="black" stroke="black" stroke-linecap="round" stroke-linejoin="round" data-v-5f63f68a=""></path>
+                    <path d="M2 3C2.55228 3 3 2.55228 3 2C3 1.44772 2.55228 1 2 1C1.44772 1 1 1.44772 1 2C1 2.55228 1.44772 3 2 3Z"
+                      fill="black" stroke="black" stroke-linecap="round" stroke-linejoin="round" data-v-5f63f68a=""></path>
                     <path
-                      d="M16 2.50025V3.51125C16.5304 3.51125 17.0391 3.72196 17.4142 4.09703C17.7893 4.47211 18 4.98081 18 5.51125V15.5112C18 16.0416 17.7893 16.5504 17.4142 16.9254C17.0391 17.3005 16.5304 17.5112 16 17.5112H2C1.46957 17.5112 0.96086 17.3005 0.58579 16.9254C0.21071 16.5504 0 16.0416 0 15.5112V5.51125C0 4.46625 0.835 3.51825 1.813 3.23925L12.813 0.0962511C13.1851 -0.0100989 13.5768 -0.0286089 13.9573 0.0421711C14.3377 0.112951 14.6966 0.271091 15.0055 0.504141C15.3145 0.737191 15.5651 1.03878 15.7377 1.38516C15.9102 1.73154 16 2.11326 16 2.50025ZM12.5 9.01123C12.1022 9.01123 11.7206 9.16933 11.4393 9.45063C11.158 9.73193 11 10.1134 11 10.5112C11 10.909 11.158 11.2906 11.4393 11.5719C11.7206 11.8532 12.1022 12.0112 12.5 12.0112C12.8978 12.0112 13.2794 11.8532 13.5607 11.5719C13.842 11.2906 14 10.909 14 10.5112C14 10.1134 13.842 9.73193 13.5607 9.45063C13.2794 9.16933 12.8978 9.01123 12.5 9.01123ZM14 2.50025C14.0001 2.42966 13.9852 2.35986 13.9563 2.29544C13.9274 2.23102 13.8853 2.17345 13.8326 2.1265C13.7798 2.07955 13.7178 2.04429 13.6505 2.02305C13.5832 2.00181 13.5121 1.99506 13.442 2.00325L13.362 2.01925L8.14 3.51125H14V2.50025Z"
-                      fill="white" />
+                      d="M2 15C2.55228 15 3 14.5523 3 14C3 13.4477 2.55228 13 2 13C1.44772 13 1 13.4477 1 14C1 14.5523 1.44772 15 2 15Z"
+                      fill="black" stroke="black" stroke-linecap="round" stroke-linejoin="round" data-v-5f63f68a=""></path>
                   </svg>
-                  Create Red Packet
-                </button>
+                  <div class="accounts">
+                    <a-card title="Hexlink Account" :bordered="false" style="width: 200px; margin: 20px;">
+                      <p>Balance:</p>
+                      <p>{{ redpacket.token.label }}: 0</p>
+                      <p>{{ redpacket.gasToken.label }}: 0</p>
+                    </a-card>
+                    <a-card v-if="connection.connected" title="External Account" :bordered="false" style="width: 200px; margin: 20px;">
+                      <p>Balance:</p>
+                      <p>{{ redpacket.token.label }}:</p>
+                      <p>{{ redpacket.gasToken.label }}: 0</p>
+                      <button v-if="connection.connected" class="connect-wallet-button" @click="connectOrDisconnectWallet" style="width: 100px;">
+                        Disconnect
+                      </button>
+                    </a-card>
+                  </div>
+                </div>
+                <div class="create">
+                  <button class="connect-wallet-button" @click="createRedPacket" style="width: auto;">
+                    <svg style="margin-right: 10px;" width="18" height="18" viewBox="0 0 18 18" fill="none"
+                      xmlns="http://www.w3.org/2000/svg">
+                      <path
+                        d="M16 2.50025V3.51125C16.5304 3.51125 17.0391 3.72196 17.4142 4.09703C17.7893 4.47211 18 4.98081 18 5.51125V15.5112C18 16.0416 17.7893 16.5504 17.4142 16.9254C17.0391 17.3005 16.5304 17.5112 16 17.5112H2C1.46957 17.5112 0.96086 17.3005 0.58579 16.9254C0.21071 16.5504 0 16.0416 0 15.5112V5.51125C0 4.46625 0.835 3.51825 1.813 3.23925L12.813 0.0962511C13.1851 -0.0100989 13.5768 -0.0286089 13.9573 0.0421711C14.3377 0.112951 14.6966 0.271091 15.0055 0.504141C15.3145 0.737191 15.5651 1.03878 15.7377 1.38516C15.9102 1.73154 16 2.11326 16 2.50025ZM12.5 9.01123C12.1022 9.01123 11.7206 9.16933 11.4393 9.45063C11.158 9.73193 11 10.1134 11 10.5112C11 10.909 11.158 11.2906 11.4393 11.5719C11.7206 11.8532 12.1022 12.0112 12.5 12.0112C12.8978 12.0112 13.2794 11.8532 13.5607 11.5719C13.842 11.2906 14 10.909 14 10.5112C14 10.1134 13.842 9.73193 13.5607 9.45063C13.2794 9.16933 12.8978 9.01123 12.5 9.01123ZM14 2.50025C14.0001 2.42966 13.9852 2.35986 13.9563 2.29544C13.9274 2.23102 13.8853 2.17345 13.8326 2.1265C13.7798 2.07955 13.7178 2.04429 13.6505 2.02305C13.5832 2.00181 13.5121 1.99506 13.442 2.00325L13.362 2.01925L8.14 3.51125H14V2.50025Z"
+                        fill="white" />
+                    </svg>
+                    Create Red Packet
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -930,17 +930,13 @@ input[type=number] {
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed, reactive } from "vue";
+import { ref, onMounted, computed } from "vue";
 import Layout from "../components/Layout.vue";
 import { useAuthStore } from '@/stores/auth';
 import { truncateAddress } from "@/services/web3/account";
 import type { Connection } from "@/interfaces/connection";
 import { connectWallet, disconnectWallet, web3Modal } from "@/services/web3/connection";
 import { ethers } from "ethers";
-
-const labelCol = { style: { width: '150px' } };
-const wrapperCol = { span: 14 };
-const openDropdown = ref<boolean>(false);
 
 interface RedPacket {
   mode: "random" | "average";
@@ -966,8 +962,8 @@ const redpacket = ref<RedPacket>({
     value: ethers.constants.AddressZero,
   },
   gasToken: {
-    label: "Disabled",
-    value: "undefined",
+    label: "MATIC",
+    value: "MATIC",
   },
   expiredAt: 0 // do not expire
 });
@@ -981,10 +977,6 @@ const tokens = [{
 }];
 
 const gasTokens = [{
-  label: "Disabled",
-  value: "undefined",
-},
-{
   label: "MATIC",
   value: {
     label: "MATIC",
@@ -1021,9 +1013,10 @@ const store = useAuthStore();
 const user = store.currentUser;
 const sendLuck = ref<boolean>(true);
 const luckHistory = ref<boolean>(false);
-const state = reactive({
-  checked1: true,
-});
+const labelCol = { style: { width: '150px' } };
+const wrapperCol = { span: 14 };
+const openDropdown = ref<boolean>(false);
+const enableGas = ref<boolean>(false);
 // TODO: Implement Web3Model V2
 
 

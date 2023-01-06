@@ -1,4 +1,4 @@
-import type { Account, Wallet } from "@/types";
+import type { Wallet } from "@/types";
 import { defineStore } from 'pinia'
 
 export const useWalletStore = defineStore({

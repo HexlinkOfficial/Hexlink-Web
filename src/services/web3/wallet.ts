@@ -14,7 +14,7 @@ export const providerOptions = {
   },
 };
 
-const web3Modal = new Web3Model({
+export const web3Modal = new Web3Model({
     cacheProvider: true,
     providerOptions
 });

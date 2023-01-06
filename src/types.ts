@@ -19,10 +19,9 @@ export interface Account {
 }
 
 export interface Wallet {
-    connected: boolean,
-    wallet?: string;
-    walletIcon?: string;
-    account?: Account;
+    wallet: string;
+    walletIcon: string;
+    account: Account;
 }
 
 // if uid exists, use uid as key to

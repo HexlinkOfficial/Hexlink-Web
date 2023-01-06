@@ -782,8 +782,8 @@ input[type=number] {
                   </div>
                 </div>
               </div>
-              <div v-if="!connection.connected" class="connectWallet">
-                <button v-if="connection.connected == false" class="connect-wallet-button" @click="connectOrDisconnectWallet">
+              <div v-if="!walletStore.connected" class="connectWallet">
+                <button v-if="walletStore.connected == false" class="connect-wallet-button" @click="connectOrDisconnectWallet">
                   <svg style="margin-right: 10px;" width="18" height="18" viewBox="0 0 18 18" fill="none"
                     xmlns="http://www.w3.org/2000/svg">
                     <path
@@ -793,7 +793,7 @@ input[type=number] {
                   Connect Wallet
                 </button>
               </div>
-              <div v-if="connection.connected">
+              <div v-if="walletStore.connected">
                 <div class="red-packet">
                   <div class="total-amount">
                     <div class="box">
@@ -899,11 +899,11 @@ input[type=number] {
                       <p>{{ redpacket.token.label }}: 0</p>
                       <p>{{ redpacket.gasToken.label }}: 0</p>
                     </a-card>
-                    <a-card v-if="connection.connected" title="External Account" :bordered="false" style="width: 200px; margin: 20px;">
+                    <a-card v-if="walletStore.connected" title="External Account" :bordered="false" style="width: 200px; margin: 20px;">
                       <p>Balance:</p>
                       <p>{{ redpacket.token.label }}:</p>
                       <p>{{ redpacket.gasToken.label }}: 0</p>
-                      <button v-if="connection.connected" class="connect-wallet-button" @click="connectOrDisconnectWallet" style="width: 100px;">
+                      <button v-if="walletStore.connected" class="connect-wallet-button" @click="connectOrDisconnectWallet" style="width: 100px;">
                         Disconnect
                       </button>
                     </a-card>
@@ -931,10 +931,11 @@ input[type=number] {
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from "vue";
-import Layout from "@/components/Layout.vue";
+import Layout from "../components/Layout.vue";
 import { useAuthStore } from '@/stores/auth';
+import { useWalletStore } from '@/stores/wallet';
 import type { Connection } from "@/interfaces/connection";
-import { connectWallet, disconnectWallet, web3Modal } from "@/services/web3/connection";
+import { connectWallet, disconnectWallet, web3Modal } from "@/services/web3/wallet";
 import { ethers } from "ethers";
 
 interface RedPacket {
@@ -983,20 +984,16 @@ const gasTokens = [{
   },
 }];
 
-const connection = ref<Connection>({
-  connected: false
-});
-
 const connectOrDisconnectWallet = async function () {
-  if (connection.value.connected) {
-    connection.value = await disconnectWallet();
+  if (walletStore.connected) {
+    await disconnectWallet();
   } else {
     if (typeof window.ethereum == 'undefined') {
       console.log('MetaMask is not installed!');
     }
-    connection.value = await connectWallet();
-    console.log(connection.value.connected);
-    console.log(connection.value);
+    await connectWallet();
+    console.log(walletStore.connected);
+    console.log(walletStore.wallet);
   }
 };
 
@@ -1008,8 +1005,13 @@ const createRedPacket = async function () {
 
 };
 
-const store = useAuthStore();
-const user = store.currentUser;
+const authStore = useAuthStore();
+const user = authStore.user;
+const walletStore = useWalletStore();
+if (walletStore.connected) {
+  walletStore.wallet;
+}
+
 const sendLuck = ref<boolean>(true);
 const luckHistory = ref<boolean>(false);
 const labelCol = { style: { width: '150px' } };

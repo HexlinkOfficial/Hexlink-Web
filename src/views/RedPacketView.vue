@@ -845,8 +845,8 @@ input[type=number] {
                         <div class="mode-text">{{ redpacket.mode }}</div>
                         <input class="mode-input" type="text" placeholder="select" readonly>
                         <div class="mode-options">
-                          <div @click="modeChoose('random')">Random</div>
-                          <div @click="modeChoose('average')">Average</div>
+                          <div @click="modeChoose('Randomly')">Randomly</div>
+                          <div @click="modeChoose('Averagely')">Averagely</div>
                         </div>
                       </div>
                       <p>Shared among</p>
@@ -939,7 +939,7 @@ import { connectWallet, disconnectWallet, web3Modal } from "@/services/web3/wall
 import { ethers } from "ethers";
 
 interface RedPacket {
-  mode: "random" | "average";
+  mode: "Randomly" | "Averagely";
   split: Number,
   balance: Number,
   token: {
@@ -954,7 +954,7 @@ interface RedPacket {
 }
 
 const redpacket = ref<RedPacket>({
-  mode: "random",
+  mode: "randomly",
   split: 0,
   balance: 0,
   token: {
@@ -997,7 +997,7 @@ const connectOrDisconnectWallet = async function () {
   }
 };
 
-const modeChoose = (gameMode: "random" | "average") => {
+const modeChoose = (gameMode: "Randomly" | "Averagely") => {
   redpacket.value.mode = gameMode;
 }
 

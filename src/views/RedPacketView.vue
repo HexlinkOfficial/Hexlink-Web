@@ -812,28 +812,6 @@ input[type=number] {
                         <div class="total-choose-token">
                           <div class="token-select">
                             <a-select v-model:value="redpacket.token" style="width: 120px" :options="tokens"></a-select>
-                            <!-- <div class="token-icon">
-                              <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path
-                                  d="M16 32C24.8366 32 32 24.8366 32 16C32 7.16344 24.8366 0 16 0C7.16344 0 0 7.16344 0 16C0 24.8366 7.16344 32 16 32Z"
-                                  fill="#627EEA" />
-                                <path d="M16.1069 7L16 7.39592V18.8837L16.1069 19L21 15.848L16.1069 7Z" fill="#C0CBF6" />
-                                <path d="M16 7L11 15.848L16 19V13.4241V7Z" fill="white" />
-                                <path d="M16.0608 20.354L16 20.4392V24.7958L16.0608 25L21 17L16.0608 20.354Z"
-                                  fill="#C0CBF6" />
-                                <path d="M16 25V20.354L11 17L16 25Z" fill="white" />
-                                <path d="M16 19L21 16.1735L16 14V19Z" fill="#8197EE" />
-                                <path d="M11 16.1735L16 19V14L11 16.1735Z" fill="#C0CBF6" />
-                              </svg>
-                            </div>
-                            <span class="token-name">ETH</span>
-                            <span class="token-dropdown">
-                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                                <path fill="currentColor"
-                                  d="m11.434 15.434-5.068-5.068A.8.8 0 0 1 6.93 9h10.14a.8.8 0 0 1 .565 1.366l-5.068 5.068a.8.8 0 0 1-1.132 0Z">
-                                </path>
-                              </svg>
-                            </span> -->
                           </div>
                         </div>
                       </div>
@@ -842,11 +820,11 @@ input[type=number] {
                   <div class="mode-and-share">
                     <div class="game-mode">
                       <div class="mode-dropdown" :class="openDropdown && 'active'" @click="openDropdown = !openDropdown;">
-                        <div class="mode-text">{{ redpacket.mode }}</div>
+                        <div class="mode-text">{{ modeLabels[redpacket.mode] }}</div>
                         <input class="mode-input" type="text" placeholder="select" readonly>
                         <div class="mode-options">
-                          <div @click="modeChoose('Randomly')">Randomly</div>
-                          <div @click="modeChoose('Averagely')">Averagely</div>
+                          <div @click="modeChoose('random')">Randomly</div>
+                          <div @click="modeChoose('equal')">Equally</div>
                         </div>
                       </div>
                       <p>Shared among</p>
@@ -865,10 +843,6 @@ input[type=number] {
                     <a-switch v-model:checked="enableGas" />
                     <p>Enable Gas sponsorship</p>
                   </div>
-                  <!-- <a-form-item label="Enable gas sponsorship">
-                    <a-select v-model:value="redpacket.gasToken" style="width: 120px" :options="gasTokens">
-                    </a-select>
-                  </a-form-item> -->
                   <div class="gas-estimation">
                     <p>Gas Estimation: XXXXXX</p>
                     <a-select v-model:value="redpacket.gasToken" style=" margin-left: 1rem; width: 120px" :options="gasTokens">
@@ -930,16 +904,15 @@ input[type=number] {
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from "vue";
+import { ref } from "vue";
 import Layout from "../components/Layout.vue";
 import { useAuthStore } from '@/stores/auth';
 import { useWalletStore } from '@/stores/wallet';
-import type { Connection } from "@/interfaces/connection";
 import { connectWallet, disconnectWallet, web3Modal } from "@/services/web3/wallet";
 import { ethers } from "ethers";
 
 interface RedPacket {
-  mode: "Randomly" | "Averagely";
+  mode: "random" | "equal";
   split: Number,
   balance: Number,
   token: {
@@ -954,7 +927,7 @@ interface RedPacket {
 }
 
 const redpacket = ref<RedPacket>({
-  mode: "randomly",
+  mode: "random",
   split: 0,
   balance: 0,
   token: {
@@ -992,12 +965,15 @@ const connectOrDisconnectWallet = async function () {
       console.log('MetaMask is not installed!');
     }
     await connectWallet();
-    console.log(walletStore.connected);
-    console.log(walletStore.wallet);
   }
 };
 
-const modeChoose = (gameMode: "Randomly" | "Averagely") => {
+const modeLabels = {
+  "random": "Randomly",
+  "equal": "Equally",
+};
+
+const modeChoose = (gameMode: "random" | "equal") => {
   redpacket.value.mode = gameMode;
 }
 
@@ -1014,18 +990,6 @@ if (walletStore.connected) {
 
 const sendLuck = ref<boolean>(true);
 const luckHistory = ref<boolean>(false);
-const labelCol = { style: { width: '150px' } };
-const wrapperCol = { span: 14 };
 const openDropdown = ref<boolean>(false);
 const enableGas = ref<boolean>(false);
-// TODO: Implement Web3Model V2
-
-
-onMounted(async () => {
-  if (web3Modal.cachedProvider) {
-    connectOrDisconnectWallet();
-  }
-})
-
-
 </script>

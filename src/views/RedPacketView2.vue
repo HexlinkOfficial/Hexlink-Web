@@ -51,8 +51,8 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import Layout from "@/components/Layout.vue";
-import type { Connection } from "@/interfaces/connection";
-import { connectWallet, disconnectWallet } from "@/services/web3/connection";
+import type { Connection } from "@/interfaces/wallet;
+import { connectWallet, disconnectWallet } from "@/services/web3/wallet;
 import { ethers } from "ethers";
 
 interface RedPacket {

@@ -1,45 +1,25 @@
 import * as ethers from "ethers";
-import { getFunctions, httpsCallable } from 'firebase/functions';
-import { getProvider } from "./provider";
-import * as config from "@/services/config";
+import { getProvider } from "@/services/web3/network";
+import * as config from "@/configs/contract";
+import type { Account } from "@/types";
+import HEXLINK_ABI from "@/configs/HexlinkABI.json";
 
-const functions = getFunctions();
-
-export interface Transaction {
-    hash: string,
-    from: string,
-    to: string,
-    amount: number,
-    state: "Executing" | "Success" | "Error",
-}
-
-const genNameHash = function(prefix: string, name: string) {
-    return ethers.utils.keccak256(ethers.utils.toUtf8Bytes(`${prefix}:${name}`));
+export function genNameHash(schema: string, name: string) {
+    return ethers.utils.keccak256(
+        ethers.utils.toUtf8Bytes(`${schema}:${name}`)
+    );
 };
 
-export async function accountAddress(prefix: string, name: string | null | undefined) {
-    if (!name) return "";
-    const admin = new ethers.Contract(
-        config.ADMIN,
-        config.ADMIN_ABI,
+export async function addressOfName(nameHash: string) : Promise<string> {
+    const hexlink = new ethers.Contract(
+        config.HEXLINK,
+        HEXLINK_ABI,
         getProvider()
     );
-    console.log(prefix, name);
-    console.log(genNameHash(prefix, name));
-    return await admin.addressOfName(genNameHash(prefix, name));
-};
-
-export async function getBalance(email: string | null | undefined) : Promise<number> {
-    const getBalance = httpsCallable(functions, 'getBalance');
-    const {data} = await getBalance();
-    const {balance} = data as {balance: number};
-    return balance;
+    return await hexlink.addressOfName(nameHash);
 }
 
-export async function isContract(address: string | undefined | null): Promise<boolean> {
-    if (!address || !ethers.utils.isAddress(address)) {
-        return false;
-    }
+export async function isContract(address: string): Promise<boolean> {
     try {
         const code = await getProvider().getCode(address);
         if (code !== '0x') return true;
@@ -47,18 +27,19 @@ export async function isContract(address: string | undefined | null): Promise<bo
     return false;
 }
 
-export function prettyPrintAddress(address: string, start: number, stop: number) {
-    if (address) {
-        const len = address.length;
-        return address.substring(0, start) + "..." + address.substring(len - stop, len)
+export async function buildAccount(nameHash: string) : Promise<Account> {
+    const address = await addressOfName(nameHash);
+    return {
+        address,
+        isContract: await isContract(address),
+        balance: await getProvider().getBalance(address)
     }
-    return "N/A";
-}
+};
 
-export async function deployAccount() : Promise<{txHash: string, receiptHash: string}> {
-    const deployAccount = httpsCallable(functions, 'deployAccount');
-    const result = await deployAccount();
-    return result.data as {txHash: string, receiptHash: string};
+export function prettyPrintAddress(address: string, start: number, stop: number) {
+    const len = address.length;
+    return address.substring(0, start) +
+        "..." + address.substring(len - stop, len);
 }
 
 export function prettyPrintTxHash(txHash: string) {
@@ -85,7 +66,6 @@ export function prettyPrintTimestamp(ts: string) {
 }
 
 export function truncateAddress(address: string) {
-    if (!address) return "No Account";
     const match = address.match(
         /^(0x[a-zA-Z0-9]{2})[a-zA-Z0-9]+([a-zA-Z0-9]{2})$/
     );

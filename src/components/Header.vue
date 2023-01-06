@@ -8,24 +8,11 @@
               <div class="brand-logo header-logo">
                 <router-link to="/">
                   <img src="../assets/logo/blue2-logo.svg" alt="" />
-                  <!-- <span>Hexlink</span> -->
                 </router-link>
               </div>
-              <!-- <div class="search">
-                <form action="#" v-on:submit.prevent="">
-                  <div class="input-group">
-                    <input type="text" class="form-control" placeholder="Search Here" />
-                    <span class="input-group-text"><i class="icofont-search"></i></span>
-                  </div>
-                </form>
-              </div> -->
             </div>
 
             <div class="header-right">
-              <!-- <div class="dark-light-toggle" @click="themeToggle()">
-                <span class="dark"><i class="icofont-moon"></i></span>
-                <span class="light"><i class="icofont-sun-alt"></i></span>
-              </div> -->
               <div class="notification dropdown" @click="activeDropDown('notification')" :class="active_ === 'notification' && 'show'">
                 <div class="notify-bell" data-toggle="dropdown">
                   <svg width="21" height="25" viewBox="0 0 21 25" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -140,11 +127,8 @@
 
               <div class="profile_log dropdown" @click="activeDropDown('profile')" :class="active_ && 'show'">
                 <div class="user" data-toggle="dropdown">
-                  <!-- <div style="position: relative;">
-                    <span class="thumb"><img :src="user?.photoURL" :size="64" referrerpolicy="no-referrer" /></span>
-                  </div> -->
                   <img class="profile" :src="user?.photoURL" :size="64" referrerpolicy="no-referrer"/>
-                  <span>@{{ user?.provider?.includes("twitter") && user.screenName }}</span>
+                  <span>@{{ user?.provider?.includes("twitter") && user.handle }}</span>
                   <svg width="14" height="8" viewBox="0 0 14 8" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 0.5rem; width: 1rem">
                     <path d="M1 1L7 7L13 1" stroke="#475569" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                   </svg>
@@ -157,24 +141,12 @@
                         <span class="thumb"><img :src="user?.photoURL" :size="64" referrerpolicy="no-referrer" /></span>
                         <div class="user-info">
                           <h5>{{ user?.provider?.includes("twitter") && user?.displayName }}</h5>
-                          <span>@{{ user?.provider?.includes("twitter") && user?.screenName }}</span>
+                          <span>@{{ user?.provider?.includes("twitter") && user?.handle }}</span>
                         </div>
                       </div>
                     </div>
                     
                     <div class="user-balance" style="border-bottom-width: 1px; border-color: #E5E7EB; border-style: dashed; ">
-                      <!-- <div class="address">
-                        <span style="color: #4B5563; font-size: 0.875rem; line-height: 1.25rem; font-weight: 500;">Address: </span>
-                        <span @click="doCopy" style="margin-bottom: 0; padding-top: 0.25rem; padding-bottom: 0.25rem; padding-left: 0.5rem; padding-right: 0.5rem; background-color: #F3F4F6; font-size: 0.875rem; line-height: 1.25rem; border-radius: 0.5rem; ">
-                          {{ addressText }}
-                        </span>
-                      </div>
-                      <div class="balance">
-                        <span style="color: #4B5563; font-size: 0.875rem; line-height: 1.25rem; font-weight: 500;">Balance: </span>
-                        <span @click="doCopy">
-                          $1990.89
-                        </span>
-                      </div> -->
                       <div class="wallet-info">
                         <h5>Your Wallet Address: </h5>
                         <div class="user-wallet">
@@ -196,7 +168,7 @@
                           </div>
                         </div>
                       </div>
-                      <div v-if="Owallet!==null">
+                      <div v-if="wallet !== undefined">
                         <h5>Your Wallet Address: </h5>
                         <div class="user_wallet" style="border: 0 solid #e5e7eb; padding: 10px 0px 0px 0px;">
                           <div class="user">
@@ -221,21 +193,6 @@
                         </div>
                       </div>
                     </div>
-                    <!-- <router-link to="profile" class="dropdown-item">
-                      <i class="icofont-ui-user"></i>Profile
-                    </router-link>
-                    <router-link to="wallet" class="dropdown-item">
-                      <i class="icofont-wallet"></i>Wallet
-                    </router-link> -->
-                    <!-- <router-link to="settings-profile" class="dropdown-item">
-                      <i class="icofont-ui-settings"></i> Setting
-                    </router-link> -->
-                    <!-- <router-link to="/activities" class="dropdown-item">
-                      <i class="icofont-history"></i> Activity
-                    </router-link> -->
-                    <!-- <router-link to="lock" class="dropdown-item">
-                      <i class="icofont-lock"></i>Lock
-                    </router-link> -->
                     <router-link to="signin" class="dropdown-item logout">
                       <i class="icofont-logout"></i> Logout
                     </router-link>
@@ -253,46 +210,37 @@
 <script lang="ts">
 import { computed } from "vue";
 import { useAuthStore } from '@/stores/auth';
+import { useWalletStore } from '@/stores/wallet';
 import { prettyPrintAddress } from '@/services/web3/account';
 import { createToaster } from "@meforma/vue-toaster";
-import { truncateAddress } from "@/services/web3/account";
 
 export default {
   name: "Header",
   data() {
-    const store = useAuthStore();
-    const user = store.currentUser!;
-    const Owallet = store.Owallet!;
-    console.log(user)
-    console.log("External Wallet: ", Owallet);
-    // const externalWallet = computed(() => {
-    //   if (Owallet.Oaccount !== null) {
-    //     return Owallet.Oaccount;
-    //   } else {
-    //     return "";
-    //   }
-    // })
-    const actualAddress = user.walletAddress;
+    const authStore = useAuthStore();
+    const user = authStore.user!;
+    
+    const walletStore = useWalletStore();
+    const wallet = walletStore.wallet!;
     const addressTextLong = computed(() => {
-      if (user.walletAddress) {
-        return prettyPrintAddress(user.walletAddress!, 5, 6);
+      if (user?.account.address) {
+        return prettyPrintAddress(user.account.address, 5, 6);
       } else {
         return "";
       }
     })
     const addressTextNormal = computed(() => {
-      if (user.walletAddress) {
-        return prettyPrintAddress(user.walletAddress!, 3, 3);
+      if (user.account.address) {
+        return prettyPrintAddress(user.account.address!, 3, 3);
       } else {
         return "";
       }
     })
     return {
-      actualAddress,
       addressTextLong,
       addressTextNormal,
       user,
-      Owallet,
+      wallet,
       active_: "",
       eth: false,
       sui: false,
@@ -389,7 +337,7 @@ export default {
       this.active_ = this.active_ === value ? "" : value;
     },
     doCopy: function () {
-      this.$copyText(this.actualAddress).then(
+      this.$copyText(this.user.account.address).then(
         function () {
           // alert("Copied");
           const toaster = createToaster({ position: "top", duration: 2000 });
@@ -405,9 +353,9 @@ export default {
   },
   mounted() {
     document.addEventListener('click', this.closeDropDown)
-    const store = useAuthStore();
-    const Owallet = store.Owallet!;
-    console.log("External Wallet: ", Owallet);
+    const store = useWalletStore();
+    const wallet = store.wallet;
+    console.log("External Wallet: ", wallet);
   },
   beforeDestroy() {
     document.removeEventListener('click', this.closeDropDown)

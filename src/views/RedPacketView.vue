@@ -931,9 +931,8 @@ input[type=number] {
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from "vue";
-import Layout from "../components/Layout.vue";
+import Layout from "@/components/Layout.vue";
 import { useAuthStore } from '@/stores/auth';
-import { truncateAddress } from "@/services/web3/account";
 import type { Connection } from "@/interfaces/connection";
 import { connectWallet, disconnectWallet, web3Modal } from "@/services/web3/connection";
 import { ethers } from "ethers";

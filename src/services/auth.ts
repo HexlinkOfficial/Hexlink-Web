@@ -2,16 +2,15 @@ import {
     getAuth,
     GoogleAuthProvider,
     TwitterAuthProvider,
-    GithubAuthProvider,
-    FacebookAuthProvider,
     signInWithPopup,
     signOut,
 } from 'firebase/auth'
 import type { User } from 'firebase/auth'
+import type { IUser } from "@/types";
 import { getFunctions, httpsCallable } from 'firebase/functions'
 import { app } from '@/services/firebase'
 import { useAuthStore } from "@/stores/auth"
-import { accountAddress } from '@/services/web3/account'
+import { genNameHash, buildAccount } from '@/services/web3/account'
 
 const auth = getAuth(app)
 const functions = getFunctions()
@@ -46,9 +45,19 @@ export async function googleSocialLogin() {
     try {
         const result = await signInWithPopup(auth, provider)
         const idToken = await getIdTokenAndSetClaimsIfNecessary(result.user)
-        const walletAddress = await accountAddress("mailto", result.user.email);
+        const nameHash = await genNameHash("mailto", result.user.email!);
+        const account = await buildAccount(nameHash);
+        const user : IUser = {
+            provider: "google",
+            uid: result.user.uid,
+            handle: result.user.email!,
+            displayName: result.user.displayName || undefined,
+            photoURL: result.user.photoURL || undefined,
+            nameHash,
+            account
+        }
         const store = useAuthStore();
-        store.signIn(result.user, idToken, walletAddress);
+        store.signIn(user, idToken);
     } catch (error: any) {
         if (error.code == 'auth/popup-closed-by-user') {
             return
@@ -59,41 +68,22 @@ export async function googleSocialLogin() {
 export async function twitterSocialLogin() {
     const provider = new TwitterAuthProvider();
     try {
-        const result = await signInWithPopup(auth, provider)
-        const idToken = await getIdTokenAndSetClaimsIfNecessary(result.user)
-        console.log(result.user);
-        const walletAddress = await accountAddress(
-            "twitter.com",
-            result.user.providerData[0].uid
-        );
+        const result = await signInWithPopup(auth, provider);
+        const idToken = await getIdTokenAndSetClaimsIfNecessary(result.user);
+        const uid = result.user.providerData[0].uid;
+        const nameHash = await genNameHash("twitter.com", uid);
+        const account = await buildAccount(nameHash);
+        const user : IUser = {
+            provider: "twitter.com",
+            uid,
+            handle: result.user.reloadUserInfo.screenName,
+            displayName: result.user.displayName || undefined,
+            photoURL: result.user.photoURL || undefined,
+            nameHash,
+            account
+        }
         const store = useAuthStore();
-        store.signIn(result.user, idToken, walletAddress);
-    } catch (error) {
-        console.log(error);
-    }
-}
-
-export async function githubSocialLogin() {
-    const provider = new GithubAuthProvider();
-    try {
-        const result = await signInWithPopup(auth, provider)
-        const idToken = await getIdTokenAndSetClaimsIfNecessary(result.user)
-        const walletAddress = await accountAddress("github.com", result.user.providerId);
-        const store = useAuthStore();
-        store.signIn(result.user, idToken, walletAddress);
-    } catch (error) {
-        console.log(error);
-    }
-}
-
-export async function facebookSocialLogin() {
-    const provider = new FacebookAuthProvider();
-    try {
-        const result = await signInWithPopup(auth, provider)
-        const idToken = await getIdTokenAndSetClaimsIfNecessary(result.user)
-        const walletAddress = await accountAddress("facebook.com", result.user.providerId);
-        const store = useAuthStore();
-        store.signIn(result.user, idToken, walletAddress);
+        store.signIn(user, idToken);
     } catch (error) {
         console.log(error);
     }

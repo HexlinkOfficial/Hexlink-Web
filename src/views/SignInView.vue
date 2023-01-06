@@ -80,26 +80,14 @@
 
 <script setup lang="ts">
     import { useRouter } from 'vue-router'; 
-    import { googleSocialLogin, twitterSocialLogin, githubSocialLogin, facebookSocialLogin } from '@/services/auth'
+    import { twitterSocialLogin } from '@/services/auth'
     import { useAuthStore } from '@/stores/auth'
-    import logo from "../assets/hori-white-logo.svg"
-    import loginbg from "../assets/bg-login.jpg"
+    import logo from "@/assets/hori-white-logo.svg"
+    import loginbg from "@/assets/bg-login.jpg"
     const store = useAuthStore();
     const router = useRouter();
-    const google_login = async () => {
-        await googleSocialLogin();
-        router.push(store.returnUrl || "/");
-    }
     const twitter_login = async () => {
         await twitterSocialLogin();
-        router.push(store.returnUrl || "/");
-    }
-    const github_login = async () => {
-        await githubSocialLogin();
-        router.push(store.returnUrl || "/");
-    }
-    const facebook_login = async () => {
-        await facebookSocialLogin();
         router.push(store.returnUrl || "/");
     }
 </script>

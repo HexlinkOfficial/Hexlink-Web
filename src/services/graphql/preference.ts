@@ -1,5 +1,5 @@
 import { gql } from '@urql/core'
-import type { IAuth } from '@/stores/auth';
+import type { IAuth } from '@/types';
 import { handleUrqlResponse, setUrqlClientIfNecessary } from './urql'
 
 export const GET_TOKEN_PREFERENCES = gql`
@@ -69,10 +69,10 @@ export async function getTokenPreferences(
     store: IAuth,
     chain: string
 ) : Promise<PreferenceOutput[]> {
-    const client = setUrqlClientIfNecessary(store.idToken)
+    const client = setUrqlClientIfNecessary(store.idToken!)
     const result = await client.query(
         GET_TOKEN_PREFERENCES,
-        {userId: store.currentUser.uid, chain}
+        {userId: store.user!.uid, chain}
     ).toPromise();
     if (await handleUrqlResponse(result)) {
         return result.data.preference;
@@ -85,12 +85,12 @@ export async function insertTokenPreferences(
     store: IAuth,
     data: PreferenceInput[],
 ) : Promise<{id: number}[]> {
-    const client = setUrqlClientIfNecessary(store.idToken)
+    const client = setUrqlClientIfNecessary(store.idToken!)
     const result = await client.mutation(
         INSERT_TOKEN_PREFERENCES,
         {
             objects: data.map(d => ({
-                user_id: store.currentUser.uid,
+                user_id: store.user!.uid,
                 chain: d.chain,
                 token_address: d.token_address.toLowerCase(),
                 token_alias: d.token_alias,
@@ -112,7 +112,7 @@ export async function updateTokenPreference(
         display: boolean,
     },
 ) : Promise<void> {
-    const client = setUrqlClientIfNecessary(store.idToken);
+    const client = setUrqlClientIfNecessary(store.idToken!);
     const result = await client.mutation(
         UPDATE_TOKEN_PREFERENCE,
         data

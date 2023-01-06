@@ -465,7 +465,7 @@ svg {
               <div v-if="tokenView" class="token-listDetail">
                 <div class="token-table">
                   <div style="overflow: visible; border-radius: 0.75rem;">
-                    <WalletTokenList :tokens="visiableTokens" :balance="totalAssets.toNumber()" :loading="loading">
+                    <WalletTokenList :tokens="visiableTokens" :loading="loading">
                     </WalletTokenList>
                   </div>
                 </div>
@@ -485,49 +485,36 @@ svg {
 import { ref, onMounted, computed } from "vue";
 import type { Token } from "@/services/web3/tokens";
 import { loadAll } from "@/services/web3/tokens";
-import { getBalance, isContract } from "@/services/web3/account";
+import { isContract } from "@/services/web3/account";
 import Layout from "../components/Layout.vue";
 import WalletTokenList from "../components/WalletTokenList.vue";
 import WalletNFTGrid from "../components/WalletNFTGrid.vue";
 import { useAuthStore } from '@/stores/auth';
-import WalletSetup from "@/components/AccountSetup.vue";
 import { BigNumber } from "bignumber.js";
 import type { NFTOutput } from '@/services/graphql/nft';
 import { getAllOwnedNFT } from '@/services/web3/nft';
 
 const store = useAuthStore();
-const user = store.currentUser;
-const firstName = user?.displayName!.split(" ")[0];
-const lastName = user?.displayName!.split(" ")[-1];
-const goerliScan = `https://goerli.etherscan.io/address/${user!.walletAddress}`;
+const user = store.user!;
+const goerliScan = `https://goerli.etherscan.io/address/${user?.account.address}`;
 const nftView = ref<boolean>(false);
 const tokenView = ref<boolean>(true);
-const active_ = ref<string>("");
 const isDeployed = ref<boolean>(true);
 const loading = ref<boolean>(true);
 const tokens = ref<{ [key: string]: Token }>({});
-const balance = ref<number>(0);
 const chain = "GOERLI";
 const nfts = ref<NFTOutput[]>([]);
-const message = "https://play.hexlink.io/join/12345";
 const showInfo = ref<boolean>(true);
-// const progress = document.querySelector(".js-completed-bar");
-// if (progress) {
-//   progress.style.width = progress.getAttribute("data-complete") + "%";
-//   progress.style.opacity = 1;
-// }
 
 onMounted(async () => {
-  balance.value = await getBalance(user?.email);
-  const accountAddress = store.currentUser!.walletAddress!;
-  tokens.value = await loadAll(store, accountAddress, chain);
-  isDeployed.value = await isContract(accountAddress);
-
+  const accountAddress = store.user?.account.address;
+  if (accountAddress) {
+    tokens.value = await loadAll(store, accountAddress, chain);
+    isDeployed.value = await isContract(accountAddress);
+  }
   const ownedNFTs = await getAllOwnedNFT(store);
   nfts.value = ownedNFTs;
-
   loading.value = false;
-  console.log(nfts)
 });
 
 const visiableTokens = computed(() => {
@@ -541,7 +528,6 @@ const totalAssets = computed(() => {
       total = total.plus(token.balance.normalized.times(token.price));
     }
   }
-  // return total.plus(BigNumber(dynamicBalance.value));
   return total;
 });
 

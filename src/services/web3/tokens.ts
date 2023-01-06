@@ -13,7 +13,7 @@ import type {
     PreferenceInput,
     Preference
 } from "@/services/graphql/preference";
-import type { IAuth } from '@/stores/auth';
+import type { IAuth } from '@/types';
 import type { TokenBalance } from "alchemy-sdk";
 import { TokenBalanceType } from "alchemy-sdk";
 import type { TokenBalancesOptionsErc20 } from "alchemy-sdk";

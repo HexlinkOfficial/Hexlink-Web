@@ -27,13 +27,17 @@ export async function isContract(address: string): Promise<boolean> {
     return false;
 }
 
-export async function buildAccount(nameHash: string) : Promise<Account> {
-    const address = await addressOfName(nameHash);
+export async function buildAccountFromAddress(address: string) : Promise<Account> {
     return {
         address,
         isContract: await isContract(address),
         balance: await getProvider().getBalance(address)
     }
+};
+
+export async function buildAccount(nameHash: string) : Promise<Account> {
+    const address = await addressOfName(nameHash);
+    return buildAccountFromAddress(address);
 };
 
 export function prettyPrintAddress(address: string, start: number, stop: number) {

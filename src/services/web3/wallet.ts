@@ -1,7 +1,7 @@
 import Web3Model from "web3modal";
 import { ethers } from "ethers";
 import { useWalletStore } from "@/stores/wallet"
-import { buildAccount } from "./account";
+import { buildAccountFromAddress } from "./account";
 import WalletConnect from "@walletconnect/web3-provider";
 import type { Wallet } from "@/types";
 
@@ -47,7 +47,7 @@ export async function connectWallet() {
   }
   const store = useWalletStore();
   store.connectWallet({
-    account: await buildAccount(accounts[0]),
+    account: await buildAccountFromAddress(accounts[0]),
     wallet,
     walletIcon,
   } as Wallet);

@@ -4,3 +4,5 @@ declare module "*.svg" {
     const filepath: string;
     export default filepath;
 }
+
+declare module '@meforma/vue-toaster';

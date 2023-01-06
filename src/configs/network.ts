@@ -2,7 +2,7 @@ import { BigNumber } from "ethers";
 import type { Network } from "@/types";
 
 export const GOERLI : Network = {
-    chainId: BigNumber.from(5),
+    chainId: 5,
     name: "goerli",
     chainName: "Goerli Test Network",
     rpcUrls: ["https://eth-goerli.g.alchemy.com/v2/U4LBbkMIAKCf4GpjXn7nB7H1_P9GiU4b"],
@@ -12,12 +12,12 @@ export const GOERLI : Network = {
         decimals: 18
     },
     blockExplorerUrls: ["https://goerli.etherscan.io"],
-    logoUrl: "https://token.metaswap.codefi.network/assets/networkLogos/polygon.svg",
+    logoUrl: "https://token.metaswap.codefi.network/assets/networkLogos/ethereum.svg",
 };
 
 export const POLYGON : Network = {
-    chainId: BigNumber.from("0x89"),
-    rpcUrls: ["https://rpc-mainnet.matic.network/"],
+    chainId: 137,
+    rpcUrls: ["https://polygon-mainnet.g.alchemy.com/v2/1GmfWOSlYIlUI0UcCu4Y2O-8DmFJrlqA"],
     name: "polygon",
     chainName: "Polygon Network",
     nativeCurrency: {

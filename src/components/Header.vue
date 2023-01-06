@@ -196,6 +196,7 @@ import { POLYGON, GOERLI } from "@/configs/network";
 import { switchNewtwork } from "@/services/web3/network";
 import type { Network } from "@/types";
 import { connectWallet, disconnectWallet } from "@/services/web3/wallet";
+import { useNetworkStore } from '@/stores/network';
 
 export default {
   name: "Header",
@@ -221,7 +222,7 @@ export default {
       active_: "",
       POLYGON,
       GOERLI,
-      selected: POLYGON,
+      selected: useNetworkStore().network,
       networkCount: 1,
       index: 0,
     };

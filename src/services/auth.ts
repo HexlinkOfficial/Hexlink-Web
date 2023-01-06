@@ -45,7 +45,7 @@ export async function googleSocialLogin() {
     try {
         const result = await signInWithPopup(auth, provider)
         const idToken = await getIdTokenAndSetClaimsIfNecessary(result.user)
-        const nameHash = await genNameHash("mailto", result.user.email!);
+        const nameHash = genNameHash("mailto", result.user.email!);
         const account = await buildAccount(nameHash);
         const user : IUser = {
             provider: "google",
@@ -55,10 +55,11 @@ export async function googleSocialLogin() {
             displayName: result.user.displayName || undefined,
             photoURL: result.user.photoURL || undefined,
             nameHash,
+            idToken,
             account
-        }
+        };
         const store = useAuthStore();
-        store.signIn(user, idToken);
+        store.signIn(user);
     } catch (error: any) {
         if (error.code == 'auth/popup-closed-by-user') {
             return
@@ -72,7 +73,7 @@ export async function twitterSocialLogin() {
         const result = await signInWithPopup(auth, provider);
         const idToken = await getIdTokenAndSetClaimsIfNecessary(result.user);
         const providerUid = result.user.providerData[0].uid;
-        const nameHash = await genNameHash("twitter.com", providerUid);
+        const nameHash = genNameHash("twitter.com", providerUid);
         const account = await buildAccount(nameHash);
         const user : IUser = {
             provider: "twitter.com",
@@ -82,10 +83,12 @@ export async function twitterSocialLogin() {
             displayName: result.user.displayName || undefined,
             photoURL: result.user.photoURL || undefined,
             nameHash,
+            idToken,
             account
-        }
+        };
+        console.log(user);
         const store = useAuthStore();
-        store.signIn(user, idToken);
+        store.signIn(user);
     } catch (error) {
         console.log(error);
     }

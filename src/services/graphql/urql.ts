@@ -28,11 +28,7 @@ export function setUrqlClientIfNecessary(idToken: string) {
     return urqlClient;
 }
 
-export function getUrqlClient(idToken: string) {
-    return urqlClient;
-}
-
-export async function handleUrqlResponse(result) {
+export async function handleUrqlResponse(result: any) {
     if (result?.error) {
         let gerrors = result.error.graphQLErrors || [];
         for (const err of gerrors) {

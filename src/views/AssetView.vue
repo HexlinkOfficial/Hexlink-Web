@@ -471,7 +471,7 @@ svg {
                 </div>
               </div>
               <div v-if="nftView" class="nft-gridDetail">
-                <WalletNFTGrid :nfts="nfts"></WalletNFTGrid>
+                <WalletNFTGrid></WalletNFTGrid>
               </div>
             </div>
           </div>
@@ -483,32 +483,33 @@ svg {
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from "vue";
-import type { Token } from "@/services/web3/tokens";
+import type { Token } from "@/types";
 import { loadAll } from "@/services/web3/tokens";
 import Layout from "../components/Layout.vue";
 import WalletTokenList from "../components/WalletTokenList.vue";
 import WalletNFTGrid from "../components/WalletNFTGrid.vue";
 import { useAuthStore } from '@/stores/auth';
 import { useNetworkStore } from '@/stores/network';
-
 import { BigNumber } from "bignumber.js";
 
-const networkStore = useNetworkStore();
-const blockExplorer = ref<string>(networkStore.network.blockExplorerUrls[0]);
+const network = useNetworkStore().network;
 const nftView = ref<boolean>(false);
 const tokenView = ref<boolean>(true);
 const loading = ref<boolean>(true);
 const tokens = ref<{ [key: string]: Token }>({});
 const showInfo = ref<boolean>(true);
 
-const authStore = useAuthStore();
+const auth = useAuthStore();
 onMounted(async () => {
-  if (authStore.authenticated) {
-    tokens.value = await loadAll(authStore, networkStore.network.name);
-    const account = authStore.user!.account.address;
-    blockExplorer.value = `${networkStore.network.blockExplorerUrls[0]}/address/${account}`;
+  if (auth.authenticated) {
+    tokens.value = await loadAll();
   }
   loading.value = false;
+});
+
+const blockExplorer = computed(() => {
+  const account = auth.user!.account.address;
+  return `${network.blockExplorerUrls[0]}/address/${account}`;
 });
 
 const visiableTokens = computed(() => {

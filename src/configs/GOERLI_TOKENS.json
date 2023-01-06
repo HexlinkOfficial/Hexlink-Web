@@ -1,0 +1,42 @@
+[
+    {
+        "chainId": 5,
+        "symbol": "Goerli ETH",
+        "name": "Goerli Ethereum",
+        "decimals": 18,
+        "address": "0x0000000000000000000000000000000000000000",
+        "logoURI": "https://token.metaswap.codefi.network/assets/networkLogos/ethereum.svg"
+    },
+    {
+        "chainId": 5,
+        "symbol": "HEXL",
+        "name": "Hexlink",
+        "decimals": 18,
+        "address": "0x4435605191245cb25ac7000469ca749c196c7750",
+        "logoURI": "/assets/logo/blue-logo.svg"
+    },
+    {
+        "chainId": 5,
+        "symbol": "USDC",
+        "name": "USD Coin",
+        "decimals": 18,
+        "address": "0x2f3a40a3db8a7e3d09b0adfefbce4f6f81927557",
+        "logoURI": "https://wallet-asset.matic.network/img/tokens/usdc.svg"
+    },
+    {
+        "chainId": 5,
+        "symbol": "WETH",
+        "name": "Wrapped Ether",
+        "decimals": 18,
+        "address": "0xb4fbf271143f4fbf7b91a5ded31805e42b2208d6",
+        "logoURI": "https://wallet-asset.matic.network/img/tokens/eth.svg"
+    },
+    {
+        "chainId": 5,
+        "symbol": "DAI",
+        "name": "Stablecoin DAI",
+        "decimals": 18,
+        "address": "0x11fe4b6ae13d2a6055c8d9cf65c55bac32b5d844",
+        "logoURI": "https://wallet-asset.matic.network/img/tokens/dai.svg"
+    }
+]

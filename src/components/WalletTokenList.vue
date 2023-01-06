@@ -25,9 +25,9 @@
           <div class="token-description">
             <div class="token-logo">
               <div class="network-logo">
-                <img :src="token.metadata.logo || 'https://token.metaswap.codefi.network/assets/networkLogos/ethereum.svg'" alt={{token.address}} />
+                <img :src="network.logoUrl" alt={{token.address}} />
               </div>
-              <img class="logo" :src="token.metadata.logo || logo" alt={{token.address}} />
+              <img class="logo" :src="token.metadata.logoURI || logo" alt={{token.address}} />
             </div>
             <div class="token-name">
               <div class="name">
@@ -40,7 +40,7 @@
           </div>
         </td>
         <td class="portfolio-percentage-detail">
-          <div>{{ balance > 0 ? (token.balance?.normalized.times(token.price || 0) / balance) : 0}} %</div>
+          <div>{{ getPortfolioRatio(token) }} %</div>
         </td>
         <td class="price-detail">
           <div class="detail">
@@ -69,6 +69,41 @@
 </template>
   <!-- </a-list>
 </template> -->
+
+<script lang="ts" setup>
+import { ref, computed } from 'vue'
+import type { Token } from "@/types";
+import type { BigNumber } from "bignumber.js";
+import logo from "../assets/network-icons/hexlink.svg";
+import { useNetworkStore } from "@/stores/network";
+
+const isGreen = ref(true);
+
+const network = useNetworkStore().network;
+
+const props = defineProps({
+  tokens: {
+    type: Object as () => Token[],
+    required: true,
+  },
+  balance: {
+    type: Object as () => BigNumber,
+    required: false,
+  },
+  loading: {
+    type: Object as () => Boolean,
+    required: true,
+  }
+});
+
+const getPortfolioRatio = (token: Token) => {
+  if (props.balance?.gt(0)) {
+    const tokeValue = token.balance?.normalized.times(token.price || 0);
+    return tokeValue?.times(100).div(props.balance);
+  }
+  return 0;
+};
+</script>
 
 <style lang="less" scoped>
 img {
@@ -271,27 +306,3 @@ tbody tr {
   justify-content: center;
   padding: 30px; }
 </style>
-
-<script lang="ts" setup>
-import { ref } from 'vue'
-import type { Token } from "@/services/web3/tokens";
-import { BigNumber } from "bignumber.js";
-import logo from "../assets/network-icons/hexlink.svg";
-
-const isGreen = ref(true);
-
-const props = defineProps({
-  tokens: {
-    type: Object as () => Token[],
-    required: true,
-  },
-  balance: {
-    type: Object as () => BigNumber,
-    required: false,
-  },
-  loading: {
-    type: Object as () => Boolean,
-    required: true,
-  }
-});
-</script>

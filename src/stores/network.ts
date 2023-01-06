@@ -1,11 +1,11 @@
 import { defineStore } from 'pinia'
 import type { Network } from "@/types";
-import { POLYGON } from "@/configs/network";
+import { GOERLI } from "@/configs/network";
 
 export const useNetworkStore = defineStore({
     id: 'network',
     state: () : {network: Network} => ({
-        network: POLYGON
+        network: GOERLI
     }),
     persist: true,
     actions: {

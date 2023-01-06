@@ -11,6 +11,8 @@ export function genNameHash(schema: string, name: string) {
 };
 
 export async function addressOfName(nameHash: string) : Promise<string> {
+    const provider = getProvider();
+    console.log(provider);
     const hexlink = new ethers.Contract(
         config.HEXLINK,
         HEXLINK_ABI,
@@ -30,14 +32,15 @@ export async function isContract(address: string): Promise<boolean> {
 export async function buildAccountFromAddress(address: string) : Promise<Account> {
     return {
         address,
-        isContract: await isContract(address),
-        balance: await getProvider().getBalance(address)
-    }
+        isContract: await isContract(address)
+    };
 };
 
 export async function buildAccount(nameHash: string) : Promise<Account> {
+    console.log(nameHash);
     const address = await addressOfName(nameHash);
-    return buildAccountFromAddress(address);
+    console.log(address);
+    return await buildAccountFromAddress(address);
 };
 
 export function prettyPrintAddress(address: string, start: number, stop: number) {

@@ -147,12 +147,4 @@
 </style>
 
 <script setup lang="ts">
-import type { NFTOutput } from '@/services/graphql/nft';
-
-const props = defineProps({
-  nfts: {
-    type: Object as () => NFTOutput[],
-    required: true,
-  },
-});
 </script>

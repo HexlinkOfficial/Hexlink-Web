@@ -4,7 +4,7 @@ import { ethers, BigNumber } from "ethers";
 import { useAuthStore } from "@/stores/auth"
 import type { Connection } from "@/interfaces/connection";
 
-const web3Modal = new Web3Model({
+export const web3Modal = new Web3Model({
     cacheProvider: true,
     providerOptions
 });

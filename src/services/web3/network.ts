@@ -6,7 +6,7 @@ export async function switchNewtwork(network: Network) {
     try {
         await window.ethereum.request({
         method: 'wallet_switchEthereumChain',
-        params: [{ chainId: network.chainId }],
+        params: [{ chainId: ethers.utils.hexValue(network.chainId) }],
         });
     } catch (error: any) {
         if (error.code === 4902) {

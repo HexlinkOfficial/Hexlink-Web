@@ -4,6 +4,7 @@ import { useWalletStore } from "@/stores/wallet"
 import { buildAccountFromAddress } from "./account";
 import WalletConnect from "@walletconnect/web3-provider";
 import type { Wallet } from "@/types";
+import { useNetworkStore } from "@/stores/network";
 
 export const providerOptions = {
   walletconnect: {
@@ -26,6 +27,10 @@ export async function disconnectWallet() {
 }
 
 export async function connectWallet() {
+  if (typeof window.ethereum == 'undefined') {
+    console.log('MetaMask is not installed!');
+  }
+
   const provider = await web3Modal.connect();
   const library = new ethers.providers.Web3Provider(provider);
   const accounts = await library.listAccounts();
@@ -47,6 +52,7 @@ export async function connectWallet() {
   }
   const store = useWalletStore();
   store.connectWallet({
+    network: useNetworkStore().network.name,
     account: await buildAccountFromAddress(accounts[0]),
     wallet,
     walletIcon,

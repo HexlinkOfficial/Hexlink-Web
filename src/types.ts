@@ -3,13 +3,15 @@ import type { BigNumber } from "ethers";
 export interface Network {
     chainId: BigNumber,
     rpcUrls: string[],
+    name: string,
     chainName: string,
     nativeCurrency: {
         name: string,
         symbol: string,
         decimals: Number,
     },
-    blockExplorerUrls: string[]
+    blockExplorerUrls: string[],
+    logoUrl: string,
 }
 
 export interface Account {
@@ -22,6 +24,7 @@ export interface Wallet {
     wallet: string;
     walletIcon: string;
     account: Account;
+    network: string,
 }
 
 // if uid exists, use uid as key to

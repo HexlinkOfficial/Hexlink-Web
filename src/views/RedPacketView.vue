@@ -792,7 +792,7 @@ input[type=number] {
                 <h1>No Red Packet Sent Yet!</h1>
               </div>
               <div v-if="!walletStore.connected && sendLuck" class="connectWallet">
-                <button v-if="walletStore.connected == false" class="connect-wallet-button" @click="connectOrDisconnectWallet">
+                <button class="connect-wallet-button" @click="connectWallet">
                   <svg style="margin-right: 10px;" width="18" height="18" viewBox="0 0 18 18" fill="none"
                     xmlns="http://www.w3.org/2000/svg">
                     <path
@@ -866,29 +866,16 @@ input[type=number] {
                   </div>
                 </div>
                 <div class="choose-account">
-                  <p>Choose Your Account</p>
-                  <svg width="4" height="16" viewBox="0 0 4 16" fill="none" xmlns="http://www.w3.org/2000/svg" data-v-5f63f68a="">
-                    <path d="M2 9C2.55228 9 3 8.55228 3 8C3 7.44772 2.55228 7 2 7C1.44772 7 1 7.44772 1 8C1 8.55228 1.44772 9 2 9Z"
-                      fill="black" stroke="black" stroke-linecap="round" stroke-linejoin="round" data-v-5f63f68a=""></path>
-                    <path d="M2 3C2.55228 3 3 2.55228 3 2C3 1.44772 2.55228 1 2 1C1.44772 1 1 1.44772 1 2C1 2.55228 1.44772 3 2 3Z"
-                      fill="black" stroke="black" stroke-linecap="round" stroke-linejoin="round" data-v-5f63f68a=""></path>
-                    <path
-                      d="M2 15C2.55228 15 3 14.5523 3 14C3 13.4477 2.55228 13 2 13C1.44772 13 1 13.4477 1 14C1 14.5523 1.44772 15 2 15Z"
-                      fill="black" stroke="black" stroke-linecap="round" stroke-linejoin="round" data-v-5f63f68a=""></path>
-                  </svg>
                   <div class="accounts">
-                    <a-card title="Hexlink Account" :bordered="false" style="width: 200px; margin: 20px;">
+                    <a-card title="Hexlink Account" style="width: 200px; margin: 20px;">
                       <p>Balance:</p>
                       <p>{{ redpacket.token.label }}: 0</p>
                       <p v-if="showGasToken()">{{ redpacket.gasToken.label }}: 0</p>
                     </a-card>
-                    <a-card v-if="walletStore.connected" title="External Account" :bordered="false" style="width: 200px; margin: 20px;">
+                    <a-card v-if="walletStore.connected" title="External Account" style="width: 200px; margin: 20px;">
                       <p>Balance:</p>
                       <p>{{ redpacket.token.label }}: 0</p>
                       <p v-if="showGasToken()">{{ redpacket.gasToken.label }}: 0</p>
-                      <button v-if="walletStore.connected" class="connect-wallet-button" @click="connectOrDisconnectWallet" style="width: 100px;">
-                        Disconnect
-                      </button>
                     </a-card>
                   </div>
                 </div>
@@ -915,7 +902,7 @@ input[type=number] {
 <script setup lang="ts">
 import { ref } from "vue";
 import Layout from "../components/Layout.vue";
-import { connectWallet, disconnectWallet, web3Modal } from "@/services/web3/wallet";
+import { connectWallet } from "@/services/web3/wallet";
 import { ethers } from "ethers";
 import { useWalletStore } from '@/stores/wallet';
 
@@ -955,16 +942,6 @@ const tokens = [{
 }];
 
 const walletStore = useWalletStore();
-const connectOrDisconnectWallet = async function () {
-  if (walletStore.connected) {
-    await disconnectWallet();
-  } else {
-    if (typeof window.ethereum == 'undefined') {
-      console.log('MetaMask is not installed!');
-    }
-    await connectWallet();
-  }
-};
 
 const modeLabels = {
   "random": "Randomly",

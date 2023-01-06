@@ -504,7 +504,7 @@ const showInfo = ref<boolean>(true);
 const authStore = useAuthStore();
 onMounted(async () => {
   if (authStore.authenticated) {
-    tokens.value = await loadAll(authStore, networkStore.network.chainName);
+    tokens.value = await loadAll(authStore, networkStore.network.name);
     const account = authStore.user!.account.address;
     blockExplorer.value = `${networkStore.network.blockExplorerUrls[0]}/address/${account}`;
   }

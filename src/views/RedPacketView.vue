@@ -866,12 +866,12 @@ input[type=number] {
                     <p>Enable Gas sponsorship</p>
                   </div>
                   <!-- <a-form-item label="Enable gas sponsorship">
-                    <a-select v-model:value="redpacket.gasToken" style="width: 120px" :options="gasTokens">
+                    <a-select v-model:value="redpacket.gasToken" style="width: 120px" :options="tokens">
                     </a-select>
                   </a-form-item> -->
                   <div class="gas-estimation">
                     <p>Gas Estimation: XXXXXX</p>
-                    <a-select v-model:value="redpacket.gasToken" style=" margin-left: 1rem; width: 120px" :options="gasTokens">
+                    <a-select v-model:value="redpacket.gasToken" style=" margin-left: 1rem; width: 120px" :options="tokens">
                     </a-select>
                     <svg style="margin-left: 1rem; width: 16px;" width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path
@@ -954,7 +954,7 @@ interface RedPacket {
 }
 
 const redpacket = ref<RedPacket>({
-  mode: "randomly",
+  mode: "Randomly",
   split: 0,
   balance: 0,
   token: {
@@ -970,18 +970,7 @@ const redpacket = ref<RedPacket>({
 
 const tokens = [{
   label: "MATIC",
-  value: {
-    label: "MATIC",
-    value: ethers.constants.AddressZero,
-  }
-}];
-
-const gasTokens = [{
-  label: "MATIC",
-  value: {
-    label: "MATIC",
-    value: ethers.constants.AddressZero,
-  },
+  value: ethers.constants.AddressZero
 }];
 
 const connectOrDisconnectWallet = async function () {

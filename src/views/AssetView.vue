@@ -458,7 +458,7 @@ svg {
                     <button class="listView-button" @click="nftView = false; tokenView = true"
                       :class="tokenView && 'show'">Tokens</button>
                     <button class="listView-button" @click="tokenView = false; nftView = true"
-                      :class="nftView && 'show'">NFTs</button>
+                      :class="nftView && 'show'">Collectables</button>
                   </div>
                 </div>
               </div>

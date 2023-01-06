@@ -719,6 +719,12 @@ input[type=number] {
   height: 500px;
   align-items: center;
   justify-content: center; }
+.sent-history {
+  display: flex;
+  width: 100%;
+  height: 500px;
+  justify-content: center;
+  align-items: center; }
 .enable-switch {
   display: flex;
   align-items: center;
@@ -775,14 +781,17 @@ input[type=number] {
                 </div>
                 <div class="views">
                   <div class="detail-view">
+                    <button class="listView-button" @click="luckHistory = true; sendLuck = false" :class="luckHistory && 'show'">Luck
+                      History</button>
                     <button class="listView-button" @click="sendLuck = true; luckHistory = false"
                       :class="sendLuck && 'show'">Send Luck</button>
-                    <button class="listView-button" @click="luckHistory = true; sendLuck = false"
-                      :class="luckHistory && 'show'">Luck History</button>
                   </div>
                 </div>
               </div>
-              <div v-if="!walletStore.connected" class="connectWallet">
+              <div v-if="luckHistory" class="sent-history">
+                <h1>No Red Packet Sent Yet!</h1>
+              </div>
+              <div v-if="!walletStore.connected && sendLuck" class="connectWallet">
                 <button v-if="walletStore.connected == false" class="connect-wallet-button" @click="connectOrDisconnectWallet">
                   <svg style="margin-right: 10px;" width="18" height="18" viewBox="0 0 18 18" fill="none"
                     xmlns="http://www.w3.org/2000/svg">
@@ -793,7 +802,7 @@ input[type=number] {
                   Connect Wallet
                 </button>
               </div>
-              <div v-if="walletStore.connected">
+              <div v-if="walletStore.connected && sendLuck">
                 <div class="red-packet">
                   <div class="total-amount">
                     <div class="box">
@@ -871,12 +880,12 @@ input[type=number] {
                     <a-card title="Hexlink Account" :bordered="false" style="width: 200px; margin: 20px;">
                       <p>Balance:</p>
                       <p>{{ redpacket.token.label }}: 0</p>
-                      <p>{{ redpacket.gasToken.label }}: 0</p>
+                      <p v-if="showGasToken()">{{ redpacket.gasToken.label }}: 0</p>
                     </a-card>
                     <a-card v-if="walletStore.connected" title="External Account" :bordered="false" style="width: 200px; margin: 20px;">
                       <p>Balance:</p>
-                      <p>{{ redpacket.token.label }}:</p>
-                      <p>{{ redpacket.gasToken.label }}: 0</p>
+                      <p>{{ redpacket.token.label }}: 0</p>
+                      <p v-if="showGasToken()">{{ redpacket.gasToken.label }}: 0</p>
                       <button v-if="walletStore.connected" class="connect-wallet-button" @click="connectOrDisconnectWallet" style="width: 100px;">
                         Disconnect
                       </button>
@@ -922,7 +931,7 @@ interface RedPacket {
   gasToken: {
     label: string,
     value: string,
-  } | "undefined",
+  },
   expiredAt: Number,
 }
 
@@ -970,6 +979,11 @@ const createRedPacket = async function () {
 
 };
 
+const showGasToken = () => {
+  if (redpacket.value.token.label == redpacket.value.gasToken.label) return false;
+  return true;
+}
+
 const authStore = useAuthStore();
 const user = authStore.user;
 const walletStore = useWalletStore();
@@ -977,8 +991,8 @@ if (walletStore.connected) {
   walletStore.wallet;
 }
 
-const sendLuck = ref<boolean>(true);
-const luckHistory = ref<boolean>(false);
+const sendLuck = ref<boolean>(false);
+const luckHistory = ref<boolean>(true);
 const openDropdown = ref<boolean>(false);
 const enableGas = ref<boolean>(false);
 </script>

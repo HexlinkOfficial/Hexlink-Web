@@ -4,7 +4,7 @@ import { useWalletStore } from "@/stores/wallet"
 import { buildAccountFromAddress } from "./account";
 import WalletConnect from "@walletconnect/web3-provider";
 import type { Wallet } from "@/types";
-import { useNetworkStore } from "@/stores/network";
+import { useProfileStore } from "@/stores/profile";
 
 export const providerOptions = {
   walletconnect: {
@@ -52,7 +52,7 @@ export async function connectWallet() {
   }
   const store = useWalletStore();
   store.connectWallet({
-    network: useNetworkStore().network.name,
+    network: useProfileStore().network.name,
     account: await buildAccountFromAddress(accounts[0]),
     wallet,
     walletIcon,

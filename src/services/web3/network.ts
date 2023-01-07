@@ -1,11 +1,11 @@
 import type { Network } from '@/types';
 import { ethers } from "ethers";
 import { useWalletStore } from "@/stores/wallet";
-import { useNetworkStore } from '@/stores/network';
+import { useProfileStore } from '@/stores/profile';
 import { Alchemy, Network as AlchemyNetwork } from "alchemy-sdk";
 
 export async function switchNetwork(network: Network) {
-    useNetworkStore().switchNetwork(network);
+    useProfileStore().switchNetwork(network);
     if (useWalletStore().connected &&
         network.chainId != Number(window.ethereum.networkVersion)) {
         try {
@@ -14,7 +14,6 @@ export async function switchNetwork(network: Network) {
                 params: [{ chainId: ethers.utils.hexValue(network.chainId) }],
             });
         } catch (error: any) {
-            console.log(error);
             if (error.code === 4902) {
                 await window.ethereum.request({
                     method: "wallet_addEthereumChain",
@@ -48,7 +47,7 @@ export function alchemyNetwork(network: Network) : AlchemyNetwork {
 }
 
 export function alchemy() {
-    const network = useNetworkStore().network;
+    const network = useProfileStore().network;
     return new Alchemy({
         apiKey: network.alchemy.key,
         network: alchemyNetwork(network)
@@ -56,7 +55,7 @@ export function alchemy() {
 }
 
 export function getProvider() {
-    const network = useNetworkStore().network;
+    const network = useProfileStore().network;
     return new ethers.providers.AlchemyProvider(
         network.chainId,
         network.alchemy.key

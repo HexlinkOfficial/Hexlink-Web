@@ -17,10 +17,9 @@ import type { TokenBalance } from "alchemy-sdk";
 import { TokenBalanceType } from "alchemy-sdk";
 import type { TokenBalancesOptionsErc20 } from "alchemy-sdk";
 import { useAuthStore } from "@/stores/auth";
-import { useNetworkStore } from '@/stores/network';
 import { getPopularTokens, nativeCoinAddress } from "@/configs/tokens";
 import { alchemy } from "@/services/web3/network";
-import { useTokenStore } from "@/stores/tokens";
+import { useProfileStore } from "@/stores/profile";
 
 export async function getERC20Metadata(token: string) : Promise<TokenMetadata> {
     const metadata = await alchemy().core.getTokenMetadata(token);
@@ -64,17 +63,14 @@ function getBalance(balance: BigNumber, decimals: number) : NormalizedTokenBalan
     }
 }
 
-export async function loadTokens() {
-    const network = useNetworkStore().network;
+export async function loadTokens(account: string) {
+    const profiles = useProfileStore();
     const auth = useAuthStore();
-    const tokenStore = useTokenStore();
+    const network = profiles.network;
     let tokens : { [key: string]: Token } = {};
-    if (!auth.authenticated) {
-        return;
-    }
 
     // generate token map
-    if (!tokenStore.initiated) {
+    if (!profiles.profile) {
         const DEFAULT_TOKENS = await getPopularTokens(network);
         DEFAULT_TOKENS.tokens.forEach(t => tokens[t.address.toLowerCase()] = {metadata: t});
         const preferences : Token[] = await getTokenPreferences(
@@ -88,14 +84,12 @@ export async function loadTokens() {
                 tokens[address] = p;
             }
         });
-        tokenStore.init(tokens);
     } else {
-        tokens = tokenStore.tokens;
+        tokens = useProfileStore().profile.tokens;
     }
 
     // collect balance information
     const tokensToSetPreference : PreferenceInput[] = [];
-    const account = auth.user!.account.address;
     const ethBalance = await getNativeCoinBalance(account, network);
     const option: TokenBalancesOptionsErc20 = {type : TokenBalanceType.ERC20};
     const erc20Balances = await alchemy().core.getTokenBalances(account, option);
@@ -133,8 +127,8 @@ export async function loadTokens() {
         const p = tokensToSetPreference[i];
         const preference = {id: inserted[i].id, display: p.display};
         tokens[p.tokenAddress].preference = preference;
-        tokenStore.updatePreference(p.tokenAddress, preference);
     }
+    return tokens;
 }
 
 export async function loadERC20Token(

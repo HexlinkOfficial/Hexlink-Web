@@ -73,18 +73,15 @@
                               <div class="mode-text2">{{ redpacket.token.label }}</div>
                               <input class="mode-input" type="text" placeholder="select" readonly>
                               <div class="mode-options">
-<<<<<<< HEAD
-                                <div class="mode-option" v-for="(item, index) of tokens" :key="index" @click="tokenChoose('token', item.metadata.symbol, item.metadata.address, item.metadata.logoURI)">
-=======
                                 <div class="mode-option"
                                   v-for="(item, index) of useProfileStore().feasibleTokens"
                                   :key="index"
                                   @click="tokenChoose(
-                                    item.metadata.name,
+                                    'token',
+                                    item.metadata.symbol,
                                     item.metadata.address,
-                                    item.metadata.logoURI!
+                                    item.metadata.logoURI
                                   )">
->>>>>>> cbcdbcbcae9fda631726f8471c7ca6d4f26f71c9
                                   <div class="token-icon">
                                     <img :src="item.metadata.logoURI"/>
                                   </div>
@@ -125,7 +122,6 @@
                   </div>
                   <div class="gas-estimation-parent">
                     <div class="gas-estimation">
-<<<<<<< HEAD
                       <p>
                         <img style="width: 20px; height: 20px;" src="https://i.postimg.cc/RhXfgJR1/gas-pump.png"/>
                         : XXXXXX
@@ -133,31 +129,13 @@
                       <div class="total-choose-token">
                         <div class="token-select">
                           <div class="mode-dropdown" :class="chooseGasDrop && 'active'" @click="chooseGasDrop = !chooseGasDrop;">
-=======
-                      <p>Gas Estimation: XXXXXX</p>
-                      <div class="mode-dropdown" :class="chooseTotalDrop && 'active'" @click="chooseTotalDrop = !chooseTotalDrop;">
-                        <div class="token-icon">
-                          <img :src="redpacket.token.logo" />
-                        </div>
-                        <div class="mode-text2">{{ redpacket.token.label }}</div>
-                        <input class="mode-input" type="text" placeholder="select" readonly>
-                        <div class="mode-options">
-                          <div class="mode-option"
-                            v-for="(item, index) of useProfileStore().feasibleTokens"
-                            :key="index"
-                            @click="tokenChoose(
-                              item.metadata.name,
-                              item.metadata.address,
-                              item.metadata.logoURI!
-                            )">
->>>>>>> cbcdbcbcae9fda631726f8471c7ca6d4f26f71c9
                             <div class="token-icon">
                               <img :src="redpacket.gasToken.logo" />
                             </div>
                             <div class="mode-text2">{{ redpacket.gasToken.label }}</div>
                             <input class="mode-input" type="text" placeholder="select" readonly>
                             <div class="mode-options">
-                              <div class="mode-option" v-for="(item, index) of tokens" :key="index"
+                              <div class="mode-option" v-for="(item, index) of useProfileStore().feasibleTokens" :key="index"
                                 @click="tokenChoose('gas', item.metadata.symbol, item.metadata.address, item.metadata.logoURI)">
                                 <div class="token-icon">
                                   <img :src="item.metadata.logoURI" />

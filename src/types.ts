@@ -28,7 +28,6 @@ export interface Wallet {
     wallet: string;
     walletIcon: string;
     account: Account;
-    network: string,
 }
 
 // if uid exists, use uid as key to

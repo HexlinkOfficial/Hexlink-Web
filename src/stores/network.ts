@@ -5,7 +5,7 @@ import { GOERLI } from "@/configs/network";
 export const useNetworkStore = defineStore({
     id: 'network',
     state: () : {network: Network} => ({
-        network: GOERLI
+        network: {...GOERLI}
     }),
     persist: true,
     actions: {
@@ -14,7 +14,7 @@ export const useNetworkStore = defineStore({
             this.network = network;
         },
         reset() {
-            this.network = GOERLI;
+            this.network = {...GOERLI};
         },
     },
 })

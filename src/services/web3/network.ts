@@ -1,36 +1,38 @@
 import type { Network } from '@/types';
 import { ethers } from "ethers";
-import { useWalletStore } from '@/stores/wallet';
+import { useWalletStore } from "@/stores/wallet";
 import { useNetworkStore } from '@/stores/network';
 import { Alchemy, Network as AlchemyNetwork } from "alchemy-sdk";
 
-export async function switchNewtwork(network: Network) {
-    try {
-        await window.ethereum.request({
-            method: 'wallet_switchEthereumChain',
-            params: [{ chainId: ethers.utils.hexValue(network.chainId) }],
-        });
-        useWalletStore().wallet!.network = network.name;
-    } catch (error: any) {
-        console.log(error);
-        if (error.code === 4902) {
-            await window.ethereum.request({
-                method: "wallet_addEthereumChain",
-                params: [{
-                    chainId: ethers.utils.hexValue(network.chainId),
-                    chainName: network.chainName,
-                    blockExplorerUrls: [...network.blockExplorerUrls],
-                    nativeCurrency: {...network.nativeCurrency},
-                    rpcUrls: [...network.rpcUrls],
-                }],
-            });
+export async function switchNetwork(network: Network) {
+    useNetworkStore().switchNetwork(network);
+    if (useWalletStore().connected &&
+        network.chainId != Number(window.ethereum.networkVersion)) {
+        try {
             await window.ethereum.request({
                 method: 'wallet_switchEthereumChain',
                 params: [{ chainId: ethers.utils.hexValue(network.chainId) }],
             });
-            useWalletStore().wallet!.network = network.name;
-        } else {
+        } catch (error: any) {
             console.log(error);
+            if (error.code === 4902) {
+                await window.ethereum.request({
+                    method: "wallet_addEthereumChain",
+                    params: [{
+                        chainId: ethers.utils.hexValue(network.chainId),
+                        chainName: network.chainName,
+                        blockExplorerUrls: [...network.blockExplorerUrls],
+                        nativeCurrency: {...network.nativeCurrency},
+                        rpcUrls: [...network.rpcUrls],
+                    }],
+                });
+                await window.ethereum.request({
+                    method: 'wallet_switchEthereumChain',
+                    params: [{ chainId: ethers.utils.hexValue(network.chainId) }],
+                });
+            } else {
+                console.log(error);
+            }
         }
     }
 }

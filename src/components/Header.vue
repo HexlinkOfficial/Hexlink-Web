@@ -173,7 +173,7 @@
                         </div>
                       </div>
                     </div>
-                    <router-link to="signin" class="dropdown-item logout">
+                    <router-link @click="signOutFirebase" to="signin" class="dropdown-item logout">
                       <i class="icofont-logout"></i> Logout
                     </router-link>
                   </div>
@@ -188,6 +188,7 @@
 </template>
 
 <script lang="ts">
+import router from '@/router';
 import { useAuthStore } from '@/stores/auth';
 import { useWalletStore } from '@/stores/wallet';
 import { prettyPrintAddress } from '@/services/web3/account';
@@ -196,6 +197,7 @@ import { POLYGON, GOERLI } from "@/configs/network";
 import { switchNetwork } from "@/services/web3/network";
 import { connectWallet, disconnectWallet } from "@/services/web3/wallet";
 import { useProfileStore } from '@/stores/profile';
+import { signOutFirebase } from "@/services/auth";
 
 export default {
   name: "Header",
@@ -219,6 +221,7 @@ export default {
       walletStore,
       user,
       switchNetwork,
+      signOutFirebase,
       active_: "",
       POLYGON,
       GOERLI,

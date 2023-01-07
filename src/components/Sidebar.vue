@@ -38,8 +38,14 @@
           </router-link>
         </li>
         <!-- signout -->
-        <li @click="logout" class="logout">
-          <router-link to="/signin" data-toggle="tooltip" data-placement="right" title="Signout">
+        <li class="logout">
+          <router-link 
+            @click="signOutFirebase"
+            to="/signin"
+            data-toggle="tooltip"
+            data-placement="right"
+            title="Signout"
+          >
             <span class="icon-grey"><i class="icofont-logout"></i></span>
           </router-link>
         </li>
@@ -54,11 +60,6 @@
 <script lang="ts" setup>
 import router from '@/router';
 import { signOutFirebase } from "@/services/auth";
-
-const logout = function() {
-  signOutFirebase();
-  router.push("/signin")
-};
 
 const props = defineProps({
   active: Number

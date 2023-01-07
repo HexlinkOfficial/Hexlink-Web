@@ -119,69 +119,82 @@
                     <p>Enable Gas sponsorship</p>
                     <a-switch style="margin-left: 1rem;" v-model:checked="enableGas" />
                   </div>
-                  <div class="gas-estimation">
-                    <p>Gas Estimation: XXXXXX</p>
-                    <a-select v-model:value="redpacket.gasToken" style=" margin-left: 1rem; width: 120px" :options="tokens">
-                    </a-select>
-                    <svg style="margin-left: 1rem; width: 16px;" width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path
-                        d="M11 21C16.5228 21 21 16.5228 21 11C21 5.47715 16.5228 1 11 1C5.47715 1 1 5.47715 1 11C1 16.5228 5.47715 21 11 21Z"
-                        stroke="#898989" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                      <path d="M11 15V11" stroke="#898989" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                      <path d="M11 8V7" stroke="#898989" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
+                  <div>
+                    <div class="gas-estimation">
+                      <p>Gas Estimation: XXXXXX</p>
+                      <a-select v-model:value="redpacket.gasToken" style=" margin-left: 1rem; width: 120px" :options="tokens">
+                      </a-select>
+                      <svg style="margin-left: 1rem; width: 16px;" width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                          d="M11 21C16.5228 21 21 16.5228 21 11C21 5.47715 16.5228 1 11 1C5.47715 1 1 5.47715 1 11C1 16.5228 5.47715 21 11 21Z"
+                          stroke="#898989" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        <path d="M11 15V11" stroke="#898989" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        <path d="M11 8V7" stroke="#898989" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                      </svg>
+                    </div>
                   </div>
                 </div>
                 <div class="choose-account">
                   <div class="account-card">
                     <div class="left">
-                      <img class="wallet-image" src="https://upload.wikimedia.org/wikipedia/commons/3/36/MetaMask_Fox.svg">
-                      <div class="chain_wrapper">
-                        <img class="chain" src="https://i.postimg.cc/yd6X9Sf1/polygon-color.png" />
+                      <div> 
+                        <img class="wallet-image" src="https://upload.wikimedia.org/wikipedia/commons/3/36/MetaMask_Fox.svg">
+                        <div class="chain_wrapper">
+                          <img class="chain" src="https://i.postimg.cc/yd6X9Sf1/polygon-color.png" />
+                        </div>
                       </div>
                     </div>
                     <div class="right">
-                      <h2>Metamask</h2>
-                      <p>Available Balance</p>
+                      <div style="min-width: 100px;">
+                        <h2>Metamask</h2>
+                        <p>Available Balance</p>
+                      </div>
                       <div class="balances">
-                        <span class="balance_item">{{ redpacket.token.label }}: 0</span>
+                        <span class="balance_item">
+                          <span>0</span>
+                          <img style="width:20px; height: 20px; margin-left: 5px; margin-right: 5px;" src="https://i.postimg.cc/yd6X9Sf1/polygon-color.png" />
+                          <span><b>{{ redpacket.token.label }}</b></span>
+                        </span>
                         <!-- gas -->
-                        <span v-if="showGasToken()" class="balance_item">{{ redpacket.token.label }}: 0</span>
+                        <span v-if="showGasToken()" class="balance_item">
+                          <span>0</span>
+                          <img style="width:20px; height: 20px; margin-left: 5px; margin-right: 5px;"
+                            src="https://i.postimg.cc/yd6X9Sf1/polygon-color.png" />
+                          <span><b>{{ redpacket.gasToken.label }}</b></span>
+                        </span>
                       </div>
                     </div>
                   </div>
                   <div class="account-card">
                     <div class="left">
-                      <img class="wallet-image" src="https://upload.wikimedia.org/wikipedia/commons/3/36/MetaMask_Fox.svg">
-                      <div class="chain_wrapper">
-                        <img class="chain" src="https://i.postimg.cc/yd6X9Sf1/polygon-color.png" />
+                      <div> 
+                        <img class="wallet-image" src="https://upload.wikimedia.org/wikipedia/commons/3/36/MetaMask_Fox.svg">
+                        <div class="chain_wrapper">
+                          <img class="chain" src="https://i.postimg.cc/yd6X9Sf1/polygon-color.png" />
+                        </div>
                       </div>
                     </div>
                     <div class="right">
-                      <h2>Metamask</h2>
-                      <p>Available Balance</p>
+                      <div>
+                        <h2>Metamask</h2>
+                        <p>Available Balance</p>
+                      </div>
                       <div class="balances">
-                        <span class="balance_item">{{ redpacket.token.label }}: 0</span>
+                        <span class="balance_item">
+                          <span>0</span>
+                          <img style="width:20px; height: 20px; margin-left: 5px; margin-right: 5px;" src="https://i.postimg.cc/yd6X9Sf1/polygon-color.png" />
+                          <span><b>{{ redpacket.token.label }}</b></span>
+                        </span>
                         <!-- gas -->
-                        <span v-if="showGasToken()" class="balance_item">{{ redpacket.token.label }}: 0</span>
+                        <span v-if="showGasToken()" class="balance_item">
+                          <span>0</span>
+                          <img style="width:20px; height: 20px; margin-left: 5px; margin-right: 5px;"
+                            src="https://i.postimg.cc/yd6X9Sf1/polygon-color.png" />
+                          <span><b>{{ redpacket.gasToken.label }}</b></span>
+                        </span>
                       </div>
                     </div>
                   </div>
-                  <!-- <div class="accounts">
-                    <a-card title="Hexlink Account" :bordered="false" style="width: 200px; margin: 20px;">
-                      <p>Balance:</p>
-                      <p>{{ redpacket.token.label }}: 0</p>
-                      <p v-if="showGasToken()">{{ redpacket.gasToken.label }}: 0</p>
-                    </a-card>
-                    <a-card v-if="walletStore.connected" title="External Account" :bordered="false" style="width: 200px; margin: 20px;">
-                      <p>Balance:</p>
-                      <p>{{ redpacket.token.label }}: 0</p>
-                      <p v-if="showGasToken()">{{ redpacket.gasToken.label }}: 0</p>
-                      <button v-if="walletStore.connected" class="connect-wallet-button" @click="connectOrDisconnectWallet" style="width: 100px;">
-                        Disconnect
-                      </button>
-                    </a-card>
-                  </div> -->
                 </div>
                 <div class="create">
                   <button class="connect-wallet-button" @click="createRedPacket" style="width: auto;">
@@ -289,17 +302,20 @@ const enableGas = ref<boolean>(false);
 </script>
 
 <style lang="less" scoped>
+.balance-token-name {
+  @media (max-width: 990px) {
+    display: none; } }
 .chain_wrapper {
   width: 15px;
   height: 15px;
   background-color: #f2f2f2;
   border-radius: 100%;
   position: relative;
-  top: -15px;
-  left: 35px; }
+  top: -13px;
+  left: 25px; }
   .chain_wrapper .chain {
-    width:20px;
-    height: 20px;
+    width:15px;
+    height: 15px;
     position: absolute;
     right: 0;
     left: 0;
@@ -315,7 +331,7 @@ const enableGas = ref<boolean>(false);
 	padding: 30px;
 	max-width: 400px;
 	min-height: 130px;
-	margin: 20px 0;
+	margin: 20px;
   margin-right: 1rem;
 	transition: all 0.5s ease; }
 .account-card:hover {
@@ -324,29 +340,36 @@ const enableGas = ref<boolean>(false);
 	transform: translate3D(0, -1px, 0) scale(1.02);
 	transition: all 0.5s ease; }
 .left {
+  display: flex;
+  align-items: center;
   margin-right: 12.5px; }
 .right {
+  display: flex;
+  align-items: center;
   margin-left: 12.5px;
   h2 {
     font-weight: 500;
-    font-size: 18px;
+    font-size: 16px;
     margin: 3px 0; }
   p {
-    font-size: 14px;
+    font-size: 12px;
     color: rgba(34, 34, 34, 0.5);
     margin: 5px 0; }
   .balances {
-    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    margin-left: 1rem;
     .balance_item {
+      display: flex;
+      align-items: center;
       padding: 0 15px;
-      margin-right: 5px;
+      margin-bottom: 5px;
       line-height: 35px;
       background-color: #e6e6e6;
-      border-radius: 5px;
-      display: inline-block; } } }
+      border-radius: 5px; } } }
 .wallet-image {
-  width: 50px;
-  height: 50px;
+  width: 40px;
+  height: 40px;
   object-fit: cover;
   object-position: 50% 50%;
   border-radius: 100%; }

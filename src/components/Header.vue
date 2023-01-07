@@ -135,7 +135,7 @@
                             <div class="user-info">
                               <span style="margin-bottom: 0;" class="smart-contract-address">
                                 <h5 @click="doCopy">
-                                  {{ addressTextLong(user.account.address) }}
+                                  {{ addressTextLong(user?.account.address) }}
                                 </h5>
                               </span>
                             </div>

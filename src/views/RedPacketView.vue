@@ -66,34 +66,19 @@
                         </div>
                         <div class="total-choose-token">
                           <div class="token-select">
-                            <div class="token-icon">
-                              <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path
-                                  d="M16 32C24.8366 32 32 24.8366 32 16C32 7.16344 24.8366 0 16 0C7.16344 0 0 7.16344 0 16C0 24.8366 7.16344 32 16 32Z"
-                                  fill="#627EEA" />
-                                <path d="M16.1069 7L16 7.39592V18.8837L16.1069 19L21 15.848L16.1069 7Z" fill="#C0CBF6" />
-                                <path d="M16 7L11 15.848L16 19V13.4241V7Z" fill="white" />
-                                <path d="M16.0608 20.354L16 20.4392V24.7958L16.0608 25L21 17L16.0608 20.354Z" fill="#C0CBF6" />
-                                <path d="M16 25V20.354L11 17L16 25Z" fill="white" />
-                                <path d="M16 19L21 16.1735L16 14V19Z" fill="#8197EE" />
-                                <path d="M11 16.1735L16 19V14L11 16.1735Z" fill="#C0CBF6" />
-                              </svg>
-                            </div>
-                            <span class="token-name">ETH</span>
-                            <span class="token-dropdown">
-                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                                <path fill="currentColor"
-                                  d="m11.434 15.434-5.068-5.068A.8.8 0 0 1 6.93 9h10.14a.8.8 0 0 1 .565 1.366l-5.068 5.068a.8.8 0 0 1-1.132 0Z">
-                                </path>
-                              </svg>
-                            </span>
-                            <a-select v-model:value="redpacket.token" style="width: 120px;" :options="tokens"></a-select>
-                            <div class="mode-dropdown" :class="openDropdown && 'active'" @click="openDropdown = !openDropdown;">
-                              <div class="mode-text">{{ modeLabels[redpacket.mode] }}</div>
+                            <div class="mode-dropdown" :class="chooseTotalDrop && 'active'" @click="chooseTotalDrop = !chooseTotalDrop;">
+                              <div class="token-icon">
+                                <img :src="redpacket.token.logo" />
+                              </div>
+                              <div class="mode-text2">{{ redpacket.token.label }}</div>
                               <input class="mode-input" type="text" placeholder="select" readonly>
                               <div class="mode-options">
-                                <div @click="modeChoose('random')">Randomly</div>
-                                <div @click="modeChoose('equal')">Equally</div>
+                                <div class="mode-option" v-for="(item, index) of tokens" :key="index" @click="tokenChoose(item.metadata.name, item.metadata.address, item.metadata.logoURI)">
+                                  <div class="token-icon">
+                                    <img :src="item.metadata.logoURI"/>
+                                  </div>
+                                  {{ item.metadata.name }}
+                                </div>
                               </div>
                             </div>
                           </div>
@@ -107,8 +92,8 @@
                         <div class="mode-text">{{ modeLabels[redpacket.mode] }}</div>
                         <input class="mode-input" type="text" placeholder="select" readonly>
                         <div class="mode-options">
-                          <div @click="modeChoose('random')">Randomly</div>
-                          <div @click="modeChoose('equal')">Equally</div>
+                          <div class="mode-option" @click="modeChoose('random')">Randomly</div>
+                          <div class="mode-option" @click="modeChoose('equal')">Equally</div>
                         </div>
                       </div>
                       <p>Shared among</p>
@@ -130,6 +115,22 @@
                   <div>
                     <div class="gas-estimation">
                       <p>Gas Estimation: XXXXXX</p>
+                      <div class="mode-dropdown" :class="chooseTotalDrop && 'active'" @click="chooseTotalDrop = !chooseTotalDrop;">
+                        <div class="token-icon">
+                          <img :src="redpacket.token.logo" />
+                        </div>
+                        <div class="mode-text2">{{ redpacket.token.label }}</div>
+                        <input class="mode-input" type="text" placeholder="select" readonly>
+                        <div class="mode-options">
+                          <div class="mode-option" v-for="(item, index) of tokens" :key="index"
+                            @click="tokenChoose(item.metadata.name, item.metadata.address, item.metadata.logoURI)">
+                            <div class="token-icon">
+                              <img :src="item.metadata.logoURI" />
+                            </div>
+                            {{ item.metadata.name }}
+                          </div>
+                        </div>
+                      </div>
                       <a-select v-model:value="redpacket.gasToken" style=" margin-left: 1rem; width: 120px" :options="tokens">
                       </a-select>
                       <svg style="margin-left: 1rem; width: 16px;" width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -242,10 +243,12 @@ interface RedPacket {
   token: {
     label: string,
     value: string,
+    logo: string
   },
   gasToken: {
     label: string,
     value: string,
+    logo: string
   },
   expiredAt: Number,
 }
@@ -261,10 +264,12 @@ const redpacket = ref<RedPacket>({
   token: {
     label: 'MATIC',
     value: ethers.constants.AddressZero,
+    logo: ""
   },
   gasToken: {
     label: "MATIC",
     value: "MATIC",
+    logo: ""
   },
   expiredAt: 0 // do not expire
 });
@@ -296,10 +301,17 @@ const modes = ["random", "equal", "what"];
 
 const modeChoose = (gameMode: "random" | "equal") => {
   redpacket.value.mode = gameMode;
+  console.log(tokens);
 }
 
 const testChoose = (mode: string) => {
   console.log(mode);
+}
+
+const tokenChoose = (token: string, address: string, logoUrl: string) => {
+  redpacket.value.token.label = token;
+  redpacket.value.token.value = address;
+  redpacket.value.token.logo = logoUrl;
 }
 
 const createRedPacket = async function () {
@@ -321,6 +333,7 @@ if (walletStore.connected) {
 const sendLuck = ref<boolean>(false);
 const luckHistory = ref<boolean>(true);
 const openDropdown = ref<boolean>(false);
+const chooseTotalDrop = ref<boolean>(false);
 const enableGas = ref<boolean>(false);
 </script>
 
@@ -761,7 +774,7 @@ const enableGas = ref<boolean>(false);
   display: inline-flex;
   -webkit-box-align: center;
   align-items: center;
-  width: 100%;
+  width: 185px;
   border-radius: 8px;
   background-color: rgb(242, 246, 250);
   font-size: 14px;
@@ -793,7 +806,6 @@ const enableGas = ref<boolean>(false);
   padding-right: 32px;
   padding: 11px 12px;
   height: 18px;
-  min-height: unset;
   text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;
@@ -801,15 +813,36 @@ const enableGas = ref<boolean>(false);
   user-select: none;
   border-radius: 15px;
   cursor: pointer;
-  // padding: 4px 0px 5px;
+  margin-right: 1.5rem;
   border: 0px;
   box-sizing: content-box;
   background: none;
-  margin: 0px;
   -webkit-tap-highlight-color: transparent;
   display: block;
   min-width: 0px;
   width: 100%;
+}
+
+.mode-text2 {
+  padding-right: 32px;
+  padding: 11px 0px 11px 0px;
+  height: 18px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  border-radius: 15px;
+  cursor: pointer;
+  border: 0px;
+  box-sizing: content-box;
+  background: none;
+  -webkit-tap-highlight-color: transparent;
+  display: block;
+  font-size: 14px;
+  line-height: 18px;
+  font-weight: 700;
+  color: #07101b;
+  -webkit-user-select: none;
+  -moz-user-select: none;
 }
 
 .mode-input {
@@ -1101,28 +1134,12 @@ const enableGas = ref<boolean>(false);
   margin-bottom: 0.2rem;
 
   .token-icon {
-    margin-left: 4px;
-    font-size: 18px;
-    margin-top: 0px;
-    margin-bottom: 0px;
     border-radius: 50%;
-    background-size: cover;
     width: 20px;
     height: 20px;
-    color: rgb(7, 16, 27) !important;
-    margin-right: 0px !important;
-    position: relative;
     display: flex;
-    -webkit-box-align: center;
-    align-items: center;
-    -webkit-box-pack: center;
     justify-content: center;
-    flex-shrink: 0;
-    line-height: 1;
-    overflow: hidden;
-    user-select: none;
-    background-color: rgb(255, 255, 255);
-    font-weight: 700;
+    margin-right: 0.5rem;
   }
 
   .token-name {
@@ -1175,6 +1192,8 @@ input[type=number] {
 }
 
 .mode-options {
+  display: flex;
+  align-items: center;
   position: absolute;
   top: 50px;
   width: 100%;
@@ -1190,12 +1209,13 @@ input[type=number] {
   z-index: 50;
 }
 
-.mode-dropdown .mode-options div {
+.mode-option {
+  display: flex;
   padding: 12px 20px;
   cursor: pointer;
 }
 
-.mode-dropdown .mode-options div:hover {
+.mode-option:hover {
   background: rgb(242, 246, 250);
   color: #999;
 }

@@ -20,7 +20,8 @@ export const useProfileStore = defineStore({
         // display is true and tokens with balance > 0
         feasibleTokens: (state) => Object.values(
             state.profiles[state.network.name]?.tokens || []
-        ).filter(t => t.preference?.display && t.balance?.value.gt(0)),
+        ).filter(t => t.preference?.display),
+        // && t.balance?.value.gt(0)
     },
     actions: {
         switchNetwork(network: Network) {

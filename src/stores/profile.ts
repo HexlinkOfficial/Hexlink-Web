@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
-import type { Token, Network, Profile, Preference, Account } from '@/types';
+import type { Token, Network, Profile, Preference, Account, NormalizedTokenBalance } from '@/types';
+import { nativeCoinAddress } from '@/configs/tokens';
 import { GOERLI } from "@/configs/network";
 
 export const useProfileStore = defineStore({
@@ -17,11 +18,11 @@ export const useProfileStore = defineStore({
         visiableTokens: (state) => Object.values(
             state.profiles[state.network.name]?.tokens || []
         ).filter(t => t.preference?.display),
+        nativeCoinAddress: (state) => nativeCoinAddress(state.network),
         // display is true and tokens with balance > 0
         feasibleTokens: (state) => Object.values(
             state.profiles[state.network.name]?.tokens || []
-        ).filter(t => t.preference?.display),
-        // && t.balance?.value.gt(0)
+        ).filter(t => t.preference?.display && t.balance?.value.gt(0)),
     },
     actions: {
         switchNetwork(network: Network) {
@@ -40,13 +41,17 @@ export const useProfileStore = defineStore({
             this.profiles[network.name].tokens = tokens;
         },
         addToken(token: Token) {
-            this.profile.tokens[token.metadata.address] = token;
+            const tokenAddr = token.metadata.address.toLowerCase();
+            this.profile.tokens[tokenAddr] = token;
         },
         removeToken(tokenAddr: string) {
-            delete this.profile.tokens[tokenAddr]
+            delete this.profile.tokens[tokenAddr.toLowerCase()]
         },
-        setPreference(tokenAddr: string, preference: Preference) {
-            this.profile.tokens[tokenAddr].preference = preference;
+        updateBalance(tokenAddr: string, balance: NormalizedTokenBalance) {
+            this.profile.tokens[tokenAddr.toLowerCase()].balance = balance;
+        },
+        updatePreference(tokenAddr: string, preference: Preference) {
+            this.profile.tokens[tokenAddr.toLowerCase()].preference = preference;
         },
         clear() {
             this.network = {...GOERLI};

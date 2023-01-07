@@ -13,33 +13,6 @@
             </div>
 
             <div class="header-right">
-              <!-- <div class="notification dropdown" @click="activeDropDown('notification')" :class="active_ === 'notification' && 'show'">
-                <div class="notify-bell" data-toggle="dropdown">
-                  <svg width="21" height="25" viewBox="0 0 21 25" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path
-                      d="M7.95298 21.7206C8.47305 22.3734 9.23679 22.7958 10.0752 22.8945C10.9135 22.9931 11.7574 22.7598 12.42 22.2462C12.6238 22.0943 12.8071 21.9177 12.9657 21.7206M1.64661 14.3616V14.1335C1.68008 13.4586 1.89638 12.8047 2.27321 12.2392C2.90044 11.5598 3.32982 10.7274 3.51629 9.82912C3.51629 9.13488 3.51629 8.43071 3.57693 7.73647C3.89022 4.39416 7.195 2.08331 10.4594 2.08331H10.5402C13.8046 2.08331 17.1093 4.39416 17.4327 7.73647C17.4934 8.43071 17.4327 9.13488 17.4833 9.82912C17.6722 10.7295 18.1012 11.5645 18.7264 12.2491C19.106 12.8096 19.3226 13.4611 19.3529 14.1335V14.3516C19.3755 15.2584 19.0632 16.1425 18.4737 16.841C17.6947 17.6578 16.6375 18.1659 15.5024 18.2692C12.1739 18.6262 8.81558 18.6262 5.48703 18.2692C4.35319 18.1614 3.29758 17.654 2.51576 16.841C1.93534 16.142 1.62725 15.2631 1.64661 14.3616Z"
-                      stroke="#333333" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" />
-                  </svg>
-                  <span class="notify-dot"></span>
-                </div>
-                <div class="dropdown-menu dropdown-menu-right notification-list mt-3" :class="active_ === 'notification' && 'show'">
-                  <h4>Notification</h4>
-                  <div class="lists">
-                    <router-link to="#" class="">
-                      <div class="d-flex align-items-center">
-                        <span class="me-3">
-                          <img src="../assets/redpocket.svg" alt="" />
-                        </span>
-                        <div>
-                          <p>Hexpocket - From XXXX</p>
-                          <span>2020-11-04 12:00:23</span>
-                        </div>
-                      </div>
-                    </router-link>
-                    <router-link to="./settings-activity">More <i class="icofont-simple-right"></i></router-link>
-                  </div>
-                </div>
-              </div> -->
               <div class="selectnetwork dropdown" @click="activeDropDown('selectnetwork')"
                 :class="active_ === 'selectnetwork' && 'show'">
                 <div class="network" data-toggle="dropdown">
@@ -73,6 +46,25 @@
                             <div class="items-name">
                               <span class="item-title">{{ POLYGON.chainName }}</span>
                               <span class="item-balance">$0.00</span>
+                            </div>
+                          </div>
+                        </button>
+                      </div>
+                      <!-- Mumbai -->
+                      <div class="network-items" @click="switchNetwork({...MUMBAI})">
+                        <button>
+                          <div style="display: flex; margin-right: 0.75rem; align-items: center; height: 1.25rem; width: 1.25rem;">
+                            <svg v-if="useProfileStore().network.name == 'mumbai'" width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M17 1L6 12L1 7" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                          </div>
+                          <div style="display: flex; white-space: nowrap; align-items: center; width: 100%; ">
+                            <div style="position: relative; margin-right: 0.75rem; min-width: max-content; ">
+                              <img src="https://token.metaswap.codefi.network/assets/networkLogos/polygon.svg" height=25 style="margin-left: 0.5rem; margin-right: 0.5rem;" />
+                            </div>
+                            <div class="items-name">
+                              <span class="item-title">{{ MUMBAI.chainName }}</span>
+                              <span class="item-balance">$11.39</span>
                             </div>
                           </div>
                         </button>
@@ -193,7 +185,7 @@ import { useAuthStore } from '@/stores/auth';
 import { useWalletStore } from '@/stores/wallet';
 import { prettyPrintAddress } from '@/services/web3/account';
 import { createToaster } from "@meforma/vue-toaster";
-import { POLYGON, GOERLI } from "@/configs/network";
+import { POLYGON, GOERLI, MUMBAI } from "@/configs/network";
 import { switchNetwork } from "@/services/web3/network";
 import { connectWallet, disconnectWallet } from "@/services/web3/wallet";
 import { useProfileStore } from '@/stores/profile';
@@ -225,6 +217,7 @@ export default {
       active_: "",
       POLYGON,
       GOERLI,
+      MUMBAI,
       index: 0,
     };
   },
@@ -243,8 +236,8 @@ export default {
     selectNetwork(value: any) {
       this.active_ = this.active_ === value ? "" : value;
     },
-    doCopy: function () {
-      this.$copyText(useProfileStore().profile?.account.address).then(
+    doCopy: function (address: string | undefined) {
+      this.$copyText(address || "0x").then(
         function () {
           // alert("Copied");
           const toaster = createToaster({ position: "top", duration: 2000 });

@@ -35,3 +35,21 @@ export const POLYGON : Network = {
     blockExplorerUrls: ["https://polygonscan.com"],
     logoUrl: "https://token.metaswap.codefi.network/assets/networkLogos/polygon.svg",
 };
+
+export const MUMBAI : Network = {
+    chainId: 80001,
+    rpcUrls: ["https://rpc-mumbai.maticvigil.com/"],
+    alchemy: {
+        rpcUrl: "https://polygon-mumbai.g.alchemy.com/v2/Fj__UEjuIj0Xym6ofwZfJbehuuXGpDxe",
+        key: "Fj__UEjuIj0Xym6ofwZfJbehuuXGpDxe",
+    },
+    name: "mumbai",
+    chainName: "Polygon Test Network",
+    nativeCurrency: {
+        name: "MATIC",
+        symbol: "MATIC",
+        decimals: 18
+    },
+    blockExplorerUrls: ["https://mumbai.polygonscan.com/"],
+    logoUrl: "https://token.metaswap.codefi.network/assets/networkLogos/polygon.svg",
+};

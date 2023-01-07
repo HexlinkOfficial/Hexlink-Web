@@ -13,7 +13,7 @@ import { useAuthStore } from "@/stores/auth"
 import { useProfileStore } from "@/stores/profile"
 import { useWalletStore } from "@/stores/wallet"
 import { genNameHash, buildAccount } from '@/services/web3/account'
-import { loadTokens } from "@/services/web3/tokens"
+import { initTokenList } from "@/services/web3/tokens"
 
 const auth = getAuth(app)
 const functions = getFunctions()
@@ -60,9 +60,7 @@ export async function googleSocialLogin() {
             idToken
         };
         useAuthStore().signIn(user);
-        const store = useProfileStore();
-        const account = await buildAccount(nameHash);
-        store.setAccount(store.network, account);
+        await initAccount(nameHash);
     } catch (error: any) {
         if (error.code == 'auth/popup-closed-by-user') {
             return
@@ -88,9 +86,7 @@ export async function twitterSocialLogin() {
             idToken,
         };
         useAuthStore().signIn(user);
-        const store = useProfileStore();
-        const account = await buildAccount(nameHash);
-        store.setAccount(store.network, account);
+        await initAccount(nameHash);
     } catch (error) {
         console.log(error);
     }
@@ -103,10 +99,11 @@ export function signOutFirebase() {
     return signOut(auth);
 }
 
-export async function initTokens() {
+export async function initAccount(nameHash: string) {
     const store = useProfileStore();
-    if (!store.profile.tokenInitiated && useAuthStore().authenticated) {
-        const tokens = await loadTokens(store.profile.account.address);
-        store.setTokens(store.network, tokens);
+    const account = await buildAccount(nameHash);
+    store.setAccount(store.network, account);
+    if (useAuthStore().authenticated) {
+        await initTokenList();
     }
 }

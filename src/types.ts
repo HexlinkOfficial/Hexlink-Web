@@ -77,8 +77,8 @@ export interface Preference {
 
 export interface NormalizedTokenBalance {
     value: BigNumber;
-    error?: any;
     normalized: BigNumber;
+    updatedAt: Date;
 }
 
 export interface Token {

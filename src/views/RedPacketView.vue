@@ -73,7 +73,18 @@
                               <div class="mode-text2">{{ redpacket.token.label }}</div>
                               <input class="mode-input" type="text" placeholder="select" readonly>
                               <div class="mode-options">
+<<<<<<< HEAD
                                 <div class="mode-option" v-for="(item, index) of tokens" :key="index" @click="tokenChoose('token', item.metadata.symbol, item.metadata.address, item.metadata.logoURI)">
+=======
+                                <div class="mode-option"
+                                  v-for="(item, index) of useProfileStore().feasibleTokens"
+                                  :key="index"
+                                  @click="tokenChoose(
+                                    item.metadata.name,
+                                    item.metadata.address,
+                                    item.metadata.logoURI!
+                                  )">
+>>>>>>> cbcdbcbcae9fda631726f8471c7ca6d4f26f71c9
                                   <div class="token-icon">
                                     <img :src="item.metadata.logoURI"/>
                                   </div>
@@ -114,6 +125,7 @@
                   </div>
                   <div class="gas-estimation-parent">
                     <div class="gas-estimation">
+<<<<<<< HEAD
                       <p>
                         <img style="width: 20px; height: 20px;" src="https://i.postimg.cc/RhXfgJR1/gas-pump.png"/>
                         : XXXXXX
@@ -121,6 +133,24 @@
                       <div class="total-choose-token">
                         <div class="token-select">
                           <div class="mode-dropdown" :class="chooseGasDrop && 'active'" @click="chooseGasDrop = !chooseGasDrop;">
+=======
+                      <p>Gas Estimation: XXXXXX</p>
+                      <div class="mode-dropdown" :class="chooseTotalDrop && 'active'" @click="chooseTotalDrop = !chooseTotalDrop;">
+                        <div class="token-icon">
+                          <img :src="redpacket.token.logo" />
+                        </div>
+                        <div class="mode-text2">{{ redpacket.token.label }}</div>
+                        <input class="mode-input" type="text" placeholder="select" readonly>
+                        <div class="mode-options">
+                          <div class="mode-option"
+                            v-for="(item, index) of useProfileStore().feasibleTokens"
+                            :key="index"
+                            @click="tokenChoose(
+                              item.metadata.name,
+                              item.metadata.address,
+                              item.metadata.logoURI!
+                            )">
+>>>>>>> cbcdbcbcae9fda631726f8471c7ca6d4f26f71c9
                             <div class="token-icon">
                               <img :src="redpacket.gasToken.logo" />
                             </div>
@@ -239,12 +269,11 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import Layout from "../components/Layout.vue";
-import { useAuthStore } from '@/stores/auth';
 import { useWalletStore } from '@/stores/wallet';
-import { connectWallet, disconnectWallet, web3Modal } from "@/services/web3/wallet";
+import { connectWallet, disconnectWallet } from "@/services/web3/wallet";
 import { ethers } from "ethers";
+import { updateBalances } from "@/services/web3/tokens";
 import { useProfileStore } from '@/stores/profile';
-import { initTokens } from "@/services/auth";
 
 interface RedPacket {
   mode: "random" | "equal";
@@ -264,7 +293,7 @@ interface RedPacket {
 }
 
 onMounted(async () => {
-  await initTokens();
+  await updateBalances();
 });
 
 const redpacket = ref<RedPacket>({
@@ -283,13 +312,6 @@ const redpacket = ref<RedPacket>({
   },
   expiredAt: 0 // do not expire
 });
-
-// const tokens = [{
-//   label: "MATIC",
-//   value: ethers.constants.AddressZero
-// }];
-
-const tokens = useProfileStore().feasibleTokens;
 
 const connectOrDisconnectWallet = async function () {
   if (walletStore.connected) {
@@ -311,7 +333,6 @@ const modes = ["random", "equal", "what"];
 
 const modeChoose = (gameMode: "random" | "equal") => {
   redpacket.value.mode = gameMode;
-  console.log(useProfileStore().profile);
 }
 
 const testChoose = (mode: string) => {
@@ -339,8 +360,6 @@ const showGasToken = () => {
   return true;
 }
 
-const authStore = useAuthStore();
-const user = authStore.user;
 const walletStore = useWalletStore();
 if (walletStore.connected) {
   walletStore.wallet;

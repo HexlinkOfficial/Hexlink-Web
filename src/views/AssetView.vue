@@ -488,7 +488,7 @@ import WalletTokenList from "../components/WalletTokenList.vue";
 import WalletNFTGrid from "../components/WalletNFTGrid.vue";
 import { useProfileStore } from '@/stores/profile';
 import { BigNumber } from "bignumber.js";
-import { initTokens } from "@/services/auth";
+import { updateBalances } from "@/services/web3/tokens";
 
 const network = useProfileStore().network;
 const profile = useProfileStore().profile;
@@ -498,7 +498,7 @@ const loading = ref<boolean>(true);
 const showInfo = ref<boolean>(true);
 
 onMounted(async () => {
-  await initTokens();
+  await updateBalances();
   loading.value = false;
 });
 

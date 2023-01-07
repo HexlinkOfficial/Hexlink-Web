@@ -465,7 +465,7 @@ svg {
               <div v-if="tokenView" class="token-listDetail">
                 <div class="token-table">
                   <div style="overflow: visible; border-radius: 0.75rem;">
-                    <WalletTokenList :tokens="useTokenStore().visiableTokens" :loading="loading">
+                    <WalletTokenList :tokens="useProfileStore().visiableTokens" :loading="loading">
                     </WalletTokenList>
                   </div>
                 </div>
@@ -483,16 +483,15 @@ svg {
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from "vue";
-import { loadTokens } from "@/services/web3/tokens";
 import Layout from "../components/Layout.vue";
 import WalletTokenList from "../components/WalletTokenList.vue";
 import WalletNFTGrid from "../components/WalletNFTGrid.vue";
 import { useAuthStore } from '@/stores/auth';
-import { useNetworkStore } from '@/stores/network';
-import { useTokenStore } from '@/stores/tokens';
+import { useProfileStore } from '@/stores/profile';
 import { BigNumber } from "bignumber.js";
 
-const network = useNetworkStore().network;
+const network = useProfileStore().network;
+const profile = useProfileStore().profile;
 const nftView = ref<boolean>(false);
 const tokenView = ref<boolean>(true);
 const loading = ref<boolean>(true);
@@ -500,23 +499,17 @@ const showInfo = ref<boolean>(true);
 
 const auth = useAuthStore();
 onMounted(async () => {
-  if (auth.authenticated) {
-    await loadTokens();
-  }
   loading.value = false;
 });
 
 const blockExplorer = computed(() => {
-  if (auth.authenticated) {
-    const account = auth.user!.account.address;
-    return `${network.blockExplorerUrls[0]}/address/${account}`;
-  }
-  return network.blockExplorerUrls[0];
+  const account = profile?.account.address;
+  return `${network.blockExplorerUrls[0]}/address/${account}`;
 });
 
 const totalAssets = computed(() => {
   let total: BigNumber = BigNumber(0);
-  for (const token of useTokenStore().visiableTokens) {
+  for (const token of useProfileStore().visiableTokens) {
     if (token.balance && token.price) {
       total = total.plus(token.balance.normalized.times(token.price));
     }

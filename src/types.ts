@@ -28,7 +28,6 @@ export interface Wallet {
     wallet: string;
     walletIcon: string;
     account: Account;
-    network: string,
 }
 
 // if uid exists, use uid as key to
@@ -42,7 +41,6 @@ export interface IUser {
     photoURL?: string,
     nameHash: string,
     idToken: string,
-    account: Account,
 }
   
 export interface IAuth {
@@ -88,4 +86,9 @@ export interface Token {
     balance?: NormalizedTokenBalance;
     preference?: Preference;
     price?: number;
+}
+
+export interface Profile {
+    account: Account;
+    tokens: { [key: string]: Token };
 }

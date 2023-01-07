@@ -6,14 +6,14 @@ import {
     signOut,
 } from 'firebase/auth'
 import type { User } from 'firebase/auth'
-import type { IUser } from "@/types";
+import type { IUser, Profile } from "@/types";
 import { getFunctions, httpsCallable } from 'firebase/functions'
 import { app } from '@/services/firebase'
 import { useAuthStore } from "@/stores/auth"
-import { useNetworkStore } from "@/stores/network"
-import { useTokenStore } from "@/stores/tokens"
+import { useProfileStore } from "@/stores/profile"
 import { useWalletStore } from "@/stores/wallet"
 import { genNameHash, buildAccount } from '@/services/web3/account'
+import { loadTokens } from "@/services/web3/tokens"
 
 const auth = getAuth(app)
 const functions = getFunctions()
@@ -58,11 +58,11 @@ export async function googleSocialLogin() {
             displayName: result.user.displayName || undefined,
             photoURL: result.user.photoURL || undefined,
             nameHash,
-            idToken,
-            account
+            idToken
         };
-        const store = useAuthStore();
-        store.signIn(user);
+        useAuthStore().signIn(user);
+        const store = useProfileStore();
+        store.setProfile(store.network, await buildProfile(nameHash));
     } catch (error: any) {
         if (error.code == 'auth/popup-closed-by-user') {
             return
@@ -77,7 +77,6 @@ export async function twitterSocialLogin() {
         const idToken = await getIdTokenAndSetClaimsIfNecessary(result.user);
         const providerUid = result.user.providerData[0].uid;
         const nameHash = genNameHash("twitter.com", providerUid);
-        const account = await buildAccount(nameHash);
         const user : IUser = {
             provider: "twitter.com",
             uid: result.user.uid,
@@ -87,19 +86,27 @@ export async function twitterSocialLogin() {
             photoURL: result.user.photoURL || undefined,
             nameHash,
             idToken,
-            account
         };
-        const store = useAuthStore();
-        store.signIn(user);
+        useAuthStore().signIn(user);
+        const store = useProfileStore();
+        store.setProfile(store.network, await buildProfile(nameHash));
+        console.log(store.profile);
     } catch (error) {
         console.log(error);
     }
 }
 
 export function signOutFirebase() {
-    useNetworkStore().reset();
     useWalletStore().disconnectWallet();
-    useTokenStore().clear();
+    useProfileStore().clear();
     useAuthStore().signOut();
     return signOut(auth);
+}
+
+async function buildProfile(nameHash: string) : Promise<Profile> {
+    const account = await buildAccount(nameHash);
+    return {
+        account,
+        tokens: await loadTokens(account.address)
+    }
 }

@@ -79,17 +79,22 @@
 </template>
 
 <script setup lang="ts">
-    import { useRouter } from 'vue-router'; 
-    import { twitterSocialLogin } from '@/services/auth'
-    import { useAuthStore } from '@/stores/auth'
-    import logo from "@/assets/hori-white-logo.svg"
-    import loginbg from "@/assets/bg-login.jpg"
-    const store = useAuthStore();
-    const router = useRouter();
-    const twitter_login = async () => {
-        await twitterSocialLogin();
-        router.push(store.returnUrl || "/");
-    }
+import { useRouter } from 'vue-router'; 
+import { twitterSocialLogin, signOutFirebase } from '@/services/auth'
+import { useAuthStore } from '@/stores/auth'
+import logo from "@/assets/hori-white-logo.svg"
+import loginbg from "@/assets/bg-login.jpg"
+
+const store = useAuthStore();
+const router = useRouter();
+
+// sign out first to ensure we clear all old data
+signOutFirebase();
+
+const twitter_login = async () => {
+    await twitterSocialLogin();
+    router.push(store.returnUrl || "/");
+}
 </script>
 
 <style lang="less" scoped>

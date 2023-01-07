@@ -75,11 +75,11 @@ import { ref } from 'vue'
 import type { Token } from "@/types";
 import type { BigNumber } from "bignumber.js";
 import logo from "../assets/network-icons/hexlink.svg";
-import { useNetworkStore } from "@/stores/network";
+import { useProfileStore } from "@/stores/profile";
 
 const isGreen = ref(true);
 
-const network = useNetworkStore().network;
+const network = useProfileStore().network;
 
 const props = defineProps({
   tokens: {

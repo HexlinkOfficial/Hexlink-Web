@@ -101,7 +101,7 @@ import type { Token } from "@/types";
 import * as ethers from "ethers";
 import { isContract, prettyPrintAddress } from '@/services/web3/account';
 import { message } from "ant-design-vue";
-import { useNetworkStore } from "@/stores/network";
+import { useProfileStore } from "@/stores/profile";
 
 const props = defineProps({
     tokens: {
@@ -127,7 +127,7 @@ const showImport = ref<boolean>(false);
 const searchText = ref<string>("");
 const tokenListToShow = ref<Token[]>([]);
 const updatingPreference = ref<{[key: string]: boolean}>({});
-const chain = useNetworkStore().network.name;
+const chain = useProfileStore().network.name;
 
 watch(
   () => props.tokens,

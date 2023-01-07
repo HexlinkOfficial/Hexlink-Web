@@ -1,4 +1,3 @@
-import { BigNumber } from "ethers";
 import type { Network } from "@/types";
 
 export const GOERLI : Network = {

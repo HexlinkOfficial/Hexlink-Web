@@ -1,7 +1,7 @@
 [
     {
         "chainId": 5,
-        "symbol": "Goerli ETH",
+        "symbol": "gETH",
         "name": "Goerli Ethereum",
         "decimals": 18,
         "address": "0x0000000000000000000000000000000000000000",
@@ -21,6 +21,14 @@
         "name": "USD Coin",
         "decimals": 18,
         "address": "0x2f3a40a3db8a7e3d09b0adfefbce4f6f81927557",
+        "logoURI": "https://wallet-asset.matic.network/img/tokens/usdc.svg"
+    },
+    {
+        "chainId": 5,
+        "symbol": "USDC2",
+        "name": "USD Coin",
+        "decimals": 18,
+        "address": "0x07865c6E87B9F70255377e024ace6630C1Eaa37F",
         "logoURI": "https://wallet-asset.matic.network/img/tokens/usdc.svg"
     },
     {

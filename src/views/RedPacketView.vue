@@ -73,11 +73,11 @@
                               <div class="mode-text2">{{ redpacket.token.label }}</div>
                               <input class="mode-input" type="text" placeholder="select" readonly>
                               <div class="mode-options">
-                                <div class="mode-option" v-for="(item, index) of tokens" :key="index" @click="tokenChoose(item.metadata.name, item.metadata.address, item.metadata.logoURI)">
+                                <div class="mode-option" v-for="(item, index) of tokens" :key="index" @click="tokenChoose('token', item.metadata.symbol, item.metadata.address, item.metadata.logoURI)">
                                   <div class="token-icon">
                                     <img :src="item.metadata.logoURI"/>
                                   </div>
-                                  {{ item.metadata.name }}
+                                  {{ item.metadata.symbol }}
                                 </div>
                               </div>
                             </div>
@@ -91,7 +91,7 @@
                       <div class="mode-dropdown" :class="openDropdown && 'active'" @click="openDropdown = !openDropdown;">
                         <div class="mode-text">{{ modeLabels[redpacket.mode] }}</div>
                         <input class="mode-input" type="text" placeholder="select" readonly>
-                        <div class="mode-options">
+                        <div class="mode-options" style="width:100%;">
                           <div class="mode-option" @click="modeChoose('random')">Randomly</div>
                           <div class="mode-option" @click="modeChoose('equal')">Equally</div>
                         </div>
@@ -112,27 +112,32 @@
                     <p>Enable Gas sponsorship</p>
                     <a-switch style="margin-left: 1rem;" v-model:checked="enableGas" />
                   </div>
-                  <div>
+                  <div class="gas-estimation-parent">
                     <div class="gas-estimation">
-                      <p>Gas Estimation: XXXXXX</p>
-                      <div class="mode-dropdown" :class="chooseTotalDrop && 'active'" @click="chooseTotalDrop = !chooseTotalDrop;">
-                        <div class="token-icon">
-                          <img :src="redpacket.token.logo" />
-                        </div>
-                        <div class="mode-text2">{{ redpacket.token.label }}</div>
-                        <input class="mode-input" type="text" placeholder="select" readonly>
-                        <div class="mode-options">
-                          <div class="mode-option" v-for="(item, index) of tokens" :key="index"
-                            @click="tokenChoose(item.metadata.name, item.metadata.address, item.metadata.logoURI)">
+                      <p>
+                        <img style="width: 20px; height: 20px;" src="https://i.postimg.cc/RhXfgJR1/gas-pump.png"/>
+                        : XXXXXX
+                      </p>
+                      <div class="total-choose-token">
+                        <div class="token-select">
+                          <div class="mode-dropdown" :class="chooseGasDrop && 'active'" @click="chooseGasDrop = !chooseGasDrop;">
                             <div class="token-icon">
-                              <img :src="item.metadata.logoURI" />
+                              <img :src="redpacket.gasToken.logo" />
                             </div>
-                            {{ item.metadata.name }}
+                            <div class="mode-text2">{{ redpacket.gasToken.label }}</div>
+                            <input class="mode-input" type="text" placeholder="select" readonly>
+                            <div class="mode-options">
+                              <div class="mode-option" v-for="(item, index) of tokens" :key="index"
+                                @click="tokenChoose('gas', item.metadata.symbol, item.metadata.address, item.metadata.logoURI)">
+                                <div class="token-icon">
+                                  <img :src="item.metadata.logoURI" />
+                                </div>
+                                {{ item.metadata.symbol }}
+                              </div>
+                            </div>
                           </div>
                         </div>
                       </div>
-                      <a-select v-model:value="redpacket.gasToken" style=" margin-left: 1rem; width: 120px" :options="tokens">
-                      </a-select>
                       <svg style="margin-left: 1rem; width: 16px;" width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path
                           d="M11 21C16.5228 21 21 16.5228 21 11C21 5.47715 16.5228 1 11 1C5.47715 1 1 5.47715 1 11C1 16.5228 5.47715 21 11 21Z"
@@ -146,7 +151,7 @@
                 <div class="choose-account">
                   <div class="account-card">
                     <div class="left">
-                      <div> 
+                      <div>
                         <img class="wallet-image" src="https://upload.wikimedia.org/wikipedia/commons/3/36/MetaMask_Fox.svg">
                         <div class="chain_wrapper">
                           <img class="chain" :src="useProfileStore().network.logoUrl" />
@@ -160,16 +165,19 @@
                       </div>
                       <div class="balances">
                         <span style="display: flex; align-items: center;">
-                          <span class="balance_item">0</span>
-                          <img style="width:20px; height: 20px; margin-left: 5px; margin-right: 5px;" src="https://i.postimg.cc/yd6X9Sf1/polygon-color.png" />
-                          <span><b>{{ redpacket.token.label }}</b></span>
+                          <span class="balance_item">
+                            <p style="font-weight:600;">10000000000</p>
+                          </span>
+                          <img style="width:20px; height: 20px; margin-left: 5px; margin-right: 5px;" :src="redpacket.token.logo" />
+                          <span style="font-size: 12px;"><b>{{ redpacket.token.label }}</b></span>
                         </span>
                         <!-- gas -->
-                        <span v-if="showGasToken()">
-                          <span class="balance_item">0</span>
-                          <img style="width:20px; height: 20px; margin-left: 5px; margin-right: 5px;"
-                            src="https://i.postimg.cc/yd6X9Sf1/polygon-color.png" />
-                          <span><b>{{ redpacket.gasToken.label }}</b></span>
+                        <span v-if="showGasToken()" style="display: flex; align-items: center;">
+                          <span class="balance_item">
+                            <p style="font-weight:600;">0</p>
+                          </span>
+                          <img style="width:20px; height: 20px; margin-left: 5px; margin-right: 5px;" :src="redpacket.gasToken.logo" />
+                          <span style="font-size: 12px;"><b>{{ redpacket.gasToken.label }}</b></span>
                         </span>
                       </div>
                     </div>
@@ -190,17 +198,19 @@
                       </div>
                       <div class="balances">
                         <span style="display: flex; align-items: center;">
-                          <span class="balance_item">10000000000</span>
-                          <img style="width:20px; height: 20px; margin-left: 5px; margin-right: 5px;"
-                            src="https://i.postimg.cc/yd6X9Sf1/polygon-color.png" />
-                          <span><b>{{ redpacket.token.label }}</b></span>
+                          <span class="balance_item">
+                            <p style="font-weight:600;">10000000000</p>
+                          </span>
+                          <img style="width:20px; height: 20px; margin-left: 5px; margin-right: 5px;" :src="redpacket.token.logo" />
+                          <span style="font-size: 12px;"><b>{{ redpacket.token.label }}</b></span>
                         </span>
                         <!-- gas -->
-                        <span v-if="showGasToken()">
-                          <span class="balance_item">0</span>
-                          <img style="width:20px; height: 20px; margin-left: 5px; margin-right: 5px;"
-                            src="https://i.postimg.cc/yd6X9Sf1/polygon-color.png" />
-                          <span><b>{{ redpacket.gasToken.label }}</b></span>
+                        <span v-if="showGasToken()" style="display: flex; align-items: center;">
+                          <span class="balance_item">
+                            <p style="font-weight:600;">000000</p>
+                          </span>
+                          <img style="width:20px; height: 20px; margin-left: 5px; margin-right: 5px;" :src="redpacket.gasToken.logo" />
+                          <span style="font-size: 12px;"><b>{{ redpacket.gasToken.label }}</b></span>
                         </span>
                       </div>
                     </div>
@@ -243,12 +253,12 @@ interface RedPacket {
   token: {
     label: string,
     value: string,
-    logo: string
+    logo: string | undefined
   },
   gasToken: {
     label: string,
     value: string,
-    logo: string
+    logo: string | undefined
   },
   expiredAt: Number,
 }
@@ -264,12 +274,12 @@ const redpacket = ref<RedPacket>({
   token: {
     label: 'MATIC',
     value: ethers.constants.AddressZero,
-    logo: ""
+    logo: "https://token.metaswap.codefi.network/assets/networkLogos/polygon.svg",
   },
   gasToken: {
     label: "MATIC",
     value: "MATIC",
-    logo: ""
+    logo: "https://token.metaswap.codefi.network/assets/networkLogos/polygon.svg",
   },
   expiredAt: 0 // do not expire
 });
@@ -301,17 +311,23 @@ const modes = ["random", "equal", "what"];
 
 const modeChoose = (gameMode: "random" | "equal") => {
   redpacket.value.mode = gameMode;
-  console.log(tokens);
+  console.log(useProfileStore().profile);
 }
 
 const testChoose = (mode: string) => {
   console.log(mode);
 }
 
-const tokenChoose = (token: string, address: string, logoUrl: string) => {
-  redpacket.value.token.label = token;
-  redpacket.value.token.value = address;
-  redpacket.value.token.logo = logoUrl;
+const tokenChoose = (mode: "token" | "gas",token: string, address: string, logoUrl: string | undefined) => {
+  if (mode === "token") {
+    redpacket.value.token.label = token;
+    redpacket.value.token.value = address;
+    redpacket.value.token.logo = logoUrl;
+  } else {
+    redpacket.value.gasToken.label = token;
+    redpacket.value.gasToken.value = address;
+    redpacket.value.gasToken.logo = logoUrl;
+  }
 }
 
 const createRedPacket = async function () {
@@ -334,6 +350,7 @@ const sendLuck = ref<boolean>(false);
 const luckHistory = ref<boolean>(true);
 const openDropdown = ref<boolean>(false);
 const chooseTotalDrop = ref<boolean>(false);
+const chooseGasDrop = ref<boolean>(false);
 const enableGas = ref<boolean>(false);
 </script>
 
@@ -392,18 +409,27 @@ const enableGas = ref<boolean>(false);
     margin: 3px 0; }
   p {
     font-size: 12px;
-    color: rgba(34, 34, 34, 0.5);
+    color: black;
     margin-bottom: 0.5rem; }
   .balances {
     display: flex;
     flex-direction: column;
-    margin-left: 1rem;
-    .balance_item {
-      padding: 0 10px;
-      margin-bottom: 5px;
-      line-height: 35px;
-      background-color: #e6e6e6;
-      border-radius: 5px; } } }
+    margin-left: 0.8rem; } }
+.balance_item {
+  width: 4.5rem;
+  overflow: auto;
+  white-space: nowrap;
+  padding: 0 10px;
+  margin-bottom: 5px;
+  line-height: 30px;
+  background-color: #F3F4F6;
+  border-radius: 5px;
+
+  p {
+    margin-bottom: 0rem;
+    overflow: auto;
+  }
+}
 .wallet-image {
   width: 40px;
   height: 40px;
@@ -774,7 +800,8 @@ const enableGas = ref<boolean>(false);
   display: inline-flex;
   -webkit-box-align: center;
   align-items: center;
-  width: 185px;
+  justify-content: flex-end;
+  width: auto;
   border-radius: 8px;
   background-color: rgb(242, 246, 250);
   font-size: 14px;
@@ -790,7 +817,7 @@ const enableGas = ref<boolean>(false);
   border-top: 2px solid rgb(242, 246, 250);
   border-right: 2px solid rgb(242, 246, 250);
   transform: rotate(-45deg);
-  right: 20px;
+  right: 10px;
   top: 15px;
   z-index: 10000;
   transition: 0.5s;
@@ -843,6 +870,7 @@ const enableGas = ref<boolean>(false);
   color: #07101b;
   -webkit-user-select: none;
   -moz-user-select: none;
+  margin-right: 1.5rem;
 }
 
 .mode-input {
@@ -1140,6 +1168,7 @@ const enableGas = ref<boolean>(false);
     display: flex;
     justify-content: center;
     margin-right: 0.5rem;
+    margin-left: 0.5rem;
   }
 
   .token-name {
@@ -1196,7 +1225,7 @@ input[type=number] {
   align-items: center;
   position: absolute;
   top: 50px;
-  width: 100%;
+  width: auto;
   background: #fff;
   box-shadow: 0 30px 30px rgba(0, 0, 0, 0.05);
   border-radius: 10px;
@@ -1338,12 +1367,19 @@ input[type=number] {
     margin-left: 0.75rem; }
   @media (max-width: 768px) {
     flex-direction: column; } }
+.gas-estimation-parent {
+  display: flex;
+  @media (max-width: 768px) {
+    width: 100%;
+    justify-content: flex-end; }
+}
 .gas-estimation {
   display: flex;
-  align-items: center;
+  // align-items: center;
 
   p {
     margin-bottom: 0rem;
+    margin-right: 1rem;
   }
 }
 
@@ -1366,7 +1402,10 @@ input[type=number] {
   display: flex;
   align-items: center;
   p {
-    margin-bottom: 0rem; }}
+    margin-bottom: 0rem; }
+  @media (max-width: 768px) {
+    width: 100%;
+    justify-content: space-between; } }
 
 .full-modal {
   .ant-modal {

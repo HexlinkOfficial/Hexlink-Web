@@ -11,7 +11,7 @@ export const GOERLI : Network = {
     },
     nativeCurrency: {
         name: "Goerli ETH",
-        symbol: "Goerli ETH",
+        symbol: "gETH",
         decimals: 18
     },
     blockExplorerUrls: ["https://goerli.etherscan.io"],

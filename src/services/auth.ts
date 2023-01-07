@@ -49,7 +49,6 @@ export async function googleSocialLogin() {
         const result = await signInWithPopup(auth, provider)
         const idToken = await getIdTokenAndSetClaimsIfNecessary(result.user)
         const nameHash = genNameHash("mailto", result.user.email!);
-        const account = await buildAccount(nameHash);
         const user : IUser = {
             provider: "google",
             uid: result.user.uid,
@@ -62,7 +61,8 @@ export async function googleSocialLogin() {
         };
         useAuthStore().signIn(user);
         const store = useProfileStore();
-        store.setProfile(store.network, await buildProfile(nameHash));
+        const account = await buildAccount(nameHash);
+        store.setAccount(store.network, account);
     } catch (error: any) {
         if (error.code == 'auth/popup-closed-by-user') {
             return
@@ -89,8 +89,8 @@ export async function twitterSocialLogin() {
         };
         useAuthStore().signIn(user);
         const store = useProfileStore();
-        store.setProfile(store.network, await buildProfile(nameHash));
-        console.log(store.profile);
+        const account = await buildAccount(nameHash);
+        store.setAccount(store.network, account);
     } catch (error) {
         console.log(error);
     }
@@ -103,10 +103,10 @@ export function signOutFirebase() {
     return signOut(auth);
 }
 
-async function buildProfile(nameHash: string) : Promise<Profile> {
-    const account = await buildAccount(nameHash);
-    return {
-        account,
-        tokens: await loadTokens(account.address)
+export async function initTokens() {
+    const store = useProfileStore();
+    if (!store.profile.tokenInitiated && useAuthStore().authenticated) {
+        const tokens = await loadTokens(store.profile.account.address);
+        store.setTokens(store.network, tokens);
     }
 }

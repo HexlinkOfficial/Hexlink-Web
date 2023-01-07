@@ -486,9 +486,9 @@ import { ref, onMounted, computed } from "vue";
 import Layout from "../components/Layout.vue";
 import WalletTokenList from "../components/WalletTokenList.vue";
 import WalletNFTGrid from "../components/WalletNFTGrid.vue";
-import { useAuthStore } from '@/stores/auth';
 import { useProfileStore } from '@/stores/profile';
 import { BigNumber } from "bignumber.js";
+import { initTokens } from "@/services/auth";
 
 const network = useProfileStore().network;
 const profile = useProfileStore().profile;
@@ -497,8 +497,8 @@ const tokenView = ref<boolean>(true);
 const loading = ref<boolean>(true);
 const showInfo = ref<boolean>(true);
 
-const auth = useAuthStore();
 onMounted(async () => {
+  await initTokens();
   loading.value = false;
 });
 

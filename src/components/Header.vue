@@ -173,7 +173,7 @@
                         </div>
                       </div>
                     </div>
-                    <router-link to="signin" class="dropdown-item logout">
+                    <router-link @click="signOutFirebase" to="signin" class="dropdown-item logout">
                       <i class="icofont-logout"></i> Logout
                     </router-link>
                   </div>
@@ -188,6 +188,7 @@
 </template>
 
 <script lang="ts">
+import router from '@/router';
 import { useAuthStore } from '@/stores/auth';
 import { useWalletStore } from '@/stores/wallet';
 import { prettyPrintAddress } from '@/services/web3/account';
@@ -220,6 +221,7 @@ export default {
       walletStore,
       user,
       switchNetwork,
+      signOutFirebase,
       active_: "",
       POLYGON,
       GOERLI,
@@ -241,8 +243,8 @@ export default {
     selectNetwork(value: any) {
       this.active_ = this.active_ === value ? "" : value;
     },
-    doCopy: function (address: string) {
-      this.$copyText(address).then(
+    doCopy: function () {
+      this.$copyText(useProfileStore().profile?.account.address).then(
         function () {
           // alert("Copied");
           const toaster = createToaster({ position: "top", duration: 2000 });

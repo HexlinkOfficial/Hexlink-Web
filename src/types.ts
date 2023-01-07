@@ -90,5 +90,6 @@ export interface Token {
 
 export interface Profile {
     account: Account;
+    tokenInitiated: boolean;
     tokens: { [key: string]: Token };
 }

@@ -5,14 +5,18 @@ import { useProfileStore } from '@/stores/profile';
 import { Alchemy, Network as AlchemyNetwork } from "alchemy-sdk";
 
 export async function switchNetwork(network: Network) {
-    useProfileStore().switchNetwork(network);
-    if (useWalletStore().connected &&
-        network.chainId != Number(window.ethereum.networkVersion)) {
+    if (!useWalletStore().connected || network.chainId == Number(window.ethereum.networkVersion)) {
+        useProfileStore().switchNetwork(network);
+        return;
+    }
+
+    if (useWalletStore().connected) {
         try {
             await window.ethereum.request({
                 method: 'wallet_switchEthereumChain',
                 params: [{ chainId: ethers.utils.hexValue(network.chainId) }],
             });
+            useProfileStore().switchNetwork(network);
         } catch (error: any) {
             if (error.code === 4902) {
                 await window.ethereum.request({
@@ -29,6 +33,7 @@ export async function switchNetwork(network: Network) {
                     method: 'wallet_switchEthereumChain',
                     params: [{ chainId: ethers.utils.hexValue(network.chainId) }],
                 });
+                useProfileStore().switchNetwork(network);
             } else {
                 console.log(error);
             }

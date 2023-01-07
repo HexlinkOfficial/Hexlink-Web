@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import type { Token, Network, Profile, Preference } from '@/types';
+import type { Token, Network, Profile, Preference, Account } from '@/types';
 import { GOERLI } from "@/configs/network";
 
 export const useProfileStore = defineStore({
@@ -17,7 +17,7 @@ export const useProfileStore = defineStore({
         visiableTokens: (state) => Object.values(
             state.profiles[state.network.name]?.tokens || []
         ).filter(t => t.preference?.display),
-        // tokens with balance > 0
+        // display is true and tokens with balance > 0
         feasibleTokens: (state) => Object.values(
             state.profiles[state.network.name]?.tokens || []
         ).filter(t => t.preference?.display && t.balance?.value.gt(0)),
@@ -27,8 +27,16 @@ export const useProfileStore = defineStore({
             console.log("Switching to network " + network.chainName);
             this.network = network;
         },
-        setProfile(network: Network, profile: Profile) {
-            this.profiles[network.name] = profile;
+        setAccount(network: Network, account: Account) {
+            this.profiles[network.name] = {
+                account,
+                tokenInitiated: false,
+                tokens: {}
+            };
+        },
+        setTokens(network: Network, tokens: { [key: string]: Token }) {
+            this.profiles[network.name].tokenInitiated = true;
+            this.profiles[network.name].tokens = tokens;
         },
         addToken(token: Token) {
             this.profile.tokens[token.metadata.address] = token;

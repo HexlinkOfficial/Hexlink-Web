@@ -158,7 +158,7 @@
                             <div class="user-info">
                               <span style="margin-bottom: 0;" class="smart-contract-address">
                                 <h5 @click="doCopy">
-                                  {{ addressTextLong(walletStore.wallet!.account.address) }}
+                                  {{ addressTextLong(walletStore.wallet?.account.address) }}
                                 </h5>
                               </span>
                             </div>
@@ -205,12 +205,11 @@ export default {
     const user = authStore.user!;
     const walletStore = useWalletStore();
 
-    const addressTextLong = function (address: string) {
-    if (user?.account.address) {
-        return prettyPrintAddress(user.account.address, 5, 6);
-      } else {
-        return "";
+    const addressTextLong = function (address: string | undefined) {
+      if (address) {
+        return prettyPrintAddress(address, 5, 6);
       }
+      return "0x";
     };
   
     return {

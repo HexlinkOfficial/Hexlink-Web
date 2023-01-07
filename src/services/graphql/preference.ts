@@ -1,5 +1,5 @@
 import { gql } from '@urql/core'
-import type { IUser, IAuth, Preference, Network } from '@/types';
+import type { IUser, Token, Network, TokenMetadata } from '@/types';
 import { handleUrqlResponse, setUrqlClientIfNecessary } from './urql'
 
 export const GET_TOKEN_PREFERENCES = gql`
@@ -17,6 +17,7 @@ export const GET_TOKEN_PREFERENCES = gql`
             token_address
             token_alias
             display
+            metadata
         }
     }
 `
@@ -48,28 +49,38 @@ export const UPDATE_TOKEN_PREFERENCE = gql`
     }
 `
 
-export interface PreferenceOutput extends Preference {
-    token_address: string,
-}
-
 export interface PreferenceInput {
     chain: string,
-    token_address: string,
-    token_alias?: string,
+    tokenAddress: string,
+    tokenAlias?: string,
     display: boolean,
+    metadata: TokenMetadata,
 }
 
 export async function getTokenPreferences(
     user: IUser,
     network: Network
-) : Promise<PreferenceOutput[]> {
+) : Promise<Token[]> {
     const client = setUrqlClientIfNecessary(user.idToken!)
     const result = await client.query(
         GET_TOKEN_PREFERENCES,
-        {userId: user.uid, chain: network.chainId.toString()}
+        {userId: user.uid, chain: network.name}
     ).toPromise();
     if (await handleUrqlResponse(result)) {
-        return result.data.preference;
+        return result.data.preference.map((p : any) => {
+            const metadata = JSON.parse(p.metadata);
+            return {
+                metadata: {
+                    ...metadata,
+                    chain: network.name
+                },
+                preference: {
+                    id: p.id,
+                    tokenAlias: p.token_alias,
+                    display: p.display,
+                }
+            }
+        });
     } else {
         return await getTokenPreferences(user, network);
     }
@@ -86,9 +97,10 @@ export async function insertTokenPreferences(
             objects: data.map(d => ({
                 user_id: user.uid,
                 chain: d.chain,
-                token_address: d.token_address.toLowerCase(),
-                token_alias: d.token_alias,
+                token_address: d.tokenAddress.toLowerCase(),
+                token_alias: d.tokenAlias,
                 display: d.display,
+                metadata: JSON.stringify(d.metadata),
             }))
         }
     ).toPromise();

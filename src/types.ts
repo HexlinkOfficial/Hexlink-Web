@@ -48,7 +48,7 @@ export interface IAuth {
 }
 
 export interface TokenMetadata {
-    chainId?: number,
+    chain?: string,
     address: string,
     name: string,
     symbol: string,

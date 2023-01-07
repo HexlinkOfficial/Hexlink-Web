@@ -8,7 +8,12 @@ import type {
     PreferenceOutput,
     PreferenceInput,
 } from "@/services/graphql/preference";
-import type { TokenMetadata, Token, Network, NormalizedTokenBalance } from '@/types';
+import type {
+    TokenMetadata,
+    Token,
+    Network,
+    NormalizedTokenBalance
+} from '@/types';
 import type { TokenBalance } from "alchemy-sdk";
 import { TokenBalanceType } from "alchemy-sdk";
 import type { TokenBalancesOptionsErc20 } from "alchemy-sdk";
@@ -16,11 +21,6 @@ import { useAuthStore } from "@/stores/auth";
 import { useNetworkStore } from '@/stores/network';
 import { getPopularTokens, nativeCoinAddress } from "@/configs/tokens";
 import { alchemy } from "@/services/web3/network";
-
-export interface GasEstimation {
-    baseCost: BigNumber;
-    maxCost: BigNumber;
-}
 
 export async function getERC20Metadata(token: string) : Promise<TokenMetadata> {
     const metadata = await alchemy().core.getTokenMetadata(token);
@@ -38,10 +38,6 @@ export async function getERC20Metadata(token: string) : Promise<TokenMetadata> {
         decimals: metadata.decimals!,
         logoURI: metadata.logo!
     }
-}
-
-async function getERC20Metadatas(tokens: string[]) : Promise<TokenMetadata[]> {
-    return await Promise.all(tokens.map(t => getERC20Metadata(t)));
 }
 
 async function getNativeCoinBalance(wallet: string, network: Network): Promise<TokenBalance> {
@@ -79,38 +75,22 @@ function getBalance(balance: TokenBalance | null, decimals: number | null) : Nor
 }
 
 export async function loadAll(): Promise<{[key: string]: Token}> {
-    const auth = useAuthStore();
-
     const tokens: {[key: string]: Token} = {};
     const network = useNetworkStore().network;
     const DEFAULT_TOKENS = await getPopularTokens(network);
     DEFAULT_TOKENS.tokens.forEach(t => tokens[t.address] = {metadata: t});
 
+    const auth = useAuthStore();
     const preferences : PreferenceOutput[] = await getTokenPreferences(
         auth.user!, network
     );
-    const customTokenAddresses : string[] = [];
     preferences.forEach(p => {
         const address = p.token_address.toLowerCase();
-        if (tokens[address]) {
-            tokens[address].preference = p;
-        } else {
-            customTokenAddresses.push(address)
-            tokens[address] = {
-                metadata: {
-                    address, 
-                    name: "",
-                    symbol: "",
-                    decimals: 0,
-                },
-                preference: p,
-            }
+        if (p.display == false && address in tokens) {
+            delete tokens[address];
+        } else if (p.display == true && !(address in tokens)) {
+            tokens[address] = p;
         }
-    });
-
-    const customMetadatas = await getERC20Metadatas(customTokenAddresses);
-    customMetadatas.forEach(metadata => {
-        tokens[metadata.address].metadata = metadata;
     });
 
     const tokensToSetPreference : PreferenceInput[] = [];
@@ -118,8 +98,9 @@ export async function loadAll(): Promise<{[key: string]: Token}> {
     const ethBalance = await getNativeCoinBalance(account, network);
     const option: TokenBalancesOptionsErc20 = {type : TokenBalanceType.ERC20};
     const erc20Balances = await alchemy().core.getTokenBalances(account, option);
+    const balances = erc20Balances.tokenBalances.concat([ethBalance as TokenBalance]);
 
-    erc20Balances.tokenBalances.concat([ethBalance as TokenBalance]).forEach(balance => {
+    balances.forEach(balance => {
         if (BigNumber(balance.tokenBalance || 0).gt(0)) {
             const address = balance.contractAddress.toLowerCase();
             tokens[address].balance = getBalance(
@@ -128,16 +109,17 @@ export async function loadAll(): Promise<{[key: string]: Token}> {
             );
             if (!tokens[address].preference) {
                 tokensToSetPreference.push({
-                    chain: network.chainId.toString(),
-                    token_address: address,
-                    display: true
+                    chain: network.name,
+                    display: true,
+                    tokenAddress: address,
+                    metadata: tokens[address].metadata
                 });
             }
         }
     });
     const inserted = await insertTokenPreferences(auth.user!, tokensToSetPreference);
     tokensToSetPreference.forEach((p, i) => {
-        tokens[p.token_address].preference = {id: inserted[i].id, display: p.display};
+        tokens[p.tokenAddress].preference = {id: inserted[i].id, display: p.display};
     });
     return tokens;
 }

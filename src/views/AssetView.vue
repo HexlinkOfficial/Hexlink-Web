@@ -508,8 +508,11 @@ onMounted(async () => {
 });
 
 const blockExplorer = computed(() => {
-  const account = auth.user!.account.address;
-  return `${network.blockExplorerUrls[0]}/address/${account}`;
+  if (auth.authenticated) {
+    const account = auth.user!.account.address;
+    return `${network.blockExplorerUrls[0]}/address/${account}`;
+  }
+  return network.blockExplorerUrls[0];
 });
 
 const visiableTokens = computed(() => {

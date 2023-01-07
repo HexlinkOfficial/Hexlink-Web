@@ -38,7 +38,7 @@
                             style="font-size: 0.8em;"
                             v-if="item.address != '0x'"
                         >
-                            Contract Address: {{prettyPrintAddress(item.address)}}
+                            Contract Address: {{prettyPrintAddress(item.metadata.address)}}
                         </a-typography-paragraph>
                     </a-col>
                     <a-col>
@@ -58,28 +58,28 @@
                 name="address"
                 :rules="[{ required: true, trigger: 'change' }]"
             >
-                <a-input v-model:value="tokenToImport.address" disabled></a-input>
+                <a-input v-model:value="tokenToImport.metadata.address" disabled></a-input>
             </a-form-item>
             <a-form-item
                 label="Name"
                 name="name"
                 :rules="[{ required: true, message: 'Name is not set' }]"
             >
-                <a-input v-model:value="tokenToImport.name"></a-input>
+                <a-input v-model:value="tokenToImport.metadata.name"></a-input>
             </a-form-item>
             <a-form-item
                 label="Symbol"
                 name="symbol"
                 :rules="[{ required: true, message: 'Symbol not found' }]"
             >
-                <a-input v-model:value="tokenToImport.symbol" disabled></a-input>
+                <a-input v-model:value="tokenToImport.metadata.symbol" disabled></a-input>
             </a-form-item>
             <a-form-item
                 label="Decimals"
                 name="decimals"
                 :rules="[{ required: true, message: 'Decimals is found' }]"
             >
-                <a-input v-model:value="tokenToImport.decimals" disabled></a-input>
+                <a-input v-model:value="tokenToImport.metadata.decimals" disabled></a-input>
             </a-form-item>
             <a-form-item>
                 <a-button type="primary" html-type="submit">Add</a-button>
@@ -97,10 +97,11 @@ import {
     updateTokenPreference
 } from '@/services/graphql/preference';
 import { loadERC20Token } from "@/services/web3/tokens";
-import type { Token } from "@/services/web3/tokens";
+import type { Token } from "@/types";
 import * as ethers from "ethers";
 import { isContract, prettyPrintAddress } from '@/services/web3/account';
 import { message } from "ant-design-vue";
+import { useNetworkStore } from "@/stores/network";
 
 const props = defineProps({
     tokens: {
@@ -109,29 +110,24 @@ const props = defineProps({
     },
 });
 
-const chain = "GOERLI";
-
 const DEFAULT_TOKEN = {
-    address: "",
-    name: "",
-    symbol: "",
-    decimals: 18,
+    metadata: {
+        address: "",
+        name: "",
+        symbol: "",
+        decimals: 18
+    }
 };
 
 const store = useAuthStore();
 const showPreference = ref<boolean>(false);
-const tokenToImport = ref<{
-    address?: string,
-    name?: string,
-    symbol?: string,
-    decimals?: number,
-    token?: Token
-}>({...DEFAULT_TOKEN});
+const tokenToImport = ref<Token>({...DEFAULT_TOKEN});
 const searching = ref<boolean>(false);
 const showImport = ref<boolean>(false);
 const searchText = ref<string>("");
 const tokenListToShow = ref<Token[]>([]);
 const updatingPreference = ref<{[key: string]: boolean}>({});
+const chain = useNetworkStore().network.name;
 
 watch(
   () => props.tokens,
@@ -156,7 +152,7 @@ const search = (token: Token, text: string) => {
     return [
         token.metadata?.name,
         token.metadata?.symbol,
-        token.preference?.token_alias
+        token.preference?.tokenAlias
     ].filter(t => !!t).join(" ").toLowerCase().includes(text);
 }
 
@@ -172,19 +168,15 @@ const genTokenList = async (text: string, tokenMap: {[key: string]: Token}) => {
         );
     }
     const filtered = tokenList.filter(
-        t => t.address.toLowerCase() == text
+        t => t.metadata.address.toLowerCase() == text
     );
     if (filtered.length > 0) {
         tokenListToShow.value =  filtered;
     } else if (await isContract(text)) {
         try {
-            const token = await loadERC20Token(text, store.currentUser!.walletAddress!);
-            tokenToImport.value.address = text;
-            tokenToImport.value.name = token.metadata.name!;
-            tokenToImport.value.decimals = token.metadata.decimals!;
-            tokenToImport.value.symbol = token.metadata.symbol!;
+            const token = await loadERC20Token(text, store.user!.account.address);
+            tokenToImport.value = token;
             showImport.value = true;
-            tokenToImport.value.token = token;
         } catch (err: any) {
             console.log("Failed to load erc20 token details" + err);
         }
@@ -195,20 +187,21 @@ const emit = defineEmits(['preferenceUpdate', 'tokenAdded']);
 const addToken = async () => {
     try {
         const [id] = await insertTokenPreferences(
-            store,
+            store.user!,
             [{
-                token_address: tokenToImport.value.address!,
+                tokenAddress: tokenToImport.value.metadata.address,
                 chain,
                 display: true,
-                token_alias: tokenToImport.value.name,
+                tokenAlias: tokenToImport.value.metadata.name,
+                metadata: tokenToImport.value.metadata,
             }]
         );
-        tokenToImport.value.token!.preference = {
-            id,
+        tokenToImport.value.preference = {
+            id: id.id,
             display: true,
-            token_alias: tokenToImport.value.name,
+            tokenAlias: tokenToImport.value.metadata.name,
         };
-        emit('tokenAdded', tokenToImport.value.token);
+        emit('tokenAdded', tokenToImport.value.metadata);
         showPreference.value = false;
         showImport.value = false;
         searchText.value = "";
@@ -221,7 +214,7 @@ const addToken = async () => {
 
 const handleClick = async (token: Token) => {
     const prevPreference = token.preference;
-    updatingPreference.value[token.address] = true;
+    updatingPreference.value[token.metadata.address] = true;
     try {
         if (token.preference) {
             token.preference.display = !token.preference.display;
@@ -229,29 +222,30 @@ const handleClick = async (token: Token) => {
                 id: token.preference!.id,
                 display: token.preference.display
             };
-            await updateTokenPreference(store, updated);
+            await updateTokenPreference(store.user!, updated);
             emit(
                 'preferenceUpdate',
                 {
-                    address: token.address,
+                    address: token.metadata.address,
                     preference: updated
                 }
             );
         } else {
             token.preference = {id: -1, display: true};
             const [{id}] = await insertTokenPreferences(
-                store,
+                store.user!,
                 [{
-                    token_address: token.address,
+                    tokenAddress: token.metadata.address,
                     chain,
-                    display: true
+                    display: true,
+                    metadata: tokenToImport.value.metadata
                 }]
             );
             token.preference = {id, display: true};
             emit(
                 'preferenceUpdate',
                 {
-                    address: token.address,
+                    address: token.metadata.address,
                     preference: { id, display: true }
                 }
             );
@@ -260,6 +254,6 @@ const handleClick = async (token: Token) => {
         token.preference = prevPreference;
         message.error("Failed to connect error");
     }
-    updatingPreference.value[token.address] = false;
+    updatingPreference.value[token.metadata.address] = false;
 }
 </script>

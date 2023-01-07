@@ -773,7 +773,6 @@ svg {
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from "vue";
-import type { Token } from "@/types";
 import { loadTokens } from "@/services/web3/tokens";
 import { isContract } from "@/services/web3/account";
 import Layout from "../components/Layout.vue";

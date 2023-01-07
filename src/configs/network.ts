@@ -5,7 +5,11 @@ export const GOERLI : Network = {
     chainId: 5,
     name: "goerli",
     chainName: "Goerli Test Network",
-    rpcUrls: ["https://eth-goerli.g.alchemy.com/v2/U4LBbkMIAKCf4GpjXn7nB7H1_P9GiU4b"],
+    rpcUrls: ["https://goerli.infura.io/v3/"],
+    alchemy: {
+        rpcUrl: "https://eth-goerli.g.alchemy.com/v2/U4LBbkMIAKCf4GpjXn7nB7H1_P9GiU4b",
+        key: "U4LBbkMIAKCf4GpjXn7nB7H1_P9GiU4b",
+    },
     nativeCurrency: {
         name: "Goerli ETH",
         symbol: "Goerli ETH",
@@ -17,7 +21,11 @@ export const GOERLI : Network = {
 
 export const POLYGON : Network = {
     chainId: 137,
-    rpcUrls: ["https://polygon-mainnet.g.alchemy.com/v2/1GmfWOSlYIlUI0UcCu4Y2O-8DmFJrlqA"],
+    rpcUrls: ["https://polygon-rpc.com"],
+    alchemy: {
+        rpcUrl: "https://polygon-mainnet.g.alchemy.com/v2/1GmfWOSlYIlUI0UcCu4Y2O-8DmFJrlqA",
+        key: "1GmfWOSlYIlUI0UcCu4Y2O-8DmFJrlqA",
+    },
     name: "polygon",
     chainName: "Polygon Network",
     nativeCurrency: {

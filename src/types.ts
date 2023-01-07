@@ -6,6 +6,10 @@ export interface Network {
     rpcUrls: string[],
     name: string,
     chainName: string,
+    alchemy: {
+        rpcUrl: string,
+        key: string,
+    },
     nativeCurrency: {
         name: string,
         symbol: string,

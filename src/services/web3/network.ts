@@ -12,10 +12,17 @@ export async function switchNewtwork(network: Network) {
         });
         useWalletStore().wallet!.network = network.name;
     } catch (error: any) {
+        console.log(error);
         if (error.code === 4902) {
             await window.ethereum.request({
                 method: "wallet_addEthereumChain",
-                params: [network],
+                params: [{
+                    chainId: ethers.utils.hexValue(network.chainId),
+                    chainName: network.chainName,
+                    blockExplorerUrls: [...network.blockExplorerUrls],
+                    nativeCurrency: {...network.nativeCurrency},
+                    rpcUrls: [...network.rpcUrls],
+                }],
             });
             await window.ethereum.request({
                 method: 'wallet_switchEthereumChain',
@@ -38,15 +45,10 @@ export function alchemyNetwork(network: Network) : AlchemyNetwork {
     throw new Error("Unsupported network");
 }
 
-export function alchemyKey(network: Network) {
-    const keys = JSON.parse(import.meta.env.VITE_ALCHEMY_KEY);
-    return keys[network.name];
-}
-
 export function alchemy() {
     const network = useNetworkStore().network;
     return new Alchemy({
-        apiKey: alchemyKey(network),
+        apiKey: network.alchemy.key,
         network: alchemyNetwork(network)
     });
 }
@@ -55,6 +57,6 @@ export function getProvider() {
     const network = useNetworkStore().network;
     return new ethers.providers.AlchemyProvider(
         network.chainId,
-        alchemyKey(network)
+        network.alchemy.key
     );
 }

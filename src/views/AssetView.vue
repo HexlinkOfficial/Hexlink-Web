@@ -465,7 +465,7 @@ svg {
               <div v-if="tokenView" class="token-listDetail">
                 <div class="token-table">
                   <div style="overflow: visible; border-radius: 0.75rem;">
-                    <WalletTokenList :tokens="visiableTokens" :loading="loading">
+                    <WalletTokenList :tokens="useTokenStore().visiableTokens" :loading="loading">
                     </WalletTokenList>
                   </div>
                 </div>
@@ -514,16 +514,9 @@ const blockExplorer = computed(() => {
   return network.blockExplorerUrls[0];
 });
 
-const visiableTokens = computed(() => {
-  const result = Object.values(useTokenStore().tokens).filter(
-    t => t.preference?.display || false
-  );
-  return result;
-});
-
 const totalAssets = computed(() => {
   let total: BigNumber = BigNumber(0);
-  for (const token of visiableTokens.value) {
+  for (const token of useTokenStore().visiableTokens) {
     if (token.balance && token.price) {
       total = total.plus(token.balance.normalized.times(token.price));
     }

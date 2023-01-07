@@ -8,9 +8,18 @@ export const useTokenStore = defineStore({
         tokens: { [key: string]: Token }
     } => ({
         initiated: false,
-        tokens: {}}
-    ),
+        tokens: {}
+    }),
     persist: true,
+    getters: {
+        visiableTokens: (state) => Object.values(state.tokens).filter(
+            t => t.preference?.display || false
+        ),
+        // tokens with balance > 0
+        feasibleTokens: (state) => Object.values(state.tokens).filter(
+            t => t.balance?.value.gt(0) || false
+        )
+    },
     actions: {
         init(tokens: { [key: string]: Token }) {
             this.initiated = true;

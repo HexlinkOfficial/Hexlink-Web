@@ -483,26 +483,25 @@ svg {
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from "vue";
-import type { Token } from "@/types";
-import { loadAll } from "@/services/web3/tokens";
+import { loadTokens } from "@/services/web3/tokens";
 import Layout from "../components/Layout.vue";
 import WalletTokenList from "../components/WalletTokenList.vue";
 import WalletNFTGrid from "../components/WalletNFTGrid.vue";
 import { useAuthStore } from '@/stores/auth';
 import { useNetworkStore } from '@/stores/network';
+import { useTokenStore } from '@/stores/tokens';
 import { BigNumber } from "bignumber.js";
 
 const network = useNetworkStore().network;
 const nftView = ref<boolean>(false);
 const tokenView = ref<boolean>(true);
 const loading = ref<boolean>(true);
-const tokens = ref<{ [key: string]: Token }>({});
 const showInfo = ref<boolean>(true);
 
 const auth = useAuthStore();
 onMounted(async () => {
   if (auth.authenticated) {
-    tokens.value = await loadAll();
+    await loadTokens();
   }
   loading.value = false;
 });
@@ -516,7 +515,10 @@ const blockExplorer = computed(() => {
 });
 
 const visiableTokens = computed(() => {
-  return Object.values(tokens.value).filter(t => t.preference?.display || false);
+  const result = Object.values(useTokenStore().tokens).filter(
+    t => t.preference?.display || false
+  );
+  return result;
 });
 
 const totalAssets = computed(() => {

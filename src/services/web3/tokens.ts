@@ -5,7 +5,6 @@ import {
     insertTokenPreferences
 } from '@/services/graphql/preference';
 import type {
-    PreferenceOutput,
     PreferenceInput,
 } from "@/services/graphql/preference";
 import type {
@@ -21,6 +20,7 @@ import { useAuthStore } from "@/stores/auth";
 import { useNetworkStore } from '@/stores/network';
 import { getPopularTokens, nativeCoinAddress } from "@/configs/tokens";
 import { alchemy } from "@/services/web3/network";
+import { useTokenStore } from "@/stores/tokens";
 
 export async function getERC20Metadata(token: string) : Promise<TokenMetadata> {
     const metadata = await alchemy().core.getTokenMetadata(token);
@@ -49,79 +49,92 @@ async function getNativeCoinBalance(wallet: string, network: Network): Promise<T
     };
 }
 
-function getBalance(balance: TokenBalance | null, decimals: number | null) : NormalizedTokenBalance {
-    const base = {
-        value: BigNumber(balance?.tokenBalance || 0),
-        error: balance?.error,
-    }
-    if (!balance || balance.error || balance.tokenBalance == null || decimals == null) {
-        return {
-            ...base,
-            normalized: BigNumber(0)
-        }
-    }
-    const normalized = new BigNumber(balance.tokenBalance).div(BigNumber(10).pow(decimals));
+function getBalance(balance: BigNumber, decimals: number) : NormalizedTokenBalance {
+    const normalized = balance.div(BigNumber(10).pow(decimals));
     if (normalized.gt(1)) {
         return {
-            ...base,
+            value: balance,
             normalized: normalized.dp(5)
         };
     } else {
         return {
-            ...base,
+            value: balance,
             normalized
         }
     }
 }
 
-export async function loadAll(): Promise<{[key: string]: Token}> {
-    const tokens: {[key: string]: Token} = {};
+export async function loadTokens() {
     const network = useNetworkStore().network;
-    const DEFAULT_TOKENS = await getPopularTokens(network);
-    DEFAULT_TOKENS.tokens.forEach(t => tokens[t.address] = {metadata: t});
-
     const auth = useAuthStore();
-    const preferences : PreferenceOutput[] = await getTokenPreferences(
-        auth.user!, network
-    );
-    preferences.forEach(p => {
-        const address = p.token_address.toLowerCase();
-        if (p.display == false && address in tokens) {
-            delete tokens[address];
-        } else if (p.display == true && !(address in tokens)) {
-            tokens[address] = p;
-        }
-    });
+    const tokenStore = useTokenStore();
+    let tokens : { [key: string]: Token } = {};
+    if (!auth.authenticated) {
+        return;
+    }
 
+    // generate token map
+    if (!tokenStore.initiated) {
+        const DEFAULT_TOKENS = await getPopularTokens(network);
+        DEFAULT_TOKENS.tokens.forEach(t => tokens[t.address.toLowerCase()] = {metadata: t});
+        const preferences : Token[] = await getTokenPreferences(
+            auth.user!, network
+        );
+        preferences.forEach(p => {
+            const address = p.metadata.address.toLowerCase();
+            if (p.preference!.display == false && address in tokens) {
+                delete tokens[address];
+            } else if (p.preference!.display == true) {
+                tokens[address] = p;
+            }
+        });
+        tokenStore.init(tokens);
+    } else {
+        tokens = tokenStore.tokens;
+    }
+
+    // collect balance information
     const tokensToSetPreference : PreferenceInput[] = [];
     const account = auth.user!.account.address;
     const ethBalance = await getNativeCoinBalance(account, network);
     const option: TokenBalancesOptionsErc20 = {type : TokenBalanceType.ERC20};
     const erc20Balances = await alchemy().core.getTokenBalances(account, option);
     const balances = erc20Balances.tokenBalances.concat([ethBalance as TokenBalance]);
-
-    balances.forEach(balance => {
-        if (BigNumber(balance.tokenBalance || 0).gt(0)) {
-            const address = balance.contractAddress.toLowerCase();
-            tokens[address].balance = getBalance(
-                balance,
-                tokens[address].metadata.decimals
-            );
-            if (!tokens[address].preference) {
-                tokensToSetPreference.push({
-                    chain: network.name,
-                    display: true,
-                    tokenAddress: address,
-                    metadata: tokens[address].metadata
-                });
+    balances.forEach(b => {
+        const address = b.contractAddress.toLowerCase();
+        if (b && !b.error && b.tokenBalance) {
+            const balance = new BigNumber(b.tokenBalance);
+            if (balance.gt(0) && address in tokens) {
+                tokens[address].balance = getBalance(
+                    balance,
+                    tokens[address].metadata.decimals
+                );
+                if (!tokens[address].preference) {
+                    tokensToSetPreference.push({
+                        chain: network.name,
+                        display: true,
+                        tokenAddress: address,
+                        metadata: tokens[address].metadata
+                    });
+                }
             }
+        } else {
+            tokens[address].balance = {
+                value: new BigNumber(0),
+                normalized: new BigNumber(0),
+                error: b.error || "error when getting balance"
+            };
         }
     });
+
+    // update preference
     const inserted = await insertTokenPreferences(auth.user!, tokensToSetPreference);
-    tokensToSetPreference.forEach((p, i) => {
-        tokens[p.tokenAddress].preference = {id: inserted[i].id, display: p.display};
-    });
-    return tokens;
+    for (let i = 0; i < tokensToSetPreference.length; i++) {
+        const p = tokensToSetPreference[i];
+        const preference = {id: inserted[i].id, display: p.display};
+        tokens[p.tokenAddress].preference = preference;
+        tokenStore.updatePreference(p.tokenAddress, preference);
+    }
 }
 
 export async function loadERC20Token(
@@ -131,9 +144,10 @@ export async function loadERC20Token(
     const token = await getERC20Metadata(address);
     const balances = await alchemy().core.getTokenBalances(wallet, [address]);
     const [balance] = balances.tokenBalances;
+    const transformed = new BigNumber(balance.tokenBalance!);
     return {
         metadata: token,
-        balance: getBalance(balance, token.decimals)
+        balance: getBalance(transformed, token.decimals)
     };
 }
 

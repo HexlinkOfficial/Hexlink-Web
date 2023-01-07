@@ -1,20 +1,34 @@
 import { defineStore } from 'pinia';
-import type { TokenMetadata } from "@/types";
+import type { Token, Preference } from '@/types';
 
 export const useTokenStore = defineStore({
     id: 'tokens',
-    state: (): {tokens: TokenMetadata[]} => ({
-        tokens: []
-    }),
+    state: (): {
+        initiated: boolean,
+        tokens: { [key: string]: Token }
+    } => ({
+        initiated: false,
+        tokens: {}}
+    ),
     persist: true,
     actions: {
-        addToken(token: TokenMetadata) {
-            this.tokens.push(token)
+        init(tokens: { [key: string]: Token }) {
+            this.initiated = true;
+            this.tokens = tokens;
         },
-        remove(token: string) {
-            this.tokens.filter(
-                t => t.address.toLowerCase() == token.toLowerCase()
-            );
-        }
+        add(token: Token) {
+            this.tokens[token.metadata.address] = token;
+        },
+        remove(tokenAddr: string) {
+            delete this.tokens[tokenAddr]
+        },
+        updatePreference(tokenAddr: string, preference: Preference) {
+            this.tokens[tokenAddr].preference = preference;
+            console.log("Updating preference");
+        },
+        clear() {
+            this.initiated = false;
+            this.tokens = {};
+        },
     },
 })

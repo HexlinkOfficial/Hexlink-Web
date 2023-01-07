@@ -12,7 +12,7 @@ import '@/assets/main.css'
 import { getAuth} from 'firebase/auth'
 import { app } from '@/services/firebase'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { useAuthStore } from "@/stores/auth"
+import { signOutFirebase } from "@/services/auth"
 import { clearUrqlClient } from '@/services/graphql/urql'
 import Toaster from '@meforma/vue-toaster';
 import VueClipboard from 'vue-clipboard2'
@@ -37,9 +37,8 @@ getAuth(app).onAuthStateChanged(async (user: any) => {
   if (user) {
     // no-op
   } else {
-    const store = useAuthStore();
     clearUrqlClient();
-    store.signOut();
+    signOutFirebase();
   }
 });
 

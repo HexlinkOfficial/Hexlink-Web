@@ -71,7 +71,7 @@
 </template> -->
 
 <script lang="ts" setup>
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import type { Token } from "@/types";
 import type { BigNumber } from "bignumber.js";
 import logo from "../assets/network-icons/hexlink.svg";

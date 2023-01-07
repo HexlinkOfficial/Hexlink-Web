@@ -10,6 +10,9 @@ import type { IUser } from "@/types";
 import { getFunctions, httpsCallable } from 'firebase/functions'
 import { app } from '@/services/firebase'
 import { useAuthStore } from "@/stores/auth"
+import { useNetworkStore } from "@/stores/network"
+import { useTokenStore } from "@/stores/tokens"
+import { useWalletStore } from "@/stores/wallet"
 import { genNameHash, buildAccount } from '@/services/web3/account'
 
 const auth = getAuth(app)
@@ -86,7 +89,6 @@ export async function twitterSocialLogin() {
             idToken,
             account
         };
-        console.log(user);
         const store = useAuthStore();
         store.signIn(user);
     } catch (error) {
@@ -95,5 +97,9 @@ export async function twitterSocialLogin() {
 }
 
 export function signOutFirebase() {
-    return signOut(auth)
+    useNetworkStore().reset();
+    useWalletStore().disconnectWallet();
+    useTokenStore().clear();
+    useAuthStore().signOut();
+    return signOut(auth);
 }

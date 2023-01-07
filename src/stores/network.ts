@@ -13,5 +13,8 @@ export const useNetworkStore = defineStore({
             console.log("Switching to network " + network.chainName);
             this.network = network;
         },
+        reset() {
+            this.network = GOERLI;
+        },
     },
 })

@@ -11,8 +11,6 @@ export function genNameHash(schema: string, name: string) {
 };
 
 export async function addressOfName(nameHash: string) : Promise<string> {
-    const provider = getProvider();
-    console.log(provider);
     const hexlink = new ethers.Contract(
         config.HEXLINK,
         HEXLINK_ABI,
@@ -37,9 +35,7 @@ export async function buildAccountFromAddress(address: string) : Promise<Account
 };
 
 export async function buildAccount(nameHash: string) : Promise<Account> {
-    console.log(nameHash);
     const address = await addressOfName(nameHash);
-    console.log(address);
     return await buildAccountFromAddress(address);
 };
 

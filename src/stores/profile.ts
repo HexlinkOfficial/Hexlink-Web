@@ -18,7 +18,11 @@ export const useProfileStore = defineStore({
         visiableTokens: (state) => Object.values(
             state.profiles[state.network.name]?.tokens || []
         ).filter(t => t.preference?.display),
-        nativeCoinAddress: (state) => nativeCoinAddress(state.network)
+        nativeCoinAddress: (state) => nativeCoinAddress(state.network),
+        // display is true and tokens with balance > 0
+        feasibleTokens: (state) => Object.values(
+            state.profiles[state.network.name]?.tokens || []
+        ).filter(t => t.preference?.display && t.balance?.value.gt(0)),
     },
     actions: {
         switchNetwork(network: Network) {

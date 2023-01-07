@@ -219,11 +219,10 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import Layout from "../components/Layout.vue";
-import { useAuthStore } from '@/stores/auth';
 import { useWalletStore } from '@/stores/wallet';
-import { connectWallet, disconnectWallet, web3Modal } from "@/services/web3/wallet";
+import { connectWallet, disconnectWallet } from "@/services/web3/wallet";
 import { ethers } from "ethers";
-import { initTokens } from "@/services/auth";
+import { updateBalances } from "@/services/web3/tokens";
 
 interface RedPacket {
   mode: "random" | "equal";
@@ -241,7 +240,7 @@ interface RedPacket {
 }
 
 onMounted(async () => {
-  await initTokens();
+  await updateBalances();
 });
 
 const redpacket = ref<RedPacket>({
@@ -293,8 +292,6 @@ const showGasToken = () => {
   return true;
 }
 
-const authStore = useAuthStore();
-const user = authStore.user;
 const walletStore = useWalletStore();
 if (walletStore.connected) {
   walletStore.wallet;

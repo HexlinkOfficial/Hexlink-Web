@@ -77,6 +77,25 @@
                           </div>
                         </button>
                       </div>
+                      <!-- Mumbai -->
+                      <div class="network-items" @click="switchNetwork({...MUMBAI})">
+                        <button>
+                          <div style="display: flex; margin-right: 0.75rem; align-items: center; height: 1.25rem; width: 1.25rem;">
+                            <svg v-if="useProfileStore().network.name == 'mumbai'" width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M17 1L6 12L1 7" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                          </div>
+                          <div style="display: flex; white-space: nowrap; align-items: center; width: 100%; ">
+                            <div style="position: relative; margin-right: 0.75rem; min-width: max-content; ">
+                              <img src="https://token.metaswap.codefi.network/assets/networkLogos/polygon.svg" height=25 style="margin-left: 0.5rem; margin-right: 0.5rem;" />
+                            </div>
+                            <div class="items-name">
+                              <span class="item-title">{{ MUMBAI.chainName }}</span>
+                              <span class="item-balance">$11.39</span>
+                            </div>
+                          </div>
+                        </button>
+                      </div>
                       <!-- Goerli -->
                       <div class="network-items" @click="switchNetwork({...GOERLI})">
                         <button>
@@ -193,7 +212,7 @@ import { useAuthStore } from '@/stores/auth';
 import { useWalletStore } from '@/stores/wallet';
 import { prettyPrintAddress } from '@/services/web3/account';
 import { createToaster } from "@meforma/vue-toaster";
-import { POLYGON, GOERLI } from "@/configs/network";
+import { POLYGON, GOERLI, MUMBAI } from "@/configs/network";
 import { switchNetwork } from "@/services/web3/network";
 import { connectWallet, disconnectWallet } from "@/services/web3/wallet";
 import { useProfileStore } from '@/stores/profile';
@@ -225,6 +244,7 @@ export default {
       active_: "",
       POLYGON,
       GOERLI,
+      MUMBAI,
       index: 0,
     };
   },

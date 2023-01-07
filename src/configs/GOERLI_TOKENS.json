@@ -1,7 +1,7 @@
 [
     {
         "chainId": 5,
-        "symbol": "Goerli ETH",
+        "symbol": "ETH",
         "name": "Goerli Ethereum",
         "decimals": 18,
         "address": "0x0000000000000000000000000000000000000000",

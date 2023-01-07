@@ -43,12 +43,8 @@
               <div class="selectnetwork dropdown" @click="activeDropDown('selectnetwork')"
                 :class="active_ === 'selectnetwork' && 'show'">
                 <div class="network" data-toggle="dropdown">
-                  <template v-for="(component, index) in selectedChains" :key="index">
-                    <img v-if="index === 0" :src="component" height=25 style="margin-left: 0.5rem;">
-                    <img v-if="index != 0" :src="component" height=25 style="margin-left: -0.5rem;">
-                  </template>
-                  <span v-if="selectedChains.length === 1">{{ currentNetwork }}</span>
-                  <span v-if="selectedChains.length != 1">{{ networkCount }} <span class="network-word" style="margin-left: 0rem;">Networks</span></span>
+                  <img :src="selected.logoUrl" height=25 style="margin-left: 0.5rem;">
+                  <span>{{ selected.chainName }}</span>
                   <svg width="14" height="8" viewBox="0 0 14 8" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 0.5rem; width: 1rem">
                     <path d="M1 1L7 7L13 1" stroke="#475569" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                   </svg>
@@ -62,10 +58,10 @@
                     </div>
                     <div>
                       <!-- Polygon -->
-                      <div class="network-items" @click="poly = !poly; countNetworks(); showNetworks()">
+                      <div class="network-items" @click="switchNetwork(POLYGON)">
                         <button>
                           <div style="display: flex; margin-right: 0.75rem; align-items: center; height: 1.25rem; width: 1.25rem;">
-                            <svg v-if="poly" width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <svg v-if="selected.name == 'polygon'" width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg">
                               <path d="M17 1L6 12L1 7" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                             </svg>
                           </div>
@@ -75,17 +71,17 @@
                                 style="margin-left: 0.5rem; margin-right: 0.5rem;" />
                             </div>
                             <div class="items-name">
-                              <span class="item-title">Polygon</span>
+                              <span class="item-title">{{ POLYGON.chainName }}</span>
                               <span class="item-balance">$0.00</span>
                             </div>
                           </div>
                         </button>
                       </div>
-                      <!-- ethereum -->
-                      <!-- <div class="network-items" @click="eth = !eth; countNetworks(); showNetworks()">
+                      <!-- Goerli -->
+                      <div class="network-items" @click="switchNetwork(GOERLI)">
                         <button>
                           <div style="display: flex; margin-right: 0.75rem; align-items: center; height: 1.25rem; width: 1.25rem;">
-                            <svg v-if="eth" width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <svg v-if="selected.name == 'goerli'" width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg">
                               <path d="M17 1L6 12L1 7" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                             </svg>
                           </div>
@@ -94,28 +90,8 @@
                               <img src="https://token.metaswap.codefi.network/assets/networkLogos/ethereum.svg" height=25 style="margin-left: 0.5rem; margin-right: 0.5rem;" />
                             </div>
                             <div class="items-name">
-                              <span class="item-title">Ethereum</span>
+                              <span class="item-title">{{ GOERLI.chainName }}</span>
                               <span class="item-balance">$11.39</span>
-                            </div>
-                          </div>
-                        </button>
-                      </div> -->
-                      <!-- Sui -->
-                      <div class="network-items" style="pointer-events: none;" @click="sui = !sui; countNetworks(); showNetworks()">
-                        <button>
-                          <div style="display: flex; margin-right: 0.75rem; align-items: center; height: 1.25rem; width: 1.25rem;">
-                            <svg v-if="sui" width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <path d="M17 1L6 12L1 7" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                            </svg>
-                          </div>
-                          <div style="display: flex; white-space: nowrap; align-items: center; width: 100%; ">
-                            <div style="position: relative; margin-right: 0.75rem; min-width: max-content; ">
-                              <img src="https://i.postimg.cc/02226CL6/coming-soon.png" height=25 style="margin-left: 0.5rem; margin-right: 0.5rem;" />
-                              <span class="notify-dot"></span>
-                            </div>
-                            <div class="items-name">
-                              <span class="item-title" style="color: #D1D1D1;">Sui</span>
-                              <span class="item-balance" style="color: #D1D1D1;">$76.47</span>
                             </div>
                           </div>
                         </button>
@@ -145,10 +121,9 @@
                         </div>
                       </div>
                     </div>
-                    
                     <div class="user-balance" style="border-bottom-width: 1px; border-color: #E5E7EB; border-style: dashed; ">
                       <div class="wallet-info">
-                        <h5>Your Wallet Address: </h5>
+                        <h5>Hexlink Account Address </h5>
                         <div class="user-wallet">
                           <div class="user">
                             <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -160,16 +135,15 @@
                             <div class="user-info">
                               <span style="margin-bottom: 0;" class="smart-contract-address">
                                 <h5 @click="doCopy">
-                                  {{ addressTextLong }}
+                                  {{ addressTextLong(user.account.address) }}
                                 </h5>
                               </span>
-                              <!-- <span style="padding-left: 9px;">$200.45</span> -->
                             </div>
                           </div>
                         </div>
                       </div>
-                      <div v-if="wallet !== undefined">
-                        <h5>Your Wallet Address: </h5>
+                      <div v-if="walletStore.connected">
+                        <h5>External Account Address </h5>
                         <div class="user_wallet" style="border: 0 solid #e5e7eb; padding: 10px 0px 0px 0px;">
                           <div class="user">
                             <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -184,11 +158,17 @@
                             <div class="user-info">
                               <span style="margin-bottom: 0;" class="smart-contract-address">
                                 <h5 @click="doCopy">
-                                  {{  }}
+                                  {{ addressTextLong(walletStore.wallet?.account.address) }}
                                 </h5>
                               </span>
-                              <!-- <span style="padding-left: 9px;">$200.45</span> -->
                             </div>
+                            <a-button
+                              type="primary"
+                              shape="round"
+                              size="small"
+                              @click="disconnectWallet">
+                              Disconnect
+                            </a-button>
                           </div>
                         </div>
                       </div>
@@ -208,127 +188,59 @@
 </template>
 
 <script lang="ts">
-import { computed } from "vue";
 import { useAuthStore } from '@/stores/auth';
 import { useWalletStore } from '@/stores/wallet';
 import { prettyPrintAddress } from '@/services/web3/account';
 import { createToaster } from "@meforma/vue-toaster";
+import { POLYGON, GOERLI } from "@/configs/network";
+import { switchNewtwork } from "@/services/web3/network";
+import type { Network } from "@/types";
+import { connectWallet, disconnectWallet } from "@/services/web3/wallet";
+import { useNetworkStore } from '@/stores/network';
 
 export default {
   name: "Header",
   data() {
     const authStore = useAuthStore();
     const user = authStore.user!;
-    
     const walletStore = useWalletStore();
-    const wallet = walletStore.wallet!;
-    const addressTextLong = computed(() => {
-      if (user?.account.address) {
-        return prettyPrintAddress(user.account.address, 5, 6);
-      } else {
-        return "";
+
+    const addressTextLong = function (address: string | undefined) {
+      if (address) {
+        return prettyPrintAddress(address, 5, 6);
       }
-    })
-    const addressTextNormal = computed(() => {
-      if (user.account.address) {
-        return prettyPrintAddress(user.account.address!, 3, 3);
-      } else {
-        return "";
-      }
-    })
+      return "0x";
+    };
+  
     return {
       addressTextLong,
-      addressTextNormal,
+      connectWallet,
+      disconnectWallet,
+      walletStore,
       user,
-      wallet,
       active_: "",
-      eth: false,
-      sui: false,
-      op: false,
-      poly: true,
-      fan: false,
-      aval: false,
-      bnb: false,
-      arbi: false,
+      POLYGON,
+      GOERLI,
+      selected: useNetworkStore().network,
       networkCount: 1,
-      selectedChains: ['https://token.metaswap.codefi.network/assets/networkLogos/polygon.svg'],
       index: 0,
-      currentNetwork: "Polygon Network",
     };
   },
   methods: {
-    showNetworks() {
-      if (this.eth) {
-        this.selectedChains.length === 1 ? this.currentNetwork = "Ethereum Network" : this.currentNetwork = "";
-      } else if (this.sui) {
-        this.selectedChains.length === 1 ? this.currentNetwork = "Sui Network" : this.currentNetwork = "";
-      } else if (this.op) {
-        this.selectedChains.length === 1 ? this.currentNetwork = "Optimism Network" : this.currentNetwork = "";
-      } else if (this.poly) {
-        this.selectedChains.length === 1 ? this.currentNetwork = "Polygon Network" : this.currentNetwork = "";
-      } else if (this.fan) {
-        this.selectedChains.length === 1 ? this.currentNetwork = "Fantom Network" : this.currentNetwork = "";
-      } else if (this.aval) {
-        this.selectedChains.length === 1 ? this.currentNetwork = "Avalanche Network" : this.currentNetwork = "";
-      } else if (this.bnb) {
-        this.selectedChains.length === 1 ? this.currentNetwork = "BNB Smart Chain" : this.currentNetwork = "";
-      } else if (this.arbi) {
-        this.selectedChains.length === 1 ? this.currentNetwork = "Arbitrum Network" : this.currentNetwork = "";
+    async switchNetwork(network: Network) {
+      this.selected = network;
+      const wallet = useWalletStore();
+      if (wallet.connected && wallet.wallet!.network !== network.name) {
+        await switchNewtwork(network);
       }
     },
     forceRerender() {
       this.index += 1;
     },
-    countNetworks() {
-      if (this.eth) {
-        !this.selectedChains.includes('https://token.metaswap.codefi.network/assets/networkLogos/ethereum.svg') && this.selectedChains.push('https://token.metaswap.codefi.network/assets/networkLogos/ethereum.svg');
-      } else {
-        this.selectedChains.includes('https://token.metaswap.codefi.network/assets/networkLogos/ethereum.svg') && this.selectedChains.splice(this.selectedChains.indexOf('https://token.metaswap.codefi.network/assets/networkLogos/ethereum.svg'),1);
-      }
-      if (this.sui) {
-        !this.selectedChains.includes('https://i.postimg.cc/5tfSHpjg/sui.png') && this.selectedChains.push('https://i.postimg.cc/5tfSHpjg/sui.png');
-      } else {
-        this.selectedChains.includes('https://i.postimg.cc/5tfSHpjg/sui.png') && this.selectedChains.splice(this.selectedChains.indexOf('https://i.postimg.cc/5tfSHpjg/sui.png'), 1);
-      }
-      if (this.op) {
-        !this.selectedChains.includes('https://token.metaswap.codefi.network/assets/networkLogos/optimism.svg') && this.selectedChains.push('https://token.metaswap.codefi.network/assets/networkLogos/optimism.svg');
-        this.selectedChains.length === 1 ? this.currentNetwork = "Optimism Network" : this.currentNetwork = "";
-      } else {
-        this.selectedChains.includes('https://token.metaswap.codefi.network/assets/networkLogos/optimism.svg') && this.selectedChains.splice(this.selectedChains.indexOf('https://token.metaswap.codefi.network/assets/networkLogos/optimism.svg'), 1);
-      }
-      if (this.poly) {
-        !this.selectedChains.includes('https://token.metaswap.codefi.network/assets/networkLogos/polygon.svg') && this.selectedChains.push('https://token.metaswap.codefi.network/assets/networkLogos/polygon.svg');
-      } else {
-        this.selectedChains.includes('https://token.metaswap.codefi.network/assets/networkLogos/polygon.svg') && this.selectedChains.splice(this.selectedChains.indexOf('https://token.metaswap.codefi.network/assets/networkLogos/polygon.svg'), 1);
-      }
-      if (this.fan) {
-        !this.selectedChains.includes('https://token.metaswap.codefi.network/assets/networkLogos/ftm.svg') && this.selectedChains.push('https://token.metaswap.codefi.network/assets/networkLogos/ftm.svg');
-      } else {
-        this.selectedChains.includes('https://token.metaswap.codefi.network/assets/networkLogos/ftm.svg') && this.selectedChains.splice(this.selectedChains.indexOf('https://token.metaswap.codefi.network/assets/networkLogos/ftm.svg'), 1);
-      }
-      if (this.aval) {
-        !this.selectedChains.includes('https://token.metaswap.codefi.network/assets/networkLogos/avalanche.svg') && this.selectedChains.push('https://token.metaswap.codefi.network/assets/networkLogos/avalanche.svg');
-      } else {
-        this.selectedChains.includes('https://token.metaswap.codefi.network/assets/networkLogos/avalanche.svg') && this.selectedChains.splice(this.selectedChains.indexOf('https://token.metaswap.codefi.network/assets/networkLogos/avalanche.svg'), 1);
-      }
-      if (this.bnb) {
-        !this.selectedChains.includes('https://token.metaswap.codefi.network/assets/networkLogos/bsc.svg') && this.selectedChains.push('https://token.metaswap.codefi.network/assets/networkLogos/bsc.svg');
-      } else {
-        this.selectedChains.includes('https://token.metaswap.codefi.network/assets/networkLogos/bsc.svg') && this.selectedChains.splice(this.selectedChains.indexOf('https://token.metaswap.codefi.network/assets/networkLogos/bsc.svg'), 1);
-      }
-      if (this.arbi) {
-        !this.selectedChains.includes('https://token.metaswap.codefi.network/assets/networkLogos/arbitrum.svg') && this.selectedChains.push('https://token.metaswap.codefi.network/assets/networkLogos/arbitrum.svg');
-      } else {
-        this.selectedChains.includes('https://token.metaswap.codefi.network/assets/networkLogos/arbitrum.svg') && this.selectedChains.splice(this.selectedChains.indexOf('https://token.metaswap.codefi.network/assets/networkLogos/arbitrum.svg'), 1);
-      }
-      this.networkCount = this.selectedChains.length;
-      console.log(this.selectedChains.length);
-      console.log(this.currentNetwork);
-    },
     activeDropDown(value: any) {
       this.active_ = this.active_ === value ? "" : value;
     },
-    closeDropDown(e) {
+    closeDropDown(e: any) {
       if (!this.$el.contains(e.target)) {
         this.active_ = "";
       }
@@ -353,9 +265,6 @@ export default {
   },
   mounted() {
     document.addEventListener('click', this.closeDropDown)
-    const store = useWalletStore();
-    const wallet = store.wallet;
-    console.log("External Wallet: ", wallet);
   },
   beforeDestroy() {
     document.removeEventListener('click', this.closeDropDown)

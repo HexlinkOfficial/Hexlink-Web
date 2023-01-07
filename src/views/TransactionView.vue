@@ -773,27 +773,25 @@ svg {
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from "vue";
-import type { Token } from "@/services/web3/tokens";
-import { loadAll } from "@/services/web3/tokens";
+import { loadTokens } from "@/services/web3/tokens";
 import { isContract } from "@/services/web3/account";
 import Layout from "../components/Layout.vue";
 import { useAuthStore } from '@/stores/auth';
+import { useTokenStore } from "@/stores/tokens";
 import { BigNumber } from "bignumber.js";
 
-const store = useAuthStore();
-const user = store.user;
 const isDeployed = ref<boolean>(true);
 const loading = ref<boolean>(true);
-const tokens = ref<{ [key: string]: Token }>({});
-const chain = "GOERLI";
+const tokens = useTokenStore().tokens;
 const all = ref<boolean>(true);
 const completed = ref<boolean>(false);
 const pending = ref<boolean>(false);
 const canceled = ref<boolean>(false);
 
 onMounted(async () => {
-  const accountAddress = store.user!.account?.address;
-  tokens.value = await loadAll(store, accountAddress, chain);
+  const auth = useAuthStore();
+  const accountAddress = auth.user!.account?.address;
+  await loadTokens();
   isDeployed.value = await isContract(accountAddress);
   loading.value = false;
 });

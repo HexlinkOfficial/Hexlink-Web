@@ -1,4 +1,4 @@
-import type { Wallet } from "@/types";
+import type { Network, Wallet } from "@/types";
 import { defineStore } from 'pinia'
 
 export const useWalletStore = defineStore({
@@ -6,7 +6,10 @@ export const useWalletStore = defineStore({
     state: (): {
         connected: boolean,
         wallet?: Wallet
-    } => ({ connected: false }),
+    } => ({
+        connected: false,
+        wallet: undefined,
+    }),
     persist: true,
     actions: {
         connectWallet(wallet: Wallet) {

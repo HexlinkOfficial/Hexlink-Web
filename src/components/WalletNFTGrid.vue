@@ -1,11 +1,5 @@
 <template>
   <div class="box">
-    <div class="amountOwned">
-      <div class="nft_tab_shown">
-        <div style="margin-right: 0.375rem; ">Owned</div>
-        <div class="amount">12</div>
-      </div>
-    </div>
     <div>
       <div class="nft_grid">
         Coming Soon
@@ -153,12 +147,4 @@
 </style>
 
 <script setup lang="ts">
-import type { NFTOutput } from '@/services/graphql/nft';
-
-const props = defineProps({
-  nfts: {
-    type: Object as () => NFTOutput[],
-    required: true,
-  },
-});
 </script>

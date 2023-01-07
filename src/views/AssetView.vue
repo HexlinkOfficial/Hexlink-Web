@@ -414,7 +414,7 @@ svg {
                 <span>Token Worth</span>
                 <div class="cta">
                   <div class="cta-title">
-                    <a :href="goerliScan" target="_blank">
+                    <a :href="blockExplorer" target="_blank">
                       <svg width="50" height="50" viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path
                           d="M10.3917 23.8059C10.3917 23.5267 10.4468 23.2502 10.5539 22.9923C10.6609 22.7344 10.8179 22.5003 11.0157 22.3033C11.2135 22.1063 11.4483 21.9503 11.7065 21.8444C11.9648 21.7384 12.2414 21.6845 12.5206 21.6858L16.05 21.6974C16.6127 21.6974 17.1524 21.921 17.5503 22.3191C17.9483 22.7172 18.1718 23.2571 18.1718 23.82V37.1707C18.5694 37.0528 19.0793 36.9272 19.6379 36.7961C20.0258 36.7048 20.3714 36.4851 20.6188 36.1727C20.8662 35.8602 21.0009 35.4734 21.001 35.0748V18.5144C21.001 18.2356 21.0559 17.9596 21.1625 17.702C21.2691 17.4444 21.4254 17.2104 21.6225 17.0132C21.8195 16.8161 22.0535 16.6597 22.3109 16.553C22.5684 16.4462 22.8444 16.3913 23.1231 16.3913H26.6594C27.2222 16.3914 27.7618 16.615 28.1597 17.0131C28.5576 17.4111 28.7812 17.951 28.7813 18.5139V33.8847C28.7813 33.8847 29.6663 33.5261 30.5291 33.1619C30.8494 33.0264 31.1228 32.7994 31.3151 32.5095C31.5074 32.2195 31.61 31.8793 31.6103 31.5314V13.2069C31.6103 12.9282 31.6652 12.6522 31.7718 12.3947C31.8784 12.1371 32.0347 11.9032 32.2317 11.706C32.4287 11.5089 32.6626 11.3526 32.92 11.2459C33.1775 11.1392 33.4534 11.0843 33.732 11.0843H37.2684C37.8312 11.0843 38.3709 11.308 38.7688 11.706C39.1668 12.1041 39.3904 12.644 39.3904 13.2069V28.2961C42.4564 26.0734 45.5637 23.3998 48.0295 20.1852C48.3873 19.7185 48.624 19.1706 48.7186 18.5902C48.8132 18.0098 48.7627 17.415 48.5716 16.8588C46.9032 11.9947 43.7736 7.7649 39.6108 4.74766C35.448 1.73042 30.4552 0.0730622 25.315 0.00220542C11.4543 -0.184057 -0.000936476 11.1346 0.000425111 25.002C-0.0131845 29.39 1.13169 33.7039 3.31929 37.5074C3.62098 38.0277 4.06481 38.451 4.59865 38.7276C5.13249 39.0043 5.73416 39.1228 6.33299 39.0692C7.00204 39.0103 7.83499 38.9271 8.82521 38.8108C9.2562 38.7617 9.65411 38.5558 9.94314 38.2322C10.2322 37.9086 10.3921 37.49 10.3926 37.0561V23.8059"
@@ -465,13 +465,13 @@ svg {
               <div v-if="tokenView" class="token-listDetail">
                 <div class="token-table">
                   <div style="overflow: visible; border-radius: 0.75rem;">
-                    <WalletTokenList :tokens="visiableTokens" :loading="loading">
+                    <WalletTokenList :tokens="useTokenStore().visiableTokens" :loading="loading">
                     </WalletTokenList>
                   </div>
                 </div>
               </div>
               <div v-if="nftView" class="nft-gridDetail">
-                <WalletNFTGrid :nfts="nfts"></WalletNFTGrid>
+                <WalletNFTGrid></WalletNFTGrid>
               </div>
             </div>
           </div>
@@ -483,47 +483,40 @@ svg {
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from "vue";
-import type { Token } from "@/services/web3/tokens";
-import { loadAll } from "@/services/web3/tokens";
-import { isContract } from "@/services/web3/account";
+import { loadTokens } from "@/services/web3/tokens";
 import Layout from "../components/Layout.vue";
 import WalletTokenList from "../components/WalletTokenList.vue";
 import WalletNFTGrid from "../components/WalletNFTGrid.vue";
 import { useAuthStore } from '@/stores/auth';
+import { useNetworkStore } from '@/stores/network';
+import { useTokenStore } from '@/stores/tokens';
 import { BigNumber } from "bignumber.js";
-import type { NFTOutput } from '@/services/graphql/nft';
-import { getAllOwnedNFT } from '@/services/web3/nft';
 
-const store = useAuthStore();
-const user = store.user!;
-const goerliScan = `https://goerli.etherscan.io/address/${user?.account.address}`;
+const network = useNetworkStore().network;
 const nftView = ref<boolean>(false);
 const tokenView = ref<boolean>(true);
-const isDeployed = ref<boolean>(true);
 const loading = ref<boolean>(true);
-const tokens = ref<{ [key: string]: Token }>({});
-const chain = "GOERLI";
-const nfts = ref<NFTOutput[]>([]);
 const showInfo = ref<boolean>(true);
 
+const auth = useAuthStore();
 onMounted(async () => {
-  const accountAddress = store.user?.account.address;
-  if (accountAddress) {
-    tokens.value = await loadAll(store, accountAddress, chain);
-    isDeployed.value = await isContract(accountAddress);
+  if (auth.authenticated) {
+    await loadTokens();
   }
-  const ownedNFTs = await getAllOwnedNFT(store);
-  nfts.value = ownedNFTs;
   loading.value = false;
 });
 
-const visiableTokens = computed(() => {
-  return Object.values(tokens.value).filter(t => t.preference?.display || false);
+const blockExplorer = computed(() => {
+  if (auth.authenticated) {
+    const account = auth.user!.account.address;
+    return `${network.blockExplorerUrls[0]}/address/${account}`;
+  }
+  return network.blockExplorerUrls[0];
 });
 
 const totalAssets = computed(() => {
   let total: BigNumber = BigNumber(0);
-  for (const token of visiableTokens.value) {
+  for (const token of useTokenStore().visiableTokens) {
     if (token.balance && token.price) {
       total = total.plus(token.balance.normalized.times(token.price));
     }

@@ -30,7 +30,7 @@
     "alchemy-sdk": "^2.1.0",
     "ant-design-vue": "^3.3.0-beta.3",
     "apexcharts": "^3.36.3",
-    "bignumber.js": "^9.1.0",
+    "bignumber.js": "^9.1.1",
     "buffer": "^6.0.3",
     "coingecko-api": "^1.0.10",
     "crypto-js": "^4.1.1",
@@ -39,7 +39,7 @@
     "fortawesome": "^0.0.1-security",
     "graphql": "^16.6.0",
     "pinia": "^2.0.22",
-    "pinia-plugin-persistedstate": "^2.2.0",
+    "pinia-plugin-persistedstate": "^3.0.2",
     "roboto-fontface": "*",
     "rollup-plugin-polyfill-node": "^0.11.0",
     "stylus": "^0.59.0",
@@ -53,7 +53,8 @@
     "vue3-apexcharts": "^1.4.1",
     "vue3-perfect-scrollbar": "^1.6.1",
     "web3modal": "^1.9.10",
-    "webfontloader": "^1.6.28"
+    "webfontloader": "^1.6.28",
+    "zipson": "^0.2.12"
   },
   "devDependencies": {
     "@rushstack/eslint-patch": "^1.2.0",

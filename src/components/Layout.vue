@@ -12,7 +12,7 @@
 
 <script setup lang="ts">
 import Header from './Header.vue';
-import SideBar from './SideBar.vue';
+import SideBar from './Sidebar.vue';
 
 const props = defineProps({
   active: Number

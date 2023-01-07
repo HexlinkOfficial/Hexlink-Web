@@ -37,22 +37,8 @@
             <span class="icon-grey"><i class="icofont-page"></i></span>
           </router-link>
         </li>
-        <!-- testabout -->
-        <!-- <li>
-          <router-link to="/testabout" data-toggle="tooltip" data-placement="right" title="Trade"
-            :class="active === 3 && 'active'">
-            <span class="icon-grey"><i class="icofont-stack-exchange"></i></span>
-          </router-link>
-        </li> -->
-        <!-- activities -->
-        <!-- <li>
-          <router-link to="/activities" data-toggle="tooltip" data-placement="right" title="Price"
-            :class="active === 4 && 'active'">
-            <span class="icon-grey"><i class="icofont-price"></i></span>
-          </router-link>
-        </li> -->
         <!-- signout -->
-        <li class="logout">
+        <li @click="logout" class="logout">
           <router-link to="/signin" data-toggle="tooltip" data-placement="right" title="Signout">
             <span class="icon-grey"><i class="icofont-logout"></i></span>
           </router-link>
@@ -65,13 +51,18 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: "Sidebar",
-  props: {
-    active: Number,
-  },
+<script lang="ts" setup>
+import router from '@/router';
+import { signOutFirebase } from "@/services/auth";
+
+const logout = function() {
+  signOutFirebase();
+  router.push("/signin")
 };
+
+const props = defineProps({
+  active: Number
+});
 </script>
 
 <style lang="less" scoped>

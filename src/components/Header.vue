@@ -13,7 +13,7 @@
             </div>
 
             <div class="header-right">
-              <div class="notification dropdown" @click="activeDropDown('notification')" :class="active_ === 'notification' && 'show'">
+              <!-- <div class="notification dropdown" @click="activeDropDown('notification')" :class="active_ === 'notification' && 'show'">
                 <div class="notify-bell" data-toggle="dropdown">
                   <svg width="21" height="25" viewBox="0 0 21 25" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path
@@ -39,7 +39,7 @@
                     <router-link to="./settings-activity">More <i class="icofont-simple-right"></i></router-link>
                   </div>
                 </div>
-              </div>
+              </div> -->
               <div class="selectnetwork dropdown" @click="activeDropDown('selectnetwork')"
                 :class="active_ === 'selectnetwork' && 'show'">
                 <div class="network" data-toggle="dropdown">
@@ -134,7 +134,7 @@
                             </svg>
                             <div class="user-info">
                               <span style="margin-bottom: 0;" class="smart-contract-address">
-                                <h5 @click="doCopy">
+                                <h5 @click="doCopy(useProfileStore().profile?.account.address)">
                                   {{ addressTextLong(useProfileStore().profile?.account.address) }}
                                 </h5>
                               </span>
@@ -157,7 +157,7 @@
                             </svg>
                             <div class="user-info">
                               <span style="margin-bottom: 0;" class="smart-contract-address">
-                                <h5 @click="doCopy">
+                                <h5 @click="doCopy(walletStore.wallet?.account.address)">
                                   {{ addressTextLong(walletStore.wallet?.account.address) }}
                                 </h5>
                               </span>
@@ -196,6 +196,7 @@ import { POLYGON, GOERLI } from "@/configs/network";
 import { switchNetwork } from "@/services/web3/network";
 import { connectWallet, disconnectWallet } from "@/services/web3/wallet";
 import { useProfileStore } from '@/stores/profile';
+import { signOutFirebase } from "@/services/auth";
 
 export default {
   name: "Header",
@@ -240,8 +241,8 @@ export default {
     selectNetwork(value: any) {
       this.active_ = this.active_ === value ? "" : value;
     },
-    doCopy: function () {
-      this.$copyText(this.user.account.address).then(
+    doCopy: function (address: string) {
+      this.$copyText(address).then(
         function () {
           // alert("Copied");
           const toaster = createToaster({ position: "top", duration: 2000 });

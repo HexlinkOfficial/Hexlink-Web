@@ -57,7 +57,7 @@ import { signOutFirebase } from "@/services/auth";
 
 const logout = function() {
   signOutFirebase();
-  router.push("/signin")
+  router.push("/signin");
 };
 
 const props = defineProps({

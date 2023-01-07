@@ -87,7 +87,15 @@
                                 </path>
                               </svg>
                             </span>
-                            <a-select v-model:value="redpacket.token" style="width: 120px" :options="tokens"></a-select>
+                            <a-select v-model:value="redpacket.token" style="width: 120px;" :options="tokens"></a-select>
+                            <div class="mode-dropdown" :class="openDropdown && 'active'" @click="openDropdown = !openDropdown;">
+                              <div class="mode-text">{{ modeLabels[redpacket.mode] }}</div>
+                              <input class="mode-input" type="text" placeholder="select" readonly>
+                              <div class="mode-options">
+                                <div @click="modeChoose('random')">Randomly</div>
+                                <div @click="modeChoose('equal')">Equally</div>
+                              </div>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -140,7 +148,7 @@
                       <div> 
                         <img class="wallet-image" src="https://upload.wikimedia.org/wikipedia/commons/3/36/MetaMask_Fox.svg">
                         <div class="chain_wrapper">
-                          <img class="chain" src="https://i.postimg.cc/yd6X9Sf1/polygon-color.png" />
+                          <img class="chain" :src="useProfileStore().network.logoUrl" />
                         </div>
                       </div>
                     </div>
@@ -150,14 +158,14 @@
                         <p>Available Balance</p>
                       </div>
                       <div class="balances">
-                        <span class="balance_item">
-                          <span>0</span>
+                        <span style="display: flex; align-items: center;">
+                          <span class="balance_item">0</span>
                           <img style="width:20px; height: 20px; margin-left: 5px; margin-right: 5px;" src="https://i.postimg.cc/yd6X9Sf1/polygon-color.png" />
                           <span><b>{{ redpacket.token.label }}</b></span>
                         </span>
                         <!-- gas -->
-                        <span v-if="showGasToken()" class="balance_item">
-                          <span>0</span>
+                        <span v-if="showGasToken()">
+                          <span class="balance_item">0</span>
                           <img style="width:20px; height: 20px; margin-left: 5px; margin-right: 5px;"
                             src="https://i.postimg.cc/yd6X9Sf1/polygon-color.png" />
                           <span><b>{{ redpacket.gasToken.label }}</b></span>
@@ -167,27 +175,28 @@
                   </div>
                   <div class="account-card">
                     <div class="left">
-                      <div> 
+                      <div>
                         <img class="wallet-image" src="https://upload.wikimedia.org/wikipedia/commons/3/36/MetaMask_Fox.svg">
                         <div class="chain_wrapper">
-                          <img class="chain" src="https://i.postimg.cc/yd6X9Sf1/polygon-color.png" />
+                          <img class="chain" :src="useProfileStore().network.logoUrl" />
                         </div>
                       </div>
                     </div>
                     <div class="right">
-                      <div>
+                      <div style="min-width: 100px;">
                         <h2>Metamask</h2>
                         <p>Available Balance</p>
                       </div>
                       <div class="balances">
-                        <span class="balance_item">
-                          <span>0</span>
-                          <img style="width:20px; height: 20px; margin-left: 5px; margin-right: 5px;" src="https://i.postimg.cc/yd6X9Sf1/polygon-color.png" />
+                        <span style="display: flex; align-items: center;">
+                          <span class="balance_item">10000000000</span>
+                          <img style="width:20px; height: 20px; margin-left: 5px; margin-right: 5px;"
+                            src="https://i.postimg.cc/yd6X9Sf1/polygon-color.png" />
                           <span><b>{{ redpacket.token.label }}</b></span>
                         </span>
                         <!-- gas -->
-                        <span v-if="showGasToken()" class="balance_item">
-                          <span>0</span>
+                        <span v-if="showGasToken()">
+                          <span class="balance_item">0</span>
                           <img style="width:20px; height: 20px; margin-left: 5px; margin-right: 5px;"
                             src="https://i.postimg.cc/yd6X9Sf1/polygon-color.png" />
                           <span><b>{{ redpacket.gasToken.label }}</b></span>
@@ -223,6 +232,7 @@ import { useAuthStore } from '@/stores/auth';
 import { useWalletStore } from '@/stores/wallet';
 import { connectWallet, disconnectWallet, web3Modal } from "@/services/web3/wallet";
 import { ethers } from "ethers";
+import { useProfileStore } from '@/stores/profile';
 
 interface RedPacket {
   mode: "random" | "equal";
@@ -254,10 +264,12 @@ const redpacket = ref<RedPacket>({
   expiredAt: 0 // do not expire
 });
 
-const tokens = [{
-  label: "MATIC",
-  value: ethers.constants.AddressZero
-}];
+// const tokens = [{
+//   label: "MATIC",
+//   value: ethers.constants.AddressZero
+// }];
+
+const tokens = useProfileStore().feasibleTokens;
 
 const connectOrDisconnectWallet = async function () {
   if (walletStore.connected) {
@@ -275,8 +287,14 @@ const modeLabels = {
   "equal": "Equally",
 };
 
+const modes = ["random", "equal", "what"];
+
 const modeChoose = (gameMode: "random" | "equal") => {
   redpacket.value.mode = gameMode;
+}
+
+const testChoose = (mode: string) => {
+  console.log(mode);
 }
 
 const createRedPacket = async function () {
@@ -302,6 +320,10 @@ const enableGas = ref<boolean>(false);
 </script>
 
 <style lang="less" scoped>
+.ant-select .ant-select-selector {
+  border: none;
+  background-color: none;
+}
 .balance-token-name {
   @media (max-width: 990px) {
     display: none; } }
@@ -342,11 +364,10 @@ const enableGas = ref<boolean>(false);
 .left {
   display: flex;
   align-items: center;
-  margin-right: 12.5px; }
+  margin-right: 0.5rem; }
 .right {
   display: flex;
   align-items: center;
-  margin-left: 12.5px;
   h2 {
     font-weight: 500;
     font-size: 16px;
@@ -354,15 +375,13 @@ const enableGas = ref<boolean>(false);
   p {
     font-size: 12px;
     color: rgba(34, 34, 34, 0.5);
-    margin: 5px 0; }
+    margin-bottom: 0.5rem; }
   .balances {
     display: flex;
     flex-direction: column;
     margin-left: 1rem;
     .balance_item {
-      display: flex;
-      align-items: center;
-      padding: 0 15px;
+      padding: 0 10px;
       margin-bottom: 5px;
       line-height: 35px;
       background-color: #e6e6e6;

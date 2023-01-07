@@ -1,42 +1,36 @@
 table:
-  name: preference
+  name: redpacket
   schema: public
 insert_permissions:
   - role: user
     permission:
       check:
-        user_id:
+        user_uid:
           _eq: X-Hasura-User-Id
       columns:
-        - chain
-        - display
+        - gas_station_enabled
         - metadata
-        - token_address
-        - token_alias
+        - red_packet_id
         - user_id
+        - user_uid
 select_permissions:
   - role: user
     permission:
       columns:
-        - chain
-        - created_at
-        - display
-        - id
+        - gas_station_enabled
         - metadata
-        - token_address
-        - token_alias
-        - updated_at
+        - red_packet_id
         - user_id
+        - user_uid
       filter:
-        user_id:
+        user_uid:
           _eq: X-Hasura-User-Id
 update_permissions:
   - role: user
     permission:
       columns:
-        - display
-        - token_alias
-        - updated_at
+        - gas_station_enabled
+        - metadata
       filter:
         user_id:
           _eq: X-Hasura-User-Id
@@ -47,5 +41,5 @@ delete_permissions:
   - role: user
     permission:
       filter:
-        user_id:
+        user_uid:
           _eq: X-Hasura-User-Id

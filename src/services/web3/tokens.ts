@@ -70,7 +70,7 @@ export async function loadTokens(account: string) {
     let tokens : { [key: string]: Token } = {};
 
     // generate token map
-    if (!profiles.profile) {
+    if (!profiles.profile.tokenInitiated) {
         const DEFAULT_TOKENS = await getPopularTokens(network);
         DEFAULT_TOKENS.tokens.forEach(t => tokens[t.address.toLowerCase()] = {metadata: t});
         const preferences : Token[] = await getTokenPreferences(

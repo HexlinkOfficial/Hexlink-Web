@@ -241,7 +241,7 @@ export default {
       this.active_ = this.active_ === value ? "" : value;
     },
     doCopy: function () {
-      this.$copyText(this.user.account.address).then(
+      this.$copyText(useProfileStore().profile?.account.address).then(
         function () {
           // alert("Copied");
           const toaster = createToaster({ position: "top", duration: 2000 });

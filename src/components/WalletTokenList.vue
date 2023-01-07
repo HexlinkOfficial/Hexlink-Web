@@ -44,15 +44,14 @@
         </td>
         <td class="price-detail">
           <div class="detail">
-            <div class="token-market-price">$ {{token.price ? token.price : 0}}</div>
+            <div class="token-market-price">$ {{ token.price || 0 }}</div>
             <p v-if="token.price" :class='isGreen ? "token-price-change-positive" : "token-price-change-negative"'>+2.64%</p>
           </div>
         </td>
         <td class="balance-detail">
           <div class="detail">
-            <div class="balance">$ {{token.balance?.normalized.times(token.price || 0).toString() || 0}}</div>
+            <div class="balance">$ {{ usdValue(token) }}</div>
             <p class="crypto-balance">{{token.balance?.normalized || 0}} {{token.metadata.symbol}}</p>
-            <!-- <button id="gettingStarted" @click="() => { $el.ownerDocument.defaultView.console.log(props.tokens) }">Getting started</button> -->
           </div>
         </td>
       </tr>
@@ -73,7 +72,7 @@
 <script lang="ts" setup>
 import { ref } from 'vue'
 import type { Token } from "@/types";
-import type { BigNumber } from "bignumber.js";
+import { BigNumber } from "bignumber.js";
 import logo from "../assets/network-icons/hexlink.svg";
 import { useProfileStore } from "@/stores/profile";
 
@@ -96,10 +95,16 @@ const props = defineProps({
   }
 });
 
+const usdValue = (token: Token) : BigNumber => {
+  if (token.balance && token.price) {
+    return token.balance.normalized.times(token.price);
+  }
+  return new BigNumber(0);
+};
+
 const getPortfolioRatio = (token: Token) => {
   if (props.balance?.gt(0)) {
-    const tokeValue = token.balance?.normalized.times(token.price || 0);
-    return tokeValue?.times(100).div(props.balance);
+    return usdValue(token).times(100).div(props.balance);
   }
   return 0;
 };

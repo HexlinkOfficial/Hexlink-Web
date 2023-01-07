@@ -204,12 +204,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import Layout from "../components/Layout.vue";
 import { useAuthStore } from '@/stores/auth';
 import { useWalletStore } from '@/stores/wallet';
 import { connectWallet, disconnectWallet, web3Modal } from "@/services/web3/wallet";
 import { ethers } from "ethers";
+import { initTokens } from "@/services/auth";
 
 interface RedPacket {
   mode: "random" | "equal";
@@ -225,6 +226,10 @@ interface RedPacket {
   },
   expiredAt: Number,
 }
+
+onMounted(async () => {
+  await initTokens();
+});
 
 const redpacket = ref<RedPacket>({
   mode: "random",

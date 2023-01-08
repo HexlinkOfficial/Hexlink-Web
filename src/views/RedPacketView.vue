@@ -166,12 +166,11 @@
                 <div class="choose-account">
                   <div class="HexlinkAccount">
                     <div style="position: relative; top: 35px; left: -10px; display: flex; justify-content: flex-end; z-index: 50;">
-                      <img :style="accountChosen[0] == 1 ? 'opacity: 1;' : 'opacity: 0'" style="width: 20px; height: 20px;" src="https://i.postimg.cc/SRjdzYHP/check.png" />
+                      <img style="width: 20px; height: 20px; opacity:1;" src="https://i.postimg.cc/SRjdzYHP/check.png" />
                     </div>
                     <!-- <div class="checked-wrapper" style="position: relative; top: -13px; left: 25px;">Hello</div> -->
-                    <div :style="accountChosen[0] == 1 && 'box-shadow: 8px 28px 50px rgb(39 44 49 / 7%), 1px 6px 12px rgb(39 44 49 / 4%); transform: translate3D(0, -1px, 0) scale(1.02); transition: all 0.2s ease; border: 2px solid #4BAE4F;'" 
+                    <div style="box-shadow: 8px 28px 50px rgb(39 44 49 / 7%), 1px 6px 12px rgb(39 44 49 / 4%); transform: translate3D(0, -1px, 0) scale(1.02); transition: all 0.2s ease; border: 2px solid #4BAE4F;" 
                       class="account-card"
-                      @click="accountChosen[0] = (accountChosen[0] + 1)%2"
                     >
                       <div class="left">
                         <div>
@@ -208,12 +207,12 @@
                   </div>
                   <div class="ExternalAccount">
                     <div style="position: relative; top: 35px; left: -10px; display: flex; justify-content: flex-end; z-index: 50;">
-                      <img :style="accountChosen[1] == 1 ? 'opacity: 1' : 'opacity: 0' " style="width: 20px; height: 20px;" src="https://i.postimg.cc/SRjdzYHP/check.png"/>
+                      <img :style="accountChosen == 1 ? 'opacity: 1' : 'opacity: 0' " style="width: 20px; height: 20px;" src="https://i.postimg.cc/SRjdzYHP/check.png"/>
                     </div>
                     <!-- <div class="checked-wrapper" style="position: relative; top: -13px; left: 25px;">Hello</div> -->
-                    <div :style="accountChosen[1] == 1 && 'box-shadow: 8px 28px 50px rgb(39 44 49 / 7%), 1px 6px 12px rgb(39 44 49 / 4%); transform: translate3D(0, -1px, 0) scale(1.02); transition: all 0.2s ease; border: 2px solid #4BAE4F;'" 
+                    <div :style="accountChosen == 1 && 'box-shadow: 8px 28px 50px rgb(39 44 49 / 7%), 1px 6px 12px rgb(39 44 49 / 4%); transform: translate3D(0, -1px, 0) scale(1.02); transition: all 0.2s ease; border: 2px solid #4BAE4F;'" 
                       class="account-card" 
-                      @click="accountChosen[1] = (accountChosen[1] + 1)%2"
+                      @click="accountChosen = (accountChosen + 1)%2"
                     >
                       <div class="left">
                         <div>

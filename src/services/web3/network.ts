@@ -64,6 +64,9 @@ export function alchemyNetwork(network: Network) : AlchemyNetwork {
     if (network.chainId == 137) {
         return AlchemyNetwork.MATIC_MAINNET;
     }
+    if (network.chainId == 80001) {
+        return AlchemyNetwork.MATIC_MUMBAI;
+    }
     throw new Error("Unsupported network");
 }
 

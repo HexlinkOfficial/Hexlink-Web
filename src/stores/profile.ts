@@ -14,6 +14,10 @@ export const useProfileStore = defineStore({
         profile: (state) : Profile => {
             return state.profiles[useNetworkStore().network.name];
         },
+        balance() {
+            return (address: string) =>
+                this.profile?.tokens[address.toLowerCase()]?.balance;
+        },
         visiableTokens() : Token[] {
             return Object.values(
                 this.profile?.tokens || []

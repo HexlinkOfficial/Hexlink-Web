@@ -1,6 +1,4 @@
 <template>
-  <!-- <a-list>
-<template #renderItem="{ item }"> -->
   <table>
     <thead class="table-thread">
       <tr>
@@ -16,7 +14,6 @@
         <th class="balance-header">
           <div class="balance-header-data">Balance</div>
         </th>
-        <!-- <th></th> -->
       </tr>
     </thead>
     <tbody v-if="!view.loading">
@@ -66,8 +63,6 @@
     </div>
   </div>
 </template>
-  <!-- </a-list>
-</template> -->
 
 <script lang="ts" setup>
 import { ref, onMounted } from 'vue'
@@ -77,14 +72,14 @@ import logo from "../assets/network-icons/hexlink.svg";
 import { useProfileStore } from "@/stores/profile";
 import { useNetworkStore } from "@/stores/network";
 import { useViewStore } from "@/stores/view";
-import { updateBalances } from "@/services/web3/tokens";
+import { updateProfileBalances } from "@/services/web3/tokens";
 
 const currentView = "tokens";
 const view = useViewStore();
 
 onMounted(async () => {
   view.setView(currentView);
-  await updateBalances();
+  await updateProfileBalances();
   view.setLoading(false);
 });
 

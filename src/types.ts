@@ -1,6 +1,4 @@
-import { BigNumber } from "bignumber.js";
-import type { BigNumber as EthersBigNumber } from "ethers";
-import { Token } from "graphql";
+import type { BigNumber } from "bignumber.js";
 
 export interface Network {
     chainId: number,

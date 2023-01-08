@@ -31,12 +31,9 @@ export const useProfileStore = defineStore({
         }
     },
     actions: {
-        init(
-            network: Network,
-            account: Account,
-            tokens: { [key: string]: Token }
-        ) {
-            this.profiles[network.name] = {
+        init(account: Account, tokens: { [key: string]: Token }) {
+            const network = useNetworkStore().network.name;
+            this.profiles[network] = {
                 account,
                 tokens,
                 initiated: true
@@ -44,16 +41,20 @@ export const useProfileStore = defineStore({
         },
         addToken(token: Token) {
             const tokenAddr = token.metadata.address.toLowerCase();
-            this.profile.tokens[tokenAddr] = token;
+            const network = useNetworkStore().network.name;
+            this.profiles[network].tokens[tokenAddr] = token;
         },
         removeToken(tokenAddr: string) {
-            delete this.profile.tokens[tokenAddr.toLowerCase()]
+            const network = useNetworkStore().network.name;
+            delete this.profiles[network].tokens[tokenAddr.toLowerCase()]
         },
         updateBalance(tokenAddr: string, balance: NormalizedTokenBalance) {
-            this.profile.tokens[tokenAddr.toLowerCase()].balance = balance;
+            const network = useNetworkStore().network.name;
+            this.profiles[network].tokens[tokenAddr.toLowerCase()].balance = balance;
         },
         updatePreference(tokenAddr: string, preference: Preference) {
-            this.profile.tokens[tokenAddr.toLowerCase()].preference = preference;
+            const network = useNetworkStore().network.name;
+            this.profiles[network].tokens[tokenAddr.toLowerCase()].preference = preference;
         },
         clear() {
             this.profiles = {};

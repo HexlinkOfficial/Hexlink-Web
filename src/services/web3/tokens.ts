@@ -12,14 +12,15 @@ import type {
     Token,
     NormalizedTokenBalance
 } from '@/types';
-import { useAuthStore } from "@/stores/auth";
 import { getPopularTokens } from "@/configs/tokens";
 import { alchemy, getProvider } from "@/services/web3/network";
 import { useProfileStore } from "@/stores/profile";
 import { ethers } from "ethers";
 import { IERC20_ABI } from "@/configs/contract";
+import { useAuthStore } from "@/stores/auth";
 import { useNetworkStore } from "@/stores/network";
-
+import { useWalletStore } from "@/stores/wallet";
+ 
 export async function getERC20Metadata(token: string) : Promise<TokenMetadata> {
     const metadata = await alchemy().core.getTokenMetadata(token);
     if (metadata.name == null
@@ -71,17 +72,52 @@ export async function initTokenList() {
     return tokens;
 }
 
-export async function updateBalances() {
+export async function updateProfileBalances() {
     const store = useProfileStore();
     const tokens = Object.values(store.profile?.tokens || []);
-    await Promise.all(tokens.map(token => updateBalance(token.metadata)));
+    const account = store.profile.account.address;
+    await Promise.all(tokens.map(
+        token => updateProfileBalance(account, token.metadata, token.balance)
+    ));
     await updatePreferences();
 }
 
-async function updateBalance(token: TokenMetadata) {
+async function updateProfileBalance(
+    account: string,
+    metadata: TokenMetadata,
+    balance: NormalizedTokenBalance | undefined
+) {
+    useProfileStore().updateBalance(
+        metadata.address,
+        await getBalance(account, metadata, balance)
+    );
+}
+
+export async function updateWalletBalances() {
     const store = useProfileStore();
+    const tokens = Object.values(store.profile?.tokens || []);
+    await Promise.all(tokens.map(
+        token => updateWalletBalance(token.metadata)
+    ));
+}
+
+async function updateWalletBalance(
+    metadata: TokenMetadata
+) {
+    const wallet = useWalletStore();
+    const oldBalance = wallet.balances[metadata.address.toLowerCase()];
+    wallet.updateBalance(
+        metadata.address,
+        await getBalance(wallet.wallet!.account.address, metadata, oldBalance)
+    );
+}
+
+async function getBalance(
+    account: string,
+    token: TokenMetadata,
+    balance: NormalizedTokenBalance | undefined
+) : Promise<NormalizedTokenBalance> {
     const provider = getProvider();
-    const account = store.profile.account.address;
     try {
         let balance = ethers.BigNumber.from(0);
         if (token.address == useNetworkStore().nativeCoinAddress) {
@@ -90,16 +126,14 @@ async function updateBalance(token: TokenMetadata) {
             const contract = new ethers.Contract(token.address, IERC20_ABI, provider);
             balance = await contract.balanceOf(account);
         }
-        store.updateBalance(
-            token.address,
-            normalizeBalance(
-                new BigNumber(balance.toHexString()),
-                token.decimals
-            )
+        return normalizeBalance(
+            new BigNumber(balance.toHexString()),
+            token.decimals
         );
     } catch (error: any) {
         console.log("Failed load balance for token " + JSON.stringify(token));
         console.log(error);
+        return balance ? balance : normalizeBalance(new BigNumber(0), token.decimals);
     }
 }
 
@@ -109,7 +143,7 @@ async function updatePreferences() {
         Object.values(store.profile?.tokens || []).filter(
             t => !t.preference && t.balance?.value.gt(0)
         ).map(t => ({
-            chain: store.network.name,
+            chain: useNetworkStore().network.name,
             display: true,
             tokenAddress: t.metadata.address,
             metadata: t.metadata

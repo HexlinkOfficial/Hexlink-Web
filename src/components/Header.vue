@@ -155,7 +155,7 @@
                               </span>
                             </div>
                             <a-button
-                              type="primary"
+                              danger
                               shape="round"
                               size="small"
                               @click="disconnectWallet">
@@ -180,7 +180,6 @@
 </template>
 
 <script lang="ts">
-import router from '@/router';
 import { useAuthStore } from '@/stores/auth';
 import { useWalletStore } from '@/stores/wallet';
 import { prettyPrintAddress } from '@/services/web3/account';

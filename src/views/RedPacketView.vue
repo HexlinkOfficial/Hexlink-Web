@@ -89,19 +89,6 @@
                                     <div style="margin-right:0.5rem;">{{ token.balance?.normalized }} available</div>
                                   </div>
                                 </div>
-<<<<<<< HEAD
-                                <!-- <div v-if="useProfileStore().feasibleTokens.length == 0" class="mode-option">
-=======
-                                <div v-if="tokens.length == 0" class="mode-option">
->>>>>>> 745319ebcf6bddc022c90db80f47e58d904b656b
-                                  <div class="token-icon">
-                                    <img :src="item.metadata.logoURI"/>
-                                  </div>
-                                  <div style="display: flex; flex-direction: column; align-items: flex-start;">
-                                    <b>{{ item.metadata.symbol }}</b>
-                                    <div style="margin-right:0.5rem;">{{ item.balance?.normalized }} available</div>
-                                  </div>
-                                </div> -->
                               </div>
                             </div>
                           </div>

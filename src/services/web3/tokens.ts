@@ -15,8 +15,6 @@ import type {
 import { getPopularTokens } from "@/configs/tokens";
 import { alchemy, getProvider } from "@/services/web3/network";
 import { useProfileStore } from "@/stores/profile";
-import { ethers } from "ethers";
-import { IERC20_ABI } from "@/configs/contract";
 import { useAuthStore } from "@/stores/auth";
 import { useNetworkStore } from "@/stores/network";
 import { useWalletStore } from "@/stores/wallet";
@@ -110,17 +108,26 @@ async function updateBalances(
     let balance = getPrevBalance(nativeCoin) || normalizeBalance(new BigNumber(0), decimals);
     try {
         const nativeCoinBalance = await getProvider().getBalance(account);
-        balance = normalizeBalance(new BigNumber(nativeCoinBalance.toString()), decimals);
+        balance = normalizeBalance(
+            new BigNumber(nativeCoinBalance.toString()),
+            decimals
+        );
     } catch(error) {
         console.log(error);
     };
     update(nativeCoin, balance);
 
-    const erc20s = tokens.map(t => t.metadata.address).filter(addr => addr != nativeCoin);
+    const erc20s = tokens.map(
+        t => t.metadata.address
+    ).filter(addr => addr != nativeCoin);
     const result = await alchemy().core.getTokenBalances(account, erc20s);
     result.tokenBalances.map((b, i) => {
-        const decimals = profile.profile.tokens[b.contractAddress.toLowerCase()].metadata.decimals;
-        let balance = getPrevBalance(b.contractAddress) || normalizeBalance(new BigNumber(0), decimals);
+        const decimals = profile.profile.tokens[
+            b.contractAddress.toLowerCase()
+        ].metadata.decimals;
+        let balance = getPrevBalance(
+            b.contractAddress
+        ) || normalizeBalance(new BigNumber(0), decimals);
         if (b.tokenBalance && !b.error) {
             balance = normalizeBalance(new BigNumber(b.tokenBalance), decimals);
         }

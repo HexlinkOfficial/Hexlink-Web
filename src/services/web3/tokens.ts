@@ -119,7 +119,7 @@ async function updateBalances(
     const erc20s = tokens.map(t => t.metadata.address).filter(addr => addr != nativeCoin);
     const result = await alchemy().core.getTokenBalances(account, erc20s);
     result.tokenBalances.map((b, i) => {
-        const decimals = tokens[i].metadata.decimals;
+        const decimals = profile.profile.tokens[b.contractAddress.toLowerCase()].metadata.decimals;
         let balance = getPrevBalance(b.contractAddress) || normalizeBalance(new BigNumber(0), decimals);
         if (b.tokenBalance && !b.error) {
             balance = normalizeBalance(new BigNumber(b.tokenBalance), decimals);

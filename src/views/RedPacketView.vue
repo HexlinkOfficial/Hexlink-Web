@@ -95,6 +95,15 @@
                                     <div style="margin-right:0.5rem;">{{ item.balance?.normalized }} available</div>
                                   </div>
                                 </div>
+                                <div v-if="useProfileStore().feasibleTokens.length == 0" class="mode-option">
+                                  <div class="token-icon">
+                                    <img :src="item.metadata.logoURI"/>
+                                  </div>
+                                  <div style="display: flex; flex-direction: column; align-items: flex-start;">
+                                    <b>{{ item.metadata.symbol }}</b>
+                                    <div style="margin-right:0.5rem;">{{ item.balance?.normalized }} available</div>
+                                  </div>
+                                </div>
                               </div>
                             </div>
                           </div>
@@ -271,11 +280,11 @@
           </div>
         </div>
       </div>
-    </div>
-    <div v-if="modal" ref="modalRef" class="confirmation">
-      <button class="close-button" title="Close" @click="modal = false">
-        𝖷
-      </button>
+      <div v-if="modal" ref="modalRef" class="confirmation">
+        <button class="close-button" title="Close" @click="modal = false">
+          𝖷
+        </button>
+      </div>
     </div>
   </layout>
 </template>
@@ -283,11 +292,11 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import Layout from "../components/Layout.vue";
-import { useWalletStore } from '@/stores/wallet';
 import { connectWallet, disconnectWallet } from "@/services/web3/wallet";
 import { ethers } from "ethers";
 import { updateProfileBalances, updateWalletBalances } from "@/services/web3/tokens";
 import { useProfileStore } from '@/stores/profile';
+import { useWalletStore } from '@/stores/wallet';
 import { BigNumber } from "bignumber.js";
 import { useNetworkStore } from '@/stores/network';
 import type { OnClickOutsideHandler } from '@vueuse/core'
@@ -378,6 +387,7 @@ const modes = ["random", "equal", "what"];
 
 const modeChoose = (gameMode: "random" | "equal") => {
   redpacket.value.mode = gameMode;
+  console.log(useWalletStore().balanceMap);
 }
 
 const tokenChoose = (mode: "token" | "gas",token: string, address: string, logoUrl: string | undefined, balance: BigNumber | undefined) => {
@@ -465,7 +475,7 @@ const chooseGasHandle: OnClickOutsideHandler = (event) => {
 .confirmation {
   background-color: white;
   position: fixed;
-  left: 50%;
+  left: 55%;
   top: 50%;
   transform: translate(-50%, -50%);
   width: 500px;
@@ -474,6 +484,9 @@ const chooseGasHandle: OnClickOutsideHandler = (event) => {
   z-index: 60;
   border-radius: 15px;
   box-shadow: 0px 10px 20px rgb(0 0 0 / 10%);
+  @media (max-width: 990px) {
+    left: 50%;
+  }
 }
 .close-button {
   padding: 0.25em 0.7em 0.2em;

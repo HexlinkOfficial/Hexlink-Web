@@ -78,7 +78,7 @@
                               <input class="mode-input" type="text" placeholder="select" readonly>
                               <div class="mode-options">
                                 <div class="mode-option"
-                                  v-for="(token, index) of useProfileStore().feasibleTokens"
+                                  v-for="(token, index) of tokens"
                                   :key="index"
                                   @click="tokenChoose('token', token)">
                                   <div class="token-icon">
@@ -89,7 +89,7 @@
                                     <div style="margin-right:0.5rem;">{{ token.balance?.normalized }} available</div>
                                   </div>
                                 </div>
-                                <div v-if="useProfileStore().feasibleTokens.length == 0" class="mode-option">
+                                <div v-if="tokens.length == 0" class="mode-option">
                                   <div class="token-icon">
                                     <img :src="item.metadata.logoURI"/>
                                   </div>
@@ -146,7 +146,7 @@
                             <div class="mode-text2">{{ redpacket.gasToken.metadata.symbol }}</div>
                             <input class="mode-input" type="text" placeholder="select" readonly>
                             <div class="mode-options">
-                              <div class="mode-option" v-for="(token, index) of useProfileStore().feasibleTokens" :key="index"
+                              <div class="mode-option" v-for="(token, index) of tokens" :key="index"
                                 @click="tokenChoose('gas', token)">
                                 <div class="token-icon">
                                   <img :src="token.metadata.logoURI" />
@@ -222,7 +222,7 @@
                     <!-- <div class="checked-wrapper" style="position: relative; top: -13px; left: 25px;">Hello</div> -->
                     <div :style="accountChosen == 1 && 'box-shadow: 8px 28px 50px rgb(39 44 49 / 7%), 1px 6px 12px rgb(39 44 49 / 4%); transform: translate3D(0, -1px, 0) scale(1.02); transition: all 0.2s ease; border: 2px solid #4BAE4F;'" 
                       class="account-card" 
-                      @click="accountChosen = (accountChosen + 1)%2"
+                      @click="chooseAccount()"
                     >
                       <div class="left">
                         <div>
@@ -240,7 +240,7 @@
                         <div class="balances">
                           <span style="display: flex; align-items: center; margin-bottom: 5px;">
                             <span class="balance_item">
-                              <p style="font-weight:600;">{{ redpacket.token.balance?.normalized }}</p>
+                              <p style="font-weight:600;">{{ eoaTokenBalance?.normalized }}</p>
                             </span>
                             <img style="width:20px; height: 20px; margin-left: 5px; margin-right: 5px;" :src="redpacket.token.metadata.logoURI" />
                             <span style="font-size: 12px;"><b>{{ redpacket.token.metadata.symbol }}</b></span>
@@ -248,7 +248,7 @@
                           <!-- gas -->
                           <span v-if="showGasToken()" style="display: flex; align-items: center;">
                             <span class="balance_item">
-                              <p style="font-weight:600;">{{ redpacket.gasToken.balance?.normalized }}</p>
+                              <p style="font-weight:600;">{{ eoaGasTokenBalance?.normalized }}</p>
                             </span>
                             <img style="width:20px; height: 20px; margin-left: 5px; margin-right: 5px;" :src="redpacket.gasToken.metadata.logoURI" />
                             <span style="font-size: 12px;"><b>{{ redpacket.gasToken.metadata.symbol }}</b></span>
@@ -284,7 +284,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from "vue";
+import { ref, onMounted, watch, computed } from "vue";
 import Layout from "../components/Layout.vue";
 import { connectWallet, disconnectWallet } from "@/services/web3/wallet";
 import { updateProfileBalances, updateWalletBalances } from "@/services/web3/tokens";
@@ -296,6 +296,7 @@ import type { OnClickOutsideHandler } from '@vueuse/core'
 import { onClickOutside } from '@vueuse/core'
 import { vOnClickOutside } from '@/services/directive';
 import type { Token } from "@/types";
+import { normalizeBalance } from '@/services/web3/tokens';
 
 interface RedPacket {
   mode: "random" | "equal";
@@ -326,11 +327,32 @@ const redpacket = ref<RedPacket>({
   expiredAt: 0 // do not expire
 });
 
+const mergedTokens = function() {
+  const profileTokens = useProfileStore().profile.tokens;
+  const walletTokenBalances = useWalletStore().balances;
+  return Object.values(profileTokens).map(token => {
+    const address = token.metadata.address.toLowerCase();
+    const decimals = token.metadata.decimals;
+    const defaultBalance = new BigNumber(0);
+    const walletBalance = walletTokenBalances[address]?.value || defaultBalance;
+    const profileBalance = profileTokens[address].balance?.value || defaultBalance;
+    const newBalance = walletBalance.plus(profileBalance);
+    return {
+      metadata: token.metadata,
+      balance: normalizeBalance(newBalance, decimals)
+    }
+  }).filter(token => token.balance.value.gt(0));
+}
+
 const refresh = async function() {
   await updateProfileBalances();
   tokens.value = useProfileStore().feasibleTokens;
   if (useWalletStore().connected) {
     await updateWalletBalances();
+    if (accountChosen.value) {
+      tokens.value = mergedTokens();
+      console.log(tokens);
+    }
   }
 
   const nativeToken = useProfileStore().nativeToken;
@@ -343,6 +365,28 @@ const refresh = async function() {
     redpacket.value.gasToken = toSelect[0];
   }
 }
+
+const chooseAccount = function() {
+  if (accountChosen.value == 0) {
+    accountChosen.value = 1;
+    tokens.value = mergedTokens();
+  } else {
+    accountChosen.value = 0;
+    tokens.value = useProfileStore().feasibleTokens;
+  }
+}
+
+const eoaTokenBalance = computed(() => {
+  return useWalletStore().balance(
+    redpacket.value.token.metadata.address.toLowerCase()
+  );
+});
+
+const eoaGasTokenBalance = computed(() => {
+  return useWalletStore().balance(
+    redpacket.value.gasToken.metadata.address.toLowerCase()
+  );
+});
 
 onMounted(refresh);
 watch(() => useNetworkStore().network, refresh);

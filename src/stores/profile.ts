@@ -25,13 +25,10 @@ export const useProfileStore = defineStore({
                 this.profile?.tokens || []
             ).filter((t : Token) => t.preference?.display);
         },
-        // display is true and tokens with balance > 0
+        // display tokens with balance > 0
         feasibleTokens() : Token[] {
             return Object.values(this.profile?.tokens || {}).filter(
-                t => {
-                    const balance = new BigNumber(t.balance?.value || 0);
-                    return t.preference?.display && balance.gt(0)
-                }
+                t => new BigNumber(t.balance?.value || 0).gt(0)
             );
         }
     },

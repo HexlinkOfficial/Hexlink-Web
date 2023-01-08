@@ -38,7 +38,7 @@ export async function getERC20Metadata(token: string) : Promise<TokenMetadata> {
     }
 }
 
-function normalizeBalance(balance: BigNumber, decimals: number) : NormalizedTokenBalance {
+export function normalizeBalance(balance: BigNumber, decimals: number) : NormalizedTokenBalance {
     const normalized = balance.div(BigNumber(10).pow(decimals));
     if (normalized.gt(1)) {
         return {

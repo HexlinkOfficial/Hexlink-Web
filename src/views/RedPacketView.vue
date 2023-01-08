@@ -70,7 +70,7 @@
                             </div>
                           </div>
                           <div class="token-select">
-                            <div class="mode-dropdown" :class="chooseTotalDrop && 'active'" @click="chooseTotalDrop = !chooseTotalDrop;">
+                            <div class="mode-dropdown" :class="chooseTotalDrop && 'active'" @click.stop="chooseTotalDrop = !chooseTotalDrop;" v-on-click-outside.bubble="chooseTotalHandle">
                               <div class="token-icon">
                                 <img :src="redpacket.token.logo" />
                               </div>
@@ -102,7 +102,7 @@
                   </div>
                   <div class="mode-and-share">
                     <div class="game-mode">
-                      <div class="mode-dropdown" :class="openDropdown && 'active'" @click="openDropdown = !openDropdown;">
+                      <div class="mode-dropdown" :class="openDropdown && 'active'" @click.stop="openDropdown = !openDropdown;" v-on-click-outside.bubble="dropdownHandle">
                         <div class="mode-text">{{ modeLabels[redpacket.mode] }}</div>
                         <input class="mode-input" type="text" placeholder="select" readonly>
                         <div class="mode-options" style="width:100%;">
@@ -134,7 +134,7 @@
                       </p>
                       <div class="total-choose-token">
                         <div class="token-select">
-                          <div class="mode-dropdown" :class="chooseGasDrop && 'active'" @click="chooseGasDrop = !chooseGasDrop;">
+                          <div class="mode-dropdown" :class="chooseGasDrop && 'active'" @click.stop="chooseGasDrop = !chooseGasDrop;" v-on-click-outside.bubble="chooseGasHandle">
                             <div class="token-icon">
                               <img :src="redpacket.gasToken.logo" />
                             </div>
@@ -249,7 +249,7 @@
                   </div>
                 </div>
                 <div class="create">
-                  <button class="connect-wallet-button" @click="createRedPacket" style="width: auto;">
+                  <button class="connect-wallet-button" @click="modal = true" style="width: auto;">
                     <svg style="margin-right: 10px;" width="18" height="18" viewBox="0 0 18 18" fill="none"
                       xmlns="http://www.w3.org/2000/svg">
                       <path
@@ -265,6 +265,11 @@
         </div>
       </div>
     </div>
+    <div v-if="modal" ref="modalRef" class="confirmation">
+      <button class="close-button" title="Close" @click="modal = false">
+        𝖷
+      </button>
+    </div>
   </layout>
 </template>
 
@@ -278,6 +283,9 @@ import { updateProfileBalances, updateWalletBalances } from "@/services/web3/tok
 import { useProfileStore } from '@/stores/profile';
 import { BigNumber } from "bignumber.js";
 import { useNetworkStore } from '@/stores/network';
+import type { OnClickOutsideHandler } from '@vueuse/core'
+import { onClickOutside } from '@vueuse/core'
+import { vOnClickOutside } from '@/services/directive';
 
 interface RedPacket {
   mode: "random" | "equal";
@@ -298,12 +306,31 @@ interface RedPacket {
   expiredAt: Number,
 }
 
+
+const sendLuck = ref<boolean>(false);
+const luckHistory = ref<boolean>(true);
+const openDropdown = ref<boolean>(false);
+const chooseTotalDrop = ref<boolean>(false);
+const chooseGasDrop = ref<boolean>(false);
+const enableGas = ref<boolean>(false);
+const accountChosen = ref<number>(0);
+const modal = ref<boolean>(false);
+const modalRef = ref<any>(null);
+
 onMounted(async () => {
   await updateProfileBalances();
   if (useWalletStore().connected) {
     await updateWalletBalances();
   }
 });
+
+onClickOutside(
+  modalRef,
+  (event) => {
+    console.log(event)
+    modal.value = false
+  },
+)
 
 const redpacket = ref<RedPacket>({
   mode: "random",
@@ -384,17 +411,48 @@ const showAvailableBalance = (hexlinkValue: BigNumber | undefined, externalValue
   // if external is chosen, return hexlinValue + externalValue
   return hexlinkValue;
 }
-
-const sendLuck = ref<boolean>(false);
-const luckHistory = ref<boolean>(true);
-const openDropdown = ref<boolean>(false);
-const chooseTotalDrop = ref<boolean>(false);
-const chooseGasDrop = ref<boolean>(false);
-const enableGas = ref<boolean>(false);
-const accountChosen = ref<number>(0);
+const chooseTotalHandle: OnClickOutsideHandler = (event) => {
+  chooseTotalDrop.value = false; }
+const dropdownHandle: OnClickOutsideHandler = (event) => {
+  openDropdown.value = false; }
+const chooseGasHandle: OnClickOutsideHandler = (event) => {
+  chooseGasDrop.value = false; }
 </script>
 
 <style lang="less" scoped>
+.confirmation {
+  background-color: white;
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 500px;
+  height: 40vh;
+  max-width: 90vw;
+  z-index: 60;
+  border-radius: 15px;
+  box-shadow: 0px 10px 20px rgb(0 0 0 / 10%);
+}
+.close-button {
+  padding: 0.25em 0.7em 0.2em;
+  position: absolute;
+  top: -0.9rem;
+  right: -0.5rem;
+  font-weight: 700;
+  background-color: #308AF5;
+  border: none;
+  outline: none;
+  color: #fff;
+  margin: 0.5rem 0;
+  border-bottom: 2px solid #076AE0;
+  text-shadow: 1px 1px 1px #1D4ED8;
+  border-radius: 4px;
+  font-size: 1rem;
+  box-sizing: border-box;
+  vertical-align: middle;
+  cursor: pointer;
+}
+
 .token-available-balance {
   font-size: 13px;
   line-height: 18px;
@@ -439,7 +497,7 @@ const accountChosen = ref<number>(0);
 .account-card {
   background-color: #fff;
 	box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.1);
-	border-radius: 20px;
+	border-radius: 15px;
 	display: flex;
 	flex-direction: row;
 	padding: 30px;
@@ -875,7 +933,7 @@ const accountChosen = ref<number>(0);
   transform: rotate(-45deg);
   right: 10px;
   top: 15px;
-  z-index: 10000;
+  z-index: 45;
   transition: 0.5s;
   pointer-events: none;
 }

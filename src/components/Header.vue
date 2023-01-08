@@ -270,6 +270,7 @@ export default {
   position: fixed;
   top: 0;
   left: 9.5rem;
+  z-index: 60;
   right: 3rem;
   z-index: 2; }
   @media only screen and (max-width: 990px) {

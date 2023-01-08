@@ -1,5 +1,6 @@
-import type { BigNumber } from "bignumber.js";
+import { BigNumber } from "bignumber.js";
 import type { BigNumber as EthersBigNumber } from "ethers";
+import { Token } from "graphql";
 
 export interface Network {
     chainId: number,
@@ -92,4 +93,48 @@ export interface Profile {
     account: Account;
     tokenInitiated: boolean;
     tokens: { [key: string]: Token };
+}
+
+export interface RedPacketData {
+    token: Token;
+    gasToken: Token;
+    enableGasStation: boolean;
+    mode: "random" | "equal";
+    split: Number;
+    balance: BigNumber;
+    expiredAt: Number;
+
+}
+
+export interface CreatingRedPacket {
+    data: RedPacketData;
+    gasSponsorshipCostMin: BigNumber;
+    gasSponsorshipCostMax: BigNumber;
+    txCostMin: BigNumber;
+    txCostMax: BigNumber;
+}
+
+export interface Claim {
+    from: string,
+    claimed: BigNumber;
+    gasSponsorshipCost: BigNumber;
+    tx: {
+        hash: string;
+        timestamp: number;
+        txCost: BigNumber;
+    }
+}
+
+export interface CreatedRedPacket {
+    id: string;
+    salt: string;
+    data: RedPacketData,
+    balanceLeft: BigNumber;
+    splitLeft: number;
+    gasSponsorshipCost: BigNumber;
+    tx: {
+        hash: string;
+        txCost: BigNumber;
+    },
+    claimHistory: Claim[]
 }

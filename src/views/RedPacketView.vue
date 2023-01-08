@@ -275,11 +275,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watch } from "vue";
 import Layout from "../components/Layout.vue";
 import { useWalletStore } from '@/stores/wallet';
 import { connectWallet, disconnectWallet } from "@/services/web3/wallet";
-import { ethers } from "ethers";
 import { updateProfileBalances, updateWalletBalances } from "@/services/web3/tokens";
 import { useProfileStore } from '@/stores/profile';
 import { BigNumber } from "bignumber.js";
@@ -307,26 +306,37 @@ const enableGas = ref<boolean>(false);
 const accountChosen = ref<number>(0);
 const modal = ref<boolean>(false);
 const modalRef = ref<any>(null);
-const nativeToken = useProfileStore().nativeToken;
 
+const tokens = ref<Token[]>([]);
 const redpacket = ref<RedPacket>({
   mode: "random",
   split: 0,
   balance: BigNumber(0),
-  token: nativeToken,
-  gasToken: nativeToken,
+  token: useProfileStore().nativeToken,
+  gasToken: useProfileStore().nativeToken,
   expiredAt: 0 // do not expire
 });
 
-onMounted(async () => {
+const refresh = async function() {
   await updateProfileBalances();
+  tokens.value = useProfileStore().feasibleTokens;
   if (useWalletStore().connected) {
     await updateWalletBalances();
   }
-  // find default value
-  // redpacket.value.token = ...;
-  // redpacket.value.gasToken = ...;
-});
+
+  const nativeToken = useProfileStore().nativeToken;
+  const toSelect = Object.values(tokens.value);
+  if (nativeToken.balance?.value.gt(0) || toSelect.length == 0) {
+    redpacket.value.token = nativeToken;
+    redpacket.value.gasToken = nativeToken;
+  } else {
+    redpacket.value.token = toSelect[0];
+    redpacket.value.gasToken = toSelect[0];
+  }
+}
+
+onMounted(refresh);
+watch(() => useNetworkStore().network, refresh);
 
 onClickOutside(
   modalRef,
@@ -334,7 +344,7 @@ onClickOutside(
     console.log(event)
     modal.value = false
   },
-)
+);
 
 const connectOrDisconnectWallet = async function () {
   if (walletStore.connected) {

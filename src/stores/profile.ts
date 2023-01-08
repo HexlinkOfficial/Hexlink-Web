@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import type { Token, Profile, Preference, Account, NormalizedTokenBalance } from '@/types';
+import type { Network, Token, Profile, Preference, Account, NormalizedTokenBalance } from '@/types';
 import { useNetworkStore } from './network';
 import BigNumber from 'bignumber.js';
 
@@ -36,9 +36,8 @@ export const useProfileStore = defineStore({
         }
     },
     actions: {
-        init(account: Account, tokens: { [key: string]: Token }) {
-            const network = useNetworkStore().network.name;
-            this.profiles[network] = {
+        init(network: Network, account: Account, tokens: { [key: string]: Token }) {
+            this.profiles[network.name] = {
                 account,
                 tokens,
                 initiated: true

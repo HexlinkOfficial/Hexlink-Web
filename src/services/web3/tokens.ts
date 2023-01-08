@@ -10,6 +10,7 @@ import type {
 import type {
     TokenMetadata,
     Token,
+    Network,
     NormalizedTokenBalance
 } from '@/types';
 import { getPopularTokens } from "@/configs/tokens";
@@ -54,9 +55,8 @@ function normalizeBalance(balance: BigNumber, decimals: number) : NormalizedToke
     }
 }
 
-export async function initTokenList() {
+export async function initTokenList(network: Network) {
     const auth = useAuthStore();
-    const network = useNetworkStore().network;
     let tokens : { [key: string]: Token } = {};
     const DEFAULT_TOKENS = await getPopularTokens(network);
     DEFAULT_TOKENS.tokens.forEach(t => tokens[t.address.toLowerCase()] = {metadata: t});

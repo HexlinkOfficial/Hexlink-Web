@@ -84,7 +84,6 @@ onMounted(async () => {
 
 watch(() => useNetworkStore().network, async function() {
   loading.value = true;
-  console.log(useProfileStore().profile);
   await updateProfileBalances();
   loading.value = false;
 });

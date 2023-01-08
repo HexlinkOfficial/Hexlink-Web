@@ -60,7 +60,7 @@
                       <div class="input-info-show">
                         <p class="token-available-balance">
                           Available Balance: 
-                          <span class="balance-amount">{{ redpacket.token.balance }}</span>
+                          <span class="balance-amount">{{ redpacket.token.balance?.normalized }}</span>
                         </p>
                         <div class="total-choose-token">
                           <div class="token-select">
@@ -72,27 +72,21 @@
                           <div class="token-select">
                             <div class="mode-dropdown" :class="chooseTotalDrop && 'active'" @click.stop="chooseTotalDrop = !chooseTotalDrop;" v-on-click-outside.bubble="chooseTotalHandle">
                               <div class="token-icon">
-                                <img :src="redpacket.token.logo" />
+                                <img :src="redpacket.token.metadata.logoURI" />
                               </div>
-                              <div class="mode-text2">{{ redpacket.token.label }}</div>
+                              <div class="mode-text2">{{ redpacket.token.metadata.symbol }}</div>
                               <input class="mode-input" type="text" placeholder="select" readonly>
                               <div class="mode-options">
                                 <div class="mode-option"
-                                  v-for="(item, index) of useProfileStore().feasibleTokens"
+                                  v-for="(token, index) of useProfileStore().feasibleTokens"
                                   :key="index"
-                                  @click="tokenChoose(
-                                    'token',
-                                    item.metadata.symbol,
-                                    item.metadata.address,
-                                    item.metadata.logoURI,
-                                    item.balance?.normalized
-                                  )">
+                                  @click="tokenChoose('token', token)">
                                   <div class="token-icon">
-                                    <img :src="item.metadata.logoURI"/>
+                                    <img :src="token.metadata.logoURI"/>
                                   </div>
                                   <div style="display: flex; flex-direction: column; align-items: flex-start;">
-                                    <b>{{ item.metadata.symbol }}</b>
-                                    <div style="margin-right:0.5rem;">{{ item.balance?.normalized }} available</div>
+                                    <b>{{ token.metadata.symbol }}</b>
+                                    <div style="margin-right:0.5rem;">{{ token.balance?.normalized }} available</div>
                                   </div>
                                 </div>
                               </div>
@@ -138,19 +132,19 @@
                         <div class="token-select">
                           <div class="mode-dropdown" :class="chooseGasDrop && 'active'" @click.stop="chooseGasDrop = !chooseGasDrop;" v-on-click-outside.bubble="chooseGasHandle">
                             <div class="token-icon">
-                              <img :src="redpacket.gasToken.logo" />
+                              <img :src="redpacket.gasToken.metadata.logoURI" />
                             </div>
-                            <div class="mode-text2">{{ redpacket.gasToken.label }}</div>
+                            <div class="mode-text2">{{ redpacket.gasToken.metadata.symbol }}</div>
                             <input class="mode-input" type="text" placeholder="select" readonly>
                             <div class="mode-options">
-                              <div class="mode-option" v-for="(item, index) of useProfileStore().feasibleTokens" :key="index"
-                                @click="tokenChoose('gas', item.metadata.symbol, item.metadata.address, item.metadata.logoURI, item.balance?.normalized)">
+                              <div class="mode-option" v-for="(token, index) of useProfileStore().feasibleTokens" :key="index"
+                                @click="tokenChoose('gas', token)">
                                 <div class="token-icon">
-                                  <img :src="item.metadata.logoURI" />
+                                  <img :src="token.metadata.logoURI" />
                                 </div>
                                 <div style="display: flex; flex-direction: column; align-items: flex-start;">
-                                  <b>{{ item.metadata.symbol }}</b>
-                                  <div style="margin-right:0.5rem;">{{ item.balance?.normalized }} available</div>
+                                  <b>{{ token.metadata.symbol }}</b>
+                                  <div style="margin-right:0.5rem;">{{ token.balance?.normalized }} available</div>
                                 </div>
                               </div>
                             </div>
@@ -189,24 +183,24 @@
                       </div>
                       <div class="right">
                         <div style="min-width: 100px;">
-                          <h2>Metamask</h2>
+                          <h2>Hexlink</h2>
                           <p>Available Balance</p>
                         </div>
                         <div class="balances">
                           <span style="display: flex; align-items: center; margin-bottom: 5px;">
                             <span class="balance_item">
-                              <p style="font-weight:600;">{{ redpacket.token.balance }}</p>
+                              <p style="font-weight:600;">{{ redpacket.token.balance?.normalized }}</p>
                             </span>
-                            <img style="width:20px; height: 20px; margin-left: 5px; margin-right: 5px;" :src="redpacket.token.logo" />
-                            <span style="font-size: 12px;"><b>{{ redpacket.token.label }}</b></span>
+                            <img style="width:20px; height: 20px; margin-left: 5px; margin-right: 5px;" :src="redpacket.token.metadata.logoURI" />
+                            <span style="font-size: 12px;"><b>{{ redpacket.token.metadata.symbol }}</b></span>
                           </span>
                           <!-- gas -->
                           <span v-if="showGasToken()" style="display: flex; align-items: center;">
                             <span class="balance_item">
-                              <p style="font-weight:600;">{{ redpacket.gasToken.balance }}</p>
+                              <p style="font-weight:600;">{{ redpacket.gasToken.balance?.normalized }}</p>
                             </span>
-                            <img style="width:20px; height: 20px; margin-left: 5px; margin-right: 5px;" :src="redpacket.gasToken.logo" />
-                            <span style="font-size: 12px;"><b>{{ redpacket.gasToken.label }}</b></span>
+                            <img style="width:20px; height: 20px; margin-left: 5px; margin-right: 5px;" :src="redpacket.gasToken.metadata.logoURI" />
+                            <span style="font-size: 12px;"><b>{{ redpacket.gasToken.metadata.symbol }}</b></span>
                           </span>
                         </div>
                       </div>
@@ -237,18 +231,18 @@
                         <div class="balances">
                           <span style="display: flex; align-items: center; margin-bottom: 5px;">
                             <span class="balance_item">
-                              <p style="font-weight:600;">{{ redpacket.token.balance }}</p>
+                              <p style="font-weight:600;">{{ redpacket.token.balance?.normalized }}</p>
                             </span>
-                            <img style="width:20px; height: 20px; margin-left: 5px; margin-right: 5px;" :src="redpacket.token.logo" />
-                            <span style="font-size: 12px;"><b>{{ redpacket.token.label }}</b></span>
+                            <img style="width:20px; height: 20px; margin-left: 5px; margin-right: 5px;" :src="redpacket.token.metadata.logoURI" />
+                            <span style="font-size: 12px;"><b>{{ redpacket.token.metadata.symbol }}</b></span>
                           </span>
                           <!-- gas -->
                           <span v-if="showGasToken()" style="display: flex; align-items: center;">
                             <span class="balance_item">
-                              <p style="font-weight:600;">{{ redpacket.gasToken.balance }}</p>
+                              <p style="font-weight:600;">{{ redpacket.gasToken.balance?.normalized }}</p>
                             </span>
-                            <img style="width:20px; height: 20px; margin-left: 5px; margin-right: 5px;" :src="redpacket.gasToken.logo" />
-                            <span style="font-size: 12px;"><b>{{ redpacket.gasToken.label }}</b></span>
+                            <img style="width:20px; height: 20px; margin-left: 5px; margin-right: 5px;" :src="redpacket.gasToken.metadata.logoURI" />
+                            <span style="font-size: 12px;"><b>{{ redpacket.gasToken.metadata.symbol }}</b></span>
                           </span>
                         </div>
                       </div>
@@ -293,26 +287,16 @@ import { useNetworkStore } from '@/stores/network';
 import type { OnClickOutsideHandler } from '@vueuse/core'
 import { onClickOutside } from '@vueuse/core'
 import { vOnClickOutside } from '@/services/directive';
+import type { Token } from "@/types";
 
 interface RedPacket {
   mode: "random" | "equal";
   split: Number,
   balance: BigNumber | undefined,
-  token: {
-    label: string,
-    value: string,
-    logo: string | undefined,
-    balance: BigNumber | undefined,
-  },
-  gasToken: {
-    label: string,
-    value: string,
-    logo: string | undefined,
-    balance: BigNumber | undefined,
-  },
+  token: Token,
+  gasToken: Token,
   expiredAt: Number,
 }
-
 
 const sendLuck = ref<boolean>(false);
 const luckHistory = ref<boolean>(true);
@@ -323,12 +307,25 @@ const enableGas = ref<boolean>(false);
 const accountChosen = ref<number>(0);
 const modal = ref<boolean>(false);
 const modalRef = ref<any>(null);
+const nativeToken = useProfileStore().nativeToken;
+
+const redpacket = ref<RedPacket>({
+  mode: "random",
+  split: 0,
+  balance: BigNumber(0),
+  token: nativeToken,
+  gasToken: nativeToken,
+  expiredAt: 0 // do not expire
+});
 
 onMounted(async () => {
   await updateProfileBalances();
   if (useWalletStore().connected) {
     await updateWalletBalances();
   }
+  // find default value
+  // redpacket.value.token = ...;
+  // redpacket.value.gasToken = ...;
 });
 
 onClickOutside(
@@ -338,25 +335,6 @@ onClickOutside(
     modal.value = false
   },
 )
-
-const redpacket = ref<RedPacket>({
-  mode: "random",
-  split: 0,
-  balance: BigNumber(0),
-  token: {
-    label: 'MATIC',
-    value: ethers.constants.AddressZero,
-    logo: "https://token.metaswap.codefi.network/assets/networkLogos/polygon.svg",
-    balance: BigNumber(0)
-  },
-  gasToken: {
-    label: "MATIC",
-    value: "MATIC",
-    logo: "https://token.metaswap.codefi.network/assets/networkLogos/polygon.svg",
-    balance: BigNumber(0) 
-  },
-  expiredAt: 0 // do not expire
-});
 
 const connectOrDisconnectWallet = async function () {
   if (walletStore.connected) {
@@ -380,17 +358,11 @@ const modeChoose = (gameMode: "random" | "equal") => {
   redpacket.value.mode = gameMode;
 }
 
-const tokenChoose = (mode: "token" | "gas",token: string, address: string, logoUrl: string | undefined, balance: BigNumber | undefined) => {
+const tokenChoose = (mode: "token" | "gas", token: Token) => {
   if (mode === "token") {
-    redpacket.value.token.label = token;
-    redpacket.value.token.value = address;
-    redpacket.value.token.logo = logoUrl;
-    redpacket.value.token.balance = balance;
+    redpacket.value.token = token;
   } else {
-    redpacket.value.gasToken.label = token;
-    redpacket.value.gasToken.value = address;
-    redpacket.value.gasToken.logo = logoUrl;
-    redpacket.value.gasToken.balance = balance;
+    redpacket.value.gasToken = token;
   }
 }
 
@@ -399,7 +371,9 @@ const createRedPacket = async function () {
 };
 
 const showGasToken = () => {
-  if (redpacket.value.token.label == redpacket.value.gasToken.label) return false;
+  const token = redpacket.value.token.metadata.address;
+  const gasToken = redpacket.value.gasToken.metadata.address;
+  if (token.toLowerCase() == gasToken.toLowerCase()) return false;
   return true;
 }
 
@@ -409,7 +383,7 @@ if (walletStore.connected) {
 }
 
 const setMaxAmount = () => {
-  redpacket.value.balance = redpacket.value.token.balance;
+  redpacket.value.balance = redpacket.value.token.balance?.normalized;
   // TODO Need to put out gas fee from the total amount
 }
 
@@ -418,6 +392,7 @@ const showAvailableBalance = (hexlinkValue: BigNumber | undefined, externalValue
   // if external is chosen, return hexlinValue + externalValue
   return hexlinkValue;
 }
+
 const chooseTotalHandle: OnClickOutsideHandler = (event) => {
   chooseTotalDrop.value = false; }
 const dropdownHandle: OnClickOutsideHandler = (event) => {

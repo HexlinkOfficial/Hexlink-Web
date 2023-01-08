@@ -1,10 +1,9 @@
 import type { Network } from '@/types';
 import { ethers } from "ethers";
 import { useWalletStore } from "@/stores/wallet";
-import { useProfileStore } from '@/stores/profile';
 import { Alchemy, Network as AlchemyNetwork } from "alchemy-sdk";
 import { initProfile } from "@/services/web3/account";
-import { updateBalances } from "@/services/web3/tokens";
+import { updateProfileBalances } from "@/services/web3/tokens";
 import { useViewStore } from '@/stores/view';
 import { useNetworkStore } from '@/stores/network';
 
@@ -13,7 +12,7 @@ async function doSwitch(network: Network) {
     const view = useViewStore();
     view.setLoading(true);
     await initProfile();
-    await updateBalances();
+    await updateProfileBalances();
     view.setLoading(false);
 }
 

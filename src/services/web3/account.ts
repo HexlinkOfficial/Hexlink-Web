@@ -91,6 +91,6 @@ export async function initProfile() {
     if (!store.profile || !store.profile.initiated) {
         const account = await buildAccount(useAuthStore().user!.nameHash);
         const tokens = await initTokenList();;
-        store.init(useNetworkStore().network, account, tokens);
+        store.init(account, tokens);
     }
 }

@@ -274,7 +274,7 @@ import Layout from "../components/Layout.vue";
 import { useWalletStore } from '@/stores/wallet';
 import { connectWallet, disconnectWallet } from "@/services/web3/wallet";
 import { ethers } from "ethers";
-import { updateBalances } from "@/services/web3/tokens";
+import { updateProfileBalances, updateWalletBalances } from "@/services/web3/tokens";
 import { useProfileStore } from '@/stores/profile';
 import { BigNumber } from "bignumber.js";
 import { useNetworkStore } from '@/stores/network';
@@ -299,7 +299,10 @@ interface RedPacket {
 }
 
 onMounted(async () => {
-  await updateBalances();
+  await updateProfileBalances();
+  if (useWalletStore().connected) {
+    await updateWalletBalances();
+  }
 });
 
 const redpacket = ref<RedPacket>({

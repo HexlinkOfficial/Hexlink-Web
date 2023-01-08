@@ -18,6 +18,10 @@ async function doSwitch(network: Network) {
 }
 
 export async function switchNetwork(network: Network) {
+    if (network.chainId == useNetworkStore().network.chainId) {
+        return;
+    }
+
     if (!useWalletStore().connected || network.chainId == Number(window.ethereum.networkVersion)) {
         doSwitch(network);
         return;

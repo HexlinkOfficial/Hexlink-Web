@@ -90,8 +90,10 @@
                                   <div class="token-icon">
                                     <img :src="item.metadata.logoURI"/>
                                   </div>
-                                  <div style="margin-right:0.5rem;">{{ item.balance?.normalized }}</div>
-                                  {{ item.metadata.symbol }}
+                                  <div style="display: flex; flex-direction: column; align-items: flex-start;">
+                                    <b>{{ item.metadata.symbol }}</b>
+                                    <div style="margin-right:0.5rem;">{{ item.balance?.normalized }} available</div>
+                                  </div>
                                 </div>
                               </div>
                             </div>
@@ -124,7 +126,7 @@
                 <div class="token-list gas-station">
                   <div class="enable-switch">
                     <p>Pay service fee for your claimers</p>
-                    <a-switch style="margin-left: 1rem;" v-model:checked="enableGas" />
+                    <a-switch style="margin-left: 1rem; height: 25px; width: 45px;" v-model:checked="enableGas" />
                   </div>
                   <div class="gas-estimation-parent">
                     <div class="gas-estimation">
@@ -146,20 +148,25 @@
                                 <div class="token-icon">
                                   <img :src="item.metadata.logoURI" />
                                 </div>
-                                <div style="margin-right:0.5rem;">{{ item.balance?.normalized }}</div>
-                                {{ item.metadata.symbol }}
+                                <div style="display: flex; flex-direction: column; align-items: flex-start;">
+                                  <b>{{ item.metadata.symbol }}</b>
+                                  <div style="margin-right:0.5rem;">{{ item.balance?.normalized }} available</div>
+                                </div>
                               </div>
                             </div>
                           </div>
                         </div>
                       </div>
-                      <svg style="margin-left: 1rem; width: 16px;" width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path
-                          d="M11 21C16.5228 21 21 16.5228 21 11C21 5.47715 16.5228 1 11 1C5.47715 1 1 5.47715 1 11C1 16.5228 5.47715 21 11 21Z"
-                          stroke="#898989" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                        <path d="M11 15V11" stroke="#898989" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                        <path d="M11 8V7" stroke="#898989" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                      </svg>
+                      <div class="tooltip fade" data-title="Hypertext Markup Language">
+                        <svg style="margin-left: 1rem; width: 16px;" width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path
+                            d="M11 21C16.5228 21 21 16.5228 21 11C21 5.47715 16.5228 1 11 1C5.47715 1 1 5.47715 1 11C1 16.5228 5.47715 21 11 21Z"
+                            stroke="#898989" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                          <path d="M11 15V11" stroke="#898989" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                          <path d="M11 8V7" stroke="#898989" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                      </div>
+                      
                     </div>
                   </div>
                 </div>
@@ -420,6 +427,41 @@ const chooseGasHandle: OnClickOutsideHandler = (event) => {
 </script>
 
 <style lang="less" scoped>
+.tooltip {
+  position: relative; }
+.tooltip:before,
+.tooltip:after {
+  display: block;
+  opacity: 0;
+  pointer-events: none;
+  position: absolute; }
+.tooltip:after {
+  border-right: 6px solid transparent;
+  border-bottom: 6px solid rgba(0, 0, 0, .75);
+  border-left: 6px solid transparent;
+  content: '';
+  height: 0;
+  top: 20px;
+  left: 20px;
+  width: 0; }
+.tooltip:before {
+  background: rgba(0, 0, 0, .75);
+  border-radius: 15px;
+  color: #fff;
+  content: attr(data-title);
+  font-size: 12px;
+  padding: 6px 10px;
+  top: 26px;
+  right: -15px;
+  white-space: nowrap; }
+.tooltip.fade:after,
+.tooltip.fade:before {
+  transform: translate3d(0,-10px,0);
+  transition: all .15s ease-in-out; }
+.tooltip.fade:hover:after,
+.tooltip.fade:hover:before {
+  opacity: 1;
+  transform: translate3d(0,3px,0); }
 .confirmation {
   background-color: white;
   position: fixed;
@@ -468,7 +510,7 @@ const chooseGasHandle: OnClickOutsideHandler = (event) => {
   text-overflow: ellipsis;
   overflow: hidden;
   color: rgb(7, 16, 27);
-  line-height: 18px;
+  line-height: 20px;
   font-weight: 700;
   margin-left: 4px;
   margin-left: 0.5rem;
@@ -932,14 +974,14 @@ const chooseGasHandle: OnClickOutsideHandler = (event) => {
   border-right: 2px solid rgb(242, 246, 250);
   transform: rotate(-45deg);
   right: 10px;
-  top: 15px;
+  top: 14px;
   z-index: 45;
   transition: 0.5s;
   pointer-events: none;
 }
 
 .mode-dropdown.active::before {
-  top: 22px;
+  top: 19px;
   transform: rotate(-225deg);
 }
 
@@ -1349,6 +1391,7 @@ input[type=number] {
 
 .mode-option {
   display: flex;
+  align-items: center;
   padding: 12px 20px;
   cursor: pointer;
 }
@@ -1485,10 +1528,10 @@ input[type=number] {
 .gas-estimation {
   display: flex;
   // align-items: center;
-
   p {
     margin-bottom: 0rem;
     margin-right: 1rem;
+    font-weight: 500;
   }
 }
 
@@ -1511,7 +1554,8 @@ input[type=number] {
   display: flex;
   align-items: center;
   p {
-    margin-bottom: 0rem; }
+    margin-bottom: 0rem;
+    font-weight: 500; }
   @media (max-width: 768px) {
     width: 100%;
     justify-content: flex-end; } }

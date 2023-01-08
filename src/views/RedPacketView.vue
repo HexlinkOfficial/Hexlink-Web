@@ -191,7 +191,7 @@
                         </div>
                       </div>
                       <div class="right">
-                        <div style="min-width: 100px;">
+                        <div style="min-width: 100px; margin-left: 0.5rem;">
                           <h2>Hexlink</h2>
                           <p>Available Balance</p>
                         </div>
@@ -243,7 +243,7 @@
                         </div>
                       </div>
                       <div class="right">
-                        <div style="min-width: 100px;">
+                        <div style="min-width: 100px; margin-left: 0.5rem;">
                           <h2>Metamask</h2>
                           <p>Available Balance</p>
                         </div>
@@ -577,8 +577,7 @@ const copy = async (text: string) => {
   box-shadow: 8px 28px 50px rgba(39, 44, 49, 0.07),
 		1px 6px 12px rgba(39, 44, 49, 0.04);
 	transform: translate3D(0, -1px, 0) scale(1.02);
-	transition: all 0.2s ease;
-  border: 2px solid #4BAE4F; }
+	transition: all 0.2s ease; }
 .left {
   display: flex;
   align-items: center;

@@ -352,13 +352,12 @@ cursor: pointer; }
   border-width: 1px;
   border-color: #F3F4F6;
   cursor: pointer; }
-  .profile_log .user:hover {
-      transform: translateY(-0.125rem);
-      fill: rgb(7, 106, 224);
-      background-color: rgba(7, 106, 224, 0.15);
-      border-color: rgb(48,138,245);
-      color: rgb(7,106,224);
-    }
+  // .profile_log .user:hover {
+  //   transform: translateY(-0.125rem);
+  //   fill: rgb(7, 106, 224);
+  //   background-color: rgba(7, 106, 224, 0.15);
+  //   border-color: rgb(48,138,245);
+  //   color: rgb(7,106,224); }
   @media only screen and (max-width: 768px) {
     .profile_log .user {
       margin-right: 0.5rem;
@@ -807,6 +806,9 @@ cursor: pointer; }
         background: #f46a6a; }
       .notification .dropdown-menu a span.pending {
         background: #f1b44c; }
+.smart-contract-address h5:hover {
+  background-color: rgba(7, 106, 224, 0.15);
+}
 .smart-contract-address h5 {
   margin-bottom: 0;
   padding-top: 0.25rem;

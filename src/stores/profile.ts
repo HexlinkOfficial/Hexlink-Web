@@ -1,14 +1,11 @@
 import { defineStore } from 'pinia';
-import type { Token, Network, Profile, Preference, Account, NormalizedTokenBalance } from '@/types';
+import type { Token, Profile, Preference, Account, NormalizedTokenBalance } from '@/types';
 import { useNetworkStore } from './network';
+import { BigNumber } from "bignumber.js";
 
 export const useProfileStore = defineStore({
     id: 'profile',
-    state: (): {
-        profiles: { [key: string]: Profile }
-    } => ({
-        profiles: {}
-    }),
+    state: (): {profiles: { [key: string]: Profile }} => ({profiles: {}}),
     persist: true,
     getters: {
         profile: (state) : Profile => {
@@ -30,7 +27,13 @@ export const useProfileStore = defineStore({
             return Object.values(
                 this.profile?.tokens || []
             ).filter(
-                t => t.preference?.display && t.balance?.value.gt(0)
+                t => {
+                    // TODO: sometimes it's string instead of bignumbeer
+                    // so we set it to bignumber again here. We need to 
+                    // figure out where we set this as string and fix it
+                    const balance = new BigNumber(t.balance?.value || 0);
+                    return t.preference?.display && balance.gt(0)
+                }
             );
         }
     },

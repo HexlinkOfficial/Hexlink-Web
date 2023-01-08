@@ -62,12 +62,13 @@ export async function initTokenList() {
     let tokens : { [key: string]: Token } = {};
     const DEFAULT_TOKENS = await getPopularTokens(network);
     DEFAULT_TOKENS.tokens.forEach(t => tokens[t.address.toLowerCase()] = {metadata: t});
-    const preferences : Token[] = await getTokenPreferences(
-        auth.user!, network
-    );
+    const preferences : Token[] = await getTokenPreferences(auth.user!, network);
     preferences.forEach(p => {
         const address = p.metadata.address.toLowerCase();
-        tokens[address] = p;
+        tokens[address] = {
+            metadata: p.metadata,
+            preference: p.preference
+        };
     });
     return tokens;
 }

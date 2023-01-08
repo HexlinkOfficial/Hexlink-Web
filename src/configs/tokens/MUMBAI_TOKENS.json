@@ -1,0 +1,26 @@
+[
+    {
+        "chainId": 80001,
+        "symbol": "MATIC",
+        "name": "MATIC",
+        "decimals": 18,
+        "address": "0x0000000000000000000000000000000000000000",
+        "logoURI": "https://token.metaswap.codefi.network/assets/networkLogos/polygon.svg"
+    },
+    {
+        "chainId": 80001,
+        "symbol": "HEXL",
+        "name": "Hexlink",
+        "decimals": 18,
+        "address": "0x38e80061511D6F43c89FfDF883Ca679eae47279E",
+        "logoURI": "/assets/logo/blue-logo.svg"
+    },
+    {
+        "chainId": 80001,
+        "symbol": "WMATIC",
+        "name": "Wrapped MATIC",
+        "decimals": 18,
+        "address": "0x9c3C9283D3e44854697Cd22D3Faa240Cfb032889",
+        "logoURI": "https://token.metaswap.codefi.network/assets/networkLogos/polygon.svg"
+    }
+]

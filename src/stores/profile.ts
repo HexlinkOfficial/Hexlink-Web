@@ -1,44 +1,46 @@
 import { defineStore } from 'pinia';
 import type { Token, Network, Profile, Preference, Account, NormalizedTokenBalance } from '@/types';
-import { nativeCoinAddress } from '@/configs/tokens';
-import { GOERLI } from "@/configs/network";
+import { useNetworkStore } from './network';
 
 export const useProfileStore = defineStore({
     id: 'profile',
     state: (): {
-        network: Network,
         profiles: { [key: string]: Profile }
     } => ({
-        network: {...GOERLI},
         profiles: {}
     }),
     persist: true,
     getters: {
-        profile: (state) => state.profiles[state.network.name],
-        visiableTokens: (state) => Object.values(
-            state.profiles[state.network.name]?.tokens || []
-        ).filter(t => t.preference?.display),
-        nativeCoinAddress: (state) => nativeCoinAddress(state.network),
+        profile: (state) : Profile => {
+            return state.profiles[useNetworkStore().network.name];
+        },
+        visiableTokens() : Token[] {
+            return Object.values(
+                this.profile?.tokens || []
+            ).filter(
+                (t : Token) => t.preference?.display
+            );
+        },
         // display is true and tokens with balance > 0
-        feasibleTokens: (state) => Object.values(
-            state.profiles[state.network.name]?.tokens || []
-        ).filter(t => t.preference?.display && t.balance?.value.gt(0)),
+        feasibleTokens() : Token[] {
+            return Object.values(
+                this.profile?.tokens || []
+            ).filter(
+                t => t.preference?.display && t.balance?.value.gt(0)
+            );
+        }
     },
     actions: {
-        switchNetwork(network: Network) {
-            console.log("Switching to network " + network.chainName);
-            this.network = network;
-        },
-        setAccount(network: Network, account: Account) {
+        init(
+            network: Network,
+            account: Account,
+            tokens: { [key: string]: Token }
+        ) {
             this.profiles[network.name] = {
                 account,
-                tokenInitiated: false,
-                tokens: {}
+                tokens,
+                initiated: true
             };
-        },
-        setTokens(network: Network, tokens: { [key: string]: Token }) {
-            this.profiles[network.name].tokenInitiated = true;
-            this.profiles[network.name].tokens = tokens;
         },
         addToken(token: Token) {
             const tokenAddr = token.metadata.address.toLowerCase();
@@ -54,7 +56,6 @@ export const useProfileStore = defineStore({
             this.profile.tokens[tokenAddr.toLowerCase()].preference = preference;
         },
         clear() {
-            this.network = {...GOERLI};
             this.profiles = {};
         },
     },

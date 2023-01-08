@@ -177,7 +177,7 @@
                         <div>
                           <img class="wallet-image" src="https://i.postimg.cc/kXgZCB4L/hexlink.png">
                           <div class="chain_wrapper">
-                            <img class="chain" :src="useProfileStore().network.logoUrl" />
+                            <img class="chain" :src="useNetworkStore().network.logoUrl" />
                           </div>
                         </div>
                       </div>
@@ -219,7 +219,7 @@
                         <div>
                           <img class="wallet-image" :src="useWalletStore().wallet?.walletIcon">
                           <div class="chain_wrapper">
-                            <img class="chain" :src="useProfileStore().network.logoUrl" />
+                            <img class="chain" :src="useNetworkStore().network.logoUrl" />
                           </div>
                         </div>
                       </div>
@@ -278,6 +278,7 @@ import { ethers } from "ethers";
 import { updateBalances } from "@/services/web3/tokens";
 import { useProfileStore } from '@/stores/profile';
 import { BigNumber } from "bignumber.js";
+import { useNetworkStore } from '@/stores/network';
 
 interface RedPacket {
   mode: "random" | "equal";

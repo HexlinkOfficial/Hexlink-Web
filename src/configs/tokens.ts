@@ -1,5 +1,6 @@
 import type { Network, TokenDataList } from "@/types";
-import GOERLI_TOKENS from "@/configs/GOERLI_TOKENS.json"
+import GOERLI_TOKENS from "@/configs/tokens/GOERLI_TOKENS.json"
+import MUMBAI_TOKENS from "@/configs/tokens/MUMBAI_TOKENS.json"
 
 const POLYGON_POPULAR_TOKENS = "https://api-polygon-tokens.polygon.technology/tokenlists/popularTokens.tokenlist.json";
 
@@ -19,6 +20,12 @@ export async function getPopularTokens(network: Network) : Promise<TokenDataList
         return {
             timestamp: new Date().toISOString(),
             tokens: GOERLI_TOKENS,
+        }
+    }
+    if (network.chainId == 80001) {
+        return {
+            timestamp: new Date().toISOString(),
+            tokens: MUMBAI_TOKENS,
         }
     }
     return {

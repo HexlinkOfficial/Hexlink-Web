@@ -90,8 +90,8 @@ export interface Token {
 }
 
 export interface Profile {
+    initiated: boolean;
     account: Account;
-    tokenInitiated: boolean;
     tokens: { [key: string]: Token };
 }
 

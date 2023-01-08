@@ -10,15 +10,15 @@ import type {
 import type {
     TokenMetadata,
     Token,
-    Network,
     NormalizedTokenBalance
 } from '@/types';
 import { useAuthStore } from "@/stores/auth";
-import { getPopularTokens, nativeCoinAddress } from "@/configs/tokens";
+import { getPopularTokens } from "@/configs/tokens";
 import { alchemy, getProvider } from "@/services/web3/network";
 import { useProfileStore } from "@/stores/profile";
 import { ethers } from "ethers";
 import { IERC20_ABI } from "@/configs/contract";
+import { useNetworkStore } from "@/stores/network";
 
 export async function getERC20Metadata(token: string) : Promise<TokenMetadata> {
     const metadata = await alchemy().core.getTokenMetadata(token);
@@ -56,28 +56,24 @@ function normalizeBalance(balance: BigNumber, decimals: number) : NormalizedToke
 }
 
 export async function initTokenList() {
-    const profiles = useProfileStore();
     const auth = useAuthStore();
-    const network = profiles.network;
-
-    if (!profiles.profile.tokenInitiated) {
-        let tokens : { [key: string]: Token } = {};
-        const DEFAULT_TOKENS = await getPopularTokens(network);
-        DEFAULT_TOKENS.tokens.forEach(t => tokens[t.address.toLowerCase()] = {metadata: t});
-        const preferences : Token[] = await getTokenPreferences(
-            auth.user!, network
-        );
-        preferences.forEach(p => {
-            const address = p.metadata.address.toLowerCase();
-            tokens[address] = p;
-        });
-        profiles.setTokens(profiles.network, tokens);
-    }
+    const network = useNetworkStore().network;
+    let tokens : { [key: string]: Token } = {};
+    const DEFAULT_TOKENS = await getPopularTokens(network);
+    DEFAULT_TOKENS.tokens.forEach(t => tokens[t.address.toLowerCase()] = {metadata: t});
+    const preferences : Token[] = await getTokenPreferences(
+        auth.user!, network
+    );
+    preferences.forEach(p => {
+        const address = p.metadata.address.toLowerCase();
+        tokens[address] = p;
+    });
+    return tokens;
 }
 
 export async function updateBalances() {
     const store = useProfileStore();
-    const tokens = Object.values(store.profile.tokens);
+    const tokens = Object.values(store.profile?.tokens || []);
     await Promise.all(tokens.map(token => updateBalance(token.metadata)));
     await updatePreferences();
 }
@@ -88,7 +84,7 @@ async function updateBalance(token: TokenMetadata) {
     const account = store.profile.account.address;
     try {
         let balance = ethers.BigNumber.from(0);
-        if (token.address == store.nativeCoinAddress) {
+        if (token.address == useNetworkStore().nativeCoinAddress) {
             balance = await provider.getBalance(account);
         } else {
             const contract = new ethers.Contract(token.address, IERC20_ABI, provider);
@@ -102,14 +98,15 @@ async function updateBalance(token: TokenMetadata) {
             )
         );
     } catch (error: any) {
-        console.log("Failed load balance for token " + token);
+        console.log("Failed load balance for token " + JSON.stringify(token));
+        console.log(error);
     }
 }
 
 async function updatePreferences() {
     const store = useProfileStore();
     const tokensToSetPreference : PreferenceInput[] = 
-        Object.values(store.profile.tokens).filter(
+        Object.values(store.profile?.tokens || []).filter(
             t => !t.preference && t.balance?.value.gt(0)
         ).map(t => ({
             chain: store.network.name,

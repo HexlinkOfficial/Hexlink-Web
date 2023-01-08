@@ -74,67 +74,57 @@ export async function initTokenList() {
 
 export async function updateProfileBalances() {
     const store = useProfileStore();
-    const tokens = Object.values(store.profile?.tokens || []);
     const account = store.profile.account.address;
-    await Promise.all(tokens.map(
-        token => updateProfileBalance(account, token.metadata, token.balance)
-    ));
+    await updateBalances(
+        account,
+        (address) => store.balance(address),
+        (address, balance) => store.updateBalance(address, balance)
+    );
     await updatePreferences();
 }
 
-async function updateProfileBalance(
-    account: string,
-    metadata: TokenMetadata,
-    balance: NormalizedTokenBalance | undefined
-) {
-    useProfileStore().updateBalance(
-        metadata.address,
-        await getBalance(account, metadata, balance)
-    );
-}
-
 export async function updateWalletBalances() {
-    const store = useProfileStore();
-    const tokens = Object.values(store.profile?.tokens || []);
-    await Promise.all(tokens.map(
-        token => updateWalletBalance(token.metadata)
-    ));
-}
-
-async function updateWalletBalance(
-    metadata: TokenMetadata
-) {
     const wallet = useWalletStore();
-    const oldBalance = wallet.balances[metadata.address.toLowerCase()];
-    wallet.updateBalance(
-        metadata.address,
-        await getBalance(wallet.wallet!.account.address, metadata, oldBalance)
+    if (!wallet.connected) { return; }
+    const account = wallet.wallet!.account.address;
+    await updateBalances(
+        account,
+        (address: string) => wallet.balance(address.toLowerCase()),
+        (
+            address: string,
+            balance: NormalizedTokenBalance
+        ) => wallet.updateBalance(address.toLowerCase(), balance)
     );
 }
 
-async function getBalance(
+async function updateBalances(
     account: string,
-    token: TokenMetadata,
-    balance: NormalizedTokenBalance | undefined
-) : Promise<NormalizedTokenBalance> {
-    const provider = getProvider();
+    getPrevBalance: (tokenAddr: string) => NormalizedTokenBalance | undefined,
+    update: (tokenAddr: string, balance: NormalizedTokenBalance) => void,
+) : Promise<void> {
+    const profile = useProfileStore();
+    const tokens = Object.values(profile.profile.tokens || []);
+    const nativeCoin = useNetworkStore().nativeCoinAddress;
+    const decimals = profile.profile.tokens[nativeCoin].metadata.decimals;
+    let balance = getPrevBalance(nativeCoin) || normalizeBalance(new BigNumber(0), decimals);
     try {
-        let balance = ethers.BigNumber.from(0);
-        if (token.address == useNetworkStore().nativeCoinAddress) {
-            balance = await provider.getBalance(account);
-        } else {
-            const contract = new ethers.Contract(token.address, IERC20_ABI, provider);
-            balance = await contract.balanceOf(account);
-        }
-        return normalizeBalance(
-            new BigNumber(balance.toHexString()),
-            token.decimals
-        );
-    } catch (error: any) {
-        console.log("Failed load balance for token " + JSON.stringify(token));
+        const nativeCoinBalance = await getProvider().getBalance(account);
+        balance = normalizeBalance(new BigNumber(nativeCoinBalance.toString()), decimals);
+    } catch(error) {
         console.log(error);
-        return balance ? balance : normalizeBalance(new BigNumber(0), token.decimals);
-    }
+    };
+    update(nativeCoin, balance);
+
+    const erc20s = tokens.map(t => t.metadata.address).filter(addr => addr != nativeCoin);
+    const result = await alchemy().core.getTokenBalances(account, erc20s);
+    result.tokenBalances.map((b, i) => {
+        const decimals = tokens[i].metadata.decimals;
+        let balance = getPrevBalance(b.contractAddress) || normalizeBalance(new BigNumber(0), decimals);
+        if (b.tokenBalance && !b.error) {
+            balance = normalizeBalance(new BigNumber(b.tokenBalance), decimals);
+        }
+        update(b.contractAddress, balance);
+    });
 }
 
 async function updatePreferences() {

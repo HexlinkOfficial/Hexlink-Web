@@ -27,7 +27,7 @@
         "chainId": 5,
         "symbol": "USDC2",
         "name": "USD Coin",
-        "decimals": 18,
+        "decimals": 6,
         "address": "0x07865c6E87B9F70255377e024ace6630C1Eaa37F",
         "logoURI": "https://wallet-asset.matic.network/img/tokens/usdc.svg"
     },

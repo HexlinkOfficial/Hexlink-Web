@@ -89,7 +89,7 @@
                                     <div style="margin-right:0.5rem;">{{ token.balance?.normalized }} available</div>
                                   </div>
                                 </div>
-                                <div v-if="useProfileStore().feasibleTokens.length == 0" class="mode-option">
+                                <!-- <div v-if="useProfileStore().feasibleTokens.length == 0" class="mode-option">
                                   <div class="token-icon">
                                     <img :src="item.metadata.logoURI"/>
                                   </div>
@@ -97,7 +97,7 @@
                                     <b>{{ item.metadata.symbol }}</b>
                                     <div style="margin-right:0.5rem;">{{ item.balance?.normalized }} available</div>
                                   </div>
-                                </div>
+                                </div> -->
                               </div>
                             </div>
                           </div>
@@ -197,17 +197,27 @@
                         </div>
                         <div class="balances">
                           <span style="display: flex; align-items: center; margin-bottom: 5px;">
-                            <span class="balance_item">
-                              <p style="font-weight:600;">{{ redpacket.token.balance?.normalized }}</p>
-                            </span>
+                            <a-tooltip placement="top">
+                              <template #title>
+                                <span>Click to Copy</span>
+                              </template>
+                              <span class="balance_item">
+                                <p @click="copy(String(redpacket.token.balance?.normalized))" style="font-weight:600;">{{ redpacket.token.balance?.normalized }}</p>
+                              </span>
+                            </a-tooltip>
                             <img style="width:20px; height: 20px; margin-left: 5px; margin-right: 5px;" :src="redpacket.token.metadata.logoURI" />
                             <span style="font-size: 12px;"><b>{{ redpacket.token.metadata.symbol }}</b></span>
                           </span>
                           <!-- gas -->
                           <span v-if="showGasToken()" style="display: flex; align-items: center;">
-                            <span class="balance_item">
-                              <p style="font-weight:600;">{{ redpacket.gasToken.balance?.normalized }}</p>
-                            </span>
+                            <a-tooltip placement="bottom">
+                              <template #title>
+                                <span>Click to Copy</span>
+                              </template>
+                              <span class="balance_item">
+                                <p @click="copy(String(redpacket.gasToken.balance?.normalized))" style="font-weight:600;">{{ redpacket.gasToken.balance?.normalized }}</p>
+                              </span>
+                            </a-tooltip>
                             <img style="width:20px; height: 20px; margin-left: 5px; margin-right: 5px;" :src="redpacket.gasToken.metadata.logoURI" />
                             <span style="font-size: 12px;"><b>{{ redpacket.gasToken.metadata.symbol }}</b></span>
                           </span>
@@ -239,17 +249,29 @@
                         </div>
                         <div class="balances">
                           <span style="display: flex; align-items: center; margin-bottom: 5px;">
-                            <span class="balance_item">
-                              <p style="font-weight:600;">{{ redpacket.token.balance?.normalized }}</p>
-                            </span>
+                            <a-tooltip placement="top">
+                              <template #title>
+                                <span>Click to Copy</span>
+                              </template>
+                              <span class="balance_item" data-title="Hypertext Markup Language">
+                                <p @click="copy(String(redpacket.token.balance?.normalized))" style="font-weight:600;">{{
+                                  redpacket.token.balance?.normalized }}</p>
+                              </span>
+                            </a-tooltip>
                             <img style="width:20px; height: 20px; margin-left: 5px; margin-right: 5px;" :src="redpacket.token.metadata.logoURI" />
                             <span style="font-size: 12px;"><b>{{ redpacket.token.metadata.symbol }}</b></span>
                           </span>
                           <!-- gas -->
                           <span v-if="showGasToken()" style="display: flex; align-items: center;">
-                            <span class="balance_item">
-                              <p style="font-weight:600;">{{ redpacket.gasToken.balance?.normalized }}</p>
-                            </span>
+                            <a-tooltip placement="bottom">
+                              <template #title>
+                                <span>Click to Copy</span>
+                              </template>
+                              <span class="balance_item">
+                                <p @click="copy(String(redpacket.gasToken.balance?.normalized))" style="font-weight:600;">{{
+                                  redpacket.gasToken.balance?.normalized }}</p>
+                              </span>
+                            </a-tooltip>
                             <img style="width:20px; height: 20px; margin-left: 5px; margin-right: 5px;" :src="redpacket.gasToken.metadata.logoURI" />
                             <span style="font-size: 12px;"><b>{{ redpacket.gasToken.metadata.symbol }}</b></span>
                           </span>
@@ -297,6 +319,8 @@ import type { OnClickOutsideHandler } from '@vueuse/core'
 import { onClickOutside } from '@vueuse/core'
 import { vOnClickOutside } from '@/services/directive';
 import type { Token } from "@/types";
+import useClipboard from 'vue-clipboard3';
+import { createToaster } from "@meforma/vue-toaster";
 
 interface RedPacket {
   mode: "random" | "equal";
@@ -317,6 +341,7 @@ const accountChosen = ref<number>(0);
 const modal = ref<boolean>(false);
 const modalRef = ref<any>(null);
 const nativeToken = useProfileStore().nativeToken;
+const { toClipboard } = useClipboard()
 
 const redpacket = ref<RedPacket>({
   mode: "random",
@@ -409,6 +434,18 @@ const dropdownHandle: OnClickOutsideHandler = (event) => {
   openDropdown.value = false; }
 const chooseGasHandle: OnClickOutsideHandler = (event) => {
   chooseGasDrop.value = false; }
+
+const copy = async (text: string) => {
+  try {
+    await toClipboard(text);
+    const toaster = createToaster({ position: "top", duration: 2000 });
+    toaster.success(`Copied`);
+  } catch (e) {
+    console.error(e)
+    const toaster = createToaster({ position: "top", duration: 2000 });
+    toaster.error(`Can not copy`);
+  }
+}
 </script>
 
 <style lang="less" scoped>
@@ -565,14 +602,13 @@ const chooseGasHandle: OnClickOutsideHandler = (event) => {
   width: 4.5rem;
   overflow: auto;
   white-space: nowrap;
-  padding: 0 10px;
+  padding-left: 10px;
   line-height: 30px;
-  background-color: #F3F4F6;
-  border-radius: 5px;
 
   p {
     margin-bottom: 0rem;
     overflow: auto;
+    font-size: 14px;
   }
 }
 .wallet-image {
@@ -1374,7 +1410,7 @@ input[type=number] {
 
 .mode-dropdown.active .mode-options {
   display: block;
-  z-index: 50;
+  z-index: 60;
 }
 
 .mode-option {

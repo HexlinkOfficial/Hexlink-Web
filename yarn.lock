@@ -3060,7 +3060,7 @@
     "slice-ansi" "^3.0.0"
     "string-width" "^4.2.0"
 
-"clipboard@^2.0.0":
+"clipboard@^2.0.0", "clipboard@^2.0.6":
   "integrity" "sha512-C+0bbOqkezLIsmWSvlsXS0Q0bmkugu7jcfMIACB+RDEntIzQIkdr148we28AfSloQLRdZlYL/QYyrq05j/3Faw=="
   "resolved" "https://registry.npmjs.org/clipboard/-/clipboard-2.0.11.tgz"
   "version" "2.0.11"
@@ -3895,9 +3895,9 @@
     "d" "^1.0.1"
     "ext" "^1.1.2"
 
-"esbuild-darwin-64@0.15.18":
-  "integrity" "sha512-2WAvs95uPnVJPuYKP0Eqx+Dl/jaYseZEUUT1sjg97TJa4oBtbAKnPnl3b5M9l51/nbx7+QAEtuummJZW0sBEmg=="
-  "resolved" "https://registry.npmjs.org/esbuild-darwin-64/-/esbuild-darwin-64-0.15.18.tgz"
+"esbuild-darwin-arm64@0.15.18":
+  "integrity" "sha512-tKPSxcTJ5OmNb1btVikATJ8NftlyNlc8BVNtyT/UAr62JFOhwHlnoPrhYWz09akBLHI9nElFVfWSTSRsrZiDUA=="
+  "resolved" "https://registry.npmjs.org/esbuild-darwin-arm64/-/esbuild-darwin-arm64-0.15.18.tgz"
   "version" "0.15.18"
 
 "esbuild@^0.15.9":
@@ -8352,6 +8352,13 @@
   "version" "0.3.3"
   dependencies:
     "clipboard" "^2.0.0"
+
+"vue-clipboard3@^2.0.0":
+  "integrity" "sha512-Q9S7dzWGax7LN5iiSPcu/K1GGm2gcBBlYwmMsUc5/16N6w90cbKow3FnPmPs95sungns4yvd9/+JhbAznECS2A=="
+  "resolved" "https://registry.npmjs.org/vue-clipboard3/-/vue-clipboard3-2.0.0.tgz"
+  "version" "2.0.0"
+  dependencies:
+    "clipboard" "^2.0.6"
 
 "vue-demi@*", "vue-demi@^0.13.11":
   "integrity" "sha512-IR8HoEEGM65YY3ZJYAjMlKygDQn25D5ajNFNoKh9RSDMQtlzCxtfQjdQgv9jjK+m3377SsJXY8ysq8kLCZL25A=="

@@ -13,7 +13,7 @@
         "name": "Hexlink",
         "decimals": 18,
         "address": "0x4435605191245cb25ac7000469ca749c196c7750",
-        "logoURI": "/assets/logo/blue-logo.svg"
+        "logoURI": "/src/assets/logo/blue-logo.svg"
     },
     {
         "chainId": 5,

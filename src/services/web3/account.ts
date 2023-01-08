@@ -1,7 +1,7 @@
 import * as ethers from "ethers";
 import { getProvider } from "@/services/web3/network";
 import { HEXLINK } from "@/configs/contract";
-import type { Account } from "@/types";
+import type { Account, Network } from "@/types";
 import { useProfileStore } from "@/stores/profile";
 import { useNetworkStore } from "@/stores/network";
 import { useAuthStore } from "@/stores/auth";
@@ -86,11 +86,11 @@ export function toHex(num: any) {
     return "0x" + val.toString(16);
 }
 
-export async function initProfile() {
+export async function initProfile(network: Network) {
     const store = useProfileStore();
     if (!store.profile || !store.profile.initiated) {
         const account = await buildAccount(useAuthStore().user!.nameHash);
-        const tokens = await initTokenList();;
-        store.init(account, tokens);
+        const tokens = await initTokenList(network);;
+        store.init(network, account, tokens);
     }
 }

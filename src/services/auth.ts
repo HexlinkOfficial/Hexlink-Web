@@ -12,6 +12,7 @@ import { app } from '@/services/firebase'
 import { useAuthStore } from "@/stores/auth"
 import { useProfileStore } from "@/stores/profile"
 import { useWalletStore } from "@/stores/wallet"
+import { useNetworkStore } from "@/stores/network"
 import { genNameHash } from '@/services/web3/account'
 import { initProfile } from "@/services/web3/account"
 
@@ -60,7 +61,7 @@ export async function googleSocialLogin() {
             idToken
         };
         useAuthStore().signIn(user);
-        await initProfile();
+        await initProfile(useNetworkStore().network);
     } catch (error: any) {
         if (error.code == 'auth/popup-closed-by-user') {
             return
@@ -86,7 +87,7 @@ export async function twitterSocialLogin() {
             idToken,
         };
         useAuthStore().signIn(user);
-        await initProfile();
+        await initProfile(useNetworkStore().network);
     } catch (error) {
         console.log(error);
     }

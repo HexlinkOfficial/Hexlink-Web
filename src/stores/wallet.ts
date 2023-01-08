@@ -1,6 +1,6 @@
 import type { NormalizedTokenBalance, Wallet } from "@/types";
 import { defineStore } from 'pinia'
-import { useNetworkStore } from "./network";
+import { useNetworkStore } from "@/stores/network";
 
 type Balances = {[key: string]: NormalizedTokenBalance};
 

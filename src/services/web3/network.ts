@@ -3,10 +3,23 @@ import { ethers } from "ethers";
 import { useWalletStore } from "@/stores/wallet";
 import { useProfileStore } from '@/stores/profile';
 import { Alchemy, Network as AlchemyNetwork } from "alchemy-sdk";
+import { initProfile } from "@/services/web3/account";
+import { updateBalances } from "@/services/web3/tokens";
+import { useViewStore } from '@/stores/view';
+
+async function doSwitch(network: Network) {
+    const profile = useProfileStore();
+    profile.switchNetwork(network);
+    const view = useViewStore();
+    view.setLoading(true);
+    await initProfile();
+    await updateBalances();
+    view.setLoading(false);
+}
 
 export async function switchNetwork(network: Network) {
     if (!useWalletStore().connected || network.chainId == Number(window.ethereum.networkVersion)) {
-        useProfileStore().switchNetwork(network);
+        doSwitch(network);
         return;
     }
 
@@ -16,7 +29,7 @@ export async function switchNetwork(network: Network) {
                 method: 'wallet_switchEthereumChain',
                 params: [{ chainId: ethers.utils.hexValue(network.chainId) }],
             });
-            useProfileStore().switchNetwork(network);
+            doSwitch(network);
         } catch (error: any) {
             if (error.code === 4902) {
                 await window.ethereum.request({
@@ -33,7 +46,7 @@ export async function switchNetwork(network: Network) {
                     method: 'wallet_switchEthereumChain',
                     params: [{ chainId: ethers.utils.hexValue(network.chainId) }],
                 });
-                useProfileStore().switchNetwork(network);
+                doSwitch(network);
             } else {
                 console.log(error);
             }

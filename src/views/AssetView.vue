@@ -465,7 +465,7 @@ svg {
               <div v-if="tokenView" class="token-listDetail">
                 <div class="token-table">
                   <div style="overflow: visible; border-radius: 0.75rem;">
-                    <WalletTokenList :tokens="useProfileStore().visiableTokens" :loading="loading">
+                    <WalletTokenList :tokens="useProfileStore().visiableTokens">
                     </WalletTokenList>
                   </div>
                 </div>
@@ -482,25 +482,18 @@ svg {
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from "vue";
+import { ref, computed } from "vue";
 import Layout from "../components/Layout.vue";
 import WalletTokenList from "../components/WalletTokenList.vue";
 import WalletNFTGrid from "../components/WalletNFTGrid.vue";
 import { useProfileStore } from '@/stores/profile';
 import { BigNumber } from "bignumber.js";
-import { updateBalances } from "@/services/web3/tokens";
 
 const network = useProfileStore().network;
 const profile = useProfileStore().profile;
 const nftView = ref<boolean>(false);
 const tokenView = ref<boolean>(true);
-const loading = ref<boolean>(true);
 const showInfo = ref<boolean>(true);
-
-onMounted(async () => {
-  await updateBalances();
-  loading.value = false;
-});
 
 const blockExplorer = computed(() => {
   const account = profile?.account.address;

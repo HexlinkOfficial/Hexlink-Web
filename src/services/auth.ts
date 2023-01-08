@@ -6,14 +6,14 @@ import {
     signOut,
 } from 'firebase/auth'
 import type { User } from 'firebase/auth'
-import type { IUser, Profile } from "@/types";
+import type { IUser } from "@/types";
 import { getFunctions, httpsCallable } from 'firebase/functions'
 import { app } from '@/services/firebase'
 import { useAuthStore } from "@/stores/auth"
 import { useProfileStore } from "@/stores/profile"
 import { useWalletStore } from "@/stores/wallet"
-import { genNameHash, buildAccount } from '@/services/web3/account'
-import { initTokenList } from "@/services/web3/tokens"
+import { genNameHash } from '@/services/web3/account'
+import { initProfile } from "@/services/web3/account"
 
 const auth = getAuth(app)
 const functions = getFunctions()
@@ -60,7 +60,7 @@ export async function googleSocialLogin() {
             idToken
         };
         useAuthStore().signIn(user);
-        await initAccount(nameHash);
+        await initProfile();
     } catch (error: any) {
         if (error.code == 'auth/popup-closed-by-user') {
             return
@@ -86,7 +86,7 @@ export async function twitterSocialLogin() {
             idToken,
         };
         useAuthStore().signIn(user);
-        await initAccount(nameHash);
+        await initProfile();
     } catch (error) {
         console.log(error);
     }
@@ -97,13 +97,4 @@ export function signOutFirebase() {
     useProfileStore().clear();
     useAuthStore().signOut();
     return signOut(auth);
-}
-
-export async function initAccount(nameHash: string) {
-    const store = useProfileStore();
-    const account = await buildAccount(nameHash);
-    store.setAccount(store.network, account);
-    if (useAuthStore().authenticated) {
-        await initTokenList();
-    }
 }

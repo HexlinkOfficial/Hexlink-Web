@@ -1,23 +1,27 @@
 import * as ethers from "ethers";
 import { getProvider } from "@/services/web3/network";
-import * as config from "@/configs/contract";
+import { HEXLINK } from "@/configs/contract";
 import type { Account } from "@/types";
+import { useProfileStore } from "@/stores/profile";
+import { useAuthStore } from "@/stores/auth";
+import { initTokenList } from "@/services/web3/tokens";
 import HEXLINK_ABI from "@/configs/HexlinkABI.json";
+
+function hexlink() {
+    const network = useProfileStore().network.name;
+    const address = (HEXLINK as any)[network];
+    return new ethers.Contract(
+        address,
+        HEXLINK_ABI,
+        getProvider()
+    );
+}
 
 export function genNameHash(schema: string, name: string) {
     return ethers.utils.keccak256(
         ethers.utils.toUtf8Bytes(`${schema}:${name}`)
     );
 };
-
-export async function addressOfName(nameHash: string) : Promise<string> {
-    const hexlink = new ethers.Contract(
-        config.HEXLINK,
-        HEXLINK_ABI,
-        getProvider()
-    );
-    return await hexlink.addressOfName(nameHash);
-}
 
 export async function isContract(address: string): Promise<boolean> {
     try {
@@ -35,7 +39,7 @@ export async function buildAccountFromAddress(address: string) : Promise<Account
 };
 
 export async function buildAccount(nameHash: string) : Promise<Account> {
-    const address = await addressOfName(nameHash);
+    const address = await hexlink().addressOfName(nameHash);
     return await buildAccountFromAddress(address);
 };
 
@@ -79,4 +83,13 @@ export function truncateAddress(address: string) {
 export function toHex(num: any) {
     const val = Number(num);
     return "0x" + val.toString(16);
+}
+
+export async function initProfile() {
+    const store = useProfileStore();
+    if (!store.profile || !store.profile.initiated) {
+        const account = await buildAccount(useAuthStore().user!.nameHash);
+        const tokens = await initTokenList();;
+        store.init(store.network, account, tokens);
+    }
 }

@@ -31,4 +31,4 @@ export const useAuthStore = defineStore({
             this.returnUrl = returnUrl;
         },
     },
-})
+});

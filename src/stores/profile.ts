@@ -29,16 +29,16 @@ export const useProfileStore = defineStore({
             console.log("Switching to network " + network.chainName);
             this.network = network;
         },
-        setAccount(network: Network, account: Account) {
+        init(
+            network: Network,
+            account: Account,
+            tokens: { [key: string]: Token }
+        ) {
             this.profiles[network.name] = {
                 account,
-                tokenInitiated: false,
-                tokens: {}
+                tokens,
+                initiated: true
             };
-        },
-        setTokens(network: Network, tokens: { [key: string]: Token }) {
-            this.profiles[network.name].tokenInitiated = true;
-            this.profiles[network.name].tokens = tokens;
         },
         addToken(token: Token) {
             const tokenAddr = token.metadata.address.toLowerCase();

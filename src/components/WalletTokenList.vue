@@ -19,7 +19,7 @@
         <!-- <th></th> -->
       </tr>
     </thead>
-    <tbody v-if="!loading">
+    <tbody v-if="!view.loading">
       <tr v-for="(token, i) in props.tokens" :key="i" class="token-detail">
         <td>
           <div class="token-description">
@@ -58,7 +58,7 @@
     </tbody>
   </table>
   <!-- loading -->
-  <div class="loading-class" v-if="loading">
+  <div class="loading-class" v-if="view.loading">
     <div class="load-3">
       <div class="line"></div>
       <div class="line"></div>
@@ -70,11 +70,22 @@
 </template> -->
 
 <script lang="ts" setup>
-import { ref } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import type { Token } from "@/types";
 import { BigNumber } from "bignumber.js";
 import logo from "../assets/network-icons/hexlink.svg";
 import { useProfileStore } from "@/stores/profile";
+import { useViewStore } from "@/stores/view";
+import { updateBalances } from "@/services/web3/tokens";
+
+const currentView = "tokens";
+const view = useViewStore();
+
+onMounted(async () => {
+  view.setView(currentView);
+  await updateBalances();
+  view.setLoading(false);
+});
 
 const isGreen = ref(true);
 
@@ -88,10 +99,6 @@ const props = defineProps({
   balance: {
     type: Object as () => BigNumber,
     required: false,
-  },
-  loading: {
-    type: Object as () => Boolean,
-    required: true,
   }
 });
 

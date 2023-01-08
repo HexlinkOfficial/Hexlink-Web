@@ -70,7 +70,7 @@
                             </div>
                           </div>
                           <div class="token-select">
-                            <div class="mode-dropdown" :class="chooseTotalDrop && 'active'" @click="chooseTotalDrop = !chooseTotalDrop;">
+                            <div class="mode-dropdown" :class="chooseTotalDrop && 'active'" @click.stop="chooseTotalDrop = !chooseTotalDrop;" v-on-click-outside.bubble="chooseTotalHandle">
                               <div class="token-icon">
                                 <img :src="redpacket.token.logo" />
                               </div>
@@ -102,7 +102,7 @@
                   </div>
                   <div class="mode-and-share">
                     <div class="game-mode">
-                      <div class="mode-dropdown" :class="openDropdown && 'active'" @click="openDropdown = !openDropdown;">
+                      <div class="mode-dropdown" :class="openDropdown && 'active'" @click.stop="openDropdown = !openDropdown;" v-on-click-outside.bubble="dropdownHandle">
                         <div class="mode-text">{{ modeLabels[redpacket.mode] }}</div>
                         <input class="mode-input" type="text" placeholder="select" readonly>
                         <div class="mode-options" style="width:100%;">
@@ -134,7 +134,7 @@
                       </p>
                       <div class="total-choose-token">
                         <div class="token-select">
-                          <div class="mode-dropdown" :class="chooseGasDrop && 'active'" @click="chooseGasDrop = !chooseGasDrop;">
+                          <div class="mode-dropdown" :class="chooseGasDrop && 'active'" @click.stop="chooseGasDrop = !chooseGasDrop;" v-on-click-outside.bubble="chooseGasHandle">
                             <div class="token-icon">
                               <img :src="redpacket.gasToken.logo" />
                             </div>
@@ -278,6 +278,9 @@ import { updateBalances } from "@/services/web3/tokens";
 import { useProfileStore } from '@/stores/profile';
 import { BigNumber } from "bignumber.js";
 import { useNetworkStore } from '@/stores/network';
+import type { OnClickOutsideHandler } from '@vueuse/core'
+import { onClickOutside } from '@vueuse/core'
+import { vOnClickOutside } from '@/services/directive';
 
 interface RedPacket {
   mode: "random" | "equal";
@@ -381,6 +384,12 @@ const showAvailableBalance = (hexlinkValue: BigNumber | undefined, externalValue
   // if external is chosen, return hexlinValue + externalValue
   return hexlinkValue;
 }
+const chooseTotalHandle: OnClickOutsideHandler = (event) => {
+  chooseTotalDrop.value = false; }
+const dropdownHandle: OnClickOutsideHandler = (event) => {
+  openDropdown.value = false; }
+const chooseGasHandle: OnClickOutsideHandler = (event) => {
+  chooseGasDrop.value = false; }
 
 const sendLuck = ref<boolean>(false);
 const luckHistory = ref<boolean>(true);
@@ -872,7 +881,7 @@ const accountChosen = ref<number>(0);
   transform: rotate(-45deg);
   right: 10px;
   top: 15px;
-  z-index: 10000;
+  z-index: 45;
   transition: 0.5s;
   pointer-events: none;
 }

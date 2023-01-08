@@ -20,12 +20,12 @@
       </tr>
     </thead>
     <tbody v-if="!view.loading">
-      <tr v-for="(token, i) in props.tokens" :key="i" class="token-detail">
+      <tr v-for="(token, i) in useProfileStore().visiableTokens" :key="i" class="token-detail">
         <td>
           <div class="token-description">
             <div class="token-logo">
               <div class="network-logo">
-                <img :src="network.logoUrl" alt={{token.address}} />
+                <img :src="useNetworkStore().network.logoUrl" alt={{token.address}} />
               </div>
               <img class="logo" :src="token.metadata.logoURI || logo" alt={{token.address}} />
             </div>
@@ -70,11 +70,12 @@
 </template> -->
 
 <script lang="ts" setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import type { Token } from "@/types";
 import { BigNumber } from "bignumber.js";
 import logo from "../assets/network-icons/hexlink.svg";
 import { useProfileStore } from "@/stores/profile";
+import { useNetworkStore } from "@/stores/network";
 import { useViewStore } from "@/stores/view";
 import { updateBalances } from "@/services/web3/tokens";
 
@@ -89,13 +90,7 @@ onMounted(async () => {
 
 const isGreen = ref(true);
 
-const network = useProfileStore().network;
-
 const props = defineProps({
-  tokens: {
-    type: Object as () => Token[],
-    required: true,
-  },
   balance: {
     type: Object as () => BigNumber,
     required: false,

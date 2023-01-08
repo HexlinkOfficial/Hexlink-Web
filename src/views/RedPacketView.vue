@@ -162,7 +162,7 @@
                       <div>
                         <img class="wallet-image" src="https://upload.wikimedia.org/wikipedia/commons/3/36/MetaMask_Fox.svg">
                         <div class="chain_wrapper">
-                          <img class="chain" :src="useProfileStore().network.logoUrl" />
+                          <img class="chain" :src="useNetworkStore().network.logoUrl" />
                         </div>
                       </div>
                     </div>
@@ -195,7 +195,7 @@
                       <div>
                         <img class="wallet-image" src="https://upload.wikimedia.org/wikipedia/commons/3/36/MetaMask_Fox.svg">
                         <div class="chain_wrapper">
-                          <img class="chain" :src="useProfileStore().network.logoUrl" />
+                          <img class="chain" :src="useNetworkStore().network.logoUrl" />
                         </div>
                       </div>
                     </div>
@@ -252,6 +252,7 @@ import { connectWallet, disconnectWallet } from "@/services/web3/wallet";
 import { ethers } from "ethers";
 import { updateBalances } from "@/services/web3/tokens";
 import { useProfileStore } from '@/stores/profile';
+import { useNetworkStore } from '@/stores/network';
 
 interface RedPacket {
   mode: "random" | "equal";

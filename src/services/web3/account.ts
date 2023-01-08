@@ -3,12 +3,13 @@ import { getProvider } from "@/services/web3/network";
 import { HEXLINK } from "@/configs/contract";
 import type { Account } from "@/types";
 import { useProfileStore } from "@/stores/profile";
+import { useNetworkStore } from "@/stores/network";
 import { useAuthStore } from "@/stores/auth";
 import { initTokenList } from "@/services/web3/tokens";
 import HEXLINK_ABI from "@/configs/HexlinkABI.json";
 
 function hexlink() {
-    const network = useProfileStore().network.name;
+    const network = useNetworkStore().network.name;
     const address = (HEXLINK as any)[network];
     return new ethers.Contract(
         address,
@@ -90,6 +91,6 @@ export async function initProfile() {
     if (!store.profile || !store.profile.initiated) {
         const account = await buildAccount(useAuthStore().user!.nameHash);
         const tokens = await initTokenList();;
-        store.init(store.network, account, tokens);
+        store.init(useNetworkStore().network, account, tokens);
     }
 }

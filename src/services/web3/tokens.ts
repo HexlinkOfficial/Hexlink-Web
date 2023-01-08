@@ -18,6 +18,7 @@ import { alchemy, getProvider } from "@/services/web3/network";
 import { useProfileStore } from "@/stores/profile";
 import { ethers } from "ethers";
 import { IERC20_ABI } from "@/configs/contract";
+import { useNetworkStore } from "@/stores/network";
 
 export async function getERC20Metadata(token: string) : Promise<TokenMetadata> {
     const metadata = await alchemy().core.getTokenMetadata(token);
@@ -55,9 +56,8 @@ function normalizeBalance(balance: BigNumber, decimals: number) : NormalizedToke
 }
 
 export async function initTokenList() {
-    const profiles = useProfileStore();
     const auth = useAuthStore();
-    const network = profiles.network;
+    const network = useNetworkStore().network;
     let tokens : { [key: string]: Token } = {};
     const DEFAULT_TOKENS = await getPopularTokens(network);
     DEFAULT_TOKENS.tokens.forEach(t => tokens[t.address.toLowerCase()] = {metadata: t});
@@ -84,7 +84,7 @@ async function updateBalance(token: TokenMetadata) {
     const account = store.profile.account.address;
     try {
         let balance = ethers.BigNumber.from(0);
-        if (token.address == store.nativeCoinAddress) {
+        if (token.address == useNetworkStore().nativeCoinAddress) {
             balance = await provider.getBalance(account);
         } else {
             const contract = new ethers.Contract(token.address, IERC20_ABI, provider);

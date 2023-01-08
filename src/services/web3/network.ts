@@ -6,10 +6,10 @@ import { Alchemy, Network as AlchemyNetwork } from "alchemy-sdk";
 import { initProfile } from "@/services/web3/account";
 import { updateBalances } from "@/services/web3/tokens";
 import { useViewStore } from '@/stores/view';
+import { useNetworkStore } from '@/stores/network';
 
 async function doSwitch(network: Network) {
-    const profile = useProfileStore();
-    profile.switchNetwork(network);
+    useNetworkStore().switchNetwork(network);
     const view = useViewStore();
     view.setLoading(true);
     await initProfile();
@@ -65,7 +65,7 @@ export function alchemyNetwork(network: Network) : AlchemyNetwork {
 }
 
 export function alchemy() {
-    const network = useProfileStore().network;
+    const network = useNetworkStore().network;
     return new Alchemy({
         apiKey: network.alchemy.key,
         network: alchemyNetwork(network)
@@ -73,7 +73,7 @@ export function alchemy() {
 }
 
 export function getProvider() {
-    const network = useProfileStore().network;
+    const network = useNetworkStore().network;
     return new ethers.providers.AlchemyProvider(
         network.chainId,
         network.alchemy.key

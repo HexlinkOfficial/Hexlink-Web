@@ -90,7 +90,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from "vue";
+import { ref, watch, computed } from "vue";
 import { useAuthStore } from '@/stores/auth';
 import {
     insertTokenPreferences,
@@ -101,7 +101,7 @@ import type { Token } from "@/types";
 import * as ethers from "ethers";
 import { isContract, prettyPrintAddress } from '@/services/web3/account';
 import { message } from "ant-design-vue";
-import { useProfileStore } from "@/stores/profile";
+import { useNetworkStore } from "@/stores/network";
 
 const props = defineProps({
     tokens: {
@@ -127,7 +127,8 @@ const showImport = ref<boolean>(false);
 const searchText = ref<string>("");
 const tokenListToShow = ref<Token[]>([]);
 const updatingPreference = ref<{[key: string]: boolean}>({});
-const chain = useProfileStore().network.name;
+
+const chain = computed(() => useNetworkStore().network.name);
 
 watch(
   () => props.tokens,

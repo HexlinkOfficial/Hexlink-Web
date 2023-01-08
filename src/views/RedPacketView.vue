@@ -90,8 +90,10 @@
                                   <div class="token-icon">
                                     <img :src="item.metadata.logoURI"/>
                                   </div>
-                                  <div style="margin-right:0.5rem;">{{ item.balance?.normalized }}</div>
-                                  {{ item.metadata.symbol }}
+                                  <div style="display: flex; flex-direction: column; align-items: flex-start;">
+                                    <b>{{ item.metadata.symbol }}</b>
+                                    <div style="margin-right:0.5rem;">{{ item.balance?.normalized }} available</div>
+                                  </div>
                                 </div>
                               </div>
                             </div>
@@ -124,7 +126,7 @@
                 <div class="token-list gas-station">
                   <div class="enable-switch">
                     <p>Pay service fee for your claimers</p>
-                    <a-switch style="margin-left: 1rem;" v-model:checked="enableGas" />
+                    <a-switch style="margin-left: 1rem; height: 25px; width: 45px;" v-model:checked="enableGas" />
                   </div>
                   <div class="gas-estimation-parent">
                     <div class="gas-estimation">
@@ -146,8 +148,10 @@
                                 <div class="token-icon">
                                   <img :src="item.metadata.logoURI" />
                                 </div>
-                                <div style="margin-right:0.5rem;">{{ item.balance?.normalized }}</div>
-                                {{ item.metadata.symbol }}
+                                <div style="display: flex; flex-direction: column; align-items: flex-start;">
+                                  <b>{{ item.metadata.symbol }}</b>
+                                  <div style="margin-right:0.5rem;">{{ item.balance?.normalized }} available</div>
+                                </div>
                               </div>
                             </div>
                           </div>
@@ -506,7 +510,7 @@ const chooseGasHandle: OnClickOutsideHandler = (event) => {
   text-overflow: ellipsis;
   overflow: hidden;
   color: rgb(7, 16, 27);
-  line-height: 18px;
+  line-height: 20px;
   font-weight: 700;
   margin-left: 4px;
   margin-left: 0.5rem;
@@ -970,14 +974,14 @@ const chooseGasHandle: OnClickOutsideHandler = (event) => {
   border-right: 2px solid rgb(242, 246, 250);
   transform: rotate(-45deg);
   right: 10px;
-  top: 15px;
+  top: 14px;
   z-index: 45;
   transition: 0.5s;
   pointer-events: none;
 }
 
 .mode-dropdown.active::before {
-  top: 22px;
+  top: 19px;
   transform: rotate(-225deg);
 }
 
@@ -1387,6 +1391,7 @@ input[type=number] {
 
 .mode-option {
   display: flex;
+  align-items: center;
   padding: 12px 20px;
   cursor: pointer;
 }
@@ -1523,10 +1528,10 @@ input[type=number] {
 .gas-estimation {
   display: flex;
   // align-items: center;
-
   p {
     margin-bottom: 0rem;
     margin-right: 1rem;
+    font-weight: 500;
   }
 }
 
@@ -1549,7 +1554,8 @@ input[type=number] {
   display: flex;
   align-items: center;
   p {
-    margin-bottom: 0rem; }
+    margin-bottom: 0rem;
+    font-weight: 500; }
   @media (max-width: 768px) {
     width: 100%;
     justify-content: flex-end; } }

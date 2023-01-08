@@ -345,28 +345,26 @@ const redpacket = ref<RedPacket>({
   expiredAt: 0 // do not expire
 });
 
-const mergedTokens = function() : Token[] {
-  const profileTokens = useProfileStore().profile.tokens;
-  const walletTokenBalances = useWalletStore().balances;
-  return Object.values(profileTokens).map(token => {
-    const address = token.metadata.address.toLowerCase();
-    const decimals = token.metadata.decimals;
-    const defaultBalance = new BigNumber(0);
-    const walletBalance = walletTokenBalances[address]?.value || defaultBalance;
-    const profileBalance = profileTokens[address].balance?.value || defaultBalance;
-    const newBalance = walletBalance.plus(profileBalance);
-    return {
-      metadata: token.metadata,
-      balance: normalizeBalance(newBalance, decimals)
-    }
-  }).filter(t => t.balance.value.gt(0));
-}
-
-const updateTokens = function() {
+const genLocalTokens = function() : Token[] {
+  // merge balances
   if (accountChosen.value) {
-    tokens.value = mergedTokens();
+    const profileTokens = useProfileStore().profile.tokens;
+    const walletTokenBalances = useWalletStore().balances;
+    return Object.values(profileTokens).map(token => {
+      const address = token.metadata.address.toLowerCase();
+      const decimals = token.metadata.decimals;
+      const defaultBalance = new BigNumber(0);
+      const walletBalance = walletTokenBalances[address]?.value || defaultBalance;
+      const profileBalance = profileTokens[address].balance?.value || defaultBalance;
+      const newBalance = walletBalance.plus(profileBalance);
+      return {
+        metadata: token.metadata,
+        balance: normalizeBalance(newBalance, decimals)
+      }
+    }).filter(t => t.balance.value.gt(0));
   } else {    
-    tokens.value = useProfileStore().feasibleTokens.map(t => ({
+    // construct new token list so it's not affecting the store
+    return useProfileStore().feasibleTokens.map(t => ({
       metadata: t.metadata,
       balance: normalizeBalance(
         new BigNumber(t.balance?.value || 0),
@@ -376,23 +374,29 @@ const updateTokens = function() {
   }
 }
 
+function defaultToken(token: Token) {
+  return {
+    metadata: token.metadata,
+    balance: normalizeBalance(
+      new BigNumber(0),
+      token.metadata.decimals
+    )
+  };
+}
+
 const refresh = async function() {
   if (useProfileStore().profile?.initiated) {
     await updateProfileBalances();
     if (useWalletStore().connected) {
       await updateWalletBalances();
     }
-    updateTokens();
+    tokens.value = genLocalTokens();
+
+    // set default token
     const nativeCoinAddr = useNetworkStore().nativeCoinAddress;
     const nativeToken = tokens.value.find(
       t => t.metadata.address == nativeCoinAddr
-    ) || {
-      metadata: useProfileStore().nativeToken.metadata,
-      balance: normalizeBalance(
-        new BigNumber(0),
-        useProfileStore().nativeToken.metadata.decimals
-      )
-    };
+    ) || defaultToken(useProfileStore().nativeToken);
     const toSelect = Object.values(tokens.value);
     if (nativeToken.balance?.value.gt(0) || toSelect.length == 0) {
       redpacket.value.token = nativeToken!;
@@ -418,31 +422,27 @@ const chooseAccount = function() {
   } else {
     accountChosen.value = 0;
   }
-  updateTokens();
+  tokens.value = genLocalTokens();
+
+  // reset redpacket token balance
   const token = tokens.value.find(
     t => t.metadata.address == redpacket.value.token.metadata.address
   );
   if (token?.balance) {
     redpacket.value.token.balance = token.balance;
   } else {
-    redpacket.value.token.balance = normalizeBalance(
-      new BigNumber(0),
-      redpacket.value.token.metadata.decimals
-    );
+    redpacket.value.token = defaultToken(redpacket.value.token as Token);
   }
 
+  // reset redpacket gas token balance
   const gasToken = tokens.value.find(
     t => t.metadata.address == redpacket.value.gasToken.metadata.address
   );
   if (gasToken?.balance) {
     redpacket.value.gasToken.balance = gasToken.balance;
   } else {
-    redpacket.value.gasToken.balance = normalizeBalance(
-      new BigNumber(0),
-      redpacket.value.gasToken.metadata.decimals
-    )
+    redpacket.value.gasToken = defaultToken(redpacket.value.gasToken as Token);
   }
-    
 }
 
 const tokenBalance = computed(() => {

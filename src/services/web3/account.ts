@@ -3,18 +3,16 @@ import { getProvider } from "@/services/web3/network";
 import { HEXLINK } from "@/configs/contract";
 import type { Account, Network } from "@/types";
 import { useProfileStore } from "@/stores/profile";
-import { useNetworkStore } from "@/stores/network";
 import { useAuthStore } from "@/stores/auth";
 import { initTokenList } from "@/services/web3/tokens";
 import HEXLINK_ABI from "@/configs/HexlinkABI.json";
 
-function hexlink() {
-    const network = useNetworkStore().network.name;
-    const address = (HEXLINK as any)[network];
+function hexlink(network: Network) {
+    const address = (HEXLINK as any)[network.name];
     return new ethers.Contract(
         address,
         HEXLINK_ABI,
-        getProvider()
+        getProvider(network)
     );
 }
 
@@ -39,8 +37,8 @@ export async function buildAccountFromAddress(address: string) : Promise<Account
     };
 };
 
-export async function buildAccount(nameHash: string) : Promise<Account> {
-    const address = await hexlink().addressOfName(nameHash);
+export async function buildAccount(network: Network, nameHash: string) : Promise<Account> {
+    const address = await hexlink(network).addressOfName(nameHash);
     return await buildAccountFromAddress(address);
 };
 
@@ -88,9 +86,9 @@ export function toHex(num: any) {
 
 export async function initProfile(network: Network) {
     const store = useProfileStore();
-    if (!store.profile || !store.profile.initiated) {
-        const account = await buildAccount(useAuthStore().user!.nameHash);
-        const tokens = await initTokenList(network);;
-        store.init(network, account, tokens);
-    }
+    if (store.profiles[network.name]?.initiated) { return; }
+    const account = await buildAccount(network, useAuthStore().user!.nameHash);
+    const tokens = await initTokenList(network);
+    console.log("initiating");
+    store.init(network, account, tokens);
 }

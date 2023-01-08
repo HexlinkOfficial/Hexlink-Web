@@ -8,17 +8,19 @@ export const useProfileStore = defineStore({
     state: (): {profiles: { [key: string]: Profile }} => ({profiles: {}}),
     persist: true,
     getters: {
-        profile: (state) : Profile => state.profiles[useNetworkStore().network.name],
+        profile: (state) : Profile => state.profiles[
+            useNetworkStore().network.name
+        ],
         nativeToken() : Token {
             const nativeCoin = useNetworkStore().nativeCoinAddress;
-            return this.profile.tokens[nativeCoin];
+            return this.profile?.tokens[nativeCoin];
         },
         balance() {
             return (
                 address: string
             ) : NormalizedTokenBalance | undefined => this.profile?.tokens[
                 address.toLowerCase()
-            ].balance;
+            ]?.balance;
         },
         visiableTokens() : Token[] {
             return Object.values(

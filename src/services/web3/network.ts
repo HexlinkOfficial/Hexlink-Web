@@ -72,8 +72,8 @@ export function alchemy() {
     });
 }
 
-export function getProvider() {
-    const network = useNetworkStore().network;
+export function getProvider(network?: Network) {
+    network = network || useNetworkStore().network;
     return new ethers.providers.AlchemyProvider(
         network.chainId,
         network.alchemy.key

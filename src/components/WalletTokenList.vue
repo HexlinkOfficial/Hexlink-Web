@@ -76,12 +76,15 @@ import { updateProfileBalances } from "@/services/web3/tokens";
 const loading = ref<boolean>(true);
 
 onMounted(async () => {
-  await updateProfileBalances();
+  if (useProfileStore().profile?.initiated) {
+    await updateProfileBalances();
+  }
   loading.value = false;
 });
 
 watch(() => useNetworkStore().network, async function() {
   loading.value = true;
+  console.log(useProfileStore().profile);
   await updateProfileBalances();
   loading.value = false;
 });

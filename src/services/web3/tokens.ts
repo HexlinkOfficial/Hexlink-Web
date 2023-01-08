@@ -73,7 +73,7 @@ export async function initTokenList(network: Network) {
 
 export async function updateProfileBalances() {
     const store = useProfileStore();
-    const account = store.profile.account.address;
+    const account = store.profile?.account.address;
     await updateBalances(
         account,
         (address) => store.balance(address),
@@ -101,10 +101,10 @@ async function updateBalances(
     getPrevBalance: (tokenAddr: string) => NormalizedTokenBalance | undefined,
     update: (tokenAddr: string, balance: NormalizedTokenBalance) => void,
 ) : Promise<void> {
-    const profile = useProfileStore();
-    const tokens = Object.values(profile.profile.tokens || []);
+    const profile = useProfileStore().profile;
+    const tokens = Object.values(profile.tokens || []);
     const nativeCoin = useNetworkStore().nativeCoinAddress;
-    const decimals = profile.profile.tokens[nativeCoin].metadata.decimals;
+    const decimals = profile.tokens[nativeCoin].metadata.decimals;
     let balance = getPrevBalance(nativeCoin) || normalizeBalance(new BigNumber(0), decimals);
     try {
         const nativeCoinBalance = await getProvider().getBalance(account);
@@ -122,7 +122,7 @@ async function updateBalances(
     ).filter(addr => addr != nativeCoin);
     const result = await alchemy().core.getTokenBalances(account, erc20s);
     result.tokenBalances.map((b, i) => {
-        const decimals = profile.profile.tokens[
+        const decimals = profile.tokens[
             b.contractAddress.toLowerCase()
         ].metadata.decimals;
         let balance = getPrevBalance(

@@ -193,7 +193,7 @@
                                 <span>Click to Copy</span>
                               </template>
                               <span class="balance_item">
-                                <p @click="copy(String(redpacket.token.balance?.normalized))" style="font-weight:600;">{{ redpacket.token.balance?.normalized }}</p>
+                                <p @click="copy(String(tokenBalance?.normalized))" style="font-weight:600;">{{ tokenBalance?.normalized }}</p>
                               </span>
                             </a-tooltip>
                             <img style="width:20px; height: 20px; margin-left: 5px; margin-right: 5px;" :src="redpacket.token.metadata.logoURI" />
@@ -206,7 +206,7 @@
                                 <span>Click to Copy</span>
                               </template>
                               <span class="balance_item">
-                                <p @click="copy(String(redpacket.gasToken.balance?.normalized))" style="font-weight:600;">{{ redpacket.gasToken.balance?.normalized }}</p>
+                                <p @click="copy(String(gasTokenBalance?.normalized))" style="font-weight:600;">{{ gasTokenBalance?.normalized }}</p>
                               </span>
                             </a-tooltip>
                             <img style="width:20px; height: 20px; margin-left: 5px; margin-right: 5px;" :src="redpacket.gasToken.metadata.logoURI" />
@@ -333,18 +333,19 @@ const modal = ref<boolean>(false);
 const modalRef = ref<any>(null);
 
 const { toClipboard } = useClipboard()
+const nativeToken = useProfileStore().nativeToken;
 
 const tokens = ref<Token[]>([]);
 const redpacket = ref<RedPacket>({
   mode: "random",
   split: 0,
   balance: BigNumber(0),
-  token: useProfileStore().nativeToken,
-  gasToken: useProfileStore().nativeToken,
+  token: nativeToken,
+  gasToken: nativeToken,
   expiredAt: 0 // do not expire
 });
 
-const mergedTokens = function() {
+const mergedTokens = function() : Token[] {
   const profileTokens = useProfileStore().profile.tokens;
   const walletTokenBalances = useWalletStore().balances;
   return Object.values(profileTokens).map(token => {
@@ -358,40 +359,103 @@ const mergedTokens = function() {
       metadata: token.metadata,
       balance: normalizeBalance(newBalance, decimals)
     }
-  }).filter(token => token.balance.value.gt(0));
+  }).filter(t => t.balance.value.gt(0));
+}
+
+const updateTokens = function() {
+  if (accountChosen.value) {
+    tokens.value = mergedTokens();
+  } else {    
+    tokens.value = useProfileStore().feasibleTokens.map(t => ({
+      metadata: t.metadata,
+      balance: normalizeBalance(
+        new BigNumber(t.balance?.value || 0),
+        t.metadata.decimals
+      )
+    }))
+  }
 }
 
 const refresh = async function() {
-  await updateProfileBalances();
-  tokens.value = useProfileStore().feasibleTokens;
-  if (useWalletStore().connected) {
-    await updateWalletBalances();
-    if (accountChosen.value) {
-      tokens.value = mergedTokens();
-      console.log(tokens);
+  if (useProfileStore().profile?.initiated) {
+    await updateProfileBalances();
+    if (useWalletStore().connected) {
+      await updateWalletBalances();
+    }
+    updateTokens();
+    const nativeCoinAddr = useNetworkStore().nativeCoinAddress;
+    const nativeToken = tokens.value.find(
+      t => t.metadata.address == nativeCoinAddr
+    ) || {
+      metadata: useProfileStore().nativeToken.metadata,
+      balance: normalizeBalance(
+        new BigNumber(0),
+        useProfileStore().nativeToken.metadata.decimals
+      )
+    };
+    const toSelect = Object.values(tokens.value);
+    if (nativeToken.balance?.value.gt(0) || toSelect.length == 0) {
+      redpacket.value.token = nativeToken!;
+      redpacket.value.gasToken = nativeToken!;
+    } else {
+      redpacket.value.token = toSelect[0];
+      redpacket.value.gasToken = toSelect[0];
     }
   }
+}
 
-  const nativeToken = useProfileStore().nativeToken;
-  const toSelect = Object.values(tokens.value);
-  if (nativeToken.balance?.value.gt(0) || toSelect.length == 0) {
-    redpacket.value.token = nativeToken;
-    redpacket.value.gasToken = nativeToken;
+const tokenChoose = (mode: "token" | "gas", token: Token) => {
+  if (mode === "token") {
+    redpacket.value.token = token;
   } else {
-    redpacket.value.token = toSelect[0];
-    redpacket.value.gasToken = toSelect[0];
+    redpacket.value.gasToken = token;
   }
 }
 
 const chooseAccount = function() {
   if (accountChosen.value == 0) {
     accountChosen.value = 1;
-    tokens.value = mergedTokens();
   } else {
     accountChosen.value = 0;
-    tokens.value = useProfileStore().feasibleTokens;
   }
+  updateTokens();
+  const token = tokens.value.find(
+    t => t.metadata.address == redpacket.value.token.metadata.address
+  );
+  if (token?.balance) {
+    redpacket.value.token.balance = token.balance;
+  } else {
+    redpacket.value.token.balance = normalizeBalance(
+      new BigNumber(0),
+      redpacket.value.token.metadata.decimals
+    );
+  }
+
+  const gasToken = tokens.value.find(
+    t => t.metadata.address == redpacket.value.gasToken.metadata.address
+  );
+  if (gasToken?.balance) {
+    redpacket.value.gasToken.balance = gasToken.balance;
+  } else {
+    redpacket.value.gasToken.balance = normalizeBalance(
+      new BigNumber(0),
+      redpacket.value.gasToken.metadata.decimals
+    )
+  }
+    
 }
+
+const tokenBalance = computed(() => {
+  return useProfileStore().balance(
+    redpacket.value.token.metadata.address.toLowerCase()
+  );
+});
+
+const gasTokenBalance = computed(() => {
+  return useProfileStore().balance(
+    redpacket.value.gasToken.metadata.address.toLowerCase()
+  );
+});
 
 const eoaTokenBalance = computed(() => {
   return useWalletStore().balance(
@@ -436,15 +500,6 @@ const modes = ["random", "equal", "what"];
 
 const modeChoose = (gameMode: "random" | "equal") => {
   redpacket.value.mode = gameMode;
-  console.log(useWalletStore().balanceMap);
-}
-
-const tokenChoose = (mode: "token" | "gas", token: Token) => {
-  if (mode === "token") {
-    redpacket.value.token = token;
-  } else {
-    redpacket.value.gasToken = token;
-  }
 }
 
 const createRedPacket = async function () {

@@ -1,0 +1,14 @@
+{
+  "goerli": {
+    "hexlink": "0xbad6a7948a1d3031ee7236d0180b6271fa569148",
+    "hexlinkHelper": "0x8797C40E4f4cdCb975ee168B29d3270B5026fFCE",
+    "gasStation": "0x8142D70dD9DB8Be87e0C01717147a0648FA92784",
+    "redPacket": "0x3770F194d37342fD6632256272B5a39Dcf7Fe9b6"
+  },
+  "mumbai": {
+    "hexlink": "0x78317ef8b020Fe10e845ab8723403cF1e58Ef1Cc",
+    "hexlinkHelper": "0xE1E06DB27dBb48Fd56B71135299386815f391Db1",
+    "gasStation": "0x495Dd646e05fde8D950D3b54E1959Ab7D5103652",
+    "redPacket": "0x50Ff471A60aE593AA0bD14c1475FC2878a3331B5"
+  }
+}

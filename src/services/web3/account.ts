@@ -1,25 +1,13 @@
-import * as ethers from "ethers";
-import { getProvider } from "@/services/web3/network";
-import { HEXLINK } from "@/configs/contract";
 import type { Account, Network } from "@/types";
 import { useProfileStore } from "@/stores/profile";
 import { useAuthStore } from "@/stores/auth";
 import { initTokenList } from "@/services/web3/tokens";
-import HEXLINK_ABI from "@/configs/HexlinkABI.json";
-
-function hexlink(network: Network) {
-    const address = (HEXLINK as any)[network.name];
-    return new ethers.Contract(
-        address,
-        HEXLINK_ABI,
-        getProvider(network)
-    );
-}
+import { hexlink } from "@/services/web3/hexlink";
+import { getProvider } from "@/services/web3/network";
+import { hash } from "@/services/web3/utils";
 
 export function genNameHash(schema: string, name: string) {
-    return ethers.utils.keccak256(
-        ethers.utils.toUtf8Bytes(`${schema}:${name}`)
-    );
+    return hash(`${schema}:${name}`);
 };
 
 export async function isContract(address: string): Promise<boolean> {
@@ -28,7 +16,7 @@ export async function isContract(address: string): Promise<boolean> {
         if (code !== '0x') return true;
     } catch (error) { }
     return false;
-}
+  }
 
 export async function buildAccountFromAddress(address: string) : Promise<Account> {
     return {

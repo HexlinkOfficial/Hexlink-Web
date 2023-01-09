@@ -33,6 +33,8 @@ export interface Wallet {
 // generate address otherwise use handle
 export interface IUser {
     provider: string,
+    identityType: string,
+    authType: string,
     uid: string,
     providerUid: string,
     handle: string,
@@ -135,4 +137,13 @@ export interface CreatedRedPacket {
         txCost: BigNumber;
     },
     claimHistory: Claim[]
+}
+
+export interface AuthProof {
+    name: string,
+    requestId: string,
+    authType: string, // non-hashed
+    identityType: string, // non-hashed
+    issuedAt: number, // timestamp
+    signatures: string // encoded with validator address
 }

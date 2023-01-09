@@ -51,7 +51,9 @@ export async function googleSocialLogin() {
         const idToken = await getIdTokenAndSetClaimsIfNecessary(result.user)
         const nameHash = genNameHash("mailto", result.user.email!);
         const user : IUser = {
-            provider: "google",
+            provider: "google.com",
+            identityType: "email",
+            authType: "oauth",
             uid: result.user.uid,
             providerUid: result.user.uid, // TODO: ensure this is google uid
             handle: result.user.email!,
@@ -78,6 +80,8 @@ export async function twitterSocialLogin() {
         const nameHash = genNameHash("twitter.com", providerUid);
         const user : IUser = {
             provider: "twitter.com",
+            identityType: "twitter.com",
+            authType: "oauth",
             uid: result.user.uid,
             providerUid,
             handle: result.user.reloadUserInfo.screenName,

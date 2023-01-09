@@ -151,7 +151,7 @@
                           </div>
                         </div>
                       </div>
-                      <div class="tooltip fade" data-title="Hypertext Markup Language">
+                      <div class="tooltip fade" data-title="Service gas fee is determined by the market, not Hexlink">
                         <svg style="margin-left: 1rem; width: 16px;" width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
                           <path
                             d="M11 21C16.5228 21 21 16.5228 21 11C21 5.47715 16.5228 1 11 1C5.47715 1 1 5.47715 1 11C1 16.5228 5.47715 21 11 21Z"
@@ -1122,7 +1122,7 @@ const copy = async (text: string) => {
   transform: rotate(-45deg);
   right: 10px;
   top: 14px;
-  z-index: 45;
+  z-index: 0;
   transition: 0.5s;
   pointer-events: none;
 }

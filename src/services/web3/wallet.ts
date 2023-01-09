@@ -58,3 +58,11 @@ export async function connectWallet() {
   } as Wallet);
   await updateWalletBalances();
 }
+
+export async function signMessage(account: string, message: string) {
+  await window.ethereum.request({
+      method: 'eth_signTypedData_v4',
+      params: [{ account, message }],
+      from: account
+  });
+}

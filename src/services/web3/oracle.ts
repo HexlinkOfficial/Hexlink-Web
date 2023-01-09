@@ -30,22 +30,26 @@ const genRequestId = async function(
 
 export async function genDeployAuthProof(
     network: Network
-) {
+) : Promise<{ initData: string, proof: AuthProof }> {
     const wallet = useWalletStore();
     if (!wallet.connected) {
         throw new Error("Not connected");
     }
 
     const accountIface = new ethers.utils.Interface(ACCOUNT_ABI);
-    const data = accountIface.encodeFunctionData(
+    const initData = accountIface.encodeFunctionData(
         "init", [wallet.wallet!.account.address]
     );
     const hexlinkIface = new ethers.utils.Interface(HEXLINK_ABI);
     const requestId = await genRequestId(
         network,
         hexlinkIface.getSighash("deploy"),
-        data
+        initData
     );
-    const genAuthProof = httpsCallable(functions, 'genAuthProof')
-    //return await genAuthProof(requestId);
+    const genAuthProof = httpsCallable(functions, 'genTwitterOAuthProof');
+    const result = await genAuthProof({requestId});
+    return {
+        initData,
+        proof: result.data as AuthProof
+    };
 }

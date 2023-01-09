@@ -190,10 +190,16 @@
                           <span style="display: flex; align-items: center; margin-bottom: 5px;">
                             <a-tooltip placement="top">
                               <template #title>
-                                <span>Click to Copy</span>
+                                <span>
+                                  Balance: 
+                                  <b>{{ tokenBalance?.normalized }}</b> 
+                                  <copy-outlined style="margin-left: 0.5rem; margin-right: 0.5rem;" @click="copy(String(tokenBalance?.normalized))"/>
+                                </span>
                               </template>
                               <span class="balance_item">
-                                <p @click="copy(String(tokenBalance?.normalized))" style="font-weight:600;">{{ tokenBalance?.normalized }}</p>
+                                <p style="font-weight:600; display: flex; justify-content: flex-end;">
+                                  {{ tokenBalance?.normalized.toString().substring(0,6) }}
+                                </p>
                               </span>
                             </a-tooltip>
                             <img style="width:20px; height: 20px; margin-left: 5px; margin-right: 5px;" :src="redpacket.token.metadata.logoURI" />
@@ -203,10 +209,16 @@
                           <span v-if="showGasToken()" style="display: flex; align-items: center;">
                             <a-tooltip placement="bottom">
                               <template #title>
-                                <span>Click to Copy</span>
+                                <span>
+                                  Balance: 
+                                  <b>{{ gasTokenBalance?.normalized }}</b>
+                                  <copy-outlined style="margin-left: 0.5rem; margin-right: 0.5rem;" @click="copy(String(gasTokenBalance?.normalized))" />
+                                </span>
                               </template>
                               <span class="balance_item">
-                                <p @click="copy(String(gasTokenBalance?.normalized))" style="font-weight:600;">{{ gasTokenBalance?.normalized }}</p>
+                                <p style="font-weight:600; display: flex; justify-content: flex-end;">
+                                  {{ gasTokenBalance?.normalized.toString().substring(0, 6) }}
+                                </p>
                               </span>
                             </a-tooltip>
                             <img style="width:20px; height: 20px; margin-left: 5px; margin-right: 5px;" :src="redpacket.gasToken.metadata.logoURI" />
@@ -242,11 +254,16 @@
                           <span style="display: flex; align-items: center; margin-bottom: 5px;">
                             <a-tooltip placement="top">
                               <template #title>
-                                <span>Click to Copy</span>
+                                <span>
+                                  Balance: 
+                                  <b>{{ eoaTokenBalance?.normalized }}</b>
+                                  <copy-outlined style="margin-left: 0.5rem; margin-right: 0.5rem;" @click="copy(String(eoaTokenBalance?.normalized))" />
+                                </span>
                               </template>
-                              <span class="balance_item" data-title="Hypertext Markup Language">
-                                <p @click="copy(String(eoaTokenBalance?.normalized))" style="font-weight:600;">{{
-                                  eoaTokenBalance?.normalized }}</p>
+                              <span class="balance_item">
+                                <p style="font-weight:600; display: flex; justify-content: flex-end;">
+                                  {{ eoaTokenBalance?.normalized.toString().substring(0, 6) }}
+                                </p>
                               </span>
                             </a-tooltip>
                             <img style="width:20px; height: 20px; margin-left: 5px; margin-right: 5px;" :src="redpacket.token.metadata.logoURI" />
@@ -256,11 +273,16 @@
                           <span v-if="showGasToken()" style="display: flex; align-items: center;">
                             <a-tooltip placement="bottom">
                               <template #title>
-                                <span>Click to Copy</span>
+                                <span>
+                                  Balance: 
+                                  <b>{{ eoaGasTokenBalance?.normalized }}</b>
+                                  <copy-outlined style="margin-left: 0.5rem; margin-right: 0.5rem;" @click="copy(String(eoaGasTokenBalance?.normalized))" />
+                                </span>
                               </template>
                               <span class="balance_item">
-                                <p @click="copy(String(eoaGasTokenBalance?.normalized))" style="font-weight:600;">{{
-                                  eoaGasTokenBalance?.normalized }}</p>
+                                <p style="font-weight:600; display: flex; justify-content: flex-end;">
+                                  {{eoaGasTokenBalance?.normalized.toString().substring(0,6) }}
+                                </p>
                               </span>
                             </a-tooltip>
                             <img style="width:20px; height: 20px; margin-left: 5px; margin-right: 5px;" :src="redpacket.gasToken.metadata.logoURI" />
@@ -312,6 +334,7 @@ import type { Token } from "@/types";
 import useClipboard from 'vue-clipboard3';
 import { createToaster } from "@meforma/vue-toaster";
 import { normalizeBalance } from '@/services/web3/tokens';
+import { CopyOutlined } from '@ant-design/icons-vue';
 
 interface RedPacket {
   mode: "random" | "equal";
@@ -682,7 +705,8 @@ const copy = async (text: string) => {
 .left {
   display: flex;
   align-items: center;
-  margin-right: 0.5rem; }
+  margin-right: 0.5rem;
+  margin-top: 10px; }
 .right {
   display: flex;
   align-items: center;
@@ -693,16 +717,15 @@ const copy = async (text: string) => {
   p {
     font-size: 12px;
     color: black;
-    margin-bottom: 0.5rem; }
+    margin-bottom: 0rem; }
   .balances {
     display: flex;
-    flex-direction: column;
-    margin-left: 0.8rem; } }
+    flex-direction: column; } }
 .balance_item {
-  width: 4.5rem;
+  width: 4rem;
   overflow: auto;
   white-space: nowrap;
-  padding-left: 10px;
+  // padding-left: 10px;
   line-height: 30px;
 
   p {

@@ -9,14 +9,6 @@
     },
     {
         "chainId": 5,
-        "symbol": "HEXL",
-        "name": "Hexlink",
-        "decimals": 18,
-        "address": "0x4435605191245cb25ac7000469ca749c196c7750",
-        "logoURI": "/src/assets/logo/blue-logo.svg"
-    },
-    {
-        "chainId": 5,
         "symbol": "USDC",
         "name": "USD Coin",
         "decimals": 18,

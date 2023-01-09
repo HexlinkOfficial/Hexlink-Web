@@ -1,6 +1,7 @@
 import type { Network, TokenDataList } from "@/types";
-import GOERLI_TOKENS from "@/configs/tokens/GOERLI_TOKENS.json"
-import MUMBAI_TOKENS from "@/configs/tokens/MUMBAI_TOKENS.json"
+import GOERLI_TOKENS from "@/configs/tokens/GOERLI_TOKENS.json";
+import MUMBAI_TOKENS from "@/configs/tokens/MUMBAI_TOKENS.json";
+import POLYGON_TOEKNS from"@/configs/tokens/POLYGON_TOKENS.json";
 
 const POLYGON_POPULAR_TOKENS = "https://api-polygon-tokens.polygon.technology/tokenlists/popularTokens.tokenlist.json";
 
@@ -13,8 +14,12 @@ export function nativeCoinAddress(network: Network) {
 
 export async function getPopularTokens(network: Network) : Promise<TokenDataList> {
     if (network.chainId == 137) {
-        const response = await fetch(POLYGON_POPULAR_TOKENS);
-        return await response.json();
+        // const response = await fetch(POLYGON_POPULAR_TOKENS);
+        // return await response.json();
+        return {
+            timestamp: new Date().toISOString(),
+            tokens: POLYGON_TOEKNS,
+        }
     }
     if (network.chainId == 5) {
         return {

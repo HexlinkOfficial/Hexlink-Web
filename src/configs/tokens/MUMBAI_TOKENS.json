@@ -9,14 +9,6 @@
     },
     {
         "chainId": 80001,
-        "symbol": "HEXL",
-        "name": "Hexlink",
-        "decimals": 18,
-        "address": "0x38e80061511D6F43c89FfDF883Ca679eae47279E",
-        "logoURI": "/src/assets/logo/blue-logo.svg"
-    },
-    {
-        "chainId": 80001,
         "symbol": "WMATIC",
         "name": "Wrapped MATIC",
         "decimals": 18,

@@ -128,7 +128,13 @@
                     <div class="gas-estimation">
                       <p>
                         <img style="width: 20px; height: 20px;" src="https://i.postimg.cc/RhXfgJR1/gas-pump.png"/>
-                        Service Fee: <b>{{ estimateGas }}</b>
+                        Service Fee: 
+                        <a-tooltip placement="top">
+                          <template #title>
+                            <span>Service Fee: <b>{{ estimateGas }}</b></span>
+                          </template>
+                          <b>{{ estimateGas?.substring(0,6) }}</b>
+                        </a-tooltip>
                       </p>
                       <div class="total-choose-token">
                         <div class="token-select">
@@ -164,6 +170,11 @@
                       </div>
                       
                     </div>
+                  </div>
+                </div>
+                <div v-if="enableGas" class="gas-sponsor-warning">
+                  <div class="alert alert--error">
+                    <p> <strong>Warning!</strong> You are going to pay service fee for your claimers. Please maintain XXXX WETH in your balance.</p>
                   </div>
                 </div>
                 <div class="choose-account">
@@ -467,13 +478,10 @@ const tokenChoose =
     } else {
       redpacket.value.gasToken = token;
     }
-    estimateGas.value = await EstimateGas(EthBigNumber.from(100000), token, 1)
-    console.log(estimateGas.value);
 };
 
 const calcGas = async () => {
   estimateGas.value = await EstimateGas(EthBigNumber.from(100000), redpacket.value.gasToken as Token, 1)
-  console.log(estimateGas.value);
 }
 
 const chooseAccount = function() {
@@ -614,6 +622,36 @@ const copy = async (text: string) => {
 </script>
 
 <style lang="less" scoped>
+.alert {
+  padding: 10px 35px 10px 14px;
+  background-color: #eee;
+  border-radius: 8px;
+  position: relative;
+  margin: 10px 0;
+  .close {
+    position: absolute;
+    border: 0;
+    top: 2px;
+    right: 2px;
+    background: none;
+    color: inherit;
+    color: #000;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    wdith: 20px;
+    height: 20px;
+    &:active,
+    &:focus {
+      outline: 0; } }
+  p {
+    margin: 0;} }
+.alert--error {
+  background: #ffefc6;
+  border-color: #e5c073;
+  color: #795d27; }
+.gas-sponsor-warning {
+  margin: 16px; }
 .tooltip {
   position: relative; }
 .tooltip:before,

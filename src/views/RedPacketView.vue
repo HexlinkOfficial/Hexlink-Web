@@ -126,7 +126,7 @@
                     <div class="gas-estimation">
                       <p>
                         <img style="width: 20px; height: 20px;" src="https://i.postimg.cc/RhXfgJR1/gas-pump.png"/>
-                        Service Fee: XXXXXX
+                        Service Fee: <b>{{ estimateGas }}</b>
                       </p>
                       <div class="total-choose-token">
                         <div class="token-select">
@@ -335,6 +335,8 @@ import useClipboard from 'vue-clipboard3';
 import { createToaster } from "@meforma/vue-toaster";
 import { normalizeBalance } from '@/services/web3/tokens';
 import { CopyOutlined } from '@ant-design/icons-vue';
+import { EstimateGas } from "@/services/web3/gas";
+import { BigNumber as EthBigNumber} from "ethers";
 
 interface RedPacket {
   mode: "random" | "equal";
@@ -354,6 +356,7 @@ const enableGas = ref<boolean>(false);
 const accountChosen = ref<number>(0);
 const modal = ref<boolean>(false);
 const modalRef = ref<any>(null);
+const estimateGas = ref<string | undefined>("0");
 
 const { toClipboard } = useClipboard()
 const nativeToken = useProfileStore().nativeToken;
@@ -431,12 +434,20 @@ const refresh = async function() {
   }
 }
 
-const tokenChoose = (mode: "token" | "gas", token: Token) => {
-  if (mode === "token") {
-    redpacket.value.token = token;
-  } else {
-    redpacket.value.gasToken = token;
-  }
+const tokenChoose = 
+  async (mode: "token" | "gas", token: Token) => {
+    if (mode === "token") {
+      redpacket.value.token = token;
+    } else {
+      redpacket.value.gasToken = token;
+    }
+    estimateGas.value = await EstimateGas(EthBigNumber.from(100000), token, 1)
+    console.log(estimateGas.value);
+};
+
+const calcGas = async () => {
+  estimateGas.value = await EstimateGas(EthBigNumber.from(100000), redpacket.value.gasToken as Token, 1)
+  console.log(estimateGas.value);
 }
 
 const chooseAccount = function() {
@@ -495,6 +506,10 @@ const eoaGasTokenBalance = computed(() => {
 onMounted(refresh);
 watch(() => useNetworkStore().network, refresh);
 
+onMounted(() => {
+  setInterval(calcGas, 5000);
+})
+
 onClickOutside(
   modalRef,
   (event) => {
@@ -521,7 +536,7 @@ const modeLabels = {
 
 const modes = ["random", "equal", "what"];
 
-const modeChoose = (gameMode: "random" | "equal") => {
+const modeChoose = async (gameMode: "random" | "equal") => {
   redpacket.value.mode = gameMode;
 }
 

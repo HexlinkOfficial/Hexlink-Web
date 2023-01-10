@@ -1,6 +1,4 @@
 <template>
-  <!-- <a-list>
-<template #renderItem="{ item }"> -->
   <table>
     <thead class="table-thread">
       <tr>
@@ -16,18 +14,17 @@
         <th class="balance-header">
           <div class="balance-header-data">Balance</div>
         </th>
-        <!-- <th></th> -->
       </tr>
     </thead>
     <tbody v-if="!loading">
-      <tr v-for="(token, i) in props.tokens" :key="i" class="token-detail">
+      <tr v-for="(token, i) in useProfileStore().visiableTokens" :key="i" class="token-detail">
         <td>
           <div class="token-description">
             <div class="token-logo">
               <div class="network-logo">
-                <img :src="token.metadata.logo || 'https://token.metaswap.codefi.network/assets/networkLogos/ethereum.svg'" alt={{token.address}} />
+                <img :src="useNetworkStore().network.logoUrl" alt={{token.address}} />
               </div>
-              <img class="logo" :src="token.metadata.logo || logo" alt={{token.address}} />
+              <img class="logo" :src="token.metadata.logoURI || logo" alt={{token.address}} />
             </div>
             <div class="token-name">
               <div class="name">
@@ -40,19 +37,18 @@
           </div>
         </td>
         <td class="portfolio-percentage-detail">
-          <div>{{ balance > 0 ? (token.balance?.normalized.times(token.price || 0) / balance) : 0}} %</div>
+          <div>{{ getPortfolioRatio(token) }} %</div>
         </td>
         <td class="price-detail">
           <div class="detail">
-            <div class="token-market-price">$ {{token.price ? token.price : 0}}</div>
+            <div class="token-market-price">$ {{ token.price || 0 }}</div>
             <p v-if="token.price" :class='isGreen ? "token-price-change-positive" : "token-price-change-negative"'>+2.64%</p>
           </div>
         </td>
         <td class="balance-detail">
           <div class="detail">
-            <div class="balance">$ {{token.balance?.normalized.times(token.price || 0).toString() || 0}}</div>
+            <div class="balance">$ {{ usdValue(token) }}</div>
             <p class="crypto-balance">{{token.balance?.normalized || 0}} {{token.metadata.symbol}}</p>
-            <!-- <button id="gettingStarted" @click="() => { $el.ownerDocument.defaultView.console.log(props.tokens) }">Getting started</button> -->
           </div>
         </td>
       </tr>
@@ -67,8 +63,54 @@
     </div>
   </div>
 </template>
-  <!-- </a-list>
-</template> -->
+
+<script lang="ts" setup>
+import { ref, onMounted, watch } from 'vue'
+import type { Token } from "@/types";
+import { BigNumber } from "bignumber.js";
+import logo from "../assets/network-icons/hexlink.svg";
+import { useProfileStore } from "@/stores/profile";
+import { useNetworkStore } from "@/stores/network";
+import { updateProfileBalances } from "@/services/web3/tokens";
+
+const loading = ref<boolean>(true);
+
+onMounted(async () => {
+  if (useProfileStore().profile?.initiated) {
+    await updateProfileBalances();
+  }
+  loading.value = false;
+});
+
+watch(() => useNetworkStore().network, async function() {
+  loading.value = true;
+  await updateProfileBalances();
+  loading.value = false;
+});
+
+const isGreen = ref(true);
+
+const props = defineProps({
+  balance: {
+    type: Object as () => BigNumber,
+    required: false,
+  }
+});
+
+const usdValue = (token: Token) : BigNumber => {
+  if (token.balance && token.price) {
+    return token.balance.normalized.times(token.price);
+  }
+  return new BigNumber(0);
+};
+
+const getPortfolioRatio = (token: Token) => {
+  if (props.balance?.gt(0)) {
+    return usdValue(token).times(100).div(props.balance);
+  }
+  return 0;
+};
+</script>
 
 <style lang="less" scoped>
 img {
@@ -271,27 +313,3 @@ tbody tr {
   justify-content: center;
   padding: 30px; }
 </style>
-
-<script lang="ts" setup>
-import { ref } from 'vue'
-import type { Token } from "@/services/web3/tokens";
-import { BigNumber } from "bignumber.js";
-import logo from "../assets/network-icons/hexlink.svg";
-
-const isGreen = ref(true);
-
-const props = defineProps({
-  tokens: {
-    type: Object as () => Token[],
-    required: true,
-  },
-  balance: {
-    type: Object as () => BigNumber,
-    required: false,
-  },
-  loading: {
-    type: Object as () => Boolean,
-    required: true,
-  }
-});
-</script>

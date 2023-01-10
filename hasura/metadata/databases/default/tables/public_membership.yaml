@@ -1,0 +1,3 @@
+table:
+  name: membership
+  schema: public

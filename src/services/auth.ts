@@ -2,16 +2,19 @@ import {
     getAuth,
     GoogleAuthProvider,
     TwitterAuthProvider,
-    GithubAuthProvider,
-    FacebookAuthProvider,
     signInWithPopup,
     signOut,
 } from 'firebase/auth'
 import type { User } from 'firebase/auth'
+import type { IUser } from "@/types";
 import { getFunctions, httpsCallable } from 'firebase/functions'
 import { app } from '@/services/firebase'
 import { useAuthStore } from "@/stores/auth"
-import { accountAddress } from '@/services/web3/account'
+import { useProfileStore } from "@/stores/profile"
+import { useWalletStore } from "@/stores/wallet"
+import { useNetworkStore } from "@/stores/network"
+import { genNameHash } from '@/services/web3/account'
+import { initProfile } from "@/services/web3/account"
 
 const auth = getAuth(app)
 const functions = getFunctions()
@@ -46,9 +49,21 @@ export async function googleSocialLogin() {
     try {
         const result = await signInWithPopup(auth, provider)
         const idToken = await getIdTokenAndSetClaimsIfNecessary(result.user)
-        const walletAddress = await accountAddress("mailto", result.user.email);
-        const store = useAuthStore();
-        store.signIn(result.user, idToken, walletAddress);
+        const nameHash = genNameHash("mailto", result.user.email!);
+        const user : IUser = {
+            provider: "google.com",
+            identityType: "email",
+            authType: "oauth",
+            uid: result.user.uid,
+            providerUid: result.user.uid, // TODO: ensure this is google uid
+            handle: result.user.email!,
+            displayName: result.user.displayName || undefined,
+            photoURL: result.user.photoURL || undefined,
+            nameHash,
+            idToken
+        };
+        useAuthStore().signIn(user);
+        await initProfile(useNetworkStore().network);
     } catch (error: any) {
         if (error.code == 'auth/popup-closed-by-user') {
             return
@@ -59,46 +74,32 @@ export async function googleSocialLogin() {
 export async function twitterSocialLogin() {
     const provider = new TwitterAuthProvider();
     try {
-        const result = await signInWithPopup(auth, provider)
-        const idToken = await getIdTokenAndSetClaimsIfNecessary(result.user)
-        console.log(result.user);
-        const walletAddress = await accountAddress(
-            "twitter.com",
-            result.user.providerData[0].uid
-        );
-        const store = useAuthStore();
-        store.signIn(result.user, idToken, walletAddress);
-    } catch (error) {
-        console.log(error);
-    }
-}
-
-export async function githubSocialLogin() {
-    const provider = new GithubAuthProvider();
-    try {
-        const result = await signInWithPopup(auth, provider)
-        const idToken = await getIdTokenAndSetClaimsIfNecessary(result.user)
-        const walletAddress = await accountAddress("github.com", result.user.providerId);
-        const store = useAuthStore();
-        store.signIn(result.user, idToken, walletAddress);
-    } catch (error) {
-        console.log(error);
-    }
-}
-
-export async function facebookSocialLogin() {
-    const provider = new FacebookAuthProvider();
-    try {
-        const result = await signInWithPopup(auth, provider)
-        const idToken = await getIdTokenAndSetClaimsIfNecessary(result.user)
-        const walletAddress = await accountAddress("facebook.com", result.user.providerId);
-        const store = useAuthStore();
-        store.signIn(result.user, idToken, walletAddress);
+        const result = await signInWithPopup(auth, provider);
+        const idToken = await getIdTokenAndSetClaimsIfNecessary(result.user);
+        const providerUid = result.user.providerData[0].uid;
+        const nameHash = genNameHash("twitter.com", providerUid);
+        const user : IUser = {
+            provider: "twitter.com",
+            identityType: "twitter.com",
+            authType: "oauth",
+            uid: result.user.uid,
+            providerUid,
+            handle: result.user.reloadUserInfo.screenName,
+            displayName: result.user.displayName || undefined,
+            photoURL: result.user.photoURL || undefined,
+            nameHash,
+            idToken,
+        };
+        useAuthStore().signIn(user);
+        await initProfile(useNetworkStore().network);
     } catch (error) {
         console.log(error);
     }
 }
 
 export function signOutFirebase() {
-    return signOut(auth)
+    useWalletStore().disconnectWallet();
+    useProfileStore().clear();
+    useAuthStore().signOut();
+    return signOut(auth);
 }

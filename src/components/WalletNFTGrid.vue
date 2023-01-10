@@ -1,69 +1,8 @@
 <template>
   <div class="box">
-    <div class="amountOwned">
-      <div class="nft_tab_shown">
-        <div style="margin-right: 0.375rem; ">Owned</div>
-        <div class="amount">12</div>
-      </div>
-    </div>
     <div>
       <div class="nft_grid">
-        <div v-for="(nft, index) in props.nfts" :key="index" class="nft_card">
-          <h1>{{ nft }}</h1>
-        </div>
-        <!-- <div class="nft_card">
-          <div class="nft_pic">
-            <div class="default-pic">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-full w-full max-w-[5rem] max-h-[5rem]">
-                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                <polyline points="21 15 16 10 5 21"></polyline>
-              </svg>
-            </div>
-          </div>
-          <div class="nft_wallet_chain">
-            <div class="items">
-              <img src="https://token.metaswap.codefi.network/assets/networkLogos/ethereum.svg"/>
-              <div class="items_tag">
-                Ethereum
-              </div>
-            </div>
-          </div>
-          <div class="nft-info">
-            <div class="collection_name">
-              <div class="collection_name_text">Invisible Mfers</div>
-            </div>
-            <p class="nft_title">invisible mfers #2725</p>
-          </div>
-        </div> -->
-        <!-- <div class="nft_card">
-          <div class="nft_pic">
-            <div class="default-pic">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                class="h-full w-full max-w-[5rem] max-h-[5rem]">
-                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                <polyline points="21 15 16 10 5 21"></polyline>
-              </svg>
-            </div>
-          </div>
-          <div class="nft_wallet_chain">
-            <div class="items">
-              <img src="https://token.metaswap.codefi.network/assets/networkLogos/ethereum.svg" />
-              <div class="items_tag">
-                Ethereum
-              </div>
-            </div>
-          </div>
-          <div class="nft-info">
-            <div class="collection_name">
-              <div class="collection_name_text">Invisible Mfers</div>
-            </div>
-            <p class="nft_title">invisible mfers #2725</p>
-          </div>
-        </div> -->
+        Coming Soon
       </div>
     </div>
   </div>
@@ -208,12 +147,4 @@
 </style>
 
 <script setup lang="ts">
-import type { NFTOutput } from '@/services/graphql/nft';
-
-const props = defineProps({
-  nfts: {
-    type: Object as () => NFTOutput[],
-    required: true,
-  },
-});
 </script>

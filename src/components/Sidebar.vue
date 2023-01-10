@@ -7,11 +7,11 @@
     <div class="menu">
       <ul>
         <li>
-          <router-link to="/redPocket" data-toggle="tooltip" data-placement="right" title="Wallet" :class="active === 1 && 'active'">
+          <router-link to="/redpacket" data-toggle="tooltip" data-placement="right" title="Wallet" :class="active === 1 && 'active'">
             <span class="icon-grey">
-              <svg width="25" height="25" viewBox="0 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg"
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
                 xmlns:xlink="http://www.w3.org/1999/xlink">
-                <rect width="25" height="25" fill="url(#pattern0)" />
+                <rect width="24" height="24" fill="url(#pattern0)" />
                 <defs>
                   <pattern id="pattern0" patternContentUnits="objectBoundingBox" width="1" height="1">
                     <use xlink:href="#image0_224_35" transform="scale(0.00195312)" />
@@ -37,23 +37,15 @@
             <span class="icon-grey"><i class="icofont-page"></i></span>
           </router-link>
         </li>
-        <!-- testabout -->
-        <!-- <li>
-          <router-link to="/testabout" data-toggle="tooltip" data-placement="right" title="Trade"
-            :class="active === 3 && 'active'">
-            <span class="icon-grey"><i class="icofont-stack-exchange"></i></span>
-          </router-link>
-        </li> -->
-        <!-- activities -->
-        <!-- <li>
-          <router-link to="/activities" data-toggle="tooltip" data-placement="right" title="Price"
-            :class="active === 4 && 'active'">
-            <span class="icon-grey"><i class="icofont-price"></i></span>
-          </router-link>
-        </li> -->
         <!-- signout -->
         <li class="logout">
-          <router-link to="/signin" data-toggle="tooltip" data-placement="right" title="Signout">
+          <router-link 
+            @click="signOutFirebase"
+            to="/signin"
+            data-toggle="tooltip"
+            data-placement="right"
+            title="Signout"
+          >
             <span class="icon-grey"><i class="icofont-logout"></i></span>
           </router-link>
         </li>
@@ -65,13 +57,13 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: "Sidebar",
-  props: {
-    active: Number,
-  },
-};
+<script lang="ts" setup>
+import router from '@/router';
+import { signOutFirebase } from "@/services/auth";
+
+const props = defineProps({
+  active: Number
+});
 </script>
 
 <style lang="less" scoped>
@@ -120,7 +112,7 @@ export default {
     list-style-type: none;
     text-align: center; }
     .menu ul li a {
-      padding: 13px 18px;
+      padding: 10px 15px;
       display: inline-block;
       margin-bottom: 20px;
       border-radius: 15px; }

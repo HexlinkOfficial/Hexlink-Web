@@ -8,60 +8,16 @@
               <div class="brand-logo header-logo">
                 <router-link to="/">
                   <img src="../assets/logo/blue2-logo.svg" alt="" />
-                  <!-- <span>Hexlink</span> -->
                 </router-link>
               </div>
-              <!-- <div class="search">
-                <form action="#" v-on:submit.prevent="">
-                  <div class="input-group">
-                    <input type="text" class="form-control" placeholder="Search Here" />
-                    <span class="input-group-text"><i class="icofont-search"></i></span>
-                  </div>
-                </form>
-              </div> -->
             </div>
 
             <div class="header-right">
-              <!-- <div class="dark-light-toggle" @click="themeToggle()">
-                <span class="dark"><i class="icofont-moon"></i></span>
-                <span class="light"><i class="icofont-sun-alt"></i></span>
-              </div> -->
-              <div class="notification dropdown" @click="activeDropDown('notification')" :class="active_ === 'notification' && 'show'">
-                <div class="notify-bell" data-toggle="dropdown">
-                  <svg width="21" height="25" viewBox="0 0 21 25" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path
-                      d="M7.95298 21.7206C8.47305 22.3734 9.23679 22.7958 10.0752 22.8945C10.9135 22.9931 11.7574 22.7598 12.42 22.2462C12.6238 22.0943 12.8071 21.9177 12.9657 21.7206M1.64661 14.3616V14.1335C1.68008 13.4586 1.89638 12.8047 2.27321 12.2392C2.90044 11.5598 3.32982 10.7274 3.51629 9.82912C3.51629 9.13488 3.51629 8.43071 3.57693 7.73647C3.89022 4.39416 7.195 2.08331 10.4594 2.08331H10.5402C13.8046 2.08331 17.1093 4.39416 17.4327 7.73647C17.4934 8.43071 17.4327 9.13488 17.4833 9.82912C17.6722 10.7295 18.1012 11.5645 18.7264 12.2491C19.106 12.8096 19.3226 13.4611 19.3529 14.1335V14.3516C19.3755 15.2584 19.0632 16.1425 18.4737 16.841C17.6947 17.6578 16.6375 18.1659 15.5024 18.2692C12.1739 18.6262 8.81558 18.6262 5.48703 18.2692C4.35319 18.1614 3.29758 17.654 2.51576 16.841C1.93534 16.142 1.62725 15.2631 1.64661 14.3616Z"
-                      stroke="#333333" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" />
-                  </svg>
-                  <span class="notify-dot"></span>
-                </div>
-                <div class="dropdown-menu dropdown-menu-right notification-list mt-3" :class="active_ === 'notification' && 'show'">
-                  <h4>Notification</h4>
-                  <div class="lists">
-                    <router-link to="#" class="">
-                      <div class="d-flex align-items-center">
-                        <span class="me-3">
-                          <img src="../assets/redpocket.svg" alt="" />
-                        </span>
-                        <div>
-                          <p>Hexpocket - From XXXX</p>
-                          <span>2020-11-04 12:00:23</span>
-                        </div>
-                      </div>
-                    </router-link>
-                    <router-link to="./settings-activity">More <i class="icofont-simple-right"></i></router-link>
-                  </div>
-                </div>
-              </div>
               <div class="selectnetwork dropdown" @click="activeDropDown('selectnetwork')"
                 :class="active_ === 'selectnetwork' && 'show'">
                 <div class="network" data-toggle="dropdown">
-                  <template v-for="(component, index) in selectedChains" :key="index">
-                    <img v-if="index === 0" :src="component" height=25 style="margin-left: 0.5rem;">
-                    <img v-if="index != 0" :src="component" height=25 style="margin-left: -0.5rem;">
-                  </template>
-                  <span v-if="selectedChains.length === 1">{{ currentNetwork }}</span>
-                  <span v-if="selectedChains.length != 1">{{ networkCount }} <span class="network-word" style="margin-left: 0rem;">Networks</span></span>
+                  <img :src="useNetworkStore().network.logoUrl" height=25 style="margin-left: 0.5rem;">
+                  <span>{{ useNetworkStore().network.chainName }}</span>
                   <svg width="14" height="8" viewBox="0 0 14 8" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 0.5rem; width: 1rem">
                     <path d="M1 1L7 7L13 1" stroke="#475569" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                   </svg>
@@ -74,11 +30,50 @@
                       </div>
                     </div>
                     <div>
-                      <!-- ethereum -->
-                      <div class="network-items" @click="eth = !eth; countNetworks(); showNetworks()">
+                      <!-- Polygon -->
+                      <div class="network-items" @click="switchNetwork({...POLYGON})">
                         <button>
                           <div style="display: flex; margin-right: 0.75rem; align-items: center; height: 1.25rem; width: 1.25rem;">
-                            <svg v-if="eth" width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <svg v-if="useNetworkStore().network.name == 'polygon'" width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M17 1L6 12L1 7" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                          </div>
+                          <div style="display: flex; white-space: nowrap; align-items: center; width: 100%; ">
+                            <div style="position: relative; margin-right: 0.75rem; min-width: max-content; ">
+                              <img src="https://token.metaswap.codefi.network/assets/networkLogos/polygon.svg" height=25
+                                style="margin-left: 0.5rem; margin-right: 0.5rem;" />
+                            </div>
+                            <div class="items-name">
+                              <span class="item-title">{{ POLYGON.chainName }}</span>
+                              <span class="item-balance">$0.00</span>
+                            </div>
+                          </div>
+                        </button>
+                      </div>
+                      <!-- Mumbai -->
+                      <div class="network-items" @click="switchNetwork({...MUMBAI})">
+                        <button>
+                          <div style="display: flex; margin-right: 0.75rem; align-items: center; height: 1.25rem; width: 1.25rem;">
+                            <svg v-if="useNetworkStore().network.name == 'mumbai'" width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M17 1L6 12L1 7" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                          </div>
+                          <div style="display: flex; white-space: nowrap; align-items: center; width: 100%; ">
+                            <div style="position: relative; margin-right: 0.75rem; min-width: max-content; ">
+                              <img src="https://token.metaswap.codefi.network/assets/networkLogos/polygon.svg" height=25 style="margin-left: 0.5rem; margin-right: 0.5rem;" />
+                            </div>
+                            <div class="items-name">
+                              <span class="item-title">{{ MUMBAI.chainName }}</span>
+                              <span class="item-balance">$11.39</span>
+                            </div>
+                          </div>
+                        </button>
+                      </div>
+                      <!-- Goerli -->
+                      <div class="network-items" @click="switchNetwork({...GOERLI})">
+                        <button>
+                          <div style="display: flex; margin-right: 0.75rem; align-items: center; height: 1.25rem; width: 1.25rem;">
+                            <svg v-if="useNetworkStore().network.name == 'goerli'" width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg">
                               <path d="M17 1L6 12L1 7" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                             </svg>
                           </div>
@@ -87,151 +82,12 @@
                               <img src="https://token.metaswap.codefi.network/assets/networkLogos/ethereum.svg" height=25 style="margin-left: 0.5rem; margin-right: 0.5rem;" />
                             </div>
                             <div class="items-name">
-                              <span class="item-title">Ethereum</span>
+                              <span class="item-title">{{ GOERLI.chainName }}</span>
                               <span class="item-balance">$11.39</span>
                             </div>
                           </div>
                         </button>
                       </div>
-                      <!-- Sui -->
-                      <div class="network-items" style="pointer-events: none;" @click="sui = !sui; countNetworks(); showNetworks()">
-                        <button>
-                          <div style="display: flex; margin-right: 0.75rem; align-items: center; height: 1.25rem; width: 1.25rem;">
-                            <svg v-if="sui" width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <path d="M17 1L6 12L1 7" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                            </svg>
-                          </div>
-                          <div style="display: flex; white-space: nowrap; align-items: center; width: 100%; ">
-                            <div style="position: relative; margin-right: 0.75rem; min-width: max-content; ">
-                              <img src="https://i.postimg.cc/02226CL6/coming-soon.png" height=25 style="margin-left: 0.5rem; margin-right: 0.5rem;" />
-                              <span class="notify-dot"></span>
-                            </div>
-                            <div class="items-name">
-                              <span class="item-title" style="color: #D1D1D1;">Sui</span>
-                              <span class="item-balance" style="color: #D1D1D1;">$76.47</span>
-                            </div>
-                          </div>
-                        </button>
-                      </div>
-                      <!-- Optimism -->
-                      <!-- <div class="network-items" @click="op = !op; countNetworks(); showNetworks()">
-                        <button>
-                          <div style="display: flex; margin-right: 0.75rem; align-items: center; height: 1.25rem; width: 1.25rem;">
-                            <svg v-if="op" width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <path d="M17 1L6 12L1 7" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                            </svg>
-                          </div>
-                          <div style="display: flex; white-space: nowrap; align-items: center; width: 100%; ">
-                            <div style="position: relative; margin-right: 0.75rem; min-width: max-content; ">
-                              <img src="https://token.metaswap.codefi.network/assets/networkLogos/optimism.svg" height=25 style="margin-left: 0.5rem; margin-right: 0.5rem;" />
-                            </div>
-                            <div class="items-name">
-                              <span class="item-title">Optimism</span>
-                              <span class="item-balance">$0.00</span>
-                            </div>
-                          </div>
-                        </button>
-                      </div> -->
-                      <!-- Polygon -->
-                      <div class="network-items" style="pointer-events: none;"  @click="poly = !poly; countNetworks(); showNetworks()">
-                        <button>
-                          <div style="display: flex; margin-right: 0.75rem; align-items: center; height: 1.25rem; width: 1.25rem;">
-                            <svg v-if="poly" width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <path d="M17 1L6 12L1 7" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                            </svg>
-                          </div>
-                          <div style="display: flex; white-space: nowrap; align-items: center; width: 100%; ">
-                            <div style="position: relative; margin-right: 0.75rem; min-width: max-content; ">
-                              <img src="https://i.postimg.cc/vHqqMQr1/polygon.png" height=25
-                                style="margin-left: 0.5rem; margin-right: 0.5rem;" />
-                            </div>
-                            <div class="items-name">
-                              <span class="item-title" style="color: #D1D1D1;">Polygon</span>
-                              <span class="item-balance" style="color: #D1D1D1;">$0.00</span>
-                            </div>
-                          </div>
-                        </button>
-                      </div>
-                      <!-- Fantom -->
-                      <!-- <div class="network-items" @click="fan = !fan; countNetworks(); showNetworks()">
-                        <button>
-                          <div style="display: flex; margin-right: 0.75rem; align-items: center; height: 1.25rem; width: 1.25rem;">
-                            <svg v-if="fan" width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <path d="M17 1L6 12L1 7" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                            </svg>
-                          </div>
-                          <div style="display: flex; white-space: nowrap; align-items: center; width: 100%; ">
-                            <div style="position: relative; margin-right: 0.75rem; min-width: max-content; ">
-                              <img src="https://token.metaswap.codefi.network/assets/networkLogos/ftm.svg" height=25
-                                style="margin-left: 0.5rem; margin-right: 0.5rem;" />
-                            </div>
-                            <div class="items-name">
-                              <span class="item-title">Fantom</span>
-                              <span class="item-balance">$0.00</span>
-                            </div>
-                          </div>
-                        </button>
-                      </div> -->
-                      <!-- Avalanche -->
-                      <!-- <div class="network-items" @click="aval = !aval; countNetworks(); showNetworks()">
-                        <button>
-                          <div style="display: flex; margin-right: 0.75rem; align-items: center; height: 1.25rem; width: 1.25rem;">
-                            <svg v-if="aval" width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <path d="M17 1L6 12L1 7" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                            </svg>
-                          </div>
-                          <div style="display: flex; white-space: nowrap; align-items: center; width: 100%; ">
-                            <div style="position: relative; margin-right: 0.75rem; min-width: max-content; ">
-                              <img src="https://token.metaswap.codefi.network/assets/networkLogos/avalanche.svg" height=25
-                                style="margin-left: 0.5rem; margin-right: 0.5rem;" />
-                            </div>
-                            <div class="items-name">
-                              <span class="item-title">Avalanche</span>
-                              <span class="item-balance">$0.00</span>
-                            </div>
-                          </div>
-                        </button>
-                      </div> -->
-                      <!-- BNB Smart Chain -->
-                      <!-- <div class="network-items" @click="bnb = !bnb; countNetworks(); showNetworks()">
-                        <button>
-                          <div style="display: flex; margin-right: 0.75rem; align-items: center; height: 1.25rem; width: 1.25rem;">
-                            <svg v-if="bnb" width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <path d="M17 1L6 12L1 7" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                            </svg>
-                          </div>
-                          <div style="display: flex; white-space: nowrap; align-items: center; width: 100%; ">
-                            <div style="position: relative; margin-right: 0.75rem; min-width: max-content; ">
-                              <img src="https://token.metaswap.codefi.network/assets/networkLogos/bsc.svg" height=25
-                                style="margin-left: 0.5rem; margin-right: 0.5rem;" />
-                            </div>
-                            <div class="items-name">
-                              <span class="item-title">BNB Smart Chain</span>
-                              <span class="item-balance">$0.00</span>
-                            </div>
-                          </div>
-                        </button>
-                      </div> -->
-                      <!-- Arbitrum -->
-                      <!-- <div class="network-items" @click="arbi = !arbi; countNetworks(); showNetworks()">
-                        <button>
-                          <div style="display: flex; margin-right: 0.75rem; align-items: center; height: 1.25rem; width: 1.25rem;">
-                            <svg v-if="arbi" width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <path d="M17 1L6 12L1 7" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                            </svg>
-                          </div>
-                          <div style="display: flex; white-space: nowrap; align-items: center; width: 100%; ">
-                            <div style="position: relative; margin-right: 0.75rem; min-width: max-content; ">
-                              <img src="https://token.metaswap.codefi.network/assets/networkLogos/arbitrum.svg" height=25
-                                style="margin-left: 0.5rem; margin-right: 0.5rem;" />
-                            </div>
-                            <div class="items-name">
-                              <span class="item-title">Arbitrum</span>
-                              <span class="item-balance">$0.00</span>
-                            </div>
-                          </div>
-                        </button>
-                      </div> -->
                     </div>
                   </div>
                 </div>
@@ -239,11 +95,8 @@
 
               <div class="profile_log dropdown" @click="activeDropDown('profile')" :class="active_ && 'show'">
                 <div class="user" data-toggle="dropdown">
-                  <!-- <div style="position: relative;">
-                    <span class="thumb"><img :src="user?.photoURL" :size="64" referrerpolicy="no-referrer" /></span>
-                  </div> -->
                   <img class="profile" :src="user?.photoURL" :size="64" referrerpolicy="no-referrer"/>
-                  <span>@{{ user?.provider?.includes("twitter") && user.screenName }}</span>
+                  <span>@{{ user?.provider?.includes("twitter") && user.handle }}</span>
                   <svg width="14" height="8" viewBox="0 0 14 8" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 0.5rem; width: 1rem">
                     <path d="M1 1L7 7L13 1" stroke="#475569" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                   </svg>
@@ -256,26 +109,13 @@
                         <span class="thumb"><img :src="user?.photoURL" :size="64" referrerpolicy="no-referrer" /></span>
                         <div class="user-info">
                           <h5>{{ user?.provider?.includes("twitter") && user?.displayName }}</h5>
-                          <span>@{{ user?.provider?.includes("twitter") && user?.screenName }}</span>
+                          <span>@{{ user?.provider?.includes("twitter") && user?.handle }}</span>
                         </div>
                       </div>
                     </div>
-                    
                     <div class="user-balance" style="border-bottom-width: 1px; border-color: #E5E7EB; border-style: dashed; ">
-                      <!-- <div class="address">
-                        <span style="color: #4B5563; font-size: 0.875rem; line-height: 1.25rem; font-weight: 500;">Address: </span>
-                        <span @click="doCopy" style="margin-bottom: 0; padding-top: 0.25rem; padding-bottom: 0.25rem; padding-left: 0.5rem; padding-right: 0.5rem; background-color: #F3F4F6; font-size: 0.875rem; line-height: 1.25rem; border-radius: 0.5rem; ">
-                          {{ addressText }}
-                        </span>
-                      </div>
-                      <div class="balance">
-                        <span style="color: #4B5563; font-size: 0.875rem; line-height: 1.25rem; font-weight: 500;">Balance: </span>
-                        <span @click="doCopy">
-                          $1990.89
-                        </span>
-                      </div> -->
                       <div class="wallet-info">
-                        <h5>Your Wallet Address: </h5>
+                        <h5>Hexlink Account Address </h5>
                         <div class="user-wallet">
                           <div class="user">
                             <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -286,17 +126,16 @@
                             </svg>
                             <div class="user-info">
                               <span style="margin-bottom: 0;" class="smart-contract-address">
-                                <h5 @click="doCopy">
-                                  {{ addressTextLong }}
+                                <h5 @click="doCopy(useProfileStore().profile?.account.address)">
+                                  {{ addressTextLong(useProfileStore().profile?.account.address) }}
                                 </h5>
                               </span>
-                              <!-- <span style="padding-left: 9px;">$200.45</span> -->
                             </div>
                           </div>
                         </div>
                       </div>
-                      <div v-if="Owallet!==null">
-                        <h5>Your Wallet Address: </h5>
+                      <div v-if="walletStore.connected">
+                        <h5>External Account Address </h5>
                         <div class="user_wallet" style="border: 0 solid #e5e7eb; padding: 10px 0px 0px 0px;">
                           <div class="user">
                             <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -310,32 +149,29 @@
                             </svg>
                             <div class="user-info">
                               <span style="margin-bottom: 0;" class="smart-contract-address">
-                                <h5 @click="doCopy">
-                                  {{  }}
+                                <h5 @click="doCopy(walletStore.wallet?.account.address)">
+                                  {{ addressTextLong(walletStore.wallet?.account.address) }}
                                 </h5>
                               </span>
-                              <!-- <span style="padding-left: 9px;">$200.45</span> -->
+                            </div>
+                            <div> 
+                              <a-tooltip placement="bottom">
+                                <template #title>
+                                  <span>Disconnect</span>
+                                </template>
+                                <svg @click="disconnectWallet" style="margin-left: 0.5rem;" width="30" height="30" viewBox="0 0 30 30" fill="none"
+                                  xmlns="http://www.w3.org/2000/svg">
+                                  <path
+                                    d="M16.8456 10.8141L20.9985 6.77662L16.8456 5.73846V10.8141V10.8141ZM14.9946 9.53076L14.1491 5.65186L11.6972 7.71389L14.9946 9.53076ZM11.7734 13.9805C11.4033 13.7673 11.0102 13.6026 10.6051 13.484C11.0119 13.2137 13.1562 11.9604 13.1562 11.9604L14.31 13.834C14.31 13.834 12.8425 14.6949 12.7799 14.7314C12.4782 14.4463 12.1425 14.1929 11.7734 13.9805ZM26.3524 15.2823L22.077 14.1314C21.4356 13.9588 20.7785 13.9282 20.1414 14.0322C19.5374 13.5326 18.8316 13.1221 18.1345 12.7173L16.8457 11.9677L15.6899 13.8329L17.0295 14.6201C17.3288 14.7939 17.6012 14.9543 17.8494 15.1083C17.1619 15.7042 16.6671 16.4892 16.4257 17.3855C16.2689 17.9681 16.2342 18.5548 16.3014 19.1202H17.1871C17.6985 19.1202 18.1563 18.8932 18.469 18.5358C18.4727 18.3443 18.4985 18.1505 18.5506 17.9574C18.6945 17.4226 19.0118 16.9643 19.4538 16.6417C19.5483 16.8716 19.598 17.1233 19.598 17.4124C19.598 18.1756 19.2148 18.916 18.5979 19.3633C18.5974 19.3619 18.5971 19.3603 18.5966 19.3589C18.2011 19.6429 17.717 19.8117 17.1919 19.8117L13.5624 19.8232C13.7791 19.0515 13.7985 18.214 13.5755 17.3854C13.2604 16.2147 12.4731 15.1943 11.4229 14.5896C10.5556 14.0902 9.51329 13.8828 8.51321 14.0141C7.97192 14.0853 3.64864 15.2821 3.64864 15.2821C2.46094 15.6019 1.46813 16.3665 0.85278 17.4351C0.237429 18.5037 0.0745383 19.7462 0.394343 20.9337C0.71403 22.1213 1.47856 23.1142 2.54708 23.7293C3.25805 24.1388 4.04567 24.3477 4.84313 24.3477C5.24438 24.3477 5.64821 24.2947 6.04571 24.1878L10.3212 23.0369C11.0586 22.8383 11.7054 22.4698 12.2327 21.986C12.4229 22.0101 12.6163 22.0239 12.8129 22.0239C12.8129 22.0239 17.1868 22.0239 17.1873 22.0239C18.3679 21.9947 19.5272 21.5544 20.3825 20.7322C20.7306 20.3972 21.0264 20.0081 21.2562 19.5788C21.2579 19.5755 21.2596 19.572 21.2613 19.5687C21.7134 18.7201 21.8827 17.7331 21.7566 16.7812C21.7344 16.6142 21.7047 16.4533 21.6656 16.2997L25.7801 17.4073C26.4008 17.5743 26.9199 17.974 27.2415 18.5328C27.5632 19.0915 27.6484 19.741 27.4812 20.3618C27.1357 21.6455 25.8102 22.4087 24.5268 22.063L20.9964 21.1126C20.3315 21.797 19.4851 22.304 18.535 22.5532C18.8852 22.7606 19.2675 22.9261 19.6794 23.037L23.9549 24.1879C24.3524 24.2949 24.7561 24.3478 25.1575 24.3478C25.9548 24.3478 26.7425 24.1387 27.4535 23.7294C28.522 23.1142 29.2867 22.1214 29.6064 20.9338C30.2675 18.4785 28.8076 15.9433 26.3524 15.2823ZM11.4028 19.3638C10.8103 18.9345 10.4196 18.244 10.4038 17.4617C10.2819 17.3224 10.1393 17.2006 9.97395 17.1054C9.71321 16.9552 9.41919 16.8637 9.12434 16.8758C8.73458 16.8919 8.21532 17.0601 8.21532 17.0601C8.20723 17.1747 8.20173 17.2915 8.20173 17.4126C8.20173 18.8028 8.82106 20.0503 9.79723 20.8964C9.78094 20.9011 9.76571 20.9076 9.7493 20.912L5.47372 22.0629C4.85309 22.23 4.20352 22.1448 3.64477 21.8231C3.08614 21.5015 2.68641 20.9824 2.5193 20.3617C2.17372 19.078 2.93684 17.7525 4.22051 17.4071C4.88579 17.228 7.22274 16.6098 7.72348 16.4645C8.23958 16.3147 8.76927 16.1597 9.31255 16.1837C9.66634 16.1994 10.0194 16.32 10.325 16.4959C10.8732 16.8116 11.2861 17.3463 11.4505 17.9572C11.5798 18.4383 11.5536 18.925 11.4028 19.3638Z"
+                                    fill="#F46A6A" />
+                                </svg>
+                              </a-tooltip>
                             </div>
                           </div>
                         </div>
                       </div>
                     </div>
-                    <!-- <router-link to="profile" class="dropdown-item">
-                      <i class="icofont-ui-user"></i>Profile
-                    </router-link>
-                    <router-link to="wallet" class="dropdown-item">
-                      <i class="icofont-wallet"></i>Wallet
-                    </router-link> -->
-                    <!-- <router-link to="settings-profile" class="dropdown-item">
-                      <i class="icofont-ui-settings"></i> Setting
-                    </router-link> -->
-                    <!-- <router-link to="/activities" class="dropdown-item">
-                      <i class="icofont-history"></i> Activity
-                    </router-link> -->
-                    <!-- <router-link to="lock" class="dropdown-item">
-                      <i class="icofont-lock"></i>Lock
-                    </router-link> -->
-                    <router-link to="signin" class="dropdown-item logout">
+                    <router-link @click="signOutFirebase" to="signin" class="dropdown-item logout">
                       <i class="icofont-logout"></i> Logout
                     </router-link>
                   </div>
@@ -350,136 +186,58 @@
 </template>
 
 <script lang="ts">
-import { computed } from "vue";
 import { useAuthStore } from '@/stores/auth';
+import { useWalletStore } from '@/stores/wallet';
+import { useNetworkStore } from '@/stores/network';
 import { prettyPrintAddress } from '@/services/web3/account';
 import { createToaster } from "@meforma/vue-toaster";
-import { truncateAddress } from "@/services/web3/account";
+import { POLYGON, GOERLI, MUMBAI } from "@/configs/network";
+import { switchNetwork } from "@/services/web3/network";
+import { connectWallet, disconnectWallet } from "@/services/web3/wallet";
+import { useProfileStore } from '@/stores/profile';
+import { signOutFirebase } from "@/services/auth";
+import { CopyOutlined } from '@ant-design/icons-vue';
 
 export default {
   name: "Header",
   data() {
-    const store = useAuthStore();
-    const user = store.currentUser!;
-    const Owallet = store.Owallet!;
-    console.log(user)
-    console.log("External Wallet: ", Owallet);
-    // const externalWallet = computed(() => {
-    //   if (Owallet.Oaccount !== null) {
-    //     return Owallet.Oaccount;
-    //   } else {
-    //     return "";
-    //   }
-    // })
-    const actualAddress = user.walletAddress;
-    const addressTextLong = computed(() => {
-      if (user.walletAddress) {
-        return prettyPrintAddress(user.walletAddress!, 5, 6);
-      } else {
-        return "";
+    const authStore = useAuthStore();
+    const user = authStore.user!;
+    const walletStore = useWalletStore();
+
+    const addressTextLong = function (address: string | undefined) {
+      if (address) {
+        return prettyPrintAddress(address, 5, 6);
       }
-    })
-    const addressTextNormal = computed(() => {
-      if (user.walletAddress) {
-        return prettyPrintAddress(user.walletAddress!, 3, 3);
-      } else {
-        return "";
-      }
-    })
+      return "0x";
+    };
+    
     return {
-      actualAddress,
       addressTextLong,
-      addressTextNormal,
+      CopyOutlined,
+      connectWallet,
+      disconnectWallet,
+      useProfileStore,
+      useNetworkStore,
+      walletStore,
       user,
-      Owallet,
+      switchNetwork,
+      signOutFirebase,
       active_: "",
-      eth: true,
-      sui: false,
-      op: false,
-      poly: false,
-      fan: false,
-      aval: false,
-      bnb: false,
-      arbi: false,
-      networkCount: 1,
-      selectedChains: ['https://token.metaswap.codefi.network/assets/networkLogos/ethereum.svg'],
+      POLYGON,
+      GOERLI,
+      MUMBAI,
       index: 0,
-      currentNetwork: "Ethereum Network",
     };
   },
   methods: {
-    showNetworks() {
-      if (this.eth) {
-        this.selectedChains.length === 1 ? this.currentNetwork = "Ethereum Network" : this.currentNetwork = "";
-      } else if (this.sui) {
-        this.selectedChains.length === 1 ? this.currentNetwork = "Sui Network" : this.currentNetwork = "";
-      } else if (this.op) {
-        this.selectedChains.length === 1 ? this.currentNetwork = "Optimism Network" : this.currentNetwork = "";
-      } else if (this.poly) {
-        this.selectedChains.length === 1 ? this.currentNetwork = "Polygon Network" : this.currentNetwork = "";
-      } else if (this.fan) {
-        this.selectedChains.length === 1 ? this.currentNetwork = "Fantom Network" : this.currentNetwork = "";
-      } else if (this.aval) {
-        this.selectedChains.length === 1 ? this.currentNetwork = "Avalanche Network" : this.currentNetwork = "";
-      } else if (this.bnb) {
-        this.selectedChains.length === 1 ? this.currentNetwork = "BNB Smart Chain" : this.currentNetwork = "";
-      } else if (this.arbi) {
-        this.selectedChains.length === 1 ? this.currentNetwork = "Arbitrum Network" : this.currentNetwork = "";
-      }
-    },
     forceRerender() {
       this.index += 1;
-    },
-    countNetworks() {
-      if (this.eth) {
-        !this.selectedChains.includes('https://token.metaswap.codefi.network/assets/networkLogos/ethereum.svg') && this.selectedChains.push('https://token.metaswap.codefi.network/assets/networkLogos/ethereum.svg');
-      } else {
-        this.selectedChains.includes('https://token.metaswap.codefi.network/assets/networkLogos/ethereum.svg') && this.selectedChains.splice(this.selectedChains.indexOf('https://token.metaswap.codefi.network/assets/networkLogos/ethereum.svg'),1);
-      }
-      if (this.sui) {
-        !this.selectedChains.includes('https://i.postimg.cc/5tfSHpjg/sui.png') && this.selectedChains.push('https://i.postimg.cc/5tfSHpjg/sui.png');
-      } else {
-        this.selectedChains.includes('https://i.postimg.cc/5tfSHpjg/sui.png') && this.selectedChains.splice(this.selectedChains.indexOf('https://i.postimg.cc/5tfSHpjg/sui.png'), 1);
-      }
-      if (this.op) {
-        !this.selectedChains.includes('https://token.metaswap.codefi.network/assets/networkLogos/optimism.svg') && this.selectedChains.push('https://token.metaswap.codefi.network/assets/networkLogos/optimism.svg');
-        this.selectedChains.length === 1 ? this.currentNetwork = "Optimism Network" : this.currentNetwork = "";
-      } else {
-        this.selectedChains.includes('https://token.metaswap.codefi.network/assets/networkLogos/optimism.svg') && this.selectedChains.splice(this.selectedChains.indexOf('https://token.metaswap.codefi.network/assets/networkLogos/optimism.svg'), 1);
-      }
-      if (this.poly) {
-        !this.selectedChains.includes('https://token.metaswap.codefi.network/assets/networkLogos/polygon.svg') && this.selectedChains.push('https://token.metaswap.codefi.network/assets/networkLogos/polygon.svg');
-      } else {
-        this.selectedChains.includes('https://token.metaswap.codefi.network/assets/networkLogos/polygon.svg') && this.selectedChains.splice(this.selectedChains.indexOf('https://token.metaswap.codefi.network/assets/networkLogos/polygon.svg'), 1);
-      }
-      if (this.fan) {
-        !this.selectedChains.includes('https://token.metaswap.codefi.network/assets/networkLogos/ftm.svg') && this.selectedChains.push('https://token.metaswap.codefi.network/assets/networkLogos/ftm.svg');
-      } else {
-        this.selectedChains.includes('https://token.metaswap.codefi.network/assets/networkLogos/ftm.svg') && this.selectedChains.splice(this.selectedChains.indexOf('https://token.metaswap.codefi.network/assets/networkLogos/ftm.svg'), 1);
-      }
-      if (this.aval) {
-        !this.selectedChains.includes('https://token.metaswap.codefi.network/assets/networkLogos/avalanche.svg') && this.selectedChains.push('https://token.metaswap.codefi.network/assets/networkLogos/avalanche.svg');
-      } else {
-        this.selectedChains.includes('https://token.metaswap.codefi.network/assets/networkLogos/avalanche.svg') && this.selectedChains.splice(this.selectedChains.indexOf('https://token.metaswap.codefi.network/assets/networkLogos/avalanche.svg'), 1);
-      }
-      if (this.bnb) {
-        !this.selectedChains.includes('https://token.metaswap.codefi.network/assets/networkLogos/bsc.svg') && this.selectedChains.push('https://token.metaswap.codefi.network/assets/networkLogos/bsc.svg');
-      } else {
-        this.selectedChains.includes('https://token.metaswap.codefi.network/assets/networkLogos/bsc.svg') && this.selectedChains.splice(this.selectedChains.indexOf('https://token.metaswap.codefi.network/assets/networkLogos/bsc.svg'), 1);
-      }
-      if (this.arbi) {
-        !this.selectedChains.includes('https://token.metaswap.codefi.network/assets/networkLogos/arbitrum.svg') && this.selectedChains.push('https://token.metaswap.codefi.network/assets/networkLogos/arbitrum.svg');
-      } else {
-        this.selectedChains.includes('https://token.metaswap.codefi.network/assets/networkLogos/arbitrum.svg') && this.selectedChains.splice(this.selectedChains.indexOf('https://token.metaswap.codefi.network/assets/networkLogos/arbitrum.svg'), 1);
-      }
-      this.networkCount = this.selectedChains.length;
-      console.log(this.selectedChains.length);
-      console.log(this.currentNetwork);
     },
     activeDropDown(value: any) {
       this.active_ = this.active_ === value ? "" : value;
     },
-    closeDropDown(e) {
+    closeDropDown(e: any) {
       if (!this.$el.contains(e.target)) {
         this.active_ = "";
       }
@@ -487,8 +245,8 @@ export default {
     selectNetwork(value: any) {
       this.active_ = this.active_ === value ? "" : value;
     },
-    doCopy: function () {
-      this.$copyText(this.actualAddress).then(
+    doCopy: function (address: string | undefined) {
+      this.$copyText(address || "0x").then(
         function () {
           // alert("Copied");
           const toaster = createToaster({ position: "top", duration: 2000 });
@@ -504,9 +262,6 @@ export default {
   },
   mounted() {
     document.addEventListener('click', this.closeDropDown)
-    const store = useAuthStore();
-    const Owallet = store.Owallet!;
-    console.log("External Wallet: ", Owallet);
   },
   beforeDestroy() {
     document.removeEventListener('click', this.closeDropDown)
@@ -523,6 +278,7 @@ export default {
   position: fixed;
   top: 0;
   left: 9.5rem;
+  z-index: 60;
   right: 3rem;
   z-index: 2; }
   @media only screen and (max-width: 990px) {
@@ -604,13 +360,12 @@ cursor: pointer; }
   border-width: 1px;
   border-color: #F3F4F6;
   cursor: pointer; }
-  .profile_log .user:hover {
-      transform: translateY(-0.125rem);
-      fill: rgb(7, 106, 224);
-      background-color: rgba(7, 106, 224, 0.15);
-      border-color: rgb(48,138,245);
-      color: rgb(7,106,224);
-    }
+  // .profile_log .user:hover {
+  //   transform: translateY(-0.125rem);
+  //   fill: rgb(7, 106, 224);
+  //   background-color: rgba(7, 106, 224, 0.15);
+  //   border-color: rgb(48,138,245);
+  //   color: rgb(7,106,224); }
   @media only screen and (max-width: 768px) {
     .profile_log .user {
       margin-right: 0.5rem;
@@ -746,10 +501,10 @@ cursor: pointer; }
     .profile_log .dropdown-menu .dropdown-item i {
       margin-right: 10px;
       font-size: 18px;
-      color: #556ee6;
+      color: #076AE0;
       font-weight: bold; }
     .profile_log .dropdown-menu .dropdown-item:hover, .profile_log .dropdown-menu .dropdown-item:focus, .profile_log .dropdown-menu .dropdown-item.active {
-      background-color: #556ee6;
+      background-color: #076AE0;
       color: #fff; }
       .profile_log .dropdown-menu .dropdown-item:hover i, .profile_log .dropdown-menu .dropdown-item:focus i, .profile_log .dropdown-menu .dropdown-item.active i {
         color: #fff; }
@@ -1059,6 +814,9 @@ cursor: pointer; }
         background: #f46a6a; }
       .notification .dropdown-menu a span.pending {
         background: #f1b44c; }
+.smart-contract-address h5:hover {
+  background-color: rgba(7, 106, 224, 0.15);
+}
 .smart-contract-address h5 {
   margin-bottom: 0;
   padding-top: 0.25rem;

@@ -1,8 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '@/views/HomeView.vue'
 import SignInView from '@/views/SignInView.vue'
-import ActivitiesView from '@/views/ActivitiesView.vue'
-import NFTView from '@/views/NFTView.vue'
 import Error404 from '@/views/Error404.vue'
 import Transaction from '@/views/TransactionView.vue'
 import { useAuthStore } from '@/stores/auth';
@@ -13,7 +10,7 @@ const router = createRouter({
     {
       path: '/',
       name: 'home',
-      component: () => import('@/views/newWallet.vue')
+      component: () => import('@/views/AssetView.vue')
     },
     {
       path: '/signin',
@@ -21,29 +18,9 @@ const router = createRouter({
       component: SignInView
     },
     {
-      path: '/activities',
-      name: 'activities',
-      component: ActivitiesView
-    },
-    {
-      path: '/collectible',
-      name: 'collectible',
-      component: NFTView
-    },
-    {
       path: '/transactions',
       name: 'transaction page',
       component: Transaction
-    },
-    {
-      path: '/testabout',
-      name: 'test aboutpage',
-      component: () => import('@/views/newAbout.vue')
-    },
-    {
-      path: '/oldhome',
-      name: 'old homepage',
-      component: HomeView
     },
     {
       path: '/adminView',
@@ -51,9 +28,9 @@ const router = createRouter({
       component: () => import('@/views/AdminView.vue')
     },
     {
-      path: '/redPocket',
+      path: '/redpacket',
       name: 'red pocket view',
-      component: () => import('@/views/RedPocketView.vue')
+      component: () => import('@/views/RedPacketView.vue')
     },
     {
       path: '/:pathMatch(.*)*',
@@ -68,6 +45,10 @@ router.beforeEach(async (to) => {
   const publicPages = ['/signin'];
   const authRequired = !publicPages.includes(to.path);
   const auth = useAuthStore();
+
+  if (to.path == '/signin' && auth.authenticated) {
+    return "/";
+  }
 
   if (authRequired && !auth.authenticated) {
     auth.setReturnUrl(to.fullPath);

@@ -35,7 +35,9 @@
                 </div>
               </div>
               <div v-if="luckHistory" class="sent-history">
-                <h1>No Red Packet Sent Yet!</h1>
+                <RedPacektHistoryList
+                  :redPackets="redPackets"
+                ></RedPacektHistoryList>
               </div>
               <div v-if="!walletStore.connected && sendLuck" class="connectWallet">
                 <button v-if="walletStore.connected == false" class="connect-wallet-button" @click="connectOrDisconnectWallet">
@@ -321,8 +323,11 @@
 <script setup lang="ts">
 import { ref, onMounted, watch, computed } from "vue";
 import Layout from "../components/Layout.vue";
+import RedPacektHistoryList from "../components/RedPacketHistoryList.vue";
 import { connectWallet, disconnectWallet } from "@/services/web3/wallet";
 import { updateProfileBalances, updateWalletBalances } from "@/services/web3/tokens";
+import { getRedPacketByUser } from '@/services/graphql/redpacket';
+import type { Metadata, RedPacketData, RedPacketOutput, ParsedRedPacket } from '@/services/graphql/redpacket';
 import { useProfileStore } from '@/stores/profile';
 import { useWalletStore } from '@/stores/wallet';
 import { BigNumber } from "bignumber.js";
@@ -357,6 +362,9 @@ const accountChosen = ref<number>(0);
 const modal = ref<boolean>(false);
 const modalRef = ref<any>(null);
 const estimateGas = ref<string | undefined>("0");
+const redPackets = ref<RedPacketData[]>([]);
+// should be fetched from the store
+const userId = ref<string>("ming");
 
 const { toClipboard } = useClipboard()
 const nativeToken = useProfileStore().nativeToken;
@@ -432,6 +440,24 @@ const refresh = async function() {
       redpacket.value.gasToken = toSelect[0];
     }
   }
+
+  redPackets.value = await loadRedPackets(userId.value);
+}
+
+const loadRedPackets = async (userId: string) : Promise<ParsedRedPacket[]> => {  
+  const redPackets: RedPacketOutput[] = await getRedPacketByUser(userId);
+  const parsedRedPackets: ParsedRedPacket[] = []
+  for (let i = 0; i < redPackets.length; i++) {
+    let metadata: Metadata = JSON.parse(redPackets[i].metadata);
+    let parsed: ParsedRedPacket = {
+        red_packet_id: redPackets[i].red_packet_id,
+        user_id: redPackets[i].user_id,
+        gas_station_enabled: redPackets[i].gas_station_enabled,
+        metadata: metadata
+      }
+    parsedRedPackets.push(parsed);
+  }
+  return parsedRedPackets;
 }
 
 const tokenChoose = 

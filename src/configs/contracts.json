@@ -1,14 +1,14 @@
 {
   "goerli": {
     "hexlink": "0xbad6a7948a1d3031ee7236d0180b6271fa569148",
-    "hexlinkHelper": "0x8797C40E4f4cdCb975ee168B29d3270B5026fFCE",
-    "gasStation": "0x8142D70dD9DB8Be87e0C01717147a0648FA92784",
-    "redPacket": "0x3770F194d37342fD6632256272B5a39Dcf7Fe9b6"
+    "hexlinkHelper": "0x32AFdFeB375090043324e4000110C69b4707539a",
+    "redPacket": "0x4c46BB27cdA575C84bc0fD87de9D2a3ef0F0BB4b",
+    "wrappedCoin": "0xb4fbf271143f4fbf7b91a5ded31805e42b2208d6"
   },
   "mumbai": {
     "hexlink": "0x78317ef8b020Fe10e845ab8723403cF1e58Ef1Cc",
-    "hexlinkHelper": "0xE1E06DB27dBb48Fd56B71135299386815f391Db1",
-    "gasStation": "0x495Dd646e05fde8D950D3b54E1959Ab7D5103652",
-    "redPacket": "0x50Ff471A60aE593AA0bD14c1475FC2878a3331B5"
+    "hexlinkHelper": "0x10b1A0BCdAd376419Dda56A060DB8F0B242FbC56",
+    "redPacket": "0x0deFb16796B8c4cB429A9e249ae21d21399e0A31",
+    "wrappedCoin": "0x9c3C9283D3e44854697Cd22D3Faa240Cfb032889"
   }
 }

@@ -1,4 +1,5 @@
 import type { BigNumber } from "bignumber.js";
+import type { BigNumber as EthersBigNumber } from "ethers";
 
 export interface Network {
     chainId: number,
@@ -98,30 +99,36 @@ export interface Profile {
 export interface RedPacketData {
     token: Token;
     gasToken: Token;
-    enableGasStation: boolean;
+    payGasForClaimers: boolean;
     mode: "random" | "equal";
     split: Number;
     balance: BigNumber;
     expiredAt: Number;
-
 }
 
-export interface CreatingRedPacket {
+export interface RedPacketInput {
     data: RedPacketData;
-    gasSponsorshipCostMin: BigNumber;
-    gasSponsorshipCostMax: BigNumber;
-    txCostMin: BigNumber;
-    txCostMax: BigNumber;
+    gasPrice: EthersBigNumber;
+    gasTokenPrice: BigNumber;
+    gasSponsorshipCostEstimation?: EthersBigNumber;
+    hexlinkAccount: {
+        tokenAmount: EthersBigNumber;
+        gasTokenAmount: EthersBigNumber;
+    },
+    walletAccount: {
+        tokenAmount: EthersBigNumber;
+        gasTokenAmount: EthersBigNumber;
+    }
 }
 
 export interface Claim {
     from: string,
-    claimed: BigNumber;
-    gasSponsorshipCost: BigNumber;
+    claimed: EthersBigNumber;
+    gasSponsorshipCost: EthersBigNumber;
     tx: {
         hash: string;
         timestamp: number;
-        txCost: BigNumber;
+        txCost: EthersBigNumber;
     }
 }
 
@@ -129,12 +136,12 @@ export interface CreatedRedPacket {
     id: string;
     salt: string;
     data: RedPacketData,
-    balanceLeft: BigNumber;
+    balanceLeft: EthersBigNumber;
     splitLeft: number;
-    gasSponsorshipCost: BigNumber;
+    gasSponsorshipCost: EthersBigNumber;
     tx: {
         hash: string;
-        txCost: BigNumber;
+        txCost: EthersBigNumber;
     },
     claimHistory: Claim[]
 }
@@ -145,5 +152,12 @@ export interface AuthProof {
     authType: string, // non-hashed
     identityType: string, // non-hashed
     issuedAt: number, // timestamp
-    signatures: string // encoded with validator address
+    signature: string // encoded with validator address
+}
+
+export interface UserOp {
+    to: string;
+    value: EthersBigNumber;
+    callData: string;
+    callGasLimit: EthersBigNumber;
 }

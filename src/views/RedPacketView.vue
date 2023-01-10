@@ -316,6 +316,9 @@
                     </svg>
                     Create Red Packet
                   </button>
+                  <button class="connect-wallet-button" @click="showClaim = !showClaim" style="width: auto; margin-right: 1rem;">
+                    Test Claim
+                  </button>
                 </div>
               </div>
             </div>
@@ -326,6 +329,13 @@
         <button class="close-button" title="Close" @click="modal = false">
           𝖷
         </button>
+      </div>
+      <div v-if="showClaim" class="claim-card transition">
+        <h2 class="transition">Sent by @XXX<br><small>Best Wishes!</small></h2>
+        <div class="cta-container transition">
+          <button class="cta">Claim</button>
+        </div>
+        <div class="card_circle transition"></div>
       </div>
     </div>
   </layout>
@@ -374,6 +384,7 @@ const modal = ref<boolean>(false);
 const modalRef = ref<any>(null);
 const estimateGas = ref<string | undefined>("0");
 const redPackets = ref<RedPacketData[]>([]);
+const showClaim = ref<boolean>(false);
 // should be fetched from the store
 const userId = ref<string>("ming");
 
@@ -622,6 +633,75 @@ const copy = async (text: string) => {
 </script>
 
 <style lang="less" scoped>
+.claim-card {
+  background-color: #fff;
+  height: 400px;
+  width: 300px;
+  position: absolute;
+  margin: auto;
+  left: 55%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0px 10px 20px rgb(0 0 0 / 10%);
+  border-radius: 15px;
+  overflow: hidden;
+  z-index: 55; 
+  @media (max-width: 990px) {
+    left: 50%; }}
+.claim-card:hover {
+  box-shadow: 0px 30px 30px rgba(0, 0, 0, 0.2);
+  height: 430px;
+  width: 330px; }
+.claim-card:hover h2 {
+  margin-top: 100px;
+  color: #fff; }
+.claim-card:hover h2 small {
+  color: #fff; }
+.transition {
+  transition: .3s cubic-bezier(.3, 0, 0, 1.3) }
+.cta-container {
+  display: flex;
+  justify-content: center;
+  text-align: center;
+  margin-top: 290px;
+  position: absolute;
+  z-index: 55;
+  width: 100%; }
+.claim-card:hover .cta-container {
+  margin-top: 320px; }
+.cta {
+  color: #fff;
+  border: 2px solid #FD4755;
+  background-color: #FD4755;
+  padding: 10px 25px;
+  border-radius: 50px;
+  font-size: 17px;
+  text-decoration: none;
+  width: 10rem;
+  font-weight: bold; }
+.claim-card h2 {
+  text-align: center;
+  margin-top: 190px;
+  position: absolute;
+  z-index: 9999;
+  font-size: 26px;
+  color: #000;
+  width: 100%; }
+.claim-card h2 small {
+  font-weight: normal;
+  font-size: 65%;
+  color: rgba(0, 0, 0, 0.5); }
+.card_circle {
+  height: 400px;
+  width: 450px;
+  background-color: #FD4755;
+  position: absolute;
+  border-radius: 50%;
+  margin-left: -75px;
+  margin-top: -270px; }
+.claim-card:hover .card_circle {
+  border-radius: 0;
+  margin-top: -130px; }
 .alert {
   padding: 10px 35px 10px 14px;
   background-color: #eee;

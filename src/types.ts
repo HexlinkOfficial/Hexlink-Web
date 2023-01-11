@@ -96,6 +96,15 @@ export interface Profile {
     tokens: { [key: string]: Token };
 }
 
+export interface RedPacket {
+    mode: "random" | "equal";
+    split: Number,
+    balance: BigNumber,
+    token: Token,
+    gasToken: Token,
+    expiredAt: Number,
+}
+
 export interface RedPacketData {
     token: Token;
     gasToken: Token;
@@ -130,6 +139,12 @@ export interface Claim {
         timestamp: number;
         txCost: EthersBigNumber;
     }
+}
+
+export interface ClaimCardData {
+    twitter: string,
+    token: Token,
+    from: string
 }
 
 export interface CreatedRedPacket {

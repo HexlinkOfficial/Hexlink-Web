@@ -17,7 +17,6 @@ import USERS from "@/configs/users.json";
 import { useWalletStore } from "@/stores/wallet";
 
 import { BigNumber as BigNumberJs } from "bignumber.js";
-import { ErrorCode } from "@ethersproject/logger";
 
 const erc20Iface = new ethers.utils.Interface(ERC20_ABI);
 const redPacketIface = new ethers.utils.Interface(RED_PACKET_ABI);

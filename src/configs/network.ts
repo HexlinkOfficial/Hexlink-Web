@@ -19,7 +19,7 @@ export const GOERLI : Network = {
     },
     blockExplorerUrls: ["https://goerli.etherscan.io"],
     logoUrl: "https://token.metaswap.codefi.network/assets/networkLogos/ethereum.svg",
-    defaultGasPrice: EthBigNumber.from("150000000000"),
+    defaultGasPrice: EthBigNumber.from("1000000000"),
     contracts: {
         "hexlink": "0xbad6a7948a1d3031ee7236d0180b6271fa569148",
         "nativeCoin": "0x0000000000000000000000000000000000000000",
@@ -51,7 +51,7 @@ export const POLYGON : Network = {
     },
     blockExplorerUrls: ["https://polygonscan.com"],
     logoUrl: "https://token.metaswap.codefi.network/assets/networkLogos/polygon.svg",
-    defaultGasPrice: EthBigNumber.from("500000000000"),
+    defaultGasPrice: EthBigNumber.from("100000000000"),
     contracts: {
         "nativeCoin": "0x0000000000000000000000000000000000001010",
         "wrappedCoin": "0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270",
@@ -80,7 +80,7 @@ export const MUMBAI : Network = {
     },
     blockExplorerUrls: ["https://mumbai.polygonscan.com/"],
     logoUrl: "https://token.metaswap.codefi.network/assets/networkLogos/polygon.svg",
-    defaultGasPrice: EthBigNumber.from("1000000000"),
+    defaultGasPrice: EthBigNumber.from("2000000000"),
     contracts: {
         "hexlink": "0x78317ef8b020Fe10e845ab8723403cF1e58Ef1Cc",
         "redPacket": "0x0deFb16796B8c4cB429A9e249ae21d21399e0A31",

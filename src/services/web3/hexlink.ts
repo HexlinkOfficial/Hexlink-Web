@@ -4,7 +4,7 @@ import { useProfileStore } from "@/stores/profile";
 import { useAuthStore } from "@/stores/auth";
 
 import { genDeployAuthProof } from "@/services/web3/oracle";
-import { hash, isNativeCoin, toEthBigNumber } from "@/services/web3/utils";
+import { hash, toEthBigNumber } from "@/services/web3/utils";
 import { getProvider } from "@/services/web3/network";
 import { signMessage } from "@/services/web3/wallet";
 

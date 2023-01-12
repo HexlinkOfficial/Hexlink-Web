@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import type { Network } from '@/types';
-import { nativeCoinAddress } from '@/configs/tokens';
+import { nativeCoinAddress, wrappedCoinAddress } from '@/configs/tokens';
 import { GOERLI } from "@/configs/network";
 
 export const useNetworkStore = defineStore({
@@ -11,6 +11,7 @@ export const useNetworkStore = defineStore({
     persist: true,
     getters: {
         nativeCoinAddress: (state) => nativeCoinAddress(state.network),
+        wrappedCoinAddress: (state) => wrappedCoinAddress(state.network),
     },
     actions: {
         switchNetwork(network: Network) {

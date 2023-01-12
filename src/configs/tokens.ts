@@ -5,19 +5,24 @@ import POLYGON_TOEKNS from"@/configs/tokens/POLYGON_TOKENS.json";
 
 const POLYGON_POPULAR_TOKENS = "https://api-polygon-tokens.polygon.technology/tokenlists/popularTokens.tokenlist.json";
 
-export function nativeCoinAddress(network: Network) {
-    return network.contracts.nativeCoin;
+export function nativeCoinAddress(network: Network) : string {
+    return network.contracts.nativeCoin as string;
 }
 
-export function wrappedCoinAddress(network: Network) {
-    return network.contracts.wrappeCoin;
+export function wrappedCoinAddress(network: Network) : string {
+    return network.contracts.wrappeCoin as string;
 }
 
-export function isStableCoin(network: Network, token: Token) {
-    const address = token.metadata.address.toLowerCase();
-    return (
-        network.contracts.stableCoins as string[]
-    ).map(c => c.toLowerCase()).includes(address);
+export function stableCoinAddresses(network: Network) : string[] {
+    return network.contracts.stableCoins as string[]
+}
+
+export function allowedGasToken(network: Network) : string[] {
+    return [
+        nativeCoinAddress(network),
+        wrappedCoinAddress(network),
+        ...stableCoinAddresses(network)
+    ];
 }
 
 export async function getPopularTokens(network: Network) : Promise<TokenDataList> {
@@ -58,4 +63,11 @@ export function isWrappedCoin(network: Network, token: Token) {
     const wrappeCoin = wrappedCoinAddress(network) as string;
     const tokenAddr = token.metadata.address;
     return tokenAddr.toLowerCase() == wrappeCoin.toLowerCase();
+}
+
+export function isStableCoin(network: Network, token: Token) {
+    const address = token.metadata.address.toLowerCase();
+    return stableCoinAddresses(network).map(
+        c => c.toLowerCase()
+    ).includes(address);
 }

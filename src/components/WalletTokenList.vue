@@ -92,21 +92,22 @@ const isGreen = ref(true);
 
 const props = defineProps({
   balance: {
-    type: Object as () => BigNumber,
+    type: Object as () => string,
     required: false,
   }
 });
 
-const usdValue = (token: Token) : BigNumber => {
+const usdValue = (token: Token) : number => {
   if (token.balance && token.price) {
-    return token.balance.normalized.times(token.price);
+    return token.price * Number(token.balance.normalized || 0);
   }
-  return new BigNumber(0);
+  return 0;
 };
 
 const getPortfolioRatio = (token: Token) => {
-  if (props.balance?.gt(0)) {
-    return usdValue(token).times(100).div(props.balance);
+  const balance = Number(props.balance || 0);
+  if (balance > 0) {
+    return usdValue(token) * 100 / balance;
   }
   return 0;
 };

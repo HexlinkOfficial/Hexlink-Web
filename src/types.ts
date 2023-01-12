@@ -1,4 +1,3 @@
-import type { BigNumber as BigNumberJs } from "bignumber.js";
 import type { BigNumber as EthersBigNumber } from "ethers";
 
 export interface Network {
@@ -14,7 +13,7 @@ export interface Network {
         name: string,
         symbol: string,
         decimals: number,
-        priceInUsd: BigNumberJs
+        priceInUsd: string
     },
     blockExplorerUrls: string[],
     logoUrl: string,
@@ -82,7 +81,7 @@ export interface Preference {
 
 export interface NormalizedTokenBalance {
     value: EthersBigNumber;
-    normalized: BigNumberJs;
+    normalized: string;
     updatedAt: Date;
 }
 
@@ -105,7 +104,7 @@ export interface RedPacket {
     payGasForClaimers: boolean;
     mode: "random" | "equal";
     split: number;
-    balance: BigNumberJs;
+    balance: string;
     expiredAt: number;
 }
 

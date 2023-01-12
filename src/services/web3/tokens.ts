@@ -46,13 +46,13 @@ export function normalizeBalance(balance: EthBigNumber, decimals: number) : Norm
     if (normalized.gt(1)) {
         return {
             value: balance,
-            normalized: normalized.dp(5),
+            normalized: normalized.dp(5).toString(10),
             updatedAt: new Date()
         };
     } else {
         return {
             value: balance,
-            normalized,
+            normalized: normalized.toString(10),
             updatedAt: new Date()
         }
     }

@@ -54,7 +54,7 @@
                   <div class="total-amount">
                     <div class="box">
                       <p class="total-amount-text">Total Amount</p>
-                      <input v-model="redpacketBalance" id="red-packet-amount" class="amount-input" autocomplete="off"
+                      <input v-model="redpacket.balance" id="red-packet-amount" class="amount-input" autocomplete="off"
                         placeholder="0.0" required="true" type="number" autocorrect="off" title="Token Amount"
                         inputmode="decimal" min="0" minlength="1" maxlength="79" pattern="^[0-9]*[.,]?[0-9]*$"
                         spellcheck="false">
@@ -163,7 +163,7 @@
                                   <div style="margin-right:0.5rem;">
                                     {{
                                       redpacket.token == token
-                                      ? token.balance?.normalized.minus(new BigNumber(redpacketBalance || 0))
+                                      ? new BigNumber(token.balance?.normalized || 0).minus(redpacket.balance || 0)
                                       : token.balance?.normalized
                                     }} available
                                   </div>
@@ -225,7 +225,7 @@
                               </template>
                               <span class="balance_item">
                                 <p style="font-weight:600; display: flex; justify-content: flex-end;">
-                                  {{ tokenBalance?.normalized.toString().substring(0,6) }}
+                                  {{ tokenBalance?.normalized.substring(0,6) }}
                                 </p>
                               </span>
                             </a-tooltip>
@@ -244,7 +244,7 @@
                               </template>
                               <span class="balance_item">
                                 <p style="font-weight:600; display: flex; justify-content: flex-end;">
-                                  {{ gasTokenBalance?.normalized.toString().substring(0, 6) }}
+                                  {{ gasTokenBalance?.normalized.substring(0, 6) }}
                                 </p>
                               </span>
                             </a-tooltip>
@@ -284,12 +284,12 @@
                                 <span>
                                   Balance: 
                                   <b>{{ eoaTokenBalance?.normalized }}</b>
-                                  <copy-outlined style="margin-left: 0.5rem; margin-right: 0.5rem;" @click="copy(String(eoaTokenBalance?.normalized))" />
+                                  <copy-outlined style="margin-left: 0.5rem; margin-right: 0.5rem;" @click="copy(eoaTokenBalance?.normalized)" />
                                 </span>
                               </template>
                               <span class="balance_item">
                                 <p style="font-weight:600; display: flex; justify-content: flex-end;">
-                                  {{ eoaTokenBalance?.normalized.toString().substring(0, 6) }}
+                                  {{ eoaTokenBalance?.normalized.substring(0, 6) }}
                                 </p>
                               </span>
                             </a-tooltip>
@@ -308,7 +308,7 @@
                               </template>
                               <span class="balance_item">
                                 <p style="font-weight:600; display: flex; justify-content: flex-end;">
-                                  {{eoaGasTokenBalance?.normalized.toString().substring(0,6) }}
+                                  {{eoaGasTokenBalance?.normalized.substring(0,6) }}
                                 </p>
                               </span>
                             </a-tooltip>
@@ -423,13 +423,12 @@ const tokens = ref<Token[]>([]);
 const { toClipboard } = useClipboard()
 const nativeToken = useProfileStore().nativeToken;
 
-const redpacketBalance = ref<string>();
 const redpacket = ref<RedPacket>({
   mode: "random",
   split: 0,
-  balance: new BigNumber(0),
-  token: nativeToken,
-  gasToken: nativeToken,
+  balance: "0",
+  token: nativeToken as Token,
+  gasToken: nativeToken as Token,
   expiredAt: 0, // do not expire,
   payGasForClaimers: true,
 });
@@ -527,11 +526,9 @@ const tokenChoose =
     } else {
       redpacket.value.gasToken = token;
     }
-    console.log(token);
 };
 
 const calcGas = async () => {
-  redpacket.value.balance = new BigNumber(redpacketBalance.value || 0);
   if (redpacket.value.balance.gt(0) && redpacket.value.split > 0) {
     console.log(redpacket.value);
     const input : RedPacketInput = {
@@ -546,8 +543,7 @@ const calcGas = async () => {
       }
     };
     estimatedGas.value = await estimateDeployAndCreateRedPacket(
-      useNetworkStore().network,
-      redpacket
+      useNetworkStore().network, input
     );
     console.log(estimatedGas.value);
   }
@@ -660,7 +656,7 @@ if (walletStore.connected) {
 }
 
 const setMaxAmount = () => {
-  redpacket.value.balance = redpacket.value.token.balance?.normalized || new BigNumber(0);
+  redpacket.value.balance = redpacket.value.token.balance?.normalized || "0";
   // TODO Need to put out gas fee from the total amount
 }
 

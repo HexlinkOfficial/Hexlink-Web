@@ -152,7 +152,7 @@
                                 </div>
                                 <div style="display: flex; flex-direction: column; align-items: flex-start;">
                                   <b>{{ token.metadata.symbol }}</b>
-                                  <div style="margin-right:0.5rem;">{{ token.balance?.normalized }} available</div>
+                                  <div style="margin-right:0.5rem;">{{ redpacket.token == token ? token.balance?.normalized.minus(redpacket.balance) : token.balance?.normalized }} available</div>
                                 </div>
                               </div>
                             </div>
@@ -331,12 +331,45 @@
         </button>
       </div>
       <div v-if="showClaim" class="claim-card transition">
-        <h2 class="transition">Sent by @XXX<br><small>Best Wishes!</small></h2>
+        <h2 class="transition">
+          <!-- <a-tooltip placement="top">
+            <template #title>
+              <span>Follow me</span>
+            </template>
+            <svg class="twitter-icon" width="37" height="29" viewBox="0 0 37 29" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path
+                d="M36.003 3.429C34.68 4.015 33.257 4.406 31.756 4.591C33.282 3.685 34.456 2.24 35.007 0.533C33.579 1.37 31.997 1.985 30.314 2.309C28.97 0.884 27.053 0 24.929 0C20.849 0 17.542 3.278 17.542 7.32C17.542 7.892 17.609 8.449 17.735 8.99C11.597 8.682 6.153 5.764 2.511 1.336C1.871 2.418 1.511 3.685 1.511 5.022C1.511 7.563 2.812 9.8 4.796 11.118C3.585 11.081 2.445 10.744 1.447 10.204C1.447 10.226 1.447 10.259 1.447 10.29C1.447 13.841 3.994 16.798 7.37 17.471C6.753 17.64 6.101 17.734 5.429 17.734C4.952 17.734 4.487 17.68 4.037 17.599C4.977 20.501 7.704 22.622 10.935 22.685C8.407 24.645 5.223 25.819 1.761 25.819C1.163 25.819 0.578 25.785 0 25.715C3.271 27.786 7.155 29 11.324 29C24.909 29 32.341 17.844 32.341 8.166C32.341 7.849 32.331 7.533 32.316 7.221C33.766 6.197 35.016 4.905 36.003 3.429Z"
+                fill="#03A9F4" />
+            </svg>
+          </a-tooltip> -->
+          Sent by<br>
+          <div style="display: flex; align-items: center; justify-content: center;">
+            @{{ claimcard.from }}
+            <a class="twitter-link" :href="claimcard.twitter">
+              <i className="fa fa-twitter"></i>
+            </a>
+          </div>
+          <small>Best Wishes!</small>
+        </h2>
         <div class="cta-container transition">
           <button class="cta">Claim</button>
         </div>
         <div class="card_circle transition"></div>
       </div>
+      <button v-if="showClaim" @click="showClaim = !showClaim" class="claim-close-button transition">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <g clip-path="url(#clip0_481_175)">
+            <path
+              d="M11.7842 10L19.8695 1.91518C20.0435 1.74093 20.0435 1.45861 19.8695 1.28437L18.7164 0.130628C18.6327 0.0471947 18.519 0 18.4008 0C18.2824 0 18.1688 0.0471947 18.0852 0.130628L10.0001 8.21566L1.91508 0.130628C1.74759 -0.0368708 1.45114 -0.0366601 1.28407 0.130628L0.131169 1.28437C-0.043072 1.45861 -0.043072 1.74093 0.131169 1.91518L8.2162 10L0.131169 18.0848C-0.043072 18.2591 -0.043072 18.5414 0.131169 18.7156L1.28428 19.8694C1.36792 19.9528 1.48148 20 1.59989 20C1.7183 20 1.83165 19.9528 1.9153 19.8694L10.0003 11.7843L18.0854 19.8694C18.169 19.9528 18.2828 20 18.401 20C18.5192 20 18.6329 19.9528 18.7166 19.8694L19.8697 18.7156C20.0437 18.5414 20.0437 18.2591 19.8697 18.0848L11.7842 10Z"
+              fill="white" />
+          </g>
+          <defs>
+            <clipPath id="clip0_481_175">
+              <rect width="20" height="20" fill="white" />
+            </clipPath>
+          </defs>
+        </svg>
+      </button>
     </div>
   </layout>
 </template>
@@ -356,22 +389,13 @@ import { useNetworkStore } from '@/stores/network';
 import type { OnClickOutsideHandler } from '@vueuse/core'
 import { onClickOutside } from '@vueuse/core'
 import { vOnClickOutside } from '@/services/directive';
-import type { Token } from "@/types";
+import type { Token, ClaimCardData, RedPacket } from "@/types";
 import useClipboard from 'vue-clipboard3';
 import { createToaster } from "@meforma/vue-toaster";
 import { normalizeBalance } from '@/services/web3/tokens';
 import { CopyOutlined } from '@ant-design/icons-vue';
 import { EstimateGas } from "@/services/web3/gas";
 import { BigNumber as EthBigNumber} from "ethers";
-
-interface RedPacket {
-  mode: "random" | "equal";
-  split: Number,
-  balance: BigNumber | undefined,
-  token: Token,
-  gasToken: Token,
-  expiredAt: Number,
-}
 
 const sendLuck = ref<boolean>(false);
 const luckHistory = ref<boolean>(true);
@@ -387,11 +411,9 @@ const redPackets = ref<RedPacketData[]>([]);
 const showClaim = ref<boolean>(false);
 // should be fetched from the store
 const userId = ref<string>("ming");
-
+const tokens = ref<Token[]>([]);
 const { toClipboard } = useClipboard()
 const nativeToken = useProfileStore().nativeToken;
-
-const tokens = ref<Token[]>([]);
 const redpacket = ref<RedPacket>({
   mode: "random",
   split: 0,
@@ -400,6 +422,11 @@ const redpacket = ref<RedPacket>({
   gasToken: nativeToken,
   expiredAt: 0 // do not expire
 });
+const claimcard = ref<ClaimCardData>({
+  twitter: "https://mobile.twitter.com/dreambig_peter",
+  token: nativeToken,
+  from: "dreambig_peter"
+})
 
 const genLocalTokens = function() : Token[] {
   // merge balances
@@ -489,10 +516,12 @@ const tokenChoose =
     } else {
       redpacket.value.gasToken = token;
     }
+    console.log(token);
 };
 
 const calcGas = async () => {
-  estimateGas.value = await EstimateGas(EthBigNumber.from(100000), redpacket.value.gasToken as Token, 1)
+  estimateGas.value = await EstimateGas(EthBigNumber.from(100000), redpacket.value.gasToken as Token, 1);
+  console.log(estimateGas.value);
 }
 
 const chooseAccount = function() {
@@ -633,6 +662,55 @@ const copy = async (text: string) => {
 </script>
 
 <style lang="less" scoped>
+.twitter-link {
+  display: flex;
+  margin-left: 0.5rem; }
+.twitter-link:hover i {
+  color: #1DA1F2; }
+.close-button {
+  padding: 0.25em 0.7em 0.2em;
+  position: absolute;
+  top: -0.9rem;
+  right: -0.5rem;
+  font-weight: 700;
+  background-color: #308AF5;
+  border: none;
+  outline: none;
+  color: #fff;
+  margin: 0.5rem 0;
+  border-bottom: 2px solid #076AE0;
+  text-shadow: 1px 1px 1px #1D4ED8;
+  border-radius: 4px;
+  font-size: 1rem;
+  box-sizing: border-box;
+  vertical-align: middle;
+  cursor: pointer;
+}
+.claim-close-button {
+  background-color: #FD4755;
+  color: #fff;
+  height: 3rem;
+  width: 3rem;
+  position: absolute;
+  margin: auto;
+  left: 55%;
+  top: 88%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0px 10px 20px rgb(0 0 0 / 10%);
+  border-radius: 55px;
+  overflow: hidden;
+  z-index: 55; 
+  font-size: 1rem;
+  box-sizing: border-box;
+  vertical-align: middle;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  @media (max-width: 990px) {
+    left: 50%; } }
+.claim-close-button:hover {
+  background-color: rgba(253, 71, 85, 0.8); }
 .claim-card {
   background-color: #fff;
   height: 400px;
@@ -651,11 +729,14 @@ const copy = async (text: string) => {
 .claim-card:hover {
   box-shadow: 0px 30px 30px rgba(0, 0, 0, 0.2);
   height: 430px;
-  width: 330px; }
+  width: 330px;
+  color: white; }
 .claim-card:hover h2 {
   margin-top: 100px;
   color: #fff; }
 .claim-card:hover h2 small {
+  color: #fff; }
+.claim-card:hover h2 div a i {
   color: #fff; }
 .transition {
   transition: .3s cubic-bezier(.3, 0, 0, 1.3) }
@@ -671,7 +752,6 @@ const copy = async (text: string) => {
   margin-top: 320px; }
 .cta {
   color: #fff;
-  border: 2px solid #FD4755;
   background-color: #FD4755;
   padding: 10px 25px;
   border-radius: 50px;
@@ -679,9 +759,11 @@ const copy = async (text: string) => {
   text-decoration: none;
   width: 10rem;
   font-weight: bold; }
+.cta:hover {
+  background-color: rgba(253,71,85,0.8); }
 .claim-card h2 {
   text-align: center;
-  margin-top: 190px;
+  margin-top: 50%;
   position: absolute;
   z-index: 9999;
   font-size: 26px;
@@ -697,8 +779,8 @@ const copy = async (text: string) => {
   background-color: #FD4755;
   position: absolute;
   border-radius: 50%;
-  margin-left: -75px;
-  margin-top: -270px; }
+  margin-left: -80px;
+  margin-top: -280px; }
 .claim-card:hover .card_circle {
   border-radius: 0;
   margin-top: -130px; }
@@ -782,25 +864,6 @@ const copy = async (text: string) => {
   @media (max-width: 990px) {
     left: 50%;
   }
-}
-.close-button {
-  padding: 0.25em 0.7em 0.2em;
-  position: absolute;
-  top: -0.9rem;
-  right: -0.5rem;
-  font-weight: 700;
-  background-color: #308AF5;
-  border: none;
-  outline: none;
-  color: #fff;
-  margin: 0.5rem 0;
-  border-bottom: 2px solid #076AE0;
-  text-shadow: 1px 1px 1px #1D4ED8;
-  border-radius: 4px;
-  font-size: 1rem;
-  box-sizing: border-box;
-  vertical-align: middle;
-  cursor: pointer;
 }
 
 .token-available-balance {

@@ -78,5 +78,5 @@ export async function initProfile(network: Network) {
     const account = await buildAccount(network, useAuthStore().user!.nameHash);
     const tokens = await initTokenList(network);
     console.log("initiating");
-    store.init(network, account, tokens);
+    console.log("Tokens: ", tokens)
 }

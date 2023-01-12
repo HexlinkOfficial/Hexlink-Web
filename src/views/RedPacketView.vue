@@ -416,7 +416,7 @@ const nativeToken = useProfileStore().nativeToken;
 const redpacket = ref<RedPacket>({
   mode: "random",
   split: 0,
-  balance: EthBigNumber.from(0),
+  balance: new BigNumber(0),
   token: nativeToken,
   gasToken: nativeToken,
   expiredAt: 0, // do not expire,

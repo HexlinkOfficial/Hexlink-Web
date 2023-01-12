@@ -142,7 +142,7 @@ export function tokenTransferOp(
 export async function deployAndCreateRedPacket(
     network: Network,
     input: RedPacketInput
-) {
+) : Promise<string> {
     const walletAccount = useWalletStore().wallet!.account;
     const hexlAccount = useProfileStore().profile!.account;
     let value : BigNumber = BigNumber.from(0);
@@ -186,7 +186,7 @@ export async function deployAndCreateRedPacket(
     const data = hexlink.interface.encodeFunctionData(
         "deploy", [useAuthStore().user!.nameHash, initData, proof]
     );
-    await sendTransaction(
+    return await sendTransaction(
         walletAccount.address,
         value,
         hexlink.address,

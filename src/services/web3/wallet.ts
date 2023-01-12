@@ -1,5 +1,5 @@
 import Web3Model from "web3modal";
-import { ethers } from "ethers";
+import { ethers, BigNumber } from "ethers";
 import { useWalletStore } from "@/stores/wallet"
 import { buildAccountFromAddress } from "./account";
 import WalletConnect from "@walletconnect/web3-provider";
@@ -64,5 +64,23 @@ export async function signMessage(account: string, message: string) {
       method: 'eth_signTypedData_v4',
       params: [{ account, message }],
       from: account
+  });
+}
+
+export async function sendTransaction(
+  account: string,
+  value: BigNumber,
+  to: string,
+  data: string
+) : Promise<string> {
+  const transactionParameters = {
+    to, // Required except during contract publications.
+    from: account, // must match user's active address.
+    value: value.toHexString(), // Only required to send ether to the recipient from the initiating external account.
+    data, // Optional, but used for defining smart contract creation and interaction.
+  };
+  return await window.ethereum.request({
+    method: 'eth_sendTransaction',
+    params: [transactionParameters],
   });
 }

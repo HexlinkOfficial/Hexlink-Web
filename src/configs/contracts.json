@@ -1,13 +1,11 @@
 {
   "goerli": {
     "hexlink": "0xbad6a7948a1d3031ee7236d0180b6271fa569148",
-    "hexlinkHelper": "0x32AFdFeB375090043324e4000110C69b4707539a",
     "redPacket": "0x4c46BB27cdA575C84bc0fD87de9D2a3ef0F0BB4b",
     "wrappedCoin": "0xb4fbf271143f4fbf7b91a5ded31805e42b2208d6"
   },
   "mumbai": {
     "hexlink": "0x78317ef8b020Fe10e845ab8723403cF1e58Ef1Cc",
-    "hexlinkHelper": "0x10b1A0BCdAd376419Dda56A060DB8F0B242FbC56",
     "redPacket": "0x0deFb16796B8c4cB429A9e249ae21d21399e0A31",
     "wrappedCoin": "0x9c3C9283D3e44854697Cd22D3Faa240Cfb032889"
   }

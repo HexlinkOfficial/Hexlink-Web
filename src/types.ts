@@ -115,9 +115,9 @@ export interface RedPacketInput {
         tokenAmount: EthersBigNumber;
         gasTokenAmount: EthersBigNumber;
     },
-    walletAccount: {
-        tokenAmount: EthersBigNumber;
-        gasTokenAmount: EthersBigNumber;
+    walletAccount?: {
+        tokenAmount?: EthersBigNumber;
+        gasTokenAmount?: EthersBigNumber;
     }
 }
 

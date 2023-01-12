@@ -54,7 +54,7 @@
                   <div class="total-amount">
                     <div class="box">
                       <p class="total-amount-text">Total Amount</p>
-                      <input v-model="redpacket.balance" id="red-packet-amount" class="amount-input" autocomplete="off"
+                      <input v-model="redpacketBalance" id="red-packet-amount" class="amount-input" autocomplete="off"
                         placeholder="0.0" required="true" type="number" autocorrect="off" title="Token Amount"
                         inputmode="decimal" min="0" minlength="1" maxlength="79" pattern="^[0-9]*[.,]?[0-9]*$"
                         spellcheck="false">
@@ -71,7 +71,12 @@
                             </div>
                           </div>
                           <div class="token-select">
-                            <div class="mode-dropdown" :class="chooseTotalDrop && 'active'" @click.stop="chooseTotalDrop = !chooseTotalDrop;" v-on-click-outside.bubble="chooseTotalHandle">
+                            <div
+                              class="mode-dropdown"
+                              :class="chooseTotalDrop && 'active'"
+                              @click.stop="chooseTotalDrop = !chooseTotalDrop;"
+                              v-on-click-outside.bubble="chooseTotalHandle"
+                            >
                               <div class="token-icon">
                                 <img :src="redpacket.token.metadata.logoURI" />
                               </div>
@@ -99,7 +104,11 @@
                   </div>
                   <div class="mode-and-share">
                     <div class="game-mode">
-                      <div class="mode-dropdown" :class="openDropdown && 'active'" @click.stop="openDropdown = !openDropdown;" v-on-click-outside.bubble="dropdownHandle">
+                      <div class="mode-dropdown"
+                        :class="openDropdown && 'active'"
+                        @click.stop="openDropdown = !openDropdown;"
+                        v-on-click-outside.bubble="dropdownHandle"
+                      >
                         <div class="mode-text">{{ modeLabels[redpacket.mode] }}</div>
                         <input class="mode-input" type="text" placeholder="select" readonly>
                         <div class="mode-options" style="width:100%;">
@@ -130,9 +139,9 @@
                         Service Fee: 
                         <a-tooltip placement="top">
                           <template #title>
-                            <span>Service Fee: <b>{{ estimateGas }}</b></span>
+                            <span>Service Fee: <b>{{ estimatedGas.total.toString() }}</b></span>
                           </template>
-                          <b>{{ estimateGas?.substring(0,6) }}</b>
+                          <b>{{ estimatedGas.total.toString().substring(0,6) }}</b>
                         </a-tooltip>
                       </p>
                       <div class="total-choose-token">
@@ -151,7 +160,13 @@
                                 </div>
                                 <div style="display: flex; flex-direction: column; align-items: flex-start;">
                                   <b>{{ token.metadata.symbol }}</b>
-                                  <div style="margin-right:0.5rem;">{{ redpacket.token == token ? token.balance?.normalized.minus(redpacket.balance) : token.balance?.normalized }} available</div>
+                                  <div style="margin-right:0.5rem;">
+                                    {{
+                                      redpacket.token == token
+                                      ? token.balance?.normalized.minus(new BigNumber(redpacketBalance || 0))
+                                      : token.balance?.normalized
+                                    }} available
+                                  </div>
                                 </div>
                               </div>
                             </div>
@@ -331,16 +346,6 @@
       </div>
       <div v-if="showClaim" class="claim-card transition">
         <h2 class="transition">
-          <!-- <a-tooltip placement="top">
-            <template #title>
-              <span>Follow me</span>
-            </template>
-            <svg class="twitter-icon" width="37" height="29" viewBox="0 0 37 29" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path
-                d="M36.003 3.429C34.68 4.015 33.257 4.406 31.756 4.591C33.282 3.685 34.456 2.24 35.007 0.533C33.579 1.37 31.997 1.985 30.314 2.309C28.97 0.884 27.053 0 24.929 0C20.849 0 17.542 3.278 17.542 7.32C17.542 7.892 17.609 8.449 17.735 8.99C11.597 8.682 6.153 5.764 2.511 1.336C1.871 2.418 1.511 3.685 1.511 5.022C1.511 7.563 2.812 9.8 4.796 11.118C3.585 11.081 2.445 10.744 1.447 10.204C1.447 10.226 1.447 10.259 1.447 10.29C1.447 13.841 3.994 16.798 7.37 17.471C6.753 17.64 6.101 17.734 5.429 17.734C4.952 17.734 4.487 17.68 4.037 17.599C4.977 20.501 7.704 22.622 10.935 22.685C8.407 24.645 5.223 25.819 1.761 25.819C1.163 25.819 0.578 25.785 0 25.715C3.271 27.786 7.155 29 11.324 29C24.909 29 32.341 17.844 32.341 8.166C32.341 7.849 32.331 7.533 32.316 7.221C33.766 6.197 35.016 4.905 36.003 3.429Z"
-                fill="#03A9F4" />
-            </svg>
-          </a-tooltip> -->
           Sent by<br>
           <div style="display: flex; align-items: center; justify-content: center;">
             @{{ claimcard.from }}
@@ -388,13 +393,13 @@ import { useNetworkStore } from '@/stores/network';
 import type { OnClickOutsideHandler } from '@vueuse/core'
 import { onClickOutside } from '@vueuse/core'
 import { vOnClickOutside } from '@/services/directive';
-import type { Token, ClaimCardData, RedPacket } from "@/types";
+import type { Token, ClaimCardData, RedPacket, EstimatedTxCost, RedPacketInput } from "@/types";
 import useClipboard from 'vue-clipboard3';
 import { createToaster } from "@meforma/vue-toaster";
 import { normalizeBalance } from '@/services/web3/tokens';
 import { CopyOutlined } from '@ant-design/icons-vue';
-import { EstimateGas } from "@/services/web3/gas";
 import { BigNumber as EthBigNumber} from "ethers";
+import { estimateDeployAndCreateRedPacket } from "@/services/web3/hexlink";
 
 const sendLuck = ref<boolean>(false);
 const luckHistory = ref<boolean>(true);
@@ -405,7 +410,11 @@ const enableGas = ref<boolean>(false);
 const accountChosen = ref<number>(0);
 const modal = ref<boolean>(false);
 const modalRef = ref<any>(null);
-const estimateGas = ref<string | undefined>("0");
+const estimatedGas = ref<EstimatedTxCost>({
+  sponsorship: EthBigNumber.from(0),
+  currentTx: EthBigNumber.from(0),
+  total: EthBigNumber.from(0)
+});
 const redPackets = ref<RedPacketData[]>([]);
 const showClaim = ref<boolean>(false);
 // should be fetched from the store
@@ -413,6 +422,8 @@ const userId = ref<string>("ming");
 const tokens = ref<Token[]>([]);
 const { toClipboard } = useClipboard()
 const nativeToken = useProfileStore().nativeToken;
+
+const redpacketBalance = ref<string>();
 const redpacket = ref<RedPacket>({
   mode: "random",
   split: 0,
@@ -436,10 +447,10 @@ const genLocalTokens = function() : Token[] {
     return Object.values(profileTokens).map(token => {
       const address = token.metadata.address.toLowerCase();
       const decimals = token.metadata.decimals;
-      const defaultBalance = new BigNumber(0);
+      const defaultBalance = EthBigNumber.from(0);
       const walletBalance = walletTokenBalances[address]?.value || defaultBalance;
       const profileBalance = profileTokens[address].balance?.value || defaultBalance;
-      const newBalance = walletBalance.plus(profileBalance);
+      const newBalance = walletBalance.add(profileBalance);
       return {
         metadata: token.metadata,
         balance: normalizeBalance(newBalance, decimals)
@@ -450,7 +461,7 @@ const genLocalTokens = function() : Token[] {
     return useProfileStore().feasibleTokens.map(t => ({
       metadata: t.metadata,
       balance: normalizeBalance(
-        new BigNumber(t.balance?.value || 0),
+        EthBigNumber.from(t.balance?.value || 0),
         t.metadata.decimals
       )
     }))
@@ -461,7 +472,7 @@ function defaultToken(token: Token) {
   return {
     metadata: token.metadata,
     balance: normalizeBalance(
-      new BigNumber(0),
+      EthBigNumber.from(0),
       token.metadata.decimals
     )
   };
@@ -520,8 +531,26 @@ const tokenChoose =
 };
 
 const calcGas = async () => {
-  estimateGas.value = await EstimateGas(EthBigNumber.from(100000), redpacket.value.gasToken as Token, 1);
-  console.log(estimateGas.value);
+  redpacket.value.balance = new BigNumber(redpacketBalance.value || 0);
+  if (redpacket.value.balance.gt(0) && redpacket.value.split > 0) {
+    console.log(redpacket.value);
+    const input : RedPacketInput = {
+      data: redpacket.value,
+      hexlinkAccount: {
+        tokenAmount: EthBigNumber.from(0),
+        gasTokenAmount: EthBigNumber.from(0)
+      },
+      walletAccount: {
+        tokenAmount: EthBigNumber.from(0),
+        gasTokenAmount: EthBigNumber.from(0)
+      }
+    };
+    estimatedGas.value = await estimateDeployAndCreateRedPacket(
+      useNetworkStore().network,
+      redpacket
+    );
+    console.log(estimatedGas.value);
+  }
 }
 
 const chooseAccount = function() {
@@ -631,14 +660,8 @@ if (walletStore.connected) {
 }
 
 const setMaxAmount = () => {
-  redpacket.value.balance = redpacket.value.token.balance?.normalized;
+  redpacket.value.balance = redpacket.value.token.balance?.normalized || new BigNumber(0);
   // TODO Need to put out gas fee from the total amount
-}
-
-const showAvailableBalance = (hexlinkValue: BigNumber | undefined, externalValue: BigNumber) => {
-  // if external not chosen, return hexlinkValue
-  // if external is chosen, return hexlinValue + externalValue
-  return hexlinkValue;
 }
 
 const chooseTotalHandle: OnClickOutsideHandler = (event) => {

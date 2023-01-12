@@ -15,7 +15,7 @@ export const GOERLI : Network = {
         name: "Goerli ETH",
         symbol: "gETH",
         decimals: 18,
-        priceInUsd: new BigNumber(1500)
+        priceInUsd: new BigNumber(1500.0)
     },
     blockExplorerUrls: ["https://goerli.etherscan.io"],
     logoUrl: "https://token.metaswap.codefi.network/assets/networkLogos/ethereum.svg",
@@ -47,7 +47,7 @@ export const POLYGON : Network = {
         name: "MATIC",
         symbol: "MATIC",
         decimals: 18,
-        priceInUsd: new BigNumber(0.8)
+        priceInUsd: new BigNumber(1.0)
     },
     blockExplorerUrls: ["https://polygonscan.com"],
     logoUrl: "https://token.metaswap.codefi.network/assets/networkLogos/polygon.svg",
@@ -76,7 +76,7 @@ export const MUMBAI : Network = {
         name: "MATIC",
         symbol: "MATIC",
         decimals: 18,
-        priceInUsd: new BigNumber(0.8)
+        priceInUsd: new BigNumber(1.0)
     },
     blockExplorerUrls: ["https://mumbai.polygonscan.com/"],
     logoUrl: "https://token.metaswap.codefi.network/assets/networkLogos/polygon.svg",

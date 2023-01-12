@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import type { Network, Token, Profile, Preference, Account, NormalizedTokenBalance } from '@/types';
 import { useNetworkStore } from './network';
-import BigNumber from 'bignumber.js';
+import { BigNumber as EthBigNumber } from 'ethers';
 
 export const useProfileStore = defineStore({
     id: 'profile',
@@ -33,7 +33,7 @@ export const useProfileStore = defineStore({
         // display tokens with balance > 0
         feasibleTokens() : Token[] {
             return Object.values(this.profile?.tokens || {}).filter(
-                t => new BigNumber(t.balance?.value || 0).gt(0)
+                t => EthBigNumber.from(t.balance?.value || 0).gt(0)
             );
         }
     },

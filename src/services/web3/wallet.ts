@@ -67,20 +67,16 @@ export async function signMessage(account: string, message: string) {
   });
 }
 
-export async function sendTransaction(
-  account: string,
-  value: BigNumber,
-  to: string,
-  data: string
-) : Promise<string> {
-  const transactionParameters = {
-    to, // Required except during contract publications.
-    from: account, // must match user's active address.
-    value: value.toHexString(), // Only required to send ether to the recipient from the initiating external account.
-    data, // Optional, but used for defining smart contract creation and interaction.
-  };
+export async function estimateGas(txParams: any) : Promise<string> {
+  return await window.ethereum.request({
+    method: 'eth_estimateGas',
+    params: [txParams],
+  });
+}
+
+export async function sendTransaction(txParams: any) : Promise<string> {
   return await window.ethereum.request({
     method: 'eth_sendTransaction',
-    params: [transactionParameters],
+    params: [txParams],
   });
 }

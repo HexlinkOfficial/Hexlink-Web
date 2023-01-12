@@ -1,4 +1,4 @@
-import type { BigNumber } from "bignumber.js";
+import type { BigNumber as BigNumberJs } from "bignumber.js";
 import type { BigNumber as EthersBigNumber } from "ethers";
 
 export interface Network {
@@ -14,7 +14,7 @@ export interface Network {
         name: string,
         symbol: string,
         decimals: number,
-        priceInUsd: BigNumber
+        priceInUsd: BigNumberJs
     },
     blockExplorerUrls: string[],
     logoUrl: string,
@@ -81,8 +81,8 @@ export interface Preference {
 }
 
 export interface NormalizedTokenBalance {
-    value: BigNumber;
-    normalized: BigNumber;
+    value: EthersBigNumber;
+    normalized: BigNumberJs;
     updatedAt: Date;
 }
 
@@ -105,14 +105,12 @@ export interface RedPacket {
     payGasForClaimers: boolean;
     mode: "random" | "equal";
     split: number;
-    balance: BigNumber;
+    balance: BigNumberJs;
     expiredAt: number;
 }
 
 export interface RedPacketInput {
     data: RedPacket;
-    gasPrice: EthersBigNumber;
-    gasSponsorshipCostEstimation?: EthersBigNumber;
     hexlinkAccount: {
         tokenAmount: EthersBigNumber;
         gasTokenAmount: EthersBigNumber;
@@ -143,7 +141,7 @@ export interface ClaimCardData {
 export interface CreatedRedPacket {
     id: string;
     salt: string;
-    data: RedPacketData,
+    data: RedPacket,
     balanceLeft: EthersBigNumber;
     splitLeft: number;
     gasSponsorshipCost: EthersBigNumber;
@@ -168,4 +166,10 @@ export interface UserOp {
     value: EthersBigNumber;
     callData: string;
     callGasLimit: EthersBigNumber;
+}
+
+export interface EstimatedTxCost {
+    sponsorship: EthersBigNumber;
+    currentTx: EthersBigNumber;
+    total: EthersBigNumber;
 }

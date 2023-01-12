@@ -2,7 +2,7 @@ import type { Account, Network } from "@/types";
 import { useProfileStore } from "@/stores/profile";
 import { useAuthStore } from "@/stores/auth";
 import { initTokenList } from "@/services/web3/tokens";
-import { hexlink } from "@/services/web3/hexlink";
+import { hexlinkContract } from "@/services/web3/hexlink";
 import { getProvider } from "@/services/web3/network";
 import { hash } from "@/services/web3/utils";
 
@@ -26,7 +26,7 @@ export async function buildAccountFromAddress(address: string) : Promise<Account
 };
 
 export async function buildAccount(network: Network, nameHash: string) : Promise<Account> {
-    const address = await hexlink(network).addressOfName(nameHash);
+    const address = await hexlinkContract(network).addressOfName(nameHash);
     return await buildAccountFromAddress(address);
 };
 

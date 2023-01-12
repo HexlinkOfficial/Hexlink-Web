@@ -35,8 +35,7 @@
                 </div>
               </div>
               <div v-if="luckHistory" class="sent-history">
-                <RedPacektHistoryList
-                  :redPackets="redPackets"
+                <RedPacektHistoryList :redPackets="redPackets"
                 ></RedPacektHistoryList>
               </div>
               <div v-if="!walletStore.connected && sendLuck" class="connectWallet">
@@ -417,10 +416,11 @@ const nativeToken = useProfileStore().nativeToken;
 const redpacket = ref<RedPacket>({
   mode: "random",
   split: 0,
-  balance: BigNumber(0),
+  balance: EthBigNumber.from(0),
   token: nativeToken,
   gasToken: nativeToken,
-  expiredAt: 0 // do not expire
+  expiredAt: 0, // do not expire,
+  payGasForClaimers: true,
 });
 const claimcard = ref<ClaimCardData>({
   twitter: "https://mobile.twitter.com/dreambig_peter",

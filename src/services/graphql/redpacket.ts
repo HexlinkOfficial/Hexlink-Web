@@ -87,7 +87,7 @@ const store = useAuthStore();
 export async function getRedPacket(
   redPacketId: string
 ) : Promise<RedPacketOutput[]> {
-  const client = setUrqlClientIfNecessary(store.idToken!);
+  const client = setUrqlClientIfNecessary(store.user!.idToken!);
   const result = await client.query(
     GET_REDPACKET,
     {userUid: store.user!.uid, redPacketId: redPacketId}
@@ -102,7 +102,7 @@ export async function getRedPacket(
 export async function getRedPacketByUser(
   userId: string
 ) : Promise<RedPacketOutput[]> {
-  const client = setUrqlClientIfNecessary(store.idToken!);
+  const client = setUrqlClientIfNecessary(store.user!.idToken!);
   const result = await client.query(
     GET_REDPACKET_BY_USER,
     {userUid: store.user!.uid, userId: userId}
@@ -117,7 +117,7 @@ export async function getRedPacketByUser(
 export async function insertRedPacket(
   data: RedPacketInput[],
 ) : Promise<{red_packet_id: string}[]> {
-  const client = setUrqlClientIfNecessary(store.idToken!)
+  const client = setUrqlClientIfNecessary(store.user!.idToken!)
   const result = await client.mutation(
       INSERT_REDPACKET,
       {

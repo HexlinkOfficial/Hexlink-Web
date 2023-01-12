@@ -13,10 +13,13 @@ export interface Network {
     nativeCurrency: {
         name: string,
         symbol: string,
-        decimals: Number,
+        decimals: number,
+        priceInUsd: BigNumber
     },
     blockExplorerUrls: string[],
     logoUrl: string,
+    defaultGasPrice: EthersBigNumber,
+    contracts: {[key : string]: string | string[]}
 }
 
 export interface Account {
@@ -97,28 +100,18 @@ export interface Profile {
 }
 
 export interface RedPacket {
-    mode: "random" | "equal";
-    split: Number,
-    balance: BigNumber,
-    token: Token,
-    gasToken: Token,
-    expiredAt: Number,
-}
-
-export interface RedPacketData {
     token: Token;
     gasToken: Token;
     payGasForClaimers: boolean;
     mode: "random" | "equal";
-    split: Number;
+    split: number;
     balance: BigNumber;
-    expiredAt: Number;
+    expiredAt: number;
 }
 
 export interface RedPacketInput {
-    data: RedPacketData;
+    data: RedPacket;
     gasPrice: EthersBigNumber;
-    gasTokenPrice: BigNumber;
     gasSponsorshipCostEstimation?: EthersBigNumber;
     hexlinkAccount: {
         tokenAmount: EthersBigNumber;

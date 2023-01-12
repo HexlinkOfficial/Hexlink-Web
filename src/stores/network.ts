@@ -10,8 +10,9 @@ export const useNetworkStore = defineStore({
     }),
     persist: true,
     getters: {
-        nativeCoinAddress: (state) => nativeCoinAddress(state.network),
-        wrappedCoinAddress: (state) => wrappedCoinAddress(state.network),
+        nativeCoinAddress: (state) => state.network.contracts.nativeCoin,
+        wrappedCoinAddress: (state) => state.network.contracts.wrappeCoin,
+        stableCoinAddresses: (state) => state.network.contracts.stableCoins,
     },
     actions: {
         switchNetwork(network: Network) {

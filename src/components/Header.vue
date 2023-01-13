@@ -806,6 +806,8 @@ cursor: pointer; }
           font-weight: 500;
           overflow: hidden;
           text-overflow: ellipsis;
+          width: 120px;
+          overflow: auto;
           white-space: nowrap; }
         .selectnetwork .dropdown-menu .box .network-items .items-name .item-balance {
           color: #6a6d7c;

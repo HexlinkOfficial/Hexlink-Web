@@ -35,9 +35,12 @@
                   </div>
                 </div>
               </div>
-              <div v-if="luckHistory" class="sent-history">
-                <RedPacektHistoryList :redPackets="redPackets"
-                ></RedPacektHistoryList>
+              <div v-if="luckHistory" class="token-listDetail">
+                <div class="token-table">
+                  <div style="overflow: visible; border-radius: 0.75rem;">
+                    <RedPacektHistoryList :redPackets="redPackets"></RedPacektHistoryList>
+                  </div>
+                </div>
               </div>
               <div v-if="!walletStore.connected && sendLuck" class="connectWallet">
                 <button v-if="walletStore.connected == false" class="connect-wallet-button" @click="connectOrDisconnectWallet">
@@ -93,7 +96,7 @@
                                   </div>
                                   <div style="display: flex; flex-direction: column; align-items: flex-start;">
                                     <b>{{ token.metadata.symbol }}</b>
-                                    <div style="margin-right:0.5rem;">{{ token.balance?.normalized }} available</div>
+                                    <div style="margin-right:0.5rem;">{{ calcRemainingBalance(token) }} available</div>
                                   </div>
                                 </div>
                               </div>
@@ -129,12 +132,7 @@
                   </div>
                 </div>
                 <div class="token-list gas-station">
-                  <div class="enable-switch">
-                    <p>Pay service fee for your claimers</p>
-                    <a-switch style="margin-left: 1rem; height: 25px; width: 45px;" v-model:checked="enableGas" />
-                  </div>
-                  <div class="gas-estimation-parent">
-                    <div class="gas-estimation">
+                  <div class="gas-estimation">
                       <p>
                         <img style="width: 20px; height: 20px;" src="https://i.postimg.cc/RhXfgJR1/gas-pump.png"/>
                         Service Fee: 
@@ -162,11 +160,7 @@
                                 <div style="display: flex; flex-direction: column; align-items: flex-start;">
                                   <b>{{ token.metadata.symbol }}</b>
                                   <div style="margin-right:0.5rem;">
-                                    {{
-                                      redpacket.token == token
-                                      ? new BigNumber(token.balance?.normalized || 0).minus(redpacket.balance || 0)
-                                      : token.balance?.normalized
-                                    }} available
+                                    {{ calcRemainingBalance(token) }} available
                                   </div>
                                 </div>
                               </div>
@@ -183,14 +177,12 @@
                           <path d="M11 8V7" stroke="#898989" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                         </svg>
                       </div>
-                      
+                  </div>
+                  <!-- <div v-if="balanceEnough">
+                    <div class="alert alert--error">
+                      <p> <strong>Warning!</strong>&nbsp;Insufficient Balance.</p>
                     </div>
-                  </div>
-                </div>
-                <div v-if="enableGas" class="gas-sponsor-warning">
-                  <div class="alert alert--error">
-                    <p> <strong>Warning!</strong> You are going to pay service fee for your claimers. Please maintain XXXX WETH in your balance.</p>
-                  </div>
+                  </div> -->
                 </div>
                 <div class="choose-account">
                   <div class="HexlinkAccount">
@@ -322,7 +314,7 @@
                   </div>
                 </div>
                 <div class="create">
-                  <button class="connect-wallet-button" @click="modal = true" style="width: auto;">
+                  <!-- <button class="connect-wallet-button" @click="modal = true" style="width: auto;">
                     <svg style="margin-right: 10px;" width="18" height="18" viewBox="0 0 18 18" fill="none"
                       xmlns="http://www.w3.org/2000/svg">
                       <path
@@ -330,7 +322,18 @@
                         fill="white" />
                     </svg>
                     Create Red Packet
-                  </button>
+                  </button> -->
+                  <router-link to="/transactions" data-toggle="tooltip" data-placement="right" title="Signout">
+                    <button class="connect-wallet-button" style="width: auto;">
+                        <svg style="margin-right: 10px;" width="18" height="18" viewBox="0 0 18 18" fill="none"
+                          xmlns="http://www.w3.org/2000/svg">
+                          <path
+                            d="M16 2.50025V3.51125C16.5304 3.51125 17.0391 3.72196 17.4142 4.09703C17.7893 4.47211 18 4.98081 18 5.51125V15.5112C18 16.0416 17.7893 16.5504 17.4142 16.9254C17.0391 17.3005 16.5304 17.5112 16 17.5112H2C1.46957 17.5112 0.96086 17.3005 0.58579 16.9254C0.21071 16.5504 0 16.0416 0 15.5112V5.51125C0 4.46625 0.835 3.51825 1.813 3.23925L12.813 0.0962511C13.1851 -0.0100989 13.5768 -0.0286089 13.9573 0.0421711C14.3377 0.112951 14.6966 0.271091 15.0055 0.504141C15.3145 0.737191 15.5651 1.03878 15.7377 1.38516C15.9102 1.73154 16 2.11326 16 2.50025ZM12.5 9.01123C12.1022 9.01123 11.7206 9.16933 11.4393 9.45063C11.158 9.73193 11 10.1134 11 10.5112C11 10.909 11.158 11.2906 11.4393 11.5719C11.7206 11.8532 12.1022 12.0112 12.5 12.0112C12.8978 12.0112 13.2794 11.8532 13.5607 11.5719C13.842 11.2906 14 10.909 14 10.5112C14 10.1134 13.842 9.73193 13.5607 9.45063C13.2794 9.16933 12.8978 9.01123 12.5 9.01123ZM14 2.50025C14.0001 2.42966 13.9852 2.35986 13.9563 2.29544C13.9274 2.23102 13.8853 2.17345 13.8326 2.1265C13.7798 2.07955 13.7178 2.04429 13.6505 2.02305C13.5832 2.00181 13.5121 1.99506 13.442 2.00325L13.362 2.01925L8.14 3.51125H14V2.50025Z"
+                            fill="white" />
+                        </svg>
+                        Create Red Packet
+                    </button>
+                  </router-link>
                   <button class="connect-wallet-button" @click="showClaim = !showClaim" style="width: auto; margin-right: 1rem;">
                     Test Claim
                   </button>
@@ -352,6 +355,7 @@
             fill="white" />
         </svg>
         <h2 class="transition">
+          <small v-if="packetId != 'luck'" style="font-size: 50%;">Claim id: {{ packetId }}</small><br>
           Sent by<br>
           <div style="display: flex; align-items: center; justify-content: center;">
             @{{ claimcard.from }}
@@ -393,13 +397,13 @@ import { CopyOutlined } from '@ant-design/icons-vue';
 import { BigNumber as EthBigNumber} from "ethers";
 import { estimateDeployAndCreateRedPacket } from "@/services/web3/hexlink";
 import { useRoute } from "vue-router";
+import { message } from 'ant-design-vue';
 
 const sendLuck = ref<boolean>(false);
 const luckHistory = ref<boolean>(true);
 const openDropdown = ref<boolean>(false);
 const chooseTotalDrop = ref<boolean>(false);
 const chooseGasDrop = ref<boolean>(false);
-const enableGas = ref<boolean>(false);
 const accountChosen = ref<number>(0);
 const modal = ref<boolean>(false);
 const modalRef = ref<any>(null);
@@ -411,7 +415,7 @@ const estimatedGas = ref<EstimatedTxCost>({
 const redPackets = ref<RedPacketData[]>([]);
 const showClaim = ref<boolean>(false);
 const packetId = ref<string>("luck");
-const open = ref<boolean>(false);
+const balanceEnough = ref<boolean>(true);
 // should be fetched from the store
 const userId = ref<string>("ming");
 const tokens = ref<Token[]>([]);
@@ -598,6 +602,24 @@ const eoaGasTokenBalance = computed(() => {
   );
 });
 
+const calcRemainingBalance = (token: Token) => {
+  if (redpacket.value.token == token) {
+    if (new BigNumber(token.balance?.normalized || 0).minus(redpacket.value.balance || 0).gt(0)) {
+      return new BigNumber(token.balance?.normalized || 0).minus(redpacket.value.balance || 0);
+    } else {
+      // balanceEnough.value = false;
+      warning();
+      return 0;
+    }
+  } else {
+    return token.balance?.normalized;
+  }
+}
+
+const warning = () => {
+  message.warning('This is a warning message');
+};
+
 onMounted(refresh);
 onMounted(async () => {
   setInterval(await calcGas, 5000);
@@ -605,7 +627,7 @@ onMounted(async () => {
 onMounted(() => {
   const route = useRoute();
   packetId.value = route.params.packetId.toString();
-  packetId.value != "luck" ? console.log(packetId.value) : console.log();
+  if (packetId.value != "luck") showClaim.value = true;
 })
 watch(() => useNetworkStore().network, refresh);
 
@@ -681,6 +703,36 @@ const copy = async (text: string) => {
 </script>
 
 <style lang="less" scoped>
+.alert {
+  padding: 10px 35px 10px 14px;
+  background-color: #eee;
+  border-radius: 8px;
+  position: relative;
+  margin: 10px 0;
+  .close {
+    position: absolute;
+    border: 0;
+    top: 2px;
+    right: 2px;
+    background: none;
+    color: inherit;
+    color: #000;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    wdith: 20px;
+    height: 20px;
+    &:active,
+    &:focus {
+      outline: 0; } }
+  p {
+    margin: 0;} }
+.alert--error {
+  background: #ffefc6;
+  border-color: #e5c073;
+  color: #795d27; }
+.balance-warning {
+  margin: 16px; }
 .hidden-layer {
   width: 100%;
   height: 100%;
@@ -795,11 +847,18 @@ const copy = async (text: string) => {
   font-weight: bold; }
 .cta:hover {
   background-color: rgba(253,71,85,0.8); }
+.claim-card p {
+  margin-top: 45%;
+  text-align: center;
+  position: absolute;
+  z-index: 55;
+  color: #000;
+  width: 100%;}
 .claim-card h2 {
   text-align: center;
   margin-top: 50%;
   position: absolute;
-  z-index: 9999;
+  z-index: 55;
   font-size: 26px;
   color: #000;
   width: 100%; }
@@ -818,36 +877,6 @@ const copy = async (text: string) => {
 .claim-card:hover .card_circle {
   border-radius: 0;
   margin-top: -130px; }
-.alert {
-  padding: 10px 35px 10px 14px;
-  background-color: #eee;
-  border-radius: 8px;
-  position: relative;
-  margin: 10px 0;
-  .close {
-    position: absolute;
-    border: 0;
-    top: 2px;
-    right: 2px;
-    background: none;
-    color: inherit;
-    color: #000;
-    font-size: 14px;
-    font-weight: bold;
-    cursor: pointer;
-    wdith: 20px;
-    height: 20px;
-    &:active,
-    &:focus {
-      outline: 0; } }
-  p {
-    margin: 0;} }
-.alert--error {
-  background: #ffefc6;
-  border-color: #e5c073;
-  color: #795d27; }
-.gas-sponsor-warning {
-  margin: 16px; }
 .tooltip {
   position: relative; }
 .tooltip:before,
@@ -1587,7 +1616,7 @@ const copy = async (text: string) => {
 
 .red-packet .total-amount .box .input-info-show {
   display: flex;
-  flex: 1 1 0%;
+  // flex: 1 1 0%;
   height: 100%;
   flex-direction: column;
   align-items: flex-end;
@@ -1897,8 +1926,9 @@ input[type=number] {
 .gas-station {
   display: flex;
   margin: 16px;
-  justify-content: space-between;
-}
+  justify-content: flex-end;
+  @media (max-width: 768px) {
+    margin: 0px; } }
 
 .create {
   display: flex;
@@ -1951,15 +1981,6 @@ input[type=number] {
   justify-content: center;
   align-items: center;
 }
-.enable-switch {
-  display: flex;
-  align-items: center;
-  p {
-    margin-bottom: 0rem;
-    font-weight: 500; }
-  @media (max-width: 768px) {
-    width: 100%;
-    justify-content: flex-end; } }
 
 .full-modal {
   .ant-modal {
@@ -1979,4 +2000,68 @@ input[type=number] {
     flex: 1;
   }
 }
+.token-listDetail {
+  border-radius: 0.75rem;
+  margin-top: 1.75rem;
+  overflow: auto; }
+  .token-listDetail .token-table {
+    display: flex;
+    margin-left: -1rem;
+    margin-right: -1rem;
+    flex-direction: column;
+  
+    @media (min-width: 640px) {
+      margin-left: 0;
+      margin-right: 0; } }
+    .token-listDetail .token-table table {
+      min-width: 100%;
+      table-layout: auto;
+      border-color: inherit;
+      text-indent: 0; }
+      .token-listDetail .token-table .table-thread {
+        display: none;
+        border-bottom: 1px solid #e5e7eb;
+        @media (min-width: 640px) {
+          display: table-header-group; } }
+        .token-listDetail .token-table .table-thread .toke-header {
+          font-weight: 400;
+          cursor: pointer; }
+          .token-listDetail .token-table .table-thread .toke-header .token-header-data {
+            display: flex;
+            align-items: center; }
+        .token-listDetail .token-table .table-thread .portfolio-percentage-header {
+          display: none;
+          font-weight: 400;
+          cursor: pointer;
+
+          @media (min-width: 1024px) {
+            display: table-cell; } }
+          .token-listDetail .token-table .table-thread .portfolio-percentage-header .portfolio-percentage-header-data {
+            display: flex;
+            align-items: center; }
+          .token-listDetail .token-table .table-thread .portfolio-percentage-header .portfolio-percentage-header-sign {
+            display: flex;
+            margin-left: 0.5rem;
+            flex-direction: column;
+            align-items: center; }
+        .token-listDetail .token-table .table-thread .price-header {
+          display: none;
+          font-weight: 400;
+          cursor: pointer;
+        
+          @media (min-width: 768px) {
+            display: table-cell; } }
+          .token-listDetail .token-table .table-thread .price-header .price-header-data {
+            display: flex;
+            align-items: center; }
+        .token-listDetail .token-table .table-thread .balance-header {
+          font-weight: 400;
+          text-align: right;
+          cursor: pointer;
+        
+          @media (min-width: 768px) {
+            text-align: left; } }
+          .token-listDetail .token-table .table-thread .balance-header .balance-header-data {
+            display: flex;
+            align-items: center; }
 </style>

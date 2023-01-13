@@ -303,7 +303,6 @@
       .token-listDetail .token-table .table-thread {
         display: none;
         border-bottom: 1px solid #e5e7eb;
-        // border-bottom-width: 1px;
         @media (min-width: 640px) {
           display: table-header-group; } }
         .token-listDetail .token-table .table-thread .toke-header {

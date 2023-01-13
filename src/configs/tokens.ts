@@ -10,7 +10,7 @@ export function nativeCoinAddress(network: Network) : string {
 }
 
 export function wrappedCoinAddress(network: Network) : string {
-    return network.contracts.wrappeCoin as string;
+    return network.contracts.wrappedCoin as string;
 }
 
 export function stableCoinAddresses(network: Network) : string[] {

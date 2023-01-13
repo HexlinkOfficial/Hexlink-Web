@@ -22,7 +22,7 @@ export const GOERLI : Network = {
     contracts: {
         "hexlink": "0xbad6a7948a1d3031ee7236d0180b6271fa569148",
         "nativeCoin": "0x0000000000000000000000000000000000000000",
-        "redPacket": "0x4c46BB27cdA575C84bc0fD87de9D2a3ef0F0BB4b",
+        "redPacket": "0x33baebd5931128a44be11af012e983b062c51aa7",
         "wrappedCoin": "0xb4fbf271143f4fbf7b91a5ded31805e42b2208d6",
         "refund": "0xa4b368e3a9D49Ff15b58f70Fb976724A98B6D149",
         "stableCoins": [
@@ -82,7 +82,7 @@ export const MUMBAI : Network = {
     defaultGasPrice: EthBigNumber.from("2000000000"),
     contracts: {
         "hexlink": "0x78317ef8b020Fe10e845ab8723403cF1e58Ef1Cc",
-        "redPacket": "0x0deFb16796B8c4cB429A9e249ae21d21399e0A31",
+        "redPacket": "0x61A15Cc5a7f6AFECB52935B565E2E64EFFFc6625",
         "nativeCoin": "0x0000000000000000000000000000000000000000",
         "wrappedCoin": "0x9c3C9283D3e44854697Cd22D3Faa240Cfb032889",
         "refund": "0xa4b368e3a9D49Ff15b58f70Fb976724A98B6D149",

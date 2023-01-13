@@ -82,7 +82,7 @@ export interface Preference {
 export interface NormalizedTokenBalance {
     value: EthersBigNumber;
     normalized: string;
-    updatedAt: Date;
+    updatedAt?: Date;
 }
 
 export interface Token {
@@ -100,8 +100,8 @@ export interface Profile {
 
 export interface RedPacket {
     token: Token;
+    salt: string,
     gasToken: Token;
-    payGasForClaimers: boolean;
     mode: "random" | "equal";
     split: number;
     balance: string;
@@ -163,7 +163,7 @@ export interface AuthProof {
 export interface UserOp {
     to: string;
     value: EthersBigNumber;
-    callData: string;
+    callData: string | [];
     callGasLimit: EthersBigNumber;
 }
 

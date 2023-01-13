@@ -1,10 +1,11 @@
 import type { Network, AuthProof } from "@/types";
 import { useWalletStore } from "@/stores/wallet";
 import ACCOUNT_ABI from "@/configs/abi/AccountSimple.json";
-import HEXLINK_ABI from "@/configs/abi/AccountSimple.json";
+import HEXLINK_ABI from "@/configs/abi/Hexlink.json";
 import { hexlinkContract } from "@/services/web3/hexlink";
 import { ethers } from "ethers";
 import { getFunctions, httpsCallable } from 'firebase/functions'
+import { useAuthStore } from "@/stores/auth";
 
 const functions = getFunctions()
 
@@ -14,7 +15,7 @@ const genRequestId = async function(
     data: string | [],
 ) {
     const hexlink = hexlinkContract(network);
-    return ethers.utils.keccak256(
+    const result = ethers.utils.keccak256(
       ethers.utils.defaultAbiCoder.encode(
         ["bytes4", "bytes", "address", "uint256", "uint256"],
         [
@@ -22,10 +23,11 @@ const genRequestId = async function(
             data,
             hexlink.address,
             network.chainId,
-            await hexlink.nonce()
+            await hexlink.nonce(useAuthStore().user!.nameHash)
         ]
       )
     );
+    return result;
 };
 
 export async function genDeployAuthProof(
@@ -49,6 +51,7 @@ export async function genDeployAuthProof(
     );
     const genAuthProof = httpsCallable(functions, 'genTwitterOAuthProof');
     const result = await genAuthProof({requestId});
+    console.log("*******");
     return {
         initData,
         proof: result.data as AuthProof

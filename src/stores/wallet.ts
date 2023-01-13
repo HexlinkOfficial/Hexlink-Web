@@ -1,6 +1,7 @@
 import type { NormalizedTokenBalance, Wallet } from "@/types";
 import { defineStore } from 'pinia'
 import { useNetworkStore } from "@/stores/network";
+import { BigNumber as EthBigNumber } from 'ethers';
 
 type Balances = {[key: string]: NormalizedTokenBalance};
 
@@ -22,7 +23,12 @@ export const useWalletStore = defineStore({
             return state.balanceMap[network] || {};
         },
         balance() {
-            return (address: string) => this.balances[address.toLowerCase()];
+            return (address: string) => {
+                return this.balances[address.toLowerCase()] || {
+                    value: EthBigNumber.from(0),
+                    normalized: "0",
+                }
+            }
         },
     },
     actions: {

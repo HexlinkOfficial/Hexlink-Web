@@ -62,7 +62,7 @@ export function isNativeCoin(network: Network, token: Token) {
 export function isWrappedCoin(network: Network, token: Token) {
     const wrappeCoin = wrappedCoinAddress(network) as string;
     const tokenAddr = token.metadata.address;
-    return tokenAddr.toLowerCase() == wrappeCoin.toLowerCase();
+    return tokenAddr.toLowerCase() == wrappeCoin?.toLowerCase();
 }
 
 export function isStableCoin(network: Network, token: Token) {

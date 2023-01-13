@@ -105,7 +105,7 @@
                 <div style="opacity: 1; transform: translateY(0);">
                   <div class="dropdown-menu dropdown-menu-right mt-3" :class="active_ === 'profile' && 'show'">
                     <div class="user-email" style="border-bottom-width: 1px; border-color: #E5E7EB; border-style: dashed; ">
-                      <div class="user">
+                      <div class="user2">
                         <span class="thumb"><img :src="user?.photoURL" :size="64" referrerpolicy="no-referrer" /></span>
                         <div class="user-info">
                           <h5>{{ user?.provider?.includes("twitter") && user?.displayName }}</h5>
@@ -117,7 +117,7 @@
                       <div class="wallet-info">
                         <h5>Hexlink Account Address </h5>
                         <div class="user-wallet">
-                          <div class="user">
+                          <div class="user2">
                             <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
                               <circle cx="15" cy="15" r="15" fill="#076AE0" />
                               <path
@@ -137,7 +137,7 @@
                       <div v-if="walletStore.connected">
                         <h5>External Account Address </h5>
                         <div class="user_wallet" style="border: 0 solid #e5e7eb; padding: 10px 0px 0px 0px;">
-                          <div class="user">
+                          <div class="user2">
                             <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
                               <circle cx="15" cy="15" r="15" fill="white" />
                               <path
@@ -358,14 +358,15 @@ cursor: pointer; }
   height: 2.5rem;
   border-radius: 9999px;
   border-width: 1px;
+  transition: 0.2s ease-in-out;
   border-color: #F3F4F6;
   cursor: pointer; }
-  // .profile_log .user:hover {
-  //   transform: translateY(-0.125rem);
-  //   fill: rgb(7, 106, 224);
-  //   background-color: rgba(7, 106, 224, 0.15);
-  //   border-color: rgb(48,138,245);
-  //   color: rgb(7,106,224); }
+  .profile_log .user:hover {
+    transform: translateY(-0.125rem);
+    fill: #076AE0;
+    background-color: rgba(7, 106, 224, 0.15);
+    border-color: rgb(48, 138, 245);
+    color: rgb(7, 106, 224); }
   @media only screen and (max-width: 768px) {
     .profile_log .user {
       margin-right: 0.5rem;
@@ -409,6 +410,62 @@ cursor: pointer; }
   @media only screen and (max-width: 1199px) {
     .profile_log .user .arrow {
       display: none; } }
+.profile_log .user2 {
+  display: flex;
+  position: relative;
+  background-color: #ffffff;
+  transition-property: all;
+  justify-content: center;
+  align-items: center;
+  width: auto;
+  height: 2.5rem;
+  border-radius: 9999px;
+  border-width: 1px;
+  border-color: #F3F4F6;
+  cursor: pointer; }
+  @media only screen and (max-width: 768px) {
+    .profile_log .user2 {
+      margin-right: 0.5rem;
+      margin-left: 0rem; 
+      transition: 0.2s ease-in-out; } }
+  .profile_log .user2 span {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    margin-right: 0.5rem;
+    color: rgb(71, 85, 105); }
+  @media only screen and (max-width: 768px) {
+    .profile_log .user2 span {
+      display: none; } }
+  .profile_log .user2 .profile {
+    height: 25px;
+    margin-left: 0.5rem;
+    margin-right: 0.5rem;
+    border-radius: 50px;
+  }
+  .profile_log .user2 .thumb {
+    display: block;
+    overflow: hidden;
+    width: 40px;
+    height: 40px;
+    border-radius: 50px;
+    border-color: #ffffff;
+    border-style: solid;
+    color: #fff;
+    text-align: center;
+    &:hover {
+      transform: translateY(-0.125rem); } }
+    .profile_log .user2 .thumb img {
+      border-radius: 50px;
+      max-width: 38px; }
+  .profile_log .user2 .arrow i {
+    font-weight: bold;
+    font-size: 14px;
+    line-height: 16px;
+    margin-top: 6px;
+    display: inline-block; }
+    @media only screen and (max-width: 1199px) {
+    .profile_log .user2 .arrow {
+      display: none; } }
 .profile_log .dropdown-menu {
   // border: 0px;
   // padding: 0px;
@@ -418,6 +475,12 @@ cursor: pointer; }
   transition: 0.2s ease-in-out;
   box-shadow: 0 1.5rem 4rem rgba(22, 28, 45, 0.15); }
   .profile_log .dropdown-menu .user {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    svg {
+      margin-right: 1rem; } }
+  .profile_log .dropdown-menu .user2 {
     display: flex;
     align-items: center;
     justify-content: flex-start;

@@ -189,11 +189,11 @@
 import { useAuthStore } from '@/stores/auth';
 import { useWalletStore } from '@/stores/wallet';
 import { useNetworkStore } from '@/stores/network';
-import { prettyPrintAddress } from '@/services/web3/account';
+import { prettyPrintAddress } from '@/web3/account';
 import { createToaster } from "@meforma/vue-toaster";
 import { POLYGON, GOERLI, MUMBAI } from "@/configs/network";
-import { switchNetwork } from "@/services/web3/network";
-import { connectWallet, disconnectWallet } from "@/services/web3/wallet";
+import { switchNetwork } from "@/web3/network";
+import { connectWallet, disconnectWallet } from "@/web3/wallet";
 import { useProfileStore } from '@/stores/profile';
 import { signOutFirebase } from "@/services/auth";
 import { CopyOutlined } from '@ant-design/icons-vue';

@@ -1,10 +1,10 @@
 import type { Account, Network } from "@/types";
 import { useProfileStore } from "@/stores/profile";
 import { useAuthStore } from "@/stores/auth";
-import { initTokenList } from "@/services/web3/tokens";
-import { hexlinkContract } from "@/services/web3/hexlink";
-import { getProvider } from "@/services/web3/network";
-import { hash } from "@/services/web3/utils";
+import { initTokenList } from "@/web3/tokens";
+import { hexlinkContract } from "@/web3/hexlink";
+import { getProvider } from "@/web3/network";
+import { hash } from "@/web3/utils";
 
 export function genNameHash(schema: string, name: string) {
     return hash(`${schema}:${name}`);

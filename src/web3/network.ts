@@ -2,7 +2,7 @@ import type { Network } from '@/types';
 import { ethers } from "ethers";
 import { useWalletStore } from "@/stores/wallet";
 import { Alchemy, Network as AlchemyNetwork } from "alchemy-sdk";
-import { initProfile } from "@/services/web3/account";
+import { initProfile } from "@/web3/account";
 import { useNetworkStore } from '@/stores/network';
 
 async function doSwitch(network: Network) {

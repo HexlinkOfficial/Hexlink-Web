@@ -4,7 +4,7 @@ import { useWalletStore } from "@/stores/wallet"
 import { buildAccountFromAddress } from "./account";
 import WalletConnect from "@walletconnect/web3-provider";
 import type { Wallet } from "@/types";
-import { updateWalletBalances } from "@/services/web3/tokens";
+import { updateWalletBalances } from "@/web3/tokens";
 
 export const providerOptions = {
   walletconnect: {

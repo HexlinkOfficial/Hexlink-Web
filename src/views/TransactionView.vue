@@ -773,7 +773,7 @@ svg {
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from "vue";
-import { isContract } from "@/services/web3/account";
+import { isContract } from "@/web3/account";
 import Layout from "../components/Layout.vue";
 import { useAuthStore } from '@/stores/auth';
 import { useProfileStore } from "@/stores/profile";

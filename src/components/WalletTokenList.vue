@@ -71,7 +71,7 @@ import { BigNumber } from "bignumber.js";
 import logo from "../assets/network-icons/hexlink.svg";
 import { useProfileStore } from "@/stores/profile";
 import { useNetworkStore } from "@/stores/network";
-import { updateProfileBalances } from "@/services/web3/tokens";
+import { updateProfileBalances } from "@/web3/tokens";
 
 const loading = ref<boolean>(true);
 

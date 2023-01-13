@@ -4,10 +4,9 @@ import { useProfileStore } from "@/stores/profile";
 import { useAuthStore } from "@/stores/auth";
 import { isNativeCoin, isWrappedCoin, isStableCoin } from "@/configs/tokens";
 
-import { genDeployAuthProof } from "@/services/web3/oracle";
-import { hash, toEthBigNumber, tokenBase } from "@/services/web3/utils";
-import { getProvider } from "@/services/web3/network";
-import { sendTransaction } from "@/services/web3/wallet";
+import { genDeployAuthProof } from "@/web3/oracle";
+import { toEthBigNumber, tokenBase } from "@/web3/utils";
+import { getProvider } from "@/web3/network";
 
 import ERC20_ABI from "@/configs/abi/ERC20.json";
 import RED_PACKET_ABI from "@/configs/abi/HappyRedPacket.json";

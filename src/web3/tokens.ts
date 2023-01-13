@@ -14,7 +14,7 @@ import type {
     NormalizedTokenBalance
 } from '@/types';
 import { getPopularTokens } from "@/configs/tokens";
-import { alchemy, getProvider } from "@/services/web3/network";
+import { alchemy, getProvider } from "@/web3/network";
 import { useProfileStore } from "@/stores/profile";
 import { useAuthStore } from "@/stores/auth";
 import { useNetworkStore } from "@/stores/network";

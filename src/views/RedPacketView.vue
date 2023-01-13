@@ -400,6 +400,7 @@ import { normalizeBalance } from '@/services/web3/tokens';
 import { CopyOutlined } from '@ant-design/icons-vue';
 import { BigNumber as EthBigNumber} from "ethers";
 import { estimateDeployAndCreateRedPacket } from "@/services/web3/hexlink";
+import { useRoute } from "vue-router";
 
 const sendLuck = ref<boolean>(false);
 const luckHistory = ref<boolean>(true);
@@ -417,6 +418,7 @@ const estimatedGas = ref<EstimatedTxCost>({
 });
 const redPackets = ref<RedPacketData[]>([]);
 const showClaim = ref<boolean>(false);
+const packetId = ref<string>("luck");
 // should be fetched from the store
 const userId = ref<string>("ming");
 const tokens = ref<Token[]>([]);
@@ -529,7 +531,7 @@ const tokenChoose =
 };
 
 const calcGas = async () => {
-  if (redpacket.value.balance.gt(0) && redpacket.value.split > 0) {
+  if (BigNumber(redpacket.value.balance).gt(0) && redpacket.value.split > 0) {
     console.log(redpacket.value);
     const input : RedPacketInput = {
       data: redpacket.value,
@@ -542,6 +544,7 @@ const calcGas = async () => {
         gasTokenAmount: EthBigNumber.from(0)
       }
     };
+    console.log("Input: ", input);
     estimatedGas.value = await estimateDeployAndCreateRedPacket(
       useNetworkStore().network, input
     );
@@ -605,8 +608,14 @@ const eoaGasTokenBalance = computed(() => {
 onMounted(refresh);
 watch(() => useNetworkStore().network, refresh);
 
+onMounted(async () => {
+  setInterval(await calcGas, 5000);
+})
+
 onMounted(() => {
-  setInterval(calcGas, 5000);
+  const route = useRoute();
+  packetId.value = route.params.packetId.toString();
+  packetId.value != "luck" ? console.log(packetId.value) : console.log();
 })
 
 onClickOutside(

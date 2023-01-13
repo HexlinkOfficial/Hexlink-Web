@@ -5,6 +5,7 @@
       <div className="row invoice-card-row">
         <div class="col-xxl-6">
           <div class="card">
+            <div v-if="showClaim" class="hidden-layer"></div>
             <div class="card-body">
               <div class="token-list">
                 <div class="title">
@@ -339,12 +340,12 @@
           </div>
         </div>
       </div>
-      <div v-if="modal" ref="modalRef" class="confirmation">
+      <div v-if="modal" ref="modalRef" class="confirmation" v-scroll-lock="open">
         <button class="close-button" title="Close" @click="modal = false">
           𝖷
         </button>
       </div>
-      <div v-if="showClaim" class="claim-card transition">
+      <div v-if="showClaim" class="claim-card transition" v-scroll-lock="open">
         <svg class="redpacket_close transition" v-if="showClaim" @click="showClaim = !showClaim" width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path
             d="M4.3949 4.39481C6.84957 1.94033 10.0794 0.412944 13.534 0.0729118C16.9886 -0.267121 20.4542 0.601242 23.3403 2.53003C26.2264 4.45882 28.3544 7.32869 29.3617 10.6506C30.3691 13.9725 30.1933 17.541 28.8645 20.7479C27.5357 23.9547 25.136 26.6016 22.0743 28.2375C19.0127 29.8734 15.4785 30.3971 12.074 29.7193C8.66957 29.0415 5.60545 27.2041 3.40381 24.5204C1.20218 21.8366 -0.000751884 18.4724 6.47942e-06 15.0011C-0.001827 13.0309 0.38547 11.0798 1.13966 9.25966C1.89386 7.43954 3.0001 5.78629 4.3949 4.39481ZM18.8931 9.52218L20.4875 11.119C20.6687 11.3019 20.7703 11.5489 20.7703 11.8063C20.7703 12.0637 20.6687 12.3107 20.4875 12.4936L17.9702 15.0011L20.4875 17.5184C20.6687 17.7013 20.7703 17.9483 20.7703 18.2057C20.7703 18.4632 20.6687 18.7102 20.4875 18.8931L18.8931 20.4874C18.7103 20.6686 18.4633 20.7702 18.2058 20.7702C17.9484 20.7702 17.7014 20.6686 17.5185 20.4874L15.0012 17.9701L12.4839 20.4874C12.3011 20.6686 12.054 20.7702 11.7966 20.7702C11.5392 20.7702 11.2922 20.6686 11.1093 20.4874L9.52227 18.8931C9.34111 18.7102 9.23948 18.4632 9.23948 18.2057C9.23948 17.9483 9.34111 17.7013 9.52227 17.5184L12.0322 15.0011L9.52227 12.4838C9.34111 12.301 9.23948 12.054 9.23948 11.7965C9.23948 11.5391 9.34111 11.2921 9.52227 11.1092L11.1093 9.52218C11.2922 9.34102 11.5392 9.23939 11.7966 9.23939C12.054 9.23939 12.3011 9.34102 12.4839 9.52218L15.0012 12.0321L17.5185 9.52218C17.7014 9.34102 17.9484 9.23939 18.2058 9.23939C18.4633 9.23939 18.7103 9.34102 18.8931 9.52218ZM15.0012 2.57337C12.1254 2.57351 9.33867 3.57077 7.11573 5.39526C4.8928 7.21974 3.37125 9.75854 2.81034 12.5791C2.24942 15.3997 2.68385 18.3274 4.03959 20.8636C5.39533 23.3998 7.58851 25.3874 10.2454 26.4878C12.9024 27.5882 15.8586 27.7333 18.6106 26.8984C21.3625 26.0635 23.7398 24.3002 25.3374 21.9091C26.935 19.5179 27.6541 16.6467 27.3721 13.7848C27.0901 10.9228 25.8246 8.24723 23.791 6.2138C22.6373 5.05871 21.2671 4.14257 19.7588 3.51788C18.2505 2.8932 16.6338 2.57223 15.0012 2.57337Z"
@@ -365,21 +366,6 @@
         </div>
         <div class="card_circle transition"></div>
       </div>
-      <!-- <button v-if="showClaim" @click="showClaim = !showClaim" class="claim-close-button transition">
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <g clip-path="url(#clip0_481_175)">
-            <path
-              d="M11.7842 10L19.8695 1.91518C20.0435 1.74093 20.0435 1.45861 19.8695 1.28437L18.7164 0.130628C18.6327 0.0471947 18.519 0 18.4008 0C18.2824 0 18.1688 0.0471947 18.0852 0.130628L10.0001 8.21566L1.91508 0.130628C1.74759 -0.0368708 1.45114 -0.0366601 1.28407 0.130628L0.131169 1.28437C-0.043072 1.45861 -0.043072 1.74093 0.131169 1.91518L8.2162 10L0.131169 18.0848C-0.043072 18.2591 -0.043072 18.5414 0.131169 18.7156L1.28428 19.8694C1.36792 19.9528 1.48148 20 1.59989 20C1.7183 20 1.83165 19.9528 1.9153 19.8694L10.0003 11.7843L18.0854 19.8694C18.169 19.9528 18.2828 20 18.401 20C18.5192 20 18.6329 19.9528 18.7166 19.8694L19.8697 18.7156C20.0437 18.5414 20.0437 18.2591 19.8697 18.0848L11.7842 10Z"
-              fill="white" />
-          </g>
-          <defs>
-            <clipPath id="clip0_481_175">
-              <rect width="20" height="20" fill="white" />
-            </clipPath>
-          </defs>
-        </svg>
-      </button> -->
-      <div class="hidden-layer"></div>
     </div>
   </layout>
 </template>
@@ -425,6 +411,7 @@ const estimatedGas = ref<EstimatedTxCost>({
 const redPackets = ref<RedPacketData[]>([]);
 const showClaim = ref<boolean>(false);
 const packetId = ref<string>("luck");
+const open = ref<boolean>(false);
 // should be fetched from the store
 const userId = ref<string>("ming");
 const tokens = ref<Token[]>([]);
@@ -694,6 +681,13 @@ const copy = async (text: string) => {
 </script>
 
 <style lang="less" scoped>
+.hidden-layer {
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.3);
+  position: absolute;
+  border-radius: 15px;
+  z-index: 55; }
 .redpacket_close {
   position: absolute;
   z-index: 50;
@@ -757,13 +751,14 @@ const copy = async (text: string) => {
   position: absolute;
   margin: auto;
   left: 55%;
-  top: 50vh;
+  top: 55%;
   transform: translate(-50%, -50%);
   box-shadow: 0px 10px 20px rgb(0 0 0 / 10%);
   border-radius: 15px;
   overflow: hidden;
   z-index: 55; 
   @media (max-width: 990px) {
+    top: 50vh;
     left: 50%; }}
 .claim-card:hover {
   box-shadow: 0px 30px 30px rgba(0, 0, 0, 0.2);

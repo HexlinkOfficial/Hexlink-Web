@@ -15,7 +15,7 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { signOutFirebase } from "@/services/auth"
 import { clearUrqlClient } from '@/services/graphql/urql'
 import Toaster from '@meforma/vue-toaster';
-import VueClipboard from 'vue-clipboard2'
+import VueClipboard from 'vue-clipboard2';
 
 let vueApp: any;
 getAuth(app).onAuthStateChanged(async (user: any) => {

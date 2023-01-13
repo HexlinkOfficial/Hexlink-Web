@@ -139,9 +139,9 @@
                         Service Fee: 
                         <a-tooltip placement="top">
                           <template #title>
-                            <span>Service Fee: <b>{{ estimatedGas.total.toString() }}</b></span>
+                            <span>Service Fee: <b>{{ estimatedGas }}</b></span>
                           </template>
-                          <b>{{ estimatedGas.total.toString().substring(0,6) }}</b>
+                          <b>{{ estimatedGas.substring(0,6) }}</b>
                         </a-tooltip>
                       </p>
                       <div class="total-choose-token">
@@ -321,7 +321,7 @@
                   </div>
                 </div>
                 <div class="create">
-                  <button class="connect-wallet-button" @click="modal = true" style="width: auto;">
+                  <button class="connect-wallet-button" @click="createRedPacket" style="width: auto;">
                     <svg style="margin-right: 10px;" width="18" height="18" viewBox="0 0 18 18" fill="none"
                       xmlns="http://www.w3.org/2000/svg">
                       <path
@@ -384,8 +384,8 @@ import Layout from "../components/Layout.vue";
 import RedPacektHistoryList from "../components/RedPacketHistoryList.vue";
 import { connectWallet, disconnectWallet } from "@/services/web3/wallet";
 import { updateProfileBalances, updateWalletBalances } from "@/services/web3/tokens";
-import { getRedPacketByUser } from '@/services/graphql/redpacket';
-import type { Metadata, RedPacketData, RedPacketOutput, ParsedRedPacket } from '@/services/graphql/redpacket';
+import { getRedPacketsByUser } from '@/graphql/redpacket';
+import type { Metadata, RedPacketDB } from '@/graphql/redpacket';
 import { useProfileStore } from '@/stores/profile';
 import { useWalletStore } from '@/stores/wallet';
 import { BigNumber } from "bignumber.js";
@@ -393,13 +393,16 @@ import { useNetworkStore } from '@/stores/network';
 import type { OnClickOutsideHandler } from '@vueuse/core'
 import { onClickOutside } from '@vueuse/core'
 import { vOnClickOutside } from '@/services/directive';
-import type { Token, ClaimCardData, RedPacket, EstimatedTxCost, RedPacketInput } from "@/types";
+import type { Token, ClaimCardData, RedPacket, RedPacketInput } from "@/types";
 import useClipboard from 'vue-clipboard3';
 import { createToaster } from "@meforma/vue-toaster";
 import { normalizeBalance } from '@/services/web3/tokens';
 import { CopyOutlined } from '@ant-design/icons-vue';
 import { BigNumber as EthBigNumber} from "ethers";
-import { estimateDeployAndCreateRedPacket } from "@/services/web3/hexlink";
+import { estimateGasSponsorship } from "@/services/web3/hexlink";
+import { toEthBigNumber, tokenBase } from "@/services/web3/utils";
+import { deployAndCreateRedPacket } from "@/services/web3/hexlink";
+import { hash } from "@/services/web3/utils";
 
 const sendLuck = ref<boolean>(false);
 const luckHistory = ref<boolean>(true);
@@ -410,12 +413,8 @@ const enableGas = ref<boolean>(false);
 const accountChosen = ref<number>(0);
 const modal = ref<boolean>(false);
 const modalRef = ref<any>(null);
-const estimatedGas = ref<EstimatedTxCost>({
-  sponsorship: EthBigNumber.from(0),
-  currentTx: EthBigNumber.from(0),
-  total: EthBigNumber.from(0)
-});
-const redPackets = ref<RedPacketData[]>([]);
+const gasSponsorship = ref<EthBigNumber>(EthBigNumber.from(0));
+const redPackets = ref<RedPacketDB[]>([]);
 const showClaim = ref<boolean>(false);
 // should be fetched from the store
 const userId = ref<string>("ming");
@@ -425,12 +424,12 @@ const nativeToken = useProfileStore().nativeToken;
 
 const redpacket = ref<RedPacket>({
   mode: "random",
+  salt: hash(new Date().toISOString()),
   split: 0,
   balance: "0",
   token: nativeToken as Token,
   gasToken: nativeToken as Token,
-  expiredAt: 0, // do not expire,
-  payGasForClaimers: true,
+  expiredAt: 0, // do not expire
 });
 const claimcard = ref<ClaimCardData>({
   twitter: "https://mobile.twitter.com/dreambig_peter",
@@ -499,24 +498,11 @@ const refresh = async function() {
       redpacket.value.gasToken = toSelect[0];
     }
   }
-
   redPackets.value = await loadRedPackets(userId.value);
 }
 
-const loadRedPackets = async (userId: string) : Promise<ParsedRedPacket[]> => {  
-  const redPackets: RedPacketOutput[] = await getRedPacketByUser(userId);
-  const parsedRedPackets: ParsedRedPacket[] = []
-  for (let i = 0; i < redPackets.length; i++) {
-    let metadata: Metadata = JSON.parse(redPackets[i].metadata);
-    let parsed: ParsedRedPacket = {
-        red_packet_id: redPackets[i].red_packet_id,
-        user_id: redPackets[i].user_id,
-        gas_station_enabled: redPackets[i].gas_station_enabled,
-        metadata: metadata
-      }
-    parsedRedPackets.push(parsed);
-  }
-  return parsedRedPackets;
+const loadRedPackets = async (userId: string) : Promise<RedPacketDB[]> => {  
+  return await getRedPacketsByUser(userId);
 }
 
 const tokenChoose = 
@@ -526,28 +512,24 @@ const tokenChoose =
     } else {
       redpacket.value.gasToken = token;
     }
+    calcGasSponsorship();
 };
 
-const calcGas = async () => {
-  if (redpacket.value.balance.gt(0) && redpacket.value.split > 0) {
-    console.log(redpacket.value);
-    const input : RedPacketInput = {
-      data: redpacket.value,
-      hexlinkAccount: {
-        tokenAmount: EthBigNumber.from(0),
-        gasTokenAmount: EthBigNumber.from(0)
-      },
-      walletAccount: {
-        tokenAmount: EthBigNumber.from(0),
-        gasTokenAmount: EthBigNumber.from(0)
-      }
-    };
-    estimatedGas.value = await estimateDeployAndCreateRedPacket(
-      useNetworkStore().network, input
+const calcGasSponsorship = () => {
+  const balance = new BigNumber(redpacket.value.balance);
+  if (balance.gt(0) && redpacket.value.split > 0) {
+    gasSponsorship.value = estimateGasSponsorship(
+      useNetworkStore().network, redpacket.value
     );
-    console.log(estimatedGas.value);
   }
 }
+
+const estimatedGas = computed(() => {
+  const result = new BigNumber(
+      gasSponsorship.value.toString()
+    ).div(tokenBase(redpacket.value.gasToken)).toString(10);
+  return result;
+});
 
 const chooseAccount = function() {
   if (accountChosen.value == 0) {
@@ -602,12 +584,14 @@ const eoaGasTokenBalance = computed(() => {
   );
 });
 
-onMounted(refresh);
-watch(() => useNetworkStore().network, refresh);
-
-onMounted(() => {
-  setInterval(calcGas, 5000);
+onMounted(async () => {
+  calcGasSponsorship();
+  await refresh();
 })
+
+watch(() => useNetworkStore().network, refresh);
+watch(() => redpacket.value.split, calcGasSponsorship);
+watch(() => redpacket.value.balance, calcGasSponsorship);
 
 onClickOutside(
   modalRef,
@@ -633,14 +617,54 @@ const modeLabels = {
   "equal": "Equally",
 };
 
-const modes = ["random", "equal", "what"];
-
 const modeChoose = async (gameMode: "random" | "equal") => {
   redpacket.value.mode = gameMode;
 }
 
-const createRedPacket = async function () {
+const calcTokenCostDistribution = () => {
+  const requiredTokenAmount = toEthBigNumber(
+    tokenBase(redpacket.value.token).times(redpacket.value.balance)
+  );
+  const hexlinkTokenAmount = tokenBalance.value.value.gt(requiredTokenAmount)
+    ? requiredTokenAmount : tokenBalance.value.value;
+  const deltaTokenAmount = hexlinkTokenAmount.gte(requiredTokenAmount)
+    ? EthBigNumber.from(0) : requiredTokenAmount.sub(hexlinkTokenAmount);
+  const eoaTokenAmount = deltaTokenAmount.gt(0)
+    ? deltaTokenAmount : EthBigNumber.from(0);
+  return {
+    hexlinkTokenAmount,
+    eoaTokenAmount
+  }
+}
 
+const calcGasTokenCostDistribution = () => {
+  const hexlinkGasTokenAmount = gasTokenBalance.value.value.gt(gasSponsorship.value)
+    ? gasSponsorship.value : gasTokenBalance.value.value;
+  const deltaTokenAmount = hexlinkGasTokenAmount.gte(gasSponsorship.value)
+    ? EthBigNumber.from(0) : gasSponsorship.value.sub(hexlinkGasTokenAmount);
+  const eoaGasTokenAmount = deltaTokenAmount.gt(0)
+    ? deltaTokenAmount : EthBigNumber.from(0);
+  return {
+    hexlinkGasTokenAmount,
+    eoaGasTokenAmount
+  }
+}
+
+const createRedPacket = async function () {
+  const tokenDistribution = calcTokenCostDistribution();
+  const gasTokenDistribution = calcGasTokenCostDistribution();
+  const input : RedPacketInput = {
+    data: redpacket.value,
+    hexlinkAccount: {
+      tokenAmount: tokenDistribution.hexlinkTokenAmount,
+      gasTokenAmount: gasTokenDistribution.hexlinkGasTokenAmount,
+    },
+    walletAccount: {
+      tokenAmount: tokenDistribution.eoaTokenAmount,
+      gasTokenAmount: gasTokenDistribution.eoaGasTokenAmount,
+    }
+  };
+  await deployAndCreateRedPacket(useNetworkStore().network, input)
 };
 
 const showGasToken = () => {

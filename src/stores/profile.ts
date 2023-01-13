@@ -21,9 +21,14 @@ export const useProfileStore = defineStore({
         balance() {
             return (
                 address: string
-            ) : NormalizedTokenBalance | undefined => this.profile?.tokens[
-                address.toLowerCase()
-            ]?.balance;
+            ) : NormalizedTokenBalance => {
+                return this.profile?.tokens[
+                    address.toLowerCase()
+                ]?.balance || {
+                    value: EthBigNumber.from(0),
+                    normalized: "0"
+                };
+            }
         },
         visiableTokens() : Token[] {
             return Object.values(

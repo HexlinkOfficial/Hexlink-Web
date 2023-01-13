@@ -101,5 +101,6 @@ export function signOutFirebase() {
     useWalletStore().disconnectWallet();
     useProfileStore().clear();
     useAuthStore().signOut();
+    useNetworkStore().reset();
     return signOut(auth);
 }

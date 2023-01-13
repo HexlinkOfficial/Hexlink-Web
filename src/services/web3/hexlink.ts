@@ -1,13 +1,13 @@
-import type { Network, RedPacketInput, Account, UserOp, Token } from "@/types";
+import type { Network, RedPacketInput, Account, UserOp, Token, RedPacket } from "@/types";
 import { ethers, BigNumber as EthBigNumber } from "ethers";
 import { useProfileStore } from "@/stores/profile";
 import { useAuthStore } from "@/stores/auth";
 import { isNativeCoin, isWrappedCoin, isStableCoin } from "@/configs/tokens";
 
 import { genDeployAuthProof } from "@/services/web3/oracle";
-import { hash, toEthBigNumber } from "@/services/web3/utils";
+import { hash, toEthBigNumber, tokenBase } from "@/services/web3/utils";
 import { getProvider } from "@/services/web3/network";
-import { sendTransaction, estimateGas } from "@/services/web3/wallet";
+import { sendTransaction } from "@/services/web3/wallet";
 
 import ERC20_ABI from "@/configs/abi/ERC20.json";
 import RED_PACKET_ABI from "@/configs/abi/HappyRedPacket.json";
@@ -15,8 +15,7 @@ import HEXLINK_ABI from "@/configs/abi/Hexlink.json";
 import ACCOUNT_ABI from "@/configs/abi/AccountSimple.json";
 import USERS from "@/configs/users.json";
 import { useWalletStore } from "@/stores/wallet";
-
-import { BigNumber } from "bignumber.js";
+import { insertRedPacket } from "@/graphql/redpacket";
 
 const erc20Iface = new ethers.utils.Interface(ERC20_ABI);
 const redPacketIface = new ethers.utils.Interface(RED_PACKET_ABI);
@@ -42,21 +41,33 @@ function calculateUsdCost(
     gasAmount: EthBigNumber,
     gasToken: Token
 ) : EthBigNumber {
-    const normalizedUsd = new BigNumber(2).pow(
-        gasToken.metadata.decimals
-    ).times(network.nativeCurrency.priceInUsd);
-    const nativeCoinBase = EthBigNumber.from(2).pow(network.nativeCurrency.decimals);
-    return toEthBigNumber(normalizedUsd).mul(gasAmount).div(nativeCoinBase);
+    const normalizedUsd = tokenBase(gasToken).times(network.nativeCurrency.priceInUsd);
+    const nativeCoinBase = EthBigNumber.from(10).pow(network.nativeCurrency.decimals);
+    return toEthBigNumber(normalizedUsd).mul(gasAmount).mul(
+        network.defaultGasPrice
+    ).div(nativeCoinBase);
+}
+
+export function estimateGasSponsorship(
+    network: Network,
+    redpacket: RedPacket
+) : EthBigNumber {
+    const sponsorshipGasAmount = EthBigNumber.from(redpacket.split).mul(200000);
+    const gasToken = redpacket.gasToken;
+    if (isNativeCoin(network, gasToken) || isWrappedCoin(network, gasToken)) {
+        return sponsorshipGasAmount.mul(network.defaultGasPrice);
+    } else if (isStableCoin(network, gasToken)) {
+        return calculateUsdCost(network, sponsorshipGasAmount, gasToken);
+    }
+    throw new Error("Unsupported gas token");
 }
 
 export function redPacketOps(network: Network, input: RedPacketInput) : UserOp[] {
     const redPacketAddr = network.contracts.redPacket as string;
-    const balance = new BigNumber(2).pow(
-        input.data.token.metadata.decimals
-    ).times(input.data.balance);
+    const balance = tokenBase(input.data.token).times(input.data.balance);
     const packet = {
        token: input.data.token.metadata.address,
-       salt: hash(new Date().toISOString()),
+       salt: input.data.salt,
        balance: toEthBigNumber(balance),
        validator: USERS.redPacketValidator,
        expiredAt: 0,
@@ -87,14 +98,12 @@ export async function serviceFeeOp(
     network: Network,
     input: RedPacketInput
 ) : Promise<UserOp> {
-    const fee = await getProvider().getFeeData();
-    const gasPrice = fee.gasPrice || network.defaultGasPrice;
     const gasAmout = EthBigNumber.from(2).mul(150000).mul(input.data.split);
     if (isNativeCoin(network, input.data.gasToken)) {
         return {
             to: refund(network),
-            value: gasPrice.mul(gasAmout),
-            callData: "",
+            value: gasAmout.mul(network.defaultGasPrice),
+            callData: [],
             callGasLimit: EthBigNumber.from(0) // no limit
         };
     } else if (isWrappedCoin(network, input.data.gasToken)) {
@@ -102,7 +111,7 @@ export async function serviceFeeOp(
             to: input.data.gasToken.metadata.address,
             value: EthBigNumber.from(0),
             callData: erc20Iface.encodeFunctionData(
-                "transfer", [refund(network), gasPrice.mul(gasAmout)]
+                "transfer", [refund(network), gasAmout.mul(network.defaultGasPrice)]
             ),
             callGasLimit: EthBigNumber.from(0) // no limit
         };
@@ -177,18 +186,22 @@ export async function buildDeployAndCreateRedPacketTx(
             ));
         }
     }
-    ops = ops.concat(redPacketOps(network, input));
-    if (input.data.payGasForClaimers) {
-        ops.push(await serviceFeeOp(network, input));
-    }
 
+    ops = ops.concat(redPacketOps(network, input));
+    ops.push(await serviceFeeOp(network, input));
     const accountIface = new ethers.utils.Interface(ACCOUNT_ABI);
     const opsData = accountIface.encodeFunctionData("execBatch", [ops]);
+    console.log("++++++");
+
     const { initData, proof } = await genDeployAuthProof(network, opsData);
     const hexlink = hexlinkContract(network);
+    console.log("======");
+
     const data = hexlink.interface.encodeFunctionData(
         "deploy", [useAuthStore().user!.nameHash, initData, proof]
     );
+    console.log("++++++");
+
     return {
         to: hexlink.address, // Required except during contract publications.
         from: walletAccount.address, // must match user's active address.
@@ -197,35 +210,16 @@ export async function buildDeployAndCreateRedPacketTx(
     };
 }
 
-export async function estimateDeployAndCreateRedPacket(
-    network: Network,
-    input: RedPacketInput
-) {
-    const txParams = await buildDeployAndCreateRedPacketTx(network, input);
-    const txGasCost = EthBigNumber.from(await estimateGas(txParams));
-    const sponsorshipAmount = EthBigNumber.from(2).mul(150000).mul(input.data.split);
-
-    const fee = await getProvider().getFeeData();
-    const gasPrice = fee.gasPrice || network.defaultGasPrice;
-    const gasToken = input.data.gasToken;
-    if (isNativeCoin(network, gasToken) || isWrappedCoin(network, gasToken)) {
-        const sponsorship = gasPrice.mul(sponsorshipAmount);
-        const currentTx = gasPrice.mul(txGasCost);
-        return {
-            sponsorship,
-            currentTx,
-            total: sponsorship.add(currentTx)
-        };
-    } else if (isStableCoin(network, gasToken)) {
-        const sponsorship = calculateUsdCost(network, sponsorshipAmount, gasToken);
-        const currentTx = calculateUsdCost(network, txGasCost, gasToken);
-        return {
-            sponsorship,
-            currentTx,
-            total: sponsorship.add(currentTx)
-        };
+function toRedPacketMetadata(rp: RedPacket) {
+    return {
+        token: rp.token.metadata.address,
+        salt: rp.salt,
+        split: rp.split,
+        balance: rp.balance,
+        mode: rp.mode,
+        validator: "0x030ffbc193c3f9f4c6378beb506eecb0933fd457",
+        expiredAt: 0,
     }
-    throw new Error("Unsupported gas token");
 }
 
 export async function deployAndCreateRedPacket(
@@ -233,5 +227,10 @@ export async function deployAndCreateRedPacket(
     input: RedPacketInput
 ) {
     const txParams = await buildDeployAndCreateRedPacketTx(network, input);
-    return await sendTransaction(txParams);
+    // store redpacket into hasura 
+    await insertRedPacket([{
+        id: "test_id",
+        metadata: toRedPacketMetadata(input.data)
+    }]);
+    //return await sendTransaction(txParams);
 }

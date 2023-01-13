@@ -3,10 +3,10 @@ import BigNumber from "bignumber.js";
 import {
     getTokenPreferences,
     insertTokenPreferences
-} from '@/services/graphql/preference';
+} from '@/graphql/preference';
 import type {
     PreferenceInput,
-} from "@/services/graphql/preference";
+} from "@/graphql/preference";
 import type {
     TokenMetadata,
     Token,

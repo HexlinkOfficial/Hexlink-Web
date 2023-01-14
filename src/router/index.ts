@@ -28,7 +28,7 @@ const router = createRouter({
       component: () => import('@/views/AdminView.vue')
     },
     {
-      path: '/redpacket/:packetId',
+      path: '/redpackets/:packetId',
       name: 'red pocket view',
       component: () => import('@/views/RedPacketView.vue')
     },

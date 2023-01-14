@@ -6,6 +6,7 @@ import { isNativeCoin, isWrappedCoin, isStableCoin } from "@/configs/tokens";
 
 import { genDeployAuthProof } from "@/web3/oracle";
 import { toEthBigNumber, tokenBase } from "@/web3/utils";
+import { hexlinkContract, refund } from "@/web3/hexlink";
 
 import ERC20_ABI from "@/configs/abi/ERC20.json";
 import RED_PACKET_ABI from "@/configs/abi/HappyRedPacket.json";
@@ -199,13 +200,14 @@ function toRedPacketMetadata(rp: RedPacket) {
 
 export async function deployAndCreateRedPacket(
     network: Network,
-    input: RedPacketInput
+    redpacket: RedPacket,
+    useHexlinkAccount: boolean
 ) {
-    const txParams = await buildDeployAndCreateRedPacketTx(network, input);
+    const txParams = await buildDeployAndCreateRedPacketTx(network, redpacket);
     // store redpacket into hasura 
     await insertRedPacket([{
         id: "test_id",
-        metadata: toRedPacketMetadata(input.data)
+        metadata: toRedPacketMetadata(redpacket)
     }]);
     //return await sendTransaction(txParams);
 }

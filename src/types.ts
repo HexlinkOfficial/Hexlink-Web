@@ -108,18 +108,6 @@ export interface RedPacket {
     expiredAt: number;
 }
 
-export interface RedPacketInput {
-    data: RedPacket;
-    hexlinkAccount: {
-        tokenAmount: EthersBigNumber;
-        gasTokenAmount: EthersBigNumber;
-    },
-    walletAccount?: {
-        tokenAmount?: EthersBigNumber;
-        gasTokenAmount?: EthersBigNumber;
-    }
-}
-
 export interface Claim {
     from: string,
     claimed: EthersBigNumber;

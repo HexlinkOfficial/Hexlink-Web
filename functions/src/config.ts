@@ -1,20 +1,40 @@
-export const ADMIN = "0x3E4daF49356B097E73D042d565eBC1e2Bb017d42";
+import * as functions from "firebase-functions";
 
-export const ADMIN_ABI = [
-  "event SetAccount(bytes32 indexed, address indexed)",
-  "function addressOfName(bytes32) external view returns(address)",
-  "function deploy(bytes32) external",
-];
+const secrets = functions.config().doppler;
 
-export const ACCOUNT_ABI = [
-  // eslint-disable-next-line max-len
-  "function execute(address, uint256, uint256, bytes calldata) external payable",
-];
+export enum KMS_KEY_TYPE {
+  operator,
+  validator
+}
 
-export const ERC20_ABI = [
-  "function transfer(address, uint256) external returns (bool)",
-];
+export interface KMS_CONFIG_TYPE {
+  projectId: string,
+  locationId: string,
+  keyRingId: string,
+  keyId: string,
+  versionId: string,
+  publicAddress: string
+}
 
-export const ERC721_ABI = [
-  "function transferFrom(address, address, uint256) external",
-];
+const IDENTITY_VERIFIER_OPERATOR_CONFIG: KMS_CONFIG_TYPE = {
+  projectId: secrets.VITE_FIREBASE_PROJECT_ID,
+  locationId: secrets.GCP_KEY_LOCATION_GLOBAL,
+  keyRingId: secrets.IDENTITY_VERIFIER_OPERATOR_KEY_RING_ID,
+  keyId: secrets.IDENTITY_VERIFIER_OPERATOR_KEY_ID,
+  versionId: secrets.IDENTITY_VERIFIER_OPERATOR_VERSION_ID,
+  publicAddress: secrets.IDENTITY_VERIFIER_OPERATOR_PUB_ADDR,
+};
+
+const IDENTITY_VERIFIER_VALIDATOR_CONFIG: KMS_CONFIG_TYPE = {
+  projectId: secrets.VITE_FIREBASE_PROJECT_ID,
+  locationId: secrets.GCP_KEY_LOCATION_GLOBAL,
+  keyRingId: secrets.IDENTITY_VERIFIER_VALIDATOR_KEY_RING_ID,
+  keyId: secrets.IDENTITY_VERIFIER_VALIDATOR_KEY_ID,
+  versionId: secrets.IDENTITY_VERIFIER_VALIDATOR_VERSION_ID,
+  publicAddress: secrets.IDENTITY_VERIFIER_VALIDATOR_PUB_ADDR,
+};
+
+export const KMS_CONFIG = new Map<string, KMS_CONFIG_TYPE>([
+  [KMS_KEY_TYPE[KMS_KEY_TYPE.operator], IDENTITY_VERIFIER_OPERATOR_CONFIG],
+  [KMS_KEY_TYPE[KMS_KEY_TYPE.validator], IDENTITY_VERIFIER_VALIDATOR_CONFIG],
+]);

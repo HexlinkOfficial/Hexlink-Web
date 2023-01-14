@@ -187,11 +187,11 @@
                 <div class="choose-account">
                   <div class="HexlinkAccount">
                     <div style="position: relative; top: 35px; left: -10px; display: flex; justify-content: flex-end; z-index: 50;">
-                      <img style="width: 20px; height: 20px; opacity:1;" src="https://i.postimg.cc/SRjdzYHP/check.png" />
+                      <img :style="accountChosen == 0 ? 'opacity: 1' : 'opacity: 0' " style="width: 20px; height: 20px;" src="https://i.postimg.cc/SRjdzYHP/check.png"/>
                     </div>
-                    <!-- <div class="checked-wrapper" style="position: relative; top: -13px; left: 25px;">Hello</div> -->
-                    <div style="box-shadow: 8px 28px 50px rgb(39 44 49 / 7%), 1px 6px 12px rgb(39 44 49 / 4%); transform: translate3D(0, -1px, 0) scale(1.02); transition: all 0.2s ease; border: 2px solid #4BAE4F;" 
+                    <div :style="accountChosen == 0 ? 'box-shadow: 8px 28px 50px rgb(39 44 49 / 7%), 1px 6px 12px rgb(39 44 49 / 4%); transform: translate3D(0, -1px, 0) scale(1.02); transition: all 0.2s ease; border: 2px solid #4BAE4F;' : ''" 
                       class="account-card"
+                      @click="chooseAccount(0)"
                     >
                       <div class="left">
                         <div>
@@ -252,10 +252,9 @@
                     <div style="position: relative; top: 35px; left: -10px; display: flex; justify-content: flex-end; z-index: 50;">
                       <img :style="accountChosen == 1 ? 'opacity: 1' : 'opacity: 0' " style="width: 20px; height: 20px;" src="https://i.postimg.cc/SRjdzYHP/check.png"/>
                     </div>
-                    <!-- <div class="checked-wrapper" style="position: relative; top: -13px; left: 25px;">Hello</div> -->
-                    <div :style="accountChosen == 1 && 'box-shadow: 8px 28px 50px rgb(39 44 49 / 7%), 1px 6px 12px rgb(39 44 49 / 4%); transform: translate3D(0, -1px, 0) scale(1.02); transition: all 0.2s ease; border: 2px solid #4BAE4F;'" 
+                    <div :style="accountChosen == 1 ? 'box-shadow: 8px 28px 50px rgb(39 44 49 / 7%), 1px 6px 12px rgb(39 44 49 / 4%); transform: translate3D(0, -1px, 0) scale(1.02); transition: all 0.2s ease; border: 2px solid #4BAE4F;' : ''" 
                       class="account-card" 
-                      @click="chooseAccount()"
+                      @click="chooseAccount(1)"
                     >
                       <div class="left">
                         <div>
@@ -314,17 +313,15 @@
                   </div>
                 </div>
                 <div class="create">
-                  <router-link to="/transactions" @click="createRedPacket" data-toggle="tooltip" data-placement="right" title="CreateRedPacket">
-                    <button class="connect-wallet-button" style="width: auto;">
-                        <svg style="margin-right: 10px;" width="18" height="18" viewBox="0 0 18 18" fill="none"
-                          xmlns="http://www.w3.org/2000/svg">
-                          <path
-                            d="M16 2.50025V3.51125C16.5304 3.51125 17.0391 3.72196 17.4142 4.09703C17.7893 4.47211 18 4.98081 18 5.51125V15.5112C18 16.0416 17.7893 16.5504 17.4142 16.9254C17.0391 17.3005 16.5304 17.5112 16 17.5112H2C1.46957 17.5112 0.96086 17.3005 0.58579 16.9254C0.21071 16.5504 0 16.0416 0 15.5112V5.51125C0 4.46625 0.835 3.51825 1.813 3.23925L12.813 0.0962511C13.1851 -0.0100989 13.5768 -0.0286089 13.9573 0.0421711C14.3377 0.112951 14.6966 0.271091 15.0055 0.504141C15.3145 0.737191 15.5651 1.03878 15.7377 1.38516C15.9102 1.73154 16 2.11326 16 2.50025ZM12.5 9.01123C12.1022 9.01123 11.7206 9.16933 11.4393 9.45063C11.158 9.73193 11 10.1134 11 10.5112C11 10.909 11.158 11.2906 11.4393 11.5719C11.7206 11.8532 12.1022 12.0112 12.5 12.0112C12.8978 12.0112 13.2794 11.8532 13.5607 11.5719C13.842 11.2906 14 10.909 14 10.5112C14 10.1134 13.842 9.73193 13.5607 9.45063C13.2794 9.16933 12.8978 9.01123 12.5 9.01123ZM14 2.50025C14.0001 2.42966 13.9852 2.35986 13.9563 2.29544C13.9274 2.23102 13.8853 2.17345 13.8326 2.1265C13.7798 2.07955 13.7178 2.04429 13.6505 2.02305C13.5832 2.00181 13.5121 1.99506 13.442 2.00325L13.362 2.01925L8.14 3.51125H14V2.50025Z"
-                            fill="white" />
-                        </svg>
-                        Create Red Packet
-                    </button>
-                  </router-link>
+                  <button class="connect-wallet-button" @click="createRedPacket" style="width: auto;">
+                      <svg style="margin-right: 10px;" width="18" height="18" viewBox="0 0 18 18" fill="none"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <path
+                          d="M16 2.50025V3.51125C16.5304 3.51125 17.0391 3.72196 17.4142 4.09703C17.7893 4.47211 18 4.98081 18 5.51125V15.5112C18 16.0416 17.7893 16.5504 17.4142 16.9254C17.0391 17.3005 16.5304 17.5112 16 17.5112H2C1.46957 17.5112 0.96086 17.3005 0.58579 16.9254C0.21071 16.5504 0 16.0416 0 15.5112V5.51125C0 4.46625 0.835 3.51825 1.813 3.23925L12.813 0.0962511C13.1851 -0.0100989 13.5768 -0.0286089 13.9573 0.0421711C14.3377 0.112951 14.6966 0.271091 15.0055 0.504141C15.3145 0.737191 15.5651 1.03878 15.7377 1.38516C15.9102 1.73154 16 2.11326 16 2.50025ZM12.5 9.01123C12.1022 9.01123 11.7206 9.16933 11.4393 9.45063C11.158 9.73193 11 10.1134 11 10.5112C11 10.909 11.158 11.2906 11.4393 11.5719C11.7206 11.8532 12.1022 12.0112 12.5 12.0112C12.8978 12.0112 13.2794 11.8532 13.5607 11.5719C13.842 11.2906 14 10.909 14 10.5112C14 10.1134 13.842 9.73193 13.5607 9.45063C13.2794 9.16933 12.8978 9.01123 12.5 9.01123ZM14 2.50025C14.0001 2.42966 13.9852 2.35986 13.9563 2.29544C13.9274 2.23102 13.8853 2.17345 13.8326 2.1265C13.7798 2.07955 13.7178 2.04429 13.6505 2.02305C13.5832 2.00181 13.5121 1.99506 13.442 2.00325L13.362 2.01925L8.14 3.51125H14V2.50025Z"
+                          fill="white" />
+                      </svg>
+                      Create Red Packet
+                  </button>
                   <button class="connect-wallet-button" @click="showClaim = !showClaim" style="width: auto; margin-right: 1rem;">
                     Test Claim
                   </button>
@@ -426,7 +423,7 @@ const claimcard = ref<ClaimCardData>({
   from: "dreambig_peter"
 })
 
-const genLocalTokens = function() : Token[] {
+const genTokenListToSelect = function() : Token[] {
   // merge balances
   if (accountChosen.value) {
     const profileTokens = useProfileStore().profile.tokens;
@@ -436,11 +433,9 @@ const genLocalTokens = function() : Token[] {
       const decimals = token.metadata.decimals;
       const defaultBalance = EthBigNumber.from(0);
       const walletBalance = walletTokenBalances[address]?.value || defaultBalance;
-      const profileBalance = profileTokens[address].balance?.value || defaultBalance;
-      const newBalance = walletBalance.add(profileBalance);
       return {
         metadata: token.metadata,
-        balance: normalizeBalance(newBalance, decimals)
+        balance: normalizeBalance(walletBalance, decimals)
       }
     }).filter(t => t.balance.value.gt(0));
   } else {    
@@ -471,7 +466,7 @@ const refresh = async function() {
     if (useWalletStore().connected) {
       await updateWalletBalances();
     }
-    tokens.value = genLocalTokens();
+    tokens.value = genTokenListToSelect();
 
     // set default token
     const nativeCoinAddr = useNetworkStore().nativeCoinAddress;
@@ -520,13 +515,9 @@ const estimatedGas = computed(() => {
   return result;
 });
 
-const chooseAccount = function() {
-  if (accountChosen.value == 0) {
-    accountChosen.value = 1;
-  } else {
-    accountChosen.value = 0;
-  }
-  tokens.value = genLocalTokens();
+const chooseAccount = function(value: number) {
+  accountChosen.value = value;
+  tokens.value = genTokenListToSelect();
 
   // reset redpacket token balance
   const token = tokens.value.find(
@@ -591,13 +582,12 @@ const warning = () => {
   message.warning('This is a warning message');
 };
 
-onMounted(refresh);
-onMounted(async () => { await refresh(); });
-onMounted(() => {
+onMounted(async () => {
+  await refresh();
   calcGasSponsorship();
   packetId.value = useRoute().params.packetId.toString();
   if (packetId.value != "luck") showClaim.value = true;
-})
+});
 
 watch(() => useNetworkStore().network, refresh);
 watch(() => redpacket.value.split, calcGasSponsorship);
@@ -631,50 +621,12 @@ const modeChoose = async (gameMode: "random" | "equal") => {
   redpacket.value.mode = gameMode;
 }
 
-const calcTokenCostDistribution = () => {
-  const requiredTokenAmount = toEthBigNumber(
-    tokenBase(redpacket.value.token).times(redpacket.value.balance)
-  );
-  const hexlinkTokenAmount = tokenBalance.value.value.gt(requiredTokenAmount)
-    ? requiredTokenAmount : tokenBalance.value.value;
-  const deltaTokenAmount = hexlinkTokenAmount.gte(requiredTokenAmount)
-    ? EthBigNumber.from(0) : requiredTokenAmount.sub(hexlinkTokenAmount);
-  const eoaTokenAmount = deltaTokenAmount.gt(0)
-    ? deltaTokenAmount : EthBigNumber.from(0);
-  return {
-    hexlinkTokenAmount,
-    eoaTokenAmount
-  }
-}
-
-const calcGasTokenCostDistribution = () => {
-  const hexlinkGasTokenAmount = gasTokenBalance.value.value.gt(gasSponsorship.value)
-    ? gasSponsorship.value : gasTokenBalance.value.value;
-  const deltaTokenAmount = hexlinkGasTokenAmount.gte(gasSponsorship.value)
-    ? EthBigNumber.from(0) : gasSponsorship.value.sub(hexlinkGasTokenAmount);
-  const eoaGasTokenAmount = deltaTokenAmount.gt(0)
-    ? deltaTokenAmount : EthBigNumber.from(0);
-  return {
-    hexlinkGasTokenAmount,
-    eoaGasTokenAmount
-  }
-}
-
 const createRedPacket = async function () {
-  const tokenDistribution = calcTokenCostDistribution();
-  const gasTokenDistribution = calcGasTokenCostDistribution();
-  const input : RedPacketInput = {
-    data: redpacket.value,
-    hexlinkAccount: {
-      tokenAmount: tokenDistribution.hexlinkTokenAmount,
-      gasTokenAmount: gasTokenDistribution.hexlinkGasTokenAmount,
-    },
-    walletAccount: {
-      tokenAmount: tokenDistribution.eoaTokenAmount,
-      gasTokenAmount: gasTokenDistribution.eoaGasTokenAmount,
-    }
-  };
-  await deployAndCreateRedPacket(useNetworkStore().network, input)
+  await deployAndCreateRedPacket(
+    useNetworkStore().network,
+    redpacket.value,
+    accountChosen.value == 0
+  );
 };
 
 const showGasToken = () => {

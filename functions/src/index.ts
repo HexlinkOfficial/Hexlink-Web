@@ -26,28 +26,18 @@ exports.processSignUp = processSignUp;
 exports.refreshToken = refreshToken;
 
 import {
-  getBalance,
-  deployAccount,
-  executeTx,
-  sendERC20,
-  sendERC721,
-  sendETH,
-  estimateERC20Transfer,
-  estimateETHTransfer,
-} from "./account";
-
-exports.getBalance = getBalance;
-exports.deployAccount = deployAccount;
-exports.sendERC20 = sendERC20;
-exports.sendERC721 = sendERC721;
-exports.sendETH = sendETH;
-exports.executeTx = executeTx;
-exports.estimateERC20Transfer = estimateERC20Transfer;
-exports.estimateETHTransfer = estimateETHTransfer;
-
-import {
   isFollowing,
   hasRetweeted} from "./twitter/twitter";
 
 exports.isFollowing = isFollowing;
 exports.hasRetweeted = hasRetweeted;
+
+import {
+  genTwitterOAuthProof,
+  calcEthAddress,
+  signWithKms,
+} from "./verifier";
+
+exports.genTwitterOAuthProof = genTwitterOAuthProof;
+exports.calcEthAddress = calcEthAddress;
+exports.signWithKms = signWithKms;

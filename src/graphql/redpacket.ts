@@ -88,7 +88,6 @@ export async function getRedPacketsByUser(
     {userId: useAuthStore().user!.uid}
   ).toPromise();
   if (await handleUrqlResponse(result)) {
-    console.log(result.data.redpacket)
     return result.data.redpacket.map((r : any) => {
       return {
         id: r.id,

@@ -315,7 +315,7 @@
                 </div>
                 <div class="create">
                   <router-link to="/transactions" data-toggle="tooltip" data-placement="right" title="CreateRedPacket">
-                    <button class="connect-wallet-button" style="width: auto;">
+                    <button class="connect-wallet-button" @click="createRedPacket" style="width: auto;">
                         <svg style="margin-right: 10px;" width="18" height="18" viewBox="0 0 18 18" fill="none"
                           xmlns="http://www.w3.org/2000/svg">
                           <path
@@ -372,7 +372,7 @@ import RedPacektHistoryList from "../components/RedPacketHistoryList.vue";
 import { connectWallet, disconnectWallet } from "@/web3/wallet";
 import { updateProfileBalances, updateWalletBalances } from "@/web3/tokens";
 import { getRedPacketsByUser } from '@/graphql/redpacket';
-import type { Metadata, RedPacketDB } from '@/graphql/redpacket';
+import type { RedPacketDB } from '@/graphql/redpacket';
 import { useProfileStore } from '@/stores/profile';
 import { useWalletStore } from '@/stores/wallet';
 import { BigNumber } from "bignumber.js";
@@ -386,9 +386,8 @@ import { createToaster } from "@meforma/vue-toaster";
 import { normalizeBalance } from '@/web3/tokens';
 import { CopyOutlined } from '@ant-design/icons-vue';
 import { BigNumber as EthBigNumber} from "ethers";
-import { estimateGasSponsorship } from "@/web3/hexlink";
+import { estimateGasSponsorship, deployAndCreateRedPacket } from "@/web3/redpacket";
 import { toEthBigNumber, tokenBase } from "@/web3/utils";
-import { deployAndCreateRedPacket } from "@/web3/hexlink";
 import { hash } from "@/web3/utils";
 import { useRoute } from "vue-router";
 import { message } from 'ant-design-vue';
@@ -592,12 +591,11 @@ const warning = () => {
   message.warning('This is a warning message');
 };
 
-onMounted(refresh);
 onMounted(async () => {
   await refresh();
   calcGasSponsorship();
   const route = useRoute();
-  packetId.value = route.params.packetId.toString();
+  packetId.value = route?.params.packetId.toString();
   if (packetId.value != "luck") showClaim.value = true;
 });
 

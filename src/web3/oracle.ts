@@ -2,7 +2,7 @@ import type { Network, AuthProof } from "@/types";
 import { useWalletStore } from "@/stores/wallet";
 import ACCOUNT_ABI from "@/configs/abi/AccountSimple.json";
 import HEXLINK_ABI from "@/configs/abi/Hexlink.json";
-import { hexlinkContract } from "@/web3/redpacket";
+import { hexlinkContract } from "@/web3/hexlink";
 import { ethers } from "ethers";
 import { getFunctions, httpsCallable } from 'firebase/functions'
 import { useAuthStore } from "@/stores/auth";

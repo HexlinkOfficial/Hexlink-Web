@@ -4,14 +4,11 @@ import { useProfileStore } from "@/stores/profile";
 import { useAuthStore } from "@/stores/auth";
 import { isNativeCoin, isWrappedCoin, isStableCoin } from "@/configs/tokens";
 
-import { genDeployAuthProof } from "@/services/web3/oracle";
-import { hash, toEthBigNumber, tokenBase } from "@/services/web3/utils";
-import { getProvider } from "@/services/web3/network";
-import { sendTransaction } from "@/services/web3/wallet";
+import { genDeployAuthProof } from "@/web3/oracle";
+import { toEthBigNumber, tokenBase } from "@/web3/utils";
 
 import ERC20_ABI from "@/configs/abi/ERC20.json";
 import RED_PACKET_ABI from "@/configs/abi/HappyRedPacket.json";
-import HEXLINK_ABI from "@/configs/abi/Hexlink.json";
 import ACCOUNT_ABI from "@/configs/abi/AccountSimple.json";
 import USERS from "@/configs/users.json";
 import { useWalletStore } from "@/stores/wallet";
@@ -19,22 +16,6 @@ import { insertRedPacket } from "@/graphql/redpacket";
 
 const erc20Iface = new ethers.utils.Interface(ERC20_ABI);
 const redPacketIface = new ethers.utils.Interface(RED_PACKET_ABI);
-
-export function hexlinkAddress(network: Network) : string {
-    return network.contracts.hexlink as string;
-}
-
-export function refund(network: Network) : string {
-    return network.contracts.refund as string;
-}
-
-export function hexlinkContract(network: Network) {
-    return new ethers.Contract(
-        hexlinkAddress(network),
-        HEXLINK_ABI,
-        getProvider(network)
-    );
-}
 
 function calculateUsdCost(
     network: Network,
@@ -191,17 +172,11 @@ export async function buildDeployAndCreateRedPacketTx(
     ops.push(await serviceFeeOp(network, input));
     const accountIface = new ethers.utils.Interface(ACCOUNT_ABI);
     const opsData = accountIface.encodeFunctionData("execBatch", [ops]);
-    console.log("++++++");
-
     const { initData, proof } = await genDeployAuthProof(network, opsData);
     const hexlink = hexlinkContract(network);
-    console.log("======");
-
     const data = hexlink.interface.encodeFunctionData(
         "deploy", [useAuthStore().user!.nameHash, initData, proof]
     );
-    console.log("++++++");
-
     return {
         to: hexlink.address, // Required except during contract publications.
         from: walletAccount.address, // must match user's active address.

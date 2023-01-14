@@ -31,8 +31,6 @@
 <script lang="ts" setup>
 import * as ethers from "ethers";
 import { ref } from 'vue';
-import type { ParsedRedPacket } from '@/services/graphql/redpacket';
-import Loading from "@/components/Loading.vue";
 import type { RedPacketDB } from '@/graphql/redpacket';
 
 const showDetailsEnabled = ref<boolean>(false);

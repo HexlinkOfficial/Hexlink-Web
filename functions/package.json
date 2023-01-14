@@ -22,7 +22,7 @@
     "bignumber.js": "^9.1.0",
     "ethers": "^5.7.0",
     "firebase-admin": "^10.0.2",
-    "firebase-functions": "^3.23.0",
+    "firebase-functions": "^4.1.1",
     "node-fetch": "^2.6.7",
     "node-html-parser": "^6.1.4",
     "nodemailer": "^6.7.8",

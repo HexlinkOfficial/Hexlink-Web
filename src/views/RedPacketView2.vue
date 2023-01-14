@@ -36,6 +36,7 @@
                 </div>
               </div>
               <RedPacektHistoryList v-if="luckHistory" :redPackets="redPackets"></RedPacektHistoryList>
+              <RedPacketSend :sendLuck="sendLuck" :redPackets="redPackets"></RedPacketSend>
             </div>
           </div>
         </div>
@@ -45,13 +46,28 @@
 </template>
 
 <script setup lang="ts">
+import { ref, onMounted, watch, computed } from "vue";
 import Layout from "@/components/Layout.vue";
 import RedPacektHistoryList from "@/components/RedPacketHistoryList.vue";
-import { ref } from "vue";
+import RedPacketSend from "@/components/RedPacketSend.vue";
+import type { RedPacketDB } from '@/graphql/redpacket';
+import type { Token, ClaimCardData, RedPacket } from "@/types";
+import { hash } from "@/web3/utils";
+import { useProfileStore } from '@/stores/profile';
+import { useNetworkStore } from '@/stores/network';
 
 const showClaim = ref<boolean>(false);
 const sendLuck = ref<boolean>(false);
 const luckHistory = ref<boolean>(true);
+const redPackets = ref<RedPacketDB[]>([]);
+
+const refresh = async function() {
+
+}
+
+// watch(() => useNetworkStore().network, refresh);
+// watch(() => redpacket.value.split, calcGasSponsorship);
+// watch(() => redpacket.value.balance, calcGasSponsorship);
 </script>
 
 <style lang="less" scoped>

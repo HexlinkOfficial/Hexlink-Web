@@ -5,7 +5,7 @@
       <div className="row invoice-card-row">
         <div class="col-xxl-6">
           <div class="card">
-            <div v-if="showClaim" class="hidden-layer"></div>
+            <div v-if="useRoute().params.action.toString() == 'claim' && useRoute().query.id != undefined" class="hidden-layer"></div>
             <div class="card-body">
               <div class="token-list">
                 <div class="title">
@@ -28,46 +28,55 @@
                 </div>
                 <div class="views">
                   <div class="detail-view">
-                    <button class="listView-button" @click="luckHistory = true; sendLuck = false" :class="luckHistory && 'show'">Luck
+                    <router-link to="/redpacket2/claim">
+                      <button class="listView-button" @click="luckHistory = true; sendLuck = false" :class="luckHistory && 'show'">Luck
                       History</button>
-                    <button class="listView-button" @click="sendLuck = true; luckHistory = false"
-                      :class="sendLuck && 'show'">Send Luck</button>
+                    </router-link>
+                    <router-link to="/redpacket2/send">
+                      <button class="listView-button" @click="sendLuck = true; luckHistory = false" :class="sendLuck && 'show'">Send
+                        Luck</button>
+                    </router-link>
                   </div>
                 </div>
               </div>
-              <RedPacektHistoryList v-if="luckHistory" :redPackets="redPackets"></RedPacektHistoryList>
-              <RedPacketSend :sendLuck="sendLuck" :redPackets="redPackets"></RedPacketSend>
+              <RedPacektHistoryList v-if="useRoute().params.action.toString() != 'send'" :luckHistory="luckHistory" :redPackets="redPackets"></RedPacektHistoryList>
+              <RedPacketSend v-if="useRoute().params.action.toString() == 'send'" :sendLuck="sendLuck"></RedPacketSend>
             </div>
           </div>
         </div>
       </div>
+      <RedPacketClaim v-if="useRoute().params.action.toString() == 'claim' && useRoute().query.id != undefined"></RedPacketClaim>
     </div>
   </Layout>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch, computed } from "vue";
+import { ref, onMounted, watch } from "vue";
 import Layout from "@/components/Layout.vue";
 import RedPacektHistoryList from "@/components/RedPacketHistoryList.vue";
 import RedPacketSend from "@/components/RedPacketSend.vue";
+import RedPacketClaim from "@/components/RedPacketClaim.vue";
 import type { RedPacketDB } from '@/graphql/redpacket';
-import type { Token, ClaimCardData, RedPacket } from "@/types";
-import { hash } from "@/web3/utils";
-import { useProfileStore } from '@/stores/profile';
 import { useNetworkStore } from '@/stores/network';
+import { getRedPacketsByUser } from '@/graphql/redpacket';
+import { useRoute } from "vue-router";
 
-const showClaim = ref<boolean>(false);
 const sendLuck = ref<boolean>(false);
 const luckHistory = ref<boolean>(true);
 const redPackets = ref<RedPacketDB[]>([]);
+const userId = ref<string>("ming");
 
 const refresh = async function() {
-
+  redPackets.value = await loadRedPackets(userId.value);
 }
 
-// watch(() => useNetworkStore().network, refresh);
-// watch(() => redpacket.value.split, calcGasSponsorship);
-// watch(() => redpacket.value.balance, calcGasSponsorship);
+const loadRedPackets = async (userId: string): Promise<RedPacketDB[]> => {
+  return await getRedPacketsByUser(userId);
+}
+
+onMounted(async () => { await refresh(); });
+
+watch(() => useNetworkStore().network, refresh);
 </script>
 
 <style lang="less" scoped>
@@ -80,7 +89,7 @@ const refresh = async function() {
   background-color: #fff;
   background-clip: border-box;
   height: calc(100% - 30px);
-  min-height: 65vh;
+  min-height: 55vh;
   margin-bottom: 1.875rem;
   transition: all .5s ease-in-out;
   border: 0px solid transparent;

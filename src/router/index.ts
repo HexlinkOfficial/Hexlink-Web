@@ -33,7 +33,7 @@ const router = createRouter({
       component: () => import('@/views/RedPacketView.vue')
     },
     {
-      path: '/redpacket2',
+      path: '/redpacket2/:action',
       name: 'red pocket view',
       component: () => import('@/views/RedPacketView2.vue')
     },

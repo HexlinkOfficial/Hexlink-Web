@@ -46,7 +46,7 @@ export function estimateGasSponsorship(
 
 export function redPacketOps(network: Network, input: RedPacketInput) : UserOp[] {
     const redPacketAddr = network.contracts.redPacket as string;
-    const balance = tokenBase(input.data.token).times(input.data.balance);
+    const balance = tokenBase(input.data?.token).times(input.data?.balance);
     const packet = {
        token: input.data.token.metadata.address,
        salt: input.data.salt,

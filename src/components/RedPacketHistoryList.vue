@@ -1,7 +1,7 @@
 <template>
   <!-- <a-list>
 <template #renderItem="{ item }"> -->
-  <div class="token-listDetail">
+  <div v-if="props.luckHistory" class="token-listDetail">
     <div class="token-table">
       <div style="overflow: visible; border-radius: 0.75rem;">
         <table>
@@ -44,6 +44,10 @@ const props = defineProps({
   redPackets: {
     type: Object as () => RedPacketDB[],
     required: true,
+  },
+  luckHistory: {
+  type: Boolean,
+  required: true,
   }
 });
 

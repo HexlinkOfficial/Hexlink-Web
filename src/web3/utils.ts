@@ -13,5 +13,5 @@ export function toEthBigNumber(value: BigNumber) : EthBigNumber {
 }
 
 export function tokenBase(token: Token) : BigNumber {
-    return new BigNumber(10).pow(token.metadata.decimals);
+    return new BigNumber(10).pow(token.metadata!.decimals);
 }

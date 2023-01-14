@@ -4,11 +4,11 @@ import HEXLINK_ABI from "@/configs/abi/Hexlink.json";
 import { ethers } from "ethers";
 
 export function hexlinkAddress(network: Network) : string {
-    return network.contracts.hexlink as string;
+    return network.addresses.hexlink as string;
 }
 
 export function refund(network: Network) : string {
-    return network.contracts.refund as string;
+    return network.addresses.refund as string;
 }
 
 export function hexlinkContract(network: Network) {

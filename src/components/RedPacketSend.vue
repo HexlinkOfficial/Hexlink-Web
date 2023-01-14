@@ -285,9 +285,8 @@ import { useWalletStore } from '@/stores/wallet';
 import { useProfileStore } from '@/stores/profile';
 import { useNetworkStore } from '@/stores/network';
 import { connectWallet, disconnectWallet } from "@/web3/wallet";
-import type { Token, ClaimCardData, RedPacket } from "@/types";
-import type { RedPacketDB } from '@/graphql/redpacket';
-import { hash, toEthBigNumber, tokenBase } from "@/web3/utils";
+import type { Token, RedPacket } from "@/types";
+import { hash, tokenBase } from "@/web3/utils";
 import type { OnClickOutsideHandler } from '@vueuse/core';
 import { onClickOutside } from '@vueuse/core'
 import { vOnClickOutside } from '@/services/directive';

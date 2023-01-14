@@ -6,6 +6,7 @@ import { hexlinkContract } from "@/web3/hexlink";
 import { ethers } from "ethers";
 import { getFunctions, httpsCallable } from 'firebase/functions'
 import { useAuthStore } from "@/stores/auth";
+import { hash } from "./utils";
 
 const functions = getFunctions()
 
@@ -51,9 +52,8 @@ export async function genDeployAuthProof(
     );
     const genAuthProof = httpsCallable(functions, 'genTwitterOAuthProof');
     const result = await genAuthProof({requestId});
-    console.log("*******");
     return {
         initData,
-        proof: result.data as AuthProof
+        proof: (result.data as any).authProof as AuthProof
     };
 }

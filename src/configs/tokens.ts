@@ -6,15 +6,15 @@ import POLYGON_TOEKNS from"@/configs/tokens/POLYGON_TOKENS.json";
 const POLYGON_POPULAR_TOKENS = "https://api-polygon-tokens.polygon.technology/tokenlists/popularTokens.tokenlist.json";
 
 export function nativeCoinAddress(network: Network) : string {
-    return network.contracts.nativeCoin as string;
+    return network.addresses.nativeCoin as string;
 }
 
 export function wrappedCoinAddress(network: Network) : string {
-    return network.contracts.wrappedCoin as string;
+    return network.addresses.wrappedCoin as string;
 }
 
 export function stableCoinAddresses(network: Network) : string[] {
-    return network.contracts.stableCoins as string[]
+    return network.addresses.stableCoins as string[]
 }
 
 export function allowedGasToken(network: Network) : string[] {

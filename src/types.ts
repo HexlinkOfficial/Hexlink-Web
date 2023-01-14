@@ -18,7 +18,7 @@ export interface Network {
     blockExplorerUrls: string[],
     logoUrl: string,
     defaultGasPrice: EthersBigNumber,
-    contracts: {[key : string]: string | string[]}
+    addresses: {[key : string]: string | string[]}
 }
 
 export interface Account {
@@ -137,6 +137,15 @@ export interface CreatedRedPacket {
         txCost: EthersBigNumber;
     },
     claimHistory: Claim[]
+}
+
+export interface AuthProof {
+    name: string,
+    requestId: string,
+    authType: string, // non-hashed
+    identityType: string, // non-hashed
+    issuedAt: number, // timestamp
+    signature: string // encoded with validator address
 }
 
 export interface AuthProof {

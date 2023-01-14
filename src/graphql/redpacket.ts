@@ -1,12 +1,15 @@
 import { gql } from '@urql/core';
 import { useAuthStore } from '@/stores/auth';
 import { handleUrqlResponse, setUrqlClientIfNecessary } from './urql';
+import { useNetworkStore } from '@/stores/network';
 
 export const GET_REDPACKET = gql`
   query GetRedPacket($id: String!) {
     red_packet_by_pk(id: $id) {
         id
         user_id
+        chain
+        tx
         metadata
     }
   }
@@ -15,14 +18,18 @@ export const GET_REDPACKET = gql`
 export const GET_REDPACKETS = gql`
     query GetRedPacketByUser (
         $userId: String!,
+        $chain: String!,
     ) {
         redpacket (
             where: {
-              user_id: { _eq: $userId},
+              user_id: { _eq: $userId },
+              chain: { _eq: $chain },
             }
         ) {
             id
             user_id
+            chain
+            tx
             metadata
         }
     }
@@ -41,7 +48,21 @@ export const INSERT_REDPACKET = gql`
     }
 `
 
-export interface Metadata {
+export const UPDATE_REDPACKET = gql`
+    mutation (
+        $id: String!
+        $tx: String!
+    ) {
+        update_redpacket_by_pk (
+            pk_columns: {id: $id},
+            _set: { tx: $tx }
+        ) {
+            id
+        }
+    }
+`
+
+export interface RedPacketDBMetadata {
   token: string
   salt: string,
   mode: string,
@@ -49,12 +70,15 @@ export interface Metadata {
   balance: string,
   validator: string,
   expiredAt: number,
+  contract: string
 }
 
 export interface RedPacketDB {
   id: string,
   userId: string,
-  metadata: Metadata
+  chain: string,
+  metadata: RedPacketDBMetadata,
+  tx?: string
 }
 
 export async function getRedPacket(
@@ -70,6 +94,7 @@ export async function getRedPacket(
     return {
       id: rp.id,
       userId: rp.user_id,
+      chain: rp.chain,
       metadata: JSON.parse(rp.metadata)
     } as RedPacketDB;
   } else {
@@ -85,7 +110,10 @@ export async function getRedPacketsByUser(
   );
   const result = await client.query(
     GET_REDPACKETS,
-    {userId: useAuthStore().user!.uid}
+    {
+      userId: useAuthStore().user!.uid,
+      chain: useNetworkStore().network.name
+    }
   ).toPromise();
   if (await handleUrqlResponse(result)) {
     return result.data.redpacket.map((r : any) => {
@@ -101,7 +129,11 @@ export async function getRedPacketsByUser(
 }
 
 export async function insertRedPacket(
-  data: {id: string, metadata: Metadata}[],
+  data: {
+    id: string,
+    metadata: RedPacketDBMetadata,
+    chain: string
+  }[],
 ) : Promise<{id: string}[]> {
   const client = setUrqlClientIfNecessary(useAuthStore().user!.idToken!)
   const result = await client.mutation(
@@ -110,7 +142,8 @@ export async function insertRedPacket(
           objects: data.map(d => ({
               user_id: useAuthStore().user!.uid,
               id: d.id,
-              metadata: JSON.stringify(d.metadata)
+              metadata: JSON.stringify(d.metadata),
+              chain: d.chain,
           }))
       }
   ).toPromise();
@@ -119,4 +152,17 @@ export async function insertRedPacket(
   } else {
       return await insertRedPacket(data);
   }
+}
+
+export async function updateRedPacket(
+  data: {id: string, tx: string},
+) : Promise<void> {
+  const client = setUrqlClientIfNecessary(useAuthStore().user!.idToken!)
+  const result = await client.mutation(
+      UPDATE_REDPACKET,
+      data
+  ).toPromise();
+  if (!await handleUrqlResponse(result)) {
+    await updateRedPacket(data);
+}
 }

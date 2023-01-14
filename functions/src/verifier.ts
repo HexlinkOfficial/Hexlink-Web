@@ -3,9 +3,12 @@ import {getAuth} from "firebase-admin/auth";
 import * as ethers from "ethers";
 import {getEthAddressFromPublicKey, signWithKmsKey} from "./kms";
 import {KMS_CONFIG, KMS_KEY_TYPE} from "./config";
+import {env} from "process";
 
 const TWITTER_PROVIDER_ID = "twitter.com";
 const OAUTH_AUTH_TYPE = "oauth";
+
+const secrets = functions.config().doppler || {};
 
 export interface AuthProof {
   name: string,
@@ -45,7 +48,8 @@ export const genTwitterOAuthProof = functions.https.onCall(
       const identityType = hash(TWITTER_PROVIDER_ID);
       const authType = hash(OAUTH_AUTH_TYPE);
 
-      const issuedAt = Math.round(Date.now() / 1000);
+      // reserve some time for current block
+      const issuedAt = Math.round(Date.now() / 1000) - 30;
       const message = ethers.utils.keccak256(
           ethers.utils.defaultAbiCoder.encode(
               ["bytes32", "bytes32", "uint256", "bytes32", "bytes32"],
@@ -56,15 +60,26 @@ export const genTwitterOAuthProof = functions.https.onCall(
                 authType]
           )
       );
-      const sig = await signWithKmsKey(
-          KMS_KEY_TYPE[KMS_KEY_TYPE.operator], message);
 
-      const validatorAddr = KMS_CONFIG.get(
-          KMS_KEY_TYPE[KMS_KEY_TYPE.operator]
-      )?.publicAddress;
-      const encodedSig = ethers.utils.defaultAbiCoder.encode(
-          ["address", "bytes"], [validatorAddr, sig]
-      );
+      let encodedSig;
+      if (env.FUNCTIONS_EMULATOR === "true") {
+        const validator = new ethers.Wallet(secrets.HARDHAT_VALIDATOR);
+        const signature = await validator.signMessage(
+            ethers.utils.arrayify(message)
+        );
+        encodedSig = ethers.utils.defaultAbiCoder.encode(
+            ["address", "bytes"], [await validator.getAddress(), signature]
+        );
+      } else {
+        const sig = await signWithKmsKey(
+            KMS_KEY_TYPE[KMS_KEY_TYPE.operator], message);
+        const validatorAddr = KMS_CONFIG.get(
+            KMS_KEY_TYPE[KMS_KEY_TYPE.operator]
+        )?.publicAddress;
+        encodedSig = ethers.utils.defaultAbiCoder.encode(
+            ["address", "bytes"], [validatorAddr, sig]
+        );
+      }
 
       const AuthProof: AuthProof = {
         name: nameHash,
@@ -74,7 +89,6 @@ export const genTwitterOAuthProof = functions.https.onCall(
         authType: OAUTH_AUTH_TYPE,
         signature: encodedSig,
       };
-
       return {code: 200, authProof: AuthProof};
     });
 

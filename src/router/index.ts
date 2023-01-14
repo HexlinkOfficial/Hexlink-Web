@@ -28,14 +28,14 @@ const router = createRouter({
       component: () => import('@/views/AdminView.vue')
     },
     {
-      path: '/redpacket/:packetId',
+      path: '/redpacket2',
       name: 'red pocket view',
-      component: () => import('@/views/RedPacketView.vue')
+      component: () => import('@/views/RedPacketViewOLD.vue')
     },
     {
-      path: '/redpacket2/:action',
+      path: '/redpacket/:action',
       name: 'red pocket view',
-      component: () => import('@/views/RedPacketView2.vue')
+      component: () => import('@/views/RedPacketView.vue')
     },
     {
       path: '/:pathMatch(.*)*',

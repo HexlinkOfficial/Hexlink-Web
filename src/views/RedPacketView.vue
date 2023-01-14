@@ -1203,6 +1203,7 @@ const copy = async (text: string) => {
   background-color: #fff;
   background-clip: border-box;
   height: calc(100% - 30px);
+  min-height: 65vh;
   margin-bottom: 1.875rem;
   transition: all .5s ease-in-out;
   border: 0px solid transparent;

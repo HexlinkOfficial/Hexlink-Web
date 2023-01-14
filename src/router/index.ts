@@ -33,6 +33,11 @@ const router = createRouter({
       component: () => import('@/views/RedPacketView.vue')
     },
     {
+      path: '/redpacket2',
+      name: 'red pocket view',
+      component: () => import('@/views/RedPacketView2.vue')
+    },
+    {
       path: '/:pathMatch(.*)*',
       name: 'error404',
       component: Error404

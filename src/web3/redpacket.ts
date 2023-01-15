@@ -1,12 +1,12 @@
-import type { Network, Account, Transaction, UserOp, Token, RedPacket } from "@/types";
+import type { Network, Account, Transaction, UserOp, Token, RedPacket, PriceInfo } from "@/types";
 import { ethers, BigNumber as EthBigNumber } from "ethers";
 import { useProfileStore } from "@/stores/profile";
 import { useAuthStore } from "@/stores/auth";
 import { isNativeCoin, isWrappedCoin, isStableCoin } from "@/configs/tokens";
 
 import { genDeployAuthProof } from "@/web3/oracle";
-import { hash, toEthBigNumber, tokenBase, tokenEqual, addressEqual } from "@/web3/utils";
-import { hexlinkContract, refund } from "@/web3/hexlink";
+import { hash, toEthBigNumber, tokenBase, tokenEqual } from "@/web3/utils";
+import { hexlinkContract, refunder } from "@/web3/hexlink";
 import { estimateGas, sendTransaction } from "@/web3/wallet";
 
 import ERC20_ABI from "@/configs/abi/ERC20.json";
@@ -17,32 +17,41 @@ import { useWalletStore } from "@/stores/wallet";
 import { insertRedPacket } from "@/graphql/redpacket";
 import { BigNumber } from "bignumber.js";
 import { getProvider } from "@/web3/network";
+import { getFunctions, httpsCallable } from 'firebase/functions'
 
 const erc20Iface = new ethers.utils.Interface(ERC20_ABI);
 const redPacketIface = new ethers.utils.Interface(RED_PACKET_ABI);
 
-function calcUsdCost(
-    network: Network,
-    gasAmount: EthBigNumber,
-    gasToken: Token
-) : EthBigNumber {
-    const normalizedUsd = tokenBase(gasToken).times(network.nativeCurrency.priceInUsd);
-    const nativeCoinBase = EthBigNumber.from(10).pow(network.nativeCurrency.decimals);
-    return toEthBigNumber(normalizedUsd).mul(gasAmount).mul(
-        network.defaultGasPrice
-    ).div(nativeCoinBase);
+const functions = getFunctions()
+async function getPriceInfo(network: Network) : Promise<PriceInfo> {
+    const getPriceInfo = httpsCallable(functions, 'priceInfo');
+    const result = await getPriceInfo({chainId: network.chainId});
+    const priceInfo : {
+        nativeCurrentyInUsd: string,
+        gasPrice: string
+    } = (result.data as any).priceInfo;
+    return {
+        nativeCurrencyInUsd: new BigNumber(priceInfo.nativeCurrentyInUsd),
+        gasPrice: EthBigNumber.from(priceInfo.gasPrice),
+    }
 }
 
-export function estimateGasSponsorship(
+export async function estimateGasSponsorship(
     network: Network,
     redpacket: RedPacket
-) : EthBigNumber {
+) : Promise<EthBigNumber> {
     const sponsorshipGasAmount = EthBigNumber.from(Number(redpacket.split)).mul(200000);
     const gasToken = redpacket.gasToken;
+    const priceInfo = await getPriceInfo(network);
     if (isNativeCoin(network, gasToken) || isWrappedCoin(network, gasToken)) {
-        return sponsorshipGasAmount.mul(network.defaultGasPrice);
+        return sponsorshipGasAmount.mul(priceInfo.gasPrice);
     } else if (isStableCoin(network, gasToken)) {
-        return calcUsdCost(network, sponsorshipGasAmount, gasToken);
+        // calculate usd value of tokens
+        const normalizedUsd = tokenBase(gasToken).times(priceInfo.nativeCurrencyInUsd);
+        const nativeCoinBase = EthBigNumber.from(10).pow(network.nativeCurrency.decimals);
+        return toEthBigNumber(normalizedUsd).mul(sponsorshipGasAmount).mul(
+            priceInfo.gasPrice
+        ).div(nativeCoinBase);
     }
     throw new Error("Unsupported gas token");
 }
@@ -163,7 +172,7 @@ async function buildCreateRedPacketTx(
     const hexlAccount = useProfileStore().profile!.account;
     let ops : UserOp[] = [];
     const tokenAmount = calcTokenAmount(input);
-    const gasTokenAmount = estimateGasSponsorship(network, input);
+    const gasTokenAmount = await estimateGasSponsorship(network, input);
     let txes : any[] = [];
 
     let value : EthBigNumber = EthBigNumber.from(0);
@@ -341,7 +350,7 @@ async function buildCreateRedPacketTx(
             function: "",
             args: [],
             op: {
-                to: refund(network),
+                to: refunder(network),
                 value: gasTokenAmount,
                 callData: [],
                 callGasLimit: EthBigNumber.from(0) // no limit
@@ -350,7 +359,7 @@ async function buildCreateRedPacketTx(
     } else {
         const args = [
             hexlAccount.address,
-            refund(network),
+            refunder(network),
             gasTokenAmount
         ];
         ops.push({

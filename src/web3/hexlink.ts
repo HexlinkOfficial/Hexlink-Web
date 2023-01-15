@@ -7,8 +7,8 @@ export function hexlinkAddress(network: Network) : string {
     return network.addresses.hexlink as string;
 }
 
-export function refund(network: Network) : string {
-    return network.addresses.refund as string;
+export function refunder(network: Network) : string {
+    return network.addresses.refunder as string;
 }
 
 export function hexlinkContract(network: Network) {

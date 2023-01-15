@@ -6,7 +6,6 @@ import { hexlinkContract } from "@/web3/hexlink";
 import { ethers } from "ethers";
 import { getFunctions, httpsCallable } from 'firebase/functions'
 import { useAuthStore } from "@/stores/auth";
-import { hash } from "./utils";
 
 const functions = getFunctions()
 

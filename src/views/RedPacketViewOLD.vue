@@ -377,13 +377,13 @@ import { useNetworkStore } from '@/stores/network';
 import type { OnClickOutsideHandler } from '@vueuse/core'
 import { onClickOutside } from '@vueuse/core'
 import { vOnClickOutside } from '@/services/directive';
-import type { Token, ClaimCardData, RedPacket, RedPacketInput } from "@/types";
+import type { Token, ClaimCardData, RedPacket } from "@/types";
 import useClipboard from 'vue-clipboard3';
 import { createToaster } from "@meforma/vue-toaster";
 import { normalizeBalance } from '@/web3/tokens';
 import { CopyOutlined } from '@ant-design/icons-vue';
 import { BigNumber as EthBigNumber} from "ethers";
-import { estimateGasSponsorship, deployAndCreateRedPacket } from "@/web3/redpacket";
+import { estimateGasSponsorship } from "@/web3/redpacket";
 import { toEthBigNumber, tokenBase } from "@/web3/utils";
 import { hash } from "@/web3/utils";
 import { useRoute } from "vue-router";
@@ -622,11 +622,6 @@ const modeChoose = async (gameMode: "random" | "equal") => {
 }
 
 const createRedPacket = async function () {
-  await deployAndCreateRedPacket(
-    useNetworkStore().network,
-    redpacket.value,
-    accountChosen.value == 0
-  );
 };
 
 const showGasToken = () => {

@@ -85,8 +85,8 @@ export interface RedPacketDB {
   id: string,
   userId: string,
   chain: string,
-  metadata: RedPacketDBMetadata | "",
-  creator: RedPacketDBCreator | "",
+  metadata: RedPacketDBMetadata,
+  creator: RedPacketDBCreator,
   tx?: string
 }
 
@@ -113,8 +113,21 @@ export async function getRedPacket(
         id: "0",
         userId: "0",
         chain: "0",
-        metadata: "",
-        creator: ""
+        metadata: {
+          token: "",
+          salt: "",
+          mode: "",
+          split: 0,
+          balance: "",
+          validator: "",
+          expiredAt: 0,
+          contract: ""
+        },
+        creator: {
+          provider: "",
+          handle: "",
+          displayName: ""
+        }
       }
     }
   } else {

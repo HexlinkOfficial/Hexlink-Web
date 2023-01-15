@@ -377,7 +377,7 @@ const genTokenListToSelect = function (): Token[] {
         metadata: token.metadata,
         balance: normalizeBalance(walletBalance, decimals)
       }
-    }).filter(t => t.balance.value.gt(0));
+    }).filter(t => t.balance.value.gt(EthBigNumber.from(0)));
   } else {
     return useProfileStore().feasibleTokens.map(t => ({
       metadata: t.metadata,

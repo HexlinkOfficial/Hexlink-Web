@@ -9,14 +9,24 @@
       </svg>
     </router-link>
     <h2 class="transition">
-      <!-- <small v-if="packetId != 'luck'" style="font-size: 50%;">Claim id: {{ packetId }}</small><br> -->
-      <small style="font-size: 50%;">Claim id: {{ useRoute().query.id }}</small><br>
-      Sent by<br>
+      <span style="font-size: 20px;">Sent by</span><br>
       <div style="display: flex; align-items: center; justify-content: center;">
-        @{{ claimcard.from }}
-        <a class="twitter-link" :href="claimcard.twitter">
+        @{{ redPacket?.creator.handle }}
+        <a class="twitter-link" :href="'https://twitter.com/' + redPacket?.creator.handle">
           <i className="fa fa-twitter"></i>
         </a>
+      </div>
+      <div class="claim-tokens" style="margin-top: 0.5rem;">
+        <div class="token-icon">
+          <img :src="getNetwork(redPacketChain)?.logoUrl" />
+        </div>
+        <b class="mode-text2">{{ getNetwork(redPacketChain)?.chainName }}</b>
+      </div>
+      <div class="claim-tokens">
+        <div class="token-icon">
+          <img :src="redPacketTokenIcon" />
+        </div>
+        <b class="mode-text2">{{ redPacketToken }}</b>
       </div>
       <small>Best Wishes!</small>
     </h2>
@@ -34,7 +44,8 @@ import type { RedPacketDB } from '@/graphql/redpacket';
 import { useProfileStore } from '@/stores/profile';
 import { getRedPacket } from '@/graphql/redpacket';
 import { useRoute } from "vue-router";
-import { getAuth } from "firebase/auth";
+import { getNetwork } from "@/configs/network";
+import GOERLI_TOKENS from "@/configs/tokens/GOERLI_TOKENS.json";
 
 const nativeToken = useProfileStore().nativeToken;
 const claimcard = ref<ClaimCardData>({
@@ -42,11 +53,21 @@ const claimcard = ref<ClaimCardData>({
   token: nativeToken,
   from: "dreambig_peter"
 })
-const redPacker = ref<RedPacketDB>();
+const redPacket = ref<RedPacketDB>();
+const redPacketChain = ref<string>("");
+const redPacketTokenIcon = ref<string>("");
+const redPacketToken = ref<string>("");
 
 onMounted(async () => {
-  redPacker.value = await getRedPacket(useRoute().query.id!.toString());
-  console.log(redPacker.value.creator);
+  redPacket.value = await getRedPacket(useRoute().query.id!.toString());
+  redPacketChain.value = redPacket.value.chain;
+  GOERLI_TOKENS.map(t => {
+    if (t.address == redPacket.value?.metadata.token) {
+      redPacketToken.value = t.symbol;
+      redPacketTokenIcon.value = t.logoURI;
+    }
+  });
+  console.log(redPacket.value);
 });
 </script>
 
@@ -73,7 +94,7 @@ onMounted(async () => {
   width: 330px;
   color: white; }
 .claim-card:hover h2 {
-  margin-top: 100px;
+  margin-top: 80px;
   color: #fff; }
 .claim-card:hover h2 small {
   color: #fff; }
@@ -125,7 +146,7 @@ onMounted(async () => {
   display: flex;
   justify-content: center;
   text-align: center;
-  margin-top: 290px;
+  margin-top: 310px;
   position: absolute;
   z-index: 55;
   width: 100%; }
@@ -142,4 +163,26 @@ onMounted(async () => {
   font-weight: bold; }
 .cta:hover {
   background-color: rgba(253,71,85,0.8); }
+.token-icon {
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  justify-content: center;
+  margin-right: 0.5rem;
+  margin-left: 0.5rem; }
+.mode-text2 {
+  padding: 5px 0px 5px 0px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  display: block;
+  font-size: 14px;
+  line-height: 18px;
+  font-weight: 700;
+  margin-right: 0.5rem; }
+.claim-tokens {
+  display: flex;
+  align-items: center;
+  justify-content: center; }
 </style>

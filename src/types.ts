@@ -1,4 +1,5 @@
 import type { BigNumber as EthersBigNumber } from "ethers";
+import type { BigNumber } from "bignumber.js";
 
 export interface Network {
     chainId: number,
@@ -13,12 +14,15 @@ export interface Network {
         name: string,
         symbol: string,
         decimals: number,
-        priceInUsd: string
     },
     blockExplorerUrls: string[],
     logoUrl: string,
-    defaultGasPrice: EthersBigNumber,
     addresses: {[key : string]: string | string[]}
+}
+
+export interface PriceInfo {
+    nativeCurrencyInUsd: BigNumber,
+    gasPrice: EthersBigNumber,
 }
 
 export interface Account {

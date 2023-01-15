@@ -9,16 +9,22 @@
       </svg>
     </router-link>
     <h2 class="transition">
-      Sent by<br>
+      <span style="font-size: 20px;">Sent by</span><br>
       <div style="display: flex; align-items: center; justify-content: center;">
         @{{ redPacket?.creator.handle }}
         <a class="twitter-link" :href="'https://twitter.com/' + redPacket?.creator.handle">
           <i className="fa fa-twitter"></i>
         </a>
       </div>
-      <div class="claim-tokens">
+      <div class="claim-tokens" style="margin-top: 0.5rem;">
         <div class="token-icon">
           <img :src="getNetwork(redPacketChain)?.logoUrl" />
+        </div>
+        <b class="mode-text2">{{ getNetwork(redPacketChain)?.chainName }}</b>
+      </div>
+      <div class="claim-tokens">
+        <div class="token-icon">
+          <img :src="redPacketTokenIcon" />
         </div>
         <b class="mode-text2">{{ redPacketToken }}</b>
       </div>
@@ -49,6 +55,7 @@ const claimcard = ref<ClaimCardData>({
 })
 const redPacket = ref<RedPacketDB>();
 const redPacketChain = ref<string>("");
+const redPacketTokenIcon = ref<string>("");
 const redPacketToken = ref<string>("");
 
 onMounted(async () => {
@@ -57,6 +64,7 @@ onMounted(async () => {
   GOERLI_TOKENS.map(t => {
     if (t.address == redPacket.value?.metadata.token) {
       redPacketToken.value = t.symbol;
+      redPacketTokenIcon.value = t.logoURI;
     }
   });
   console.log(redPacket.value);
@@ -86,7 +94,7 @@ onMounted(async () => {
   width: 330px;
   color: white; }
 .claim-card:hover h2 {
-  margin-top: 100px;
+  margin-top: 80px;
   color: #fff; }
 .claim-card:hover h2 small {
   color: #fff; }
@@ -138,7 +146,7 @@ onMounted(async () => {
   display: flex;
   justify-content: center;
   text-align: center;
-  margin-top: 290px;
+  margin-top: 310px;
   position: absolute;
   z-index: 55;
   width: 100%; }
@@ -164,7 +172,7 @@ onMounted(async () => {
   margin-right: 0.5rem;
   margin-left: 0.5rem; }
 .mode-text2 {
-  padding: 11px 0px 11px 0px;
+  padding: 5px 0px 5px 0px;
   text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;

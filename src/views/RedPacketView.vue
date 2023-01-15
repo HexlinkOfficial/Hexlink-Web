@@ -68,6 +68,7 @@ const userId = ref<string>("ming");
 
 const refresh = async function() {
   redPackets.value = await loadRedPackets(userId.value);
+  console.log(redPackets.value)
 }
 
 const loadRedPackets = async (userId: string): Promise<RedPacketDB[]> => {

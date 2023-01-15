@@ -4,17 +4,17 @@ import {
     TwitterAuthProvider,
     signInWithPopup,
     signOut,
-} from 'firebase/auth'
-import type { User } from 'firebase/auth'
+} from 'firebase/auth';
+import type { User } from 'firebase/auth';
 import type { IUser } from "@/types";
-import { getFunctions, httpsCallable } from 'firebase/functions'
-import { app } from '@/services/firebase'
-import { useAuthStore } from "@/stores/auth"
-import { useProfileStore } from "@/stores/profile"
-import { useWalletStore } from "@/stores/wallet"
-import { useNetworkStore } from "@/stores/network"
-import { genNameHash } from '@/web3/account'
-import { initProfile } from "@/web3/account"
+import { getFunctions, httpsCallable } from 'firebase/functions';
+import { app } from '@/services/firebase';
+import { useAuthStore } from "@/stores/auth";
+import { useProfileStore } from "@/stores/profile";
+import { useWalletStore } from "@/stores/wallet";
+import { useNetworkStore } from "@/stores/network";
+import { genNameHash } from '@/web3/account';
+import { initProfile } from "@/web3/account";
 
 const auth = getAuth(app)
 const functions = getFunctions()

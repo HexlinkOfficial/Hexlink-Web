@@ -50,7 +50,7 @@
                       </div>
                       <div style="display: flex; flex-direction: column; align-items: flex-start;">
                         <b>{{ token.metadata.symbol }}</b>
-                        <div style="margin-right:0.5rem;">{{ calcRemainingBalance(token) }} available</div>
+                        <div style="margin-right:0.5rem;">balance {{ calcRemainingBalance(token) }}</div>
                       </div>
                     </div>
                   </div>
@@ -111,7 +111,7 @@
                     <div style="display: flex; flex-direction: column; align-items: flex-start;">
                       <b>{{ token.metadata.symbol }}</b>
                       <div style="margin-right:0.5rem;">
-                        {{ calcRemainingBalance(token) }} available
+                        Balance {{ calcRemainingBalance(token) }}
                       </div>
                     </div>
                   </div>

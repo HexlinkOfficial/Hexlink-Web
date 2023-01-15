@@ -293,11 +293,16 @@ import { vOnClickOutside } from '@/services/directive';
 import { updateProfileBalances, updateWalletBalances, normalizeBalance } from "@/web3/tokens";
 import { BigNumber as EthBigNumber } from "ethers";
 import { BigNumber } from "bignumber.js";
-import { estimateGasSponsorship, deployAndCreateRedPacket } from "@/web3/redpacket";
+import {
+  estimateGasSponsorship,
+  deployAndCreateNewRedPacket,
+  createNewRedPacket
+} from "@/web3/redpacket";
 import { message } from 'ant-design-vue';
 import useClipboard from 'vue-clipboard3';
 import { createToaster } from "@meforma/vue-toaster";
 import { CopyOutlined } from '@ant-design/icons-vue';
+import { isContract } from "@/web3/account";
 
 const chooseTotalDrop = ref<boolean>(false);
 const openDropdown = ref<boolean>(false);
@@ -341,7 +346,7 @@ if (walletStore.connected) {
 }
 
 const genTokenListToSelect = function (): Token[] {
-  // merge balances
+  // construct new token list so it's not affecting the store
   if (accountChosen.value) {
     const profileTokens = useProfileStore().profile.tokens;
     const walletTokenBalances = useWalletStore().balances;
@@ -356,7 +361,6 @@ const genTokenListToSelect = function (): Token[] {
       }
     }).filter(t => t.balance.value.gt(0));
   } else {
-    // construct new token list so it's not affecting the store
     return useProfileStore().feasibleTokens.map(t => ({
       metadata: t.metadata,
       balance: normalizeBalance(
@@ -423,11 +427,20 @@ const modeChoose = async (gameMode: "random" | "equal") => {
 }
 
 const createRedPacket = async function () {
-  await deployAndCreateRedPacket(
-    useNetworkStore().network,
-    redpacket.value,
-    accountChosen.value == 0
-  );
+  const account = useProfileStore().account;
+  if (await isContract(account.address)) {
+    await createNewRedPacket(
+      useNetworkStore().network,
+      redpacket.value,
+      accountChosen.value == 0
+    );
+  } else {
+    await deployAndCreateNewRedPacket(
+      useNetworkStore().network,
+      redpacket.value,
+      accountChosen.value == 0
+    );
+  }
 };
 
 const setMaxAmount = () => {

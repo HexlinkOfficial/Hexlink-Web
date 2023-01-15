@@ -5,9 +5,9 @@ import { useAuthStore } from "@/stores/auth";
 import { isNativeCoin, isWrappedCoin, isStableCoin } from "@/configs/tokens";
 
 import { genDeployAuthProof } from "@/web3/oracle";
-import { hash, toEthBigNumber, tokenBase } from "@/web3/utils";
-import { hexlinkContract, refund } from "@/web3/hexlink";
-import { sendTransaction } from "@/web3/wallet";
+import { hash, toEthBigNumber, tokenBase, tokenEqual, addressEqual } from "@/web3/utils";
+import { hexlinkAddress, hexlinkContract, refund } from "@/web3/hexlink";
+import { estimateGas, sendTransaction } from "@/web3/wallet";
 
 import ERC20_ABI from "@/configs/abi/ERC20.json";
 import RED_PACKET_ABI from "@/configs/abi/HappyRedPacket.json";
@@ -95,11 +95,65 @@ export function redPacketOps(
     }
 }
 
-export async function buildDeployAndCreateRedPacketTx(
+function buildApproveTxes(
+    network: Network,
+    input: RedPacket
+) {
+    const walletAccount = useWalletStore().wallet!.account;
+    const hexlAccount = useProfileStore().profile!.account;
+    const tokenAmount = calcTokenAmount(input);
+    const gasTokenAmount = estimateGasSponsorship(network, input);
+    const txes : any[] = [];
+    if (tokenEqual(input.token, input.gasToken)) {
+        if (!isNativeCoin(network, input.token)) {
+            const data = erc20Iface.encodeFunctionData(
+                "approve", [
+                    hexlAccount.address,
+                    tokenAmount.add(gasTokenAmount)
+                ]
+            );
+            txes.push({
+                to: input.token.metadata.address,
+                from: walletAccount.address,
+                data,
+            });
+        }
+    } else {
+        if (!isNativeCoin(network, input.token)) {
+            const data = erc20Iface.encodeFunctionData(
+                "approve", [
+                    hexlAccount.address,
+                    tokenAmount
+                ]
+            );
+            txes.push({
+                to: input.token.metadata.address,
+                from: walletAccount.address,
+                data
+            });
+        }
+        if (!isNativeCoin(network, input.gasToken)) {
+            const data = erc20Iface.encodeFunctionData(
+                "approve", [
+                    hexlAccount.address,
+                    gasTokenAmount
+                ]
+            );
+            txes.push({
+                to: input.gasToken.metadata.address,
+                from: walletAccount.address,
+                data
+            });
+        }
+    }
+    return txes;
+}
+
+function buildCreateRedPacketTx(
     network: Network,
     input: RedPacket,
     useHexlinkAccount: boolean
-) : Promise<any> {
+) {
     const walletAccount = useWalletStore().wallet!.account;
     const hexlAccount = useProfileStore().profile!.account;
     let value : EthBigNumber = EthBigNumber.from(0);
@@ -107,7 +161,14 @@ export async function buildDeployAndCreateRedPacketTx(
     const from = useHexlinkAccount ? hexlAccount : walletAccount;
 
     const tokenAmount = calcTokenAmount(input);
+    const gasTokenAmount = estimateGasSponsorship(network, input);
+    let txes : any[] = [];
+
     if (!useHexlinkAccount) {
+        console.log("----");
+        txes = buildApproveTxes(network, input);
+        console.log(txes);
+
         if (isNativeCoin(network, input.token)) {
             value = value.add(tokenAmount);
         } else {
@@ -126,12 +187,14 @@ export async function buildDeployAndCreateRedPacketTx(
         }
     }
 
-    const gasTokenAmout = estimateGasSponsorship(network, input);
+    // refund from hexl account to refund account
     if (isNativeCoin(network, input.gasToken)) {
-        value = value.add(gasTokenAmout);
+        if (!useHexlinkAccount) {
+            value = value.add(gasTokenAmount);
+        }
         ops.push({
             to: refund(network),
-            value: gasTokenAmout,
+            value: gasTokenAmount,
             callData: [],
             callGasLimit: EthBigNumber.from(0) // no limit
         });
@@ -143,16 +206,33 @@ export async function buildDeployAndCreateRedPacketTx(
                 "transferFrom", [
                     from.address,
                     refund(network),
-                    gasTokenAmout
+                    gasTokenAmount
                 ]
             ),
             callGasLimit: EthBigNumber.from(0) // no limit
         });
     }
+
     ops = ops.concat(redPacketOps(network, input));
     const accountIface = new ethers.utils.Interface(ACCOUNT_ABI);
-    const opsData = accountIface.encodeFunctionData("execBatch", [ops]);
-    const { initData, proof } = await genDeployAuthProof(network, opsData);
+    const data = accountIface.encodeFunctionData("execBatch", [ops]);
+    txes.push({
+        to: hexlAccount.address,
+        from: walletAccount.address,
+        value: ethers.utils.hexValue(value),
+        data,
+    });
+    return txes;
+}
+
+export async function buildDeployAndCreateRedPacketTx(
+    network: Network,
+    input: RedPacket,
+    useHexlinkAccount: boolean
+) : Promise<any> {
+    const txes = buildCreateRedPacketTx(network, input, useHexlinkAccount);
+    const tx = txes.pop();
+    const { initData, proof } = await genDeployAuthProof(network, tx.last.data);
     const hexlink = hexlinkContract(network);
     const data = hexlink.interface.encodeFunctionData(
         "deploy", [useAuthStore().user!.nameHash, initData, {
@@ -162,12 +242,13 @@ export async function buildDeployAndCreateRedPacketTx(
             signature: proof.signature
         }]
     );
-    return {
+    const walletAccount = useWalletStore().wallet!.account;
+    return txes.push({
         to: hexlink.address,
         from: walletAccount.address,
-        value: ethers.utils.hexValue(value),
+        value: tx.value,
         data,
-    };
+    });
 }
 
 function redpacketId(network: Network, input: RedPacket) {
@@ -185,16 +266,26 @@ function redpacketId(network: Network, input: RedPacket) {
     )
 }
 
-export async function deployAndCreateRedPacket(
+async function processTxAndSave(
     network: Network,
     redpacket: RedPacket,
-    useHexlinkAccount: boolean
-) {
-    const txParams = await buildDeployAndCreateRedPacketTx(
-        network,
-        redpacket,
-        useHexlinkAccount
-    );
+    txes: any[],
+    dryrun: boolean
+) : Promise<{id: string, tx: string}> {
+    if (dryrun) {
+        for (let i = 0; i < txes.length; i++) {
+            const tx = txes[i];
+            const gasUsed = await estimateGas(tx);
+            console.log({
+                tx: tx,
+                gasUsed: EthBigNumber.from(gasUsed).toString()
+            })
+        }
+        return {
+            id: redpacketId(network, redpacket),
+            tx: ''
+        }
+    }
     const id = redpacketId(network, redpacket);
     await insertRedPacket([{
         id,
@@ -210,6 +301,41 @@ export async function deployAndCreateRedPacket(
             contract: network.addresses.redPacket as string
         }
     }]);
-    const tx = await sendTransaction(txParams);
-    await updateRedPacket({id, tx});
+    let tx : string = "";
+    for (let i = 0; i < txes.length; i++) {
+        let txHash = await sendTransaction(txes[i]);
+        if (addressEqual(txes[i].to, hexlinkAddress(network))) {
+            await updateRedPacket({id, tx});
+            tx = txHash;
+        }
+    }
+    return {id, tx};
+}
+
+export async function deployAndCreateNewRedPacket(
+    network: Network,
+    redpacket: RedPacket,
+    useHexlinkAccount: boolean,
+    dryrun: boolean
+) {
+    const txes = await buildDeployAndCreateRedPacketTx(
+        network,
+        redpacket,
+        useHexlinkAccount
+    );
+    return await processTxAndSave(network, redpacket, txes, dryrun);
+}
+
+export async function createNewRedPacket(
+    network: Network,
+    redpacket: RedPacket,
+    useHexlinkAccount: boolean,
+    dryrun: boolean
+) : Promise<{id: string, tx: string}> {
+    const txes = buildCreateRedPacketTx(
+        network,
+        redpacket,
+        useHexlinkAccount
+    );
+    return await processTxAndSave(network, redpacket, txes, dryrun);
 }

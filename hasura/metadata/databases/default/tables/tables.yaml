@@ -1,5 +1,3 @@
-- "!include public_membership.yaml"
 - "!include public_nft.yaml"
 - "!include public_preference.yaml"
 - "!include public_redpacket.yaml"
-- "!include public_user.yaml"

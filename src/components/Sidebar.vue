@@ -7,7 +7,7 @@
     <div class="menu">
       <ul>
         <li>
-          <router-link to="/redpacket" data-toggle="tooltip" data-placement="right" title="Wallet" :class="active === 1 && 'active'">
+          <router-link to="/redpacket/claim" data-toggle="tooltip" data-placement="right" title="Wallet" :class="active === 1 && 'active'">
             <span class="icon-grey">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
                 xmlns:xlink="http://www.w3.org/1999/xlink">
@@ -67,6 +67,8 @@ const props = defineProps({
 </script>
 
 <style lang="less" scoped>
+#app {
+  overflow: hidden; }
 .sidebar {
   background: #fff;
   position: fixed;
@@ -76,7 +78,8 @@ const props = defineProps({
   top: 2.5%;
   z-index: 3;
   bottom: 20px;
-  border-radius: 25px; }
+  border-radius: 25px;
+  z-index: 100; }
   // @media only screen and (max-width: 1023px) {
   //   .sidebar {
   //     width: 5rem;

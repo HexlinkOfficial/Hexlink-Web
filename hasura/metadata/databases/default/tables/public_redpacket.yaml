@@ -5,41 +5,30 @@ insert_permissions:
   - role: user
     permission:
       check:
-        user_uid:
+        user_id:
           _eq: X-Hasura-User-Id
       columns:
-        - gas_station_enabled
+        - id
         - metadata
-        - red_packet_id
         - user_id
-        - user_uid
 select_permissions:
   - role: user
     permission:
       columns:
-        - gas_station_enabled
+        - id
         - metadata
-        - red_packet_id
         - user_id
-        - user_uid
-      filter:
-        user_uid:
-          _eq: X-Hasura-User-Id
+      filter: {}
 update_permissions:
   - role: user
     permission:
       columns:
-        - gas_station_enabled
         - metadata
-      filter:
-        user_id:
-          _eq: X-Hasura-User-Id
-      check:
-        user_id:
-          _eq: X-Hasura-User-Id
+      filter: {}
+      check: null
 delete_permissions:
   - role: user
     permission:
       filter:
-        user_uid:
+        user_id:
           _eq: X-Hasura-User-Id

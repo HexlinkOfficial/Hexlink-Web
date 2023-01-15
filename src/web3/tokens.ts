@@ -3,10 +3,10 @@ import BigNumber from "bignumber.js";
 import {
     getTokenPreferences,
     insertTokenPreferences
-} from '@/services/graphql/preference';
+} from '@/graphql/preference';
 import type {
     PreferenceInput,
-} from "@/services/graphql/preference";
+} from "@/graphql/preference";
 import type {
     TokenMetadata,
     Token,
@@ -14,11 +14,12 @@ import type {
     NormalizedTokenBalance
 } from '@/types';
 import { getPopularTokens } from "@/configs/tokens";
-import { alchemy, getProvider } from "@/services/web3/network";
+import { alchemy, getProvider } from "@/web3/network";
 import { useProfileStore } from "@/stores/profile";
 import { useAuthStore } from "@/stores/auth";
 import { useNetworkStore } from "@/stores/network";
 import { useWalletStore } from "@/stores/wallet";
+import { BigNumber as EthBigNumber } from 'ethers';
  
 export async function getERC20Metadata(token: string) : Promise<TokenMetadata> {
     const metadata = await alchemy().core.getTokenMetadata(token);
@@ -38,18 +39,20 @@ export async function getERC20Metadata(token: string) : Promise<TokenMetadata> {
     }
 }
 
-export function normalizeBalance(balance: BigNumber, decimals: number) : NormalizedTokenBalance {
-    const normalized = balance.div(BigNumber(10).pow(decimals));
+export function normalizeBalance(balance: EthBigNumber, decimals: number) : NormalizedTokenBalance {
+    const normalized = new BigNumber(
+        balance.toString()
+    ).div(BigNumber(10).pow(decimals));
     if (normalized.gt(1)) {
         return {
             value: balance,
-            normalized: normalized.dp(5),
+            normalized: normalized.dp(5).toString(10),
             updatedAt: new Date()
         };
     } else {
         return {
             value: balance,
-            normalized,
+            normalized: normalized.toString(10),
             updatedAt: new Date()
         }
     }
@@ -102,14 +105,15 @@ async function updateBalances(
     update: (tokenAddr: string, balance: NormalizedTokenBalance) => void,
 ) : Promise<void> {
     const profile = useProfileStore().profile;
+    if (!profile.initiated) { return };
     const tokens = Object.values(profile.tokens || []);
     const nativeCoin = useNetworkStore().nativeCoinAddress;
     const decimals = profile.tokens[nativeCoin].metadata.decimals;
-    let balance = getPrevBalance(nativeCoin) || normalizeBalance(new BigNumber(0), decimals);
+    let balance = getPrevBalance(nativeCoin) || normalizeBalance(EthBigNumber.from(0), decimals);
     try {
         const nativeCoinBalance = await getProvider().getBalance(account);
         balance = normalizeBalance(
-            new BigNumber(nativeCoinBalance.toString()),
+            nativeCoinBalance,
             decimals
         );
     } catch(error) {
@@ -127,9 +131,9 @@ async function updateBalances(
         ].metadata.decimals;
         let balance = getPrevBalance(
             b.contractAddress
-        ) || normalizeBalance(new BigNumber(0), decimals);
+        ) || normalizeBalance(EthBigNumber.from(0), decimals);
         if (b.tokenBalance && !b.error) {
-            balance = normalizeBalance(new BigNumber(b.tokenBalance), decimals);
+            balance = normalizeBalance(EthBigNumber.from(b.tokenBalance), decimals);
         }
         update(b.contractAddress, balance);
     });
@@ -166,7 +170,7 @@ export async function loadERC20Token(
     return {
         metadata: token,
         balance: normalizeBalance(
-            new BigNumber(balance.tokenBalance!),
+            EthBigNumber.from(balance.tokenBalance!),
             token.decimals
         )
     };

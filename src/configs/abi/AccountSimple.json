@@ -13,6 +13,25 @@
     "anonymous": false,
     "inputs": [
       {
+        "indexed": false,
+        "internalType": "address",
+        "name": "to",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "GasPaid",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
         "indexed": true,
         "internalType": "address",
         "name": "previousOwner",
@@ -64,7 +83,7 @@
     ],
     "name": "exec",
     "outputs": [],
-    "stateMutability": "nonpayable",
+    "stateMutability": "payable",
     "type": "function"
   },
   {
@@ -99,7 +118,7 @@
     ],
     "name": "execBatch",
     "outputs": [],
-    "stateMutability": "nonpayable",
+    "stateMutability": "payable",
     "type": "function"
   },
   {
@@ -108,6 +127,11 @@
         "internalType": "address",
         "name": "owner",
         "type": "address"
+      },
+      {
+        "internalType": "bytes",
+        "name": "data",
+        "type": "bytes"
       }
     ],
     "name": "init",
@@ -168,40 +192,6 @@
   {
     "inputs": [
       {
-        "internalType": "address payable",
-        "name": "receiver",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "token",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "amount",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "price",
-        "type": "uint256"
-      }
-    ],
-    "name": "refundGas",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "payment",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
         "internalType": "address",
         "name": "account",
         "type": "address"
@@ -232,7 +222,57 @@
     ],
     "name": "validateAndCall",
     "outputs": [],
-    "stateMutability": "nonpayable",
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes",
+        "name": "txData",
+        "type": "bytes"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_nonce",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bytes",
+        "name": "signature",
+        "type": "bytes"
+      },
+      {
+        "components": [
+          {
+            "internalType": "address payable",
+            "name": "receiver",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "token",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "base",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "price",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct GasPayer.GasPayment",
+        "name": "gas",
+        "type": "tuple"
+      }
+    ],
+    "name": "validateAndCallWithGasRefund",
+    "outputs": [],
+    "stateMutability": "payable",
     "type": "function"
   },
   {

@@ -53,11 +53,6 @@
           },
           {
             "internalType": "uint256",
-            "name": "expiredAt",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
             "name": "balance",
             "type": "uint256"
           },
@@ -75,11 +70,6 @@
             "internalType": "uint8",
             "name": "mode",
             "type": "uint8"
-          },
-          {
-            "internalType": "bool",
-            "name": "enableGasSponsorship",
-            "type": "bool"
           }
         ],
         "indexed": false,
@@ -112,11 +102,6 @@
           },
           {
             "internalType": "uint256",
-            "name": "expiredAt",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
             "name": "balance",
             "type": "uint256"
           },
@@ -134,11 +119,6 @@
             "internalType": "uint8",
             "name": "mode",
             "type": "uint8"
-          },
-          {
-            "internalType": "bool",
-            "name": "enableGasSponsorship",
-            "type": "bool"
           }
         ],
         "internalType": "struct HappyRedPacket.RedPacketData",
@@ -182,11 +162,6 @@
           },
           {
             "internalType": "uint256",
-            "name": "expiredAt",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
             "name": "balance",
             "type": "uint256"
           },
@@ -204,11 +179,6 @@
             "internalType": "uint8",
             "name": "mode",
             "type": "uint8"
-          },
-          {
-            "internalType": "bool",
-            "name": "enableGasSponsorship",
-            "type": "bool"
           }
         ],
         "internalType": "struct HappyRedPacket.RedPacketData",
@@ -233,6 +203,11 @@
     "outputs": [
       {
         "components": [
+          {
+            "internalType": "uint256",
+            "name": "createdAt",
+            "type": "uint256"
+          },
           {
             "internalType": "uint256",
             "name": "balance",

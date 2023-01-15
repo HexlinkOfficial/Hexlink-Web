@@ -55,13 +55,7 @@
     </tbody>
   </table>
   <!-- loading -->
-  <div class="loading-class" v-if="loading">
-    <div class="load-3">
-      <div class="line"></div>
-      <div class="line"></div>
-      <div class="line"></div>
-    </div>
-  </div>
+  <Loading v-if="loading"/>
 </template>
 
 <script lang="ts" setup>
@@ -71,7 +65,8 @@ import { BigNumber } from "bignumber.js";
 import logo from "../assets/network-icons/hexlink.svg";
 import { useProfileStore } from "@/stores/profile";
 import { useNetworkStore } from "@/stores/network";
-import { updateProfileBalances } from "@/services/web3/tokens";
+import { updateProfileBalances } from "@/web3/tokens";
+import Loading from "@/components/Loading.vue";
 
 const loading = ref<boolean>(true);
 
@@ -92,21 +87,22 @@ const isGreen = ref(true);
 
 const props = defineProps({
   balance: {
-    type: Object as () => BigNumber,
+    type: Object as () => string,
     required: false,
   }
 });
 
-const usdValue = (token: Token) : BigNumber => {
+const usdValue = (token: Token) : number => {
   if (token.balance && token.price) {
-    return token.balance.normalized.times(token.price);
+    return token.price * Number(token.balance.normalized || 0);
   }
-  return new BigNumber(0);
+  return 0;
 };
 
 const getPortfolioRatio = (token: Token) => {
-  if (props.balance?.gt(0)) {
-    return usdValue(token).times(100).div(props.balance);
+  const balance = Number(props.balance || 0);
+  if (balance > 0) {
+    return usdValue(token) * 100 / balance;
   }
   return 0;
 };
@@ -292,24 +288,4 @@ tbody tr {
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap; }
-.load-3 .line:nth-last-child(1) {
-  animation: loadingC 0.6s 0.1s linear infinite; }
-.load-3 .line:nth-last-child(2) {
-  animation: loadingC 0.6s 0.2s linear infinite; }
-.load-3 .line:nth-last-child(3) {
-  animation: loadingC 0.6s 0.3s linear infinite; }
-@keyframes loadingC {
-  0% { transform: translate(0, 0); }
-  50% { transform: translate(0, 15px); }
-  100% { transform: translate(0, 0); } }
-.line {
-  display: inline-block;
-  width: 20px;
-  height: 5px;
-  border-radius: 15px;
-  background-color: #076AE0; }
-.loading-class {
-  display: flex;
-  justify-content: center;
-  padding: 30px; }
 </style>

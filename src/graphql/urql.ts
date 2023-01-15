@@ -1,6 +1,6 @@
 import { createClient } from '@urql/vue';
 import type { Client } from '@urql/vue';
-import { refreshToken } from '../auth';
+import { refreshToken } from '../services/auth';
 
 let urqlClient: Client | null;
 let urqlClientIdToken: string;

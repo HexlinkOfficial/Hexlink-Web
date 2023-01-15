@@ -1,10 +1,12 @@
 import type { Account, Network } from "@/types";
 import { useProfileStore } from "@/stores/profile";
 import { useAuthStore } from "@/stores/auth";
-import { initTokenList } from "@/services/web3/tokens";
-import { hexlink } from "@/services/web3/hexlink";
-import { getProvider } from "@/services/web3/network";
-import { hash } from "@/services/web3/utils";
+import { initTokenList } from "@/web3/tokens";
+import { hexlinkContract } from "@/web3/hexlink";
+import { getProvider } from "@/web3/network";
+import { hash } from "@/web3/utils";
+import { Contract } from "ethers";
+import ACCOUNT_ABI from "@/configs/abi/AccountSimple.json";
 
 export function genNameHash(schema: string, name: string) {
     return hash(`${schema}:${name}`);
@@ -16,7 +18,11 @@ export async function isContract(address: string): Promise<boolean> {
         if (code !== '0x') return true;
     } catch (error) { }
     return false;
-  }
+}
+
+export function accountContract(network: Network, address: string): Contract {
+    return new Contract(address, ACCOUNT_ABI, getProvider(network));
+}
 
 export async function buildAccountFromAddress(address: string) : Promise<Account> {
     return {
@@ -26,8 +32,13 @@ export async function buildAccountFromAddress(address: string) : Promise<Account
 };
 
 export async function buildAccount(network: Network, nameHash: string) : Promise<Account> {
-    const address = await hexlink(network).addressOfName(nameHash);
-    return await buildAccountFromAddress(address);
+    const address = await hexlinkContract(network).addressOfName(nameHash);
+    const account = await buildAccountFromAddress(address);
+    if (account.isContract) {
+        const contract = accountContract(network, address);
+        account.owner = await contract.owner();
+    }
+    return account;
 };
 
 export function prettyPrintAddress(address: string, start: number, stop: number) {
@@ -77,6 +88,5 @@ export async function initProfile(network: Network) {
     if (store.profiles[network.name]?.initiated) { return; }
     const account = await buildAccount(network, useAuthStore().user!.nameHash);
     const tokens = await initTokenList(network);
-    console.log("initiating");
     store.init(network, account, tokens);
 }

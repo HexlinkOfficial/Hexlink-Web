@@ -303,7 +303,6 @@
       .token-listDetail .token-table .table-thread {
         display: none;
         border-bottom: 1px solid #e5e7eb;
-        // border-bottom-width: 1px;
         @media (min-width: 640px) {
           display: table-header-group; } }
         .token-listDetail .token-table .table-thread .toke-header {
@@ -483,8 +482,8 @@ svg {
 <script setup lang="ts">
 import { ref, computed } from "vue";
 import Layout from "../components/Layout.vue";
-import WalletTokenList from "../components/WalletTokenList.vue";
-import WalletNFTGrid from "../components/WalletNFTGrid.vue";
+import WalletTokenList from "@/components/WalletTokenList.vue";
+import WalletNFTGrid from "@/components/WalletNFTGrid.vue";
 import { useProfileStore } from '@/stores/profile';
 import { useNetworkStore } from '@/stores/network';
 import { BigNumber } from "bignumber.js";

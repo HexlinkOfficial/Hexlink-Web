@@ -1,10 +1,10 @@
 import Web3Model from "web3modal";
-import { ethers } from "ethers";
+import { ethers, BigNumber } from "ethers";
 import { useWalletStore } from "@/stores/wallet"
 import { buildAccountFromAddress } from "./account";
 import WalletConnect from "@walletconnect/web3-provider";
 import type { Wallet } from "@/types";
-import { updateWalletBalances } from "@/services/web3/tokens";
+import { updateWalletBalances } from "@/web3/tokens";
 
 export const providerOptions = {
   walletconnect: {
@@ -64,5 +64,19 @@ export async function signMessage(account: string, message: string) {
       method: 'eth_signTypedData_v4',
       params: [{ account, message }],
       from: account
+  });
+}
+
+export async function estimateGas(txParams: any) : Promise<string> {
+  return await window.ethereum.request({
+    method: 'eth_estimateGas',
+    params: [txParams],
+  });
+}
+
+export async function sendTransaction(txParams: any) : Promise<string> {
+  return await window.ethereum.request({
+    method: 'eth_sendTransaction',
+    params: [txParams],
   });
 }

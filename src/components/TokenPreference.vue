@@ -95,11 +95,11 @@ import { useAuthStore } from '@/stores/auth';
 import {
     insertTokenPreferences,
     updateTokenPreference
-} from '@/services/graphql/preference';
-import { loadERC20Token } from "@/services/web3/tokens";
+} from '@/graphql/preference';
+import { loadERC20Token } from "@/web3/tokens";
 import type { Token } from "@/types";
 import * as ethers from "ethers";
-import { isContract, prettyPrintAddress } from '@/services/web3/account';
+import { isContract, prettyPrintAddress } from '@/web3/account';
 import { message } from "ant-design-vue";
 import { useNetworkStore } from "@/stores/network";
 

@@ -1,6 +1,6 @@
 import { ethers } from "ethers";
 import type { BigNumber } from "ethers";
-import { getProvider } from "@/services/web3/network";
+import { getProvider } from "@/web3/network";
 import type { Token } from "@/types";
 import { useNetworkStore } from "@/stores/network";
 

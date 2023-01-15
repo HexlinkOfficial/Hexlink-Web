@@ -1,10 +1,12 @@
 import type { Network, AuthProof } from "@/types";
 import { useWalletStore } from "@/stores/wallet";
 import ACCOUNT_ABI from "@/configs/abi/AccountSimple.json";
-import HEXLINK_ABI from "@/configs/abi/AccountSimple.json";
-import { hexlink } from "@/services/web3/hexlink";
+import HEXLINK_ABI from "@/configs/abi/Hexlink.json";
+import { hexlinkContract } from "@/web3/hexlink";
 import { ethers } from "ethers";
 import { getFunctions, httpsCallable } from 'firebase/functions'
+import { useAuthStore } from "@/stores/auth";
+import { hash } from "./utils";
 
 const functions = getFunctions()
 
@@ -13,23 +15,25 @@ const genRequestId = async function(
     func: string,
     data: string | [],
 ) {
-    const hexlinkContract = hexlink(network);
-    return ethers.utils.keccak256(
+    const hexlink = hexlinkContract(network);
+    const result = ethers.utils.keccak256(
       ethers.utils.defaultAbiCoder.encode(
         ["bytes4", "bytes", "address", "uint256", "uint256"],
         [
             func,
             data,
-            hexlinkContract.address,
+            hexlink.address,
             network.chainId,
-            await hexlinkContract.nonce()
+            await hexlink.nonce(useAuthStore().user!.nameHash)
         ]
       )
     );
+    return result;
 };
 
 export async function genDeployAuthProof(
-    network: Network
+    network: Network,
+    data: string
 ) : Promise<{ initData: string, proof: AuthProof }> {
     const wallet = useWalletStore();
     if (!wallet.connected) {
@@ -38,7 +42,7 @@ export async function genDeployAuthProof(
 
     const accountIface = new ethers.utils.Interface(ACCOUNT_ABI);
     const initData = accountIface.encodeFunctionData(
-        "init", [wallet.wallet!.account.address]
+        "init", [wallet.wallet!.account.address, data]
     );
     const hexlinkIface = new ethers.utils.Interface(HEXLINK_ABI);
     const requestId = await genRequestId(
@@ -50,6 +54,6 @@ export async function genDeployAuthProof(
     const result = await genAuthProof({requestId});
     return {
         initData,
-        proof: result.data as AuthProof
+        proof: (result.data as any).authProof as AuthProof
     };
 }

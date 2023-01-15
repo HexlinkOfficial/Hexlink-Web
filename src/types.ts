@@ -1,4 +1,3 @@
-import type { BigNumber } from "bignumber.js";
 import type { BigNumber as EthersBigNumber } from "ethers";
 
 export interface Network {
@@ -13,15 +12,19 @@ export interface Network {
     nativeCurrency: {
         name: string,
         symbol: string,
-        decimals: Number,
+        decimals: number,
+        priceInUsd: string
     },
     blockExplorerUrls: string[],
     logoUrl: string,
+    defaultGasPrice: EthersBigNumber,
+    addresses: {[key : string]: string | string[]}
 }
 
 export interface Account {
     address: string;
     isContract: boolean;
+    owner?: string;
 }
 
 export interface Wallet {
@@ -78,9 +81,9 @@ export interface Preference {
 }
 
 export interface NormalizedTokenBalance {
-    value: BigNumber;
-    normalized: BigNumber;
-    updatedAt: Date;
+    value: EthersBigNumber;
+    normalized: string;
+    updatedAt?: Date;
 }
 
 export interface Token {
@@ -96,29 +99,14 @@ export interface Profile {
     tokens: { [key: string]: Token };
 }
 
-export interface RedPacketData {
+export interface RedPacket {
     token: Token;
+    salt: string,
     gasToken: Token;
-    payGasForClaimers: boolean;
     mode: "random" | "equal";
-    split: Number;
-    balance: BigNumber;
-    expiredAt: Number;
-}
-
-export interface RedPacketInput {
-    data: RedPacketData;
-    gasPrice: EthersBigNumber;
-    gasTokenPrice: BigNumber;
-    gasSponsorshipCostEstimation?: EthersBigNumber;
-    hexlinkAccount: {
-        tokenAmount: EthersBigNumber;
-        gasTokenAmount: EthersBigNumber;
-    },
-    walletAccount: {
-        tokenAmount: EthersBigNumber;
-        gasTokenAmount: EthersBigNumber;
-    }
+    split: number;
+    balance: string;
+    expiredAt: number;
 }
 
 export interface Claim {
@@ -132,10 +120,16 @@ export interface Claim {
     }
 }
 
+export interface ClaimCardData {
+    twitter: string,
+    token: Token,
+    from: string
+}
+
 export interface CreatedRedPacket {
     id: string;
     salt: string;
-    data: RedPacketData,
+    data: RedPacket,
     balanceLeft: EthersBigNumber;
     splitLeft: number;
     gasSponsorshipCost: EthersBigNumber;
@@ -155,9 +149,41 @@ export interface AuthProof {
     signature: string // encoded with validator address
 }
 
+export interface AuthProof {
+    name: string,
+    requestId: string,
+    authType: string, // non-hashed
+    identityType: string, // non-hashed
+    issuedAt: number, // timestamp
+    signature: string // encoded with validator address
+}
+
+export interface EstimatedTxCost {
+    sponsorship: EthersBigNumber;
+    currentTx: EthersBigNumber;
+    total: EthersBigNumber;
+}
+
+export interface Transaction {
+    name: string,
+    function: string,
+    args: any[],
+    tx: {
+        to: string
+        from: string,
+        value?: string,
+        data: string,
+    }
+}
+
 export interface UserOp {
-    to: string;
-    value: EthersBigNumber;
-    callData: string;
-    callGasLimit: EthersBigNumber;
+    name: string,
+    function: string,
+    args: any[],
+    op: {
+        to: string;
+        value: EthersBigNumber;
+        callData: string | [];
+        callGasLimit: EthersBigNumber;
+    }
 }

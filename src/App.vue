@@ -5,22 +5,16 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: "App",
-  data() {
-    return {
-      isLoading: true,
-      time: 100,
-      show: 5,
-    };
-  },
-  mounted() {
-    setTimeout(() => {
-      this.isLoading = false;
-    }, 1000);
-  },
-};
+<script setup lang="ts">
+import { ref, onMounted } from "vue";
+
+const isLoading = ref<boolean>(true);
+
+onMounted(() => {
+  setTimeout(() => {
+    isLoading.value = false;
+  }, 1000);
+});
 </script>
 
 <style lang="less">

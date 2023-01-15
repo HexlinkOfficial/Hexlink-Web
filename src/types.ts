@@ -158,13 +158,6 @@ export interface AuthProof {
     signature: string // encoded with validator address
 }
 
-export interface UserOp {
-    to: string;
-    value: EthersBigNumber;
-    callData: string | [];
-    callGasLimit: EthersBigNumber;
-}
-
 export interface EstimatedTxCost {
     sponsorship: EthersBigNumber;
     currentTx: EthersBigNumber;
@@ -172,8 +165,25 @@ export interface EstimatedTxCost {
 }
 
 export interface Transaction {
-    to: string
-    from: string,
-    value?: string,
-    data: string,
+    name: string,
+    function: string,
+    args: any[],
+    tx: {
+        to: string
+        from: string,
+        value?: string,
+        data: string,
+    }
+}
+
+export interface UserOp {
+    name: string,
+    function: string,
+    args: any[],
+    op: {
+        to: string;
+        value: EthersBigNumber;
+        callData: string | [];
+        callGasLimit: EthersBigNumber;
+    }
 }

@@ -83,7 +83,7 @@
     ],
     "name": "exec",
     "outputs": [],
-    "stateMutability": "nonpayable",
+    "stateMutability": "payable",
     "type": "function"
   },
   {
@@ -118,7 +118,7 @@
     ],
     "name": "execBatch",
     "outputs": [],
-    "stateMutability": "nonpayable",
+    "stateMutability": "payable",
     "type": "function"
   },
   {
@@ -222,7 +222,7 @@
     ],
     "name": "validateAndCall",
     "outputs": [],
-    "stateMutability": "nonpayable",
+    "stateMutability": "payable",
     "type": "function"
   },
   {
@@ -272,7 +272,7 @@
     ],
     "name": "validateAndCallWithGasRefund",
     "outputs": [],
-    "stateMutability": "nonpayable",
+    "stateMutability": "payable",
     "type": "function"
   },
   {

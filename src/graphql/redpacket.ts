@@ -144,7 +144,8 @@ export async function insertRedPacket(
     id: string,
     creator: RedPacketDBCreator,
     metadata: RedPacketDBMetadata,
-    chain: string
+    chain: string,
+    tx: string
   }[],
 ) : Promise<{id: string}[]> {
   const client = setUrqlClientIfNecessary(useAuthStore().user!.idToken!)
@@ -156,7 +157,8 @@ export async function insertRedPacket(
               id: d.id,
               metadata: JSON.stringify(d.metadata),
               chain: d.chain,
-              creator: JSON.stringify(d.creator)
+              creator: JSON.stringify(d.creator),
+              tx: d.tx
           }))
       }
   ).toPromise();

@@ -94,3 +94,13 @@ export const MUMBAI : Network = {
         "validator": "0xEF2e3F91209F88A3143e36Be10D52502162426B3"
     }
 };
+
+export const getNetwork = (chain: string) => {
+    if (chain == "goerli") {
+        return GOERLI;
+    } else if (chain == "polygon") {
+        return POLYGON;
+    } else if (chain == "mumbai") {
+        return MUMBAI;
+    }
+}

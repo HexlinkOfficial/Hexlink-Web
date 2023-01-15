@@ -450,13 +450,13 @@ const createRedPacket = async function () {
     await createNewRedPacket(
       useNetworkStore().network,
       redpacket.value,
-      accountChosen.value == 0
+      accountChosen.value == 0,
     );
   } else {
     await deployAndCreateNewRedPacket(
       useNetworkStore().network,
       redpacket.value,
-      accountChosen.value == 0
+      accountChosen.value == 0,
     );
   }
 };
@@ -481,24 +481,17 @@ const tokenChoose =
       redpacket.value.token = token;
     } else {
       redpacket.value.gasToken = token;
+      calcGasSponsorship();
     }
-    calcGasSponsorship();
   };
 
 const calcGasSponsorship = () => {
-  const balance = new BigNumber(redpacket.value.balance);
-  if (balance.gt(0) && redpacket.value.split > 0) {
-    gasSponsorship.value = estimateGasSponsorship(
-      useNetworkStore().network, redpacket.value
-    );
-  }
-};
-
-const estimatedGas = () => {
+  gasSponsorship.value = estimateGasSponsorship(
+    useNetworkStore().network, redpacket.value
+  );
   const result = new BigNumber(
     gasSponsorship.value.toString()
   ).div(tokenBase(redpacket.value.gasToken)).toString(10);
-  // return result;
   gasAmount.value = result;
 };
 
@@ -509,9 +502,7 @@ onMounted(async () => {
 
 watch(() => useNetworkStore().network, refresh);
 watch(() => [redpacket.value.split, redpacket.value.balance], calcGasSponsorship);
-// watch(() => redpacket.value.balance, calcGasSponsorship);
-watch(() => [redpacket.value.balance, redpacket.value.split], estimatedGas);
-// watch(() => redpacket.value.split, estimatedGas);
+watch(() => [redpacket.value.balance, redpacket.value.split], calcGasSponsorship);
 
 const chooseAccount = function (value: number) {
   accountChosen.value = value;

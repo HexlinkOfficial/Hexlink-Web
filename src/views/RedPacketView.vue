@@ -60,6 +60,7 @@ import type { RedPacketDB } from '@/graphql/redpacket';
 import { useNetworkStore } from '@/stores/network';
 import { getRedPacketsByUser } from '@/graphql/redpacket';
 import { useRoute } from "vue-router";
+import { useProfileStore } from "@/stores/profile";
 
 const sendLuck = ref<boolean>(false);
 const luckHistory = ref<boolean>(true);
@@ -67,23 +68,26 @@ const redPackets = ref<RedPacketDB[]>([]);
 const userId = ref<string>("ming");
 
 const refresh = async function() {
-  redPackets.value = await loadRedPackets(userId.value);
-  console.log(redPackets.value)
+  if (useProfileStore().profile?.initiated) {
+    redPackets.value = await loadRedPackets(userId.value);
+  }
 }
 
 const loadRedPackets = async (userId: string): Promise<RedPacketDB[]> => {
   return await getRedPacketsByUser(userId);
 }
 
-onMounted(async () => { await refresh(); });
+onMounted(refresh);
 onMounted(() => {
   if(useRoute().params.action.toString() == "send") {
     sendLuck.value = true;
-    luckHistory.value = false; }
+    luckHistory.value = false;
+  }
   if (useRoute().params.action.toString() == "claim") {
     sendLuck.value = false;
-    luckHistory.value = true; }
-})
+    luckHistory.value = true;
+  }
+});
 
 watch(() => useNetworkStore().network, refresh);
 </script>

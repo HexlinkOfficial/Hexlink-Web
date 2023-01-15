@@ -1,5 +1,5 @@
 <template>
-  <div class="header">
+  <div ref="root" class="header">
     <div class="container">
       <div class="row">
         <div class="col-xxl-12">
@@ -14,7 +14,7 @@
 
             <div class="header-right">
               <div class="selectnetwork dropdown" @click="activeDropDown('selectnetwork')"
-                :class="active_ === 'selectnetwork' && 'show'">
+                :class="active && 'show'">
                 <div class="network" data-toggle="dropdown">
                   <img :src="useNetworkStore().network.logoUrl" height=25 style="margin-left: 0.5rem;">
                   <span>{{ useNetworkStore().network.chainName }}</span>
@@ -22,7 +22,7 @@
                     <path d="M1 1L7 7L13 1" stroke="#475569" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                   </svg>
                 </div>
-                <div class="dropdown-menu dropdown-menu-right network-list mt-3" onclick="event.stopPropagation()" :class="active_ === 'selectnetwork' && 'show'">
+                <div class="dropdown-menu dropdown-menu-right network-list mt-3" onclick="event.stopPropagation()" :class="active === 'selectnetwork' && 'show'">
                   <div class="box">
                     <div class="title">
                       <div class="title-header">
@@ -30,26 +30,6 @@
                       </div>
                     </div>
                     <div>
-                      <!-- Polygon -->
-                      <div class="network-items" @click="switchNetwork({...POLYGON})">
-                        <button>
-                          <div style="display: flex; margin-right: 0.75rem; align-items: center; height: 1.25rem; width: 1.25rem;">
-                            <svg v-if="useNetworkStore().network.name == 'polygon'" width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <path d="M17 1L6 12L1 7" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                            </svg>
-                          </div>
-                          <div style="display: flex; white-space: nowrap; align-items: center; width: 100%; ">
-                            <div style="position: relative; margin-right: 0.75rem; min-width: max-content; ">
-                              <img src="https://token.metaswap.codefi.network/assets/networkLogos/polygon.svg" height=25
-                                style="margin-left: 0.5rem; margin-right: 0.5rem;" />
-                            </div>
-                            <div class="items-name">
-                              <span class="item-title">{{ POLYGON.chainName }}</span>
-                              <span class="item-balance">$0.00</span>
-                            </div>
-                          </div>
-                        </button>
-                      </div>
                       <!-- Mumbai -->
                       <div class="network-items" @click="switchNetwork({...MUMBAI})">
                         <button>
@@ -93,7 +73,7 @@
                 </div>
               </div>
 
-              <div class="profile_log dropdown" @click="activeDropDown('profile')" :class="active_ && 'show'">
+              <div class="profile_log dropdown" @click="activeDropDown('profile')" :class="active && 'show'">
                 <div class="user" data-toggle="dropdown">
                   <img class="profile" :src="user?.photoURL" :size="64" referrerpolicy="no-referrer"/>
                   <span>@{{ user?.provider?.includes("twitter") && user.handle }}</span>
@@ -103,7 +83,7 @@
                 </div>
                 <!-- dropdown menu -->
                 <div style="opacity: 1; transform: translateY(0);">
-                  <div class="dropdown-menu dropdown-menu-right mt-3" :class="active_ === 'profile' && 'show'">
+                  <div class="dropdown-menu dropdown-menu-right mt-3" :class="active === 'profile' && 'show'">
                     <div class="user-email" style="border-bottom-width: 1px; border-color: #E5E7EB; border-style: dashed; ">
                       <div class="user2">
                         <span class="thumb"><img :src="user?.photoURL" :size="64" referrerpolicy="no-referrer" /></span>
@@ -185,7 +165,8 @@
   </div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
+import { ref, onMounted, onBeforeUnmount } from 'vue';
 import { useAuthStore } from '@/stores/auth';
 import { useWalletStore } from '@/stores/wallet';
 import { useNetworkStore } from '@/stores/network';
@@ -193,82 +174,60 @@ import { prettyPrintAddress } from '@/web3/account';
 import { createToaster } from "@meforma/vue-toaster";
 import { POLYGON, GOERLI, MUMBAI } from "@/configs/network";
 import { switchNetwork } from "@/web3/network";
-import { connectWallet, disconnectWallet } from "@/web3/wallet";
-import { useProfileStore } from '@/stores/profile';
+import { disconnectWallet } from "@/web3/wallet";
+import { useProfileStore } from "@/stores/profile";
 import { signOutFirebase } from "@/services/auth";
-import { CopyOutlined } from '@ant-design/icons-vue';
+import useClipboard from 'vue-clipboard3';
 
-export default {
-  name: "Header",
-  data() {
-    const authStore = useAuthStore();
-    const user = authStore.user!;
-    const walletStore = useWalletStore();
+const authStore = useAuthStore();
+const user = authStore.user!;
+const walletStore = useWalletStore();
+const active = ref<string>("");
+const { toClipboard } = useClipboard();
 
-    const addressTextLong = function (address: string | undefined) {
-      if (address) {
-        return prettyPrintAddress(address, 5, 6);
-      }
-      return "0x";
-    };
-    
-    return {
-      addressTextLong,
-      CopyOutlined,
-      connectWallet,
-      disconnectWallet,
-      useProfileStore,
-      useNetworkStore,
-      walletStore,
-      user,
-      switchNetwork,
-      signOutFirebase,
-      active_: "",
-      POLYGON,
-      GOERLI,
-      MUMBAI,
-      index: 0,
-    };
-  },
-  methods: {
-    forceRerender() {
-      this.index += 1;
-    },
-    activeDropDown(value: any) {
-      this.active_ = this.active_ === value ? "" : value;
-    },
-    closeDropDown(e: any) {
-      if (!this.$el.contains(e.target)) {
-        this.active_ = "";
-      }
-    },
-    selectNetwork(value: any) {
-      this.active_ = this.active_ === value ? "" : value;
-    },
-    doCopy: function (address: string | undefined) {
-      this.$copyText(address || "0x").then(
-        function () {
-          // alert("Copied");
-          const toaster = createToaster({ position: "top", duration: 2000 });
-          toaster.success(`Copied`);
-        },
-        function () {
-          // alert("Can not copy");
-          const toaster = createToaster({ position: "top", duration: 2000 });
-          toaster.error(`Can not copy`);
-        }
-      );
-    },
-  },
-  mounted() {
-    document.addEventListener('click', this.closeDropDown)
-  },
-  beforeDestroy() {
-    document.removeEventListener('click', this.closeDropDown)
-  },
-  created() {
-  },
+const addressTextLong = function (address: string | undefined) {
+  if (address) {
+    return prettyPrintAddress(address, 5, 6);
+  }
+  return "0x";
 };
+
+const root = ref<HTMLElement | null>(null);
+
+const activeDropDown = (value: any) => {
+  console.log(value);
+  active.value = active.value === value ? "" : value;
+  console.log(active.value);
+};
+
+const closeDropDown = (e: any) => {
+  if (root.value && !root.value.contains(e.target)) {
+    active.value = "";
+  }
+};
+
+const doCopy = (address: string | undefined) => {
+  toClipboard(address || "0x").then(
+    function () {
+      // alert("Copied");
+      const toaster = createToaster({ position: "top", duration: 2000 });
+      toaster.success(`Copied`);
+    },
+    function () {
+      // alert("Can not copy");
+      const toaster = createToaster({ position: "top", duration: 2000 });
+      toaster.error(`Can not copy`);
+    }
+  );
+};
+
+onMounted(() => {
+  document.addEventListener('click', closeDropDown)
+});
+
+onBeforeUnmount(() => {
+  document.removeEventListener('click', closeDropDown)
+});
 </script>
 
 <style lang="scss" scoped>

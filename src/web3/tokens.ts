@@ -76,7 +76,8 @@ export async function initTokenList(network: Network) {
 
 export async function updateProfileBalances() {
     const store = useProfileStore();
-    const account = store.profile?.account.address;
+    if (!store.profile?.initiated) { return };
+    const account = store.profile!.account.address;
     await updateBalances(
         account,
         (address) => store.balance(address),
@@ -105,7 +106,6 @@ async function updateBalances(
     update: (tokenAddr: string, balance: NormalizedTokenBalance) => void,
 ) : Promise<void> {
     const profile = useProfileStore().profile;
-    if (!profile.initiated) { return };
     const tokens = Object.values(profile.tokens || []);
     const nativeCoin = useNetworkStore().nativeCoinAddress;
     const decimals = profile.tokens[nativeCoin].metadata.decimals;

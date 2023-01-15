@@ -24,6 +24,7 @@ export interface Network {
 export interface Account {
     address: string;
     isContract: boolean;
+    owner?: string;
 }
 
 export interface Wallet {
@@ -168,4 +169,11 @@ export interface EstimatedTxCost {
     sponsorship: EthersBigNumber;
     currentTx: EthersBigNumber;
     total: EthersBigNumber;
+}
+
+export interface Transaction {
+    to: string
+    from: string,
+    value?: string,
+    data: string,
 }

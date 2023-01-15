@@ -10,6 +10,7 @@ export const GET_REDPACKET = gql`
         user_id
         chain
         tx
+        creator
         metadata
     }
   }
@@ -30,6 +31,7 @@ export const GET_REDPACKETS = gql`
             user_id
             chain
             tx
+            creator
             metadata
         }
     }
@@ -73,11 +75,18 @@ export interface RedPacketDBMetadata {
   contract: string
 }
 
+export interface RedPacketDBCreator {
+  provider: string;
+  handle: string;
+  displayName?: string;
+}
+
 export interface RedPacketDB {
   id: string,
   userId: string,
   chain: string,
   metadata: RedPacketDBMetadata | "",
+  creator: RedPacketDBCreator | "",
   tx?: string
 }
 
@@ -96,14 +105,16 @@ export async function getRedPacket(
         id: rp.id,
         userId: rp.user_id,
         chain: rp.chain,
-        metadata: JSON.parse(rp.metadata)
+        metadata: JSON.parse(rp.metadata),
+        creator: JSON.parse(rp.creator)
       } as RedPacketDB;
     } else {
       return {
         id: "0",
         userId: "0",
         chain: "0",
-        metadata: ""
+        metadata: "",
+        creator: ""
       }
     }
   } else {
@@ -129,7 +140,8 @@ export async function getRedPacketsByUser(
       return {
         id: r.id,
         userId: r.user_id,
-        metadata: JSON.parse(r.metadata)
+        metadata: JSON.parse(r.metadata),
+        creator: JSON.parse(r.creator)
       } as RedPacketDB;
     });
   } else {
@@ -140,6 +152,7 @@ export async function getRedPacketsByUser(
 export async function insertRedPacket(
   data: {
     id: string,
+    creator: RedPacketDBCreator,
     metadata: RedPacketDBMetadata,
     chain: string
   }[],
@@ -153,6 +166,7 @@ export async function insertRedPacket(
               id: d.id,
               metadata: JSON.stringify(d.metadata),
               chain: d.chain,
+              creator: JSON.stringify(d.creator)
           }))
       }
   ).toPromise();

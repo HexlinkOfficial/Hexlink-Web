@@ -1,13 +1,13 @@
-import type { Network, Account, UserOp, Token, RedPacket } from "@/types";
+import type { Network, Account, Transaction, UserOp, Token, RedPacket } from "@/types";
 import { ethers, BigNumber as EthBigNumber } from "ethers";
 import { useProfileStore } from "@/stores/profile";
 import { useAuthStore } from "@/stores/auth";
 import { isNativeCoin, isWrappedCoin, isStableCoin } from "@/configs/tokens";
 
 import { genDeployAuthProof } from "@/web3/oracle";
-import { hash, toEthBigNumber, tokenBase } from "@/web3/utils";
-import { hexlinkContract, refund } from "@/web3/hexlink";
-import { sendTransaction } from "@/web3/wallet";
+import { hash, toEthBigNumber, tokenBase, tokenEqual, addressEqual } from "@/web3/utils";
+import { hexlinkAddress, hexlinkContract, refund } from "@/web3/hexlink";
+import { estimateGas, sendTransaction } from "@/web3/wallet";
 
 import ERC20_ABI from "@/configs/abi/ERC20.json";
 import RED_PACKET_ABI from "@/configs/abi/HappyRedPacket.json";
@@ -16,6 +16,7 @@ import USERS from "@/configs/users.json";
 import { useWalletStore } from "@/stores/wallet";
 import { insertRedPacket, updateRedPacket } from "@/graphql/redpacket";
 import { BigNumber } from "bignumber.js";
+import { getProvider } from "@/web3/network";
 
 const erc20Iface = new ethers.utils.Interface(ERC20_ABI);
 const redPacketIface = new ethers.utils.Interface(RED_PACKET_ABI);
@@ -36,7 +37,7 @@ export function estimateGasSponsorship(
     network: Network,
     redpacket: RedPacket
 ) : EthBigNumber {
-    const sponsorshipGasAmount = EthBigNumber.from(redpacket.split).mul(200000);
+    const sponsorshipGasAmount = EthBigNumber.from(Number(redpacket.split)).mul(200000);
     const gasToken = redpacket.gasToken;
     if (isNativeCoin(network, gasToken) || isWrappedCoin(network, gasToken)) {
         return sponsorshipGasAmount.mul(network.defaultGasPrice);
@@ -95,22 +96,100 @@ export function redPacketOps(
     }
 }
 
-export async function buildDeployAndCreateRedPacketTx(
+async function validAllowance(
+    network: Network,
+    token: Token,
+    from: Account,
+    operator: Account,
+    requiredAmount: EthBigNumber
+) {
+    const erc20 = new ethers.Contract(
+        token.metadata.address,
+        ERC20_ABI,
+        getProvider(network)
+    );
+    const allowance = await erc20.allowance(from.address, operator.address);
+    return allowance.gt(requiredAmount);
+}
+
+async function buildApproveTx(
+    contract: string,
+    from: string,
+    operator: string,
+) : Promise<Transaction | undefined> {
+    const data = erc20Iface.encodeFunctionData(
+        "approve", [
+            operator,
+            ethers.constants.MaxInt256
+        ]
+    );
+    return {
+        to: contract,
+        from,
+        data,
+    };
+}
+
+async function buildCreateRedPacketTx(
     network: Network,
     input: RedPacket,
     useHexlinkAccount: boolean
-) : Promise<any> {
+) {
     const walletAccount = useWalletStore().wallet!.account;
     const hexlAccount = useProfileStore().profile!.account;
-    let value : EthBigNumber = EthBigNumber.from(0);
     let ops : UserOp[] = [];
     const from = useHexlinkAccount ? hexlAccount : walletAccount;
 
     const tokenAmount = calcTokenAmount(input);
+    const gasTokenAmount = estimateGasSponsorship(network, input);
+    let txes : any[] = [];
+
+    let value : EthBigNumber = EthBigNumber.from(0);
     if (!useHexlinkAccount) {
-        if (isNativeCoin(network, input.token)) {
+         if (isNativeCoin(network, input.token) && isNativeCoin(network, input.gasToken)) {
+            value = value.add(tokenAmount).add(gasTokenAmount)
+        } else if (isNativeCoin(network, input.token)) {
+            const valid = await validAllowance(
+                network,
+                input.token,
+                walletAccount,
+                hexlAccount,
+                gasTokenAmount);
+            if (!valid) {
+                txes.push(await buildApproveTx(
+                    input.gasToken.metadata.address,
+                    walletAccount.address,
+                    hexlAccount.address
+                ));
+            }
             value = value.add(tokenAmount);
-        } else {
+            ops.push({
+                to: input.token.metadata.address,
+                value: EthBigNumber.from(0),
+                callData: erc20Iface.encodeFunctionData(
+                    "transferFrom", [
+                        from.address,
+                        hexlAccount.address,
+                        gasTokenAmount
+                    ]
+                ),
+                callGasLimit: EthBigNumber.from(0) // no limit
+            });
+        } else if (isNativeCoin(network, input.gasToken)) {
+            const valid = await validAllowance(
+                network,
+                input.token,
+                walletAccount,
+                hexlAccount,
+                tokenAmount);
+            if (!valid) {
+                txes.push(await buildApproveTx(
+                    input.token.metadata.address,
+                    walletAccount.address,
+                    hexlAccount.address
+                ));
+            }
+            value = value.add(gasTokenAmount);
             ops.push({
                 to: input.token.metadata.address,
                 value: EthBigNumber.from(0),
@@ -123,15 +202,91 @@ export async function buildDeployAndCreateRedPacketTx(
                 ),
                 callGasLimit: EthBigNumber.from(0) // no limit
             });
+        } else if (tokenEqual(input.token, input.gasToken)) {
+            const valid = await validAllowance(
+                network,
+                input.token,
+                walletAccount,
+                hexlAccount,
+                tokenAmount.add(gasTokenAmount));
+            if (!valid) {
+                txes.push(await buildApproveTx(
+                    input.token.metadata.address,
+                    walletAccount.address,
+                    hexlAccount.address
+                ));
+            }
+            ops.push({
+                to: input.token.metadata.address,
+                value: EthBigNumber.from(0),
+                callData: erc20Iface.encodeFunctionData(
+                    "transferFrom", [
+                        from.address,
+                        hexlAccount.address,
+                        tokenAmount.add(gasTokenAmount)
+                    ]
+                ),
+                callGasLimit: EthBigNumber.from(0) // no limit
+            });
+        } else {
+            const valid1 = await validAllowance(
+                network,
+                input.token,
+                walletAccount,
+                hexlAccount,
+                tokenAmount);
+            if (!valid1) {
+                txes.push(await buildApproveTx(
+                    input.token.metadata.address,
+                    walletAccount.address,
+                    hexlAccount.address
+                ));
+            }
+            ops.push({
+                to: input.token.metadata.address,
+                value: EthBigNumber.from(0),
+                callData: erc20Iface.encodeFunctionData(
+                    "transferFrom", [
+                        from.address,
+                        hexlAccount.address,
+                        tokenAmount
+                    ]
+                ),
+                callGasLimit: EthBigNumber.from(0) // no limit
+            });
+            const valid2 = await validAllowance(
+                network,
+                input.token,
+                walletAccount,
+                hexlAccount,
+                gasTokenAmount);
+            if (!valid2) {
+                txes.push(await buildApproveTx(
+                    input.gasToken.metadata.address,
+                    walletAccount.address,
+                    hexlAccount.address
+                ));
+            }
+            ops.push({
+                to: input.token.metadata.address,
+                value: EthBigNumber.from(0),
+                callData: erc20Iface.encodeFunctionData(
+                    "transferFrom", [
+                        from.address,
+                        hexlAccount.address,
+                        gasTokenAmount
+                    ]
+                ),
+                callGasLimit: EthBigNumber.from(0) // no limit
+            });
         }
     }
 
-    const gasTokenAmout = estimateGasSponsorship(network, input);
+    // refund from hexl account to refund account
     if (isNativeCoin(network, input.gasToken)) {
-        value = value.add(gasTokenAmout);
         ops.push({
             to: refund(network),
-            value: gasTokenAmout,
+            value: gasTokenAmount,
             callData: [],
             callGasLimit: EthBigNumber.from(0) // no limit
         });
@@ -143,16 +298,33 @@ export async function buildDeployAndCreateRedPacketTx(
                 "transferFrom", [
                     from.address,
                     refund(network),
-                    gasTokenAmout
+                    gasTokenAmount
                 ]
             ),
             callGasLimit: EthBigNumber.from(0) // no limit
         });
     }
     ops = ops.concat(redPacketOps(network, input));
+
     const accountIface = new ethers.utils.Interface(ACCOUNT_ABI);
-    const opsData = accountIface.encodeFunctionData("execBatch", [ops]);
-    const { initData, proof } = await genDeployAuthProof(network, opsData);
+    const data = accountIface.encodeFunctionData("execBatch", [ops]);
+    txes.push({
+        to: hexlAccount.address,
+        from: walletAccount.address,
+        value: ethers.utils.hexValue(value),
+        data,
+    });
+    return txes;
+}
+
+export async function buildDeployAndCreateRedPacketTx(
+    network: Network,
+    input: RedPacket,
+    useHexlinkAccount: boolean
+) : Promise<any> {
+    const txes = await buildCreateRedPacketTx(network, input, useHexlinkAccount);
+    const tx = txes.pop(); // last tx is the redpacket creation tx
+    const { initData, proof } = await genDeployAuthProof(network, tx.last.data);
     const hexlink = hexlinkContract(network);
     const data = hexlink.interface.encodeFunctionData(
         "deploy", [useAuthStore().user!.nameHash, initData, {
@@ -162,12 +334,13 @@ export async function buildDeployAndCreateRedPacketTx(
             signature: proof.signature
         }]
     );
-    return {
+    const walletAccount = useWalletStore().wallet!.account;
+    return txes.push({
         to: hexlink.address,
         from: walletAccount.address,
-        value: ethers.utils.hexValue(value),
+        value: tx.value,
         data,
-    };
+    });
 }
 
 function redpacketId(network: Network, input: RedPacket) {
@@ -185,17 +358,28 @@ function redpacketId(network: Network, input: RedPacket) {
     )
 }
 
-export async function deployAndCreateRedPacket(
+async function processTxAndSave(
     network: Network,
     redpacket: RedPacket,
-    useHexlinkAccount: boolean
-) {
-    const txParams = await buildDeployAndCreateRedPacketTx(
-        network,
-        redpacket,
-        useHexlinkAccount
-    );
+    txes: any[],
+    dryrun: boolean
+) : Promise<{id: string, tx: string}> {
+    if (dryrun) {
+        for (let i = 0; i < txes.length; i++) {
+            const tx = txes[i];
+            const gasUsed = await estimateGas(tx);
+            console.log({
+                tx: tx,
+                gasUsed: EthBigNumber.from(gasUsed).toString()
+            })
+        }
+        return {
+            id: redpacketId(network, redpacket),
+            tx: ''
+        }
+    }
     const id = redpacketId(network, redpacket);
+    const user = useAuthStore().user;
     await insertRedPacket([{
         id,
         chain: network.name,
@@ -208,8 +392,48 @@ export async function deployAndCreateRedPacket(
             validator: network.addresses.validator as string,
             expiredAt: 0,
             contract: network.addresses.redPacket as string
+        },
+        creator: {
+            handle: user!.handle,
+            displayName: user!.displayName,
+            provider: user!.provider,
         }
     }]);
-    const tx = await sendTransaction(txParams);
-    await updateRedPacket({id, tx});
+    let tx : string = "";
+    for (let i = 0; i < txes.length; i++) {
+        let txHash = await sendTransaction(txes[i]);
+        if (addressEqual(txes[i].to, hexlinkAddress(network))) {
+            await updateRedPacket({id, tx});
+            tx = txHash;
+        }
+    }
+    return {id, tx};
+}
+
+export async function deployAndCreateNewRedPacket(
+    network: Network,
+    redpacket: RedPacket,
+    useHexlinkAccount: boolean,
+    dryrun: boolean = false
+) {
+    const txes = await buildDeployAndCreateRedPacketTx(
+        network,
+        redpacket,
+        useHexlinkAccount
+    );
+    return await processTxAndSave(network, redpacket, txes, dryrun);
+}
+
+export async function createNewRedPacket(
+    network: Network,
+    redpacket: RedPacket,
+    useHexlinkAccount: boolean,
+    dryrun: boolean = false
+) : Promise<{id: string, tx: string}> {
+    const txes = await buildCreateRedPacketTx(
+        network,
+        redpacket,
+        useHexlinkAccount
+    );
+    return await processTxAndSave(network, redpacket, txes, dryrun);
 }

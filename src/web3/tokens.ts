@@ -105,7 +105,8 @@ async function updateBalances(
     update: (tokenAddr: string, balance: NormalizedTokenBalance) => void,
 ) : Promise<void> {
     const profile = useProfileStore().profile;
-    const tokens = Object.values(profile?.tokens || []);
+    if (!profile.initiated) { return };
+    const tokens = Object.values(profile.tokens || []);
     const nativeCoin = useNetworkStore().nativeCoinAddress;
     const decimals = profile.tokens[nativeCoin].metadata.decimals;
     let balance = getPrevBalance(nativeCoin) || normalizeBalance(EthBigNumber.from(0), decimals);

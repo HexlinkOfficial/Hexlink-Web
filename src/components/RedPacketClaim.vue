@@ -46,20 +46,8 @@ const redPacker = ref<RedPacketDB>();
 
 onMounted(async () => {
   redPacker.value = await getRedPacket(useRoute().query.id!.toString());
-  console.log(redPacker.value);
+  console.log(redPacker.value.creator);
 });
-
-const getUserInfo = (uid: string) => {
-  getAuth()
-    .getUser(uid)
-    .then((userRecord) => {
-      // See the UserRecord reference doc for the contents of userRecord.
-      console.log(`Successfully fetched user data: ${userRecord.toJSON()}`);
-    })
-    .catch((error) => {
-      console.log('Error fetching user data:', error);
-    });
-}
 </script>
 
 <style lang="less" scoped>

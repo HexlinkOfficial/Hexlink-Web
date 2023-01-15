@@ -5,7 +5,7 @@ import { useNetworkStore } from '@/stores/network';
 
 export const GET_REDPACKET = gql`
   query GetRedPacket($id: String!) {
-    red_packet_by_pk(id: $id) {
+    redpacket_by_pk(id: $id) {
         id
         user_id
         chain
@@ -77,7 +77,7 @@ export interface RedPacketDB {
   id: string,
   userId: string,
   chain: string,
-  metadata: RedPacketDBMetadata,
+  metadata: RedPacketDBMetadata | "",
   tx?: string
 }
 
@@ -90,13 +90,22 @@ export async function getRedPacket(
     {id: redPacketId}
   ).toPromise();
   if (await handleUrqlResponse(result)) {
-    const rp = result.data.redpacket;
-    return {
-      id: rp.id,
-      userId: rp.user_id,
-      chain: rp.chain,
-      metadata: JSON.parse(rp.metadata)
-    } as RedPacketDB;
+    const rp = result.data.redpacket_by_pk;
+    if(rp) {
+      return {
+        id: rp.id,
+        userId: rp.user_id,
+        chain: rp.chain,
+        metadata: JSON.parse(rp.metadata)
+      } as RedPacketDB;
+    } else {
+      return {
+        id: "0",
+        userId: "0",
+        chain: "0",
+        metadata: ""
+      }
+    }
   } else {
     return await getRedPacket(redPacketId);
   }

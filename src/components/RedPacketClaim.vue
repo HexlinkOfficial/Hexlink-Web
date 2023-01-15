@@ -30,8 +30,11 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import type { ClaimCardData } from "@/types";
+import type { RedPacketDB } from '@/graphql/redpacket';
 import { useProfileStore } from '@/stores/profile';
+import { getRedPacket } from '@/graphql/redpacket';
 import { useRoute } from "vue-router";
+import { getAuth } from "firebase/auth";
 
 const nativeToken = useProfileStore().nativeToken;
 const claimcard = ref<ClaimCardData>({
@@ -39,6 +42,24 @@ const claimcard = ref<ClaimCardData>({
   token: nativeToken,
   from: "dreambig_peter"
 })
+const redPacker = ref<RedPacketDB>();
+
+onMounted(async () => {
+  redPacker.value = await getRedPacket(useRoute().query.id!.toString());
+  console.log(redPacker.value);
+});
+
+const getUserInfo = (uid: string) => {
+  getAuth()
+    .getUser(uid)
+    .then((userRecord) => {
+      // See the UserRecord reference doc for the contents of userRecord.
+      console.log(`Successfully fetched user data: ${userRecord.toJSON()}`);
+    })
+    .catch((error) => {
+      console.log('Error fetching user data:', error);
+    });
+}
 </script>
 
 <style lang="less" scoped>
@@ -79,7 +100,7 @@ const claimcard = ref<ClaimCardData>({
   width: 100%;}
 .claim-card h2 {
   text-align: center;
-  margin-top: 50%;
+  margin-top: 45%;
   position: absolute;
   z-index: 55;
   font-size: 26px;

@@ -1,5 +1,5 @@
 import Web3Model from "web3modal";
-import { ethers, BigNumber } from "ethers";
+import { ethers } from "ethers";
 import { useWalletStore } from "@/stores/wallet"
 import { buildAccountFromAddress } from "./account";
 import WalletConnect from "@walletconnect/web3-provider";
@@ -57,6 +57,12 @@ export async function connectWallet() {
     walletIcon,
   } as Wallet);
   await updateWalletBalances();
+
+  window.ethereum.on('accountsChanged', async function (accounts: string[]) {
+    const account = await buildAccountFromAddress(accounts[0]);
+    store.switchAccount(account);
+    await updateWalletBalances();
+  });
 }
 
 export async function signMessage(account: string, message: string) {

@@ -1,4 +1,4 @@
-import type { NormalizedTokenBalance, Wallet } from "@/types";
+import type { NormalizedTokenBalance, Wallet, Account } from "@/types";
 import { defineStore } from 'pinia'
 import { useNetworkStore } from "@/stores/network";
 import { BigNumber as EthBigNumber } from 'ethers';
@@ -41,6 +41,9 @@ export const useWalletStore = defineStore({
             this.wallet = undefined;
             this.balanceMap = {};
             console.log("External account disconnected");
+        },
+        switchAccount(account: Account) {
+            this.wallet!.account = account;
         },
         updateBalance(tokenAddr: string, balance: NormalizedTokenBalance) {
             const network = useNetworkStore().network.name;

@@ -21,8 +21,9 @@ export interface Network {
 }
 
 export interface PriceInfo {
-    nativeCurrencyInUsd: BigNumber,
-    gasPrice: EthersBigNumber,
+    nativeCurrencyInUsd: BigNumber;
+    gasPrice: EthersBigNumber;
+    updatedAt: number;
 }
 
 export interface Account {

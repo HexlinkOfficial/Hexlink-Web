@@ -485,8 +485,8 @@ const tokenChoose =
     }
   };
 
-const calcGasSponsorship = () => {
-  gasSponsorship.value = estimateGasSponsorship(
+const calcGasSponsorship = async () => {
+  gasSponsorship.value = await estimateGasSponsorship(
     useNetworkStore().network, redpacket.value
   );
   const result = new BigNumber(

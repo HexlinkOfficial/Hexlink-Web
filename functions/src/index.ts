@@ -41,3 +41,9 @@ import {
 exports.genTwitterOAuthProof = genTwitterOAuthProof;
 exports.calcEthAddress = calcEthAddress;
 exports.signWithKms = signWithKms;
+
+import {
+  networkConfig,
+} from "./config";
+
+exports.networkConfig = networkConfig;

@@ -16,12 +16,6 @@
           <i className="fa fa-twitter"></i>
         </a>
       </div>
-      <div class="claim-tokens" style="margin-top: 0.5rem;">
-        <div class="token-icon">
-          <img :src="getNetwork(redPacketChain)?.logoUrl" />
-        </div>
-        <b class="mode-text2">{{ getNetwork(redPacketChain)?.chainName }}</b>
-      </div>
       <div class="claim-tokens">
         <div class="token-icon">
           <img :src="redPacketTokenIcon" />
@@ -94,7 +88,7 @@ onMounted(async () => {
   width: 330px;
   color: white; }
 .claim-card:hover h2 {
-  margin-top: 80px;
+  margin-top: 90px;
   color: #fff; }
 .claim-card:hover h2 small {
   color: #fff; }
@@ -109,7 +103,7 @@ onMounted(async () => {
   width: 100%;}
 .claim-card h2 {
   text-align: center;
-  margin-top: 45%;
+  margin-top: 50%;
   position: absolute;
   z-index: 55;
   font-size: 26px;

@@ -6,7 +6,7 @@ import { isNativeCoin, isWrappedCoin, isStableCoin } from "@/configs/tokens";
 
 import { genDeployAuthProof } from "@/web3/oracle";
 import { hash, toEthBigNumber, tokenBase, tokenEqual, addressEqual } from "@/web3/utils";
-import { hexlinkAddress, hexlinkContract, refund } from "@/web3/hexlink";
+import { hexlinkContract, refund } from "@/web3/hexlink";
 import { estimateGas, sendTransaction } from "@/web3/wallet";
 
 import ERC20_ABI from "@/configs/abi/ERC20.json";
@@ -14,7 +14,7 @@ import RED_PACKET_ABI from "@/configs/abi/HappyRedPacket.json";
 import ACCOUNT_ABI from "@/configs/abi/AccountSimple.json";
 import USERS from "@/configs/users.json";
 import { useWalletStore } from "@/stores/wallet";
-import { insertRedPacket, updateRedPacket } from "@/graphql/redpacket";
+import { insertRedPacket } from "@/graphql/redpacket";
 import { BigNumber } from "bignumber.js";
 import { getProvider } from "@/web3/network";
 
@@ -174,7 +174,7 @@ async function buildCreateRedPacketTx(
             value = value.add(tokenAmount);
             const valid = await validAllowance(
                 network,
-                input.token,
+                input.gasToken,
                 walletAccount,
                 hexlAccount,
                 gasTokenAmount);
@@ -195,7 +195,7 @@ async function buildCreateRedPacketTx(
                 function: "transferFrom",
                 args,
                 op: {
-                    to: input.token.metadata.address,
+                    to: input.gasToken.metadata.address,
                     value: EthBigNumber.from(0),
                     callData: erc20Iface.encodeFunctionData(
                         "transferFrom", args
@@ -302,7 +302,7 @@ async function buildCreateRedPacketTx(
             });
             const valid2 = await validAllowance(
                 network,
-                input.token,
+                input.gasToken,
                 walletAccount,
                 hexlAccount,
                 gasTokenAmount);
@@ -321,12 +321,12 @@ async function buildCreateRedPacketTx(
             ops.push({
                 name: "depositToken",
                 function: "transferFrom",
-                args: args1,
+                args: args2,
                 op: {
                     to: input.gasToken.metadata.address,
                     value: EthBigNumber.from(0),
                     callData: erc20Iface.encodeFunctionData(
-                        "transferFrom", args1
+                        "transferFrom", args2
                     ),
                     callGasLimit: EthBigNumber.from(0) // no limit
                 }

@@ -55,7 +55,7 @@
     </tbody>
   </table>
   <!-- loading -->
-  <Loading :loading="loading"/>
+  <Loading v-if="loading"/>
 </template>
 
 <script lang="ts" setup>
@@ -66,6 +66,7 @@ import logo from "../assets/network-icons/hexlink.svg";
 import { useProfileStore } from "@/stores/profile";
 import { useNetworkStore } from "@/stores/network";
 import { updateProfileBalances } from "@/web3/tokens";
+import Loading from "@/components/Loading.vue";
 
 const loading = ref<boolean>(true);
 

@@ -12,12 +12,16 @@
   </div>
   <div v-if="walletStore.connected && props.sendLuck">
     <div class="red-packet">
+      <p v-if="hasBalanceWarning" class="balance-warning-mobile"><i class="icofont-warning-alt" style="margin-right: 0.25rem;"></i>Insufficient balance</p>
       <div class="total-amount">
         <div class="box">
           <p class="total-amount-text">Total Amount</p>
-          <input v-model="redpacket.balance" id="red-packet-amount" class="amount-input" autocomplete="off"
-            placeholder="0.0" required="true" type="number" autocorrect="off" title="Token Amount" inputmode="decimal"
-            min="0" minlength="1" maxlength="79" pattern="^[0-9]*[.,]?[0-9]*$" spellcheck="false">
+          <div style="display: flex; width: 100%;">
+            <input v-model="redPacketBalance" @change="setRedPBalance" :style="hasBalanceWarning && 'color: #FE646F;'" id="red-packet-amount" class="amount-input"
+              autocomplete="off" placeholder="0.0" required="true" type="number" autocorrect="off" title="Token Amount"
+              inputmode="decimal" min="0" minlength="1" maxlength="79" pattern="^[0-9]*[.,]?[0-9]*$" spellcheck="false">
+            <p v-if="hasBalanceWarning" class="balance-warning"><i class="icofont-warning-alt" style="margin-right: 0.25rem;"></i>Insufficient balance</p>
+          </div>
           <div class="input-info-show">
             <p class="token-available-balance">
               Available Balance:
@@ -313,6 +317,8 @@ const modalRef = ref<any>(null);
 const gasSponsorship = ref<EthBigNumber>(EthBigNumber.from(0));
 const modal = ref<boolean>(false);
 const gasAmount = ref<string>("0");
+const redPacketBalance = ref<string>("0");
+const hasBalanceWarning = ref<boolean>(false);
 const nativeToken = useProfileStore().nativeToken;
 const { toClipboard } = useClipboard()
 
@@ -332,6 +338,18 @@ const redpacket = ref<RedPacket>({
   gasToken: nativeToken as Token,
   expiredAt: 0, // do not expire
 });
+
+const setRedPBalance = () => {
+  if (Number(redPacketBalance.value) > Number(redpacket.value.token.balance?.normalized)) {
+    redpacket.value.balance = "0";
+    console.log("Number too BIG!");
+    hasBalanceWarning.value = true;
+  } else {
+    redpacket.value.balance = redPacketBalance.value;
+    console.log("Number is: ", redPacketBalance.value);
+    hasBalanceWarning.value = false;
+  }
+}
 
 const showGasToken = () => {
   const token = redpacket.value.token.metadata.address;
@@ -490,10 +508,10 @@ onMounted(async () => {
 });
 
 watch(() => useNetworkStore().network, refresh);
-watch(() => redpacket.value.split, calcGasSponsorship);
-watch(() => redpacket.value.balance, calcGasSponsorship);
-watch(() => redpacket.value.balance, estimatedGas);
-watch(() => redpacket.value.split, estimatedGas);
+watch(() => [redpacket.value.split, redpacket.value.balance], calcGasSponsorship);
+// watch(() => redpacket.value.balance, calcGasSponsorship);
+watch(() => [redpacket.value.balance, redpacket.value.split], estimatedGas);
+// watch(() => redpacket.value.split, estimatedGas);
 
 const chooseAccount = function (value: number) {
   accountChosen.value = value;
@@ -1057,7 +1075,6 @@ input[type=number] {
     display: flex;
     margin-top: 0; } }
 .token-list .views .detail-view {
-  display: flex;
   padding: 0.125rem;
   transition-property: background-color, border-color, color, fill, stroke;
   border-radius: 50px;
@@ -1225,4 +1242,37 @@ input[type=number] {
   display: flex;
   margin: 16px;
   flex-direction: row-reverse; }
+.balance-warning {
+  @media (max-width: 767px) {
+    display: none; }
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  flex: 2 1 0%;
+  font-weight: 700;
+  padding-top: 22px !important;
+  padding-bottom: 0px !important;
+  padding-left: 0px !important;
+  padding: 11px 12px;
+  height: 18px;
+  border: 0px;
+  box-sizing: content-box;
+  background: none;
+  margin: 0px;
+  -webkit-tap-highlight-color: transparent;
+  color: #FE646F;
+  width: auto; }
+.balance-warning-mobile {
+  @media (min-width: 768px) {
+    display: none; }
+  @media (min-width: 640px) {
+    margin-left: 16px; }
+  display: flex;
+  align-items: center;
+  font-weight: 700;
+  padding-top: 11px;
+  height: 18px;
+  margin-bottom: -0.5rem;
+  color: #FE646F;
+  width: auto; }
 </style>

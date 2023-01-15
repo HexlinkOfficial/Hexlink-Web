@@ -1,5 +1,5 @@
 <template>
-  <div class="loading-class" v-if="loading">
+  <div class="loading-class">
     <div class="load-3">
       <div class="line"></div>
       <div class="line"></div>
@@ -7,15 +7,6 @@
     </div>
   </div>
 </template>
-
-<script lang="ts" setup>
-const props = defineProps({
-  loading: {
-    type: Object as () => boolean,
-    required: true,
-  }
-});
-</script>
 
 <style lang="less" scoped>
 .load-3 .line:nth-last-child(1) {

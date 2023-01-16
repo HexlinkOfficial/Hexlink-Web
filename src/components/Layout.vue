@@ -1,6 +1,6 @@
 <template>
-  <RedPacketClaim v-if="useRoute().params.action.toString() == 'claim' && useRoute().query.id != undefined"></RedPacketClaim>
-  <div v-if="useRoute().params.action.toString() == 'claim' && useRoute().query.id != undefined" class="hidden-layer"></div>
+  <RedPacketClaim v-if="showClaim()"></RedPacketClaim>
+  <div v-if="showClaim()" class="hidden-layer"></div>
   <div id="main-wrapper" class="show">
     <Header />
     <SideBar :active="active" />
@@ -21,9 +21,13 @@ import { useRoute } from "vue-router";
 const props = defineProps({
   active: Number
 });
+
+const showClaim = () => {
+  if (useRoute().params.action?.toString() == 'claim' && useRoute().query.id != undefined) return true;
+}
 </script>
 
-<style leng="less" scoped>
+<style lang="less" scoped>
 #main-wrapper {
   opacity: 0;
   transition: all 0.25s ease-in;

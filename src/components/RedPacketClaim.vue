@@ -62,8 +62,8 @@ const claimcard = ref<ClaimCardData>({
   token: nativeToken,
   from: "dreambig_peter"
 })
-const redPacket = ref<RedPacketDB>();
-const redPacketChain = ref<string>("");
+const redPacket = ref<RedPacketDB | undefined>();
+const redPacketChain = ref<string | undefined>("");
 const redPacketTokenIcon = ref<string>("");
 const redPacketToken = ref<string>("");
 const claimStatus = ref<string>("");
@@ -71,7 +71,7 @@ const claimFinalStatus = ref<string>("");
 
 onMounted(async () => {
   redPacket.value = await getRedPacket(useRoute().query.id!.toString());
-  redPacketChain.value = redPacket.value.chain;
+  redPacketChain.value = redPacket.value?.chain;
   GOERLI_TOKENS.map(t => {
     if (t.address == redPacket.value?.metadata.token) {
       redPacketToken.value = t.symbol;

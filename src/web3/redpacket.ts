@@ -1,4 +1,4 @@
-import type { Network, Account, Transaction, UserOp, Token, RedPacket, PriceInfo } from "@/types";
+import type { Network, Account, Transaction, UserOp, Token, RedPacket } from "@/types";
 import { ethers, BigNumber as EthBigNumber } from "ethers";
 import { useProfileStore } from "@/stores/profile";
 import { useAuthStore } from "@/stores/auth";
@@ -16,25 +16,10 @@ import USERS from "@/configs/users.json";
 import { useWalletStore } from "@/stores/wallet";
 import { insertRedPacket } from "@/graphql/redpacket";
 import { BigNumber } from "bignumber.js";
-import { getProvider } from "@/web3/network";
-import { getFunctions, httpsCallable } from 'firebase/functions'
+import { getProvider, getPriceInfo } from "@/web3/network";
 
 const erc20Iface = new ethers.utils.Interface(ERC20_ABI);
 const redPacketIface = new ethers.utils.Interface(RED_PACKET_ABI);
-
-const functions = getFunctions()
-async function getPriceInfo(network: Network) : Promise<PriceInfo> {
-    const getPriceInfo = httpsCallable(functions, 'priceInfo');
-    const result = await getPriceInfo({chainId: network.chainId});
-    const priceInfo : {
-        nativeCurrentyInUsd: string,
-        gasPrice: string
-    } = (result.data as any).priceInfo;
-    return {
-        nativeCurrencyInUsd: new BigNumber(priceInfo.nativeCurrentyInUsd),
-        gasPrice: EthBigNumber.from(priceInfo.gasPrice),
-    }
-}
 
 export async function estimateGasSponsorship(
     network: Network,

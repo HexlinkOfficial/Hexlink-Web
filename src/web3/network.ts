@@ -1,9 +1,12 @@
-import type { Network } from '@/types';
-import { ethers } from "ethers";
-import { useWalletStore } from "@/stores/wallet";
+import { ethers, BigNumber as EthBigNumber } from "ethers";
+import { BigNumber } from "bignumber.js";
 import { Alchemy, Network as AlchemyNetwork } from "alchemy-sdk";
+
+import type { Network, PriceInfo } from '@/types';
+import { useWalletStore } from "@/stores/wallet";
 import { initProfile } from "@/web3/account";
 import { useNetworkStore } from '@/stores/network';
+import { getFunctions, httpsCallable } from 'firebase/functions'
 
 async function doSwitch(network: Network) {
     await initProfile(network);
@@ -78,4 +81,24 @@ export function getProvider(network?: Network) {
         network.chainId,
         network.alchemy.key
     );
+}
+
+const functions = getFunctions();
+export async function getPriceInfo(network: Network) : Promise<PriceInfo> {
+    const priceInfo = useNetworkStore().priceInfo[network.name];
+    // refresh every 15 mins
+    if (!priceInfo || priceInfo.updatedAt < new Date().getTime() - 900000) {
+        const getPriceInfo = httpsCallable(functions, 'priceInfo');
+        const result = await getPriceInfo({chainId: network.chainId});
+        const info : {
+            nativeCurrencyInUsd: string,
+            gasPrice: string
+        } = (result.data as any).priceInfo;
+        useNetworkStore().refreshPriceInfo(network, {
+            nativeCurrencyInUsd: new BigNumber(info.nativeCurrencyInUsd),
+            gasPrice: EthBigNumber.from(info.gasPrice),
+            updatedAt: new Date().getTime()
+        });
+    }
+    return useNetworkStore().priceInfo[network.name];
 }

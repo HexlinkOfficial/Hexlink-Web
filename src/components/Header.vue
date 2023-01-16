@@ -172,7 +172,7 @@ import { useWalletStore } from '@/stores/wallet';
 import { useNetworkStore } from '@/stores/network';
 import { prettyPrintAddress } from '@/web3/account';
 import { createToaster } from "@meforma/vue-toaster";
-import { POLYGON, GOERLI, MUMBAI } from "@/configs/network";
+import { GOERLI, MUMBAI } from "@/configs/network";
 import { switchNetwork } from "@/web3/network";
 import { disconnectWallet } from "@/web3/wallet";
 import { useProfileStore } from "@/stores/profile";
@@ -195,9 +195,7 @@ const addressTextLong = function (address: string | undefined) {
 const root = ref<HTMLElement | null>(null);
 
 const activeDropDown = (value: any) => {
-  console.log(value);
   active.value = active.value === value ? "" : value;
-  console.log(active.value);
 };
 
 const closeDropDown = (e: any) => {
@@ -222,7 +220,7 @@ const doCopy = (address: string | undefined) => {
 };
 
 onMounted(() => {
-  document.addEventListener('click', closeDropDown)
+  document.addEventListener('click', closeDropDown);
 });
 
 onBeforeUnmount(() => {

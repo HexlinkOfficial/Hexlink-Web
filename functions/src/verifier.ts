@@ -1,9 +1,9 @@
 import * as functions from "firebase-functions";
-import {getAuth} from "firebase-admin/auth";
 import * as ethers from "ethers";
 import {signWithKmsKey} from "./kms";
 import {KMS_CONFIG, KMS_KEY_TYPE} from "./config";
 import {env} from "process";
+import {genNameHash} from "./account";
 
 const TWITTER_PROVIDER_ID = "twitter.com";
 const OAUTH_AUTH_TYPE = "oauth";
@@ -26,24 +26,11 @@ export const genTwitterOAuthProof = functions.https.onCall(
         return {code: 401, message: "Unauthorized Call"};
       }
 
-      const user = await getAuth().getUser(uid);
-      if (!user) {
-        return {code: 400, message: "Invalid uid: failed to get the user."};
+      const result = await genNameHash(uid);
+      if (result.nameHash == undefined) {
+        return result;
       }
-
-      const userInfoList = user.providerData;
-      let twitterUid = "";
-      for (const userInfo of userInfoList) {
-        if (userInfo.providerId.toLowerCase() === TWITTER_PROVIDER_ID) {
-          twitterUid = userInfo.uid;
-        }
-      }
-
-      if (!twitterUid || twitterUid.length === 0) {
-        return {code: 400, message: "Invalid uid: not provided with twitter"};
-      }
-
-      const nameHash = genNameHash(TWITTER_PROVIDER_ID, twitterUid);
+      const {nameHash} = result;
 
       const identityType = hash(TWITTER_PROVIDER_ID);
       const authType = hash(OAUTH_AUTH_TYPE);
@@ -91,10 +78,6 @@ export const genTwitterOAuthProof = functions.https.onCall(
       };
       return {code: 200, authProof: AuthProof};
     });
-
-const genNameHash = function(prefix: string, uid: string) {
-  return ethers.utils.keccak256(ethers.utils.toUtf8Bytes(`${prefix}:${uid}`));
-};
 
 const hash = function(value: string) {
   return ethers.utils.keccak256(ethers.utils.toUtf8Bytes(value));

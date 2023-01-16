@@ -78,7 +78,7 @@ export function alchemy() {
 export function getProvider(network?: Network) {
     network = network || useNetworkStore().network;
     return new ethers.providers.AlchemyProvider(
-        network.chainId,
+        Number(network.chainId),
         network.alchemy.key
     );
 }

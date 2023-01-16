@@ -2,7 +2,7 @@ import type { Network } from "@/types";
 import ADDRESSES from "@/configs/addresses.json";
 
 export const GOERLI : Network = {
-    chainId: 5,
+    chainId: "5",
     name: "goerli",
     chainName: "Goerli Test Network",
     rpcUrls: ["https://goerli.infura.io/v3/"],
@@ -21,7 +21,7 @@ export const GOERLI : Network = {
 };
 
 export const POLYGON : Network = {
-    chainId: 137,
+    chainId: "137",
     rpcUrls: ["https://polygon-rpc.com"],
     alchemy: {
         rpcUrl: "https://polygon-mainnet.g.alchemy.com/v2/1GmfWOSlYIlUI0UcCu4Y2O-8DmFJrlqA",
@@ -40,7 +40,7 @@ export const POLYGON : Network = {
 };
 
 export const MUMBAI : Network = {
-    chainId: 80001,
+    chainId: "80001",
     rpcUrls: ["https://rpc-mumbai.maticvigil.com/"],
     alchemy: {
         rpcUrl: "https://polygon-mumbai.g.alchemy.com/v2/Fj__UEjuIj0Xym6ofwZfJbehuuXGpDxe",

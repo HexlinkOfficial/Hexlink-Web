@@ -73,7 +73,8 @@ export interface RedPacketDBMetadata {
   balance: string,
   validator: string,
   expiredAt: number,
-  contract: string
+  contract: string,
+  creator: string,
 }
 
 export interface RedPacketDB {

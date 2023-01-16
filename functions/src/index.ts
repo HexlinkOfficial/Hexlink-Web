@@ -47,3 +47,9 @@ import {
 } from "./config";
 
 exports.priceInfo = priceInfo;
+
+import {
+  claimRedPacket,
+} from "./redpacket";
+
+exports.claimRedPacket = claimRedPacket;

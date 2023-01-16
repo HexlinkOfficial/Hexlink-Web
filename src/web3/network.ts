@@ -18,7 +18,7 @@ export async function switchNetwork(network: Network) {
         return;
     }
 
-    if (!useWalletStore().connected || network.chainId == Number(window.ethereum.networkVersion)) {
+    if (!useWalletStore().connected || network.chainId == window.ethereum.networkVersion) {
         doSwitch(network);
         return;
     }
@@ -55,13 +55,13 @@ export async function switchNetwork(network: Network) {
 }
 
 export function alchemyNetwork(network: Network) : AlchemyNetwork {
-    if (network.chainId == 5) {
+    if (network.chainId == "5") {
         return AlchemyNetwork.ETH_GOERLI;
     }
-    if (network.chainId == 137) {
+    if (network.chainId == "137") {
         return AlchemyNetwork.MATIC_MAINNET;
     }
-    if (network.chainId == 80001) {
+    if (network.chainId == "80001") {
         return AlchemyNetwork.MATIC_MUMBAI;
     }
     throw new Error("Unsupported network");

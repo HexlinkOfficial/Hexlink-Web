@@ -1,12 +1,12 @@
 
 import { defineStore } from 'pinia';
-import type { CreatedRedPacket, RedPacketInput } from "@/types";
+import type { CreatedRedPacket, RedPacket } from "@/types";
 
 export const useRedPacketStore = defineStore({
   id: 'redpacket',
   state: (): {
     [key: string]: {
-      creating: RedPacketInput | undefined,
+      creating: RedPacket | undefined,
       created: { [key: string]: CreatedRedPacket }
     }
   } => ({ }),

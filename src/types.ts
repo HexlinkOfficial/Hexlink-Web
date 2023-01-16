@@ -2,7 +2,7 @@ import type { BigNumber as EthersBigNumber } from "ethers";
 import type { BigNumber } from "bignumber.js";
 
 export interface Network {
-    chainId: number,
+    chainId: string,
     rpcUrls: string[],
     name: string,
     chainName: string,
@@ -197,4 +197,4 @@ export interface HexlinkUserInfo {
     provider: string;
     handle: string;
     displayName?: string;
-  }
+}

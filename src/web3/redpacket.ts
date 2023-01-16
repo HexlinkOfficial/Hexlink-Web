@@ -452,16 +452,17 @@ async function processTxAndSave(
         if (txes[i].name == "createRedPacket" || txes[i].name == "deployAndCreateRedPacket") {
             await insertRedPacket([{
                 id,
-                chain: network.name,
+                chain: network.chainId,
                 metadata: {
                     token: redpacket.token.metadata.address,
                     salt: redpacket.salt,
                     split: redpacket.split,
-                    balance: redpacket.balance,
+                    balance: calcTokenAmount(redpacket).toString(),
                     mode: redpacket.mode,
                     validator: network.addresses.validator as string,
                     expiredAt: 0,
-                    contract: network.addresses.redPacket as string
+                    contract: network.addresses.redPacket as string,
+                    creator: useProfileStore().account.address
                 },
                 creator: userInfo(),
                 tx: txHash

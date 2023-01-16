@@ -5,7 +5,6 @@
       <div className="row invoice-card-row">
         <div class="col-xxl-6">
           <div class="card">
-            <div v-if="useRoute().params.action.toString() == 'claim' && useRoute().query.id != undefined" class="hidden-layer"></div>
             <div class="card-body">
               <div class="token-list">
                 <div class="title">
@@ -45,7 +44,6 @@
           </div>
         </div>
       </div>
-      <RedPacketClaim v-if="useRoute().params.action.toString() == 'claim' && useRoute().query.id != undefined"></RedPacketClaim>
     </div>
   </Layout>
 </template>
@@ -55,7 +53,6 @@ import { ref, onMounted, watch } from "vue";
 import Layout from "@/components/Layout.vue";
 import RedPacektHistoryList from "@/components/RedPacketHistoryList.vue";
 import RedPacketSend from "@/components/RedPacketSend.vue";
-import RedPacketClaim from "@/components/RedPacketClaim.vue";
 import type { RedPacketDB } from '@/graphql/redpacket';
 import { useNetworkStore } from '@/stores/network';
 import { getRedPacketsByUser } from '@/graphql/redpacket';

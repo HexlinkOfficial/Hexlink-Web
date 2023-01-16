@@ -87,6 +87,7 @@ onMounted(() => {
     sendLuck.value = false;
     luckHistory.value = true;
   }
+  console.log(useNetworkStore().network);
 });
 
 watch(() => useNetworkStore().network, refresh);
@@ -179,7 +180,6 @@ const createPacket = () => {
     display: flex;
     margin-top: 0; } }
 .token-list .views .detail-view {
-  display: flex;
   padding: 0.125rem;
   transition-property: background-color, border-color, color, fill, stroke;
   border-radius: 50px;

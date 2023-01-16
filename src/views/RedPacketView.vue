@@ -40,7 +40,7 @@
                 </div>
               </div>
               <RedPacektHistoryList v-if="useRoute().params.action.toString() != 'send'" :luckHistory="luckHistory" :redPackets="redPackets"></RedPacektHistoryList>
-              <RedPacketSend v-if="useRoute().params.action.toString() == 'send'" :sendLuck="sendLuck"></RedPacketSend>
+              <RedPacketSend v-if="useRoute().params.action.toString() == 'send'" :sendLuck="sendLuck" @createPacket="createPacket"></RedPacketSend>
             </div>
           </div>
         </div>
@@ -90,6 +90,10 @@ onMounted(() => {
 });
 
 watch(() => useNetworkStore().network, refresh);
+
+const createPacket = () => {
+  console.log("hello world!");
+}
 </script>
 
 <style lang="less" scoped>

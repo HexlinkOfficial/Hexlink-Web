@@ -34,13 +34,9 @@ exports.hasRetweeted = hasRetweeted;
 
 import {
   genTwitterOAuthProof,
-  calcEthAddress,
-  signWithKms,
 } from "./verifier";
 
 exports.genTwitterOAuthProof = genTwitterOAuthProof;
-exports.calcEthAddress = calcEthAddress;
-exports.signWithKms = signWithKms;
 
 import {
   priceInfo,

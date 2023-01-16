@@ -1,7 +1,7 @@
 import * as functions from "firebase-functions";
 import {getAuth} from "firebase-admin/auth";
 import * as ethers from "ethers";
-import {getEthAddressFromPublicKey, signWithKmsKey} from "./kms";
+import {signWithKmsKey} from "./kms";
 import {KMS_CONFIG, KMS_KEY_TYPE} from "./config";
 import {env} from "process";
 
@@ -99,20 +99,3 @@ const genNameHash = function(prefix: string, uid: string) {
 const hash = function(value: string) {
   return ethers.utils.keccak256(ethers.utils.toUtf8Bytes(value));
 };
-
-export const signWithKms = functions.https.onCall(
-    async (data, context) => {
-      const uid = context.auth?.uid;
-      if (!uid) {
-        return {code: 401, message: "Unauthorized Call"};
-      }
-
-      return signWithKmsKey(data.keyType, data.message);
-    }
-);
-
-export const calcEthAddress = functions.https.onCall(
-    async (data) => {
-      return getEthAddressFromPublicKey(data.keyType);
-    }
-);

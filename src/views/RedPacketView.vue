@@ -5,7 +5,6 @@
       <div className="row invoice-card-row">
         <div class="col-xxl-6">
           <div class="card">
-            <div v-if="useRoute().params.action.toString() == 'claim' && useRoute().query.id != undefined" class="hidden-layer"></div>
             <div class="card-body">
               <div class="token-list">
                 <div class="title">
@@ -40,12 +39,11 @@
                 </div>
               </div>
               <RedPacektHistoryList v-if="useRoute().params.action.toString() != 'send'" :luckHistory="luckHistory" :redPackets="redPackets"></RedPacektHistoryList>
-              <RedPacketSend v-if="useRoute().params.action.toString() == 'send'" :sendLuck="sendLuck"></RedPacketSend>
+              <RedPacketSend v-if="useRoute().params.action.toString() == 'send'" :sendLuck="sendLuck" @createPacket="createPacket"></RedPacketSend>
             </div>
           </div>
         </div>
       </div>
-      <RedPacketClaim v-if="useRoute().params.action.toString() == 'claim' && useRoute().query.id != undefined"></RedPacketClaim>
     </div>
   </Layout>
 </template>
@@ -55,7 +53,6 @@ import { ref, onMounted, watch } from "vue";
 import Layout from "@/components/Layout.vue";
 import RedPacektHistoryList from "@/components/RedPacketHistoryList.vue";
 import RedPacketSend from "@/components/RedPacketSend.vue";
-import RedPacketClaim from "@/components/RedPacketClaim.vue";
 import type { RedPacketDB } from '@/graphql/redpacket';
 import { useNetworkStore } from '@/stores/network';
 import { getRedPacketsByUser } from '@/graphql/redpacket';
@@ -87,9 +84,14 @@ onMounted(() => {
     sendLuck.value = false;
     luckHistory.value = true;
   }
+  console.log(useNetworkStore().network);
 });
 
 watch(() => useNetworkStore().network, refresh);
+
+const createPacket = () => {
+  console.log("hello world!");
+}
 </script>
 
 <style lang="less" scoped>
@@ -175,7 +177,6 @@ watch(() => useNetworkStore().network, refresh);
     display: flex;
     margin-top: 0; } }
 .token-list .views .detail-view {
-  display: flex;
   padding: 0.125rem;
   transition-property: background-color, border-color, color, fill, stroke;
   border-radius: 50px;

@@ -329,6 +329,8 @@ const props = defineProps({
   }
 });
 
+const emit = defineEmits(["createPacket"])
+
 const redpacket = ref<RedPacket>({
   mode: "random",
   salt: hash(new Date().toISOString()),
@@ -446,6 +448,7 @@ const modeChoose = async (gameMode: "random" | "equal") => {
 
 const createRedPacket = async function () {
   const account = useProfileStore().account;
+  emit("createPacket", "someValue");
   if (await isContract(account.address)) {
     await createNewRedPacket(
       useNetworkStore().network,

@@ -192,3 +192,9 @@ export interface UserOp {
         callGasLimit: EthersBigNumber;
     }
 }
+
+export interface HexlinkUserInfo {
+    provider: string;
+    handle: string;
+    displayName?: string;
+  }

@@ -2,6 +2,7 @@ import { gql } from '@urql/core';
 import { useAuthStore } from '@/stores/auth';
 import { handleUrqlResponse, setUrqlClientIfNecessary } from './urql';
 import { useNetworkStore } from '@/stores/network';
+import type { HexlinkUserInfo } from "@/types";
 
 export const GET_REDPACKET = gql`
   query GetRedPacket($id: String!) {
@@ -75,24 +76,18 @@ export interface RedPacketDBMetadata {
   contract: string
 }
 
-export interface RedPacketDBCreator {
-  provider: string;
-  handle: string;
-  displayName?: string;
-}
-
 export interface RedPacketDB {
   id: string,
   userId: string,
   chain: string,
   metadata: RedPacketDBMetadata,
-  creator: RedPacketDBCreator,
+  creator: HexlinkUserInfo,
   tx?: string
 }
 
 export async function getRedPacket(
   redPacketId: string
-) : Promise<RedPacketDB> {
+) : Promise<RedPacketDB | undefined> {
   const client = setUrqlClientIfNecessary(useAuthStore().user!.idToken!);
   const result = await client.query(
     GET_REDPACKET,
@@ -109,26 +104,7 @@ export async function getRedPacket(
         creator: JSON.parse(rp.creator)
       } as RedPacketDB;
     } else {
-      return {
-        id: "0",
-        userId: "0",
-        chain: "0",
-        metadata: {
-          token: "",
-          salt: "",
-          mode: "",
-          split: 0,
-          balance: "",
-          validator: "",
-          expiredAt: 0,
-          contract: ""
-        },
-        creator: {
-          provider: "",
-          handle: "",
-          displayName: ""
-        }
-      }
+      return undefined;
     }
   } else {
     return await getRedPacket(redPacketId);
@@ -165,7 +141,7 @@ export async function getRedPacketsByUser(
 export async function insertRedPacket(
   data: {
     id: string,
-    creator: RedPacketDBCreator,
+    creator: HexlinkUserInfo,
     metadata: RedPacketDBMetadata,
     chain: string,
     tx: string

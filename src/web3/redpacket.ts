@@ -17,6 +17,7 @@ import { useWalletStore } from "@/stores/wallet";
 import { insertRedPacket } from "@/graphql/redpacket";
 import { BigNumber } from "bignumber.js";
 import { getProvider, getPriceInfo } from "@/web3/network";
+import { userInfo } from "@/web3/account";
 
 const erc20Iface = new ethers.utils.Interface(ERC20_ABI);
 const redPacketIface = new ethers.utils.Interface(RED_PACKET_ABI);
@@ -446,7 +447,6 @@ async function processTxAndSave(
         return id;
     }
 
-    const user = useAuthStore().user;    
     for (let i = 0; i < txes.length; i++) {
         let txHash = await sendTransaction(txes[i].tx);
         if (txes[i].name == "createRedPacket" || txes[i].name == "deployAndCreateRedPacket") {
@@ -463,11 +463,7 @@ async function processTxAndSave(
                     expiredAt: 0,
                     contract: network.addresses.redPacket as string
                 },
-                creator: {
-                    handle: user!.handle,
-                    displayName: user!.displayName,
-                    provider: user!.provider,
-                },
+                creator: userInfo(),
                 tx: txHash
             }]);
         }

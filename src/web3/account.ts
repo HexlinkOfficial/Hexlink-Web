@@ -1,4 +1,4 @@
-import type { Account, Network } from "@/types";
+import type { Account, HexlinkUserInfo, Network } from "@/types";
 import { useProfileStore } from "@/stores/profile";
 import { useAuthStore } from "@/stores/auth";
 import { initTokenList } from "@/web3/tokens";
@@ -89,4 +89,13 @@ export async function initProfile(network: Network) {
     const account = await buildAccount(network, useAuthStore().user!.nameHash);
     const tokens = await initTokenList(network);
     store.init(network, account, tokens);
+}
+
+export function userInfo() : HexlinkUserInfo {
+    const user = useAuthStore().user!;
+    return {
+        handle: user.handle,
+        displayName: user.displayName,
+        provider: user.provider,
+    };
 }

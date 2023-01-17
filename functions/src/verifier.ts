@@ -3,7 +3,7 @@ import * as ethers from "ethers";
 import {signWithKmsKey} from "./kms";
 import {KMS_CONFIG, KMS_KEY_TYPE} from "./config";
 import {env} from "process";
-import {genNameHash} from "./account";
+import {genNameHash, toEthSignedMessageHash} from "./account";
 
 const TWITTER_PROVIDER_ID = "twitter.com";
 const OAUTH_AUTH_TYPE = "oauth";
@@ -61,7 +61,7 @@ export const genTwitterOAuthProof = functions.https.onCall(
         const sig = await signWithKmsKey(
             KMS_KEY_TYPE[KMS_KEY_TYPE.operator],
             toEthSignedMessageHash(message)
-        );
+        ) as string;
         const validatorAddr = KMS_CONFIG.get(
             KMS_KEY_TYPE[KMS_KEY_TYPE.operator]
         )?.publicAddress;
@@ -83,10 +83,4 @@ export const genTwitterOAuthProof = functions.https.onCall(
 
 const hash = function(value: string) {
   return ethers.utils.keccak256(ethers.utils.toUtf8Bytes(value));
-};
-
-const toEthSignedMessageHash = function(messageHex: string) {
-  return ethers.utils.keccak256(
-      ethers.utils.solidityPack(["string", "bytes32"],
-          ["\x19Ethereum Signed Message:\n32", messageHex]));
 };

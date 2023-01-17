@@ -54,18 +54,30 @@ import { useRoute } from "vue-router";
 import { claimRedPacket } from "@/web3/redpacket";
 import { getERC20Metadata } from "@/web3/tokens";
 import { getNetwork } from "@/configs/network";
+import { useProfileStore } from "@/stores/profile";
+import { switchNetwork } from "@/web3/network";
+import type { TokenMetadata, Network } from "@/types";
 
 const redPacket = ref<RedPacketDB | undefined>();
 const redPacketTokenIcon = ref<string>("");
 const redPacketToken = ref<string>("");
 const claimStatus = ref<string>("");
 
+async function loadTokenMetadata(
+  tokenAddr: string,
+  network: Network
+) : Promise<TokenMetadata> {
+  const token = useProfileStore().profiles[
+    network.name
+  ].tokens[tokenAddr.toLowerCase()];
+  return token?.metadata || await getERC20Metadata(tokenAddr, network);
+}
+
 onMounted(async () => {
   redPacket.value = await getRedPacket(useRoute().query.id!.toString());
-  const metadata = await getERC20Metadata(
-    redPacket.value!.metadata.token,
-    getNetwork(redPacket.value!.chain)
-  );
+  const network = getNetwork(redPacket.value!.chain);
+  switchNetwork(network);
+  const metadata = await loadTokenMetadata(redPacket.value!.metadata.token, network);
   redPacketToken.value = metadata.symbol;
   redPacketTokenIcon.value = metadata.logoURI || "";
 });

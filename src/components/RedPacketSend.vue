@@ -336,17 +336,14 @@ const redpacket = ref<RedPacket>({
   balance: "0",
   token: nativeToken as Token,
   gasToken: nativeToken as Token,
-  expiredAt: 0, // do not expire
 });
 
 const setRedPBalance = () => {
   if (Number(redPacketBalance.value) > Number(redpacket.value.token.balance?.normalized)) {
     redpacket.value.balance = "0";
-    console.log("Number too BIG!");
     hasBalanceWarning.value = true;
   } else {
     redpacket.value.balance = redPacketBalance.value;
-    console.log("Number is: ", redPacketBalance.value);
     hasBalanceWarning.value = false;
   }
 }
@@ -377,7 +374,10 @@ const genTokenListToSelect = function (): Token[] {
         metadata: token.metadata,
         balance: normalizeBalance(walletBalance, decimals)
       }
-    }).filter(t => t.balance.value.gt(EthBigNumber.from(0)));
+    }).filter(t => {
+      const balance = EthBigNumber.from(t.balance.value);
+      return balance.gt(EthBigNumber.from(0))
+    });
   } else {
     return useProfileStore().feasibleTokens.map(t => ({
       metadata: t.metadata,
@@ -445,7 +445,7 @@ const modeChoose = async (gameMode: "random" | "equal") => {
 }
 
 const confirmRedPacket = async function () {
-  useRedPacketStore().beforeCreate(useNetworkStore().network, redpacket.value, accountChosen.value == 0);
+  useRedPacketStore().beforeCreate(useNetworkStore().network!, redpacket.value, accountChosen.value == 0);
 };
 
 const setMaxAmount = () => {
@@ -474,7 +474,7 @@ const tokenChoose =
 
 const calcGasSponsorship = async () => {
   gasSponsorship.value = await estimateGasSponsorship(
-    useNetworkStore().network, redpacket.value
+    useNetworkStore().network!, redpacket.value
   );
   const result = new BigNumber(
     gasSponsorship.value.toString()

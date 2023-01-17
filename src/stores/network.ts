@@ -5,7 +5,7 @@ import { GOERLI } from "@/configs/network";
 export const useNetworkStore = defineStore({
     id: 'network',
     state: (): {
-        network: Network,
+        network: Network | undefined,
         priceInfo: {[key: string]: PriceInfo}
     } => ({
         network: {...GOERLI},
@@ -13,20 +13,21 @@ export const useNetworkStore = defineStore({
     }),
     persist: true,
     getters: {
-        nativeCoinAddress: (state) : string => state.network.addresses.nativeCoin as string,
-        wrappedCoinAddress: (state) : string => state.network.addresses.wrappeCoin as string,
-        stableCoinAddresses: (state) : string[] => state.network.addresses.stableCoins as string[],
+        nativeCoinAddress: (state) : string => state.network!.address.nativeCoin as string,
+        wrappedCoinAddress: (state) : string => state.network!.address.wrappeCoin as string,
+        stableCoinAddresses: (state) : string[] => state.network!.address.stableCoins as string[],
     },
     actions: {
         switchNetwork(network: Network) {
             console.log("Switching to network " + network.chainName);
-            this.network = network;
+            this.network = {...network};
         },
         refreshPriceInfo(network: Network, priceInfo: PriceInfo) {
             this.priceInfo[network.name] = priceInfo;
         },
         reset() {
-            this.network = {...GOERLI};
-        },
+            this.network = undefined;
+            this.priceInfo = {};
+        }
     },
 })

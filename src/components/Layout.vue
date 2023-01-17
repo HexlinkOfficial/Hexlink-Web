@@ -50,8 +50,8 @@ const showConform = () => {
     margin-left: 0px;
     margin-bottom: 50px; } }
 .hidden-layer {
-  width: 100%;
-  height: 100%;
+  width: 100vw;
+  height: 100vh;
   background-color: rgba(0, 0, 0, 0.5);
   position: absolute;
   z-index: 50; }

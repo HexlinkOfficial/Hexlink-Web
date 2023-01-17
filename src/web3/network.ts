@@ -14,20 +14,23 @@ async function doSwitch(network: Network) {
 }
 
 export async function switchNetwork(network: Network) {
-    if (network.chainId == useNetworkStore().network.chainId) {
+    const currentNetwork = useNetworkStore().network;
+    if (network.chainId == currentNetwork?.chainId) {
         return;
     }
 
-    if (!useWalletStore().connected || network.chainId == window.ethereum.networkVersion) {
+    if (!currentNetwork || !useWalletStore().connected
+        || Number(network.chainId) == window.ethereum.networkVersion) {
         doSwitch(network);
         return;
     }
 
     if (useWalletStore().connected) {
+        const hexifyChainId = ethers.utils.hexValue(Number(network.chainId));
         try {
             await window.ethereum.request({
                 method: 'wallet_switchEthereumChain',
-                params: [{ chainId: ethers.utils.hexValue(network.chainId) }],
+                params: [{ chainId: hexifyChainId }],
             });
             doSwitch(network);
         } catch (error: any) {
@@ -35,7 +38,7 @@ export async function switchNetwork(network: Network) {
                 await window.ethereum.request({
                     method: "wallet_addEthereumChain",
                     params: [{
-                        chainId: ethers.utils.hexValue(network.chainId),
+                        chainId: hexifyChainId,
                         chainName: network.chainName,
                         blockExplorerUrls: [...network.blockExplorerUrls],
                         nativeCurrency: {...network.nativeCurrency},
@@ -44,7 +47,7 @@ export async function switchNetwork(network: Network) {
                 });
                 await window.ethereum.request({
                     method: 'wallet_switchEthereumChain',
-                    params: [{ chainId: ethers.utils.hexValue(network.chainId) }],
+                    params: [{ chainId: hexifyChainId }],
                 });
                 doSwitch(network);
             } else {
@@ -70,16 +73,16 @@ export function alchemyNetwork(network: Network) : AlchemyNetwork {
 export function alchemy(network?: Network) {
     network = network || useNetworkStore().network;
     return new Alchemy({
-        apiKey: network.alchemy.key,
-        network: alchemyNetwork(network)
+        apiKey: network!.alchemy.key,
+        network: alchemyNetwork(network!)
     });
 }
 
 export function getProvider(network?: Network) {
     network = network || useNetworkStore().network;
     return new ethers.providers.AlchemyProvider(
-        Number(network.chainId),
-        network.alchemy.key
+        Number(network!.chainId),
+        network!.alchemy.key
     );
 }
 

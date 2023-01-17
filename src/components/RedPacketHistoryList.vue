@@ -7,21 +7,33 @@
         <table>
           <thead>
             <tr>
-              <th>Red Packet</th>
+              <th>Token</th>
               <th>Amount/Rest</th>
-              <th>Gas Station Balance</th>
               <th>Split</th>
               <th>Mode</th>
-              <!-- <th></th> -->
+              <th>CreatedAt</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="(redPacket, i) in props.redPackets" :key="i" @click="showDetails()">
-              <td>a link</td>
-              <td>{{ redPacket.metadata.balance }}/0</td>
-              <td>0</td>
-              <td>{{ redPacket.metadata.split }}</td>
-              <td>{{ redPacket.metadata.mode }}</td>
+            <tr v-for="(redPacket, i) in redPackets" :key="i" @click="showDetails()">
+              <td>{{ redPacket.token.symbol }}/0</td>
+              <td>{{
+                normalize(redPacket.redPacket.metadata.balance, redPacket.token)
+              }}/{{
+                normalize(redPacket.state.balance, redPacket.token)
+              }}</td>
+              <td>{{ redPacket.redPacket.metadata.split }} / {{ redPacket.state.split }}</td>
+              <td>{{ redPacket.redPacket.metadata.mode }}</td>
+              <td>{{ redPacket.state.createdAt.toLocaleDateString() }}</td>
+              <td>
+                <a-button @click="refund" disabled>
+                  Refund
+                </a-button>
+                <a-typography-paragraph :copyable="{ text: claimLink(redPacket.redPacket) }">
+                  Claim Link
+                </a-typography-paragraph>
+              </td>
             </tr>
             <tr v-if="showDetailsEnabled">
               <td colspan=2>01/04/2023</td>
@@ -35,32 +47,79 @@
 </template>
 
 <script lang="ts" setup>
-import * as ethers from "ethers";
-import { ref } from 'vue';
+import { ref, watch, onMounted } from 'vue';
+import { useRoute } from 'vue-router';
+import { getERC20Metadata } from '@/web3/tokens';
+import { useProfileStore } from "@/stores/profile";
+import { useNetworkStore } from '@/stores/network';
+import { getRedPacketsByUser } from '@/graphql/redpacket';
 import type { RedPacketDB } from '@/graphql/redpacket';
+import type { TokenMetadata } from '@/types';
+import { BigNumber as EthBigNumber } from "ethers";
+import { queryRedPacketInfo } from "@/web3/redpacket";
+import { normalizeBalance } from '@/web3/tokens';
+
+interface RedPacketAggregated {
+  redPacket: RedPacketDB,
+  token: TokenMetadata,
+  state: {
+    balance: EthBigNumber,
+    split: number,
+    createdAt: Date
+  }
+};
+
+const redPackets = ref<RedPacketAggregated[]>([]);
+const profileStore = useProfileStore();
+
+const loadData = async function() {
+  if (useProfileStore().profile?.initiated) {
+    const rps : RedPacketDB[] = await getRedPacketsByUser();
+    redPackets.value = await Promise.all(rps.map(r => aggregate(r)));
+  }
+}
+
+onMounted(loadData);
+watch(() => useNetworkStore().network, loadData);
 
 const showDetailsEnabled = ref<boolean>(false);
 const props = defineProps({
-  redPackets: {
-    type: Object as () => RedPacketDB[],
-    required: true,
-  },
   luckHistory: {
-  type: Boolean,
-  required: true,
+    type: Boolean,
+    required: true,
   }
 });
 
+const refund = () => {
+  console.log("Not supported yet");
+};
+
+const claimLink = (redPacket: RedPacketDB) => {
+  return window.location.origin + useRoute().path + "?id=" + redPacket.id
+};
+
 const showDetails = async function() {
   showDetailsEnabled.value = showDetailsEnabled.value ? false : true;
+};
+
+const normalize = (balance: EthBigNumber | string, token: TokenMetadata) => {
+  const normalized = normalizeBalance(EthBigNumber.from(balance), token.decimals);
+  return normalized.normalized;
 }
 
-const getTransaction = async function() {
-  const provider = new ethers.providers.EtherscanProvider("goerli");
-  const txHash = "0x";
-  const tx = await provider.getTransaction(txHash);
-  console.log(tx);
-}
+const aggregate = async function(redPacket: RedPacketDB) : Promise<RedPacketAggregated> {
+  const state = await queryRedPacketInfo(redPacket);
+  const tokenAddr = redPacket.metadata.token.toLowerCase();
+  if (!profileStore.profile.tokens[tokenAddr]) {
+    profileStore.addToken({metadata: await getERC20Metadata(tokenAddr)});
+  }
+  const token = profileStore.profile.tokens[tokenAddr];
+  return {
+    redPacket,
+    token: token.metadata,
+    state
+  } as RedPacketAggregated;
+};
 </script>
 
 <style lang="less" scoped>

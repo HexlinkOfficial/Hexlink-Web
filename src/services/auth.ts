@@ -12,9 +12,10 @@ import { app } from '@/services/firebase';
 import { useAuthStore } from "@/stores/auth";
 import { useProfileStore } from "@/stores/profile";
 import { useWalletStore } from "@/stores/wallet";
-import { useNetworkStore } from "@/stores/network";
+import { switchNetwork } from "@/web3/network";
 import { genNameHash } from '@/web3/account';
-import { initProfile } from "@/web3/account";
+import { GOERLI } from "@/configs/network";
+import { useNetworkStore } from '@/stores/network';
 
 const auth = getAuth(app)
 const functions = getFunctions()
@@ -63,7 +64,7 @@ export async function googleSocialLogin() {
             idToken
         };
         useAuthStore().signIn(user);
-        await initProfile(useNetworkStore().network);
+        await switchNetwork(GOERLI);
     } catch (error: any) {
         if (error.code == 'auth/popup-closed-by-user') {
             return
@@ -91,7 +92,7 @@ export async function twitterSocialLogin() {
             idToken,
         };
         useAuthStore().signIn(user);
-        await initProfile(useNetworkStore().network);
+        await switchNetwork(GOERLI);
     } catch (error) {
         console.log(error);
     }

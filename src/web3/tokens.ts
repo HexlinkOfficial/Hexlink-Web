@@ -145,7 +145,7 @@ async function updatePreferences() {
         Object.values(store.profile?.tokens || []).filter(
             t => !t.preference && t.balance?.value.gt(0)
         ).map(t => ({
-            chain: useNetworkStore().network.name,
+            chain: useNetworkStore().network!.name,
             display: true,
             tokenAddress: t.metadata.address,
             metadata: t.metadata

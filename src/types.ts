@@ -17,7 +17,7 @@ export interface Network {
     },
     blockExplorerUrls: string[],
     logoUrl: string,
-    addresses: {[key : string]: string | string[]}
+    address: {[key : string]: string | string[]}
 }
 
 export interface PriceInfo {
@@ -106,12 +106,11 @@ export interface Profile {
 
 export interface RedPacket {
     token: Token;
-    salt: string,
+    salt: string;
     gasToken: Token;
     mode: "random" | "equal";
     split: number;
     balance: string;
-    expiredAt: number;
 }
 
 export interface Claim {

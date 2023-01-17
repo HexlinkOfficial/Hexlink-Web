@@ -12,7 +12,8 @@ export const GET_REDPACKET = gql`
         chain
         tx
         creator
-        metadata
+        metadata,
+        created_at
     }
   }
 `
@@ -33,7 +34,8 @@ export const GET_REDPACKETS = gql`
             chain
             tx
             creator
-            metadata
+            metadata,
+            created_at
         }
     }
 `
@@ -72,7 +74,6 @@ export interface RedPacketDBMetadata {
   split: number,
   balance: string,
   validator: string,
-  expiredAt: number,
   contract: string,
   creator: string,
 }
@@ -83,7 +84,8 @@ export interface RedPacketDB {
   chain: string,
   metadata: RedPacketDBMetadata,
   creator: HexlinkUserInfo,
-  tx?: string
+  tx?: string,
+  createdAt: string,
 }
 
 export async function getRedPacket(
@@ -102,7 +104,8 @@ export async function getRedPacket(
         userId: rp.user_id,
         chain: rp.chain,
         metadata: JSON.parse(rp.metadata),
-        creator: JSON.parse(rp.creator)
+        creator: JSON.parse(rp.creator),
+        createdAt: rp.created_at
       } as RedPacketDB;
     } else {
       return undefined;
@@ -112,9 +115,7 @@ export async function getRedPacket(
   }
 }
 
-export async function getRedPacketsByUser(
-  userId: string
-) : Promise<RedPacketDB[]> {
+export async function getRedPacketsByUser() : Promise<RedPacketDB[]> {
   const client = setUrqlClientIfNecessary(
     useAuthStore().user!.idToken!
   );
@@ -122,20 +123,22 @@ export async function getRedPacketsByUser(
     GET_REDPACKETS,
     {
       userId: useAuthStore().user!.uid,
-      chain: useNetworkStore().network.name
+      chain: useNetworkStore().network!.chainId.toString()
     }
   ).toPromise();
   if (await handleUrqlResponse(result)) {
     return result.data.redpacket.map((r : any) => {
       return {
         id: r.id,
+        chain: r.chain,
         userId: r.user_id,
         metadata: JSON.parse(r.metadata),
-        creator: JSON.parse(r.creator)
+        creator: JSON.parse(r.creator),
+        createdAt: r.created_at
       } as RedPacketDB;
     });
   } else {
-    return await getRedPacketsByUser(userId);
+    return await getRedPacketsByUser();
   }
 }
 

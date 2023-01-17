@@ -114,7 +114,7 @@ const createRedPacket = async () => {
   border-radius: 50px;
   font-size: 17px;
   text-decoration: none;
-  width: 10rem;
+  width: 13rem;
   font-weight: bold; }
 .cta:hover {
   background-color: rgba(253,71,85,0.8); }

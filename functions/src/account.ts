@@ -51,7 +51,7 @@ export async function genNameHash(uid: string) : Promise<
   return {code: 400, message: "Invalid uid: not provided with twitter"};
 }
 
-export const provider = (chainId: string) => {
+export const getProvider = (chainId: string) => {
   return new ethers.providers.AlchemyProvider(
       Number(chainId), ALCHEMY_KEYS[chainId]
   );
@@ -65,7 +65,7 @@ export const accountAddress = async function(
   if (result.nameHash == undefined) {
     return result;
   }
-  const hexlink = hexlinkContract(chainId, provider(chainId));
+  const hexlink = hexlinkContract(chainId, getProvider(chainId));
   try {
     const address = await hexlink.addressOfName(result.nameHash);
     return {code: 200, address};

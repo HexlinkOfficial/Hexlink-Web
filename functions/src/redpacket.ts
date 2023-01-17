@@ -1,10 +1,15 @@
 /* eslint-disable require-jsdoc */
 import * as functions from "firebase-functions";
+import {env} from "process";
+
 import {insertRedPacketClaim, getRedPacket} from "./graphql/redpacket";
 import {signWithKmsKey} from "./kms";
 import {ethers, BigNumber as EthBigNumber, Signer} from "ethers";
 import RED_PACKET_ABI from "./abi/HappyRedPacket.json";
-import {provider, accountAddress} from "./account";
+import {getProvider, accountAddress} from "./account";
+import {resolveProperties} from "@ethersproject/properties";
+import {serialize, UnsignedTransaction} from "@ethersproject/transactions";
+import {KMS_KEY_TYPE} from "./config";
 
 const secrets = functions.config().doppler || {};
 
@@ -13,15 +18,54 @@ const RED_PACKET_CONTRACT : {[key: string]: string} = {
   "137": "0xAAf0Bc5Ef7634b78F2d4f176a1f34493802e9d5C",
 };
 
-const redPacketContract = (chainId: string, signer: Signer) => {
+const redPacketContract = (
+    chainId: string,
+    signerOrProvider: Signer | ethers.providers.AlchemyProvider
+) => {
   return new ethers.Contract(
       RED_PACKET_CONTRACT[chainId],
       RED_PACKET_ABI,
-      signer
+      signerOrProvider
   );
 };
 
-async function sendClaimTx(
+export async function sendClaimTxWithoutSignature(
+    redPacket: {metadata: string},
+    data: {chainId: string, claimer: string, creator?: string},
+) {
+  const parsed = JSON.parse(redPacket.metadata);
+  const creator = parsed.creator || data.creator;
+  const provider = getProvider(data.chainId);
+  const unsignedTx = await redPacketContract(
+      data.chainId, provider
+  ).populateTransaction.claimWithoutSignature(
+      creator, {
+        token: parsed.token,
+        salt: parsed.salt,
+        balance: EthBigNumber.from(parsed.balance),
+        validator: parsed.validator,
+        split: parsed.split,
+        mode: parsed.mode,
+      }, data.claimer
+  );
+  const tx = await resolveProperties(unsignedTx);
+  const message = ethers.utils.keccak256(serialize(<UnsignedTransaction>tx));
+  let signature;
+  if (env.FUNCTIONS_EMULATOR === "true") {
+    const validator = new ethers.Wallet(secrets.HARDHAT_VALIDATOR);
+    signature = validator._signingKey().signDigest(message);
+  } else {
+    signature = await signWithKmsKey(
+        KMS_KEY_TYPE[KMS_KEY_TYPE.validator],
+        message
+    );
+  }
+  const signedTx = serialize(<UnsignedTransaction>tx, signature);
+  const sentTx = await provider.sendTransaction(signedTx);
+  return sentTx.hash;
+}
+
+export async function sendClaimTx(
     redPacket: {metadata: string},
     data: {chainId: string, claimer: string, creator?: string},
     signature: string,
@@ -31,7 +75,7 @@ async function sendClaimTx(
 
   const signer = new ethers.Wallet(
       secrets.HARDHAT_DEPLOYER,
-      provider(data.chainId)
+      getProvider(data.chainId)
   );
   const tx = await redPacketContract(data.chainId, signer).claim(
       creator, {
@@ -54,31 +98,27 @@ export const claimRedPacket = functions.https.onCall(
       }
       data.claimer = await accountAddress(data.chainId, uid);
       const redPacket = await getRedPacket(data.redPacketId);
-      const message = ethers.utils.keccak256(
-          ethers.utils.defaultAbiCoder.encode(
-              ["bytes32", "address"],
-              [redPacket.id, data.claimer]
-          )
-      );
-      const signature = await signWithKmsKey("validator", message);
       if (data.signOnly) {
-        await insertRedPacketClaim(uid, [{
+        const message = ethers.utils.keccak256(
+            ethers.utils.defaultAbiCoder.encode(
+                ["bytes32", "address"],
+                [redPacket.id, data.claimer]
+            )
+        );
+        const signature = await signWithKmsKey("validator", message);
+        const [{id}] = await insertRedPacketClaim(uid, [{
           redPacketId: redPacket.id,
           creatorId: redPacket.user_id,
         }]);
-        return {code: 200, data: {signature}};
+        return {code: 200, data: {id, signature}};
       } else {
-        const tx = await sendClaimTx(
-            redPacket,
-            data,
-            signature
-        );
-        await insertRedPacketClaim(uid, [{
+        const txHash = await sendClaimTxWithoutSignature(redPacket, data);
+        const [{id}] = await insertRedPacketClaim(uid, [{
           redPacketId: redPacket.id,
           creatorId: redPacket.user_id,
           tx: "",
         }]);
-        return {code: 200, data: {tx}};
+        return {code: 200, data: {id, tx: txHash}};
       }
     }
 );

@@ -25,14 +25,14 @@
       <small>Best Wishes!</small>
     </h2>
     <div class="cta-container transition">
-      <button class="cta" @click="loadStatus('error')">Claim</button>
+      <button class="cta" @click="claim">Claim</button>
     </div>
     <div class="card_circle transition"></div>
   </div>
-  <div v-if="claimStatus == 'loading'" class="claim-success-card transition">
+  <div v-if="claimStatus !== ''" class="claim-success-card transition">
     <h2 class="transition">
       <!-- <i class="fa fa-check-circle-o fa-5x" aria-hidden="true"></i> -->
-      <div class="spinner-lg" :class="loadStatusLogo()">
+      <div class="spinner-lg" :class="claimStatus">
         <div class="check"></div>
       </div>
       <span style="font-size: 20px; margin-top: 1rem;">{{ loadText() }}</span><br>
@@ -48,61 +48,44 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
-import type { ClaimCardData } from "@/types";
 import type { RedPacketDB } from '@/graphql/redpacket';
-import { useProfileStore } from '@/stores/profile';
 import { getRedPacket } from '@/graphql/redpacket';
 import { useRoute } from "vue-router";
+import { claimRedPacket } from "@/web3/redpacket";
+import { getERC20Metadata } from "@/web3/tokens";
 import { getNetwork } from "@/configs/network";
-import GOERLI_TOKENS from "@/configs/tokens/GOERLI_TOKENS.json";
 
-const nativeToken = useProfileStore().nativeToken;
-const claimcard = ref<ClaimCardData>({
-  twitter: "https://mobile.twitter.com/dreambig_peter",
-  token: nativeToken,
-  from: "dreambig_peter"
-})
 const redPacket = ref<RedPacketDB | undefined>();
-const redPacketChain = ref<string | undefined>("");
 const redPacketTokenIcon = ref<string>("");
 const redPacketToken = ref<string>("");
 const claimStatus = ref<string>("");
-const claimFinalStatus = ref<string>("");
 
 onMounted(async () => {
   redPacket.value = await getRedPacket(useRoute().query.id!.toString());
-  redPacketChain.value = redPacket.value?.chain;
-  GOERLI_TOKENS.map(t => {
-    if (t.address == redPacket.value?.metadata.token) {
-      redPacketToken.value = t.symbol;
-      redPacketTokenIcon.value = t.logoURI;
-    }
-  });
-  console.log(redPacket.value);
+  const metadata = await getERC20Metadata(
+    redPacket.value!.metadata.token,
+    getNetwork(redPacket.value!.chain)
+  );
+  redPacketToken.value = metadata.symbol;
+  redPacketTokenIcon.value = metadata.logoURI || "";
 });
 
-const loadStatus = (status: 'success' | 'error') => {
+const claim = async () => {
   claimStatus.value = 'loading';
-  setInterval(() => {
-    claimFinalStatus.value = status;
-  }, 5000);
-};
-
-const loadStatusLogo = () => {
-  if (claimFinalStatus.value == 'success') {
-    return 'success!';
-  } else if (claimFinalStatus.value == 'error') {
-    return 'error';
-  } else {
-    return 'loading';
+  try {
+    await claimRedPacket(redPacket.value!);
+    claimStatus.value = 'success';
+  } catch (e) {
+    console.log("Failed to claim redpacket with error " + JSON.stringify(e));
+    claimStatus.value = 'error';
   }
-};
+}
 
 const loadText = () => {
-  if (claimFinalStatus.value == 'success') {
+  if (claimStatus.value == 'success') {
     return 'Claim Successful!';
-  } else if (claimFinalStatus.value == 'error') {
-    return 'Claim Failed!';
+  } else if (claimStatus.value == 'error') {
+    return 'Uhmmmm, something went wrong!';
   } else {
     return 'Processing...';
   }

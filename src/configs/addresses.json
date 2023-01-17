@@ -10,7 +10,8 @@
             "0x07865c6E87B9F70255377e024ace6630C1Eaa37F",
             "0x11fe4b6ae13d2a6055c8d9cf65c55bac32b5d844"
         ],
-        "validator": "0xEF2e3F91209F88A3143e36Be10D52502162426B3"
+        "validator": "0x030ffbc193c3f9f4c6378beb506eecb0933fd457",
+        "testValidator": "0xEF2e3F91209F88A3143e36Be10D52502162426B3"
     },
     "mumbai": {
         "hexlink": "0x78317ef8b020Fe10e845ab8723403cF1e58Ef1Cc",
@@ -21,7 +22,8 @@
         "stableCoins": [
             "0xE097d6B3100777DC31B34dC2c58fB524C2e76921"
         ],
-        "validator": "0xEF2e3F91209F88A3143e36Be10D52502162426B3"
+        "validator": "0x030ffbc193c3f9f4c6378beb506eecb0933fd457",
+        "testValidator": "0xEF2e3F91209F88A3143e36Be10D52502162426B3"
     },
     "polygon": {
         "nativeCoin": "0x0000000000000000000000000000000000001010",
@@ -31,6 +33,7 @@
             "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174",
             "0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063"
         ],
-        "validator": "0x030ffbc193c3f9f4c6378beb506eecb0933fd457"
+        "validator": "0x030ffbc193c3f9f4c6378beb506eecb0933fd457",
+        "testValidator": "0xEF2e3F91209F88A3143e36Be10D52502162426B3"
     }
 }

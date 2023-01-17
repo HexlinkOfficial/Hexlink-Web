@@ -21,8 +21,8 @@ import { useNetworkStore } from "@/stores/network";
 import { useWalletStore } from "@/stores/wallet";
 import { BigNumber as EthBigNumber } from 'ethers';
  
-export async function getERC20Metadata(token: string) : Promise<TokenMetadata> {
-    const metadata = await alchemy().core.getTokenMetadata(token);
+export async function getERC20Metadata(token: string, network?: Network) : Promise<TokenMetadata> {
+    const metadata = await alchemy(network).core.getTokenMetadata(token);
     if (metadata.name == null
         || metadata.symbol == null
         || metadata.decimals == null) {
@@ -162,9 +162,10 @@ async function updatePreferences() {
 
 export async function loadERC20Token(
     address: string,
-    wallet: string
+    wallet: string,
+    network?: Network
 ): Promise<Token> {
-    const token = await getERC20Metadata(address);
+    const token = await getERC20Metadata(address, network);
     const balances = await alchemy().core.getTokenBalances(wallet, [address]);
     const [balance] = balances.tokenBalances;
     return {

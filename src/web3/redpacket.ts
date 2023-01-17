@@ -15,12 +15,25 @@ import ACCOUNT_ABI from "@/configs/abi/AccountSimple.json";
 import USERS from "@/configs/users.json";
 import { useWalletStore } from "@/stores/wallet";
 import { insertRedPacket } from "@/graphql/redpacket";
+import type { RedPacketDB } from "@/graphql/redpacket";
 import { BigNumber } from "bignumber.js";
 import { getProvider, getPriceInfo } from "@/web3/network";
 import { userInfo } from "@/web3/account";
+import { getNetwork } from "@/configs/network";
+import { updateRedPacketClaimer } from "@/graphql/redpacketClaim";
+
+import { getFunctions, httpsCallable } from 'firebase/functions'
+const functions = getFunctions();
 
 const erc20Iface = new ethers.utils.Interface(ERC20_ABI);
 const redPacketIface = new ethers.utils.Interface(RED_PACKET_ABI);
+
+function validator(network: Network) : string {
+    if (import.meta.env.VITE_USE_FUNCTIONS_EMULATOR) {
+        return network.addresses.testValidator as string;
+    }
+    return network.addresses.validator as string;
+}
 
 export async function estimateGasSponsorship(
     network: Network,
@@ -459,7 +472,7 @@ async function processTxAndSave(
                     split: redpacket.split,
                     balance: calcTokenAmount(redpacket).toString(),
                     mode: redpacket.mode,
-                    validator: network.addresses.validator as string,
+                    validator: validator(network),
                     expiredAt: 0,
                     contract: network.addresses.redPacket as string,
                     creator: useProfileStore().account.address
@@ -498,4 +511,12 @@ export async function createNewRedPacket(
         useHexlinkAccount
     );
     return await processTxAndSave(network, redpacket, txes, dryrun);
+}
+
+export async function claimRedPacket(redPacket: RedPacketDB) : Promise<void> {
+    const claimRedPacket = httpsCallable(functions, 'claimRedPacket');
+    const network = getNetwork(redPacket.chain);
+    const result = await claimRedPacket({chainId: network.chainId, redPacketId: redPacket.id});
+    const {id} = result.data as {id: number, tx: string};
+    await updateRedPacketClaimer(id, userInfo());
 }

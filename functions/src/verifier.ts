@@ -59,7 +59,9 @@ export const genTwitterOAuthProof = functions.https.onCall(
         );
       } else {
         const sig = await signWithKmsKey(
-            KMS_KEY_TYPE[KMS_KEY_TYPE.operator], message);
+            KMS_KEY_TYPE[KMS_KEY_TYPE.operator],
+            toEthSignedMessageHash(message)
+        );
         const validatorAddr = KMS_CONFIG.get(
             KMS_KEY_TYPE[KMS_KEY_TYPE.operator]
         )?.publicAddress;
@@ -81,4 +83,10 @@ export const genTwitterOAuthProof = functions.https.onCall(
 
 const hash = function(value: string) {
   return ethers.utils.keccak256(ethers.utils.toUtf8Bytes(value));
+};
+
+const toEthSignedMessageHash = function(messageHex: string) {
+  return ethers.utils.keccak256(
+      ethers.utils.solidityPack(["string", "bytes32"],
+          ["\x19Ethereum Signed Message:\n32", messageHex]));
 };

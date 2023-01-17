@@ -67,8 +67,8 @@ export function alchemyNetwork(network: Network) : AlchemyNetwork {
     throw new Error("Unsupported network");
 }
 
-export function alchemy() {
-    const network = useNetworkStore().network;
+export function alchemy(network?: Network) {
+    network = network || useNetworkStore().network;
     return new Alchemy({
         apiKey: network.alchemy.key,
         network: alchemyNetwork(network)

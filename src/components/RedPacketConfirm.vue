@@ -46,7 +46,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref } from "vue";
 import { useRedPacketStore } from '@/stores/redpacket';
 import { useProfileStore } from '@/stores/profile';
 import { useNetworkStore } from '@/stores/network';

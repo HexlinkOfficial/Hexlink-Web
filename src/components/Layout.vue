@@ -2,7 +2,7 @@
   <RedPacketClaim v-if="showClaim()"></RedPacketClaim>
   <RedpacketConform v-if="showConform()"></RedpacketConform>
   <div v-if="showClaim() || showConform()" class="hidden-layer"></div>
-  <div id="main-wrapper" class="show">
+  <div id="main-wrapper" class="show" :style="(showClaim() || showConform()) ? 'position: fixed;' : 'position: relative;'">
     <Header />
     <SideBar :active="active" />
     <div class="content-body">
@@ -53,6 +53,6 @@ const showConform = () => {
   width: 100vw;
   height: 100vh;
   background-color: rgba(0, 0, 0, 0.5);
-  position: absolute;
+  position: fixed;
   z-index: 50; }
 </style>

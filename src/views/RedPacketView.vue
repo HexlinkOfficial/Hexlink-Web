@@ -49,25 +49,32 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watch as watched } from "vue";
 import Layout from "@/components/Layout.vue";
 import RedPacektHistoryList from "@/components/RedPacketHistoryList.vue";
 import RedPacketSend from "@/components/RedPacketSend.vue";
 import { useRoute } from "vue-router";
+import { watch } from "fs";
 
 const sendLuck = ref<boolean>(false);
 const luckHistory = ref<boolean>(true);
+const param = ref<string>("");
 
-onMounted(() => {
-  if(useRoute().params.action.toString() == "send") {
+onMounted(() => { changetab()} );
+
+const changetab = () => {
+  param.value = useRoute().params.action.toString();
+  if (param.value == "send") {
     sendLuck.value = true;
     luckHistory.value = false;
   }
-  if (useRoute().params.action.toString() == "claim") {
+  if (param.value == "claim") {
     sendLuck.value = false;
     luckHistory.value = true;
   }
-});
+}
+
+watched(() => param.value, changetab);
 
 const redPacketCreated = () => {
   console.log("hello world!");

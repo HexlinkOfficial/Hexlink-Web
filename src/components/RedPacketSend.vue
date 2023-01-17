@@ -143,7 +143,7 @@
             <div>
               <img class="wallet-image" src="https://i.postimg.cc/kXgZCB4L/hexlink.png">
               <div class="chain_wrapper">
-                <img class="chain" :src="useNetworkStore().network.logoUrl" />
+                <img class="chain" :src="useNetworkStore().network?.logoUrl" />
               </div>
             </div>
           </div>
@@ -210,7 +210,7 @@
             <div>
               <img class="wallet-image" :src="useWalletStore().wallet?.walletIcon">
               <div class="chain_wrapper">
-                <img class="chain" :src="useNetworkStore().network.logoUrl" />
+                <img class="chain" :src="useNetworkStore().network?.logoUrl" />
               </div>
             </div>
           </div>
@@ -363,9 +363,9 @@ if (walletStore.connected) {
 const genTokenListToSelect = function (): Token[] {
   // construct new token list so it's not affecting the store
   if (accountChosen.value) {
-    const profileTokens = useProfileStore().profile.tokens;
+    const profileTokens = useProfileStore().profile?.tokens;
     const walletTokenBalances = useWalletStore().balances;
-    return Object.values(profileTokens).map(token => {
+    return Object.values(profileTokens!).map(token => {
       const address = token.metadata.address.toLowerCase();
       const decimals = token.metadata.decimals;
       const defaultBalance = EthBigNumber.from(0);
@@ -411,7 +411,7 @@ const refresh = async function () {
     const nativeCoinAddr = useNetworkStore().nativeCoinAddress;
     const nativeToken = tokens.value.find(
       t => t.metadata.address == nativeCoinAddr
-    ) || defaultToken(useProfileStore().nativeToken);
+    ) || defaultToken(useProfileStore().nativeToken!);
     const toSelect = Object.values(tokens.value);
     if (nativeToken.balance?.value.gt(0) || toSelect.length == 0) {
       redpacket.value.token = nativeToken!;

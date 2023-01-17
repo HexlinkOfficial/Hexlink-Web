@@ -25,7 +25,7 @@
               }}</td>
               <td>{{ redPacket.redPacket.metadata.split }} / {{ redPacket.state.split }}</td>
               <td>{{ redPacket.redPacket.metadata.mode }}</td>
-              <td>{{ redPacket.state.createdAt.toLocaleDateString() }}</td>
+              <td>{{ redPacket.state.createdAt.toLocaleString() }}</td>
               <td>
                 <a-typography-paragraph :copyable="{ text: claimLink(redPacket.redPacket) }">
                   Claim Link

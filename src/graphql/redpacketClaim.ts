@@ -74,7 +74,7 @@ export const INSERT_REDPACKET_CLAIM = gql`
 export const UPDATE_REDPACKET_CLAIM = gql`
     mutation (
         $id: Int!
-        $claimer: String!
+        $claimer: jsonb!
     ) {
         update_redpacket_claim_by_pk (
             pk_columns: {id: $id},

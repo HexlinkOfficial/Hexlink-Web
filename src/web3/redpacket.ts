@@ -12,7 +12,6 @@ import { estimateGas, sendTransaction } from "@/web3/wallet";
 import ERC20_ABI from "@/configs/abi/ERC20.json";
 import RED_PACKET_ABI from "@/configs/abi/HappyRedPacket.json";
 import ACCOUNT_ABI from "@/configs/abi/AccountSimple.json";
-import USERS from "@/configs/users.json";
 import { useWalletStore } from "@/stores/wallet";
 import { useNetworkStore } from "@/stores/network";
 import { insertRedPacket } from "@/graphql/redpacket";
@@ -40,10 +39,10 @@ function redPacketMode(mode: string) : number {
     return mode == "random" ? 2 : 1;
 }
 
-export function redPacketContract(network?: Network) {
+export function redPacketContract(contract: string, network?: Network) {
     network = network || useNetworkStore().network;
     return new ethers.Contract(
-        network!.address.redpacket as string,
+        contract,
         RED_PACKET_ABI,
         getProvider(network)
     );
@@ -85,7 +84,7 @@ export function redPacketOps(
        token: input.token.metadata.address,
        salt: input.salt,
        balance: calcTokenAmount(input),
-       validator: USERS.redPacketValidator,
+       validator: validator(network),
        split: input.split,
        mode: redPacketMode(input.mode),
     };
@@ -449,7 +448,7 @@ function redpacketId(network: Network, input: RedPacket) {
             [
                 Number(network.chainId),
                 network.address.redpacket as string,
-                useProfileStore().account.address,
+                useProfileStore().account!.address,
                 [
                     input.token.metadata.address,
                     input.salt,
@@ -549,20 +548,9 @@ export async function queryRedPacketInfo(redPacket: RedPacketDB) : Promise<{
     split: number,
     createdAt: Date
 }> {
-    const contract = redPacketContract();
-    const info = await contract.getPacket(
-        redPacket.metadata.creator, {
-            token: redPacket.metadata.token,
-            salt: redPacket.metadata.salt,
-            balance: EthBigNumber.from(redPacket.metadata.balance),
-            validator: redPacket.metadata.validator,
-            split: redPacket.metadata.split,
-            mode: redPacketMode(redPacket.metadata.mode)
-        }
-    );
-    console.log(contract.address);
-    console.log(redPacket.metadata);
-    console.log(info);
+    const info = await redPacketContract(
+        redPacket.metadata.contract
+    ).getPacket(redPacket.id);
     return {
         createdAt: new Date(info.createdAt.toNumber() * 1000),
         balance: info.balance,

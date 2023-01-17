@@ -1,0 +1,31 @@
+table:
+  name: redpacket_claim
+  schema: public
+select_permissions:
+  - role: user
+    permission:
+      columns:
+        - claimer
+        - claimer_id
+        - created_at
+        - creator_id
+        - id
+        - redpacket_id
+        - tx
+      filter:
+        _or:
+          - claimer_id:
+              _eq: X-Hasura-User-Id
+          - creator_id:
+              _eq: X-Hasura-User-Id
+      limit: 1000
+update_permissions:
+  - role: user
+    permission:
+      columns:
+        - claimer
+        - tx
+      filter:
+        claimer_id:
+          _eq: X-Hasura-User-Id
+      check: null

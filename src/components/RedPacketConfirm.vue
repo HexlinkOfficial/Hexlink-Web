@@ -35,13 +35,13 @@ const createRedPacket = async () => {
   const account = useProfileStore().account;
   if (await isContract(account.address)) {
     await createNewRedPacket(
-      useNetworkStore().network,
+      useNetworkStore().network!,
       useRedPacketStore().redpacket,
       useRedPacketStore().useHex,
     );
   } else {
     await deployAndCreateNewRedPacket(
-      useNetworkStore().network,
+      useNetworkStore().network!,
       useRedPacketStore().redpacket,
       useRedPacketStore().useHex,
     );

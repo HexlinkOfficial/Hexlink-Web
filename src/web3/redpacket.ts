@@ -22,7 +22,6 @@ import { getProvider, getPriceInfo } from "@/web3/network";
 import { userInfo } from "@/web3/account";
 import { getNetwork } from "@/configs/network";
 import { updateRedPacketClaimer } from "@/graphql/redpacketClaim";
-import { genNameHash } from "@/web3/account";
 
 import { getFunctions, httpsCallable } from 'firebase/functions'
 const functions = getFunctions();
@@ -32,9 +31,9 @@ const redPacketIface = new ethers.utils.Interface(RED_PACKET_ABI);
 
 function validator(network: Network) : string {
     if (import.meta.env.VITE_USE_FUNCTIONS_EMULATOR) {
-        return network.addresses.testValidator as string;
+        return network.address.testValidator as string;
     }
-    return network.addresses.validator as string;
+    return network.address.validator as string;
 }
 
 function redPacketMode(mode: string) : number {
@@ -44,7 +43,7 @@ function redPacketMode(mode: string) : number {
 export function redPacketContract(network?: Network) {
     network = network || useNetworkStore().network;
     return new ethers.Contract(
-        network.addresses.redpacket as string,
+        network!.address.redpacket as string,
         RED_PACKET_ABI,
         getProvider(network)
     );
@@ -81,7 +80,7 @@ export function redPacketOps(
     network: Network,
     input: RedPacket
 ) : UserOp[] {
-    const redPacketAddr = network.addresses.redpacket as string;
+    const redPacketAddr = network.address.redpacket as string;
     const packet = {
        token: input.token.metadata.address,
        salt: input.salt,
@@ -188,7 +187,6 @@ async function buildCreateRedPacketTx(
     const tokenAmount = calcTokenAmount(input);
     const gasTokenAmount = await estimateGasSponsorship(network, input);
     let txes : any[] = [];
-
     let value : EthBigNumber = EthBigNumber.from(0);
     if (!useHexlinkAccount) {
          if (isNativeCoin(input.token, network) && isNativeCoin(input.gasToken, network)) {
@@ -444,20 +442,21 @@ export async function buildDeployAndCreateRedPacketTx(
 
 function redpacketId(network: Network, input: RedPacket) {
     const redPacketType = "tuple(address,bytes32,uint256,address,uint32,uint8)";
+    console.log(input);
     return ethers.utils.keccak256(
         ethers.utils.defaultAbiCoder.encode(
             ["uint256", "address", "address", redPacketType],
             [
                 Number(network.chainId),
-                network.addresses.redpacket as string,
+                network.address.redpacket as string,
                 useProfileStore().account.address,
                 [
-                    input.token,
+                    input.token.metadata.address,
                     input.salt,
-                    EthBigNumber.from(input.balance),
+                    calcTokenAmount(input),
                     validator(network),
                     input.split,
-                    input.mode
+                    redPacketMode(input.mode)
                 ]
             ]
         )
@@ -492,7 +491,7 @@ async function processTxAndSave(
             balance: calcTokenAmount(redpacket).toString(),
             mode: redpacket.mode,
             validator: validator(network),
-            contract: network.addresses.redpacket as string,
+            contract: network.address.redpacket as string,
             creator: useProfileStore().account.address
         },
         creator: userInfo()
@@ -569,9 +568,14 @@ function genRedPacketId(redPacket: RedPacketDB) : string {
 
 export async function queryRedPacketInfo(redPacket: RedPacketDB) : Promise<{
     balance: EthBigNumber,
-    split: EthBigNumber
+    split: number,
+    createdAt: Date
 }> {
     const redPacketId = genRedPacketId(redPacket);
     const info = await redPacketContract().getPacket(redPacketId);
-    return info;
+    return {
+        createdAt: new Date(info.createdAt),
+        balance: info.balance,
+        split: info.split
+    }
 }

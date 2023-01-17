@@ -335,7 +335,6 @@ const redpacket = ref<RedPacket>({
   balance: "0",
   token: nativeToken as Token,
   gasToken: nativeToken as Token,
-  expiredAt: 0, // do not expire
 });
 
 const setRedPBalance = () => {
@@ -375,8 +374,8 @@ const genTokenListToSelect = function (): Token[] {
         balance: normalizeBalance(walletBalance, decimals)
       }
     }).filter(t => {
-      console.log(t.balance.value);
-      return t.balance.value.gt(EthBigNumber.from(0))
+      const balance = EthBigNumber.from(t.balance.value);
+      return balance.gt(EthBigNumber.from(0))
     });
   } else {
     return useProfileStore().feasibleTokens.map(t => ({
@@ -449,13 +448,13 @@ const createRedPacket = async function () {
   let redPacketId;
   if (await isContract(account.address)) {
     redPacketId = await createNewRedPacket(
-      useNetworkStore().network,
+      useNetworkStore().network!,
       redpacket.value,
       accountChosen.value == 0,
     );
   } else {
     redPacketId = await deployAndCreateNewRedPacket(
-      useNetworkStore().network,
+      useNetworkStore().network!,
       redpacket.value,
       accountChosen.value == 0,
     );
@@ -489,7 +488,7 @@ const tokenChoose =
 
 const calcGasSponsorship = async () => {
   gasSponsorship.value = await estimateGasSponsorship(
-    useNetworkStore().network, redpacket.value
+    useNetworkStore().network!, redpacket.value
   );
   const result = new BigNumber(
     gasSponsorship.value.toString()

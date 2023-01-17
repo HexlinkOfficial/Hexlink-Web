@@ -22,7 +22,7 @@
           <div class="token-description">
             <div class="token-logo">
               <div class="network-logo">
-                <img :src="useNetworkStore().network.logoUrl" alt={{token.address}} />
+                <img :src="useNetworkStore().network!.logoUrl" alt={{token.address}} />
               </div>
               <img class="logo" :src="token.metadata.logoURI || logo" alt={{token.address}} />
             </div>
@@ -61,7 +61,6 @@
 <script lang="ts" setup>
 import { ref, onMounted, watch } from 'vue'
 import type { Token } from "@/types";
-import { BigNumber } from "bignumber.js";
 import logo from "../assets/network-icons/hexlink.svg";
 import { useProfileStore } from "@/stores/profile";
 import { useNetworkStore } from "@/stores/network";

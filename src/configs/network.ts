@@ -17,7 +17,7 @@ export const GOERLI : Network = {
     },
     blockExplorerUrls: ["https://goerli.etherscan.io"],
     logoUrl: "https://token.metaswap.codefi.network/assets/networkLogos/ethereum.svg",
-    addresses: ADDRESSES.goerli,
+    address: ADDRESSES.goerli,
 };
 
 export const POLYGON : Network = {
@@ -36,7 +36,7 @@ export const POLYGON : Network = {
     },
     blockExplorerUrls: ["https://polygonscan.com"],
     logoUrl: "https://token.metaswap.codefi.network/assets/networkLogos/polygon.svg",
-    addresses: ADDRESSES.polygon,
+    address: ADDRESSES.polygon,
 };
 
 export const MUMBAI : Network = {
@@ -55,7 +55,7 @@ export const MUMBAI : Network = {
     },
     blockExplorerUrls: ["https://mumbai.polygonscan.com/"],
     logoUrl: "https://token.metaswap.codefi.network/assets/networkLogos/polygon.svg",
-    addresses: ADDRESSES.mumbai
+    address: ADDRESSES.mumbai
 };
 
 export const getNetwork = (chain: string) : Network => {

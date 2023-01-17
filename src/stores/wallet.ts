@@ -19,7 +19,7 @@ export const useWalletStore = defineStore({
     persist: true,
     getters: {
         balances: (state): Balances => {
-            const network = useNetworkStore().network.name;
+            const network = useNetworkStore().network!.name;
             return state.balanceMap[network] || {};
         },
         balance() {
@@ -46,7 +46,7 @@ export const useWalletStore = defineStore({
             this.wallet!.account = account;
         },
         updateBalance(tokenAddr: string, balance: NormalizedTokenBalance) {
-            const network = useNetworkStore().network.name;
+            const network = useNetworkStore().network!.name;
             const address = tokenAddr.toLowerCase();
             if (this.balanceMap[network]) {
                 this.balanceMap[network][address] = balance;

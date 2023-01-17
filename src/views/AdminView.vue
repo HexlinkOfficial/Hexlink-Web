@@ -83,7 +83,7 @@ export default {
         for (var i = 0; i < newAddressItems.length; i++) {
             if (newAddressItems[i].length > 0) {
                 // TO-DO: remove the duplicate
-                this.receiverAddrItems.push({addr:newAddressItems[i]})
+                this.receiverAddrItems.push({addr: newAddressItems[i]})
             }
         }
         this.receiverAddrStr = ''

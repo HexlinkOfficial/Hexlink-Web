@@ -494,20 +494,17 @@ const showInfo = ref<boolean>(true);
 
 const blockExplorer = computed(() => {
   const account = useProfileStore().profile?.account.address;
-  return `${useNetworkStore().network.blockExplorerUrls[0]}/address/${account}`;
+  return `${useNetworkStore().network?.blockExplorerUrls[0]}/address/${account}`;
 });
 
 const totalAssets = computed(() => {
   let total: BigNumber = BigNumber(0);
   for (const token of useProfileStore().visiableTokens) {
     if (token.balance && token.price) {
-      total = total.plus(token.balance.normalized.times(token.price));
+      const value = new BigNumber(token.balance.normalized).times(token.price);
+      total = total.plus(value);
     }
   }
   return total;
-});
-
-const dynamicBalance = computed(() => {
-  return BigNumber(Math.floor(Math.random() * 100));
 });
 </script>

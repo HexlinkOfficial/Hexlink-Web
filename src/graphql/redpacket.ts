@@ -123,7 +123,7 @@ export async function getRedPacketsByUser() : Promise<RedPacketDB[]> {
     GET_REDPACKETS,
     {
       userId: useAuthStore().user!.uid,
-      chain: useNetworkStore().network.chainId.toString()
+      chain: useNetworkStore().network!.chainId.toString()
     }
   ).toPromise();
   if (await handleUrqlResponse(result)) {

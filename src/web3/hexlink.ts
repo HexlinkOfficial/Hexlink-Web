@@ -6,12 +6,12 @@ import { useNetworkStore } from "@/stores/network";
 
 export function hexlinkAddress(network?: Network) : string {
     network = network || useNetworkStore().network;
-    return network.addresses.hexlink as string;
+    return network!.address.hexlink as string;
 }
 
 export function refunder(network?: Network) : string {
     network = network || useNetworkStore().network;
-    return network.addresses.refunder as string;
+    return network!.address.refunder as string;
 }
 
 export function hexlinkContract(network?: Network) {

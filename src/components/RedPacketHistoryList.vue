@@ -17,15 +17,20 @@
           </thead>
           <tbody>
             <tr v-for="(redPacket, i) in redPackets" :key="i" @click="showDetails()">
-              <td>{{ metadata(redPacket.metadata.token).symbol }}/0</td>
-              <td>{{ redPacket.metadata.balance }}/0</td>
-              <td>{{ redPacket.metadata.split }}</td>
-              <td>{{ redPacket.createdAt }}</td>
+              <td>{{ redPacket.token.symbol }}/0</td>
+              <td>{{
+                normalize(redPacket.redPacket.metadata.balance, redPacket.token)
+              }}/{{
+                normalize(redPacket.state.balance, redPacket.token)
+              }}</td>
+              <td>{{ redPacket.redPacket.metadata.split }} / {{ redPacket.state.split }}</td>
+              <td>{{ redPacket.redPacket.metadata.mode }}</td>
+              <td>{{ redPacket.state.createdAt.toLocaleDateString() }}</td>
               <td>
                 <a-button @click="refund" disabled>
                   Refund
                 </a-button>
-                <a-typography-paragraph :copyable="{ text: claimLink(redPacket) }">
+                <a-typography-paragraph :copyable="{ text: claimLink(redPacket.redPacket) }">
                   Claim Link
                 </a-typography-paragraph>
               </td>
@@ -50,15 +55,17 @@ import { useNetworkStore } from '@/stores/network';
 import { getRedPacketsByUser } from '@/graphql/redpacket';
 import type { RedPacketDB } from '@/graphql/redpacket';
 import type { TokenMetadata } from '@/types';
-import type { BigNumber as EthBigNumber } from "ethers";
+import { BigNumber as EthBigNumber } from "ethers";
 import { queryRedPacketInfo } from "@/web3/redpacket";
+import { normalizeBalance } from '@/web3/tokens';
 
 interface RedPacketAggregated {
   redPacket: RedPacketDB,
   token: TokenMetadata,
   state: {
     balance: EthBigNumber,
-    split: EthBigNumber
+    split: number,
+    createdAt: Date
   }
 };
 
@@ -88,15 +95,16 @@ const refund = () => {
 };
 
 const claimLink = (redPacket: RedPacketDB) => {
-  return useRoute().path + "/id=" + redPacket.id
+  return window.location.origin + useRoute().path + "?id=" + redPacket.id
 };
 
 const showDetails = async function() {
   showDetailsEnabled.value = showDetailsEnabled.value ? false : true;
 };
 
-const metadata = (tokenAddr: string): TokenMetadata => {
-  return profileStore.profile.tokens[tokenAddr.toLowerCase()].metadata;
+const normalize = (balance: EthBigNumber | string, token: TokenMetadata) => {
+  const normalized = normalizeBalance(EthBigNumber.from(balance), token.decimals);
+  return normalized.normalized;
 }
 
 const aggregate = async function(redPacket: RedPacketDB) : Promise<RedPacketAggregated> {

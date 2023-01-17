@@ -3,13 +3,17 @@ import * as functions from "firebase-functions";
 import {env} from "process";
 
 import {insertRedPacketClaim, getRedPacket} from "./graphql/redpacket";
-import {signWithKmsKey} from "./kms";
+import {signWithKmsKey, getEthAddressFromPublicKey} from "./kms";
 import {ethers, BigNumber as EthBigNumber, Signer, Signature} from "ethers";
 import RED_PACKET_ABI from "./abi/HappyRedPacket.json";
-import {getProvider, accountAddress, toEthSignedMessageHash} from "./account";
+import {
+  getInfuraProvider,
+  accountAddress,
+  toEthSignedMessageHash,
+} from "./account";
 import {resolveProperties} from "@ethersproject/properties";
 import {serialize, UnsignedTransaction} from "@ethersproject/transactions";
-import {KMS_KEY_TYPE} from "./config";
+import {KMS_KEY_TYPE, PriceConfig} from "./config";
 
 const secrets = functions.config().doppler || {};
 
@@ -19,7 +23,7 @@ function redPacketMode(mode: string) : number {
 
 const redPacketContract = (
     contract: string,
-    signerOrProvider: Signer | ethers.providers.AlchemyProvider
+    signerOrProvider: Signer | ethers.providers.Provider
 ) => {
   return new ethers.Contract(
       contract,
@@ -27,6 +31,15 @@ const redPacketContract = (
       signerOrProvider
   );
 };
+
+async function validator() {
+  if (env.FUNCTIONS_EMULATOR === "true") {
+    return "0xEF2e3F91209F88A3143e36Be10D52502162426B3";
+  }
+  return await getEthAddressFromPublicKey(
+      KMS_KEY_TYPE[KMS_KEY_TYPE.validator]
+  );
+}
 
 async function signRaw(message: string) : Promise<Signature> {
   if (env.FUNCTIONS_EMULATOR === "true") {
@@ -61,19 +74,32 @@ export async function sendClaimTxWithoutSignature(
 ) {
   const parsed = JSON.parse(redPacket.metadata);
   const creator = parsed.creator || data.creator;
-  const provider = getProvider(data.chainId);
+  const provider = getInfuraProvider(data.chainId);
   const unsignedTx = await redPacketContract(
       parsed.contract, provider
   ).populateTransaction.claimWithoutSignature(
-      creator, {
+      creator,
+      {
         token: parsed.token,
         salt: parsed.salt,
         balance: EthBigNumber.from(parsed.balance),
         validator: parsed.validator,
         split: parsed.split,
         mode: redPacketMode(parsed.mode),
-      }, data.claimer
+      },
+      data.claimer
   );
+  unsignedTx.chainId = Number(data.chainId);
+  unsignedTx.from = await validator();
+  unsignedTx.type = 2;
+  unsignedTx.nonce = await provider.getTransactionCount(unsignedTx.from);
+  unsignedTx.gasLimit = EthBigNumber.from(500000);
+  const feeData = await provider.getFeeData();
+  unsignedTx.maxPriorityFeePerGas =
+    feeData.maxPriorityFeePerGas || EthBigNumber.from(0);
+  const defaultGasPrice = EthBigNumber.from(PriceConfig[data.chainId].gasPrice);
+  unsignedTx.maxFeePerGas =
+    feeData.maxFeePerGas || feeData.maxPriorityFeePerGas?.add(defaultGasPrice);
   const tx = await resolveProperties(unsignedTx);
   const signature = await signRaw(
       ethers.utils.keccak256(serialize(<UnsignedTransaction>tx))
@@ -90,10 +116,9 @@ export async function sendClaimTx(
 ) : Promise<string> {
   const parsed = JSON.parse(redPacket.metadata);
   const creator = parsed.creator || data.creator;
-
   const signer = new ethers.Wallet(
       secrets.HARDHAT_DEPLOYER,
-      getProvider(data.chainId)
+      getInfuraProvider(data.chainId)
   );
   const tx = await redPacketContract(parsed.contract, signer).claim(
       creator, {
@@ -120,14 +145,14 @@ export const claimRedPacket = functions.https.onCall(
       }
       data.claimer = account.address;
       const redPacket = await getRedPacket(data.redPacketId);
-      const message = ethers.utils.keccak256(
-          ethers.utils.defaultAbiCoder.encode(
-              ["bytes32", "address"],
-              [redPacket.id, data.claimer]
-          )
-      );
-      const signature = await sign(message);
       if (data.signOnly) {
+        const message = ethers.utils.keccak256(
+            ethers.utils.defaultAbiCoder.encode(
+                ["bytes32", "address"],
+                [redPacket.id, data.claimer]
+            )
+        );
+        const signature = await sign(message);
         const [{id}] = await insertRedPacketClaim([{
           redPacketId: redPacket.id,
           creatorId: redPacket.user_id,
@@ -135,7 +160,7 @@ export const claimRedPacket = functions.https.onCall(
         }]);
         return {code: 200, id, signature};
       } else {
-        const txHash = await sendClaimTx(redPacket, data, signature);
+        const txHash = await sendClaimTxWithoutSignature(redPacket, data);
         const [{id}] = await insertRedPacketClaim([{
           redPacketId: redPacket.id,
           creatorId: redPacket.user_id,

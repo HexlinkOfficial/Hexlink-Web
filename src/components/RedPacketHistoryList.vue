@@ -27,9 +27,6 @@
               <td>{{ redPacket.redPacket.metadata.mode }}</td>
               <td>{{ redPacket.state.createdAt.toLocaleDateString() }}</td>
               <td>
-                <a-button @click="refund" disabled>
-                  Refund
-                </a-button>
                 <a-typography-paragraph :copyable="{ text: claimLink(redPacket.redPacket) }">
                   Claim Link
                 </a-typography-paragraph>
@@ -90,10 +87,6 @@ const props = defineProps({
   }
 });
 
-const refund = () => {
-  console.log("Not supported yet");
-};
-
 const claimLink = (redPacket: RedPacketDB) => {
   return window.location.origin + useRoute().path + "?id=" + redPacket.id
 };
@@ -110,10 +103,10 @@ const normalize = (balance: EthBigNumber | string, token: TokenMetadata) => {
 const aggregate = async function(redPacket: RedPacketDB) : Promise<RedPacketAggregated> {
   const state = await queryRedPacketInfo(redPacket);
   const tokenAddr = redPacket.metadata.token.toLowerCase();
-  if (!profileStore.profile.tokens[tokenAddr]) {
+  if (!profileStore.profile!.tokens[tokenAddr]) {
     profileStore.addToken({metadata: await getERC20Metadata(tokenAddr)});
   }
-  const token = profileStore.profile.tokens[tokenAddr];
+  const token = profileStore.profile!.tokens[tokenAddr];
   return {
     redPacket,
     token: token.metadata,

@@ -492,7 +492,7 @@ async function processTxAndSave(
             mode: redpacket.mode,
             validator: validator(network),
             contract: network.address.redpacket as string,
-            creator: useProfileStore().account.address
+            creator: useProfileStore().account!.address
         },
         creator: userInfo()
     };
@@ -544,37 +544,27 @@ export async function claimRedPacket(redPacket: RedPacketDB) : Promise<void> {
     await updateRedPacketClaimer(id, userInfo());
 }
 
-function genRedPacketId(redPacket: RedPacketDB) : string {
-    const redPacketType = "tuple(address,bytes32,uint256,address,uint32,uint8)";
-    return ethers.utils.keccak256(
-        ethers.utils.defaultAbiCoder.encode(
-            ["uint256", "address", "address", redPacketType],
-            [
-                EthBigNumber.from(redPacket.chain),
-                redPacket.metadata.contract,
-                redPacket.metadata.creator,
-                [
-                    redPacket.metadata.token,
-                    redPacket.metadata.salt,
-                    EthBigNumber.from(redPacket.metadata.balance),
-                    redPacket.metadata.validator,
-                    redPacket.metadata.split,
-                    redPacketMode(redPacket.metadata.mode)
-                ]
-            ]
-        )
-    );
-}
-
 export async function queryRedPacketInfo(redPacket: RedPacketDB) : Promise<{
     balance: EthBigNumber,
     split: number,
     createdAt: Date
 }> {
-    const redPacketId = genRedPacketId(redPacket);
-    const info = await redPacketContract().getPacket(redPacketId);
+    const contract = redPacketContract();
+    const info = await contract.getPacket(
+        redPacket.metadata.creator, {
+            token: redPacket.metadata.token,
+            salt: redPacket.metadata.salt,
+            balance: EthBigNumber.from(redPacket.metadata.balance),
+            validator: redPacket.metadata.validator,
+            split: redPacket.metadata.split,
+            mode: redPacketMode(redPacket.metadata.mode)
+        }
+    );
+    console.log(contract.address);
+    console.log(redPacket.metadata);
+    console.log(info);
     return {
-        createdAt: new Date(info.createdAt),
+        createdAt: new Date(info.createdAt.toNumber() * 1000),
         balance: info.balance,
         split: info.split
     }

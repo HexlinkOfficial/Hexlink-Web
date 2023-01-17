@@ -76,3 +76,9 @@ export const accountAddress = async function(
     return {code: 500, message: "Internal Error"};
   }
 };
+
+export const toEthSignedMessageHash = function(messageHex: string) {
+  return ethers.utils.keccak256(
+      ethers.utils.solidityPack(["string", "bytes32"],
+          ["\x19Ethereum Signed Message:\n32", messageHex]));
+};

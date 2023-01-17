@@ -7,21 +7,28 @@
         <table>
           <thead>
             <tr>
-              <th>Red Packet</th>
+              <th>Token</th>
               <th>Amount/Rest</th>
-              <th>Gas Station Balance</th>
               <th>Split</th>
               <th>Mode</th>
-              <!-- <th></th> -->
+              <th>CreatedAt</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="(redPacket, i) in props.redPackets" :key="i" @click="showDetails()">
-              <td>a link</td>
+            <tr v-for="(redPacket, i) in redPackets" :key="i" @click="showDetails()">
+              <td>{{ metadata(redPacket.metadata.token).symbol }}/0</td>
               <td>{{ redPacket.metadata.balance }}/0</td>
-              <td>0</td>
               <td>{{ redPacket.metadata.split }}</td>
-              <td>{{ redPacket.metadata.mode }}</td>
+              <td>{{ redPacket.createdAt }}</td>
+              <td>
+                <a-button @click="refund" disabled>
+                  Refund
+                </a-button>
+                <a-typography-paragraph :copyable="{ text: claimLink(redPacket) }">
+                  Claim Link
+                </a-typography-paragraph>
+              </td>
             </tr>
             <tr v-if="showDetailsEnabled">
               <td colspan=2>01/04/2023</td>
@@ -35,32 +42,76 @@
 </template>
 
 <script lang="ts" setup>
-import * as ethers from "ethers";
-import { ref } from 'vue';
+import { ref, watch, onMounted } from 'vue';
+import { useRoute } from 'vue-router';
+import { getERC20Metadata } from '@/web3/tokens';
+import { useProfileStore } from "@/stores/profile";
+import { useNetworkStore } from '@/stores/network';
+import { getRedPacketsByUser } from '@/graphql/redpacket';
 import type { RedPacketDB } from '@/graphql/redpacket';
+import type { TokenMetadata } from '@/types';
+import type { BigNumber as EthBigNumber } from "ethers";
+import { queryRedPacketInfo } from "@/web3/redpacket";
+
+interface RedPacketAggregated {
+  redPacket: RedPacketDB,
+  token: TokenMetadata,
+  state: {
+    balance: EthBigNumber,
+    split: EthBigNumber
+  }
+};
+
+const redPackets = ref<RedPacketAggregated[]>([]);
+const profileStore = useProfileStore();
+
+const loadData = async function() {
+  if (useProfileStore().profile?.initiated) {
+    const rps : RedPacketDB[] = await getRedPacketsByUser();
+    redPackets.value = await Promise.all(rps.map(r => aggregate(r)));
+  }
+}
+
+onMounted(loadData);
+watch(() => useNetworkStore().network, loadData);
 
 const showDetailsEnabled = ref<boolean>(false);
 const props = defineProps({
-  redPackets: {
-    type: Object as () => RedPacketDB[],
-    required: true,
-  },
   luckHistory: {
-  type: Boolean,
-  required: true,
+    type: Boolean,
+    required: true,
   }
 });
 
+const refund = () => {
+  console.log("Not supported yet");
+};
+
+const claimLink = (redPacket: RedPacketDB) => {
+  return useRoute().path + "/id=" + redPacket.id
+};
+
 const showDetails = async function() {
   showDetailsEnabled.value = showDetailsEnabled.value ? false : true;
+};
+
+const metadata = (tokenAddr: string): TokenMetadata => {
+  return profileStore.profile.tokens[tokenAddr.toLowerCase()].metadata;
 }
 
-const getTransaction = async function() {
-  const provider = new ethers.providers.EtherscanProvider("goerli");
-  const txHash = "0x";
-  const tx = await provider.getTransaction(txHash);
-  console.log(tx);
-}
+const aggregate = async function(redPacket: RedPacketDB) : Promise<RedPacketAggregated> {
+  const state = await queryRedPacketInfo(redPacket);
+  const tokenAddr = redPacket.metadata.token.toLowerCase();
+  if (!profileStore.profile.tokens[tokenAddr]) {
+    profileStore.addToken({metadata: await getERC20Metadata(tokenAddr)});
+  }
+  const token = profileStore.profile.tokens[tokenAddr];
+  return {
+    redPacket,
+    token: token.metadata,
+    state
+  } as RedPacketAggregated;
+};
 </script>
 
 <style lang="less" scoped>

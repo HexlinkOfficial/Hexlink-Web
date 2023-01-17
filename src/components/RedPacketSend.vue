@@ -276,9 +276,6 @@
         </svg>
         Create Red Packet
       </button>
-      <!-- <button class="connect-wallet-button" @click="showClaim = !showClaim" style="width: auto; margin-right: 1rem;">
-        Test Claim
-      </button> -->
     </div>
   </div>
 </template>
@@ -329,7 +326,7 @@ const props = defineProps({
   }
 });
 
-const emit = defineEmits(["createPacket"])
+const emit = defineEmits(["redPacketCreated"])
 
 const redpacket = ref<RedPacket>({
   mode: "random",
@@ -344,11 +341,9 @@ const redpacket = ref<RedPacket>({
 const setRedPBalance = () => {
   if (Number(redPacketBalance.value) > Number(redpacket.value.token.balance?.normalized)) {
     redpacket.value.balance = "0";
-    console.log("Number too BIG!");
     hasBalanceWarning.value = true;
   } else {
     redpacket.value.balance = redPacketBalance.value;
-    console.log("Number is: ", redPacketBalance.value);
     hasBalanceWarning.value = false;
   }
 }
@@ -379,7 +374,10 @@ const genTokenListToSelect = function (): Token[] {
         metadata: token.metadata,
         balance: normalizeBalance(walletBalance, decimals)
       }
-    }).filter(t => t.balance.value.gt(EthBigNumber.from(0)));
+    }).filter(t => {
+      console.log(t.balance.value);
+      return t.balance.value.gt(EthBigNumber.from(0))
+    });
   } else {
     return useProfileStore().feasibleTokens.map(t => ({
       metadata: t.metadata,
@@ -448,20 +446,21 @@ const modeChoose = async (gameMode: "random" | "equal") => {
 
 const createRedPacket = async function () {
   const account = useProfileStore().account;
-  emit("createPacket", "someValue");
+  let redPacketId;
   if (await isContract(account.address)) {
-    await createNewRedPacket(
+    redPacketId = await createNewRedPacket(
       useNetworkStore().network,
       redpacket.value,
       accountChosen.value == 0,
     );
   } else {
-    await deployAndCreateNewRedPacket(
+    redPacketId = await deployAndCreateNewRedPacket(
       useNetworkStore().network,
       redpacket.value,
       accountChosen.value == 0,
     );
   }
+  emit("redPacketCreated", {id: redPacketId});
 };
 
 const setMaxAmount = () => {

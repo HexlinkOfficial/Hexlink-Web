@@ -14,6 +14,7 @@ import RED_PACKET_ABI from "@/configs/abi/HappyRedPacket.json";
 import ACCOUNT_ABI from "@/configs/abi/AccountSimple.json";
 import USERS from "@/configs/users.json";
 import { useWalletStore } from "@/stores/wallet";
+import { useNetworkStore } from "@/stores/network";
 import { insertRedPacket } from "@/graphql/redpacket";
 import type { RedPacketDB } from "@/graphql/redpacket";
 import { BigNumber } from "bignumber.js";
@@ -21,6 +22,7 @@ import { getProvider, getPriceInfo } from "@/web3/network";
 import { userInfo } from "@/web3/account";
 import { getNetwork } from "@/configs/network";
 import { updateRedPacketClaimer } from "@/graphql/redpacketClaim";
+import { genNameHash } from "@/web3/account";
 
 import { getFunctions, httpsCallable } from 'firebase/functions'
 const functions = getFunctions();
@@ -35,6 +37,19 @@ function validator(network: Network) : string {
     return network.addresses.validator as string;
 }
 
+function redPacketMode(mode: string) : number {
+    return mode == "random" ? 2 : 1;
+}
+
+export function redPacketContract(network?: Network) {
+    network = network || useNetworkStore().network;
+    return new ethers.Contract(
+        network.addresses.redpacket as string,
+        RED_PACKET_ABI,
+        getProvider(network)
+    );
+}
+
 export async function estimateGasSponsorship(
     network: Network,
     redpacket: RedPacket
@@ -42,9 +57,9 @@ export async function estimateGasSponsorship(
     const sponsorshipGasAmount = EthBigNumber.from(Number(redpacket.split)).mul(200000);
     const gasToken = redpacket.gasToken;
     const priceInfo = await getPriceInfo(network);
-    if (isNativeCoin(network, gasToken) || isWrappedCoin(network, gasToken)) {
+    if (isNativeCoin(gasToken, network) || isWrappedCoin(gasToken, network)) {
         return sponsorshipGasAmount.mul(priceInfo.gasPrice);
-    } else if (isStableCoin(network, gasToken)) {
+    } else if (isStableCoin(gasToken, network)) {
         // calculate usd value of tokens
         const normalizedUsd = tokenBase(gasToken).times(priceInfo.nativeCurrencyInUsd);
         const nativeCoinBase = EthBigNumber.from(10).pow(network.nativeCurrency.decimals);
@@ -66,16 +81,16 @@ export function redPacketOps(
     network: Network,
     input: RedPacket
 ) : UserOp[] {
-    const redPacketAddr = network.addresses.redPacket as string;
+    const redPacketAddr = network.addresses.redpacket as string;
     const packet = {
        token: input.token.metadata.address,
        salt: input.salt,
        balance: calcTokenAmount(input),
        validator: USERS.redPacketValidator,
        split: input.split,
-       mode: input.mode == "random" ? 2 : 1
+       mode: redPacketMode(input.mode),
     };
-    if (isNativeCoin(network, input.token)) {
+    if (isNativeCoin(input.token, network)) {
         return [{
             name: "createRedPacket",
             function: "create",
@@ -176,9 +191,9 @@ async function buildCreateRedPacketTx(
 
     let value : EthBigNumber = EthBigNumber.from(0);
     if (!useHexlinkAccount) {
-         if (isNativeCoin(network, input.token) && isNativeCoin(network, input.gasToken)) {
+         if (isNativeCoin(input.token, network) && isNativeCoin(input.gasToken, network)) {
             value = value.add(tokenAmount).add(gasTokenAmount)
-        } else if (isNativeCoin(network, input.token)) {
+        } else if (isNativeCoin(input.token, network)) {
             value = value.add(tokenAmount);
             const valid = await validAllowance(
                 network,
@@ -211,7 +226,7 @@ async function buildCreateRedPacketTx(
                     callGasLimit: EthBigNumber.from(0) // no limit
                 }
             });
-        } else if (isNativeCoin(network, input.gasToken)) {
+        } else if (isNativeCoin(input.gasToken, network)) {
             value = value.add(gasTokenAmount);
             const valid = await validAllowance(
                 network,
@@ -343,7 +358,7 @@ async function buildCreateRedPacketTx(
     }
 
     // refund from hexl account to refund account
-    if (isNativeCoin(network, input.gasToken)) {
+    if (isNativeCoin(input.gasToken, network)) {
         ops.push({
             name: "refundGasToken",
             function: "",
@@ -428,18 +443,25 @@ export async function buildDeployAndCreateRedPacketTx(
 }
 
 function redpacketId(network: Network, input: RedPacket) {
+    const redPacketType = "tuple(address,bytes32,uint256,address,uint32,uint8)";
     return ethers.utils.keccak256(
         ethers.utils.defaultAbiCoder.encode(
-            ["uint256", "address", "address", "address", "bytes32"],
+            ["uint256", "address", "address", redPacketType],
             [
-                network.chainId,
-                network.addresses.redPacket,
+                Number(network.chainId),
+                network.addresses.redpacket as string,
                 useProfileStore().account.address,
-                input.token.metadata.address,
-                input.salt
+                [
+                    input.token,
+                    input.salt,
+                    EthBigNumber.from(input.balance),
+                    validator(network),
+                    input.split,
+                    input.mode
+                ]
             ]
         )
-    )
+    );
 }
 
 async function processTxAndSave(
@@ -460,24 +482,26 @@ async function processTxAndSave(
         return id;
     }
 
+    const toInsert = {
+        id,
+        chain: network.chainId.toString(),
+        metadata: {
+            token: redpacket.token.metadata.address,
+            salt: redpacket.salt,
+            split: redpacket.split,
+            balance: calcTokenAmount(redpacket).toString(),
+            mode: redpacket.mode,
+            validator: validator(network),
+            contract: network.addresses.redpacket as string,
+            creator: useProfileStore().account.address
+        },
+        creator: userInfo()
+    };
     for (let i = 0; i < txes.length; i++) {
         let txHash = await sendTransaction(txes[i].tx);
         if (txes[i].name == "createRedPacket" || txes[i].name == "deployAndCreateRedPacket") {
             await insertRedPacket([{
-                id,
-                chain: network.chainId,
-                metadata: {
-                    token: redpacket.token.metadata.address,
-                    salt: redpacket.salt,
-                    split: redpacket.split,
-                    balance: calcTokenAmount(redpacket).toString(),
-                    mode: redpacket.mode,
-                    validator: validator(network),
-                    expiredAt: 0,
-                    contract: network.addresses.redPacket as string,
-                    creator: useProfileStore().account.address
-                },
-                creator: userInfo(),
+                ...toInsert,
                 tx: txHash
             }]);
         }
@@ -519,4 +543,35 @@ export async function claimRedPacket(redPacket: RedPacketDB) : Promise<void> {
     const result = await claimRedPacket({chainId: network.chainId, redPacketId: redPacket.id});
     const {id} = result.data as {id: number, tx: string};
     await updateRedPacketClaimer(id, userInfo());
+}
+
+function genRedPacketId(redPacket: RedPacketDB) : string {
+    const redPacketType = "tuple(address,bytes32,uint256,address,uint32,uint8)";
+    return ethers.utils.keccak256(
+        ethers.utils.defaultAbiCoder.encode(
+            ["uint256", "address", "address", redPacketType],
+            [
+                EthBigNumber.from(redPacket.chain),
+                redPacket.metadata.contract,
+                redPacket.metadata.creator,
+                [
+                    redPacket.metadata.token,
+                    redPacket.metadata.salt,
+                    EthBigNumber.from(redPacket.metadata.balance),
+                    redPacket.metadata.validator,
+                    redPacket.metadata.split,
+                    redPacketMode(redPacket.metadata.mode)
+                ]
+            ]
+        )
+    );
+}
+
+export async function queryRedPacketInfo(redPacket: RedPacketDB) : Promise<{
+    balance: EthBigNumber,
+    split: EthBigNumber
+}> {
+    const redPacketId = genRedPacketId(redPacket);
+    const info = await redPacketContract().getPacket(redPacketId);
+    return info;
 }

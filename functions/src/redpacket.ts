@@ -4,9 +4,9 @@ import {env} from "process";
 
 import {insertRedPacketClaim, getRedPacket} from "./graphql/redpacket";
 import {signWithKmsKey} from "./kms";
-import {ethers, BigNumber as EthBigNumber, Signer} from "ethers";
+import {ethers, BigNumber as EthBigNumber, Signer, Signature} from "ethers";
 import RED_PACKET_ABI from "./abi/HappyRedPacket.json";
-import {getProvider, accountAddress} from "./account";
+import {getProvider, accountAddress, toEthSignedMessageHash} from "./account";
 import {resolveProperties} from "@ethersproject/properties";
 import {serialize, UnsignedTransaction} from "@ethersproject/transactions";
 import {KMS_KEY_TYPE} from "./config";
@@ -29,6 +29,32 @@ const redPacketContract = (
   );
 };
 
+async function signRaw(message: string) : Promise<Signature> {
+  if (env.FUNCTIONS_EMULATOR === "true") {
+    const validator = new ethers.Wallet(secrets.HARDHAT_VALIDATOR);
+    return validator._signingKey().signDigest(message);
+  } else {
+    return await signWithKmsKey(
+        KMS_KEY_TYPE[KMS_KEY_TYPE.validator],
+        message,
+        false
+    ) as Signature;
+  }
+}
+
+async function sign(message: string) : Promise<string> {
+  const mHash = toEthSignedMessageHash(message);
+  if (env.FUNCTIONS_EMULATOR === "true") {
+    const validator = new ethers.Wallet(secrets.HARDHAT_VALIDATOR);
+    return validator.signMessage(mHash);
+  } else {
+    return await signWithKmsKey(
+        KMS_KEY_TYPE[KMS_KEY_TYPE.validator],
+        mHash
+    ) as string;
+  }
+}
+
 export async function sendClaimTxWithoutSignature(
     redPacket: {metadata: string},
     data: {chainId: string, claimer: string, creator?: string},
@@ -49,17 +75,9 @@ export async function sendClaimTxWithoutSignature(
       }, data.claimer
   );
   const tx = await resolveProperties(unsignedTx);
-  const message = ethers.utils.keccak256(serialize(<UnsignedTransaction>tx));
-  let signature;
-  if (env.FUNCTIONS_EMULATOR === "true") {
-    const validator = new ethers.Wallet(secrets.HARDHAT_VALIDATOR);
-    signature = validator._signingKey().signDigest(message);
-  } else {
-    signature = await signWithKmsKey(
-        KMS_KEY_TYPE[KMS_KEY_TYPE.validator],
-        message
-    );
-  }
+  const signature = await signRaw(
+      ethers.utils.keccak256(serialize(<UnsignedTransaction>tx))
+  );
   const signedTx = serialize(<UnsignedTransaction>tx, signature);
   const sentTx = await provider.sendTransaction(signedTx);
   return sentTx.hash;
@@ -105,7 +123,7 @@ export const claimRedPacket = functions.https.onCall(
                 [redPacket.id, data.claimer]
             )
         );
-        const signature = await signWithKmsKey("validator", message);
+        const signature = await sign(message);
         const [{id}] = await insertRedPacketClaim(uid, [{
           redPacketId: redPacket.id,
           creatorId: redPacket.user_id,

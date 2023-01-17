@@ -1,9 +1,11 @@
+/* eslint-disable require-jsdoc */
 import * as kms from "@google-cloud/kms";
 import * as asn1 from "asn1.js";
 import * as crypto from "crypto";
 import * as ethers from "ethers";
 import * as crc32c from "fast-crc32c";
 import * as BN from "bn.js";
+import {Signature} from "ethers";
 import {KMS_KEY_TYPE, KMS_CONFIG, KMS_CONFIG_TYPE} from "./config";
 
 const client = new kms.KeyManagementServiceClient();
@@ -54,9 +56,15 @@ export const getEthAddressFromPublicKey = async function(keyType: string) {
   return address;
 };
 
+function hex(sig: Signature) : string {
+  return "0x" + sig.r + sig.s + sig.v.toString(16);
+}
+
 export const signWithKmsKey = async function(
-    keyType:string,
-    message: string) {
+    keyType: string,
+    message: string,
+    returnHex = true
+) : Promise<Signature | string> {
   const digestBuffer = Buffer.from(ethers.utils.arrayify(message));
   const signature = await getKmsSignature(digestBuffer, keyType);
   const address = KMS_CONFIG.get(keyType)!.publicAddress;
@@ -68,8 +76,8 @@ export const signWithKmsKey = async function(
       address);
   const rHex = r.toString("hex");
   const sHex = s.toString("hex");
-  const sig = "0x" + rHex + sHex + v.toString(16);
-  return sig;
+  const sig = {r: rHex, s: sHex, recoveryParam: v} as Signature;
+  return returnHex ? hex(sig) : sig;
 };
 
 const getKmsSignature = async function(digestBuffer: Buffer, keyType: string) {

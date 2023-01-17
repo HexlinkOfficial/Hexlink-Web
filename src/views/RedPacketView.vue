@@ -38,8 +38,8 @@
                   </div>
                 </div>
               </div>
-              <RedPacektHistoryList v-if="useRoute().params.action.toString() != 'send'" :luckHistory="luckHistory" :redPackets="redPackets"></RedPacektHistoryList>
-              <RedPacketSend v-if="useRoute().params.action.toString() == 'send'" :sendLuck="sendLuck" @createPacket="createPacket"></RedPacketSend>
+              <RedPacektHistoryList v-if="useRoute().params.action.toString() != 'send'" :luckHistory="luckHistory"></RedPacektHistoryList>
+              <RedPacketSend v-if="useRoute().params.action.toString() == 'send'" :sendLuck="sendLuck" @redPacketCreated="redPacketCreated"></RedPacketSend>
             </div>
           </div>
         </div>
@@ -49,32 +49,15 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from "vue";
+import { ref, onMounted } from "vue";
 import Layout from "@/components/Layout.vue";
 import RedPacektHistoryList from "@/components/RedPacketHistoryList.vue";
 import RedPacketSend from "@/components/RedPacketSend.vue";
-import type { RedPacketDB } from '@/graphql/redpacket';
-import { useNetworkStore } from '@/stores/network';
-import { getRedPacketsByUser } from '@/graphql/redpacket';
 import { useRoute } from "vue-router";
-import { useProfileStore } from "@/stores/profile";
 
 const sendLuck = ref<boolean>(false);
 const luckHistory = ref<boolean>(true);
-const redPackets = ref<RedPacketDB[]>([]);
-const userId = ref<string>("ming");
 
-const refresh = async function() {
-  if (useProfileStore().profile?.initiated) {
-    redPackets.value = await loadRedPackets(userId.value);
-  }
-}
-
-const loadRedPackets = async (userId: string): Promise<RedPacketDB[]> => {
-  return await getRedPacketsByUser(userId);
-}
-
-onMounted(refresh);
 onMounted(() => {
   if(useRoute().params.action.toString() == "send") {
     sendLuck.value = true;
@@ -84,12 +67,9 @@ onMounted(() => {
     sendLuck.value = false;
     luckHistory.value = true;
   }
-  console.log(useNetworkStore().network);
 });
 
-watch(() => useNetworkStore().network, refresh);
-
-const createPacket = () => {
+const redPacketCreated = () => {
   console.log("hello world!");
 }
 </script>

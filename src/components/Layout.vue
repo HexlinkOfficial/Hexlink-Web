@@ -1,6 +1,7 @@
 <template>
   <RedPacketClaim v-if="showClaim()"></RedPacketClaim>
-  <div v-if="showClaim()" class="hidden-layer"></div>
+  <RedpacketConform v-if="showConform()"></RedpacketConform>
+  <div v-if="showClaim() || showConform()" class="hidden-layer"></div>
   <div id="main-wrapper" class="show">
     <Header />
     <SideBar :active="active" />
@@ -16,6 +17,7 @@
 import Header from './Header.vue';
 import SideBar from './Sidebar.vue';
 import RedPacketClaim from "@/components/RedPacketClaim.vue";
+import RedpacketConform from "@/components/RedPacketConfirm.vue";
 import { useRoute } from "vue-router";
 
 const props = defineProps({
@@ -24,6 +26,10 @@ const props = defineProps({
 
 const showClaim = () => {
   if (useRoute().params.action?.toString() == 'claim' && useRoute().query.id != undefined) return true;
+}
+
+const showConform = () => {
+  if (useRoute().params.action?.toString() == 'send' && useRoute().query.id == 'confirm') return true;
 }
 </script>
 

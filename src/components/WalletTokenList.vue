@@ -76,7 +76,7 @@ onMounted(async () => {
   loading.value = false;
 });
 
-watch(() => useNetworkStore().network, async function() {
+watch(() => useNetworkStore().network, async () => {
   loading.value = true;
   await updateProfileBalances();
   loading.value = false;

@@ -1,8 +1,8 @@
 <template>
   <RedPacketClaim v-if="showClaim()"></RedPacketClaim>
-  <RedpacketConform v-if="showConform()"></RedpacketConform>
-  <div v-if="showClaim() || showConform()" class="hidden-layer"></div>
-  <div id="main-wrapper" class="show" :class="(showClaim() || showConform()) && 'mobile-modal'">
+  <RedpacketConform v-if="showConfirm"></RedpacketConform>
+  <div v-if="showClaim() || showConfirm" class="hidden-layer"></div>
+  <div id="main-wrapper" class="show" :class="(showClaim() || showConfirm) && 'mobile-modal'">
     <Header />
     <SideBar :active="active" />
     <div class="content-body">
@@ -14,23 +14,29 @@
 </template>
 
 <script setup lang="ts">
+import { ref, watch } from "vue";
 import Header from './Header.vue';
 import SideBar from './Sidebar.vue';
 import RedPacketClaim from "@/components/RedPacketClaim.vue";
 import RedpacketConform from "@/components/RedPacketConfirm.vue";
+import { useRedPacketStore } from '@/stores/redpacket';
 import { useRoute } from "vue-router";
 
 const props = defineProps({
   active: Number
 });
 
+const showConfirm = ref<boolean>(false);
+
 const showClaim = () => {
   if (useRoute().params.action?.toString() == 'claim' && useRoute().query.id != undefined) return true;
 }
 
 const showConform = () => {
-  if (useRoute().params.action?.toString() == 'send' && useRoute().query.id == 'confirm') return true;
+  showConfirm.value = !showConfirm.value;
 }
+
+watch(() => [useRedPacketStore().packetStatus], showConform);
 </script>
 
 <style lang="less" scoped>

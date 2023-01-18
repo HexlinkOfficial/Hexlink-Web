@@ -7,6 +7,7 @@ export const useRedPacketStore = defineStore({
   id: 'redpacket',
   state: (): {
     [key: string]: {
+      status: boolean
       creating: RedPacket
       useHexlink: boolean
     }
@@ -20,12 +21,16 @@ export const useRedPacketStore = defineStore({
     useHex() : boolean {
       const network = useNetworkStore().network;
       return this[network!.name].useHexlink;
+    },
+    packetStatus(): boolean {
+      const network = useNetworkStore().network;
+      return this[network!.name].status!;
     }
   },
   actions: {
-    beforeCreate(network: Network, redpacket: RedPacket, useHex: boolean) {
+    beforeCreate(network: Network, redpacket: RedPacket, useHex: boolean, status: boolean) {
       console.log("Creating Red Packet...");
-      this[network.name] = { creating: redpacket, useHexlink: useHex };
+      this[network.name] = { status: status, creating: redpacket, useHexlink: useHex };
     }
   },
 })

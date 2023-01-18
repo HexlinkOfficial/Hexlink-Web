@@ -331,7 +331,7 @@ const redpacket = ref<RedPacket>({
   balance: "0",
   token: nativeToken as Token,
   gasToken: nativeToken as Token,
-  validator: validator()
+  validator: validator(),
 });
 
 const setRedPBalance = () => {
@@ -441,7 +441,7 @@ const modeChoose = async (gameMode: "random" | "equal") => {
 }
 
 const confirmRedPacket = async function () {
-  useRedPacketStore().beforeCreate(useNetworkStore().network!, redpacket.value, accountChosen.value == 0);
+  useRedPacketStore().beforeCreate(useNetworkStore().network!, redpacket.value, accountChosen.value == 0, true);
 };
 
 const setMaxAmount = () => {

@@ -77,6 +77,8 @@ export interface RedPacketDBMetadata {
   contract: string,
   creator: string,
   tokenAmount: string,
+  gasToken: string,
+  gasTokenAmount: string
 }
 
 export interface RedPacketDB {

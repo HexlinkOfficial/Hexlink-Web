@@ -297,16 +297,11 @@ import { vOnClickOutside } from '@/services/directive';
 import { updateProfileBalances, updateWalletBalances, normalizeBalance } from "@/web3/tokens";
 import { BigNumber as EthBigNumber } from "ethers";
 import { BigNumber } from "bignumber.js";
-import {
-  estimateGasSponsorship,
-  deployAndCreateNewRedPacket,
-  createNewRedPacket
-} from "@/web3/redpacket";
+import { estimateGasSponsorship, validator } from "@/web3/redpacket";
 import { message } from 'ant-design-vue';
 import useClipboard from 'vue-clipboard3';
 import { createToaster } from "@meforma/vue-toaster";
 import { CopyOutlined } from '@ant-design/icons-vue';
-import { isContract } from "@/web3/account";
 
 const chooseTotalDrop = ref<boolean>(false);
 const openDropdown = ref<boolean>(false);
@@ -336,6 +331,7 @@ const redpacket = ref<RedPacket>({
   balance: "0",
   token: nativeToken as Token,
   gasToken: nativeToken as Token,
+  validator: validator()
 });
 
 const setRedPBalance = () => {

@@ -1,6 +1,6 @@
 
 import { defineStore } from 'pinia';
-import type { CreatedRedPacket, RedPacket, Network } from "@/types";
+import type { RedPacket, Network } from "@/types";
 import { useNetworkStore } from './network';
 
 export const useRedPacketStore = defineStore({
@@ -15,11 +15,11 @@ export const useRedPacketStore = defineStore({
   getters: {
     redpacket() : RedPacket {
       const network = useNetworkStore().network;
-      return this[network.name].creating;
+      return this[network!.name].creating;
     },
     useHex() : boolean {
       const network = useNetworkStore().network;
-      return this[network.name].useHexlink;
+      return this[network!.name].useHexlink;
     }
   },
   actions: {

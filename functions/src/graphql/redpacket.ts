@@ -29,6 +29,7 @@ export interface RedPacketClaimInput {
   redPacketId: string,
   creatorId: string,
   tx?: string,
+  claimerId: string,
 }
 
 export interface HexlinkUserInfo {
@@ -45,7 +46,6 @@ export interface RedPacketClaim extends RedPacketClaimInput {
 }
 
 export async function insertRedPacketClaim(
-    uid: string,
     data: RedPacketClaimInput[],
 ) : Promise<{id: string}[]> {
   const result = await client.mutation(
@@ -53,7 +53,7 @@ export async function insertRedPacketClaim(
       {
         objects: data.map((d) => ({
           redpacket_id: d.redPacketId,
-          claimer_id: uid,
+          claimer_id: d.claimerId,
           creator_id: d.creatorId,
           tx: d.tx || "",
         })),

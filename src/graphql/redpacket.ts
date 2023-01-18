@@ -115,7 +115,7 @@ export async function getRedPacket(
   }
 }
 
-export async function getRedPacketsByUser() : Promise<RedPacketDB[]> {
+export async function getCreatedRedPackets() : Promise<RedPacketDB[]> {
   const client = setUrqlClientIfNecessary(
     useAuthStore().user!.idToken!
   );

@@ -41,7 +41,7 @@
         "type": "bytes32"
       },
       {
-        "indexed": false,
+        "indexed": true,
         "internalType": "address",
         "name": "claimer",
         "type": "address"
@@ -66,7 +66,7 @@
         "type": "bytes32"
       },
       {
-        "indexed": false,
+        "indexed": true,
         "internalType": "address",
         "name": "creator",
         "type": "address"
@@ -148,59 +148,66 @@
   {
     "inputs": [
       {
-        "internalType": "address",
-        "name": "creator",
-        "type": "address"
-      },
-      {
         "components": [
           {
             "internalType": "address",
-            "name": "token",
+            "name": "creator",
             "type": "address"
           },
           {
-            "internalType": "bytes32",
-            "name": "salt",
-            "type": "bytes32"
-          },
-          {
-            "internalType": "uint256",
-            "name": "balance",
-            "type": "uint256"
+            "components": [
+              {
+                "internalType": "address",
+                "name": "token",
+                "type": "address"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "salt",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "uint256",
+                "name": "balance",
+                "type": "uint256"
+              },
+              {
+                "internalType": "address",
+                "name": "validator",
+                "type": "address"
+              },
+              {
+                "internalType": "uint32",
+                "name": "split",
+                "type": "uint32"
+              },
+              {
+                "internalType": "uint8",
+                "name": "mode",
+                "type": "uint8"
+              }
+            ],
+            "internalType": "struct HappyRedPacket.RedPacketData",
+            "name": "packet",
+            "type": "tuple"
           },
           {
             "internalType": "address",
-            "name": "validator",
+            "name": "claimer",
             "type": "address"
           },
           {
-            "internalType": "uint32",
-            "name": "split",
-            "type": "uint32"
-          },
-          {
-            "internalType": "uint8",
-            "name": "mode",
-            "type": "uint8"
+            "internalType": "bytes",
+            "name": "signature",
+            "type": "bytes"
           }
         ],
-        "internalType": "struct HappyRedPacket.RedPacketData",
-        "name": "pd",
-        "type": "tuple"
-      },
-      {
-        "internalType": "address",
-        "name": "claimer",
-        "type": "address"
-      },
-      {
-        "internalType": "bytes",
-        "name": "signature",
-        "type": "bytes"
+        "internalType": "struct HappyRedPacket.RedPacketClaim[]",
+        "name": "claims",
+        "type": "tuple[]"
       }
     ],
-    "name": "claim",
+    "name": "batchClaim",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -208,54 +215,66 @@
   {
     "inputs": [
       {
-        "internalType": "address",
-        "name": "creator",
-        "type": "address"
-      },
-      {
         "components": [
           {
             "internalType": "address",
-            "name": "token",
+            "name": "creator",
             "type": "address"
           },
           {
-            "internalType": "bytes32",
-            "name": "salt",
-            "type": "bytes32"
-          },
-          {
-            "internalType": "uint256",
-            "name": "balance",
-            "type": "uint256"
+            "components": [
+              {
+                "internalType": "address",
+                "name": "token",
+                "type": "address"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "salt",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "uint256",
+                "name": "balance",
+                "type": "uint256"
+              },
+              {
+                "internalType": "address",
+                "name": "validator",
+                "type": "address"
+              },
+              {
+                "internalType": "uint32",
+                "name": "split",
+                "type": "uint32"
+              },
+              {
+                "internalType": "uint8",
+                "name": "mode",
+                "type": "uint8"
+              }
+            ],
+            "internalType": "struct HappyRedPacket.RedPacketData",
+            "name": "packet",
+            "type": "tuple"
           },
           {
             "internalType": "address",
-            "name": "validator",
+            "name": "claimer",
             "type": "address"
           },
           {
-            "internalType": "uint32",
-            "name": "split",
-            "type": "uint32"
-          },
-          {
-            "internalType": "uint8",
-            "name": "mode",
-            "type": "uint8"
+            "internalType": "bytes",
+            "name": "signature",
+            "type": "bytes"
           }
         ],
-        "internalType": "struct HappyRedPacket.RedPacketData",
-        "name": "pd",
+        "internalType": "struct HappyRedPacket.RedPacketClaim",
+        "name": "c",
         "type": "tuple"
-      },
-      {
-        "internalType": "address",
-        "name": "claimer",
-        "type": "address"
       }
     ],
-    "name": "claimWithoutSignature",
+    "name": "claim",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

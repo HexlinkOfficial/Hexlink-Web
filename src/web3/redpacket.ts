@@ -12,7 +12,6 @@ import { estimateGas, sendTransaction } from "@/web3/wallet";
 import ERC20_ABI from "@/configs/abi/ERC20.json";
 import RED_PACKET_ABI from "@/configs/abi/HappyRedPacket.json";
 import ACCOUNT_ABI from "@/configs/abi/AccountSimple.json";
-import USERS from "@/configs/users.json";
 import { useWalletStore } from "@/stores/wallet";
 import { useNetworkStore } from "@/stores/network";
 import { insertRedPacket } from "@/graphql/redpacket";
@@ -29,7 +28,8 @@ const functions = getFunctions();
 const erc20Iface = new ethers.utils.Interface(ERC20_ABI);
 const redPacketIface = new ethers.utils.Interface(RED_PACKET_ABI);
 
-function validator(network: Network) : string {
+export function validator(network?: Network) : string {
+    network = network || useNetworkStore().network!;
     if (import.meta.env.VITE_USE_FUNCTIONS_EMULATOR) {
         return network.address.testValidator as string;
     }
@@ -40,10 +40,10 @@ function redPacketMode(mode: string) : number {
     return mode == "random" ? 2 : 1;
 }
 
-export function redPacketContract(network?: Network) {
+export function redPacketContract(contract?: string, network?: Network) {
     network = network || useNetworkStore().network;
     return new ethers.Contract(
-        network!.address.redpacket as string,
+        contract || network!.address.redpacket as string,
         RED_PACKET_ABI,
         getProvider(network)
     );
@@ -85,7 +85,7 @@ export function redPacketOps(
        token: input.token.metadata.address,
        salt: input.salt,
        balance: calcTokenAmount(input),
-       validator: USERS.redPacketValidator,
+       validator: input.validator,
        split: input.split,
        mode: redPacketMode(input.mode),
     };
@@ -184,21 +184,21 @@ async function buildCreateRedPacketTx(
     const walletAccount = useWalletStore().wallet!.account;
     const hexlAccount = useProfileStore().profile!.account;
     let ops : UserOp[] = [];
-    const tokenAmount = calcTokenAmount(input);
-    const gasTokenAmount = await estimateGasSponsorship(network, input);
     let txes : any[] = [];
     let value : EthBigNumber = EthBigNumber.from(0);
+    input.tokenAmount = calcTokenAmount(input);
+    input.gasTokenAmount = await estimateGasSponsorship(network, input);
     if (!useHexlinkAccount) {
          if (isNativeCoin(input.token, network) && isNativeCoin(input.gasToken, network)) {
-            value = value.add(tokenAmount).add(gasTokenAmount)
+            value = value.add(input.tokenAmount).add(input.gasTokenAmount)
         } else if (isNativeCoin(input.token, network)) {
-            value = value.add(tokenAmount);
+            value = value.add(input.tokenAmount);
             const valid = await validAllowance(
                 network,
                 input.gasToken,
                 walletAccount,
                 hexlAccount,
-                gasTokenAmount);
+                input.gasTokenAmount);
             if (!valid) {
                 txes.push(await buildApproveTx(
                     input.gasToken.metadata.address,
@@ -209,7 +209,7 @@ async function buildCreateRedPacketTx(
             const args = [
                 walletAccount.address,
                 hexlAccount.address,
-                gasTokenAmount
+                input.gasTokenAmount
             ];
             ops.push({
                 name: "depositGasToken",
@@ -225,13 +225,13 @@ async function buildCreateRedPacketTx(
                 }
             });
         } else if (isNativeCoin(input.gasToken, network)) {
-            value = value.add(gasTokenAmount);
+            value = value.add(input.gasTokenAmount);
             const valid = await validAllowance(
                 network,
                 input.token,
                 walletAccount,
                 hexlAccount,
-                tokenAmount);
+                input.tokenAmount);
             if (!valid) {
                 txes.push(await buildApproveTx(
                     input.token.metadata.address,
@@ -242,7 +242,7 @@ async function buildCreateRedPacketTx(
             const args = [
                 walletAccount.address,
                 hexlAccount.address,
-                tokenAmount
+                input.tokenAmount
             ];
             ops.push({
                 name: "depositToken",
@@ -263,7 +263,7 @@ async function buildCreateRedPacketTx(
                 input.token,
                 walletAccount,
                 hexlAccount,
-                tokenAmount.add(gasTokenAmount));
+                input.tokenAmount.add(input.gasTokenAmount));
             if (!valid) {
                 txes.push(await buildApproveTx(
                     input.token.metadata.address,
@@ -274,7 +274,7 @@ async function buildCreateRedPacketTx(
             const args = [
                 walletAccount.address,
                 hexlAccount.address,
-                tokenAmount.add(gasTokenAmount)
+                input.tokenAmount.add(input.gasTokenAmount)
             ];
             ops.push({
                 name: "depositTokenAndGasToken",
@@ -295,7 +295,7 @@ async function buildCreateRedPacketTx(
                 input.token,
                 walletAccount,
                 hexlAccount,
-                tokenAmount);
+                input.tokenAmount);
             if (!valid1) {
                 txes.push(await buildApproveTx(
                     input.token.metadata.address,
@@ -306,7 +306,7 @@ async function buildCreateRedPacketTx(
             const args1 = [
                 walletAccount.address,
                 hexlAccount.address,
-                tokenAmount
+                input.tokenAmount
             ];
             ops.push({
                 name: "depositToken",
@@ -326,7 +326,7 @@ async function buildCreateRedPacketTx(
                 input.gasToken,
                 walletAccount,
                 hexlAccount,
-                gasTokenAmount);
+                input.gasTokenAmount);
             if (!valid2) {
                 txes.push(await buildApproveTx(
                     input.gasToken.metadata.address,
@@ -337,7 +337,7 @@ async function buildCreateRedPacketTx(
             const args2 = [
                 walletAccount.address,
                 hexlAccount.address,
-                gasTokenAmount
+                input.gasTokenAmount
             ];
             ops.push({
                 name: "depositToken",
@@ -363,7 +363,7 @@ async function buildCreateRedPacketTx(
             args: [],
             op: {
                 to: refunder(network),
-                value: gasTokenAmount,
+                value: input.gasTokenAmount,
                 callData: [],
                 callGasLimit: EthBigNumber.from(0) // no limit
             }
@@ -372,7 +372,7 @@ async function buildCreateRedPacketTx(
         const args = [
             hexlAccount.address,
             refunder(network),
-            gasTokenAmount
+            input.gasTokenAmount
         ];
         ops.push({
             name: "refundGasToken",
@@ -449,12 +449,12 @@ function redpacketId(network: Network, input: RedPacket) {
             [
                 Number(network.chainId),
                 network.address.redpacket as string,
-                useProfileStore().account.address,
+                useProfileStore().account!.address,
                 [
                     input.token.metadata.address,
                     input.salt,
                     calcTokenAmount(input),
-                    validator(network),
+                    input.validator,
                     input.split,
                     redPacketMode(input.mode)
                 ]
@@ -488,11 +488,14 @@ async function processTxAndSave(
             token: redpacket.token.metadata.address,
             salt: redpacket.salt,
             split: redpacket.split,
-            balance: calcTokenAmount(redpacket).toString(),
+            balance: redpacket.balance,
+            tokenAmount: redpacket.tokenAmount?.toString(),
             mode: redpacket.mode,
-            validator: validator(network),
+            validator: redpacket.validator,
+            gasToken: redpacket.gasToken.metadata.address,
+            gasTokenAmount: redpacket.gasTokenAmount?.toString(),
             contract: network.address.redpacket as string,
-            creator: useProfileStore().account.address
+            creator: useProfileStore().account!.address
         },
         creator: userInfo()
     };
@@ -544,37 +547,16 @@ export async function claimRedPacket(redPacket: RedPacketDB) : Promise<void> {
     await updateRedPacketClaimer(id, userInfo());
 }
 
-function genRedPacketId(redPacket: RedPacketDB) : string {
-    const redPacketType = "tuple(address,bytes32,uint256,address,uint32,uint8)";
-    return ethers.utils.keccak256(
-        ethers.utils.defaultAbiCoder.encode(
-            ["uint256", "address", "address", redPacketType],
-            [
-                EthBigNumber.from(redPacket.chain),
-                redPacket.metadata.contract,
-                redPacket.metadata.creator,
-                [
-                    redPacket.metadata.token,
-                    redPacket.metadata.salt,
-                    EthBigNumber.from(redPacket.metadata.balance),
-                    redPacket.metadata.validator,
-                    redPacket.metadata.split,
-                    redPacketMode(redPacket.metadata.mode)
-                ]
-            ]
-        )
-    );
-}
-
 export async function queryRedPacketInfo(redPacket: RedPacketDB) : Promise<{
     balance: EthBigNumber,
     split: number,
     createdAt: Date
 }> {
-    const redPacketId = genRedPacketId(redPacket);
-    const info = await redPacketContract().getPacket(redPacketId);
+    const info = await redPacketContract(
+        redPacket.metadata.contract
+    ).getPacket(redPacket.id);
     return {
-        createdAt: new Date(info.createdAt),
+        createdAt: new Date(info.createdAt.toNumber() * 1000),
         balance: info.balance,
         split: info.split
     }

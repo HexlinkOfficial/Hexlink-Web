@@ -8,6 +8,8 @@ const ALCHEMY_KEYS : {[key: string]: string} = {
   "137": "Fj__UEjuIj0Xym6ofwZfJbehuuXGpDxe",
 };
 
+const INFURA_API_KEY = "a4cc527f8e6e4cb397ff4d8c39e5f55b";
+
 const HEXLINK_CONTRACT : {[key: string]: string} = {
   "5": "0xbad6a7948a1d3031ee7236d0180b6271fa569148",
   "137": "0x78317ef8b020Fe10e845ab8723403cF1e58Ef1Cc",
@@ -15,7 +17,7 @@ const HEXLINK_CONTRACT : {[key: string]: string} = {
 
 const hexlinkContract = (
     chainId: string,
-    provider: ethers.providers.AlchemyProvider
+    provider: ethers.providers.Provider
 ) => {
   return new ethers.Contract(
       HEXLINK_CONTRACT[chainId],
@@ -51,9 +53,20 @@ export async function genNameHash(uid: string) : Promise<
   return {code: 400, message: "Invalid uid: not provided with twitter"};
 }
 
-export const getProvider = (chainId: string) => {
+export const getAlchemyProvider = (
+    chainId: string
+) : ethers.providers.Provider => {
   return new ethers.providers.AlchemyProvider(
       Number(chainId), ALCHEMY_KEYS[chainId]
+  );
+};
+
+export const getInfuraProvider = (
+    chainId: string
+) : ethers.providers.Provider => {
+  return new ethers.providers.InfuraProvider(
+      Number(chainId),
+      INFURA_API_KEY,
   );
 };
 
@@ -65,7 +78,7 @@ export const accountAddress = async function(
   if (result.nameHash == undefined) {
     return result;
   }
-  const hexlink = hexlinkContract(chainId, getProvider(chainId));
+  const hexlink = hexlinkContract(chainId, getInfuraProvider(chainId));
   try {
     const address = await hexlink.addressOfName(result.nameHash);
     return {code: 200, address};

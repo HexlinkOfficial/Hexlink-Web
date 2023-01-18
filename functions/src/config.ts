@@ -59,10 +59,10 @@ const MUMBAI : PriceInfo= {
   gasPrice: "2000000000", // 2 gwei
 };
 
-const PriceConfig : {[key: number]: PriceInfo} = {
-  5: GOERLI,
-  137: POLYGON,
-  80001: MUMBAI,
+export const PriceConfig : {[key: string]: PriceInfo} = {
+  "5": GOERLI,
+  "137": POLYGON,
+  "80001": MUMBAI,
 };
 
 export const priceInfo = functions.https.onCall(
@@ -71,6 +71,6 @@ export const priceInfo = functions.https.onCall(
       if (!uid) {
         return {code: 401, message: "Unauthorized Call"};
       }
-      return {priceInfo: PriceConfig[data.chainId]};
+      return {priceInfo: PriceConfig[data.chainId.toString()]};
     }
 );

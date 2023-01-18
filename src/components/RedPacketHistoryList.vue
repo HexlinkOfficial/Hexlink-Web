@@ -25,11 +25,8 @@
               }}</td>
               <td>{{ redPacket.redPacket.metadata.split }} / {{ redPacket.state.split }}</td>
               <td>{{ redPacket.redPacket.metadata.mode }}</td>
-              <td>{{ redPacket.state.createdAt.toLocaleDateString() }}</td>
+              <td>{{ redPacket.state.createdAt.toLocaleString() }}</td>
               <td>
-                <a-button @click="refund" disabled>
-                  Refund
-                </a-button>
                 <a-typography-paragraph :copyable="{ text: claimLink(redPacket.redPacket) }">
                   Claim Link
                 </a-typography-paragraph>
@@ -52,11 +49,11 @@ import { useRoute } from 'vue-router';
 import { getERC20Metadata } from '@/web3/tokens';
 import { useProfileStore } from "@/stores/profile";
 import { useNetworkStore } from '@/stores/network';
-import { getRedPacketsByUser } from '@/graphql/redpacket';
+import { getCreatedRedPackets, getRedPacket } from '@/graphql/redpacket';
 import type { RedPacketDB } from '@/graphql/redpacket';
-import type { TokenMetadata } from '@/types';
+import type { TokenMetadata, Token } from '@/types';
 import { BigNumber as EthBigNumber } from "ethers";
-import { queryRedPacketInfo } from "@/web3/redpacket";
+import { queryRedPacketInfo, redPacketContract } from "@/web3/redpacket";
 import { normalizeBalance } from '@/web3/tokens';
 
 interface RedPacketAggregated {
@@ -69,15 +66,41 @@ interface RedPacketAggregated {
   }
 };
 
+interface ClaimedRedPacket {
+  redPacket: RedPacketDB,
+  token: TokenMetadata,
+  claimed: EthBigNumber;
+}
+
 const redPackets = ref<RedPacketAggregated[]>([]);
 const profileStore = useProfileStore();
 
+const claimed = ref<ClaimedRedPacket[]>([]);
+const loadClaimed = () => {
+  const contract = redPacketContract();
+  const account = useProfileStore().account!.address;
+  const filter = contract.filters.Claimed(null, account); // claimed by user
+  contract.on(filter, async (packetId, _claimer, amount) => {
+    const rp = await getRedPacket(packetId);
+    if (rp) {
+      const token = await loadAndSaveERC20Token(rp.metadata.token);
+      claimed.value.push({
+        redPacket: rp,
+        token: token.metadata,
+        claimed: amount,
+      });
+    }
+    console.log(claimed.value);
+  });
+};
+
 const loadData = async function() {
   if (useProfileStore().profile?.initiated) {
-    const rps : RedPacketDB[] = await getRedPacketsByUser();
+    const rps : RedPacketDB[] = await getCreatedRedPackets();
     redPackets.value = await Promise.all(rps.map(r => aggregate(r)));
+    loadClaimed();
   }
-}
+};
 
 onMounted(loadData);
 watch(() => useNetworkStore().network, loadData);
@@ -89,10 +112,6 @@ const props = defineProps({
     required: true,
   }
 });
-
-const refund = () => {
-  console.log("Not supported yet");
-};
 
 const claimLink = (redPacket: RedPacketDB) => {
   return window.location.origin + useRoute().path + "?id=" + redPacket.id
@@ -107,13 +126,17 @@ const normalize = (balance: EthBigNumber | string, token: TokenMetadata) => {
   return normalized.normalized;
 }
 
+const loadAndSaveERC20Token = async (tokenAddr: string) : Promise<Token> => {
+  if (!profileStore.profile!.tokens[tokenAddr]) {
+    profileStore.addToken({metadata: await getERC20Metadata(tokenAddr)});
+  }
+  return profileStore.profile!.tokens[tokenAddr]!;
+}
+
 const aggregate = async function(redPacket: RedPacketDB) : Promise<RedPacketAggregated> {
   const state = await queryRedPacketInfo(redPacket);
   const tokenAddr = redPacket.metadata.token.toLowerCase();
-  if (!profileStore.profile.tokens[tokenAddr]) {
-    profileStore.addToken({metadata: await getERC20Metadata(tokenAddr)});
-  }
-  const token = profileStore.profile.tokens[tokenAddr];
+  const token = await loadAndSaveERC20Token(tokenAddr);
   return {
     redPacket,
     token: token.metadata,

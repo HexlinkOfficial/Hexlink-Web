@@ -48,12 +48,17 @@ export const GET_REDPACKET_CLAIMS_BY_CLAIMER = gql`
             }
         ) {
             id
-            redpacket_id
             claimer
             claimer_id
             tx
             created_at
             creator_id
+            redpackets {
+              chain
+              metadata
+              creator
+              created_at
+            }
         }
     }
 `
@@ -147,7 +152,7 @@ export async function getRedPacketClaims(
   }
 }
 
-export async function getClaimedRedPacket() : Promise<RedPacketClaim[]> {
+export async function getClaimedRedPackets() : Promise<RedPacketClaim[]> {
   const client = setUrqlClientIfNecessary(
     useAuthStore().user!.idToken!
   );
@@ -160,7 +165,7 @@ export async function getClaimedRedPacket() : Promise<RedPacketClaim[]> {
       return parseRedPacketClaim(r);
     });
   } else {
-    return await getClaimedRedPacket();
+    return await getClaimedRedPackets();
   }
 }
 

@@ -105,12 +105,16 @@ export interface Profile {
 }
 
 export interface RedPacket {
+    id?: string;
     token: Token;
     salt: string;
     gasToken: Token;
+    gasTokenAmount?: EthersBigNumber;
+    tokenAmount?: EthersBigNumber;
     mode: "random" | "equal";
     split: number;
     balance: string;
+    validator: string;
 }
 
 export interface Claim {

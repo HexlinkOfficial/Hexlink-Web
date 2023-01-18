@@ -103,7 +103,7 @@ export async function sendClaimTx(
   const provider = getInfuraProvider(data.chainId);
   let unsignedTx = await redPacketContract(
       parsed.contract, provider
-  ).populateTransaction.claimWithoutSignature({
+  ).populateTransaction.claim({
     creator,
     packet: {
       token: parsed.token,

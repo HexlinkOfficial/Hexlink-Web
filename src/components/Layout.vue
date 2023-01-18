@@ -2,7 +2,7 @@
   <RedPacketClaim v-if="showClaim()"></RedPacketClaim>
   <RedpacketConform v-if="showConform()"></RedpacketConform>
   <div v-if="showClaim() || showConform()" class="hidden-layer"></div>
-  <div id="main-wrapper" class="show" :style="(showClaim() || showConform()) ? 'position: fixed;' : 'position: relative;'">
+  <div id="main-wrapper" class="show" :class="(showClaim() || showConform()) && 'mobile-modal'">
     <Header />
     <SideBar :active="active" />
     <div class="content-body">
@@ -55,4 +55,7 @@ const showConform = () => {
   background-color: rgba(0, 0, 0, 0.5);
   position: fixed;
   z-index: 50; }
+.mobile-modal {
+  @media (max-width: 768px) {
+    position: fixed; } }
 </style>

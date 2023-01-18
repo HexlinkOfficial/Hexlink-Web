@@ -74,7 +74,7 @@ const createRedPacket = async () => {
     }
     claimStatus.value = 'success';
   } catch (e) {
-    console.log("Failed to claim redpacket with error " + JSON.stringify(e));
+    console.log("Failed to claim redpacket with error " + e);
     claimStatus.value = 'error';
   }
 }

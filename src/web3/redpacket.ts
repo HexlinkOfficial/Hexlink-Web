@@ -389,6 +389,7 @@ async function buildCreateRedPacketTx(
         });
     }
     ops = ops.concat(redPacketOps(network, input));
+
     const accountIface = new ethers.utils.Interface(ACCOUNT_ABI);
     const data = accountIface.encodeFunctionData(
         "execBatch",
@@ -415,7 +416,7 @@ export async function buildDeployAndCreateRedPacketTx(
 ) : Promise<any> {
     const txes = await buildCreateRedPacketTx(network, input, useHexlinkAccount);
     const tx = txes.pop(); // last tx is the redpacket creation tx
-    const { initData, proof } = await genDeployAuthProof(network, tx.last.data);
+    const { initData, proof } = await genDeployAuthProof(network, tx.tx.data);
     const hexlink = hexlinkContract(network);
     const args = [useAuthStore().user!.nameHash, initData, {
         authType: hash(proof.authType),
@@ -427,22 +428,22 @@ export async function buildDeployAndCreateRedPacketTx(
         "deploy", args
     );
     const walletAccount = useWalletStore().wallet!.account;
-    return txes.push({
+    txes.push({
         name: "deployAndCreateRedPacket",
         function: "deploy",
         args,
         tx: {
             to: hexlink.address,
             from: walletAccount.address,
-            value: tx.value,
+            value: tx.tx.value,
             data,
         }
     });
+    return txes;
 }
 
 function redpacketId(network: Network, input: RedPacket) {
     const redPacketType = "tuple(address,bytes32,uint256,address,uint32,uint8)";
-    console.log(input);
     return ethers.utils.keccak256(
         ethers.utils.defaultAbiCoder.encode(
             ["uint256", "address", "address", redPacketType],

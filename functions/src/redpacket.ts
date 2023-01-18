@@ -108,7 +108,7 @@ export async function sendClaimTx(
     packet: {
       token: parsed.token,
       salt: parsed.salt,
-      balance: EthBigNumber.from(parsed.balance),
+      balance: EthBigNumber.from(parsed.tokenAmount),
       validator: parsed.validator,
       split: parsed.split,
       mode: redPacketMode(parsed.mode),

@@ -12,13 +12,13 @@ export const GET_REDPACKET = gql`
         chain
         tx
         creator
-        metadata,
+        metadata
         created_at
     }
   }
 `
 
-export const GET_REDPACKETS = gql`
+export const GET_CREATED_REDPACKETS = gql`
     query GetRedPacketByUser (
         $userId: String!,
         $chain: String!,
@@ -34,7 +34,7 @@ export const GET_REDPACKETS = gql`
             chain
             tx
             creator
-            metadata,
+            metadata
             created_at
         }
     }
@@ -120,7 +120,7 @@ export async function getCreatedRedPackets() : Promise<RedPacketDB[]> {
     useAuthStore().user!.idToken!
   );
   const result = await client.query(
-    GET_REDPACKETS,
+    GET_CREATED_REDPACKETS,
     {
       userId: useAuthStore().user!.uid,
       chain: useNetworkStore().network!.chainId.toString()

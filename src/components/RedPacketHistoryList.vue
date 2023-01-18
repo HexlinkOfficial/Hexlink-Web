@@ -77,20 +77,7 @@ const profileStore = useProfileStore();
 
 const claimed = ref<ClaimedRedPacket[]>([]);
 const loadClaimed = () => {
-  const contract = redPacketContract();
-  const account = useProfileStore().account!.address;
-  const filter = contract.filters.Claimed(null, account); // claimed by user
-  contract.on(filter, async (packetId, _claimer, amount) => {
-    const rp = await getRedPacket(packetId);
-    if (rp) {
-      const token = await loadAndSaveERC20Token(rp.metadata.token);
-      claimed.value.push({
-        redPacket: rp,
-        token: token.metadata,
-        claimed: amount,
-      });
-    }
-  });
+  
 };
 
 const loadData = async function() {

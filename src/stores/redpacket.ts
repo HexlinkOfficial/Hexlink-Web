@@ -28,14 +28,14 @@ export const useRedPacketStore = defineStore({
     }
   },
   actions: {
-    beforeCreate(network: Network, redpacket: RedPacket, useHex: boolean, packetStatus: boolean) {
+    beforeCreate(network: Network, redpacket: RedPacket, useHex: boolean) {
       console.log("Creating Red Packet...");
-      console.log(this[network.name]);
-      this[network.name] = { status: packetStatus, creating: redpacket, useHexlink: useHex };
+      this[network.name] = { status: true, creating: redpacket, useHexlink: useHex };
+    },
+    closeModal(network: Network) {
+      console.log("Closing Modal...");
+      this[network.name].status = false;
       console.log(this[network.name].status);
-      console.log(this[network.name]);
-      console.log(this[network.name].creating);
-      console.log(this.packetStatus);
     }
   },
 })

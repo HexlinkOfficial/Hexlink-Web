@@ -76,6 +76,7 @@ export interface RedPacketDBMetadata {
   validator: string,
   contract: string,
   creator: string,
+  tokenAmount: string,
 }
 
 export interface RedPacketDB {

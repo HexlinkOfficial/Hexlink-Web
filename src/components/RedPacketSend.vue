@@ -444,8 +444,8 @@ const confirmRedPacket = function () {
   useRedPacketStore().beforeCreate(
     useNetworkStore().network!,
     redpacket.value,
-    accountChosen.value == 0,
-    true);
+    accountChosen.value == 0
+  );
 };
 
 const setMaxAmount = () => {

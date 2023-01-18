@@ -17,9 +17,9 @@
           </thead>
           <tbody>
             <tr v-for="(redPacket, i) in redPackets" :key="i" @click="showDetails()">
-              <td>{{ redPacket.token.symbol }}/0</td>
+              <td>{{ redPacket.token.symbol }}</td>
               <td>{{
-                normalize(redPacket.redPacket.metadata.balance, redPacket.token)
+                normalize(redPacket.redPacket.metadata.tokenAmount, redPacket.token)
               }}/{{
                 normalize(redPacket.state.balance, redPacket.token)
               }}</td>

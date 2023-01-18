@@ -1,6 +1,6 @@
 <template>
   <RedPacketClaim v-if="showClaim()"></RedPacketClaim>
-  <RedpacketConform v-if="useRedPacketStore().packetStatus"></RedpacketConform>
+  <RedpacketConform v-if="useRedPacketStore()[useNetworkStore().network!.name]?.status"></RedpacketConform>
   <div v-if="showClaim() || showConfirm" class="hidden-layer"></div>
   <div id="main-wrapper" class="show" :class="(showClaim() || showConfirm) && 'mobile-modal'">
     <Header />
@@ -14,7 +14,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted } from "vue";
+import { ref, computed, watch, onMounted } from "vue";
 import Header from './Header.vue';
 import SideBar from './Sidebar.vue';
 import RedPacketClaim from "@/components/RedPacketClaim.vue";
@@ -27,11 +27,13 @@ const props = defineProps({
   active: Number
 });
 
-const showConfirm = ref<boolean>(false);
-
 const showClaim = () => {
   if (useRoute().params.action?.toString() == 'claim' && useRoute().query.id != undefined) return true;
 }
+
+const showConfirm = computed(() => {
+  return useRedPacketStore()[useNetworkStore().network!.name]?.status;
+})
 
 // const showConform = () => {
 //   showConfirm.value = true;

@@ -90,7 +90,6 @@ const loadClaimed = () => {
         claimed: amount,
       });
     }
-    console.log(claimed.value);
   });
 };
 

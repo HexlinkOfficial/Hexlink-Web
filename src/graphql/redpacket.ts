@@ -138,7 +138,7 @@ export async function getCreatedRedPackets() : Promise<RedPacketDB[]> {
       } as RedPacketDB;
     });
   } else {
-    return await getRedPacketsByUser();
+    return await getCreatedRedPackets();
   }
 }
 

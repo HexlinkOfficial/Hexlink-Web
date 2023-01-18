@@ -50,7 +50,7 @@ import { getERC20Metadata } from '@/web3/tokens';
 import { useProfileStore } from "@/stores/profile";
 import { useNetworkStore } from '@/stores/network';
 import { getCreatedRedPackets, getRedPacket } from '@/graphql/redpacket';
-import { getClaimedRedPackets } from '@/graphql/redpacketClaim';
+import { getClaimedRedPackets, type ClaimedRedPacket } from '@/graphql/redpacketClaim';
 import type { TokenMetadata, Token, RedPacketDB } from '@/types';
 import { BigNumber as EthBigNumber } from "ethers";
 import { queryRedPacketInfo, redPacketContract } from "@/web3/redpacket";
@@ -66,36 +66,20 @@ interface RedPacketAggregated {
   }
 };
 
-interface ClaimedRedPacketOnChain {
-  redPacket: RedPacketDB,
-  token: TokenMetadata,
-  claimed: EthBigNumber;
-  txInfo: {
-    blockNumber: number;
-    txIndex: number;
-    txHash: string;
-    logIndex: number;
-    timestamp: number;
-  }
-}
-
 const redPackets = ref<RedPacketAggregated[]>([]);
 const profileStore = useProfileStore();
 
-const claimed = ref<ClaimedRedPacketOnChain[]>([]);
-const loadClaimedOnchain = async () => {
-  const contract = redPacketContract();
-  const eventFilter = contract.filters.Claimed(null, profileStore.account!.address);
-  const logs = await contract.queryFilter(eventFilter, "earliest", "pending");
-  const result = await Promise.all(logs.map(log => aggregatedClaimed(log)));
-  claimed.value = result.filter(res => res) as ClaimedRedPacketOnChain[];
-};
+const claimed = ref<ClaimedRedPacket[]>([]);
+const loadClaimInfo = async () => {
+  const claimed = await getClaimedRedPackets();
+  console.log(claimed);
+}
 
 const loadData = async function() {
   if (useProfileStore().profile?.initiated) {
     const rps : RedPacketDB[] = await getCreatedRedPackets();
     redPackets.value = await Promise.all(rps.map(r => aggregateCreated(r)));
-    await loadClaimedOnchain();
+    await loadClaimInfo();
   }
 };
 

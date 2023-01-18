@@ -24,10 +24,11 @@ export const GET_REDPACKET_CLAIM = gql`
 
 export const GET_REDPACKET_CLAIMS = gql`
     query GetClaimsByRedPacket($redpacketId: String!) {
-        redpacket_claim() (
+        redpacket_claim (
             where: {
                 redpacket_id: { _eq: $redpacketId },
-            }
+            },
+            limit: 100
         ) {
             id
             redpacket_id
@@ -42,7 +43,7 @@ export const GET_REDPACKET_CLAIMS = gql`
 
 export const GET_REDPACKET_CLAIMS_BY_CLAIMER = gql`
     query GetClaimsByClaimer($claimerId: String!) {
-        redpacket_claim(limit: 100) (
+        redpacket_claim (
             where: {
                 claimer_id: { _eq: $claimerId },
             }

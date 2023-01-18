@@ -23,11 +23,12 @@ export const GET_CREATED_REDPACKETS = gql`
         $userId: String!,
         $chain: String!,
     ) {
-        redpacket(limit: 100) (
+        redpacket (
             where: {
               user_id: { _eq: $userId },
               chain: { _eq: $chain },
-            }
+            },
+            limit: 100
         ) {
             id
             user_id

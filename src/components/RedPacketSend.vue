@@ -436,12 +436,16 @@ const modeLabels = {
   "equal": "Equally",
 };
 
-const modeChoose = async (gameMode: "random" | "equal") => {
+const modeChoose = (gameMode: "random" | "equal") => {
   redpacket.value.mode = gameMode;
 }
 
-const confirmRedPacket = async function () {
-  useRedPacketStore().beforeCreate(useNetworkStore().network!, redpacket.value, accountChosen.value == 0, true);
+const confirmRedPacket = function () {
+  useRedPacketStore().beforeCreate(
+    useNetworkStore().network!,
+    redpacket.value,
+    accountChosen.value == 0,
+    true);
 };
 
 const setMaxAmount = () => {

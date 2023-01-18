@@ -1,6 +1,6 @@
 <template>
   <RedPacketClaim v-if="showClaim()"></RedPacketClaim>
-  <RedpacketConform v-if="showConfirm"></RedpacketConform>
+  <RedpacketConform v-if="useRedPacketStore().packetStatus"></RedpacketConform>
   <div v-if="showClaim() || showConfirm" class="hidden-layer"></div>
   <div id="main-wrapper" class="show" :class="(showClaim() || showConfirm) && 'mobile-modal'">
     <Header />
@@ -14,12 +14,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from "vue";
+import { ref, watch, onMounted } from "vue";
 import Header from './Header.vue';
 import SideBar from './Sidebar.vue';
 import RedPacketClaim from "@/components/RedPacketClaim.vue";
 import RedpacketConform from "@/components/RedPacketConfirm.vue";
 import { useRedPacketStore } from '@/stores/redpacket';
+import { useNetworkStore } from '@/stores/network';
 import { useRoute } from "vue-router";
 
 const props = defineProps({
@@ -32,15 +33,17 @@ const showClaim = () => {
   if (useRoute().params.action?.toString() == 'claim' && useRoute().query.id != undefined) return true;
 }
 
-const showConform = () => {
-  showConfirm.value = true;
-}
+// const showConform = () => {
+//   showConfirm.value = true;
+// }
 
 // const showConfirm = () => {
 //   if (useRoute().params.action?.toString() == 'send' && useRoute().query.id == "confirm") return true;
 // }
-
-watch(() => useRedPacketStore().packetStatus, showConform);
+// onMounted(() => {
+//   console.log(useRedPacketStore().redpacket);
+// })
+// watch(() => useRedPacketStore()[useNetworkStore().network!.name].status, showConform);
 </script>
 
 <style lang="less" scoped>

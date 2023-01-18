@@ -138,6 +138,9 @@ export const claimRedPacket = functions.https.onCall(
       }
       data.claimer = account.address;
       const redPacket = await getRedPacket(data.redPacketId);
+      if (!redPacket) {
+        return {code: 400, message: "Failed to load redpacket"};
+      }
       if (data.signOnly) {
         const message = ethers.utils.keccak256(
             ethers.utils.defaultAbiCoder.encode(

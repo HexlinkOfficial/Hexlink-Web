@@ -84,10 +84,14 @@ export interface RedPacket {
 
 export async function getRedPacket(
     redPacketId: string
-) : Promise<RedPacket> {
+) : Promise<RedPacket | undefined> {
   const result = await client.query(
       GET_REDPACKET,
       {id: redPacketId}
   ).toPromise();
-  return result.data.redpacket_by_pk;
+  if (result.error) {
+    console.log("Failed to get red packet", result.error);
+    return undefined;
+  }
+  return result.data?.redpacket_by_pk;
 }

@@ -201,3 +201,27 @@ export interface HexlinkUserInfo {
     handle: string;
     displayName?: string;
 }
+
+export interface RedPacketDBMetadata {
+    token: string
+    salt: string,
+    mode: string,
+    split: number,
+    balance: string,
+    validator: string,
+    contract: string,
+    creator: string,
+    gasToken: string,
+    tokenAmount?: string,
+    gasTokenAmount?: string,
+  }
+  
+  export interface RedPacketDB {
+    id: string,
+    userId: string,
+    chain: string,
+    metadata: RedPacketDBMetadata,
+    creator: HexlinkUserInfo,
+    tx?: string,
+    createdAt: string,
+  }

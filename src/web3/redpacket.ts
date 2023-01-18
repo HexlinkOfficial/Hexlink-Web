@@ -1,4 +1,4 @@
-import type { Network, Account, Transaction, UserOp, Token, RedPacket } from "@/types";
+import type { Network, Account, Transaction, UserOp, Token, RedPacket, RedPacketDB } from "@/types";
 import { ethers, BigNumber as EthBigNumber } from "ethers";
 import { useProfileStore } from "@/stores/profile";
 import { useAuthStore } from "@/stores/auth";
@@ -15,9 +15,8 @@ import ACCOUNT_ABI from "@/configs/abi/AccountSimple.json";
 import { useWalletStore } from "@/stores/wallet";
 import { useNetworkStore } from "@/stores/network";
 import { insertRedPacket } from "@/graphql/redpacket";
-import type { RedPacketDB } from "@/graphql/redpacket";
 import { BigNumber } from "bignumber.js";
-import { getProvider, getPriceInfo } from "@/web3/network";
+import { getInfuraProvider, getPriceInfo } from "@/web3/network";
 import { userInfo } from "@/web3/account";
 import { getNetwork } from "@/configs/network";
 import { updateRedPacketClaimer } from "@/graphql/redpacketClaim";
@@ -45,7 +44,7 @@ export function redPacketContract(contract?: string, network?: Network) {
     return new ethers.Contract(
         contract || network!.address.redpacket as string,
         RED_PACKET_ABI,
-        getProvider(network)
+        getInfuraProvider(network)
     );
 }
 

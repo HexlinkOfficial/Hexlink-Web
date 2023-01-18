@@ -2,7 +2,7 @@ import { gql } from '@urql/core';
 import { useAuthStore } from '@/stores/auth';
 import { handleUrqlResponse, setUrqlClientIfNecessary } from './urql';
 import { useNetworkStore } from '@/stores/network';
-import type { HexlinkUserInfo } from "@/types";
+import type { HexlinkUserInfo, RedPacketDB} from "@/types";
 
 export const GET_REDPACKET = gql`
   query GetRedPacket($id: String!) {
@@ -23,7 +23,7 @@ export const GET_CREATED_REDPACKETS = gql`
         $userId: String!,
         $chain: String!,
     ) {
-        redpacket (
+        redpacket(limit: 100) (
             where: {
               user_id: { _eq: $userId },
               chain: { _eq: $chain },
@@ -66,30 +66,6 @@ export const UPDATE_REDPACKET = gql`
         }
     }
 `
-
-export interface RedPacketDBMetadata {
-  token: string
-  salt: string,
-  mode: string,
-  split: number,
-  balance: string,
-  validator: string,
-  contract: string,
-  creator: string,
-  gasToken: string,
-  tokenAmount?: string,
-  gasTokenAmount?: string,
-}
-
-export interface RedPacketDB {
-  id: string,
-  userId: string,
-  chain: string,
-  metadata: RedPacketDBMetadata,
-  creator: HexlinkUserInfo,
-  tx?: string,
-  createdAt: string,
-}
 
 export async function getRedPacket(
   redPacketId: string

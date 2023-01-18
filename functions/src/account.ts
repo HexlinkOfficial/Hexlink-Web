@@ -3,17 +3,19 @@ import {getAuth} from "firebase-admin/auth";
 import {ethers} from "ethers";
 import HEXLINK_ABI from "./abi/Hexlink.json";
 
+import * as functions from "firebase-functions";
+
 const ALCHEMY_KEYS : {[key: string]: string} = {
   "5": "U4LBbkMIAKCf4GpjXn7nB7H1_P9GiU4b",
   "137": "Fj__UEjuIj0Xym6ofwZfJbehuuXGpDxe",
 };
 
-const INFURA_API_KEY = "a4cc527f8e6e4cb397ff4d8c39e5f55b";
-
 const HEXLINK_CONTRACT : {[key: string]: string} = {
   "5": "0xbad6a7948a1d3031ee7236d0180b6271fa569148",
   "137": "0x78317ef8b020Fe10e845ab8723403cF1e58Ef1Cc",
 };
+
+const secrets = functions.config().doppler || {};
 
 const hexlinkContract = (
     chainId: string,
@@ -66,7 +68,7 @@ export const getInfuraProvider = (
 ) : ethers.providers.Provider => {
   return new ethers.providers.InfuraProvider(
       Number(chainId),
-      INFURA_API_KEY,
+      secrets.VITE_INFURA_API_KEY,
   );
 };
 

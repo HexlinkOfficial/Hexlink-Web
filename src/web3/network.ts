@@ -86,6 +86,14 @@ export function getProvider(network?: Network) {
     );
 }
 
+export function getInfuraProvider(network?: Network) {
+    network = network || useNetworkStore().network;
+    return new ethers.providers.InfuraProvider(
+        Number(network!.chainId),
+        import.meta.env.VITE_INFURA_API_KEY
+    );
+}
+
 const functions = getFunctions();
 export async function getPriceInfo(network: Network) : Promise<PriceInfo> {
     const priceInfo = useNetworkStore().priceInfo[network.name];

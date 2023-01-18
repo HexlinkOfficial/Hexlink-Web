@@ -33,10 +33,14 @@ const showClaim = () => {
 }
 
 const showConform = () => {
-  showConfirm.value = !showConfirm.value;
+  showConfirm.value = true;
 }
 
-watch(() => [useRedPacketStore().packetStatus], showConform);
+// const showConfirm = () => {
+//   if (useRoute().params.action?.toString() == 'send' && useRoute().query.id == "confirm") return true;
+// }
+
+watch(() => useRedPacketStore().packetStatus, showConform);
 </script>
 
 <style lang="less" scoped>

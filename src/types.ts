@@ -214,14 +214,38 @@ export interface RedPacketDBMetadata {
     gasToken: string,
     tokenAmount?: string,
     gasTokenAmount?: string,
-  }
+}
+
+export type RedPacketStatus = "pending" | "error" | "alive" | "finalized";
   
-  export interface RedPacketDB {
+export interface RedPacketDB {
     id: string,
     userId: string,
     chain: string,
     metadata: RedPacketDBMetadata,
     creator: HexlinkUserInfo,
-    tx?: string,
+    tx: string,
     createdAt: string,
-  }
+    status?: RedPacketStatus,
+    claims?: RedPacketClaim[]
+}
+
+export interface RedPacketClaimInput {
+    redPacketId: string,
+    tx: string,
+}
+  
+export type TxStatus = "pending" | "error" | "success";
+  
+export interface RedPacketClaim extends RedPacketClaimInput {
+    createdAt: Date,
+    id: number,
+    claimer: HexlinkUserInfo,
+    txStatus?: TxStatus,
+    claimed?: EthersBigNumber,
+}
+  
+export interface ClaimedRedPacket {
+    claim: RedPacketClaim,
+    redPacket: RedPacketDB
+}

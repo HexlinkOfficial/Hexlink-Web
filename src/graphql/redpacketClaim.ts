@@ -4,6 +4,7 @@ import { handleUrqlResponse, setUrqlClientIfNecessary } from './urql';
 import type { HexlinkUserInfo, RedPacketDB } from "@/types";
 import { userInfo } from "@/web3/account";
 import { BigNumber as EthBigNumber } from "ethers";
+import type { RedPacketClaim, ClaimedRedPacket, TxStatus, RedPacketClaimInput } from "@/types";
 
 export const GET_REDPACKET_CLAIM = gql`
     query GetRedPacketByRedPacket(
@@ -39,7 +40,6 @@ export const GET_REDPACKET_CLAIMS = gql`
             claimer_id
             tx
             created_at
-            creator_id
             tx_status
             claimed
         }
@@ -58,7 +58,6 @@ export const GET_REDPACKET_CLAIMS_BY_CLAIMER = gql`
             claimer_id
             tx
             created_at
-            creator_id
             tx_status
             claimed
             redpacket {
@@ -120,38 +119,15 @@ export const UPDATE_REDPACKET_CLAIM_TX = gql`
     }
 `
 
-export interface RedPacketClaimInput {
-  redPacketId: string,
-  creatorId: string,
-  tx: string,
-}
-
-export type TxStatus = "pending" | "error" | "success";
-
-export interface RedPacketClaim extends RedPacketClaimInput {
-  createdAt: Date,
-  id: number,
-  claimerId: string,
-  claimer: HexlinkUserInfo,
-  txStatus?: TxStatus,
-  claimed?: EthBigNumber,
-}
-
 function parseRedPacketClaim(claim: any) {
   return {
     id: claim.id,
     claimerId: claim.claimer_id,
     claimer: JSON.parse(claim.claimer) as HexlinkUserInfo,
     tx: claim.tx,
-    creatorId: claim.creator_id,
     redPacketId: claim.redpacket_id,
     createdAt: new Date(claim.createdAt),
   };
-}
-
-export interface ClaimedRedPacket {
-  claim: RedPacketClaim,
-  redPacket: RedPacketDB
 }
 
 function parseClaimedRedPacket(claim: any) {
@@ -161,7 +137,6 @@ function parseClaimedRedPacket(claim: any) {
       claimerId: claim.claimer_id,
       claimer: JSON.parse(claim.claimer) as HexlinkUserInfo,
       tx: claim.tx,
-      creatorId: claim.creator_id,
       createdAt: new Date(claim.created_at),
       redPacketId: claim.redpacket.id,
       txStatus: claim.tx_status,
@@ -243,7 +218,6 @@ export async function insertRedPacketClaim(
               redpacket_id: d.redPacketId,
               claimer_id: useAuthStore().user!.uid,
               claimer: userInfo(),
-              creator_id: d.creatorId,
               tx: d.tx
           }))
       }

@@ -49,12 +49,11 @@ import { useRoute } from 'vue-router';
 import { getERC20Metadata } from '@/web3/tokens';
 import { useProfileStore } from "@/stores/profile";
 import { useNetworkStore } from '@/stores/network';
-import { getCreatedRedPackets } from '@/graphql/redpacket';
+import { getCreatedRedPackets, updateRedPacketStatus } from '@/graphql/redpacket';
 import { getClaimedRedPackets, updateRedPacketTxStatus } from '@/graphql/redpacketClaim';
-import type { ClaimedRedPacket } from '@/graphql/redpacketClaim';
-import type { TokenMetadata, Token, RedPacketDB } from '@/types';
+import type { TokenMetadata, Token, RedPacketDB, ClaimedRedPacket, RedPacketClaim } from '@/types';
 import { BigNumber as EthBigNumber } from "ethers";
-import { queryRedPacketInfo, redPacketContract } from "@/web3/redpacket";
+import { queryRedPacketInfo } from "@/web3/redpacket";
 import { normalizeBalance } from '@/web3/tokens';
 import { getInfuraProvider } from "@/web3/network";
 import { ethers } from "ethers";
@@ -73,20 +72,19 @@ const profileStore = useProfileStore();
 
 const redPackets = ref<RedPacketAggregated[]>([]);
 const claimed = ref<ClaimedRedPacket[]>([]);
-const loadClaimInfo = async () => {
+const loadClaimInfo = async (provider: ethers.providers.Provider) => {
   const claims : ClaimedRedPacket[] = await getClaimedRedPackets();
-  const provider = getInfuraProvider();
-  const contract = redPacketContract();
   claimed.value = await Promise.all(
-    claims.map(c => aggregatedClaimed(provider, c, contract))
+    claims.map(c => aggregatedClaimed(provider, c))
   );
 }
 
 const loadData = async function() {
   if (useProfileStore().profile?.initiated) {
+    const provider = getInfuraProvider();
     const rps : RedPacketDB[] = await getCreatedRedPackets();
-    redPackets.value = await Promise.all(rps.map(r => aggregateCreated(r)));
-    await loadClaimInfo();
+    redPackets.value = await Promise.all(rps.map(r => aggregateCreated(provider, r)));
+    await loadClaimInfo(provider);
   }
 };
 
@@ -130,14 +128,38 @@ const loadAndSaveERC20Token = async (tokenAddr: string) : Promise<Token> => {
   return profileStore.profile!.tokens[tokenAddr]!;
 }
 
-const aggregateCreated = async function(redPacket: RedPacketDB) : Promise<RedPacketAggregated> {
+const aggregateCreated = async function(
+  provider: ethers.providers.Provider,
+  redPacket: RedPacketDB
+) : Promise<RedPacketAggregated> {
+  redPacket.claims = await Promise.all((redPacket.claims || []).map(c => validateClaimStatus(provider, c)));
   const state = await queryRedPacketInfo(redPacket);
   const tokenAddr = redPacket.metadata.token.toLowerCase();
   const token = await loadAndSaveERC20Token(tokenAddr);
+  const oldStatus = redPacket.status;
+  if (!redPacket.status || redPacket.status == "pending") {
+    const receipt = await provider.getTransactionReceipt(redPacket.tx);
+    if (receipt?.status == 0) {
+      redPacket.status = "error";
+    } else if (receipt?.status == 1) {
+      redPacket.status = "alive";
+    }
+  }
+  if (redPacket.status == "alive") {
+    if (state.balance.eq(0) || state.split == 0) {
+      redPacket.status = "finalized";
+    }
+  }
+  if (oldStatus !== redPacket.status) {
+    await updateRedPacketStatus({
+      id: redPacket.id,
+      status: redPacket.status!
+    });
+  }
   return {
     redPacket,
     token: token.metadata,
-    state
+    state,
   } as RedPacketAggregated;
 };
 
@@ -156,38 +178,44 @@ const parseLog = (log: any) => {
   }
 }
 
-const aggregatedClaimed = async function(
+const validateClaimStatus = async (
   provider: ethers.providers.Provider,
-  redpacket: ClaimedRedPacket,
-  redpacketContract: ethers.Contract
-) : Promise<ClaimedRedPacket> {
-  if (redpacket.claim.txStatus == "success" || redpacket.claim.txStatus == "error") {
-    return redpacket;
+  claim: RedPacketClaim
+) : Promise<RedPacketClaim> => {
+  if (claim.txStatus == "success" || claim.txStatus == "error") {
+    return claim;
   }
-
-  const receipt = await provider.getTransactionReceipt(redpacket.claim.tx);
+  const receipt = await provider.getTransactionReceipt(claim.tx);
   if (!receipt) {
-    return redpacket;
+    return claim;
   } // not mined
   if (receipt.status) { // success
     const events = receipt.logs.filter(
-      (log: any) => log.address == redpacketContract.address
+      (log: any) => log.address.toLowerCase() == (useNetworkStore().network!.address.redpacket as string).toLowerCase()
     ).map(
       (log: any) => parseLog(log)
     );
     const event = events.find((e: any) => e.name == "Claimed");
     const claimedAmount = event?.args.amount || EthBigNumber.from(0);
     await updateRedPacketTxStatus(
-      redpacket.claim.id,
+      claim.id,
       "success",
       claimedAmount.toString()
     );
-    redpacket.claim.txStatus = "success";
-    redpacket.claim.claimed = claimedAmount;
+    claim.txStatus = "success";
+    claim.claimed = claimedAmount;
   } else { // reverted
-    await updateRedPacketTxStatus(redpacket.claim.id, "error");
-    redpacket.claim.txStatus = "error";
+    await updateRedPacketTxStatus(claim.id, "error");
+    claim.txStatus = "error";
   }
+  return claim;
+}
+
+const aggregatedClaimed = async function(
+  provider: ethers.providers.Provider,
+  redpacket: ClaimedRedPacket
+) : Promise<ClaimedRedPacket> {
+  redpacket.claim = await validateClaimStatus(provider, redpacket.claim);
   return redpacket;
 }
 

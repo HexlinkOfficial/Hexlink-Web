@@ -489,11 +489,11 @@ async function processTxAndSave(
             salt: redpacket.salt,
             split: redpacket.split,
             balance: redpacket.balance,
-            tokenAmount: redpacket.tokenAmount?.toString(),
+            tokenAmount: redpacket.tokenAmount!.toString(),
             mode: redpacket.mode,
             validator: redpacket.validator,
             gasToken: redpacket.gasToken.metadata.address,
-            gasTokenAmount: redpacket.gasTokenAmount?.toString(),
+            gasTokenAmount: redpacket.gasTokenAmount!.toString(),
             contract: network.address.redpacket as string,
             creator: useProfileStore().account!.address
         },

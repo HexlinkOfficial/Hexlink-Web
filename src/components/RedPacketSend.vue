@@ -75,8 +75,8 @@
         </div>
         <div class="share-number">
           <div class="share-input-div">
-            <input v-model="redpacket.split" id="red-packet-share" class="shares-input" autocomplete="off" placeholder="0"
-              type="number" min="0" step="1" autocorrect="off" inputmode="decimal" pattern="^[0-9]$" spellcheck="false" onkeydown="if(event.key==='.'){event.preventDefault();}"  oninput="event.target.value = event.target.value.replace(/[^0-9]*/g,'');">
+            <input v-model="redpacket.split" id="red-packet-share" class="shares-input" autocomplete="off" placeholder="1"
+              type="number" min="1" step="1" autocorrect="off" inputmode="decimal" pattern="^[0-9]$" spellcheck="false" onkeydown="if(event.key==='.'){event.preventDefault();}"  oninput="event.target.value = event.target.value.replace(/[^0-9]*/g,'');">
           </div>
           <p>People</p>
         </div>
@@ -321,7 +321,7 @@ const { toClipboard } = useClipboard()
 const redpacket = ref<RedPacket>({
   mode: "random",
   salt: hash(new Date().toISOString()),
-  split: 0,
+  split: 1,
   balance: "0",
   token: nativeToken as Token,
   gasToken: nativeToken as Token,
@@ -435,11 +435,14 @@ const modeChoose = (gameMode: "random" | "equal") => {
 }
 
 const confirmRedPacket = function () {
-  useRedPacketStore().beforeCreate(
-    useNetworkStore().network!,
-    redpacket.value,
-    accountChosen.value == 0
-  );
+  // make sure input is right
+  if (redpacket.value.balance != "0" && redpacket.value.split > 0) {
+    useRedPacketStore().beforeCreate(
+      useNetworkStore().network!,
+      redpacket.value,
+      accountChosen.value == 0
+    );
+  }
 };
 
 const setMaxAmount = () => {
@@ -508,6 +511,8 @@ const chooseAccount = function (value: number) {
   } else {
     redpacket.value.gasToken = defaultToken(redpacket.value.gasToken as Token);
   }
+
+  setRedPBalance();
 }
 
 const tokenBalance = computed(() => {

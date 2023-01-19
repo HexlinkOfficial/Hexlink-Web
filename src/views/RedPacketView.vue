@@ -28,18 +28,18 @@
                 <div class="views">
                   <div class="detail-view">
                     <router-link to="/redpacket/claim">
-                      <button class="listView-button" @click="luckHistory = true; sendLuck = false" :class="luckHistory && 'show'">Luck
+                      <button class="listView-button" @click="luckHistory = true; sendLuck = false" :class="useRoute().params.action?.toString() == 'claim' && 'show'">Luck
                       History</button>
                     </router-link>
                     <router-link to="/redpacket/send">
-                      <button class="listView-button" @click="sendLuck = true; luckHistory = false" :class="sendLuck && 'show'">Send
+                      <button class="listView-button" @click="sendLuck = true; luckHistory = false" :class="useRoute().params.action?.toString() == 'send' && 'show'">Send
                         Luck</button>
                     </router-link>
                   </div>
                 </div>
               </div>
-              <RedPacektHistoryList v-if="useRoute().params.action.toString() != 'send'" :luckHistory="luckHistory"></RedPacektHistoryList>
-              <RedPacketSend v-if="useRoute().params.action.toString() == 'send'" :sendLuck="sendLuck" @redPacketCreated="redPacketCreated"></RedPacketSend>
+              <RedPacektHistoryList v-if="useRoute().params.action.toString() != 'send'"></RedPacektHistoryList>
+              <RedPacketSend v-if="useRoute().params.action.toString() == 'send'"></RedPacketSend>
             </div>
           </div>
         </div>
@@ -57,10 +57,6 @@ import { useRoute } from "vue-router";
 
 const sendLuck = ref<boolean>(false);
 const luckHistory = ref<boolean>(true);
-
-const redPacketCreated = () => {
-  console.log("hello world!");
-}
 </script>
 
 <style lang="less" scoped>

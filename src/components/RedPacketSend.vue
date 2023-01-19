@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!walletStore.connected && props.sendLuck" class="connectWallet">
+  <div v-if="!walletStore.connected && useRoute().params.action?.toString() == 'send'" class="connectWallet">
     <button v-if="walletStore.connected == false" class="connect-wallet-button" @click="connectOrDisconnectWallet">
       <svg style="margin-right: 10px;" width="18" height="18" viewBox="0 0 18 18" fill="none"
         xmlns="http://www.w3.org/2000/svg">
@@ -10,7 +10,7 @@
       Connect Wallet
     </button>
   </div>
-  <div v-if="walletStore.connected && props.sendLuck">
+  <div v-if="walletStore.connected && useRoute().params.action?.toString() == 'send'">
     <div class="red-packet">
       <p v-if="hasBalanceWarning" class="balance-warning-mobile"><i class="icofont-warning-alt" style="margin-right: 0.25rem;"></i>Insufficient balance</p>
       <div class="total-amount">
@@ -25,7 +25,7 @@
           <div class="input-info-show">
             <p class="token-available-balance">
               Available Balance:
-              <span class="balance-amount">{{ redpacket.token.balance?.normalized }}</span>
+              <span class="balance-amount">{{ redpacket.token.balance?.normalized.substring(0,6) }}</span>
             </p>
             <div class="total-choose-token">
               <div class="token-select">
@@ -76,7 +76,7 @@
         <div class="share-number">
           <div class="share-input-div">
             <input v-model="redpacket.split" id="red-packet-share" class="shares-input" autocomplete="off" placeholder="0"
-              type="number" autocorrect="off" inputmode="decimal" pattern="^[0-9]$" spellcheck="false">
+              type="number" min="0" step="1" autocorrect="off" inputmode="decimal" pattern="^[0-9]$" spellcheck="false" onkeydown="if(event.key==='.'){event.preventDefault();}"  oninput="event.target.value = event.target.value.replace(/[^0-9]*/g,'');">
           </div>
           <p>People</p>
         </div>
@@ -302,6 +302,7 @@ import { message } from 'ant-design-vue';
 import useClipboard from 'vue-clipboard3';
 import { createToaster } from "@meforma/vue-toaster";
 import { CopyOutlined } from '@ant-design/icons-vue';
+import { useRoute } from "vue-router";
 
 const chooseTotalDrop = ref<boolean>(false);
 const openDropdown = ref<boolean>(false);
@@ -316,13 +317,6 @@ const redPacketBalance = ref<string>("0");
 const hasBalanceWarning = ref<boolean>(false);
 const nativeToken = useProfileStore().nativeToken;
 const { toClipboard } = useClipboard()
-
-const props = defineProps({
-  sendLuck: {
-    type: Boolean,
-    required: true,
-  }
-});
 
 const redpacket = ref<RedPacket>({
   mode: "random",
@@ -449,7 +443,7 @@ const confirmRedPacket = function () {
 };
 
 const setMaxAmount = () => {
-  redpacket.value.balance = redpacket.value.token.balance?.normalized || "0";
+  redPacketBalance.value = redpacket.value.token.balance?.normalized || "0";
 }
 
 const chooseTotalHandle: OnClickOutsideHandler = (event) => {
@@ -721,6 +715,9 @@ onClickOutside(
   top: 10px;
   left: 12px; }
 .token-available-balance {
+  display: flex;
+  justify-content: flex-end;
+  width: 175px;
   font-size: 13px;
   line-height: 18px;
   color: rgb(118, 127, 141);

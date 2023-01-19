@@ -1,7 +1,7 @@
 <template>
   <!-- <a-list>
 <template #renderItem="{ item }"> -->
-  <div v-if="props.luckHistory" class="token-listDetail">
+  <div v-if="useRoute().params.action?.toString() == 'claim'" class="token-listDetail">
     <div class="token-table">
       <div style="overflow: visible; border-radius: 0.75rem;">
         <table>
@@ -87,12 +87,6 @@ onMounted(loadData);
 watch(() => useNetworkStore().network, loadData);
 
 const showDetailsEnabled = ref<boolean>(false);
-const props = defineProps({
-  luckHistory: {
-    type: Boolean,
-    required: true,
-  }
-});
 
 const claimLink = (redPacket: RedPacketDB) => {
   return window.location.origin + useRoute().path + "?id=" + redPacket.id

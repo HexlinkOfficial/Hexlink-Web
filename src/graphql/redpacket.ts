@@ -2,7 +2,7 @@ import { gql } from '@urql/core';
 import { useAuthStore } from '@/stores/auth';
 import { handleUrqlResponse, setUrqlClientIfNecessary } from './urql';
 import { useNetworkStore } from '@/stores/network';
-import type { HexlinkUserInfo, RedPacketDB} from "@/types";
+import type { HexlinkUserInfo} from "@/types";
 
 export const GET_REDPACKET = gql`
   query GetRedPacket($id: String!) {
@@ -67,6 +67,30 @@ export const UPDATE_REDPACKET = gql`
         }
     }
 `
+
+export interface RedPacketDBMetadata {
+  token: string
+  salt: string,
+  mode: string,
+  split: number,
+  balance: string,
+  validator: string,
+  contract: string,
+  creator: string,
+  tokenAmount: string,
+  gasToken: string,
+  gasTokenAmount: string
+}
+
+export interface RedPacketDB {
+  id: string,
+  userId: string,
+  chain: string,
+  metadata: RedPacketDBMetadata,
+  creator: HexlinkUserInfo,
+  tx?: string,
+  createdAt: string,
+}
 
 export async function getRedPacket(
   redPacketId: string

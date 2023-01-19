@@ -58,7 +58,7 @@ import { normalizeBalance } from '@/web3/tokens';
 import { getInfuraProvider } from "@/web3/network";
 import { ethers } from "ethers";
 
-interface RedPacketAggregated {
+interface CreatedRedPacket {
   redPacket: RedPacketDB,
   token: TokenMetadata,
   state: {
@@ -70,7 +70,7 @@ interface RedPacketAggregated {
 
 const profileStore = useProfileStore();
 
-const redPackets = ref<RedPacketAggregated[]>([]);
+const redPackets = ref<CreatedRedPacket[]>([]);
 const claimed = ref<ClaimedRedPacket[]>([]);
 const loadClaimInfo = async (provider: ethers.providers.Provider) => {
   const claims : ClaimedRedPacket[] = await getClaimedRedPackets();
@@ -107,7 +107,7 @@ const normalize = (balance: EthBigNumber | undefined, token: TokenMetadata) => {
   return normalized.normalized;
 }
 
-const normalizedDbBalance = (redPacket: RedPacketAggregated) => {
+const normalizedDbBalance = (redPacket: CreatedRedPacket) => {
   return redPacket.redPacket.metadata.tokenAmount
     ? (
       redPacket.redPacket.metadata.balance || 
@@ -131,7 +131,7 @@ const loadAndSaveERC20Token = async (tokenAddr: string) : Promise<Token> => {
 const aggregateCreated = async function(
   provider: ethers.providers.Provider,
   redPacket: RedPacketDB
-) : Promise<RedPacketAggregated> {
+) : Promise<CreatedRedPacket> {
   redPacket.claims = await Promise.all((redPacket.claims || []).map(c => validateClaimStatus(provider, c)));
   const state = await queryRedPacketInfo(redPacket);
   const tokenAddr = redPacket.metadata.token.toLowerCase();
@@ -160,7 +160,7 @@ const aggregateCreated = async function(
     redPacket,
     token: token.metadata,
     state,
-  } as RedPacketAggregated;
+  } as CreatedRedPacket;
 };
 
 const iface = new ethers.utils.Interface([

@@ -142,7 +142,7 @@ async function validAllowance(
     const erc20 = new ethers.Contract(
         token.metadata.address,
         ERC20_ABI,
-        getProvider(network)
+        getInfuraProvider(network)
     );
     const allowance = await erc20.allowance(
         owner.address,

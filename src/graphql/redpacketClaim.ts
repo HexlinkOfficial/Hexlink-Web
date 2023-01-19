@@ -3,6 +3,7 @@ import { useAuthStore } from '@/stores/auth';
 import { handleUrqlResponse, setUrqlClientIfNecessary } from './urql';
 import type { HexlinkUserInfo, RedPacketDB } from "@/types";
 import { userInfo } from "@/web3/account";
+import { BigNumber as EthBigNumber } from "ethers";
 
 export const GET_REDPACKET_CLAIM = gql`
     query GetRedPacketByRedPacket(
@@ -18,6 +19,8 @@ export const GET_REDPACKET_CLAIM = gql`
             id
             tx
             created_at
+            tx_status
+            claimed
         }
     }
 `
@@ -37,6 +40,8 @@ export const GET_REDPACKET_CLAIMS = gql`
             tx
             created_at
             creator_id
+            tx_status
+            claimed
         }
     }
 `
@@ -54,6 +59,8 @@ export const GET_REDPACKET_CLAIMS_BY_CLAIMER = gql`
             tx
             created_at
             creator_id
+            tx_status
+            claimed
             redpacket {
               id
               user_id
@@ -86,7 +93,27 @@ export const UPDATE_REDPACKET_CLAIM = gql`
     ) {
         update_redpacket_claim_by_pk (
             pk_columns: {id: $id},
-            _set: { claimer: $claimer }
+            _set: {
+              claimer: $claimer,
+            }
+        ) {
+            id
+        }
+    }
+`
+
+export const UPDATE_REDPACKET_CLAIM_TX = gql`
+    mutation (
+        $id: Int!
+        $txStatus: String!
+        $claimed: String
+    ) {
+        update_redpacket_claim_by_pk (
+            pk_columns: {id: $id},
+            _set: {
+              tx_status: $txStatus,
+              claimed: $claimed,
+            }
         ) {
             id
         }
@@ -99,11 +126,15 @@ export interface RedPacketClaimInput {
   tx: string,
 }
 
+export type TxStatus = "pending" | "error" | "success";
+
 export interface RedPacketClaim extends RedPacketClaimInput {
   createdAt: Date,
-  id: string,
+  id: number,
   claimerId: string,
   claimer: HexlinkUserInfo,
+  txStatus?: TxStatus,
+  claimed?: EthBigNumber,
 }
 
 function parseRedPacketClaim(claim: any) {
@@ -119,23 +150,23 @@ function parseRedPacketClaim(claim: any) {
 }
 
 export interface ClaimedRedPacket {
-  id: string,
-  claimerId: string,
-  claimer: HexlinkUserInfo,
-  creatorId: string,
-  tx: string,
-  createdAt: Date,
+  claim: RedPacketClaim,
   redPacket: RedPacketDB
 }
 
 function parseClaimedRedPacket(claim: any) {
   return {
-    id: claim.id,
-    claimerId: claim.claimer_id,
-    claimer: JSON.parse(claim.claimer) as HexlinkUserInfo,
-    tx: claim.tx,
-    creatorId: claim.creator_id,
-    createdAt: new Date(claim.created_at),
+    claim: {
+      id: claim.id,
+      claimerId: claim.claimer_id,
+      claimer: JSON.parse(claim.claimer) as HexlinkUserInfo,
+      tx: claim.tx,
+      creatorId: claim.creator_id,
+      createdAt: new Date(claim.created_at),
+      redPacketId: claim.redpacket.id,
+      txStatus: claim.tx_status,
+      claimed: claim.claimed ? EthBigNumber.from(claim.claimed) : undefined,
+    },
     redPacket: {
       id: claim.redpacket.id,
       userId: claim.redpacket.user_id,
@@ -193,7 +224,6 @@ export async function getClaimedRedPackets() : Promise<ClaimedRedPacket[]> {
     { claimerId: useAuthStore().user!.uid }
   ).toPromise();
   if (await handleUrqlResponse(result)) {
-    console.log(result);
     return result.data.redpacket_claim.map((r : any) => {
       return parseClaimedRedPacket(r);
     });
@@ -238,5 +268,22 @@ export async function updateRedPacketClaimer(
   ).toPromise();
   if (!await handleUrqlResponse(result)) {
       await updateRedPacketClaimer(id, claimer);
+  }
+}
+
+export async function updateRedPacketTxStatus(
+  id: number,
+  txStatus: TxStatus,
+  claimed?: string
+) : Promise<void> {
+  const client = setUrqlClientIfNecessary(
+    useAuthStore().user!.idToken!
+  );
+  const result = await client.mutation(
+      UPDATE_REDPACKET_CLAIM_TX,
+      {id, txStatus, claimed}
+  ).toPromise();
+  if (!await handleUrqlResponse(result)) {
+      await updateRedPacketTxStatus(id, txStatus, claimed);
   }
 }

@@ -2,7 +2,7 @@ import { gql } from '@urql/core';
 import { useAuthStore } from '@/stores/auth';
 import { handleUrqlResponse, setUrqlClientIfNecessary } from './urql';
 import { useNetworkStore } from '@/stores/network';
-import type { HexlinkUserInfo } from "@/types";
+import type { HexlinkUserInfo} from "@/types";
 
 export const GET_REDPACKET = gql`
   query GetRedPacket($id: String!) {
@@ -27,7 +27,8 @@ export const GET_CREATED_REDPACKETS = gql`
             where: {
               user_id: { _eq: $userId },
               chain: { _eq: $chain },
-            }
+            },
+            limit: 100
         ) {
             id
             user_id

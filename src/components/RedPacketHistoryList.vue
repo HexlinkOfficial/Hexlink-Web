@@ -19,8 +19,8 @@
             <tr v-for="(redPacket, i) in redPackets" :key="i" @click="showDetails()">
               <td>{{ redPacket.token.symbol }}</td>
               <td>{{
-                normalize(redPacket.redPacket.metadata.tokenAmount, redPacket.token)
-              }}/{{
+                normalizedDbBalance(redPacket)
+              }} / {{
                 normalize(redPacket.state.balance, redPacket.token)
               }}</td>
               <td>{{ redPacket.redPacket.metadata.split }} / {{ redPacket.state.split }}</td>
@@ -50,8 +50,8 @@ import { getERC20Metadata } from '@/web3/tokens';
 import { useProfileStore } from "@/stores/profile";
 import { useNetworkStore } from '@/stores/network';
 import { getCreatedRedPackets, getRedPacket } from '@/graphql/redpacket';
-import type { RedPacketDB } from '@/graphql/redpacket';
-import type { TokenMetadata, Token } from '@/types';
+import { getClaimedRedPackets, type ClaimedRedPacket } from '@/graphql/redpacketClaim';
+import type { TokenMetadata, Token, RedPacketDB } from '@/types';
 import { BigNumber as EthBigNumber } from "ethers";
 import { queryRedPacketInfo, redPacketContract } from "@/web3/redpacket";
 import { normalizeBalance } from '@/web3/tokens';
@@ -66,25 +66,20 @@ interface RedPacketAggregated {
   }
 };
 
-interface ClaimedRedPacket {
-  redPacket: RedPacketDB,
-  token: TokenMetadata,
-  claimed: EthBigNumber;
-}
-
 const redPackets = ref<RedPacketAggregated[]>([]);
 const profileStore = useProfileStore();
 
 const claimed = ref<ClaimedRedPacket[]>([]);
-const loadClaimed = () => {
-  
-};
+const loadClaimInfo = async () => {
+  const claimed = await getClaimedRedPackets();
+  console.log(claimed);
+}
 
 const loadData = async function() {
   if (useProfileStore().profile?.initiated) {
     const rps : RedPacketDB[] = await getCreatedRedPackets();
-    redPackets.value = await Promise.all(rps.map(r => aggregate(r)));
-    loadClaimed();
+    redPackets.value = await Promise.all(rps.map(r => aggregateCreated(r)));
+    await loadClaimInfo();
   }
 };
 
@@ -107,9 +102,24 @@ const showDetails = async function() {
   showDetailsEnabled.value = showDetailsEnabled.value ? false : true;
 };
 
-const normalize = (balance: EthBigNumber | string, token: TokenMetadata) => {
-  const normalized = normalizeBalance(EthBigNumber.from(balance), token.decimals);
+const normalize = (balance: EthBigNumber | undefined, token: TokenMetadata) => {
+  balance = balance || EthBigNumber.from(0);
+  const normalized = normalizeBalance(balance, token.decimals);
   return normalized.normalized;
+}
+
+const normalizedDbBalance = (redPacket: RedPacketAggregated) => {
+  return redPacket.redPacket.metadata.tokenAmount
+    ? (
+      redPacket.redPacket.metadata.balance || 
+        normalize(
+          EthBigNumber.from(redPacket.redPacket.metadata.tokenAmount),
+          redPacket.token
+        )
+    ) : normalize(
+      EthBigNumber.from(redPacket.redPacket.metadata.balance),
+      redPacket.token
+    );
 }
 
 const loadAndSaveERC20Token = async (tokenAddr: string) : Promise<Token> => {
@@ -119,7 +129,7 @@ const loadAndSaveERC20Token = async (tokenAddr: string) : Promise<Token> => {
   return profileStore.profile!.tokens[tokenAddr]!;
 }
 
-const aggregate = async function(redPacket: RedPacketDB) : Promise<RedPacketAggregated> {
+const aggregateCreated = async function(redPacket: RedPacketDB) : Promise<RedPacketAggregated> {
   const state = await queryRedPacketInfo(redPacket);
   const tokenAddr = redPacket.metadata.token.toLowerCase();
   const token = await loadAndSaveERC20Token(tokenAddr);
@@ -129,6 +139,26 @@ const aggregate = async function(redPacket: RedPacketDB) : Promise<RedPacketAggr
     state
   } as RedPacketAggregated;
 };
+
+const aggregatedClaimed = async function(log: any) : Promise<ClaimedRedPacket | undefined> {
+  const redPacket = await getRedPacket(log.args.PacketId);
+  if (redPacket) {
+    const token = await loadAndSaveERC20Token(redPacket?.metadata.token)
+    return {
+      redPacket,
+      token: token.metadata,
+      claimed: log.args.amount,
+      txInfo: {
+        blockNumber: log.blockNumber,
+        txIndex: log.transactionIndex,
+        txHash: log.transactionHash,
+        logIndex: log.logIndex,
+        timestamp: (await log.getBlock()).timestamp
+      }
+    };
+  }
+}
+
 </script>
 
 <style lang="less" scoped>

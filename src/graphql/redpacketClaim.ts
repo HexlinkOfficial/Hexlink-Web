@@ -1,7 +1,7 @@
 import { gql } from '@urql/core';
 import { useAuthStore } from '@/stores/auth';
 import { handleUrqlResponse, setUrqlClientIfNecessary } from './urql';
-import type { HexlinkUserInfo } from "@/types";
+import type { HexlinkUserInfo, RedPacketDB } from "@/types";
 import { userInfo } from "@/web3/account";
 
 export const GET_REDPACKET_CLAIM = gql`
@@ -23,11 +23,12 @@ export const GET_REDPACKET_CLAIM = gql`
 `
 
 export const GET_REDPACKET_CLAIMS = gql`
-    query GetRedPacketByRedPacket($redpacketId: String!) {
+    query GetClaimsByRedPacket($redpacketId: String!) {
         redpacket_claim (
             where: {
                 redpacket_id: { _eq: $redpacketId },
-            }
+            },
+            limit: 100
         ) {
             id
             redpacket_id
@@ -41,7 +42,7 @@ export const GET_REDPACKET_CLAIMS = gql`
 `
 
 export const GET_REDPACKET_CLAIMS_BY_CLAIMER = gql`
-    query GetRedPacketByRedPacket($claimerId: String!) {
+    query GetClaimsByClaimer($claimerId: String!) {
         redpacket_claim (
             where: {
                 claimer_id: { _eq: $claimerId },
@@ -53,7 +54,9 @@ export const GET_REDPACKET_CLAIMS_BY_CLAIMER = gql`
             tx
             created_at
             creator_id
-            redpackets {
+            redpacket {
+              id
+              user_id
               chain
               metadata
               creator
@@ -115,6 +118,35 @@ function parseRedPacketClaim(claim: any) {
   };
 }
 
+export interface ClaimedRedPacket {
+  id: string,
+  claimerId: string,
+  claimer: HexlinkUserInfo,
+  creatorId: string,
+  tx: string,
+  createdAt: Date,
+  redPacket: RedPacketDB
+}
+
+function parseClaimedRedPacket(claim: any) {
+  return {
+    id: claim.id,
+    claimerId: claim.claimer_id,
+    claimer: JSON.parse(claim.claimer) as HexlinkUserInfo,
+    tx: claim.tx,
+    creatorId: claim.creator_id,
+    createdAt: new Date(claim.created_at),
+    redPacket: {
+      id: claim.redpacket.id,
+      userId: claim.redpacket.user_id,
+      chain: claim.redpacket.chain,
+      metadata: JSON.parse(claim.redpacket.metadata),
+      creator: JSON.parse(claim.redpacket.creator),
+      createdAt: claim.redpacket.created_at
+    } as RedPacketDB
+  };
+}
+
 export async function isClaimed(
   redPacketId: string,
   claimerId: string,
@@ -127,7 +159,7 @@ export async function isClaimed(
     {redPacketId, claimerId}
   ).toPromise();
   if (await handleUrqlResponse(result)) {
-    return result.data.redpacket_claims.length > 0;
+    return result.data.redpacket_claim.length > 0;
   } else {
     return await isClaimed(redPacketId, claimerId);
   }
@@ -144,7 +176,7 @@ export async function getRedPacketClaims(
     {redPacketId}
   ).toPromise();
   if (await handleUrqlResponse(result)) {
-    return result.data.redpacket_claims.map((r : any) => {
+    return result.data.redpacket_claim.map((r : any) => {
       return parseRedPacketClaim(r);
     });
   } else {
@@ -152,17 +184,18 @@ export async function getRedPacketClaims(
   }
 }
 
-export async function getClaimedRedPackets() : Promise<RedPacketClaim[]> {
+export async function getClaimedRedPackets() : Promise<ClaimedRedPacket[]> {
   const client = setUrqlClientIfNecessary(
     useAuthStore().user!.idToken!
   );
   const result = await client.query(
     GET_REDPACKET_CLAIMS_BY_CLAIMER,
-    { claimer_id: useAuthStore().user!.uid }
+    { claimerId: useAuthStore().user!.uid }
   ).toPromise();
   if (await handleUrqlResponse(result)) {
-    return result.data.redpacket_claims.map((r : any) => {
-      return parseRedPacketClaim(r);
+    console.log(result);
+    return result.data.redpacket_claim.map((r : any) => {
+      return parseClaimedRedPacket(r);
     });
   } else {
     return await getClaimedRedPackets();

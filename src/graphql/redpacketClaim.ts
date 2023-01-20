@@ -8,12 +8,12 @@ import type { RedPacketClaim, ClaimedRedPacket, TxStatus, RedPacketClaimInput } 
 
 export const GET_REDPACKET_CLAIM = gql`
     query GetRedPacketByRedPacket(
-        $redpacketId: String!,
+        $redPacketId: String!,
         $claimerId: String!,
     ) {
         redpacket_claim (
             where: {
-                redpacket_id: { _eq: $redpacketId },
+                redpacket_id: { _eq: $redPacketId },
                 claimer_id: { _eq: $claimerId },
             }
         ) {
@@ -27,10 +27,11 @@ export const GET_REDPACKET_CLAIM = gql`
 `
 
 export const GET_REDPACKET_CLAIMS = gql`
-    query GetClaimsByRedPacket($redpacketId: String!) {
+    query GetClaimsByRedPacket($redPacketId: String!) {
         redpacket_claim (
             where: {
-                redpacket_id: { _eq: $redpacketId },
+                redpacket_id: { _eq: $redPacketId },
+                tx_status: { _neq: "error" }
             },
             limit: 100
         ) {
@@ -119,7 +120,7 @@ export const UPDATE_REDPACKET_CLAIM_TX = gql`
     }
 `
 
-function parseRedPacketClaim(claim: any) {
+function parseRedPacketClaim(claim: any) : RedPacketClaim {
   return {
     id: claim.id,
     claimerId: claim.claimer_id,
@@ -127,7 +128,9 @@ function parseRedPacketClaim(claim: any) {
     tx: claim.tx,
     redPacketId: claim.redpacket_id,
     createdAt: new Date(claim.createdAt),
-  };
+    txStatus: claim.tx_status,
+    claimed: claim.claimed,
+  } as RedPacketClaim;
 }
 
 function parseClaimedRedPacket(claim: any) {

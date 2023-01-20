@@ -1,7 +1,6 @@
 <template>
-  <!-- <a-list>
-<template #renderItem="{ item }"> -->
-  <div v-if="useRoute().params.action?.toString() == 'claim'" class="token-listDetail">
+  <Loading v-if="loading"/>
+  <div v-if="!loading" class="token-listDetail">
     <div class="token-table">
       <div style="overflow: visible; border-radius: 0.75rem;">
         <table>
@@ -50,13 +49,14 @@ import { getERC20Metadata } from '@/web3/tokens';
 import { useProfileStore } from "@/stores/profile";
 import { useNetworkStore } from '@/stores/network';
 import { getCreatedRedPackets, updateRedPacketStatus } from '@/graphql/redpacket';
-import { getClaimedRedPackets, updateRedPacketTxStatus } from '@/graphql/redpacketClaim';
+import { getClaimedRedPackets, updateRedPacketTxStatus, getRedPacketClaims } from '@/graphql/redpacketClaim';
 import type { TokenMetadata, Token, RedPacketDB, ClaimedRedPacket, RedPacketClaim } from '@/types';
 import { BigNumber as EthBigNumber } from "ethers";
 import { queryRedPacketInfo } from "@/web3/redpacket";
 import { normalizeBalance } from '@/web3/tokens';
 import { getInfuraProvider } from "@/web3/network";
 import { ethers } from "ethers";
+import Loading from "@/components/Loading.vue";
 
 interface CreatedRedPacket {
   redPacket: RedPacketDB,
@@ -79,15 +79,29 @@ const loadClaimInfo = async (provider: ethers.providers.Provider) => {
   );
 }
 
+const loadClaimsForOnePacket = async (
+  provider: ethers.providers.Provider,
+  redPacketId: string
+) : Promise<RedPacketClaim[]> => {
+  const claims = await getRedPacketClaims(redPacketId);
+  return await Promise.all(
+    claims.map(c => validateClaimStatus(provider, c))
+  );
+}
+
 const loadData = async function() {
+  loading.value = true;
   if (useProfileStore().profile?.initiated) {
     const provider = getInfuraProvider();
     const rps : RedPacketDB[] = await getCreatedRedPackets();
     redPackets.value = await Promise.all(rps.map(r => aggregateCreated(provider, r)));
-    await loadClaimInfo(provider);
+    // await loadClaimInfo(provider);
+    // await loadClaimsForOnePacket(provider, redPackets.value[0]?.redPacket.id);
   }
+  loading.value = false;
 };
 
+const loading = ref<boolean>(true);
 onMounted(loadData);
 watch(() => useNetworkStore().network, loadData);
 
@@ -132,7 +146,6 @@ const aggregateCreated = async function(
   provider: ethers.providers.Provider,
   redPacket: RedPacketDB
 ) : Promise<CreatedRedPacket> {
-  redPacket.claims = await Promise.all((redPacket.claims || []).map(c => validateClaimStatus(provider, c)));
   const state = await queryRedPacketInfo(redPacket);
   const tokenAddr = redPacket.metadata.token.toLowerCase();
   const token = await loadAndSaveERC20Token(tokenAddr);

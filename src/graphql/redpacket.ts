@@ -38,14 +38,6 @@ export const GET_CREATED_REDPACKETS = gql`
             metadata
             created_at
             status
-            redpacket_claims {
-              id
-              claimer
-              claimed
-              tx_status
-              tx
-              created_at
-            }
         }
     }
 `
@@ -125,15 +117,7 @@ export async function getCreatedRedPackets() : Promise<RedPacketDB[]> {
         creator: JSON.parse(r.creator),
         createdAt: r.created_at,
         tx: r.tx,
-        status: r.status,
-        claims: r.redpacket_claims.map((c: any) => ({
-          id: c.id,
-          claimer: JSON.parse(c.claimer),
-          txStatus: c.tx_status,
-          claimed: c.claimed,
-          tx: c.tx,
-          createdAt: new Date(c.created_at)
-        } as RedPacketClaim))
+        status: r.status
       } as RedPacketDB;
     });
   } else {

@@ -227,7 +227,6 @@ export interface RedPacketDB {
     tx: string,
     createdAt: string,
     status?: RedPacketStatus,
-    claims?: RedPacketClaim[]
 }
 
 export interface RedPacketClaimInput {

@@ -14,7 +14,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from "vue";
+import { computed } from "vue";
 import Header from './Header.vue';
 import SideBar from './Sidebar.vue';
 import RedPacketClaim from "@/components/RedPacketClaim.vue";
@@ -32,20 +32,11 @@ const showClaim = () => {
 }
 
 const showConfirm = computed(() => {
-  return useRedPacketStore()[useNetworkStore().network!.name]?.status;
+  const network = useNetworkStore().network!.name;
+  if (network) {
+    return useRedPacketStore()[network]?.status;
+  }
 })
-
-// const showConform = () => {
-//   showConfirm.value = true;
-// }
-
-// const showConfirm = () => {
-//   if (useRoute().params.action?.toString() == 'send' && useRoute().query.id == "confirm") return true;
-// }
-// onMounted(() => {
-//   console.log(useRedPacketStore().redpacket);
-// })
-// watch(() => useRedPacketStore()[useNetworkStore().network!.name].status, showConform);
 </script>
 
 <style lang="less" scoped>

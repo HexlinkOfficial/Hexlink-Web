@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!walletStore.connected && useRoute().params.action?.toString() == 'send'" class="connectWallet">
+  <div v-if="!walletStore.connected" class="connectWallet">
     <button v-if="walletStore.connected == false" class="connect-wallet-button" @click="connectOrDisconnectWallet">
       <svg style="margin-right: 10px;" width="18" height="18" viewBox="0 0 18 18" fill="none"
         xmlns="http://www.w3.org/2000/svg">
@@ -10,14 +10,14 @@
       Connect Wallet
     </button>
   </div>
-  <div v-if="walletStore.connected && useRoute().params.action?.toString() == 'send'">
+  <div v-if="walletStore.connected">
     <div class="red-packet">
       <p v-if="hasBalanceWarning" class="balance-warning-mobile"><i class="icofont-warning-alt" style="margin-right: 0.25rem;"></i>Insufficient balance</p>
       <div class="total-amount">
         <div class="box">
           <p class="total-amount-text">Total Amount</p>
           <div style="display: flex; width: 100%;">
-            <input v-model="redPacketBalance" @change="setRedPBalance" :style="hasBalanceWarning && 'color: #FE646F;'" id="red-packet-amount" class="amount-input"
+            <input v-model="redPacketBalance" @change="setRedPBalance" :style="hasBalanceWarning ? 'color: #FE646F;' : ''" id="red-packet-amount" class="amount-input"
               autocomplete="off" placeholder="0.0" required="true" type="number" autocorrect="off" title="Token Amount"
               inputmode="decimal" min="0" minlength="1" maxlength="79" pattern="^[0-9]*[.,]?[0-9]*$" spellcheck="false">
             <p v-if="hasBalanceWarning" class="balance-warning"><i class="icofont-warning-alt" style="margin-right: 0.25rem;"></i>Insufficient balance</p>
@@ -267,7 +267,6 @@
       </div>
     </div>
     <div class="create">
-      <router-link to="/redpacket/send?id=confirm">
         <button class="connect-wallet-button" @click="confirmRedPacket" style="width: auto;">
           <svg style="margin-right: 10px;" width="18" height="18" viewBox="0 0 18 18" fill="none"
             xmlns="http://www.w3.org/2000/svg">
@@ -277,7 +276,6 @@
           </svg>
           Confirm Red Packet
         </button>
-      </router-link>
     </div>
   </div>
 </template>
@@ -302,7 +300,6 @@ import { message } from 'ant-design-vue';
 import useClipboard from 'vue-clipboard3';
 import { createToaster } from "@meforma/vue-toaster";
 import { CopyOutlined } from '@ant-design/icons-vue';
-import { useRoute } from "vue-router";
 
 const chooseTotalDrop = ref<boolean>(false);
 const openDropdown = ref<boolean>(false);
@@ -412,7 +409,6 @@ const refresh = async function () {
     }
   }
 };
-
 
 const connectOrDisconnectWallet = async function () {
   if (walletStore.connected) {

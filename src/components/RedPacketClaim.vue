@@ -1,6 +1,6 @@
 <template>
   <div v-if="claimStatus == ''" class="claim-card transition">
-    <router-link to="/redpacket/claim">
+    <router-link to="/redpackets">
       <svg class="redpacket_close transition" width="30" height="30" viewBox="0 0 30 30" fill="none"
         xmlns="http://www.w3.org/2000/svg">
         <path
@@ -31,14 +31,13 @@
   </div>
   <div v-if="claimStatus !== ''" class="claim-success-card transition">
     <h2 class="transition">
-      <!-- <i class="fa fa-check-circle-o fa-5x" aria-hidden="true"></i> -->
       <div class="spinner-lg" :class="claimStatus">
         <div class="check"></div>
       </div>
       <span style="font-size: 20px; margin-top: 1rem;">{{ loadText() }}</span><br>
     </h2>
     <div class="cta-container transition" style="margin-top: 340px;">
-      <router-link to="/redpacket/claim">
+      <router-link to="/redpackets">
         <button class="cta">OK</button>
       </router-link>
     </div>
@@ -48,7 +47,6 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
-import type { RedPacketDB } from '@/graphql/redpacket';
 import { getRedPacket } from '@/graphql/redpacket';
 import { useRoute } from "vue-router";
 import { claimRedPacket } from "@/web3/redpacket";
@@ -56,7 +54,7 @@ import { getERC20Metadata } from "@/web3/tokens";
 import { getNetwork } from "@/configs/network";
 import { useProfileStore } from "@/stores/profile";
 import { switchNetwork } from "@/web3/network";
-import type { TokenMetadata, Network } from "@/types";
+import type { TokenMetadata, Network, RedPacketDB } from "@/types";
 
 const redPacket = ref<RedPacketDB | undefined>();
 const redPacketTokenIcon = ref<string>("");
@@ -74,7 +72,7 @@ async function loadTokenMetadata(
 }
 
 onMounted(async () => {
-  redPacket.value = await getRedPacket(useRoute().query.id!.toString());
+  redPacket.value = await getRedPacket(useRoute().query.claim!.toString());
   const network = getNetwork(redPacket.value!.chain);
   switchNetwork(network);
   const metadata = await loadTokenMetadata(redPacket.value!.metadata.token, network);

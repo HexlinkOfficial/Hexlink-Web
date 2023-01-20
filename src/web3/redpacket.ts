@@ -512,11 +512,11 @@ async function processTxAndSave(
 }
 
 export async function deployAndCreateNewRedPacket(
-    network: Network,
     redpacket: RedPacket,
     useHexlinkAccount: boolean,
     dryrun: boolean = false
 ) {
+    const network = useNetworkStore().network!;
     const txes = await buildDeployAndCreateRedPacketTx(
         network,
         redpacket,
@@ -526,11 +526,11 @@ export async function deployAndCreateNewRedPacket(
 }
 
 export async function createNewRedPacket(
-    network: Network,
     redpacket: RedPacket,
     useHexlinkAccount: boolean,
     dryrun: boolean = false
 ) : Promise<string> {
+    const network = useNetworkStore().network!;
     const txes = await buildCreateRedPacketTx(
         network,
         redpacket,

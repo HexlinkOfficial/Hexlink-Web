@@ -1,58 +1,54 @@
 <template>
-    <Layout :active="1">
-      <h1 style="margin-bottom: 1rem;">Red Packet</h1>
-      <div class="row">
+    <div class="row">
         <div className="row invoice-card-row">
-          <div class="col-xxl-6">
+            <div class="col-xxl-6">
             <div class="card">
-              <div class="card-body">
+                <div class="card-body">
                 <div class="token-list">
-                  <div class="title">
+                    <div class="title">
                     <div class="title-col">
-                      <div class="content">
+                        <div class="content">
                         <div class="text">Share your love</div>
                         <svg width="4" height="16" viewBox="0 0 4 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path
+                            <path
                             d="M2 9C2.55228 9 3 8.55228 3 8C3 7.44772 2.55228 7 2 7C1.44772 7 1 7.44772 1 8C1 8.55228 1.44772 9 2 9Z"
                             fill="black" stroke="black" stroke-linecap="round" stroke-linejoin="round" />
-                          <path
+                            <path
                             d="M2 3C2.55228 3 3 2.55228 3 2C3 1.44772 2.55228 1 2 1C1.44772 1 1 1.44772 1 2C1 2.55228 1.44772 3 2 3Z"
                             fill="black" stroke="black" stroke-linecap="round" stroke-linejoin="round" />
-                          <path
+                            <path
                             d="M2 15C2.55228 15 3 14.5523 3 14C3 13.4477 2.55228 13 2 13C1.44772 13 1 13.4477 1 14C1 14.5523 1.44772 15 2 15Z"
                             fill="black" stroke="black" stroke-linecap="round" stroke-linejoin="round" />
                         </svg>
-                      </div>
+                        </div>
                     </div>
-                  </div>
-                  <div class="views">
+                    </div>
+                    <div class="views">
                     <div class="detail-view">
-                      <router-link to="/redpackets">
+                        <router-link to="/redpackets">
                         <button class="listView-button" :class="selected == 'history' ? 'show' : ''">
-                          Luck History
+                            Luck History
                         </button>
-                      </router-link>
-                      <router-link to="/redpacket/send">
+                        </router-link>
+                        <router-link to="/redpacket/send">
                         <button class="listView-button" :class="selected == 'send' ? 'show' : ''">
-                          Send Luck
+                            Send Luck
                         </button>
-                      </router-link>
+                        </router-link>
                     </div>
-                  </div>
+                    </div>
                 </div>
                 <slot></slot>
-              </div>
+                </div>
             </div>
-          </div>
+            </div>
         </div>
-      </div>
-    </Layout>
-  </template>
+    </div>
+</template>
   
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { computed } from "vue";
 import { useRoute } from "vue-router";
-import Layout from "@/components/Layout.vue";
 
 const selected  = computed(() => {
     return useRoute().path == '/redpacket/send' ? 'send' : 'history';

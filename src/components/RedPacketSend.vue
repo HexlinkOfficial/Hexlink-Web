@@ -431,12 +431,10 @@ const modeChoose = (gameMode: "random" | "equal") => {
 }
 
 const confirmRedPacket = function () {
-  // make sure input is right
   if (redpacket.value.balance != "0" && redpacket.value.split > 0) {
     useRedPacketStore().beforeCreate(
-      useNetworkStore().network!,
       redpacket.value,
-      accountChosen.value == 0
+      accountChosen.value == 0 ? "hexlink" : "wallet"
     );
   }
 };

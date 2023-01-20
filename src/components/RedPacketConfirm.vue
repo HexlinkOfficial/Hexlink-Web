@@ -9,10 +9,10 @@
       </svg>
     </router-link>
     <h2 class="transition">
-      <span style="font-size: 20px; margin-top: 1rem;">{{ message }}</span><br>
+      <span style="font-size: 20px; margin-top: 4rem;">{{ message }}</span><br>
     </h2>
     <div class="cta-container transition" style="margin-top: 340px;">
-      <button class="cta" @click="createRedPacket">Create Red Packet</button>
+      <button class="cta" @click="createRedPacket">Confirm</button>
     </div>
     <div class="card_circle transition" style="margin-top: -100px;"></div>
   </div>
@@ -76,7 +76,7 @@ const message = computed(() => {
     return "Processing";
   }
   if (store.status == "confirming") {
-    return "Are you sure?";
+    return "Let's go!";
   }
   return "";
 });

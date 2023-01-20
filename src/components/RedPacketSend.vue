@@ -430,8 +430,24 @@ const modeChoose = (gameMode: "random" | "equal") => {
   redpacket.value.mode = gameMode;
 }
 
+const validateInput = () => {
+  if (Number(redpacket.value.balance) == 0) {
+    message.error("Number of tokens to deposit cannot be 0");
+    return false;
+  }
+  if (Number(redpacket.value.split) == 0) {
+    message.error("Number of claimers cannot be 0");
+    return false;
+  }
+  if (hasBalanceWarning.value) {
+    message.error("Insufficient balance");
+    return false;
+  }
+  return true;
+};
+
 const confirmRedPacket = function () {
-  if (redpacket.value.balance != "0" && redpacket.value.split > 0) {
+  if (validateInput()) {
     useRedPacketStore().beforeCreate(
       redpacket.value,
       accountChosen.value == 0 ? "hexlink" : "wallet"
@@ -538,18 +554,12 @@ const calcRemainingBalance = (token: Token) => {
     if (new BigNumber(token.balance?.normalized || 0).minus(redpacket.value.balance || 0).gt(0)) {
       return new BigNumber(token.balance?.normalized || 0).minus(redpacket.value.balance || 0);
     } else {
-      // balanceEnough.value = false;
-      warning();
       return 0;
     }
   } else {
     return token.balance?.normalized;
   }
 }
-
-const warning = () => {
-  message.warning('This is a warning message');
-};
 
 const copy = async (text: string) => {
   try {

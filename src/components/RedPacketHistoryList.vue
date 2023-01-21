@@ -125,7 +125,7 @@ import type { TokenMetadata, Token, RedPacketDB, ClaimedRedPacket, RedPacketClai
 import { BigNumber as EthBigNumber } from "ethers";
 import { queryRedPacketInfo } from "@/web3/redpacket";
 import { normalizeBalance } from '@/web3/tokens';
-import { getInfuraProvider } from "@/web3/network";
+import { getInfuraProvider, getProvider } from "@/web3/network";
 import { ethers } from "ethers";
 import Loading from "@/components/Loading.vue";
 import { createToaster } from "@meforma/vue-toaster";
@@ -175,34 +175,35 @@ const loadData = async function() {
     // await loadClaimsForOnePacket(provider, redPackets.value[0]?.redPacket.id);
   }
   loading.value = false;
-  console.log(redPackets.value);
   extractDate();
 };
 
 const extractDate = () => {
   const group: any = {};
-  redPackets.value.forEach((val) => {
-    const date = val.state.createdAt.toLocaleString().split(',')[0];
-    if (date in group) {
-      group[date].push(val);
-    } else {
-      group[date] = new Array(val);
+  redPackets.value.forEach(async (val) => {
+    let txn_test = await getProvider().getTransaction(val.redPacket.tx);
+    if (txn_test) {
+      const date = val.state.createdAt.toLocaleString().split(',')[0];
+      if (date in group) {
+        group[date].push(val);
+      } else {
+        group[date] = new Array(val);
+      }
+
+      // sort the object
+      const ordered_group: any = {}
+      var isDescending = true;
+      const d_group = Object.keys(group).sort((a, b) => isDescending ? new Date(b).getTime() - new Date(a).getTime() : new Date(a).getTime() - new Date(b).getTime());
+      d_group.forEach((v) => {
+        ordered_group[v] = group[v];
+      })
+      console.log(ordered_group);
+      redPacketByDate.value = ordered_group;
     }
   });
-
-  // sort the object
-  const ordered_group: any = {}
-  var isDescending = true;
-  const d_group = Object.keys(group).sort((a,b) => isDescending ? new Date(b).getTime() - new Date(a).getTime() : new Date(a).getTime() - new Date(b).getTime());
-  d_group.forEach((v) => {
-    ordered_group[v] = group[v];
-  })
-  console.log(ordered_group);
-  redPacketByDate.value = ordered_group;
 }
 
 const loading = ref<boolean>(true);
-
   
 onMounted(loadData);
 watch(() => useNetworkStore().network, loadData);

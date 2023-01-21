@@ -286,7 +286,7 @@ watch([
 ], calcGasSponsorship);
 watch(
   [() => redpacket.value.balance, redPacketTokenBalance],
-  (_old, [newBalance, newTokenBalance]) => {
+  ([newBalance, newTokenBalance], _old) => {
     if (Number(newBalance) > Number(newTokenBalance)) {
       hasBalanceWarning.value = true;
     } else {

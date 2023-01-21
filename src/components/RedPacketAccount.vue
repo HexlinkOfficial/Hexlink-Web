@@ -119,10 +119,6 @@ const account = computed(() => {
     }
 })
 
-const address = computed(() => {
-
-});
-
 const chooseAccount = () => {
     useRedPacketStore().setAccount(props.account)
 };

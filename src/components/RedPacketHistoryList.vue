@@ -172,8 +172,9 @@ watch(() => useNetworkStore().network, loadData);
 
 const showDetailsEnabled = ref<boolean>(false);
 
+const route = useRoute();
 const claimLink = (redPacket: RedPacketDB) => {
-  return (window.location.origin + useRoute().path + "?claim=" + redPacket.id);
+  return (window.location.origin + route.path + "?claim=" + redPacket.id);
 };
 
 const showDetails = () => {

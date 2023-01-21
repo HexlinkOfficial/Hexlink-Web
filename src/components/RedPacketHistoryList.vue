@@ -256,8 +256,8 @@ const aggregateCreated = async function(
   }
   if (!redPacket.state) {
     redPacket.state = {
-      balance: "0",
-      split: 0,
+      balance: redPacket.metadata.balance,
+      split: redPacket.metadata.split,
       createdAt: redPacket.createdAt,
     }
   }

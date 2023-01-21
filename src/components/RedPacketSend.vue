@@ -329,10 +329,7 @@ const validateInput = () => {
 
 const confirmRedPacket = function () {
   if (validateInput()) {
-    useRedPacketStore().beforeCreate(
-      redpacket.value,
-      redPacketStore.account
-    );
+    useRedPacketStore().beforeCreate(redpacket.value);
   }
 };
 

@@ -20,10 +20,9 @@ export const useRedPacketStore = defineStore({
   }),
   persist: true,
   actions: {
-    beforeCreate(redpacket: RedPacket, account: string) {
+    beforeCreate(redpacket: RedPacket) {
       this.status = "confirming";
       this.redpacket = redpacket;
-      this.account = "hexlink";
     },
     setStatus(status: Status) {
       this.status = status;

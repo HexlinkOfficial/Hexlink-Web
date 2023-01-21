@@ -46,20 +46,20 @@
                 <div class="claim-status">
                   <div class="progress-bar">
                     <span class="box-progress" :style="{
-                      width: (v.redPacket.metadata.split - v.redpacket.state.split)/v.redPacket.metadata.split*100 + '%'
+                      width: (v.redPacket.metadata.split - v.redPacket.state.split)/v.redPacket.metadata.split*100 + '%'
                     }"></span>
                   </div>
                   <div class="claimed-data">
                     <p class="claimed-number">
                       Claimed: 
                       <strong>{{
-                          v.redPacket.metadata.split - v.redpacket.state.split
+                          v.redPacket.metadata.split - v.redPacket.state.split
                         }}/{{ v.redPacket.metadata.split }}</strong>
                        Share
                     </p>
                     <p class="claimed-number">
                       Left:
-                      <strong>{{ normalize(v.redpacket.state.balance, v.token) }}</strong>
+                      <strong>{{ normalize(v.redPacket.state.balance, v.token) }}</strong>
                       <div class="token-icon" style="margin-right: 0.25rem; margin-left: 0.25rem;">
                         <img :src="v.token.logoURI">
                       </div>
@@ -150,28 +150,25 @@ const loadData = async function() {
 const extractDate = () => {
   const group: any = {};
   redPackets.value.forEach(async (val) => {
-    let txn_test = await getProvider().getTransaction(val.redPacket.tx);
-    if (txn_test) {
-      const date = new Date(val.redPacket.createdAt).toLocaleString().split(',')[0];
-      if (date in group) {
-        group[date].push(val);
-      } else {
-        group[date] = new Array(val);
-      }
-
-      // sort the object
-      const ordered_group: any = {}
-      var isDescending = true;
-      const d_group = Object.keys(group).sort((a, b) => isDescending
-        ? new Date(b).getTime() - new Date(a).getTime()
-        : new Date(a).getTime() - new Date(b).getTime());
-      d_group.forEach((v) => {
-        ordered_group[v] = group[v];
-      })
-      redPacketByDate.value = ordered_group;
+    const date = new Date(val.redPacket.createdAt).toLocaleString().split(',')[0];
+    if (date in group) {
+      group[date].push(val);
+    } else {
+      group[date] = new Array(val);
     }
+
+    // sort the object
+    const ordered_group: any = {}
+    var isDescending = true;
+    const d_group = Object.keys(group).sort((a, b) => isDescending
+      ? new Date(b).getTime() - new Date(a).getTime()
+      : new Date(a).getTime() - new Date(b).getTime());
+    d_group.forEach((v) => {
+      ordered_group[v] = group[v];
+    })
+    redPacketByDate.value = ordered_group;
   });
-}
+};
 
 const loading = ref<boolean>(true);
   
@@ -256,6 +253,13 @@ const aggregateCreated = async function(
       status: update.status!,
       state: update.status == "finalized" ? update.state : undefined,
     });
+  }
+  if (!redPacket.state) {
+    redPacket.state = {
+      balance: "0",
+      split: 0,
+      createdAt: redPacket.createdAt,
+    }
   }
   return {
     redPacket,

@@ -44,7 +44,7 @@
                       </div>
                     </div>
                     <div style="color: #6a6d7c; white-space: nowrap; margin-left: 0; font-size: 12px;">
-                      <div style="display: flex;">{{ v.redPacket.createdAt.toLocaleString().split('T')[1].split('.')[0] }}</div>
+                      <div style="display: flex;">{{ new Date(v.redPacket.createdAt).toLocaleString().split(',')[1] }}</div>
                     </div>
                   </div>
                 </div>

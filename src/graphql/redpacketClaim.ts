@@ -8,7 +8,6 @@ import type {
   RedPacketClaim,
   ClaimedRedPacket,
   TxStatus,
-  RedPacketClaimInput
 } from "@/types";
 
 export const GET_REDPACKET_CLAIM = gql`
@@ -36,7 +35,7 @@ export const GET_REDPACKET_CLAIMS = gql`
         redpacket_claim (
             where: {
                 redpacket_id: { _eq: $redPacketId },
-                tx_status: { _neq: "error" }
+                tx_status: { _eq: "success" }
             },
             limit: 100
         ) {
@@ -77,19 +76,6 @@ export const GET_REDPACKET_CLAIMS_BY_CLAIMER = gql`
               metadata
               creator
               created_at
-            }
-        }
-    }
-`
-
-export const INSERT_REDPACKET_CLAIM = gql`
-    mutation ($objects: [redpacket_claim_insert_input!]!) {
-        insert_redpacket_claim (
-            objects: $objects
-        ) {
-            affected_rows
-            returning {
-                id
             }
         }
     }
@@ -219,28 +205,6 @@ export async function getClaimedRedPackets() : Promise<ClaimedRedPacket[]> {
     });
   } else {
     return await getClaimedRedPackets();
-  }
-}
-
-export async function insertRedPacketClaim(
-  data: RedPacketClaimInput[],
-) : Promise<{id: string}[]> {
-  const client = setUrqlClientIfNecessary(useAuthStore().user!.idToken!)
-  const result = await client.mutation(
-      INSERT_REDPACKET_CLAIM,
-      {
-          objects: data.map(d => ({
-              redpacket_id: d.redPacketId,
-              claimer_id: useAuthStore().user!.uid,
-              claimer: useAuthStore().userInfo,
-              tx: d.tx
-          }))
-      }
-  ).toPromise();
-  if (await handleUrqlResponse(result)) {
-      return result.data.insert_redpacket_claim.returning;
-  } else {
-      return await insertRedPacketClaim(data);
   }
 }
 

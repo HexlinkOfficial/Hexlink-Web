@@ -9,15 +9,16 @@ select_permissions:
   - role: user
     permission:
       columns:
-        - claimed
-        - claimer
-        - claimer_id
-        - created_at
-        - creator_id
         - id
+        - created_at
+        - updated_at
         - redpacket_id
+        - claimer_id
         - tx
+        - claimer
         - tx_status
+        - claimed
+        - creator_id
       filter:
         _or:
           - claimer_id:
@@ -33,6 +34,9 @@ update_permissions:
         - claimer
         - tx_status
       filter:
-        claimer_id:
-          _eq: X-Hasura-User-Id
-      check: null
+        _or:
+          - claimer_id:
+              _eq: X-Hasura-User-Id
+          - creator_id:
+              _eq: X-Hasura-User-Id
+      check: {}

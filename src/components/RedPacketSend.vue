@@ -774,43 +774,35 @@ onClickOutside(
   box-sizing: border-box;
   -webkit-tap-highlight-color: transparent;
   margin-bottom: 0.2rem;
-  .token-icon {
-    border-radius: 50%;
-    width: 20px;
-    height: 20px;
-    display: flex;
-    justify-content: center;
-    margin-right: 0.5rem;
-    margin-left: 0.5rem; }
-  .token-name {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    padding-left: 8px;
-    padding-right: 8px;
-    white-space: nowrap;
-    cursor: pointer;
-    font-size: 14px;
-    line-height: 18px;
-    font-weight: 700;
-    color: rgb(7, 16, 27);
-    user-select: none;
-    -webkit-tap-highlight-color: transparent; }
-  .token-dropdown {
-    -webkit-tap-highlight-color: transparent;
-    font-size: 16px;
-    cursor: pointer;
-    margin: 0px 4px 0px -4px;
-    color: rgb(118, 127, 141) !important;
-    display: inline-block;
-    background-repeat: no-repeat;
-    background-position: center center;
-    flex-shrink: 0;
-    aspect-ratio: 1 / 1;
-    height: 24px;
-    width: 24px;
-    line-height: 18px;
-    font-weight: 700;
-    user-select: none; } }
+.token-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-left: 8px;
+  padding-right: 8px;
+  white-space: nowrap;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 18px;
+  font-weight: 700;
+  color: rgb(7, 16, 27);
+  user-select: none;
+  -webkit-tap-highlight-color: transparent; }
+.token-dropdown {
+  -webkit-tap-highlight-color: transparent;
+  font-size: 16px;
+  cursor: pointer;
+  margin: 0px 4px 0px -4px;
+  color: rgb(118, 127, 141) !important;
+  display: inline-block;
+  background-repeat: no-repeat;
+  background-position: center center;
+  flex-shrink: 0;
+  aspect-ratio: 1 / 1;
+  height: 24px;
+  width: 24px;
+  line-height: 18px;
+  font-weight: 700;
+  user-select: none; } }
 .max-amount-button {
   position: relative;
   margin: 0px;

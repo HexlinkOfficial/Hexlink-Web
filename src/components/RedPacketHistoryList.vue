@@ -87,7 +87,13 @@ import { loadErc20Token } from '@/web3/tokens';
 import { useNetworkStore } from '@/stores/network';
 import { getCreatedRedPackets, updateRedPacketStatus } from '@/graphql/redpacket';
 import { getClaimedRedPackets, updateRedPacketTxStatus, getRedPacketClaims } from '@/graphql/redpacketClaim';
-import type { Token, RedPacketDB, ClaimedRedPacket, RedPacketClaim } from '@/types';
+import type {
+  Token,
+  RedPacketDB,
+  ClaimedRedPacket,
+  RedPacketClaim,
+  RedPacketOnchainState
+} from '@/types';
 import { BigNumber as EthBigNumber } from "ethers";
 import { queryRedPacketInfo } from "@/web3/redpacket";
 import { normalizeBalance } from '@/web3/tokens';
@@ -100,11 +106,7 @@ import { useTokenStore } from '@/stores/token';
 interface CreatedRedPacket {
   redPacket: RedPacketDB,
   token: Token,
-  state: {
-    balance: EthBigNumber,
-    split: number,
-    createdAt: Date
-  }
+  state: RedPacketOnchainState
 };
 
 const redPackets = ref<CreatedRedPacket[]>([]);
@@ -133,7 +135,9 @@ const loadData = async function() {
   if (useAccountStore().account) {
     const provider = getInfuraProvider();
     const rps : RedPacketDB[] = await getCreatedRedPackets();
+    console.log(rps);
     redPackets.value = await Promise.all(rps.map(r => aggregateCreated(provider, r)));
+    console.log(redPackets.value);
     await loadClaimInfo(provider);
     // await loadClaimsForOnePacket(provider, redPackets.value[0]?.redPacket.id);
   }
@@ -156,7 +160,9 @@ const extractDate = () => {
       // sort the object
       const ordered_group: any = {}
       var isDescending = true;
-      const d_group = Object.keys(group).sort((a, b) => isDescending ? new Date(b).getTime() - new Date(a).getTime() : new Date(a).getTime() - new Date(b).getTime());
+      const d_group = Object.keys(group).sort((a, b) => isDescending
+        ? new Date(b).getTime() - new Date(a).getTime()
+        : new Date(a).getTime() - new Date(b).getTime());
       d_group.forEach((v) => {
         ordered_group[v] = group[v];
       })
@@ -181,9 +187,11 @@ const showDetails = () => {
   showDetailsEnabled.value = showDetailsEnabled.value ? false : true;
 };
 
-const normalize = (balance: EthBigNumber | undefined, token: Token) => {
-  balance = balance || EthBigNumber.from(0);
-  const normalized = normalizeBalance(balance, token.decimals);
+const normalize = (balance: string | undefined, token: Token) => {
+  const normalized = normalizeBalance(
+    EthBigNumber.from(balance || 0),
+    token.decimals
+  );
   return normalized.normalized;
 }
 
@@ -192,11 +200,11 @@ const normalizedDbBalance = (redPacket: CreatedRedPacket) => {
     ? (
       redPacket.redPacket.metadata.balance || 
         normalize(
-          EthBigNumber.from(redPacket.redPacket.metadata.tokenAmount),
+          redPacket.redPacket.metadata.tokenAmount,
           redPacket.token
         )
     ) : normalize(
-      EthBigNumber.from(redPacket.redPacket.metadata.balance),
+      redPacket.redPacket.metadata.balance,
       redPacket.token
     );
 }
@@ -213,10 +221,12 @@ const aggregateCreated = async function(
   provider: ethers.providers.Provider,
   redPacket: RedPacketDB
 ) : Promise<CreatedRedPacket> {
-  const state = await queryRedPacketInfo(redPacket);
   const tokenAddr = redPacket.metadata.token.toLowerCase();
   const token = await loadAndSaveERC20Token(tokenAddr);
-  const oldStatus = redPacket.status;
+  const update : {
+    status?: string,
+    state?: RedPacketOnchainState
+  } = {status: redPacket.status};
   if (!redPacket.status || redPacket.status == "pending") {
     const receipt = await provider.getTransactionReceipt(redPacket.tx);
     if (receipt?.status == 0) {
@@ -226,20 +236,27 @@ const aggregateCreated = async function(
     }
   }
   if (redPacket.status == "alive") {
+    const state = await queryRedPacketInfo(redPacket);
     if (state.balance.eq(0) || state.split == 0) {
       redPacket.status = "finalized";
+      update.state = {
+        balance: state.balance.toString(),
+        split: state.split,
+        createdAt: new Date(state.createdAt).toISOString(),
+      }
     }
   }
-  if (oldStatus !== redPacket.status) {
+  if (update.status != redPacket.status) {
     await updateRedPacketStatus({
       id: redPacket.id,
-      status: redPacket.status!
+      status: redPacket.status!,
+      state: update.state
     });
   }
   return {
     redPacket,
-    token,
-    state,
+    token,  
+    state: update.state
   } as CreatedRedPacket;
 };
 

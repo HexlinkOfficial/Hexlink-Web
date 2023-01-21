@@ -212,7 +212,13 @@ export interface RedPacketDBMetadata {
 }
 
 export type RedPacketStatus = "pending" | "error" | "alive" | "finalized";
-  
+
+export interface RedPacketOnchainState {
+    balance: string,
+    split: number,
+    createdAt: string
+}
+
 export interface RedPacketDB {
     id: string,
     userId: string,
@@ -222,6 +228,7 @@ export interface RedPacketDB {
     tx: string,
     createdAt: string,
     status?: RedPacketStatus,
+    state?: RedPacketOnchainState
 }
 
 export interface RedPacketClaimInput {

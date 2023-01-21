@@ -235,10 +235,14 @@ const genTokenList = async function () {
       );
     }
     if (redPacketStore.account == "hexlink") {
-      tokens.value = tokenStore.tokens.filter(t => Number(hexlAccountBalance(t)) > 0);
+      tokens.value = tokenStore.tokens.filter(
+        t => Number(hexlAccountBalance(t)) > 0
+      );
       setDefaultToken(walletAccountBalance);
     } else {
-      tokens.value = tokenStore.tokens.filter(t => Number(walletAccountBalance(t)) > 0);
+      tokens.value = tokenStore.tokens.filter(
+        t => Number(walletAccountBalance(t)) > 0
+      );
       setDefaultToken(hexlAccountBalance);
     }
 }
@@ -318,10 +322,6 @@ const validateInput = () => {
   }
   if (Number(redpacket.value.split) == 0) {
     message.error("Number of claimers cannot be 0");
-    return false;
-  }
-  if (hasBalanceWarning.value) {
-    message.error("Insufficient balance");
     return false;
   }
   return true;

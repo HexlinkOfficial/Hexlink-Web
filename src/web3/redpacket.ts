@@ -482,7 +482,7 @@ async function processTxAndSave(
 
     const toInsert = {
         id,
-        chain: network.chainId.toString(),
+        chain: network.name.toString(),
         metadata: {
             token: redpacket.token.address,
             salt: redpacket.salt,

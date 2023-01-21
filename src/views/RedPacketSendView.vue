@@ -14,12 +14,8 @@ import RedPacketSend from "@/components/RedPacketSend.vue";
 import RedpacketConfirm from "@/components/RedPacketConfirm.vue";
 import Layout from "@/components/Layout.vue";
 
-import { watch } from "vue";
 import { useRedPacketStore } from '@/stores/redpacket';
 import { storeToRefs } from 'pinia'
 
 const { status } = storeToRefs(useRedPacketStore());
-watch(() => status, (status) => {
-  console.log(status);
-});
 </script>

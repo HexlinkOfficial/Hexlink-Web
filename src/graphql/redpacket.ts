@@ -2,7 +2,7 @@ import { gql } from '@urql/core';
 import { useAuthStore } from '@/stores/auth';
 import { handleUrqlResponse, setUrqlClientIfNecessary } from './urql';
 import { useNetworkStore } from '@/stores/network';
-import type { HexlinkUserInfo, RedPacketDB, RedPacketDBMetadata, RedPacketClaim } from "@/types";
+import type { HexlinkUserInfo, RedPacketDB, RedPacketDBMetadata, RedPacketOnchainState } from "@/types";
 
 export const GET_REDPACKET = gql`
   query GetRedPacket($id: String!) {
@@ -38,6 +38,7 @@ export const GET_CREATED_REDPACKETS = gql`
             metadata
             created_at
             status
+            state
         }
     }
 `
@@ -59,10 +60,11 @@ export const UPDATE_REDPACKET_STATUS = gql`
     mutation (
         $id: String!
         $status: String!
+        $state: String
     ) {
         update_redpacket_by_pk (
             pk_columns: {id: $id},
-            _set: { status: $status }
+            _set: { status: $status, state: $state }
         ) {
             id
         }
@@ -104,7 +106,7 @@ export async function getCreatedRedPackets() : Promise<RedPacketDB[]> {
     GET_CREATED_REDPACKETS,
     {
       userId: useAuthStore().user!.uid,
-      chain: useNetworkStore().network!.chainId.toString()
+      chain: useNetworkStore().network.name.toString()
     }
   ).toPromise();
   if (await handleUrqlResponse(result)) {
@@ -117,7 +119,8 @@ export async function getCreatedRedPackets() : Promise<RedPacketDB[]> {
         creator: JSON.parse(r.creator),
         createdAt: r.created_at,
         tx: r.tx,
-        status: r.status
+        status: r.status,
+        state: JSON.parse(r.state || {}),
       } as RedPacketDB;
     });
   } else {
@@ -156,12 +159,16 @@ export async function insertRedPacket(
 }
 
 export async function updateRedPacketStatus(
-  data: {id: string, status: string},
+  data: {id: string, status: string, state?: RedPacketOnchainState},
 ) : Promise<void> {
   const client = setUrqlClientIfNecessary(useAuthStore().user!.idToken!)
   const result = await client.mutation(
       UPDATE_REDPACKET_STATUS,
-      data
+      {
+        id: data.id,
+        status: data.status,
+        state: data.state ? JSON.stringify(data.state) : undefined
+      }
   ).toPromise();
   if (!await handleUrqlResponse(result)) {
       await updateRedPacketStatus(data);

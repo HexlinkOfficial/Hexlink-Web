@@ -80,40 +80,6 @@
             </div>
           </div>
         </div>
-        <!-- <table>
-          <thead>
-            <tr>
-              <th>Token</th>
-              <th>Amount/Rest</th>
-              <th>Split</th>
-              <th>Mode</th>
-              <th>CreatedAt</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="(redPacket, i) in redPackets" :key="i" @click="showDetails()">
-              <td>{{ redPacket.token.symbol }}</td>
-              <td>{{
-                normalizedDbBalance(redPacket)
-              }} / {{
-                normalize(redPacket.state.balance, redPacket.token)
-              }}</td>
-              <td>{{ redPacket.redPacket.metadata.split }} / {{ redPacket.state.split }}</td>
-              <td>{{ redPacket.redPacket.metadata.mode }}</td>
-              <td>{{ redPacket.state.createdAt.toLocaleString() }}</td>
-              <td>
-                <a-typography-paragraph :copyable="{ text: claimLink(redPacket.redPacket) }">
-                  Claim Link
-                </a-typography-paragraph>
-              </td>
-            </tr>
-            <tr v-if="showDetailsEnabled">
-              <td colspan=2>01/04/2023</td>
-              <td colspan=4>ming claimed xxx Token</td>
-            </tr>
-          </tbody>
-        </table> -->
       </div>
     </div>
   </div>
@@ -121,33 +87,32 @@
 
 <script lang="ts" setup>
 import { ref, watch, onMounted } from 'vue';
-import { getERC20Metadata } from '@/web3/tokens';
-import { useProfileStore } from "@/stores/profile";
+import { useRoute } from 'vue-router';
+import { loadErc20Token } from '@/web3/tokens';
 import { useNetworkStore } from '@/stores/network';
 import { getCreatedRedPackets, updateRedPacketStatus } from '@/graphql/redpacket';
 import { getClaimedRedPackets, updateRedPacketTxStatus, getRedPacketClaims } from '@/graphql/redpacketClaim';
-import type { TokenMetadata, Token, RedPacketDB, ClaimedRedPacket, RedPacketClaim } from '@/types';
+import type {
+  Token,
+  RedPacketDB,
+  ClaimedRedPacket,
+  RedPacketClaim,
+  RedPacketOnchainState
+} from '@/types';
 import { BigNumber as EthBigNumber } from "ethers";
 import { queryRedPacketInfo } from "@/web3/redpacket";
 import { normalizeBalance } from '@/web3/tokens';
 import { getInfuraProvider, getProvider } from "@/web3/network";
 import { ethers } from "ethers";
 import Loading from "@/components/Loading.vue";
-import { createToaster } from "@meforma/vue-toaster";
-import useClipboard from 'vue-clipboard3';
-import { useRoute } from 'vue-router';
+import { useAccountStore } from '@/stores/account';
+import { useTokenStore } from '@/stores/token';
 
 interface CreatedRedPacket {
   redPacket: RedPacketDB,
-  token: TokenMetadata,
-  state: {
-    balance: EthBigNumber,
-    split: number,
-    createdAt: Date
-  }
+  token: Token,
+  state: RedPacketOnchainState
 };
-
-const profileStore = useProfileStore();
 
 const redPackets = ref<CreatedRedPacket[]>([]);
 const claimed = ref<ClaimedRedPacket[]>([]);
@@ -172,10 +137,12 @@ const redPacketByDate = ref<any>([]);
 
 const loadData = async function() {
   loading.value = true;
-  if (useProfileStore().profile?.initiated) {
+  if (useAccountStore().account) {
     const provider = getInfuraProvider();
     const rps : RedPacketDB[] = await getCreatedRedPackets();
+    console.log(rps);
     redPackets.value = await Promise.all(rps.map(r => aggregateCreated(provider, r)));
+    console.log(redPackets.value);
     await loadClaimInfo(provider);
     // await loadClaimsForOnePacket(provider, redPackets.value[0]?.redPacket.id);
   }
@@ -198,11 +165,12 @@ const extractDate = () => {
       // sort the object
       const ordered_group: any = {}
       var isDescending = true;
-      const d_group = Object.keys(group).sort((a, b) => isDescending ? new Date(b).getTime() - new Date(a).getTime() : new Date(a).getTime() - new Date(b).getTime());
+      const d_group = Object.keys(group).sort((a, b) => isDescending
+        ? new Date(b).getTime() - new Date(a).getTime()
+        : new Date(a).getTime() - new Date(b).getTime());
       d_group.forEach((v) => {
         ordered_group[v] = group[v];
       })
-      console.log(ordered_group);
       redPacketByDate.value = ordered_group;
     }
   });
@@ -213,33 +181,22 @@ const loading = ref<boolean>(true);
 onMounted(loadData);
 watch(() => useNetworkStore().network, loadData);
 
-const { toClipboard } = useClipboard();
-
-const copy = async (text: string) => {
-  try {
-    await toClipboard(text);
-    const toaster = createToaster({ position: "top", duration: 2000 });
-    toaster.success(`Copied`);
-  } catch (e) {
-    console.error(e)
-    const toaster = createToaster({ position: "top", duration: 2000 });
-    toaster.error(`Can not copy`);
-  }
-};
-
 const showDetailsEnabled = ref<boolean>(false);
 
+const route = useRoute();
 const claimLink = (redPacket: RedPacketDB) => {
-  return (window.location.origin + useRoute().path + "?claim=" + redPacket.id);
+  return (window.location.origin + route.path + "?claim=" + redPacket.id);
 };
 
 const showDetails = () => {
   showDetailsEnabled.value = showDetailsEnabled.value ? false : true;
 };
 
-const normalize = (balance: EthBigNumber | undefined, token: TokenMetadata) => {
-  balance = balance || EthBigNumber.from(0);
-  const normalized = normalizeBalance(balance, token.decimals);
+const normalize = (balance: string | undefined, token: Token) => {
+  const normalized = normalizeBalance(
+    EthBigNumber.from(balance || 0),
+    token.decimals
+  );
   return normalized.normalized;
 }
 
@@ -248,30 +205,33 @@ const normalizedDbBalance = (redPacket: CreatedRedPacket) => {
     ? (
       redPacket.redPacket.metadata.balance || 
         normalize(
-          EthBigNumber.from(redPacket.redPacket.metadata.tokenAmount),
+          redPacket.redPacket.metadata.tokenAmount,
           redPacket.token
         )
     ) : normalize(
-      EthBigNumber.from(redPacket.redPacket.metadata.balance),
+      redPacket.redPacket.metadata.balance,
       redPacket.token
     );
 }
 
+const tokenStore = useTokenStore();
 const loadAndSaveERC20Token = async (tokenAddr: string) : Promise<Token> => {
-  if (!profileStore.profile!.tokens[tokenAddr]) {
-    profileStore.addToken({metadata: await getERC20Metadata(tokenAddr)});
+  if (!tokenStore.token(tokenAddr)) {
+    tokenStore.set(await loadErc20Token(tokenAddr));
   }
-  return profileStore.profile!.tokens[tokenAddr]!;
+  return tokenStore.token(tokenAddr);
 }
 
 const aggregateCreated = async function(
   provider: ethers.providers.Provider,
   redPacket: RedPacketDB
 ) : Promise<CreatedRedPacket> {
-  const state = await queryRedPacketInfo(redPacket);
   const tokenAddr = redPacket.metadata.token.toLowerCase();
   const token = await loadAndSaveERC20Token(tokenAddr);
-  const oldStatus = redPacket.status;
+  const update : {
+    status?: string,
+    state?: RedPacketOnchainState
+  } = {status: redPacket.status};
   if (!redPacket.status || redPacket.status == "pending") {
     const receipt = await provider.getTransactionReceipt(redPacket.tx);
     if (receipt?.status == 0) {
@@ -281,20 +241,27 @@ const aggregateCreated = async function(
     }
   }
   if (redPacket.status == "alive") {
+    const state = await queryRedPacketInfo(redPacket);
     if (state.balance.eq(0) || state.split == 0) {
       redPacket.status = "finalized";
+      update.state = {
+        balance: state.balance.toString(),
+        split: state.split,
+        createdAt: new Date(state.createdAt).toISOString(),
+      }
     }
   }
-  if (oldStatus !== redPacket.status) {
+  if (update.status != redPacket.status) {
     await updateRedPacketStatus({
       id: redPacket.id,
-      status: redPacket.status!
+      status: redPacket.status!,
+      state: update.state
     });
   }
   return {
     redPacket,
-    token: token.metadata,
-    state,
+    token,  
+    state: update.state
   } as CreatedRedPacket;
 };
 
@@ -326,10 +293,10 @@ const validateClaimStatus = async (
   } // not mined
   if (receipt.status) { // success
     const events = receipt.logs.filter(
-      (log: any) => log.address.toLowerCase() == (useNetworkStore().network!.address.redpacket as string).toLowerCase()
-    ).map(
-      (log: any) => parseLog(log)
-    );
+      (log: any) => log.address.toLowerCase() == (
+        useNetworkStore().network.address.redpacket as string
+      ).toLowerCase()
+    ).map((log: any) => parseLog(log));
     const event = events.find((e: any) => e.name == "Claimed");
     const claimedAmount = event?.args.amount || EthBigNumber.from(0);
     await updateRedPacketTxStatus(

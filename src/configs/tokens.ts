@@ -28,7 +28,7 @@ export function allowedGasToken(network: Network) : string[] {
 
 export async function getPopularTokens(network?: Network) : Promise<TokenDataList> {
     network = network || useNetworkStore().network;
-    if (network!.chainId == "137") {
+    if (network.chainId == "137") {
         // const response = await fetch(POLYGON_POPULAR_TOKENS);
         // return await response.json();
         return {
@@ -36,13 +36,13 @@ export async function getPopularTokens(network?: Network) : Promise<TokenDataLis
             tokens: POLYGON_TOEKNS,
         }
     }
-    if (network!.chainId == "5") {
+    if (network.chainId == "5") {
         return {
             timestamp: new Date().toISOString(),
             tokens: GOERLI_TOKENS,
         }
     }
-    if (network!.chainId == "80001") {
+    if (network.chainId == "80001") {
         return {
             timestamp: new Date().toISOString(),
             tokens: MUMBAI_TOKENS,
@@ -57,22 +57,17 @@ export async function getPopularTokens(network?: Network) : Promise<TokenDataLis
 
 export function isNativeCoin(token: Token, network?: Network) {
     network = network || useNetworkStore().network;
-    const nativeCoin = nativeCoinAddress(network!) as string;
-    const tokenAddr = token.metadata.address;
-    return tokenAddr.toLowerCase() == nativeCoin.toLowerCase();
+    return token.address == nativeCoinAddress(network).toLowerCase();
 }
 
 export function isWrappedCoin(token: Token, network?: Network) {
     network = network || useNetworkStore().network;
-    const wrappeCoin = wrappedCoinAddress(network!) as string;
-    const tokenAddr = token.metadata.address;
-    return tokenAddr.toLowerCase() == wrappeCoin?.toLowerCase();
+    return token.address == wrappedCoinAddress(network).toLowerCase();
 }
 
 export function isStableCoin(token: Token, network?: Network) {
     network = network || useNetworkStore().network;
-    const address = token.metadata.address.toLowerCase();
-    return stableCoinAddresses(network!).map(
+    return stableCoinAddresses(network).map(
         c => c.toLowerCase()
-    ).includes(address);
+    ).includes(token.address);
 }

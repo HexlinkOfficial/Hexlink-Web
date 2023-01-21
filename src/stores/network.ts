@@ -1,33 +1,37 @@
 import { defineStore } from 'pinia';
-import type { Network, PriceInfo } from '@/types';
-import { GOERLI } from "@/configs/network";
+import type { PriceInfo, Network } from '@/types';
+import { getNetwork } from '@/configs/network';
 
 export const useNetworkStore = defineStore({
     id: 'network',
     state: (): {
-        network: Network | undefined,
-        priceInfo: {[key: string]: PriceInfo}
+        current: number | string,
+        priceInfos: {[key: string]: PriceInfo}
     } => ({
-        network: {...GOERLI},
-        priceInfo: {}
+        current: "goerli",
+        priceInfos: {}
     }),
     persist: true,
     getters: {
-        nativeCoinAddress: (state) : string => state.network!.address.nativeCoin as string,
-        wrappedCoinAddress: (state) : string => state.network!.address.wrappeCoin as string,
-        stableCoinAddresses: (state) : string[] => state.network!.address.stableCoins as string[],
+        network: (state) : Network => {
+            return getNetwork(state.current)
+        },
+        priceInfo: (state) : PriceInfo => {
+            const network = useNetworkStore().network.name
+            return state.priceInfos[network];
+        }
     },
     actions: {
         switchNetwork(network: Network) {
-            console.log("Switching to network " + network.chainName);
-            this.network = {...network};
+            console.log("Switching to chain " + network.name);
+            this.current = network.name;
         },
         refreshPriceInfo(network: Network, priceInfo: PriceInfo) {
-            this.priceInfo[network.name] = priceInfo;
+            this.priceInfos[network.name] = priceInfo;
         },
         reset() {
-            this.network = undefined;
-            this.priceInfo = {};
+            this.current = "goerli";
+            this.priceInfos = {};
         }
     },
-})
+});

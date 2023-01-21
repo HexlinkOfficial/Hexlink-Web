@@ -2,9 +2,9 @@ import type { BigNumber as EthersBigNumber } from "ethers";
 import type { BigNumber } from "bignumber.js";
 
 export interface Network {
-    chainId: string,
-    rpcUrls: string[],
     name: string,
+    chainId?: string,
+    rpcUrls: string[],
     chainName: string,
     alchemy: {
         rpcUrl: string,
@@ -59,8 +59,9 @@ export interface IAuth {
     returnUrl?: string,
 }
 
-export interface TokenMetadata {
+export interface Token {
     chain?: string,
+    chainId: string | number,
     address: string,
     name: string,
     symbol: string,
@@ -69,12 +70,13 @@ export interface TokenMetadata {
     tags?: string[],
     extensions?: {
         "rootAddress": string
-    }
+    },
+    preference?: Preference
 }
 
 export interface TokenDataList {
     tags?: {[key: string]: {name: string, description: string}}
-    tokens: TokenMetadata[],
+    tokens: Token[],
     timestamp: string,
     error?: string,
 }
@@ -91,13 +93,6 @@ export interface NormalizedTokenBalance {
     updatedAt?: Date;
 }
 
-export interface Token {
-    metadata: TokenMetadata,
-    balance?: NormalizedTokenBalance;
-    preference?: Preference;
-    price?: number;
-}
-
 export interface Profile {
     initiated: boolean;
     account: Account;
@@ -106,14 +101,14 @@ export interface Profile {
 
 export interface RedPacket {
     id?: string;
-    token: Token;
     salt: string;
-    gasToken: Token;
-    gasTokenAmount?: EthersBigNumber;
-    tokenAmount?: EthersBigNumber;
     mode: "random" | "equal";
     split: number;
     balance: string;
+    token: Token;
+    tokenAmount?: EthersBigNumber;
+    gasToken: Token;
+    gasTokenAmount?: EthersBigNumber;
     validator: string;
 }
 
@@ -217,7 +212,13 @@ export interface RedPacketDBMetadata {
 }
 
 export type RedPacketStatus = "pending" | "error" | "alive" | "finalized";
-  
+
+export interface RedPacketOnchainState {
+    balance: string,
+    split: number,
+    createdAt: string
+}
+
 export interface RedPacketDB {
     id: string,
     userId: string,
@@ -227,6 +228,7 @@ export interface RedPacketDB {
     tx: string,
     createdAt: string,
     status?: RedPacketStatus,
+    state?: RedPacketOnchainState
 }
 
 export interface RedPacketClaimInput {
@@ -234,7 +236,7 @@ export interface RedPacketClaimInput {
     tx: string,
 }
   
-export type TxStatus = "pending" | "error" | "success";
+export type TxStatus = "" | "pending" | "error" | "success";
   
 export interface RedPacketClaim extends RedPacketClaimInput {
     createdAt: Date,

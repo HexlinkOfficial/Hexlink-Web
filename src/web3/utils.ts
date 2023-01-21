@@ -13,7 +13,7 @@ export function toEthBigNumber(value: BigNumber) : EthBigNumber {
 }
 
 export function tokenBase(token: Token) : BigNumber {
-    return new BigNumber(10).pow(token.metadata!.decimals);
+    return new BigNumber(10).pow(token!.decimals);
 }
 
 export function addressEqual(address1: string, address2: string) {
@@ -21,7 +21,7 @@ export function addressEqual(address1: string, address2: string) {
 }
 
 export function tokenEqual(token1: Token, token2: Token) {
-    return EthBigNumber.from(token1.metadata.address).eq(
-        EthBigNumber.from(token2.metadata.address)
+    return EthBigNumber.from(token1.address).eq(
+        EthBigNumber.from(token2.address)
     );
 }

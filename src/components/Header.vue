@@ -16,8 +16,8 @@
               <div class="selectnetwork dropdown" @click="activeDropDown('selectnetwork')"
                 :class="active && 'show'">
                 <div class="network" data-toggle="dropdown">
-                  <img :src="useNetworkStore().network?.logoUrl" height=25 style="margin-left: 0.5rem;">
-                  <span>{{ useNetworkStore().network?.chainName }}</span>
+                  <img :src="useNetworkStore().network.logoUrl" height=25 style="margin-left: 0.5rem;">
+                  <span>{{ useNetworkStore().network.chainName }}</span>
                   <svg width="14" height="8" viewBox="0 0 14 8" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 0.5rem; width: 1rem">
                     <path d="M1 1L7 7L13 1" stroke="#475569" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                   </svg>
@@ -34,7 +34,7 @@
                       <div class="network-items" @click="switchNetwork({...MUMBAI})">
                         <button>
                           <div style="display: flex; margin-right: 0.75rem; align-items: center; height: 1.25rem; width: 1.25rem;">
-                            <svg v-if="useNetworkStore().network?.name == 'mumbai'" width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <svg v-if="useNetworkStore().network.name == 'mumbai'" width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg">
                               <path d="M17 1L6 12L1 7" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                             </svg>
                           </div>
@@ -53,7 +53,7 @@
                       <div class="network-items" @click="switchNetwork({...GOERLI})">
                         <button>
                           <div style="display: flex; margin-right: 0.75rem; align-items: center; height: 1.25rem; width: 1.25rem;">
-                            <svg v-if="useNetworkStore().network?.name == 'goerli'" width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <svg v-if="useNetworkStore().network.name == 'goerli'" width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg">
                               <path d="M17 1L6 12L1 7" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                             </svg>
                           </div>
@@ -106,8 +106,8 @@
                             </svg>
                             <div class="user-info">
                               <span style="margin-bottom: 0;" class="smart-contract-address">
-                                <h5 @click="doCopy(useProfileStore().profile?.account.address)">
-                                  {{ addressTextLong(useProfileStore().profile?.account.address) }}
+                                <h5 @click="doCopy(useAccountStore().account?.address)">
+                                  {{ addressTextLong(useAccountStore().account?.address) }}
                                 </h5>
                               </span>
                             </div>
@@ -175,7 +175,7 @@ import { createToaster } from "@meforma/vue-toaster";
 import { GOERLI, MUMBAI } from "@/configs/network";
 import { switchNetwork } from "@/web3/network";
 import { disconnectWallet } from "@/web3/wallet";
-import { useProfileStore } from "@/stores/profile";
+import { useAccountStore } from "@/stores/account";
 import { signOutFirebase } from "@/services/auth";
 import useClipboard from 'vue-clipboard3';
 

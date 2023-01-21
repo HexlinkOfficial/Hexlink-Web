@@ -5,12 +5,10 @@ import { Alchemy, Network as AlchemyNetwork } from "alchemy-sdk";
 import type { Network, PriceInfo } from '@/types';
 import { useWalletStore } from "@/stores/wallet";
 import { useRedPacketStore } from "@/stores/redpacket";
-import { initProfile } from "@/web3/account";
 import { useNetworkStore } from '@/stores/network';
 import { getFunctions, httpsCallable } from 'firebase/functions'
 
 async function doSwitch(network: Network) {
-    await initProfile(network);
     useRedPacketStore().reset();
     useNetworkStore().switchNetwork(network);
 }
@@ -98,7 +96,7 @@ export function getInfuraProvider(network?: Network) {
 
 const functions = getFunctions();
 export async function getPriceInfo(network: Network) : Promise<PriceInfo> {
-    const priceInfo = useNetworkStore().priceInfo[network.name];
+    const priceInfo = useNetworkStore().priceInfos[network.name];
     // refresh every 15 mins
     if (!priceInfo || priceInfo.updatedAt < new Date().getTime() - 900000) {
         const getPriceInfo = httpsCallable(functions, 'priceInfo');
@@ -113,5 +111,5 @@ export async function getPriceInfo(network: Network) : Promise<PriceInfo> {
             updatedAt: new Date().getTime()
         });
     }
-    return useNetworkStore().priceInfo[network.name];
+    return useNetworkStore().priceInfos[network.name];
 }

@@ -426,7 +426,7 @@ svg {
                   </div>
                 </div>
               </div>
-              <div class="price">$ {{ totalAssets }}</div>
+              <div class="price">$ {{ price }}</div>
             </div>
           </div>
         </div>
@@ -484,8 +484,8 @@ import { ref, computed } from "vue";
 import Layout from "../components/Layout.vue";
 import WalletTokenList from "@/components/WalletTokenList.vue";
 import WalletNFTGrid from "@/components/WalletNFTGrid.vue";
-import { useProfileStore } from '@/stores/profile';
 import { useNetworkStore } from '@/stores/network';
+import { useAccountStore } from "@/stores/account";
 import { BigNumber } from "bignumber.js";
 
 const nftView = ref<boolean>(false);
@@ -493,18 +493,11 @@ const tokenView = ref<boolean>(true);
 const showInfo = ref<boolean>(true);
 
 const blockExplorer = computed(() => {
-  const account = useProfileStore().profile?.account.address;
+  const account = useAccountStore().account?.address;
   return `${useNetworkStore().network?.blockExplorerUrls[0]}/address/${account}`;
 });
 
-const totalAssets = computed(() => {
-  let total: BigNumber = BigNumber(0);
-  for (const token of useProfileStore().visiableTokens) {
-    if (token.balance && token.price) {
-      const value = new BigNumber(token.balance.normalized).times(token.price);
-      total = total.plus(value);
-    }
-  }
-  return total;
+const price = computed(() => {
+  return BigNumber(0);
 });
 </script>

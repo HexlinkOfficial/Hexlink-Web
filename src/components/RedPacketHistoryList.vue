@@ -216,58 +216,84 @@ const loadAndSaveERC20Token = async (tokenAddr: string) : Promise<Token> => {
   return tokenStore.token(tokenAddr);
 }
 
+const redPacketState = async (redPacket: RedPacketDB) => {
+  const state = await queryRedPacketInfo(redPacket);
+  return {
+    balance: state.balance.toString(),
+    split: state.split,
+    createdAt: state.createdAt.toISOString(),
+  };
+}
+
 const aggregateCreated = async function(
   provider: ethers.providers.Provider,
   redPacket: RedPacketDB
 ) : Promise<CreatedRedPacket> {
   const tokenAddr = redPacket.metadata.token.toLowerCase();
   const token = await loadAndSaveERC20Token(tokenAddr);
-  const update : {
-    status?: RedPacketStatus,
-    state?: RedPacketOnchainState
-  } = {status: redPacket.status};
-  if (!redPacket.status || redPacket.status == "pending") {
-    const receipt = await provider.getTransactionReceipt(redPacket.tx);
-    if (receipt?.status == 0) {
-      update.status = "error";
-    } else if (receipt?.status == 1) {
-      update.status = "alive";
+
+  if (redPacket.status == 'finalized') {
+    if (!redPacket.state) {
+      redPacket.state = await redPacketState(redPacket);
+      await updateRedPacketStatus({
+        id: redPacket.id,
+        status: "finalized",
+        state: redPacket.state,
+      });
     }
+    return { redPacket, token };
   }
-  if (redPacket.status == "alive" || update.status == "alive") {
-    const state = await queryRedPacketInfo(redPacket);
-    update.state = {
-      balance: state.balance.toString(),
-      split: state.split,
-      createdAt: state.createdAt.toISOString(),
+
+  if (redPacket.status == "alive") {
+    redPacket.state = await redPacketState(redPacket);
+    if (EthBigNumber.from(redPacket.state.balance).eq(0) || redPacket.state.split == 0) {
+      redPacket.status = "finalized";
+      await updateRedPacketStatus({
+        id: redPacket.id,
+        status: "finalized",
+        state: redPacket.state,
+      });
     }
-    if (state.balance.eq(0) || state.split == 0) {
-      update.status = "finalized";
-    }
+    return { redPacket, token };
   }
-  if (update.status) {
-    redPacket.status = update.status;
-    redPacket.state = update.state;
+
+  const receipt = await provider.getTransactionReceipt(redPacket.tx);
+  if (receipt?.status == 1) {
+    redPacket.state = await redPacketState(redPacket);
+    if (EthBigNumber.from(redPacket.state.balance).eq(0) || redPacket.state.split == 0) {
+      redPacket.status = "finalized";
+      await updateRedPacketStatus({
+        id: redPacket.id,
+        status: "finalized",
+        state: redPacket.state,
+      });
+    } else {
+      redPacket.status = "alive";
+      await updateRedPacketStatus({
+        id: redPacket.id,
+        status: "alive",
+      });
+    }
+    return { redPacket, token };
+  }
+
+  // not mined or error
+  redPacket.state = {
+    balance: calcTokenAmount(
+        redPacket.metadata.balance,
+        token
+    ).toString(),
+    split: redPacket.metadata.split,
+    createdAt: redPacket.createdAt,
+  };
+  if (receipt?.status == 0) {
+    redPacket.status = "error";
     await updateRedPacketStatus({
       id: redPacket.id,
-      status: update.status!,
-      state: update.status == "finalized" ? update.state : undefined,
+      status: "error",
     });
   }
-  if (!redPacket.state) {
-    redPacket.state = {
-      balance: calcTokenAmount(
-          redPacket.metadata.balance,
-          token
-      ).toString(),
-      split: redPacket.metadata.split,
-      createdAt: redPacket.createdAt,
-    }
-  }
-  return {
-    redPacket,
-    token,
-  } as CreatedRedPacket;
+  return { redPacket, token };
 };
 
 const iface = new ethers.utils.Interface([

@@ -68,7 +68,7 @@
                   </div>
                 </div>
                 <div class="cta">
-                  <button class="connect-wallet-button" @click="(claimLink(v.redPacket))">
+                  <button class="connect-wallet-button" @click="copyShareLink(v.redPacket)">
                     Share
                   </button>
                   <button class="connect-wallet-button">
@@ -96,8 +96,6 @@ import type {
   RedPacketDB,
   ClaimedRedPacket,
   RedPacketClaim,
-  RedPacketStatus,
-  RedPacketOnchainState
 } from '@/types';
 import { BigNumber as EthBigNumber } from "ethers";
 import { calcTokenAmount, queryRedPacketInfo } from "@/web3/redpacket";
@@ -107,6 +105,7 @@ import { ethers } from "ethers";
 import Loading from "@/components/Loading.vue";
 import { useAccountStore } from '@/stores/account';
 import { useTokenStore } from '@/stores/token';
+import { copy } from "@/web3/utils";
 
 interface CreatedRedPacket {
   redPacket: RedPacketDB,
@@ -178,8 +177,8 @@ watch(() => useNetworkStore().network, loadData);
 const showDetailsEnabled = ref<boolean>(false);
 
 const route = useRoute();
-const claimLink = (redPacket: RedPacketDB) => {
-  return (window.location.origin + route.path + "?claim=" + redPacket.id);
+const copyShareLink = (redPacket: RedPacketDB) => {
+  return copy(window.location.origin + route.path + "?claim=" + redPacket.id);
 };
 
 const showDetails = () => {
@@ -216,15 +215,6 @@ const loadAndSaveERC20Token = async (tokenAddr: string) : Promise<Token> => {
   return tokenStore.token(tokenAddr);
 }
 
-const redPacketState = async (redPacket: RedPacketDB) => {
-  const state = await queryRedPacketInfo(redPacket);
-  return {
-    balance: state.balance.toString(),
-    split: state.split,
-    createdAt: state.createdAt.toISOString(),
-  };
-}
-
 const aggregateCreated = async function(
   provider: ethers.providers.Provider,
   redPacket: RedPacketDB
@@ -232,9 +222,18 @@ const aggregateCreated = async function(
   const tokenAddr = redPacket.metadata.token.toLowerCase();
   const token = await loadAndSaveERC20Token(tokenAddr);
 
+  const redPacketState = async () => {
+    const state = await queryRedPacketInfo(redPacket);
+    return {
+      balance: state.balance.toString(),
+      split: state.split,
+      createdAt: state.createdAt.toISOString(),
+    };
+  };
+
   if (redPacket.status == 'finalized') {
     if (!redPacket.state) {
-      redPacket.state = await redPacketState(redPacket);
+      redPacket.state = await redPacketState();
       await updateRedPacketStatus({
         id: redPacket.id,
         status: "finalized",
@@ -244,8 +243,8 @@ const aggregateCreated = async function(
     return { redPacket, token };
   }
 
-  if (redPacket.status == "alive") {
-    redPacket.state = await redPacketState(redPacket);
+  const checkIfFinalized = async (forceUpdate: boolean) => {
+    redPacket.state = await redPacketState();
     if (EthBigNumber.from(redPacket.state.balance).eq(0) || redPacket.state.split == 0) {
       redPacket.status = "finalized";
       await updateRedPacketStatus({
@@ -253,27 +252,24 @@ const aggregateCreated = async function(
         status: "finalized",
         state: redPacket.state,
       });
-    }
-    return { redPacket, token };
-  }
-
-  const receipt = await provider.getTransactionReceipt(redPacket.tx);
-  if (receipt?.status == 1) {
-    redPacket.state = await redPacketState(redPacket);
-    if (EthBigNumber.from(redPacket.state.balance).eq(0) || redPacket.state.split == 0) {
-      redPacket.status = "finalized";
-      await updateRedPacketStatus({
-        id: redPacket.id,
-        status: "finalized",
-        state: redPacket.state,
-      });
-    } else {
-      redPacket.status = "alive";
+    } else if (forceUpdate) {
       await updateRedPacketStatus({
         id: redPacket.id,
         status: "alive",
       });
     }
+    return redPacket;
+  };
+
+  if (redPacket.status == "alive") {
+    redPacket = await checkIfFinalized(false);
+    return { redPacket, token };
+  }
+
+  const receipt = await provider.getTransactionReceipt(redPacket.tx);
+  if (receipt?.status == 1) {
+    redPacket.status = "alive";
+    redPacket = await checkIfFinalized(true);
     return { redPacket, token };
   }
 

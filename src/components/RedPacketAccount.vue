@@ -11,7 +11,7 @@
         <div>
             <img class="wallet-image" :src="account.logo">
             <div class="chain_wrapper">
-            <img class="chain" :src="useNetworkStore().network?.logoUrl" />
+            <img class="chain" :src="useNetworkStore().network.logoUrl" />
             </div>
         </div>
         </div>

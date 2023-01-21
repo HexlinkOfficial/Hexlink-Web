@@ -22,7 +22,7 @@
           <div class="token-description">
             <div class="token-logo">
               <div class="network-logo">
-                <img :src="useNetworkStore().network!.logoUrl" alt={{token.address}} />
+                <img :src="useNetworkStore().network.logoUrl" alt={{token.address}} />
               </div>
               <img class="logo" :src="token.logoURI || logo" alt={{token.address}} />
             </div>

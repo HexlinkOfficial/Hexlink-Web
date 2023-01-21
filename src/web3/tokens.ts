@@ -98,7 +98,7 @@ export async function updatePreferences(balances: BalanceMap) {
         store.tokens.filter(
             t => !t.preference && balance(t)?.value.gt(0)
         ).map(t => ({
-            chain: useNetworkStore().network!.name,
+            chain: useNetworkStore().network.name,
             display: true,
             tokenAddress: t.address.toLowerCase(),
             metadata: t

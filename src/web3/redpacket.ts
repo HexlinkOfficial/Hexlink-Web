@@ -27,7 +27,7 @@ const erc20Iface = new ethers.utils.Interface(ERC20_ABI);
 const redPacketIface = new ethers.utils.Interface(RED_PACKET_ABI);
 
 export function validator(network?: Network) : string {
-    network = network || useNetworkStore().network!;
+    network = network || useNetworkStore().network;
     if (import.meta.env.VITE_USE_FUNCTIONS_EMULATOR) {
         return network.address.testValidator as string;
     }
@@ -515,7 +515,7 @@ export async function deployAndCreateNewRedPacket(
     useHexlinkAccount: boolean,
     dryrun: boolean = false
 ) {
-    const network = useNetworkStore().network!;
+    const network = useNetworkStore().network;
     const txes = await buildDeployAndCreateRedPacketTx(
         network,
         redpacket,
@@ -529,7 +529,7 @@ export async function createNewRedPacket(
     useHexlinkAccount: boolean,
     dryrun: boolean = false
 ) : Promise<string> {
-    const network = useNetworkStore().network!;
+    const network = useNetworkStore().network;
     const txes = await buildCreateRedPacketTx(
         network,
         redpacket,

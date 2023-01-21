@@ -213,6 +213,7 @@ const redpacket = ref<RedPacket>({
 });
 
 const tokenBalance = computed(() => {
+  console.log(redpacket.value);
   if (redPacketStore.account == "hexlink") {
     return hexlAccountBalance(redpacket.value.token);
   }
@@ -252,7 +253,7 @@ const setDefaultToken = function (getBalance: (t: Token) => string) {
 
 const calcGasSponsorship = async () => {
   redpacket.value.gasTokenAmount = await estimateGasSponsorship(
-    useNetworkStore().network!, redpacket.value
+    useNetworkStore().network, redpacket.value
   );
 };
 

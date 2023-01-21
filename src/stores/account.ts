@@ -10,7 +10,7 @@ export const useAccountStore = defineStore({
     getters: {
         account:  (state) : Account | undefined => {
             const network = useNetworkStore().network;
-            return state[network!.name];
+            return state[network.name];
         }
     },
     actions: {

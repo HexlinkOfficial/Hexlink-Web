@@ -95,7 +95,6 @@ export async function twitterSocialLogin() {
         };
         useAuthStore().signIn(user);
         await init();
-        await switchNetwork(GOERLI);
     } catch (error) {
         console.log(error);
     }
@@ -116,4 +115,5 @@ export async function init() {
     await Promise.all(
         SUPPORTED_NETWORKS.map(network => initTokenList(network))
     );
+    await switchNetwork(GOERLI);
 }

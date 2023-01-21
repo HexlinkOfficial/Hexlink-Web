@@ -1,31 +1,33 @@
 import { defineStore } from 'pinia';
-import type { Network, PriceInfo } from '@/types';
-import { GOERLI } from "@/configs/network";
+import type { PriceInfo, Network } from '@/types';
+import { getNetwork } from '@/configs/network';
 
 export const useNetworkStore = defineStore({
     id: 'network',
     state: (): {
-        network: Network | undefined,
+        chainId: number | string,
         priceInfo: {[key: string]: PriceInfo}
     } => ({
-        network: {...GOERLI},
+        chainId: 5,
         priceInfo: {}
     }),
     persist: true,
     getters: {
-
+        network: (state) : Network => {
+            return getNetwork(state.chainId)
+        }
     },
     actions: {
-        switchNetwork(network: Network) {
-            console.log("Switching to network " + network.chainName);
-            this.network = {...network};
+        switchNetwork(chainId: string | number) {
+            console.log("Switching to chain " + chainId);
+            this.chainId = chainId;
         },
-        refreshPriceInfo(network: Network, priceInfo: PriceInfo) {
-            this.priceInfo[network.name] = priceInfo;
+        refreshPriceInfo(chainId: string | number, priceInfo: PriceInfo) {
+            this.priceInfo[chainId.toString()] = priceInfo;
         },
         reset() {
-            this.network = undefined;
+            this.chainId = 5;
             this.priceInfo = {};
         }
     },
-})
+});

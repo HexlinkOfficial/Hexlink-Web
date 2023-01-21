@@ -202,10 +202,10 @@ const validateClaimStatus = async (
   } // not mined
   if (receipt.status) { // success
     const events = receipt.logs.filter(
-      (log: any) => log.address.toLowerCase() == (useNetworkStore().network!.address.redpacket as string).toLowerCase()
-    ).map(
-      (log: any) => parseLog(log)
-    );
+      (log: any) => log.address.toLowerCase() == (
+        useNetworkStore().network.address.redpacket as string
+      ).toLowerCase()
+    ).map((log: any) => parseLog(log));
     const event = events.find((e: any) => e.name == "Claimed");
     const claimedAmount = event?.args.amount || EthBigNumber.from(0);
     await updateRedPacketTxStatus(

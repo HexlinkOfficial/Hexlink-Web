@@ -58,12 +58,12 @@ export const MUMBAI : Network = {
     address: ADDRESSES.mumbai
 };
 
-export const getNetwork = (chain: string) : Network => {
-    if (chain == "goerli" || chain == "5") {
+export const getNetwork = (chain: string | number) : Network => {
+    if (chain == "goerli" || chain == "5" || chain == 5) {
         return GOERLI;
-    } else if (chain == "polygon" || chain == "137") {
+    } else if (chain == "polygon" || chain == "137" || chain == 137) {
         return POLYGON;
-    } else if (chain == "mumbai" || chain == "80001") {
+    } else if (chain == "mumbai" || chain == "80001" || chain == 80001) {
         return MUMBAI;
     }
     throw new Error("Unsupported chain");

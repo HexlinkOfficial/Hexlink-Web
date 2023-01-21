@@ -29,22 +29,25 @@ export const useTokenStore = defineStore({
         },
         nativeCoin: (state) => {
             const nativeCoin = network().address.nativeCoin as string;
-            return state.tokens[nativeCoin.toLowerCase()];
+            return state[network().chainId][nativeCoin.toLowerCase()];
         },
         wrappedCoin: (state) => {
             const wrappeCoin = network().address.wrappeCoin as string;
-            return state.tokens[wrappeCoin.toLowerCase()];
+            return state[network().chainId][wrappeCoin.toLowerCase()];
         },
         stableCoins: (state) => {
             const addresses = network().address.stableCoins as string[];
-            return addresses.map(addr => state.tokens[addr.toLowerCase()]);
+            return addresses.map(addr => state[network().chainId][addr.toLowerCase()]);
         },
-
     },
     actions: {
         set(token: Token) {
             token.address = token.address.toLowerCase();
-            this[token.chainId.toString()][token.address] = token;
+            if (this[token.chainId.toString()]) {
+                this[token.chainId.toString()][token.address] = token;
+            } else {
+                this[token.chainId.toString()] = { [token.address]: token };
+            }
         },
         setMulti(tokens: Token[]) {
             tokens.forEach(t => this.set(t));

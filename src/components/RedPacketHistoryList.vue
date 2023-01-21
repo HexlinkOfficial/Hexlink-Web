@@ -44,18 +44,18 @@
                       </div>
                     </div>
                     <div style="color: #6a6d7c; white-space: nowrap; margin-left: 0; font-size: 12px;">
-                      <div style="display: flex;">{{ v.redPacket.createdAt.toLocaleString().split(',')[1] }}</div>
+                      <div style="display: flex;">{{ v.redPacket.createdAt.toLocaleString().split('T')[1].split('.')[0] }}</div>
                     </div>
                   </div>
                 </div>
                 <div class="claim-status">
                   <div class="progress-bar">
-                    <span class="box-progress" :style="{ width: (v.redPacket.metadata.split - v.state.split)/v.redPacket.metadata.split*100 + '%' }"></span>
+                    <span class="box-progress" :style="{ width: (v.redPacket.metadata.split - v.state?.split)/v.redPacket.metadata.split*100 + '%' }"></span>
                   </div>
                   <div class="claimed-data">
                     <p class="claimed-number">
                       Claimed: 
-                      <strong>{{ v.redPacket.metadata.split - v.state.split }}/{{ v.redPacket.metadata.split }}</strong>
+                      <strong>{{ v.redPacket.metadata.split - v.state?.split }}/{{ v.redPacket.metadata.split }}</strong>
                        Share
                     </p>
                     <p class="claimed-number">
@@ -69,7 +69,7 @@
                   </div>
                 </div>
                 <div class="cta">
-                  <button class="connect-wallet-button" @click="(claimLink(v.redPacket))">
+                  <button class="connect-wallet-button" @click="(copy(claimLink(v.redPacket)))">
                     Share
                   </button>
                   <button class="connect-wallet-button">
@@ -107,6 +107,8 @@ import { ethers } from "ethers";
 import Loading from "@/components/Loading.vue";
 import { useAccountStore } from '@/stores/account';
 import { useTokenStore } from '@/stores/token';
+import useClipboard from 'vue-clipboard3';
+import { createToaster } from "@meforma/vue-toaster";
 
 interface CreatedRedPacket {
   redPacket: RedPacketDB,
@@ -171,6 +173,8 @@ const extractDate = () => {
       })
       redPacketByDate.value = ordered_group;
     }
+
+    console.log(redPacketByDate.value);
   });
 }
 
@@ -178,6 +182,19 @@ const loading = ref<boolean>(true);
   
 onMounted(loadData);
 watch(() => useNetworkStore().network, loadData);
+
+const { toClipboard } = useClipboard();
+const copy = async (text: string) => {
+  try {
+    await toClipboard(text);
+    const toaster = createToaster({ position: "top", duration: 2000 });
+    toaster.success(`Copied`);
+  } catch (e) {
+    console.error(e)
+    const toaster = createToaster({ position: "top", duration: 2000 });
+    toaster.error(`Can not copy`);
+  }
+}
 
 const showDetailsEnabled = ref<boolean>(false);
 
@@ -374,6 +391,9 @@ const aggregatedClaimed = async function(
   background-color: rgb(7, 106, 224);
   // border: 2px solid rgb(7, 106, 224);
   color: white; }
+.connect-wallet-button:hover {
+  background-color: rgba(7, 106, 224, 0.6);
+}
 .cta {
   display: flex;
   flex-direction: column;

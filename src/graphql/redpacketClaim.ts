@@ -3,7 +3,13 @@ import { useAuthStore } from '@/stores/auth';
 import { handleUrqlResponse, setUrqlClientIfNecessary } from './urql';
 import type { HexlinkUserInfo, RedPacketDB } from "@/types";
 import { BigNumber as EthBigNumber } from "ethers";
-import type { RedPacketClaim, ClaimedRedPacket, TxStatus, RedPacketClaimInput } from "@/types";
+import { useNetworkStore } from '@/stores/network';
+import type {
+  RedPacketClaim,
+  ClaimedRedPacket,
+  TxStatus,
+  RedPacketClaimInput
+} from "@/types";
 
 export const GET_REDPACKET_CLAIM = gql`
     query GetRedPacketByRedPacket(
@@ -47,10 +53,14 @@ export const GET_REDPACKET_CLAIMS = gql`
 `
 
 export const GET_REDPACKET_CLAIMS_BY_CLAIMER = gql`
-    query GetClaimsByClaimer($claimerId: String!) {
+    query GetClaimsByClaimer(
+        $claimerId: String!
+        $chain: String!
+    ) {
         redpacket_claim (
             where: {
                 claimer_id: { _eq: $claimerId },
+                redpacket: { chain: { _eq: $chain }}
             }
         ) {
             id
@@ -198,7 +208,10 @@ export async function getClaimedRedPackets() : Promise<ClaimedRedPacket[]> {
   );
   const result = await client.query(
     GET_REDPACKET_CLAIMS_BY_CLAIMER,
-    { claimerId: useAuthStore().user!.uid }
+    {
+      claimerId: useAuthStore().user!.uid,
+      chain: useNetworkStore().network.name
+    }
   ).toPromise();
   if (await handleUrqlResponse(result)) {
     return result.data.redpacket_claim.map((r : any) => {

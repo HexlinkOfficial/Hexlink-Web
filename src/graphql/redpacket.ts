@@ -2,7 +2,12 @@ import { gql } from '@urql/core';
 import { useAuthStore } from '@/stores/auth';
 import { handleUrqlResponse, setUrqlClientIfNecessary } from './urql';
 import { useNetworkStore } from '@/stores/network';
-import type { HexlinkUserInfo, RedPacketDB, RedPacketDBMetadata, RedPacketOnchainState } from "@/types";
+import type {
+  HexlinkUserInfo,
+  RedPacketDB,
+  RedPacketDBMetadata,
+  RedPacketOnchainState
+} from "@/types";
 
 export const GET_REDPACKET = gql`
   query GetRedPacket($id: String!) {
@@ -60,7 +65,7 @@ export const UPDATE_REDPACKET_STATUS = gql`
     mutation (
         $id: String!
         $status: String!
-        $state: String
+        $state: jsonb
     ) {
         update_redpacket_by_pk (
             pk_columns: {id: $id},
@@ -106,7 +111,7 @@ export async function getCreatedRedPackets() : Promise<RedPacketDB[]> {
     GET_CREATED_REDPACKETS,
     {
       userId: useAuthStore().user!.uid,
-      chain: useNetworkStore().network.name.toString()
+      chain: useNetworkStore().network.name,
     }
   ).toPromise();
   if (await handleUrqlResponse(result)) {
@@ -120,7 +125,7 @@ export async function getCreatedRedPackets() : Promise<RedPacketDB[]> {
         createdAt: r.created_at,
         tx: r.tx,
         status: r.status,
-        state: JSON.parse(r.state || {}),
+        state: r.state ? JSON.parse(r.state) : r.state,
       } as RedPacketDB;
     });
   } else {

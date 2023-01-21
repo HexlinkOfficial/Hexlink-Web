@@ -82,7 +82,7 @@ import { useWalletStore } from "@/stores/wallet";
 
 const props = defineProps({
     account: {
-        type: Object as () => AccountType,
+        type: String as () => AccountType,
         required: true,
     },
     token: {

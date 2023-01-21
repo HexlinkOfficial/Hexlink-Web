@@ -5,29 +5,33 @@ import { getNetwork } from '@/configs/network';
 export const useNetworkStore = defineStore({
     id: 'network',
     state: (): {
-        chainId: number | string,
-        priceInfo: {[key: string]: PriceInfo}
+        current: number | string,
+        priceInfos: {[key: string]: PriceInfo}
     } => ({
-        chainId: 5,
-        priceInfo: {}
+        current: "goerli",
+        priceInfos: {}
     }),
     persist: true,
     getters: {
         network: (state) : Network => {
-            return getNetwork(state.chainId)
+            return getNetwork(state.current)
+        },
+        priceInfo: (state) : PriceInfo => {
+            const network = useNetworkStore().network.name
+            return state.priceInfos[network];
         }
     },
     actions: {
-        switchNetwork(chainId: string | number) {
-            console.log("Switching to chain " + chainId);
-            this.chainId = chainId;
+        switchNetwork(network: Network) {
+            console.log("Switching to chain " + network.name);
+            this.current = network.name;
         },
-        refreshPriceInfo(chainId: string | number, priceInfo: PriceInfo) {
-            this.priceInfo[chainId.toString()] = priceInfo;
+        refreshPriceInfo(network: Network, priceInfo: PriceInfo) {
+            this.priceInfos[network.name] = priceInfo;
         },
         reset() {
-            this.chainId = 5;
-            this.priceInfo = {};
+            this.current = "goerli";
+            this.priceInfos = {};
         }
     },
 });

@@ -2,9 +2,9 @@ import type { BigNumber as EthersBigNumber } from "ethers";
 import type { BigNumber } from "bignumber.js";
 
 export interface Network {
-    chainId: string,
-    rpcUrls: string[],
     name: string,
+    chainId?: string,
+    rpcUrls: string[],
     chainName: string,
     alchemy: {
         rpcUrl: string,
@@ -60,6 +60,7 @@ export interface IAuth {
 }
 
 export interface Token {
+    chain?: string,
     chainId: string | number,
     address: string,
     name: string,

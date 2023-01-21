@@ -213,7 +213,6 @@ const redpacket = ref<RedPacket>({
 });
 
 const tokenBalance = computed(() => {
-  console.log(redpacket.value);
   if (redPacketStore.account == "hexlink") {
     return hexlAccountBalance(redpacket.value.token);
   }

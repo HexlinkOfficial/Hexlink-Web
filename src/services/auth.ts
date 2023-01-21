@@ -17,6 +17,8 @@ import { GOERLI } from "@/configs/network";
 import { useNetworkStore } from '@/stores/network';
 import { SUPPORTED_NETWORKS } from "@/configs/network";
 import { initTokenList } from "@/web3/tokens";
+import { useAccountStore } from '@/stores/account';
+import { useTokenStore } from '@/stores/token';
 
 const auth = getAuth(app)
 const functions = getFunctions()
@@ -103,6 +105,8 @@ export async function twitterSocialLogin() {
 export function signOutFirebase() {
     useWalletStore().disconnectWallet();
     useAuthStore().signOut();
+    useAccountStore().reset();
+    useTokenStore().reset();
     useNetworkStore().reset();
     return signOut(auth);
 }

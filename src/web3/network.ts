@@ -96,7 +96,7 @@ export function getInfuraProvider(network?: Network) {
 
 const functions = getFunctions();
 export async function getPriceInfo(network: Network) : Promise<PriceInfo> {
-    const priceInfo = useNetworkStore().priceInfo[network.name];
+    const priceInfo = useNetworkStore().priceInfos[network.name];
     // refresh every 15 mins
     if (!priceInfo || priceInfo.updatedAt < new Date().getTime() - 900000) {
         const getPriceInfo = httpsCallable(functions, 'priceInfo');
@@ -111,5 +111,5 @@ export async function getPriceInfo(network: Network) : Promise<PriceInfo> {
             updatedAt: new Date().getTime()
         });
     }
-    return useNetworkStore().priceInfo[network.name];
+    return useNetworkStore().priceInfos[network.name];
 }

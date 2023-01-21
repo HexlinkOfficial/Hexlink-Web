@@ -57,6 +57,7 @@ import { getInfuraProvider } from "@/web3/network";
 import { ethers } from "ethers";
 import Loading from "@/components/Loading.vue";
 import { useAccountStore } from '@/stores/account';
+import { useTokenStore } from '@/stores/token';
 
 interface CreatedRedPacket {
   redPacket: RedPacketDB,
@@ -133,11 +134,12 @@ const normalizedDbBalance = (redPacket: CreatedRedPacket) => {
     );
 }
 
+const tokenStore = useTokenStore();
 const loadAndSaveERC20Token = async (tokenAddr: string) : Promise<Token> => {
-  if (!profileStore.profile!.tokens[tokenAddr]) {
-    profileStore.addToken(await loadErc20Token(tokenAddr));
+  if (!tokenStore.token(tokenAddr)) {
+    tokenStore.set(await loadErc20Token(tokenAddr));
   }
-  return profileStore.profile!.tokens[tokenAddr]!;
+  return tokenStore.token(tokenAddr);
 }
 
 const aggregateCreated = async function(

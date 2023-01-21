@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { useNetworkStore } from "@/stores/network";
-import { SUPPORTED_NETWORKS } from "@/configs/network";
+import { SUPPORTED_NETWORKS, getNetwork } from "@/configs/network";
 import type { Token, Preference } from '@/types';
 
 interface TokenMap {
@@ -13,50 +13,57 @@ const network = () => {
 
 export const useTokenStore = defineStore({
     id: 'tokens',
-    state: (): {[key: string]: TokenMap} => ({ }),
+    state: (): {
+        data: {[key: string]: TokenMap}
+    } => ({data: {}}),
     persist: true,
     getters: {
         tokens: (state) : Token[] => {
-            return Object.values(state[network().chainId] || {});
+            return Object.values(state.data[network().name] || {});
         },
         visiableTokens() : Token[] {
             return this.tokens.filter(t => t.preference?.display);
         },
         token: (state) => {
             return (address: string) : Token => {
-                return state[network().chainId][address.toLowerCase()];
+                return state.data[network().name][address.toLowerCase()];
             }
         },
         nativeCoin: (state) => {
-            const nativeCoin = network().address.nativeCoin as string;
-            return state[network().chainId][nativeCoin.toLowerCase()];
+            const n = network();
+            const nativeCoin = n.address.nativeCoin as string;
+            return state.data[n.name][nativeCoin.toLowerCase()];
         },
         wrappedCoin: (state) => {
-            const wrappeCoin = network().address.wrappeCoin as string;
-            return state[network().chainId][wrappeCoin.toLowerCase()];
+            const n = network();
+            const wrappeCoin = n.address.wrappeCoin as string;
+            return state.data[n.name][wrappeCoin.toLowerCase()];
         },
         stableCoins: (state) => {
-            const addresses = network().address.stableCoins as string[];
-            return addresses.map(addr => state[network().chainId][addr.toLowerCase()]);
+            const n = network();
+            const addresses = n.address.stableCoins as string[];
+            return addresses.map(addr => state.data[n.name][addr.toLowerCase()]);
         },
     },
     actions: {
         set(token: Token) {
             token.address = token.address.toLowerCase();
-            if (this[token.chainId.toString()]) {
-                this[token.chainId.toString()][token.address] = token;
+            const network = getNetwork(token.chain || token.chainId);
+            if (this.data[network.name]) {
+                this.data[network.name][token.address] = token;
             } else {
-                this[token.chainId.toString()] = { [token.address]: token };
+                this.data[network.name] = { [token.address]: token };
             }
         },
         setMulti(tokens: Token[]) {
             tokens.forEach(t => this.set(t));
         },
         setPreference(token: Token, p: Preference) {
-            this[token.chainId.toString()][token.address].preference = p;
+            const network = getNetwork(token.chain || token.chainId);
+            this.data[network.name][token.address].preference = p;
         },
         reset() {
-            SUPPORTED_NETWORKS.forEach(network => delete this[network.name]);
+            SUPPORTED_NETWORKS.forEach(network => delete this.data[network.name]);
         }
     }
 });

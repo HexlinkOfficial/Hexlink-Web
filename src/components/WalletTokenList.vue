@@ -85,7 +85,7 @@ const loadTokens = async () => {
   loading.value = false;
 }
 onMounted(loadTokens);
-watch(() => useNetworkStore().network, loadTokens);
+watch(() => useNetworkStore().chainId, loadTokens);
 
 const isGreen = ref(true);
 

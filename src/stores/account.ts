@@ -5,20 +5,22 @@ import { SUPPORTED_NETWORKS } from '@/configs/network';
 
 export const useAccountStore = defineStore({
     id: 'account',
-    state: (): {[key: string]: Account} => ({}),
+    state: (): {
+        accounts: {[key: string]: Account | undefined} 
+    }=> ({accounts: {}}),
     persist: true,
     getters: {
-        account:  (state) : Account | undefined => {
+        account: (state) : Account | undefined => {
             const network = useNetworkStore().network;
-            return state[network.name];
+            return state.accounts[network.name];
         }
     },
     actions: {
         setAccount(network: Network, account: Account) {
-            this[network.name] = account;
+            this.accounts[network.name] = account;
         },
         reset() {
-            SUPPORTED_NETWORKS.forEach(network => delete this[network.name]);
+            SUPPORTED_NETWORKS.forEach(network => delete this.accounts[network.name]);
         },
     },
 })

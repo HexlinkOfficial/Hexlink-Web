@@ -39,7 +39,7 @@
                       </div>
                     </div>
                     <div style="color: #6a6d7c; white-space: nowrap; margin-left: 0; font-size: 12px;">
-                      <div style="display: flex;">{{ v.state.createdAt.toLocaleString().split(',')[1] }}</div>
+                      <div style="display: flex;">{{ v.redPacket.createdAt.toLocaleString().split(',')[1] }}</div>
                     </div>
                   </div>
                 </div>
@@ -135,9 +135,7 @@ const loadData = async function() {
   if (useAccountStore().account) {
     const provider = getInfuraProvider();
     const rps : RedPacketDB[] = await getCreatedRedPackets();
-    console.log(rps);
     redPackets.value = await Promise.all(rps.map(r => aggregateCreated(provider, r)));
-    console.log(redPackets.value);
     await loadClaimInfo(provider);
     // await loadClaimsForOnePacket(provider, redPackets.value[0]?.redPacket.id);
   }
@@ -150,7 +148,7 @@ const extractDate = () => {
   redPackets.value.forEach(async (val) => {
     let txn_test = await getProvider().getTransaction(val.redPacket.tx);
     if (txn_test) {
-      const date = val.state.createdAt.toLocaleString().split(',')[0];
+      const date = new Date(val.redPacket.createdAt).toLocaleString().split(',')[0];
       if (date in group) {
         group[date].push(val);
       } else {
@@ -237,20 +235,20 @@ const aggregateCreated = async function(
   }
   if (redPacket.status == "alive") {
     const state = await queryRedPacketInfo(redPacket);
+    update.state = {
+      balance: state.balance.toString(),
+      split: state.split,
+      createdAt: state.createdAt.toISOString(),
+    }
     if (state.balance.eq(0) || state.split == 0) {
       redPacket.status = "finalized";
-      update.state = {
-        balance: state.balance.toString(),
-        split: state.split,
-        createdAt: new Date(state.createdAt).toISOString(),
-      }
     }
   }
   if (update.status != redPacket.status) {
     await updateRedPacketStatus({
       id: redPacket.id,
       status: redPacket.status!,
-      state: update.state
+      state: redPacket.status == "finalized" ? update.state : undefined,
     });
   }
   return {

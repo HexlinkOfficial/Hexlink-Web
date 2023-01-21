@@ -106,8 +106,8 @@
                             </svg>
                             <div class="user-info">
                               <span style="margin-bottom: 0;" class="smart-contract-address">
-                                <h5 @click="doCopy(useProfileStore().profile?.account.address)">
-                                  {{ addressTextLong(useProfileStore().profile?.account.address) }}
+                                <h5 @click="doCopy(useAccountStore().account?.address)">
+                                  {{ addressTextLong(useAccountStore().account?.address) }}
                                 </h5>
                               </span>
                             </div>
@@ -175,7 +175,7 @@ import { createToaster } from "@meforma/vue-toaster";
 import { GOERLI, MUMBAI } from "@/configs/network";
 import { switchNetwork } from "@/web3/network";
 import { disconnectWallet } from "@/web3/wallet";
-import { useProfileStore } from "@/stores/profile";
+import { useAccountStore } from "@/stores/account";
 import { signOutFirebase } from "@/services/auth";
 import useClipboard from 'vue-clipboard3';
 

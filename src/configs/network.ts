@@ -68,3 +68,5 @@ export const getNetwork = (chain: string) : Network => {
     }
     throw new Error("Unsupported chain");
 }
+
+export const SUPPORTED_NETWORKS = [GOERLI, MUMBAI];

@@ -45,30 +45,28 @@
 <script lang="ts" setup>
 import { ref, watch, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
-import { getERC20Metadata } from '@/web3/tokens';
-import { useProfileStore } from "@/stores/profile";
+import { loadErc20Token } from '@/web3/tokens';
 import { useNetworkStore } from '@/stores/network';
 import { getCreatedRedPackets, updateRedPacketStatus } from '@/graphql/redpacket';
 import { getClaimedRedPackets, updateRedPacketTxStatus, getRedPacketClaims } from '@/graphql/redpacketClaim';
-import type { TokenMetadata, Token, RedPacketDB, ClaimedRedPacket, RedPacketClaim } from '@/types';
+import type { Token, RedPacketDB, ClaimedRedPacket, RedPacketClaim } from '@/types';
 import { BigNumber as EthBigNumber } from "ethers";
 import { queryRedPacketInfo } from "@/web3/redpacket";
 import { normalizeBalance } from '@/web3/tokens';
 import { getInfuraProvider } from "@/web3/network";
 import { ethers } from "ethers";
 import Loading from "@/components/Loading.vue";
+import { useAccountStore } from '@/stores/account';
 
 interface CreatedRedPacket {
   redPacket: RedPacketDB,
-  token: TokenMetadata,
+  token: Token,
   state: {
     balance: EthBigNumber,
     split: number,
     createdAt: Date
   }
 };
-
-const profileStore = useProfileStore();
 
 const redPackets = ref<CreatedRedPacket[]>([]);
 const claimed = ref<ClaimedRedPacket[]>([]);
@@ -91,7 +89,7 @@ const loadClaimsForOnePacket = async (
 
 const loadData = async function() {
   loading.value = true;
-  if (useProfileStore().profile?.initiated) {
+  if (useAccountStore().account) {
     const provider = getInfuraProvider();
     const rps : RedPacketDB[] = await getCreatedRedPackets();
     redPackets.value = await Promise.all(rps.map(r => aggregateCreated(provider, r)));
@@ -115,7 +113,7 @@ const showDetails = async function() {
   showDetailsEnabled.value = showDetailsEnabled.value ? false : true;
 };
 
-const normalize = (balance: EthBigNumber | undefined, token: TokenMetadata) => {
+const normalize = (balance: EthBigNumber | undefined, token: Token) => {
   balance = balance || EthBigNumber.from(0);
   const normalized = normalizeBalance(balance, token.decimals);
   return normalized.normalized;
@@ -137,7 +135,7 @@ const normalizedDbBalance = (redPacket: CreatedRedPacket) => {
 
 const loadAndSaveERC20Token = async (tokenAddr: string) : Promise<Token> => {
   if (!profileStore.profile!.tokens[tokenAddr]) {
-    profileStore.addToken({metadata: await getERC20Metadata(tokenAddr)});
+    profileStore.addToken(await loadErc20Token(tokenAddr));
   }
   return profileStore.profile!.tokens[tokenAddr]!;
 }
@@ -171,7 +169,7 @@ const aggregateCreated = async function(
   }
   return {
     redPacket,
-    token: token.metadata,
+    token,
     state,
   } as CreatedRedPacket;
 };

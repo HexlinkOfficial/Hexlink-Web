@@ -2,7 +2,7 @@ import { gql } from '@urql/core';
 import { useAuthStore } from '@/stores/auth';
 import { handleUrqlResponse, setUrqlClientIfNecessary } from './urql';
 import { useNetworkStore } from '@/stores/network';
-import type { HexlinkUserInfo, RedPacketDB, RedPacketDBMetadata, RedPacketClaim } from "@/types";
+import type { HexlinkUserInfo, RedPacketDB, RedPacketDBMetadata } from "@/types";
 
 export const GET_REDPACKET = gql`
   query GetRedPacket($id: String!) {

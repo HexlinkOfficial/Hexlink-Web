@@ -9,6 +9,13 @@ export const useAuthStore = defineStore({
         returnUrl: undefined,
     }),
     persist: true,
+    getters: {
+        userInfo: (state) => ({
+            handle: state.user!.handle,
+            displayName: state.user!.displayName,
+            provider: state.user!.provider,
+        })
+    },
     actions: {
         signIn(user: IUser) {
             console.log("User logged in");

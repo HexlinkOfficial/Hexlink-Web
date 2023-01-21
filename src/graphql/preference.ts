@@ -1,5 +1,5 @@
 import { gql } from '@urql/core'
-import type { IUser, Token, Network, TokenMetadata } from '@/types';
+import type { IUser, Network, Token } from '@/types';
 import { handleUrqlResponse, setUrqlClientIfNecessary } from './urql'
 
 export const GET_TOKEN_PREFERENCES = gql`
@@ -29,7 +29,9 @@ export const INSERT_TOKEN_PREFERENCES = gql`
         ) {
             affected_rows
             returning {
-                id
+                id,
+                metadata,
+                display
             }
         }
     }
@@ -54,7 +56,7 @@ export interface PreferenceInput {
     tokenAddress: string,
     tokenAlias?: string,
     display: boolean,
-    metadata: TokenMetadata,
+    metadata: Token,
 }
 
 export async function getTokenPreferences(
@@ -70,10 +72,8 @@ export async function getTokenPreferences(
         return result.data.preference.map((p : any) => {
             const metadata = JSON.parse(p.metadata);
             return {
-                metadata: {
-                    ...metadata,
-                    chain: network.name
-                },
+                ...metadata,
+                chainId: network.chainId,
                 preference: {
                     id: p.id,
                     tokenAlias: p.token_alias,
@@ -89,7 +89,7 @@ export async function getTokenPreferences(
 export async function insertTokenPreferences(
     user: IUser,
     data: PreferenceInput[],
-) : Promise<{id: number}[]> {
+) : Promise<{id: number, metadata: Token, display: boolean}[]> {
     const client = setUrqlClientIfNecessary(user.idToken!)
     const result = await client.mutation(
         INSERT_TOKEN_PREFERENCES,
@@ -105,7 +105,13 @@ export async function insertTokenPreferences(
         }
     ).toPromise();
     if (await handleUrqlResponse(result)) {
-        return result.data.insert_preference.returning;
+        return result.data.insert_preference.returning.map(
+            (res: any) => ({
+                id: res.id,
+                metadata: JSON.parse(res.metadata),
+                display: res.display
+            })
+        );
     } else {
         return await insertTokenPreferences(user, data);
     }

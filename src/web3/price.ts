@@ -1,5 +1,5 @@
 import * as ethers from "ethers";
-import { getProvider } from "./provider";
+import { getProvider } from "@/web3/network";
 import BigNumber from "bignumber.js";
 
 export async function getETHPrice() : Promise<BigNumber> {

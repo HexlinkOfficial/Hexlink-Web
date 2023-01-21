@@ -1,12 +1,10 @@
-import type { Account, HexlinkUserInfo, Network } from "@/types";
-import { useProfileStore } from "@/stores/profile";
-import { useAuthStore } from "@/stores/auth";
-import { initTokenList } from "@/web3/tokens";
+import type { Account, Network } from "@/types";
 import { hexlinkContract } from "@/web3/hexlink";
 import { getProvider } from "@/web3/network";
 import { hash } from "@/web3/utils";
 import { Contract } from "ethers";
 import ACCOUNT_ABI from "@/configs/abi/AccountSimple.json";
+import { useAccountStore } from "@/stores/account";
 
 export function genNameHash(schema: string, name: string) {
     return hash(`${schema}:${name}`);
@@ -31,14 +29,14 @@ export async function buildAccountFromAddress(address: string) : Promise<Account
     };
 };
 
-export async function buildAccount(network: Network, nameHash: string) : Promise<Account> {
+export async function initHexlAccount(network: Network, nameHash: string) : Promise<void> {
     const address = await hexlinkContract(network).addressOfName(nameHash);
     const account = await buildAccountFromAddress(address);
     if (account.isContract) {
         const contract = accountContract(network, address);
         account.owner = await contract.owner();
     }
-    return account;
+    useAccountStore().setAccount(network, account);
 };
 
 export function prettyPrintAddress(address: string, start: number, stop: number) {
@@ -81,21 +79,4 @@ export function truncateAddress(address: string) {
 export function toHex(num: any) {
     const val = Number(num);
     return "0x" + val.toString(16);
-}
-
-export async function initProfile(network: Network) {
-    const store = useProfileStore();
-    if (store.profiles[network.name]?.initiated) { return; }
-    const account = await buildAccount(network, useAuthStore().user!.nameHash);
-    const tokens = await initTokenList(network);
-    store.init(network, account, tokens);
-}
-
-export function userInfo() : HexlinkUserInfo {
-    const user = useAuthStore().user!;
-    return {
-        handle: user.handle,
-        displayName: user.displayName,
-        provider: user.provider,
-    };
 }

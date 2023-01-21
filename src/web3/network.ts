@@ -5,12 +5,10 @@ import { Alchemy, Network as AlchemyNetwork } from "alchemy-sdk";
 import type { Network, PriceInfo } from '@/types';
 import { useWalletStore } from "@/stores/wallet";
 import { useRedPacketStore } from "@/stores/redpacket";
-import { initProfile } from "@/web3/account";
 import { useNetworkStore } from '@/stores/network';
 import { getFunctions, httpsCallable } from 'firebase/functions'
 
 async function doSwitch(network: Network) {
-    await initProfile(network);
     useRedPacketStore().reset();
     useNetworkStore().switchNetwork(network);
 }

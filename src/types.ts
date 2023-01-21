@@ -59,8 +59,8 @@ export interface IAuth {
     returnUrl?: string,
 }
 
-export interface TokenMetadata {
-    chain?: string,
+export interface Token {
+    chainId: string | number,
     address: string,
     name: string,
     symbol: string,
@@ -69,12 +69,13 @@ export interface TokenMetadata {
     tags?: string[],
     extensions?: {
         "rootAddress": string
-    }
+    },
+    preference?: Preference
 }
 
 export interface TokenDataList {
     tags?: {[key: string]: {name: string, description: string}}
-    tokens: TokenMetadata[],
+    tokens: Token[],
     timestamp: string,
     error?: string,
 }
@@ -91,13 +92,6 @@ export interface NormalizedTokenBalance {
     updatedAt?: Date;
 }
 
-export interface Token {
-    metadata: TokenMetadata,
-    balance?: NormalizedTokenBalance;
-    preference?: Preference;
-    price?: number;
-}
-
 export interface Profile {
     initiated: boolean;
     account: Account;
@@ -106,14 +100,14 @@ export interface Profile {
 
 export interface RedPacket {
     id?: string;
-    token: Token;
     salt: string;
-    gasToken: Token;
-    gasTokenAmount?: EthersBigNumber;
-    tokenAmount?: EthersBigNumber;
     mode: "random" | "equal";
     split: number;
     balance: string;
+    token: Token;
+    tokenAmount?: EthersBigNumber;
+    gasToken: Token;
+    gasTokenAmount?: EthersBigNumber;
     validator: string;
 }
 
@@ -234,7 +228,7 @@ export interface RedPacketClaimInput {
     tx: string,
 }
   
-export type TxStatus = "pending" | "error" | "success";
+export type TxStatus = "" | "pending" | "error" | "success";
   
 export interface RedPacketClaim extends RedPacketClaimInput {
     createdAt: Date,

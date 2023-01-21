@@ -50,32 +50,27 @@ import { ref, onMounted } from "vue";
 import { getRedPacket } from '@/graphql/redpacket';
 import { useRoute } from "vue-router";
 import { claimRedPacket } from "@/web3/redpacket";
-import { getERC20Metadata } from "@/web3/tokens";
+import { loadErc20Token } from "@/web3/tokens";
 import { getNetwork } from "@/configs/network";
-import { useProfileStore } from "@/stores/profile";
+import { useTokenStore } from "@/stores/token";
 import { switchNetwork } from "@/web3/network";
-import type { TokenMetadata, Network, RedPacketDB } from "@/types";
+import type { Token, Network, RedPacketDB } from "@/types";
 
 const redPacket = ref<RedPacketDB | undefined>();
 const redPacketTokenIcon = ref<string>("");
 const redPacketToken = ref<string>("");
 const claimStatus = ref<string>("");
 
-async function loadTokenMetadata(
-  tokenAddr: string,
-  network: Network
-) : Promise<TokenMetadata> {
-  const token = useProfileStore().profiles[
-    network.name
-  ].tokens[tokenAddr.toLowerCase()];
-  return token?.metadata || await getERC20Metadata(tokenAddr, network);
+async function loadToken(tokenAddr: string) : Promise<Token> {
+  const token = useTokenStore().token(tokenAddr);
+  return token || await loadErc20Token(tokenAddr);
 }
 
 onMounted(async () => {
   redPacket.value = await getRedPacket(useRoute().query.claim!.toString());
   const network = getNetwork(redPacket.value!.chain);
-  switchNetwork(network);
-  const metadata = await loadTokenMetadata(redPacket.value!.metadata.token, network);
+  await switchNetwork(network);
+  const metadata = await loadToken(redPacket.value!.metadata.token);
   redPacketToken.value = metadata.symbol;
   redPacketTokenIcon.value = metadata.logoURI || "";
 });

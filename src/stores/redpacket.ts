@@ -3,7 +3,7 @@ import { defineStore } from 'pinia';
 import type { RedPacket } from "@/types";
 
 type Status = "" | "confirming" | "processing" | "error" | "success";
-type AccountType = "hexlink" | "wallet";
+export type AccountType = "hexlink" | "wallet";
 
 interface CreatingRedPacket {
   status: Status;
@@ -27,6 +27,9 @@ export const useRedPacketStore = defineStore({
     },
     setStatus(status: Status) {
       this.status = status;
+    },
+    setAccount(account: AccountType) {
+      this.account = account;
     },
     reset() {
       this.status = "";

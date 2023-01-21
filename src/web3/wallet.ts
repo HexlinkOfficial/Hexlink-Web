@@ -4,7 +4,6 @@ import { useWalletStore } from "@/stores/wallet"
 import { buildAccountFromAddress } from "./account";
 import WalletConnect from "@walletconnect/web3-provider";
 import type { Wallet } from "@/types";
-import { updateWalletBalances } from "@/web3/tokens";
 
 export const providerOptions = {
   walletconnect: {
@@ -56,12 +55,10 @@ export async function connectWallet() {
     wallet,
     walletIcon,
   } as Wallet);
-  await updateWalletBalances();
 
   window.ethereum.on('accountsChanged', async function (accounts: string[]) {
     const account = await buildAccountFromAddress(accounts[0]);
     store.switchAccount(account);
-    await updateWalletBalances();
   });
 }
 

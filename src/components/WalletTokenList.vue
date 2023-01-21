@@ -17,21 +17,21 @@
       </tr>
     </thead>
     <tbody v-if="!loading">
-      <tr v-for="(token, i) in useProfileStore().visiableTokens" :key="i" class="token-detail">
+      <tr v-for="(token, i) in useTokenStore().visiableTokens" :key="i" class="token-detail">
         <td>
           <div class="token-description">
             <div class="token-logo">
               <div class="network-logo">
                 <img :src="useNetworkStore().network!.logoUrl" alt={{token.address}} />
               </div>
-              <img class="logo" :src="token.metadata.logoURI || logo" alt={{token.address}} />
+              <img class="logo" :src="token.logoURI || logo" alt={{token.address}} />
             </div>
             <div class="token-name">
               <div class="name">
                 <div class="symbol">
-                  <div class="symbol-text">{{token.metadata.symbol}}</div>
+                  <div class="symbol-text">{{token.symbol}}</div>
                 </div>
-                <div class="fullname">{{token.metadata.name}}</div>
+                <div class="fullname">{{token.name}}</div>
               </div>
             </div>
           </div>
@@ -41,14 +41,14 @@
         </td>
         <td class="price-detail">
           <div class="detail">
-            <div class="token-market-price">$ {{ token.price || 0 }}</div>
-            <p v-if="token.price" :class='isGreen ? "token-price-change-positive" : "token-price-change-negative"'>+2.64%</p>
+            <div class="token-market-price">$ {{ price(token) || 0 }}</div>
+            <p v-if="price(token)" :class='isGreen ? "token-price-change-positive" : "token-price-change-negative"'>+2.64%</p>
           </div>
         </td>
         <td class="balance-detail">
           <div class="detail">
             <div class="balance">$ {{ usdValue(token) }}</div>
-            <p class="crypto-balance">{{token.balance?.normalized || 0}} {{token.metadata.symbol}}</p>
+            <p class="crypto-balance">{{balance(token)}} {{token.symbol}}</p>
           </div>
         </td>
       </tr>
@@ -62,25 +62,30 @@
 import { ref, onMounted, watch } from 'vue'
 import type { Token } from "@/types";
 import logo from "../assets/network-icons/hexlink.svg";
-import { useProfileStore } from "@/stores/profile";
 import { useNetworkStore } from "@/stores/network";
-import { updateProfileBalances } from "@/web3/tokens";
+import { getBalances, updatePreferences } from "@/web3/tokens";
+import type { BalanceMap } from "@/web3/tokens";
 import Loading from "@/components/Loading.vue";
+import { useAccountStore } from '@/stores/account';
+import { useTokenStore } from '@/stores/token';
 
 const loading = ref<boolean>(true);
+const balances = ref<BalanceMap>({});
+const balance = (token: Token) : string => {
+  return balances.value[token.address]?.normalized || "0";
+}
 
-onMounted(async () => {
-  if (useProfileStore().profile?.initiated) {
-    await updateProfileBalances();
+const loadTokens = async () => {
+  loading.value = true;
+  const account = useAccountStore().account?.address
+  if (account) {
+    balances.value = await getBalances(account, balances.value);
+    await updatePreferences(balances.value);
   }
   loading.value = false;
-});
-
-watch(() => useNetworkStore().network, async () => {
-  loading.value = true;
-  await updateProfileBalances();
-  loading.value = false;
-});
+}
+onMounted(loadTokens);
+watch(() => useNetworkStore().network, loadTokens);
 
 const isGreen = ref(true);
 
@@ -91,10 +96,11 @@ const props = defineProps({
   }
 });
 
+const price = (token: Token) : number => {
+  return 0;
+}
+
 const usdValue = (token: Token) : number => {
-  if (token.balance && token.price) {
-    return token.price * Number(token.balance.normalized || 0);
-  }
   return 0;
 };
 

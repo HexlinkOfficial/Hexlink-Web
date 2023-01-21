@@ -10,12 +10,13 @@ import type { IUser } from "@/types";
 import { getFunctions, httpsCallable } from 'firebase/functions';
 import { app } from '@/services/firebase';
 import { useAuthStore } from "@/stores/auth";
-import { useProfileStore } from "@/stores/profile";
 import { useWalletStore } from "@/stores/wallet";
 import { switchNetwork } from "@/web3/network";
-import { genNameHash } from '@/web3/account';
+import { genNameHash, initHexlAccount } from '@/web3/account';
 import { GOERLI } from "@/configs/network";
 import { useNetworkStore } from '@/stores/network';
+import { SUPPORTED_NETWORKS } from "@/configs/network";
+import { initTokenList } from "@/web3/tokens";
 
 const auth = getAuth(app)
 const functions = getFunctions()
@@ -64,6 +65,7 @@ export async function googleSocialLogin() {
             idToken
         };
         useAuthStore().signIn(user);
+        await init();
         await switchNetwork(GOERLI);
     } catch (error: any) {
         if (error.code == 'auth/popup-closed-by-user') {
@@ -92,6 +94,7 @@ export async function twitterSocialLogin() {
             idToken,
         };
         useAuthStore().signIn(user);
+        await init();
         await switchNetwork(GOERLI);
     } catch (error) {
         console.log(error);
@@ -100,8 +103,17 @@ export async function twitterSocialLogin() {
 
 export function signOutFirebase() {
     useWalletStore().disconnectWallet();
-    useProfileStore().clear();
     useAuthStore().signOut();
     useNetworkStore().reset();
     return signOut(auth);
+}
+
+export async function init() {
+    const user = useAuthStore().user!;
+    await Promise.all(
+        SUPPORTED_NETWORKS.map(network => initHexlAccount(network, user.nameHash))
+    );
+    await Promise.all(
+        SUPPORTED_NETWORKS.map(network => initTokenList(network))
+    );
 }

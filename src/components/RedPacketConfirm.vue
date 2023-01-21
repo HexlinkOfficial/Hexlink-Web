@@ -35,7 +35,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { useRedPacketStore } from '@/stores/redpacket';
-import { useProfileStore } from '@/stores/profile';
+import { useAccountStore } from '@/stores/account';
 import { isContract } from "@/web3/account";
 import { deployAndCreateNewRedPacket, createNewRedPacket } from "@/web3/redpacket";
 
@@ -43,8 +43,7 @@ const store = useRedPacketStore();
 const createRedPacket = async () => {
   store.setStatus("processing");
   try {
-    const account = useProfileStore().account;
-    if (await isContract(account!.address)) {
+    if (await isContract(useAccountStore().account!.address)) {
       await createNewRedPacket(
         store.redpacket!,
         store.account == "hexlink"

@@ -2,7 +2,6 @@ import { gql } from '@urql/core';
 import { useAuthStore } from '@/stores/auth';
 import { handleUrqlResponse, setUrqlClientIfNecessary } from './urql';
 import type { HexlinkUserInfo, RedPacketDB } from "@/types";
-import { userInfo } from "@/web3/account";
 import { BigNumber as EthBigNumber } from "ethers";
 import type { RedPacketClaim, ClaimedRedPacket, TxStatus, RedPacketClaimInput } from "@/types";
 
@@ -220,7 +219,7 @@ export async function insertRedPacketClaim(
           objects: data.map(d => ({
               redpacket_id: d.redPacketId,
               claimer_id: useAuthStore().user!.uid,
-              claimer: userInfo(),
+              claimer: useAuthStore().userInfo,
               tx: d.tx
           }))
       }

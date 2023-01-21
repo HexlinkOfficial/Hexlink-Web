@@ -772,45 +772,21 @@ svg {
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted } from "vue";
 import { isContract } from "@/web3/account";
 import Layout from "../components/Layout.vue";
-import { useAuthStore } from '@/stores/auth';
-import { useProfileStore } from "@/stores/profile";
-import { BigNumber } from "bignumber.js";
+import { useAccountStore } from "@/stores/account";
 
-const profile = useProfileStore().profile;
 const isDeployed = ref<boolean>(true);
 const loading = ref<boolean>(true);
-const tokens = profile.tokens;
 const all = ref<boolean>(true);
 const completed = ref<boolean>(false);
 const pending = ref<boolean>(false);
 const canceled = ref<boolean>(false);
 
 onMounted(async () => {
-  const auth = useAuthStore();
-  const accountAddress = profile.account?.address;
+  const accountAddress = useAccountStore().account!.address;
   isDeployed.value = await isContract(accountAddress);
   loading.value = false;
-});
-
-const visiableTokens = computed(() => {
-  return Object.values(tokens.value).filter(t => t.preference?.display || false);
-});
-
-const totalAssets = computed(() => {
-  let total: BigNumber = BigNumber(0);
-  for (const token of visiableTokens.value) {
-    if (token.balance && token.price) {
-      total = total.plus(token.balance.normalized.times(token.price));
-    }
-  }
-  // return total.plus(BigNumber(dynamicBalance.value));
-  return total;
-});
-
-const dynamicBalance = computed(() => {
-  return BigNumber(Math.floor(Math.random() * 100));
 });
 </script>

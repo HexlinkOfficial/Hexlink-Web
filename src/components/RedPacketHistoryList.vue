@@ -45,12 +45,12 @@
                 </div>
                 <div class="claim-status">
                   <div class="progress-bar">
-                    <span class="box-progress" :style="{ width: v.state.split/v.redPacket.metadata.split*100 + '%' }"></span>
+                    <span class="box-progress" :style="{ width: (v.redPacket.metadata.split - v.state.split)/v.redPacket.metadata.split*100 + '%' }"></span>
                   </div>
                   <div class="claimed-data">
                     <p class="claimed-number">
                       Claimed: 
-                      <strong>{{ v.state.split }}/{{ v.redPacket.metadata.split }}</strong>
+                      <strong>{{ v.redPacket.metadata.split - v.state.split }}/{{ v.redPacket.metadata.split }}</strong>
                        Share
                     </p>
                     <p class="claimed-number">
@@ -180,7 +180,7 @@ const loadData = async function() {
 };
 
 const extractDate = () => {
-  var group: any = {};
+  const group: any = {};
   redPackets.value.forEach((val) => {
     const date = val.state.createdAt.toLocaleString().split(',')[0];
     if (date in group) {
@@ -189,12 +189,21 @@ const extractDate = () => {
       group[date] = new Array(val);
     }
   });
-  console.log(group);
-  redPacketByDate.value = group;
+
+  // sort the object
+  const ordered_group: any = {}
+  var isDescending = true;
+  const d_group = Object.keys(group).sort((a,b) => isDescending ? new Date(b).getTime() - new Date(a).getTime() : new Date(a).getTime() - new Date(b).getTime());
+  d_group.forEach((v) => {
+    ordered_group[v] = group[v];
+  })
+  console.log(ordered_group);
+  redPacketByDate.value = ordered_group;
 }
 
 const loading = ref<boolean>(true);
 
+  
 onMounted(loadData);
 watch(() => useNetworkStore().network, loadData);
 

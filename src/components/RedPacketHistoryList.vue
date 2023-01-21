@@ -2,8 +2,8 @@
   <div v-if="loading" class="loading-state">
     <Loading />
   </div>
-  <div v-if="redPackets.length == 0" class="no-history">
-    <div>You have no luck history yet! Go send some luck~</div>
+  <div v-if="redPackets.length == 0 && !loading" class="no-history">
+    <div style="text-align: center;">You have no luck history yet! Go send some luck~</div>
   </div>
   <div v-if="!loading" class="token-listDetail">
     <div class="token-table">
@@ -333,7 +333,7 @@ const aggregatedClaimed = async function(
   padding: 0.5rem;
   align-items: center;
   justify-content: center;
-  height: 85%; }
+  height: 42vh; }
 .sent-info {
   display: flex;
   flex-shrink: 1;

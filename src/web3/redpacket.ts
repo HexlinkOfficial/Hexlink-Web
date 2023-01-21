@@ -68,10 +68,11 @@ export async function estimateGasSponsorship(
 }
 
 export function calcTokenAmount(
-    redpacket: RedPacket
+    balance: string | number,
+    token: Token
 ) : EthBigNumber {
-    const base = new BigNumber(10).pow(redpacket.token.decimals);
-    return toEthBigNumber(base.times(redpacket.balance));
+    const base = new BigNumber(10).pow(token.decimals);
+    return toEthBigNumber(base.times(balance));
 }
 
 export function redPacketOps(
@@ -82,7 +83,7 @@ export function redPacketOps(
     const packet = {
        token: input.token.address,
        salt: input.salt,
-       balance: calcTokenAmount(input),
+       balance: calcTokenAmount(input.balance, input.token),
        validator: input.validator,
        split: input.split,
        mode: redPacketMode(input.mode),
@@ -184,7 +185,7 @@ async function buildCreateRedPacketTx(
     let ops : UserOp[] = [];
     let txes : any[] = [];
     let value : EthBigNumber = EthBigNumber.from(0);
-    input.tokenAmount = calcTokenAmount(input);
+    input.tokenAmount = calcTokenAmount(input.balance, input.token);
     input.gasTokenAmount = await estimateGasSponsorship(network, input);
     if (!useHexlinkAccount) {
          if (isNativeCoin(input.token, network) && isNativeCoin(input.gasToken, network)) {
@@ -452,7 +453,7 @@ function redpacketId(network: Network, input: RedPacket) {
                 [
                     input.token.address,
                     input.salt,
-                    calcTokenAmount(input),
+                    calcTokenAmount(input.balance, input.token),
                     input.validator,
                     input.split,
                     redPacketMode(input.mode)

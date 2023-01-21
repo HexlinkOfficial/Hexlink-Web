@@ -59,7 +59,6 @@ export async function insertRedPacketClaim(
         })),
       }
   ).toPromise();
-  console.log(result);
   return result.data.insert_redpacket_claim.returning;
 }
 

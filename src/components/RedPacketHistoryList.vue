@@ -100,7 +100,7 @@ import type {
   RedPacketOnchainState
 } from '@/types';
 import { BigNumber as EthBigNumber } from "ethers";
-import { queryRedPacketInfo } from "@/web3/redpacket";
+import { calcTokenAmount, queryRedPacketInfo } from "@/web3/redpacket";
 import { normalizeBalance } from '@/web3/tokens';
 import { getInfuraProvider, getProvider } from "@/web3/network";
 import { ethers } from "ethers";
@@ -256,7 +256,10 @@ const aggregateCreated = async function(
   }
   if (!redPacket.state) {
     redPacket.state = {
-      balance: redPacket.metadata.balance,
+      balance: calcTokenAmount(
+          redPacket.metadata.balance,
+          token
+      ).toString(),
       split: redPacket.metadata.split,
       createdAt: redPacket.createdAt,
     }

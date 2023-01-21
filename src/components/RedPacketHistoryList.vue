@@ -45,17 +45,21 @@
                 </div>
                 <div class="claim-status">
                   <div class="progress-bar">
-                    <span class="box-progress" :style="{ width: (v.redPacket.metadata.split - v.state.split)/v.redPacket.metadata.split*100 + '%' }"></span>
+                    <span class="box-progress" :style="{
+                      width: (v.redPacket.metadata.split - v.redpacket.state.split)/v.redPacket.metadata.split*100 + '%'
+                    }"></span>
                   </div>
                   <div class="claimed-data">
                     <p class="claimed-number">
                       Claimed: 
-                      <strong>{{ v.redPacket.metadata.split - v.state.split }}/{{ v.redPacket.metadata.split }}</strong>
+                      <strong>{{
+                          v.redPacket.metadata.split - v.redpacket.state.split
+                        }}/{{ v.redPacket.metadata.split }}</strong>
                        Share
                     </p>
                     <p class="claimed-number">
                       Left:
-                      <strong>{{ normalize(v.state.balance, v.token) }}</strong>
+                      <strong>{{ normalize(v.redpacket.state.balance, v.token) }}</strong>
                       <div class="token-icon" style="margin-right: 0.25rem; margin-left: 0.25rem;">
                         <img :src="v.token.logoURI">
                       </div>
@@ -92,6 +96,7 @@ import type {
   RedPacketDB,
   ClaimedRedPacket,
   RedPacketClaim,
+  RedPacketStatus,
   RedPacketOnchainState
 } from '@/types';
 import { BigNumber as EthBigNumber } from "ethers";
@@ -106,7 +111,6 @@ import { useTokenStore } from '@/stores/token';
 interface CreatedRedPacket {
   redPacket: RedPacketDB,
   token: Token,
-  state: RedPacketOnchainState
 };
 
 const redPackets = ref<CreatedRedPacket[]>([]);
@@ -222,18 +226,18 @@ const aggregateCreated = async function(
   const tokenAddr = redPacket.metadata.token.toLowerCase();
   const token = await loadAndSaveERC20Token(tokenAddr);
   const update : {
-    status?: string,
+    status?: RedPacketStatus,
     state?: RedPacketOnchainState
   } = {status: redPacket.status};
   if (!redPacket.status || redPacket.status == "pending") {
     const receipt = await provider.getTransactionReceipt(redPacket.tx);
     if (receipt?.status == 0) {
-      redPacket.status = "error";
+      update.status = "error";
     } else if (receipt?.status == 1) {
-      redPacket.status = "alive";
+      update.status = "alive";
     }
   }
-  if (redPacket.status == "alive") {
+  if (redPacket.status == "alive" || update.status == "alive") {
     const state = await queryRedPacketInfo(redPacket);
     update.state = {
       balance: state.balance.toString(),
@@ -241,20 +245,21 @@ const aggregateCreated = async function(
       createdAt: state.createdAt.toISOString(),
     }
     if (state.balance.eq(0) || state.split == 0) {
-      redPacket.status = "finalized";
+      update.status = "finalized";
     }
   }
-  if (update.status != redPacket.status) {
+  if (update.status) {
+    redPacket.status = update.status;
+    redPacket.state = update.state;
     await updateRedPacketStatus({
       id: redPacket.id,
-      status: redPacket.status!,
-      state: redPacket.status == "finalized" ? update.state : undefined,
+      status: update.status!,
+      state: update.status == "finalized" ? update.state : undefined,
     });
   }
   return {
     redPacket,
-    token,  
-    state: update.state
+    token,
   } as CreatedRedPacket;
 };
 

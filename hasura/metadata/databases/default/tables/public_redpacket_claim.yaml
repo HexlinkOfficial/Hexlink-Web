@@ -1,10 +1,15 @@
 table:
   name: redpacket_claim
   schema: public
+object_relationships:
+  - name: redpacket
+    using:
+      foreign_key_constraint_on: redpacket_id
 select_permissions:
   - role: user
     permission:
       columns:
+        - claimed
         - claimer
         - claimer_id
         - created_at
@@ -12,6 +17,7 @@ select_permissions:
         - id
         - redpacket_id
         - tx
+        - tx_status
       filter:
         _or:
           - claimer_id:
@@ -23,8 +29,9 @@ update_permissions:
   - role: user
     permission:
       columns:
+        - claimed
         - claimer
-        - tx
+        - tx_status
       filter:
         claimer_id:
           _eq: X-Hasura-User-Id

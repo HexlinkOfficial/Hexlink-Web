@@ -230,7 +230,7 @@ const genTokenList = async function () {
     );
     if (walletStore.connected) {
       walletAccountBalances.value = await getBalances(
-        walletStore.wallet!.account.address, 
+        walletStore.account!.address,
         walletAccountBalances.value,
       );
     }

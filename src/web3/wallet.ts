@@ -3,7 +3,6 @@ import { ethers } from "ethers";
 import { useWalletStore } from "@/stores/wallet"
 import { buildAccountFromAddress } from "./account";
 import WalletConnect from "@walletconnect/web3-provider";
-import type { Wallet } from "@/types";
 
 export const providerOptions = {
   walletconnect: {
@@ -20,7 +19,7 @@ export const web3Modal = new Web3Model({
 });
 
 export async function disconnectWallet() {
-  await web3Modal.clearCachedProvider();
+  web3Modal.clearCachedProvider();
   const store = useWalletStore();
   store.disconnectWallet();
 }
@@ -50,11 +49,11 @@ export async function connectWallet() {
     }
   }
   const store = useWalletStore();
-  store.connectWallet({
-    account: await buildAccountFromAddress(accounts[0]),
+  store.connectWallet(
     wallet,
     walletIcon,
-  } as Wallet);
+    await buildAccountFromAddress(accounts[0])
+  );
 
   window.ethereum.on('accountsChanged', async function (accounts: string[]) {
     const account = await buildAccountFromAddress(accounts[0]);

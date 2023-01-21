@@ -180,7 +180,7 @@ async function buildCreateRedPacketTx(
     input: RedPacket,
     useHexlinkAccount: boolean
 ) {
-    const walletAccount = useWalletStore().wallet!.account;
+    const walletAccount = useWalletStore().account!;
     const hexlAccount = useAccountStore().account!;
     let ops : UserOp[] = [];
     let txes : any[] = [];
@@ -426,14 +426,13 @@ export async function buildDeployAndCreateRedPacketTx(
     const data = hexlink.interface.encodeFunctionData(
         "deploy", args
     );
-    const walletAccount = useWalletStore().wallet!.account;
     txes.push({
         name: "deployAndCreateRedPacket",
         function: "deploy",
         args,
         tx: {
             to: hexlink.address,
-            from: walletAccount.address,
+            from: useWalletStore().account!.address,
             value: tx.tx.value,
             data,
         }

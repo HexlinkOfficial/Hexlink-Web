@@ -17,7 +17,7 @@
         </div>
         <div class="right">
         <div style="min-width: 100px; margin-left: 0.5rem;">
-            <h2>{{account.name}} Account</h2>
+            <h2>{{capitalize(account.name)}} Account</h2>
             <p>Available Balance</p>
         </div>
         <div class="balances">
@@ -102,6 +102,7 @@ const props = defineProps({
     },
 });
 
+const wallet = useWalletStore();
 const account = computed(() => {
     if (props.account == "hexlink") {
         return {
@@ -111,12 +112,16 @@ const account = computed(() => {
         };
     } else {
         return {
-            address: useWalletStore().wallet?.account.address,
-            name: useWalletStore().wallet?.wallet,
-            logo: useWalletStore().wallet?.walletIcon,
+            address: wallet.account?.address,
+            name: wallet.wallet,
+            logo: wallet.walletIcon,
         };
     }
-})
+});
+
+const capitalize = (word: string) => {
+    return word.charAt(0).toUpperCase() + word.slice(1)
+}
 
 const chooseAccount = () => {
     useRedPacketStore().setAccount(props.account)

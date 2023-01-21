@@ -1,28 +1,40 @@
-import type { NormalizedTokenBalance, Wallet, Account } from "@/types";
+import type { Account } from "@/types";
 import { defineStore } from 'pinia'
 
 export const useWalletStore = defineStore({
     id: 'wallet',
     state: (): {
         connected: boolean,
-        wallet?: Wallet,
+        wallet: string;
+        walletIcon: string;
+        account?: Account;
     } => ({
         connected: false,
-        wallet: undefined,
+        wallet: "",
+        walletIcon: "",
+        account: undefined,
     }),
     persist: true,
     actions: {
-        connectWallet(wallet: Wallet) {
+        connectWallet(
+            wallet: string,
+            walletIcon: string,
+            account: Account,
+        ) {
             this.wallet = wallet;
+            this.walletIcon = walletIcon;
+            this.account = account;
             this.connected = true;
         },
         disconnectWallet() {
             this.connected = false;
-            this.wallet = undefined;
+            this.wallet = "";
+            this.walletIcon = "",
+            this.account = undefined,
             console.log("External account disconnected");
         },
         switchAccount(account: Account) {
-            this.wallet!.account = account;
+            this.account = account;
         },
     },
 })

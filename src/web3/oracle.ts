@@ -41,7 +41,7 @@ export async function genDeployAuthProof(
 
     const accountIface = new ethers.utils.Interface(ACCOUNT_ABI);
     const initData = accountIface.encodeFunctionData(
-        "init", [wallet.wallet!.account.address, data]
+        "init", [wallet.account!.address, data]
     );
     const hexlinkIface = new ethers.utils.Interface(HEXLINK_ABI);
     const requestId = await genRequestId(

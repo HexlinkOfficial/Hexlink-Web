@@ -64,7 +64,6 @@ const createRedPacket = async () => {
 const closeModal = () => store.setStatus("");
 
 const message = computed(() => {
-  console.log(store.status);
   if (store.status == 'error') {
     return "Something went wrong";
   }

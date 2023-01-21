@@ -160,7 +160,6 @@ const extractDate = () => {
       d_group.forEach((v) => {
         ordered_group[v] = group[v];
       })
-      console.log(ordered_group);
       redPacketByDate.value = ordered_group;
     }
   });

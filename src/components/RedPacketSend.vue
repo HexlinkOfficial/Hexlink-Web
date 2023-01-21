@@ -25,12 +25,12 @@
           <div class="input-info-show">
             <p class="token-available-balance">
               Available Balance:
-              <span class="balance-amount">{{ tokenBalance.substring(0,6) }}</span>
+              <span class="balance-amount">{{ redPacketTokenBalance.substring(0,6) }}</span>
             </p>
             <div class="total-choose-token">
               <div class="token-select">
                 <div class="max-amount-button">
-                  <span class="button-text" @click="redpacket.balance = tokenBalance">MAX</span>
+                  <span class="button-text" @click="redpacket.balance = redPacketTokenBalance">MAX</span>
                   <span class="button-outline"></span>
                 </div>
               </div>
@@ -50,7 +50,7 @@
                       </div>
                       <div style="display: flex; flex-direction: column; align-items: flex-start;">
                         <b>{{ token.symbol }}</b>
-                        <div style="margin-right:0.5rem;">balance {{ calcRemainingBalance(token) }}</div>
+                        <div style="margin-right:0.5rem;">balance {{ tokenBalance(token) }}</div>
                       </div>
                     </div>
                   </div>
@@ -111,7 +111,7 @@
                     <div style="display: flex; flex-direction: column; align-items: flex-start;">
                       <b>{{ token.symbol }}</b>
                       <div style="margin-right:0.5rem;">
-                        Balance {{ calcRemainingBalance(token) }}
+                        Balance {{ tokenBalance(token) }}
                       </div>
                     </div>
                   </div>
@@ -212,12 +212,16 @@ const redpacket = ref<RedPacket>({
   validator: validator(),
 });
 
-const tokenBalance = computed(() => {
+const tokenBalance = (token: Token) => {
   if (redPacketStore.account == "hexlink") {
-    return hexlAccountBalance(redpacket.value.token);
+    return hexlAccountBalance(token);
   }
-  return walletAccountBalance(redpacket.value.token);
-});
+  return walletAccountBalance(token);
+};
+
+const redPacketTokenBalance = computed(
+  () => tokenBalance(redpacket.value.token)
+);
 
 const genTokenList = async function () {
     hexlAccountBalances.value = await getBalances(
@@ -281,7 +285,7 @@ watch([
   () => redpacket.value.split
 ], calcGasSponsorship);
 watch(
-  [() => redpacket.value.balance, tokenBalance],
+  [() => redpacket.value.balance, redPacketTokenBalance],
   (_old, [newBalance, newTokenBalance]) => {
     if (Number(newBalance) > Number(newTokenBalance)) {
       hasBalanceWarning.value = true;
@@ -340,18 +344,6 @@ const dropdownHandle: OnClickOutsideHandler = (event) => {
 }
 const chooseGasHandle: OnClickOutsideHandler = (event) => {
   chooseGasDrop.value = false;
-}
-
-const calcRemainingBalance = (token: Token) => {
-  if (redpacket.value.token == token) {
-    if (new BigNumber(tokenBalance.value || 0).minus(redpacket.value.balance || 0).gt(0)) {
-      return new BigNumber(tokenBalance.value || 0).minus(redpacket.value.balance || 0);
-    } else {
-      return 0;
-    }
-  } else {
-    return tokenBalance.value;
-  }
 }
 
 onClickOutside(

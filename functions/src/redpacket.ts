@@ -77,7 +77,7 @@ async function sign(message: string) : Promise<string> {
 async function buildTx(
     provider: ethers.providers.Provider,
     unsignedTx: PopulatedTransaction
-) {
+) : Promise<ethers.PopulatedTransaction> {
   const {chainId} = await provider.getNetwork();
   unsignedTx.chainId = chainId;
   unsignedTx.from = await validator();
@@ -94,13 +94,13 @@ async function buildTx(
   return unsignedTx;
 }
 
-export async function sendClaimTx(
+export async function buildClaimTx(
+    provider: ethers.providers.Provider,
     redPacket: {metadata: string},
     data: {chainId: string, claimer: string, creator?: string},
-) {
+) : Promise<string> {
   const parsed = JSON.parse(redPacket.metadata);
   const creator = parsed.creator || data.creator;
-  const provider = getInfuraProvider(data.chainId);
   let unsignedTx = await redPacketContract(
       parsed.contract, provider
   ).populateTransaction.claim({
@@ -121,9 +121,7 @@ export async function sendClaimTx(
   const signature = await signRaw(
       ethers.utils.keccak256(serialize(<UnsignedTransaction>tx))
   );
-  const signedTx = serialize(<UnsignedTransaction>tx, signature);
-  const sentTx = await provider.sendTransaction(signedTx);
-  return sentTx.hash;
+  return serialize(<UnsignedTransaction>tx, signature);
 }
 
 export const claimRedPacket = functions.https.onCall(
@@ -156,13 +154,16 @@ export const claimRedPacket = functions.https.onCall(
         }]);
         return {code: 200, id, signature};
       } else {
-        const txHash = await sendClaimTx(redPacket, data);
+        const provider = getInfuraProvider(data.chainId);
+        const signedTx = await buildClaimTx(provider, redPacket, data);
+        const txHash = ethers.utils.keccak256(signedTx);
         const [{id}] = await insertRedPacketClaim([{
           redPacketId: redPacket.id,
           creatorId: redPacket.user_id,
           claimerId: uid,
           tx: txHash,
         }]);
+        await provider.sendTransaction(signedTx);
         return {code: 200, id, tx: txHash};
       }
     }

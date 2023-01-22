@@ -230,7 +230,7 @@ const genTokenList = async function () {
     );
     if (walletStore.connected) {
       walletAccountBalances.value = await getBalances(
-        walletStore.wallet!.account.address, 
+        walletStore.account!.address,
         walletAccountBalances.value,
       );
     }
@@ -329,10 +329,7 @@ const validateInput = () => {
 
 const confirmRedPacket = function () {
   if (validateInput()) {
-    useRedPacketStore().beforeCreate(
-      redpacket.value,
-      redPacketStore.account
-    );
+    useRedPacketStore().beforeCreate(redpacket.value);
   }
 };
 

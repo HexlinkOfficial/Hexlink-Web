@@ -32,12 +32,6 @@ export interface Account {
     owner?: string;
 }
 
-export interface Wallet {
-    wallet: string;
-    walletIcon: string;
-    account: Account;
-}
-
 // if uid exists, use uid as key to
 // generate address otherwise use handle
 export interface IUser {

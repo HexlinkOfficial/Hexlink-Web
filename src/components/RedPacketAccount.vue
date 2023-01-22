@@ -17,7 +17,7 @@
         </div>
         <div class="right">
         <div style="min-width: 100px; margin-left: 0.5rem;">
-            <h2>{{account.name}} Account</h2>
+            <h2>{{capitalize(account.name)}} Account</h2>
             <p>Available Balance</p>
         </div>
         <div class="balances">
@@ -72,13 +72,12 @@
 import { computed } from "vue";
 import { useRedPacketStore } from "@/stores/redpacket";
 import { useNetworkStore } from "@/stores/network";
-import { createToaster } from "@meforma/vue-toaster";
 import type { AccountType } from "@/stores/redpacket";
 import { CopyOutlined } from '@ant-design/icons-vue';
-import useClipboard from 'vue-clipboard3';
 import type { Token } from "@/types";
 import { useAccountStore } from "@/stores/account";
 import { useWalletStore } from "@/stores/wallet";
+import { copy } from "@/web3/utils";
 
 const props = defineProps({
     account: {
@@ -103,6 +102,7 @@ const props = defineProps({
     },
 });
 
+const wallet = useWalletStore();
 const account = computed(() => {
     if (props.account == "hexlink") {
         return {
@@ -112,12 +112,16 @@ const account = computed(() => {
         };
     } else {
         return {
-            address: useWalletStore().wallet?.account.address,
-            name: useWalletStore().wallet?.wallet,
-            logo: useWalletStore().wallet?.walletIcon,
+            address: wallet.account?.address,
+            name: wallet.wallet,
+            logo: wallet.walletIcon,
         };
     }
-})
+});
+
+const capitalize = (word: string) => {
+    return word.charAt(0).toUpperCase() + word.slice(1)
+}
 
 const chooseAccount = () => {
     useRedPacketStore().setAccount(props.account)
@@ -126,19 +130,6 @@ const chooseAccount = () => {
 const isChosen = computed(() => {
     return useRedPacketStore().account == props.account;
 });
-
-const { toClipboard } = useClipboard();
-const copy = async (text: string) => {
-    try {
-        await toClipboard(text);
-        const toaster = createToaster({ position: "top", duration: 2000 });
-        toaster.success(`Copied`);
-    } catch (e) {
-        console.error(e)
-        const toaster = createToaster({ position: "top", duration: 2000 });
-        toaster.error(`Can not copy`);
-    }
-}
 
 const showGasToken = computed(() => {
   return props.token.address != props.gasToken.address;

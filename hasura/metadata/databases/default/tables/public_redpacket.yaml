@@ -1,6 +1,14 @@
 table:
   name: redpacket
   schema: public
+array_relationships:
+  - name: redpacket_claims
+    using:
+      foreign_key_constraint_on:
+        column: redpacket_id
+        table:
+          name: redpacket_claim
+          schema: public
 insert_permissions:
   - role: user
     permission:
@@ -18,14 +26,26 @@ select_permissions:
   - role: user
     permission:
       columns:
-        - creator
-        - metadata
         - chain
-        - id
-        - tx
         - created_at
+        - creator
+        - id
+        - metadata
+        - state
+        - status
+        - tx
         - user_id
       filter: {}
+update_permissions:
+  - role: user
+    permission:
+      columns:
+        - state
+        - status
+      filter:
+        user_id:
+          _eq: X-Hasura-User-Id
+      check: null
 delete_permissions:
   - role: user
     permission:

@@ -19,13 +19,13 @@ export async function switchNetwork(network: Network) {
         return;
     }
 
-    if (!currentNetwork || !useWalletStore().connected
-        || Number(network.chainId) == window.ethereum.networkVersion) {
+    const connected = useWalletStore().connected;
+    if (!currentNetwork || !connected || Number(network.chainId) == window.ethereum.networkVersion) {
         doSwitch(network);
         return;
     }
 
-    if (useWalletStore().connected) {
+    if (connected) {
         const hexifyChainId = ethers.utils.hexValue(Number(network.chainId));
         try {
             await window.ethereum.request({

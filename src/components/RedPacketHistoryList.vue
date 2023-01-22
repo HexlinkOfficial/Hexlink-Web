@@ -55,17 +55,21 @@
                 </div>
                 <div class="claim-status">
                   <div class="progress-bar">
-                    <span class="box-progress" :style="{ width: (v.redPacket.metadata.split - v.state?.split)/v.redPacket.metadata.split*100 + '%' }"></span>
+                    <span class="box-progress" :style="{
+                      width: (v.redPacket.metadata.split - v.redPacket.state.split)/v.redPacket.metadata.split*100 + '%'
+                    }"></span>
                   </div>
                   <div class="claimed-data">
                     <p class="claimed-number">
                       Claimed: 
-                      <strong>{{ v.redPacket.metadata.split - v.state?.split }}/{{ v.redPacket.metadata.split }}</strong>
+                      <strong>{{
+                          v.redPacket.metadata.split - v.redPacket.state.split
+                        }}/{{ v.redPacket.metadata.split }}</strong>
                        Share
                     </p>
                     <p class="claimed-number">
                       Left:
-                      <strong>{{ normalize(v.state.balance, v.token) }}</strong>
+                      <strong>{{ normalize(v.redPacket.state.balance, v.token) }}</strong>
                       <div class="token-icon" style="margin-right: 0.25rem; margin-left: 0.25rem;">
                         <img :src="v.token.logoURI">
                       </div>
@@ -74,7 +78,7 @@
                   </div>
                 </div>
                 <div class="cta">
-                  <button class="connect-wallet-button" @click="(copy(claimLink(v.redPacket)))">
+                  <button class="connect-wallet-button" @click="copyShareLink(v.redPacket)">
                     Share
                   </button>
                   <button class="connect-wallet-button">
@@ -102,10 +106,9 @@ import type {
   RedPacketDB,
   ClaimedRedPacket,
   RedPacketClaim,
-  RedPacketOnchainState
 } from '@/types';
 import { BigNumber as EthBigNumber } from "ethers";
-import { queryRedPacketInfo } from "@/web3/redpacket";
+import { calcTokenAmount, queryRedPacketInfo } from "@/web3/redpacket";
 import { normalizeBalance } from '@/web3/tokens';
 import { getInfuraProvider, getProvider } from "@/web3/network";
 import { ethers } from "ethers";
@@ -114,11 +117,11 @@ import { useAccountStore } from '@/stores/account';
 import { useTokenStore } from '@/stores/token';
 import useClipboard from 'vue-clipboard3';
 import { createToaster } from "@meforma/vue-toaster";
+import { copy } from "@/web3/utils";
 
 interface CreatedRedPacket {
   redPacket: RedPacketDB,
   token: Token,
-  state: RedPacketOnchainState
 };
 
 const redPackets = ref<CreatedRedPacket[]>([]);
@@ -159,54 +162,49 @@ const loadData = async function() {
 const extractDate = () => {
   const group: any = {};
   redPackets.value.forEach(async (val) => {
-    let txn_test = await getProvider().getTransaction(val.redPacket.tx);
-    if (txn_test) {
-      const date = new Date(val.redPacket.createdAt).toLocaleString().split(',')[0];
-      if (date in group) {
-        group[date].push(val);
-      } else {
-        group[date] = new Array(val);
-      }
-
-      // sort the object
-      const ordered_group: any = {}
-      var isDescending = true;
-      const d_group = Object.keys(group).sort((a, b) => isDescending
-        ? new Date(b).getTime() - new Date(a).getTime()
-        : new Date(a).getTime() - new Date(b).getTime());
-      d_group.forEach((v) => {
-        ordered_group[v] = group[v];
-      })
-      redPacketByDate.value = ordered_group;
+    const date = new Date(val.redPacket.createdAt).toLocaleString().split(',')[0];
+    if (date in group) {
+      group[date].push(val);
+    } else {
+      group[date] = new Array(val);
     }
 
-    console.log(redPacketByDate.value);
+    // sort the object
+    const ordered_group: any = {}
+    var isDescending = true;
+    const d_group = Object.keys(group).sort((a, b) => isDescending
+      ? new Date(b).getTime() - new Date(a).getTime()
+      : new Date(a).getTime() - new Date(b).getTime());
+    d_group.forEach((v) => {
+      ordered_group[v] = group[v];
+    })
+    redPacketByDate.value = ordered_group;
   });
-}
+};
 
 const loading = ref<boolean>(true);
   
 onMounted(loadData);
 watch(() => useNetworkStore().network, loadData);
 
-const { toClipboard } = useClipboard();
-const copy = async (text: string) => {
-  try {
-    await toClipboard(text);
-    const toaster = createToaster({ position: "top", duration: 2000 });
-    toaster.success(`Copied`);
-  } catch (e) {
-    console.error(e)
-    const toaster = createToaster({ position: "top", duration: 2000 });
-    toaster.error(`Can not copy`);
-  }
-}
+// const { toClipboard } = useClipboard();
+// const copy = async (text: string) => {
+//   try {
+//     await toClipboard(text);
+//     const toaster = createToaster({ position: "top", duration: 2000 });
+//     toaster.success(`Copied`);
+//   } catch (e) {
+//     console.error(e)
+//     const toaster = createToaster({ position: "top", duration: 2000 });
+//     toaster.error(`Can not copy`);
+//   }
+// }
 
 const showDetailsEnabled = ref<boolean>(false);
 
 const route = useRoute();
-const claimLink = (redPacket: RedPacketDB) => {
-  return (window.location.origin + route.path + "?claim=" + redPacket.id);
+const copyShareLink = (redPacket: RedPacketDB) => {
+  return copy(window.location.origin + route.path + "?claim=" + redPacket.id);
 };
 
 const showDetails = () => {
@@ -249,41 +247,75 @@ const aggregateCreated = async function(
 ) : Promise<CreatedRedPacket> {
   const tokenAddr = redPacket.metadata.token.toLowerCase();
   const token = await loadAndSaveERC20Token(tokenAddr);
-  const update : {
-    status?: string,
-    state?: RedPacketOnchainState
-  } = {status: redPacket.status};
-  if (!redPacket.status || redPacket.status == "pending") {
-    const receipt = await provider.getTransactionReceipt(redPacket.tx);
-    if (receipt?.status == 0) {
-      redPacket.status = "error";
-    } else if (receipt?.status == 1) {
-      redPacket.status = "alive";
-    }
-  }
-  if (redPacket.status == "alive") {
+
+  const redPacketState = async () => {
     const state = await queryRedPacketInfo(redPacket);
-    update.state = {
+    return {
       balance: state.balance.toString(),
       split: state.split,
       createdAt: state.createdAt.toISOString(),
+    };
+  };
+
+  if (redPacket.status == 'finalized') {
+    if (!redPacket.state) {
+      redPacket.state = await redPacketState();
+      await updateRedPacketStatus({
+        id: redPacket.id,
+        status: "finalized",
+        state: redPacket.state,
+      });
     }
-    if (state.balance.eq(0) || state.split == 0) {
-      redPacket.status = "finalized";
-    }
+    return { redPacket, token };
   }
-  if (update.status != redPacket.status) {
+
+  const checkIfFinalized = async (forceUpdate: boolean) => {
+    redPacket.state = await redPacketState();
+    if (EthBigNumber.from(redPacket.state.balance).eq(0) || redPacket.state.split == 0) {
+      redPacket.status = "finalized";
+      await updateRedPacketStatus({
+        id: redPacket.id,
+        status: "finalized",
+        state: redPacket.state,
+      });
+    } else if (forceUpdate) {
+      await updateRedPacketStatus({
+        id: redPacket.id,
+        status: "alive",
+      });
+    }
+    return redPacket;
+  };
+
+  if (redPacket.status == "alive") {
+    redPacket = await checkIfFinalized(false);
+    return { redPacket, token };
+  }
+
+  const receipt = await provider.getTransactionReceipt(redPacket.tx);
+  if (receipt?.status == 1) {
+    redPacket.status = "alive";
+    redPacket = await checkIfFinalized(true);
+    return { redPacket, token };
+  }
+
+  // not mined or error
+  redPacket.state = {
+    balance: calcTokenAmount(
+        redPacket.metadata.balance,
+        token
+    ).toString(),
+    split: redPacket.metadata.split,
+    createdAt: redPacket.createdAt,
+  };
+  if (receipt?.status == 0) {
+    redPacket.status = "error";
     await updateRedPacketStatus({
       id: redPacket.id,
-      status: redPacket.status!,
-      state: redPacket.status == "finalized" ? update.state : undefined,
+      status: "error",
     });
   }
-  return {
-    redPacket,
-    token,  
-    state: update.state
-  } as CreatedRedPacket;
+  return { redPacket, token };
 };
 
 const iface = new ethers.utils.Interface([

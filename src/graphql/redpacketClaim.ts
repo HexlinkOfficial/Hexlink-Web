@@ -3,7 +3,7 @@ import { useAuthStore } from '@/stores/auth';
 import { handleUrqlResponse, setUrqlClientIfNecessary } from './urql';
 import type { HexlinkUserInfo, RedPacketDB } from "@/types";
 import { BigNumber as EthBigNumber } from "ethers";
-import { useNetworkStore } from '@/stores/network';
+import { useChainStore } from '@/stores/chain';
 import type {
   RedPacketClaim,
   ClaimedRedPacket,
@@ -196,7 +196,7 @@ export async function getClaimedRedPackets() : Promise<ClaimedRedPacket[]> {
     GET_REDPACKET_CLAIMS_BY_CLAIMER,
     {
       claimerId: useAuthStore().user!.uid,
-      chain: useNetworkStore().network.name
+      chain: useChainStore().chain.name
     }
   ).toPromise();
   if (await handleUrqlResponse(result)) {

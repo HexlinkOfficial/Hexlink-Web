@@ -51,10 +51,11 @@ import { getRedPacket } from '@/graphql/redpacket';
 import { useRoute } from "vue-router";
 import { claimRedPacket } from "@/web3/redpacket";
 import { loadErc20Token } from "@/web3/tokens";
-import { getNetwork } from "@/configs/network";
 import { useTokenStore } from "@/stores/token";
 import { switchNetwork } from "@/web3/network";
-import type { Token, Network, RedPacketDB } from "@/types";
+import type { Token } from "@hexlink/hexlink";
+import { getChain } from '@hexlink/hexlink';
+import type { RedPacketDB } from "@/types";
 
 const redPacket = ref<RedPacketDB | undefined>();
 const redPacketTokenIcon = ref<string>("");
@@ -68,7 +69,7 @@ async function loadToken(tokenAddr: string) : Promise<Token> {
 
 onMounted(async () => {
   redPacket.value = await getRedPacket(useRoute().query.claim!.toString());
-  const network = getNetwork(redPacket.value!.chain);
+  const network = getChain(redPacket.value!.chain);
   await switchNetwork(network);
   const metadata = await loadToken(redPacket.value!.metadata.token);
   redPacketToken.value = metadata.symbol;

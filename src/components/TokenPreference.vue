@@ -96,12 +96,12 @@ import {
     insertTokenPreferences,
     updateTokenPreference
 } from '@/graphql/preference';
-import { loadERC20Token } from "@/web3/tokens";
-import type { Token } from "@/types";
+import { loadErc20Token } from "@/web3/tokens";
+import type { Token } from "@hexlink/hexlink";
 import * as ethers from "ethers";
-import { isContract, prettyPrintAddress } from '@/web3/account';
+import { prettyPrintAddress, isContract } from '@hexlink/hexlink';
 import { message } from "ant-design-vue";
-import { useNetworkStore } from "@/stores/network";
+import { useChainStore } from "@/stores/chain";
 
 const props = defineProps({
     tokens: {
@@ -111,12 +111,12 @@ const props = defineProps({
 });
 
 const DEFAULT_TOKEN = {
-    metadata: {
-        address: "",
-        name: "",
-        symbol: "",
-        decimals: 18
-    }
+    address: "",
+    name: "",
+    symbol: "",
+    decimals: 18,
+    chain: "",
+    chainId: "",
 };
 
 const store = useAuthStore();
@@ -128,7 +128,7 @@ const searchText = ref<string>("");
 const tokenListToShow = ref<Token[]>([]);
 const updatingPreference = ref<{[key: string]: boolean}>({});
 
-const chain = computed(() => useNetworkStore().network.name);
+const chain = computed(() => useChainStore().chain.name);
 
 watch(
   () => props.tokens,
@@ -151,8 +151,8 @@ const onSearch = async (text: string) => {
 
 const search = (token: Token, text: string) => {
     return [
-        token.metadata?.name,
-        token.metadata?.symbol,
+        token.name,
+        token.symbol,
         token.preference?.tokenAlias
     ].filter(t => !!t).join(" ").toLowerCase().includes(text);
 }
@@ -169,13 +169,13 @@ const genTokenList = async (text: string, tokenMap: {[key: string]: Token}) => {
         );
     }
     const filtered = tokenList.filter(
-        t => t.metadata.address.toLowerCase() == text
+        t => t.address.toLowerCase() == text
     );
     if (filtered.length > 0) {
         tokenListToShow.value =  filtered;
-    } else if (await isContract(text)) {
+    } else if (await isContract(useChainStore().provider, text)) {
         try {
-            const token = await loadERC20Token(text, store.user!.account.address);
+            const token = await loadErc20Token(text);
             tokenToImport.value = token;
             showImport.value = true;
         } catch (err: any) {
@@ -190,19 +190,19 @@ const addToken = async () => {
         const [id] = await insertTokenPreferences(
             store.user!,
             [{
-                tokenAddress: tokenToImport.value.metadata.address,
-                chain,
+                tokenAddress: tokenToImport.value.address,
+                chain: useChainStore().chain.name,
                 display: true,
-                tokenAlias: tokenToImport.value.metadata.name,
-                metadata: tokenToImport.value.metadata,
+                tokenAlias: tokenToImport.value.name,
+                metadata: tokenToImport.value,
             }]
         );
         tokenToImport.value.preference = {
             id: id.id,
             display: true,
-            tokenAlias: tokenToImport.value.metadata.name,
+            tokenAlias: tokenToImport.value.name,
         };
-        emit('tokenAdded', tokenToImport.value.metadata);
+        emit('tokenAdded', tokenToImport.value);
         showPreference.value = false;
         showImport.value = false;
         searchText.value = "";
@@ -215,7 +215,7 @@ const addToken = async () => {
 
 const handleClick = async (token: Token) => {
     const prevPreference = token.preference;
-    updatingPreference.value[token.metadata.address] = true;
+    updatingPreference.value[token.address] = true;
     try {
         if (token.preference) {
             token.preference.display = !token.preference.display;
@@ -227,7 +227,7 @@ const handleClick = async (token: Token) => {
             emit(
                 'preferenceUpdate',
                 {
-                    address: token.metadata.address,
+                    address: token.address,
                     preference: updated
                 }
             );
@@ -236,17 +236,17 @@ const handleClick = async (token: Token) => {
             const [{id}] = await insertTokenPreferences(
                 store.user!,
                 [{
-                    tokenAddress: token.metadata.address,
-                    chain,
+                    tokenAddress: token.address,
+                    chain: useChainStore().chain.name,
                     display: true,
-                    metadata: tokenToImport.value.metadata
+                    metadata: tokenToImport.value
                 }]
             );
             token.preference = {id, display: true};
             emit(
                 'preferenceUpdate',
                 {
-                    address: token.metadata.address,
+                    address: token.address,
                     preference: { id, display: true }
                 }
             );
@@ -255,6 +255,6 @@ const handleClick = async (token: Token) => {
         token.preference = prevPreference;
         message.error("Failed to connect error");
     }
-    updatingPreference.value[token.metadata.address] = false;
+    updatingPreference.value[token.address] = false;
 }
 </script>

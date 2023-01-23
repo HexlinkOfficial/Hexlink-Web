@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "outDir": "./lib/",
+    "rootDir": "./src",
+    "resolveJsonModule": true,
+    "module": "esnext",
+    "types": ["node"]
+  },
+  "exclude": [],
+  "extends": "@vue/tsconfig/tsconfig.node.json",
+  "include": [
+    "./src/*.ts",
+    "./src/*.json",
+    "src/abi/*.json",
+    "src/tokens/*.json",
+  ]
+}
+

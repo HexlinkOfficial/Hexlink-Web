@@ -88,24 +88,26 @@
 import { ref, watch, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { loadErc20Token } from '@/web3/tokens';
-import { useNetworkStore } from '@/stores/network';
+import { useChainStore } from "@/stores/chain";
 import { getCreatedRedPackets, updateRedPacketStatus } from '@/graphql/redpacket';
 import { getClaimedRedPackets, updateRedPacketTxStatus, getRedPacketClaims } from '@/graphql/redpacketClaim';
 import type {
-  Token,
   RedPacketDB,
   ClaimedRedPacket,
   RedPacketClaim,
 } from '@/types';
 import { BigNumber as EthBigNumber } from "ethers";
 import { calcTokenAmount, queryRedPacketInfo } from "@/web3/redpacket";
-import { normalizeBalance } from '@/web3/tokens';
-import { getInfuraProvider, getProvider } from "@/web3/network";
+import { getInfuraProvider } from "@/web3/network";
 import { ethers } from "ethers";
 import Loading from "@/components/Loading.vue";
 import { useAccountStore } from '@/stores/account';
 import { useTokenStore } from '@/stores/token';
 import { copy } from "@/web3/utils";
+
+import { normalizeBalance } from '@hexlink/hexlink';
+import type { Token } from "@hexlink/hexlink";
+import { redPacketAddress } from "@hexlink/redpacket";
 
 interface CreatedRedPacket {
   redPacket: RedPacketDB,
@@ -136,7 +138,7 @@ const redPacketByDate = ref<any>([]);
 const loadData = async function() {
   loading.value = true;
   if (useAccountStore().account) {
-    const provider = getInfuraProvider();
+    const provider = getInfuraProvider(useChainStore().chain);
     const rps : RedPacketDB[] = await getCreatedRedPackets();
     redPackets.value = await Promise.all(rps.map(r => aggregateCreated(provider, r)));
     await loadClaimInfo(provider);
@@ -172,7 +174,7 @@ const extractDate = () => {
 const loading = ref<boolean>(true);
   
 onMounted(loadData);
-watch(() => useNetworkStore().network, loadData);
+watch(() => useChainStore().current, loadData);
 
 const showDetailsEnabled = ref<boolean>(false);
 
@@ -186,10 +188,7 @@ const showDetails = () => {
 };
 
 const normalize = (balance: string | undefined, token: Token) => {
-  const normalized = normalizeBalance(
-    EthBigNumber.from(balance || 0),
-    token.decimals
-  );
+  const normalized = normalizeBalance(balance || "0", token.decimals);
   return normalized.normalized;
 }
 
@@ -321,7 +320,7 @@ const validateClaimStatus = async (
   if (receipt.status) { // success
     const events = receipt.logs.filter(
       (log: any) => log.address.toLowerCase() == (
-        useNetworkStore().network.address.redpacket as string
+        redPacketAddress(useChainStore().chain)
       ).toLowerCase()
     ).map((log: any) => parseLog(log));
     const event = events.find((e: any) => e.name == "Claimed");

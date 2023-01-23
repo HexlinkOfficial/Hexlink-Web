@@ -772,21 +772,11 @@ svg {
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
-import { isContract } from "@/web3/account";
+import { ref } from "vue";
 import Layout from "../components/Layout.vue";
-import { useAccountStore } from "@/stores/account";
 
-const isDeployed = ref<boolean>(true);
-const loading = ref<boolean>(true);
 const all = ref<boolean>(true);
 const completed = ref<boolean>(false);
 const pending = ref<boolean>(false);
 const canceled = ref<boolean>(false);
-
-onMounted(async () => {
-  const accountAddress = useAccountStore().account!.address;
-  isDeployed.value = await isContract(accountAddress);
-  loading.value = false;
-});
 </script>

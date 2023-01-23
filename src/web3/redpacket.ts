@@ -1,65 +1,67 @@
-import type { Network, Account, Transaction, UserOp, Token, RedPacket, RedPacketDB } from "@/types";
+import type { Transaction, UserOp, RedPacketDB } from "@/types";
 import { ethers, BigNumber as EthBigNumber } from "ethers";
 import { useAuthStore } from "@/stores/auth";
-import { isNativeCoin, isWrappedCoin, isStableCoin } from "@/configs/tokens";
 
 import { genDeployAuthProof } from "@/web3/oracle";
-import { hash, toEthBigNumber, tokenBase, tokenEqual } from "@/web3/utils";
-import { hexlinkContract, refunder } from "@/web3/hexlink";
+import { toEthBigNumber, tokenBase, tokenEqual } from "@/web3/utils";
 import { estimateGas, sendTransaction } from "@/web3/wallet";
 
-import ERC20_ABI from "@/configs/abi/ERC20.json";
-import RED_PACKET_ABI from "@/configs/abi/HappyRedPacket.json";
-import ACCOUNT_ABI from "@/configs/abi/AccountSimple.json";
+import type { Account, Chain, Token } from "@hexlink/hexlink";
+import {
+    hash,
+    isNativeCoin,
+    isWrappedCoin,
+    isStableCoin,
+    erc20Interface,
+    erc20Contract,
+    getChain,
+    hexlAddress,
+    hexlInterface,
+} from "@hexlink/hexlink";
+import type { RedPacket } from "@hexlink/redpacket";
+import {
+    redPacketInterface,
+    redPacketAddress,
+    redPacketContract
+} from "@hexlink/redpacket";
+
+import { useChainStore } from "@/stores/chain";
 import { useWalletStore } from "@/stores/wallet";
-import { useNetworkStore } from "@/stores/network";
 import { insertRedPacket } from "@/graphql/redpacket";
 import { BigNumber } from "bignumber.js";
-import { getInfuraProvider, getPriceInfo } from "@/web3/network";
-import { getNetwork } from "@/configs/network";
+import { getPriceInfo } from "@/web3/network";
 import { updateRedPacketClaimer } from "@/graphql/redpacketClaim";
 import { useAccountStore } from "@/stores/account";
 
 import { getFunctions, httpsCallable } from 'firebase/functions'
 const functions = getFunctions();
 
-const erc20Iface = new ethers.utils.Interface(ERC20_ABI);
-const redPacketIface = new ethers.utils.Interface(RED_PACKET_ABI);
+const chainStore = useChainStore();
 
-export function validator(network?: Network) : string {
-    network = network || useNetworkStore().network;
+export function validator() : string {
     if (import.meta.env.VITE_USE_FUNCTIONS_EMULATOR) {
-        return network.address.testValidator as string;
+        return "0xEF2e3F91209F88A3143e36Be10D52502162426B3";
     }
-    return network.address.validator as string;
+    return "0x030ffbc193c3f9f4c6378beb506eecb0933fd457";
 }
 
 function redPacketMode(mode: string) : number {
     return mode == "random" ? 2 : 1;
 }
 
-export function redPacketContract(contract?: string, network?: Network) {
-    network = network || useNetworkStore().network;
-    return new ethers.Contract(
-        contract || network!.address.redpacket as string,
-        RED_PACKET_ABI,
-        getInfuraProvider(network)
-    );
-}
-
 export async function estimateGasSponsorship(
-    network: Network,
     redpacket: RedPacket
 ) : Promise<EthBigNumber> {
     const sponsorshipGasAmount = EthBigNumber.from(Number(redpacket.split)).mul(200000);
     const gasToken = redpacket.gasToken;
-    const priceInfo = await getPriceInfo(network);
-    if (isNativeCoin(gasToken, network) || isWrappedCoin(gasToken, network)) {
+    const chain = chainStore.chain;
+    const priceInfo = await getPriceInfo(chain);
+    if (isNativeCoin(gasToken, chain) || isWrappedCoin(gasToken, chain)) {
         return sponsorshipGasAmount.mul(priceInfo.gasPrice);
-    } else if (isStableCoin(gasToken, network)) {
+    } else if (isStableCoin(gasToken, chain)) {
         // calculate usd value of tokens
         const normalizedUsd = tokenBase(gasToken).times(priceInfo.nativeCurrencyInUsd);
-        const nativeCoinBase = EthBigNumber.from(10).pow(network.nativeCurrency.decimals);
+        const nativeCoinBase = EthBigNumber.from(10).pow(chain.nativeCurrency.decimals);
         return toEthBigNumber(normalizedUsd).mul(sponsorshipGasAmount).mul(
             priceInfo.gasPrice
         ).div(nativeCoinBase);
@@ -76,10 +78,9 @@ export function calcTokenAmount(
 }
 
 export function redPacketOps(
-    network: Network,
     input: RedPacket
 ) : UserOp[] {
-    const redPacketAddr = network.address.redpacket as string;
+    const chain = useChainStore().chain;
     const packet = {
        token: input.token.address,
        salt: input.salt,
@@ -88,7 +89,8 @@ export function redPacketOps(
        split: input.split,
        mode: redPacketMode(input.mode),
     };
-    if (isNativeCoin(input.token, network)) {
+    const redPacketAddr = redPacketAddress(chain);
+    if (isNativeCoin(input.token, chain)) {
         return [{
             name: "createRedPacket",
             function: "create",
@@ -96,7 +98,7 @@ export function redPacketOps(
             op: {
                 to: redPacketAddr,
                 value: packet.balance,
-                callData: redPacketIface.encodeFunctionData(
+                callData: redPacketInterface().encodeFunctionData(
                     "create", [packet]
                 ),
                 callGasLimit: EthBigNumber.from(0) // no limit
@@ -110,7 +112,7 @@ export function redPacketOps(
             op: {
                 to: input.token.address,
                 value: EthBigNumber.from(0),
-                callData: erc20Iface.encodeFunctionData(
+                callData: erc20Interface().encodeFunctionData(
                     "approve", [redPacketAddr, packet.balance]
                 ),
                 callGasLimit: EthBigNumber.from(0) // no limit
@@ -123,7 +125,7 @@ export function redPacketOps(
             op: {
                 to: redPacketAddr,
                 value: EthBigNumber.from(0),
-                callData: redPacketIface.encodeFunctionData(
+                callData: redPacketInterface().encodeFunctionData(
                     "create", [packet]
                 ),
                 callGasLimit: EthBigNumber.from(0) // no limit
@@ -133,17 +135,12 @@ export function redPacketOps(
 }
 
 async function validAllowance(
-    network: Network,
     token: Token,
     owner: Account,
     operator: Account,
     requiredAmount: EthBigNumber
 ) {
-    const erc20 = new ethers.Contract(
-        token.address,
-        ERC20_ABI,
-        getInfuraProvider(network)
-    );
+    const erc20 = erc20Contract(chainStore.provider, token.address);
     const allowance = await erc20.allowance(
         owner.address,
         operator.address
@@ -160,7 +157,7 @@ async function buildApproveTx(
         operator,
         ethers.constants.MaxInt256
     ];
-    const data = erc20Iface.encodeFunctionData(
+    const data = erc20Interface().encodeFunctionData(
         "approve", args
     );
     return {
@@ -176,7 +173,6 @@ async function buildApproveTx(
 }
 
 async function buildCreateRedPacketTx(
-    network: Network,
     input: RedPacket,
     useHexlinkAccount: boolean
 ) {
@@ -186,14 +182,14 @@ async function buildCreateRedPacketTx(
     let txes : any[] = [];
     let value : EthBigNumber = EthBigNumber.from(0);
     input.tokenAmount = calcTokenAmount(input.balance, input.token);
-    input.gasTokenAmount = await estimateGasSponsorship(network, input);
+    const chain = useChainStore().chain;
+    input.gasTokenAmount = await estimateGasSponsorship(input);
     if (!useHexlinkAccount) {
-         if (isNativeCoin(input.token, network) && isNativeCoin(input.gasToken, network)) {
+         if (isNativeCoin(input.token, chain) && isNativeCoin(input.gasToken, chain)) {
             value = value.add(input.tokenAmount).add(input.gasTokenAmount)
-        } else if (isNativeCoin(input.token, network)) {
+        } else if (isNativeCoin(input.token, chain)) {
             value = value.add(input.tokenAmount);
             const valid = await validAllowance(
-                network,
                 input.gasToken,
                 walletAccount,
                 hexlAccount,
@@ -217,16 +213,15 @@ async function buildCreateRedPacketTx(
                 op: {
                     to: input.gasToken.address,
                     value: EthBigNumber.from(0),
-                    callData: erc20Iface.encodeFunctionData(
+                    callData: erc20Interface().encodeFunctionData(
                         "transferFrom", args
                     ),
                     callGasLimit: EthBigNumber.from(0) // no limit
                 }
             });
-        } else if (isNativeCoin(input.gasToken, network)) {
+        } else if (isNativeCoin(input.gasToken, chain)) {
             value = value.add(input.gasTokenAmount);
             const valid = await validAllowance(
-                network,
                 input.token,
                 walletAccount,
                 hexlAccount,
@@ -250,7 +245,7 @@ async function buildCreateRedPacketTx(
                 op: {
                     to: input.token.address,
                     value: EthBigNumber.from(0),
-                    callData: erc20Iface.encodeFunctionData(
+                    callData: erc20Interface().encodeFunctionData(
                         "transferFrom", args
                     ),
                     callGasLimit: EthBigNumber.from(0) // no limit
@@ -258,7 +253,6 @@ async function buildCreateRedPacketTx(
             });
         } else if (tokenEqual(input.token, input.gasToken)) {
             const valid = await validAllowance(
-                network,
                 input.token,
                 walletAccount,
                 hexlAccount,
@@ -282,7 +276,7 @@ async function buildCreateRedPacketTx(
                 op: {
                     to: input.token.address,
                     value: EthBigNumber.from(0),
-                    callData: erc20Iface.encodeFunctionData(
+                    callData: erc20Interface().encodeFunctionData(
                         "transferFrom", args
                     ),
                     callGasLimit: EthBigNumber.from(0) // no limit
@@ -290,7 +284,6 @@ async function buildCreateRedPacketTx(
             });
         } else {
             const valid1 = await validAllowance(
-                network,
                 input.token,
                 walletAccount,
                 hexlAccount,
@@ -314,14 +307,13 @@ async function buildCreateRedPacketTx(
                 op: {
                     to: input.token.address,
                     value: EthBigNumber.from(0),
-                    callData: erc20Iface.encodeFunctionData(
+                    callData: erc20Interface().encodeFunctionData(
                         "transferFrom", args1
                     ),
                     callGasLimit: EthBigNumber.from(0) // no limit
                 }
             });
             const valid2 = await validAllowance(
-                network,
                 input.gasToken,
                 walletAccount,
                 hexlAccount,
@@ -345,7 +337,7 @@ async function buildCreateRedPacketTx(
                 op: {
                     to: input.gasToken.address,
                     value: EthBigNumber.from(0),
-                    callData: erc20Iface.encodeFunctionData(
+                    callData: erc20Interface().encodeFunctionData(
                         "transferFrom", args2
                     ),
                     callGasLimit: EthBigNumber.from(0) // no limit
@@ -355,13 +347,13 @@ async function buildCreateRedPacketTx(
     }
 
     // refund from hexl account to refund account
-    if (isNativeCoin(input.gasToken, network)) {
+    if (isNativeCoin(input.gasToken, chain)) {
         ops.push({
             name: "refundGasToken",
             function: "",
             args: [],
             op: {
-                to: refunder(network),
+                to: useChainStore().refunder,
                 value: input.gasTokenAmount,
                 callData: [],
                 callGasLimit: EthBigNumber.from(0) // no limit
@@ -370,7 +362,7 @@ async function buildCreateRedPacketTx(
     } else {
         const args = [
             hexlAccount.address,
-            refunder(network),
+            useChainStore().refunder,
             input.gasTokenAmount
         ];
         ops.push({
@@ -380,17 +372,16 @@ async function buildCreateRedPacketTx(
             op: {
                 to: input.gasToken.address,
                 value: EthBigNumber.from(0),
-                callData: erc20Iface.encodeFunctionData(
+                callData: erc20Interface().encodeFunctionData(
                     "transferFrom", args
                 ),
                 callGasLimit: EthBigNumber.from(0) // no limit
             }
         });
     }
-    ops = ops.concat(redPacketOps(network, input));
+    ops = ops.concat(redPacketOps(input));
 
-    const accountIface = new ethers.utils.Interface(ACCOUNT_ABI);
-    const data = accountIface.encodeFunctionData(
+    const data = accountInterface().encodeFunctionData(
         "execBatch",
         [ops.map(op => op.op)]
     );
@@ -409,21 +400,19 @@ async function buildCreateRedPacketTx(
 }
 
 export async function buildDeployAndCreateRedPacketTx(
-    network: Network,
     input: RedPacket,
     useHexlinkAccount: boolean
 ) : Promise<any> {
-    const txes = await buildCreateRedPacketTx(network, input, useHexlinkAccount);
+    const txes = await buildCreateRedPacketTx(input, useHexlinkAccount);
     const tx = txes.pop(); // last tx is the redpacket creation tx
-    const { initData, proof } = await genDeployAuthProof(network, tx.tx.data);
-    const hexlink = hexlinkContract(network);
+    const { initData, proof } = await genDeployAuthProof(tx.tx.data);
     const args = [useAuthStore().user!.nameHash, initData, {
         authType: hash(proof.authType),
         identityType: hash(proof.identityType),
         issuedAt: EthBigNumber.from(proof.issuedAt),
         signature: proof.signature
     }];
-    const data = hexlink.interface.encodeFunctionData(
+    const data = hexlInterface().encodeFunctionData(
         "deploy", args
     );
     txes.push({
@@ -431,7 +420,7 @@ export async function buildDeployAndCreateRedPacketTx(
         function: "deploy",
         args,
         tx: {
-            to: hexlink.address,
+            to: hexlAddress(useChainStore().chain),
             from: useWalletStore().account!.address,
             value: tx.tx.value,
             data,
@@ -440,14 +429,14 @@ export async function buildDeployAndCreateRedPacketTx(
     return txes;
 }
 
-function redpacketId(network: Network, input: RedPacket) {
+function redpacketId(chain: Chain, input: RedPacket) {
     const redPacketType = "tuple(address,bytes32,uint256,address,uint32,uint8)";
     return ethers.utils.keccak256(
         ethers.utils.defaultAbiCoder.encode(
             ["uint256", "address", "address", redPacketType],
             [
-                Number(network.chainId),
-                network.address.redpacket as string,
+                Number(chain.chainId),
+                redPacketAddress(chain),
                 useAccountStore().account!.address,
                 [
                     input.token.address,
@@ -463,12 +452,12 @@ function redpacketId(network: Network, input: RedPacket) {
 }
 
 async function processTxAndSave(
-    network: Network,
     redpacket: RedPacket,
     txes: any[],
     dryrun: boolean
 ) : Promise<string> {
-    const id = redpacketId(network, redpacket);
+    const chain = useChainStore().chain;
+    const id = redpacketId(chain, redpacket);
     if (dryrun) {
         for (let i = 0; i < txes.length; i++) {
             const gasUsed = await estimateGas(txes[i].tx);
@@ -482,7 +471,7 @@ async function processTxAndSave(
 
     const toInsert = {
         id,
-        chain: network.name.toString(),
+        chain: chain.name,
         metadata: {
             token: redpacket.token.address,
             salt: redpacket.salt,
@@ -493,7 +482,7 @@ async function processTxAndSave(
             validator: redpacket.validator,
             gasToken: redpacket.gasToken.address,
             gasTokenAmount: redpacket.gasTokenAmount!.toString(),
-            contract: network.address.redpacket as string,
+            contract: redPacketAddress(chain),
             creator: useAccountStore().account!.address
         },
         creator: useAuthStore().userInfo
@@ -515,13 +504,11 @@ export async function deployAndCreateNewRedPacket(
     useHexlinkAccount: boolean,
     dryrun: boolean = false
 ) {
-    const network = useNetworkStore().network;
     const txes = await buildDeployAndCreateRedPacketTx(
-        network,
         redpacket,
         useHexlinkAccount
     );
-    return await processTxAndSave(network, redpacket, txes, dryrun);
+    return await processTxAndSave(redpacket, txes, dryrun);
 }
 
 export async function createNewRedPacket(
@@ -529,31 +516,31 @@ export async function createNewRedPacket(
     useHexlinkAccount: boolean,
     dryrun: boolean = false
 ) : Promise<string> {
-    const network = useNetworkStore().network;
     const txes = await buildCreateRedPacketTx(
-        network,
         redpacket,
         useHexlinkAccount
     );
-    return await processTxAndSave(network, redpacket, txes, dryrun);
+    return await processTxAndSave(redpacket, txes, dryrun);
 }
 
 export async function claimRedPacket(redPacket: RedPacketDB) : Promise<void> {
     const claimRedPacket = httpsCallable(functions, 'claimRedPacket');
-    const network = getNetwork(redPacket.chain);
-    const result = await claimRedPacket({chainId: network.chainId, redPacketId: redPacket.id});
+    const chain = getChain(redPacket.chain);
+    const result = await claimRedPacket({chainId: chain.chainId, redPacketId: redPacket.id});
     const {id} = result.data as {id: number, tx: string};
     await updateRedPacketClaimer(id, useAuthStore().userInfo);
 }
 
-export async function queryRedPacketInfo(redPacket: RedPacketDB) : Promise<{
+export async function queryRedPacketInfo(rp: RedPacketDB) : Promise<{
     balance: EthBigNumber,
     split: number,
     createdAt: Date
 }> {
-    const info = await redPacketContract(
-        redPacket.metadata.contract
-    ).getPacket(redPacket.id);
+    const redPacket = await redPacketContract(
+        useChainStore().provider,
+        // rp.metadata.contract
+    );
+    const info = redPacket.getPacket(rp.id);
     return {
         createdAt: new Date(info.createdAt.toNumber() * 1000),
         balance: info.balance,

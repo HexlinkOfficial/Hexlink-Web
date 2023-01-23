@@ -1,7 +1,9 @@
 import { defineStore } from 'pinia';
-import type { Network, Account } from '@/types';
-import { useNetworkStore } from '@/stores/network';
-import { SUPPORTED_NETWORKS } from '@/configs/network';
+
+import type { Chain } from "@hexlink/common";
+import { SUPPORTED_CHAINS } from "@hexlink/common";
+import type { Account } from "@hexlink/account";
+import { useChainStore } from '@/stores/chain';
 
 export const useAccountStore = defineStore({
     id: 'account',
@@ -11,16 +13,15 @@ export const useAccountStore = defineStore({
     persist: true,
     getters: {
         account: (state) : Account | undefined => {
-            const network = useNetworkStore().network;
-            return state.accounts[network.name];
+            return state.accounts[useChainStore().chain.name];
         }
     },
     actions: {
-        setAccount(network: Network, account: Account) {
-            this.accounts[network.name] = account;
+        setAccount(chain: Chain, account: Account) {
+            this.accounts[chain.name] = account;
         },
         reset() {
-            SUPPORTED_NETWORKS.forEach(network => delete this.accounts[network.name]);
+            SUPPORTED_CHAINS.forEach(chain => delete this.accounts[chain.name]);
         },
     },
 })

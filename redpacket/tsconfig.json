@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "outDir": "./lib/",
+    "rootDir": "./src",
+    "resolveJsonModule": true,
+  },
+  "exclude": [],
+  "extends": "../../tsconfig.package.json",
+  "include": [
+    "./src/*.ts",
+    "./src/*.json",
+  ]
+}
+

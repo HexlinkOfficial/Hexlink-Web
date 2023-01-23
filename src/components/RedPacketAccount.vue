@@ -11,7 +11,7 @@
         <div>
             <img class="wallet-image" :src="account.logo">
             <div class="chain_wrapper">
-            <img class="chain" :src="useNetworkStore().network.logoUrl" />
+            <img class="chain" :src="useChainStore().chain.logoUrl" />
             </div>
         </div>
         </div>
@@ -71,10 +71,10 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { useRedPacketStore } from "@/stores/redpacket";
-import { useNetworkStore } from "@/stores/network";
+import { useChainStore } from "@/stores/chain";
 import type { AccountType } from "@/stores/redpacket";
 import { CopyOutlined } from '@ant-design/icons-vue';
-import type { Token } from "@/types";
+import type { Token } from "@hexlink/hexlink";
 import { useAccountStore } from "@/stores/account";
 import { useWalletStore } from "@/stores/wallet";
 import { copy } from "@/web3/utils";

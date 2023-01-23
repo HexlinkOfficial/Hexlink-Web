@@ -1,0 +1,15 @@
+{
+  "author": "shu@hexlink.io",
+  "description": "Utilities and classes for hexlink redpacket contract",
+  "main": "./lib/index.js",
+  "module": "./lib.esm/index.js",
+  "name": "@hexlink/redpacket",
+  "scripts": {
+    "build": "tsc --build ./tsconfig.json",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "sideEffects": false,
+  "types": "./lib/index.d.ts",
+  "version": "0.1.1"
+}
+

@@ -22,7 +22,7 @@
           <div class="token-description">
             <div class="token-logo">
               <div class="network-logo">
-                <img :src="useNetworkStore().network.logoUrl" alt={{token.address}} />
+                <img :src="useChainStore().chain.logoUrl" alt={{token.address}} />
               </div>
               <img class="logo" :src="token.logoURI || logo" alt={{token.address}} />
             </div>
@@ -60,9 +60,9 @@
 
 <script lang="ts" setup>
 import { ref, onMounted, watch } from 'vue'
-import type { Token } from "@/types";
+import type { Token } from "@hexlink/hexlink";
 import logo from "../assets/network-icons/hexlink.svg";
-import { useNetworkStore } from "@/stores/network";
+import { useChainStore } from "@/stores/chain";
 import { getBalances, updatePreferences } from "@/web3/tokens";
 import type { BalanceMap } from "@/web3/tokens";
 import Loading from "@/components/Loading.vue";
@@ -85,7 +85,7 @@ const loadTokens = async () => {
   loading.value = false;
 }
 onMounted(loadTokens);
-watch(() => useNetworkStore().chainId, loadTokens);
+watch(() => useChainStore().current, loadTokens);
 
 const isGreen = ref(true);
 

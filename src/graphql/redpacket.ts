@@ -1,7 +1,7 @@
 import { gql } from '@urql/core';
 import { useAuthStore } from '@/stores/auth';
 import { handleUrqlResponse, setUrqlClientIfNecessary } from './urql';
-import { useNetworkStore } from '@/stores/network';
+import { useChainStore } from '@/stores/chain';
 import type {
   HexlinkUserInfo,
   RedPacketDB,
@@ -111,7 +111,7 @@ export async function getCreatedRedPackets() : Promise<RedPacketDB[]> {
     GET_CREATED_REDPACKETS,
     {
       userId: useAuthStore().user!.uid,
-      chain: useNetworkStore().network.name,
+      chain: useChainStore().chain.name,
     }
   ).toPromise();
   if (await handleUrqlResponse(result)) {

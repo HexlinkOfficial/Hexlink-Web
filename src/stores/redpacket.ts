@@ -1,6 +1,6 @@
 
 import { defineStore } from 'pinia';
-import type { RedPacket } from "@/types";
+import type { RedPacket } from "@hexlink/redpacket";
 
 type Status = "" | "confirming" | "processing" | "error" | "success";
 export type AccountType = "hexlink" | "wallet";

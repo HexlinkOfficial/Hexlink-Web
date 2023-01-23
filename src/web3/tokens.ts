@@ -7,20 +7,41 @@ import {
 import type {
     PreferenceInput,
 } from "@/graphql/preference";
-import type {
-    Token,
-    Network,
-    NormalizedTokenBalance
-} from '@/types';
-import { getPopularTokens } from "@/configs/tokens";
-import { alchemy, getProvider } from "@/web3/network";
+
 import { useAuthStore } from "@/stores/auth";
-import { useNetworkStore } from "@/stores/network";
-import { BigNumber as EthBigNumber } from 'ethers';
+import { useChainStore } from "@/stores/chain";
 import { useTokenStore } from "@/stores/token";
+
+import type { Token, Chain,  NormalizedTokenBalance } from '@hexlink/hexlink';
+import { normalizeBalance, getPopularTokens } from "@hexlink/hexlink";
+import { Alchemy, Network } from "alchemy-sdk";
+import { alchemyKey } from "@/web3/network";
  
-export async function loadErc20Token(token: string, network?: Network) : Promise<Token> {
-    const metadata = await alchemy(network).core.getTokenMetadata(token);
+const chainStore = useChainStore();
+
+function alchemyNetwork(chain: Chain) : Network {
+    if (chain.chainId == "5") {
+        return Network.ETH_GOERLI;
+    }
+    if (chain.chainId == "137") {
+        return Network.MATIC_MAINNET;
+    }
+    if (chain.chainId == "80001") {
+        return Network.MATIC_MUMBAI;
+    }
+    throw new Error("Unsupported network");
+}
+
+function alchemy() {
+    const chain = chainStore.chain;
+    return new Alchemy({
+        apiKey: alchemyKey(chain),
+        network: alchemyNetwork(chain!)
+    });
+}
+
+export async function loadErc20Token(token: string) : Promise<Token> {
+    const metadata = await alchemy().core.getTokenMetadata(token);
     if (metadata.name == null
         || metadata.symbol == null
         || metadata.decimals == null) {
@@ -34,35 +55,17 @@ export async function loadErc20Token(token: string, network?: Network) : Promise
         symbol: metadata.symbol!,
         decimals: metadata.decimals!,
         logoURI: metadata.logo!,
-        chainId: network!.chainId,
+        chain: chainStore.chain.name,
+        chainId: chainStore.chain.chainId!,
     }
 }
 
-export function normalizeBalance(balance: EthBigNumber, decimals: number) : NormalizedTokenBalance {
-    const normalized = new BigNumber(
-        balance.toString()
-    ).div(BigNumber(10).pow(decimals));
-    if (normalized.gt(1)) {
-        return {
-            value: balance,
-            normalized: normalized.dp(3).toString(10),
-            updatedAt: new Date()
-        };
-    } else {
-        return {
-            value: balance,
-            normalized: normalized.dp(4).toString(10),
-            updatedAt: new Date()
-        }
-    }
-}
-
-export async function initTokenList(network: Network) {
+export async function initTokenList(chain: Chain) {
     const auth = useAuthStore();
     const tokens = useTokenStore();
-    const DEFAULT_TOKENS = await getPopularTokens(network);
+    const DEFAULT_TOKENS = await getPopularTokens(chain);
     DEFAULT_TOKENS.tokens.forEach(t => tokens.set(t));
-    const preferences : Token[] = await getTokenPreferences(auth.user!, network);
+    const preferences : Token[] = await getTokenPreferences(auth.user!, chain);
     preferences.forEach(p => tokens.set(p));
 }
 
@@ -71,8 +74,9 @@ export type BalanceMap = {[key: string] : NormalizedTokenBalance};
 export async function getBalances(account: string, balances: BalanceMap = {}) : Promise<BalanceMap> {
     const store = useTokenStore();
     const nativeCoin = useTokenStore().nativeCoin;
+    const balance = await chainStore.provider.getBalance(account);
     balances[nativeCoin.address] = normalizeBalance(
-        await getProvider().getBalance(account),
+        balance.toString(),
         nativeCoin.decimals
     );
 
@@ -84,7 +88,7 @@ export async function getBalances(account: string, balances: BalanceMap = {}) : 
         const decimals = store.token(b.contractAddress).decimals;
         if (b.tokenBalance && !b.error) {
             balances[b.contractAddress] = normalizeBalance(
-                EthBigNumber.from(b.tokenBalance), decimals
+                b.tokenBalance, decimals
             );
         }
     });
@@ -96,9 +100,9 @@ export async function updatePreferences(balances: BalanceMap) {
     const balance = (t: Token) => balances[t.address.toLowerCase()];
     const tokensToSetPreference : PreferenceInput[] = 
         store.tokens.filter(
-            t => !t.preference && balance(t)?.value.gt(0)
+            t => !t.preference && new BigNumber(balance(t)?.value).gt(0)
         ).map(t => ({
-            chain: useNetworkStore().network.name,
+            chain: chainStore.chain.name,
             display: true,
             tokenAddress: t.address.toLowerCase(),
             metadata: t

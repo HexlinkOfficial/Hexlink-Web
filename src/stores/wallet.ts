@@ -1,4 +1,4 @@
-import type { Account } from "@/types";
+import type { Account } from "@hexlink/account";
 import { defineStore } from 'pinia'
 
 export const useWalletStore = defineStore({

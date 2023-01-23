@@ -1,8 +1,17 @@
 import Web3Model from "web3modal";
 import { ethers } from "ethers";
 import { useWalletStore } from "@/stores/wallet"
-import { buildAccountFromAddress } from "./account";
 import WalletConnect from "@walletconnect/web3-provider";
+import { isContract } from "@hexlink/hexlink";
+import type { Account } from "@hexlink/hexlink";
+import { useChainStore } from "@/stores/chain";
+
+async function buildAccount(account: string) : Promise<Account> {
+  return {
+    address: account,
+    isContract: await isContract(useChainStore().provider, account),
+  };
+}
 
 export const providerOptions = {
   walletconnect: {
@@ -52,12 +61,11 @@ export async function connectWallet() {
   store.connectWallet(
     wallet,
     walletIcon,
-    await buildAccountFromAddress(accounts[0])
+    await buildAccount(accounts[0])
   );
 
   window.ethereum.on('accountsChanged', async function (accounts: string[]) {
-    const account = await buildAccountFromAddress(accounts[0]);
-    store.switchAccount(account);
+    store.switchAccount(await buildAccount(accounts[0]));
   });
 }
 

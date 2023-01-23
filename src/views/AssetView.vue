@@ -484,7 +484,7 @@ import { ref, computed } from "vue";
 import Layout from "../components/Layout.vue";
 import WalletTokenList from "@/components/WalletTokenList.vue";
 import WalletNFTGrid from "@/components/WalletNFTGrid.vue";
-import { useNetworkStore } from '@/stores/network';
+import { useChainStore } from '@/stores/chain';
 import { useAccountStore } from "@/stores/account";
 import { BigNumber } from "bignumber.js";
 
@@ -494,7 +494,7 @@ const showInfo = ref<boolean>(true);
 
 const blockExplorer = computed(() => {
   const account = useAccountStore().account?.address;
-  return `${useNetworkStore().network?.blockExplorerUrls[0]}/address/${account}`;
+  return `${useChainStore().chain.blockExplorerUrls[0]}/address/${account}`;
 });
 
 const price = computed(() => {

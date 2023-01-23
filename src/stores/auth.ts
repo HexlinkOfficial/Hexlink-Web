@@ -14,6 +14,7 @@ export const useAuthStore = defineStore({
             handle: state.user!.handle,
             displayName: state.user!.displayName,
             provider: state.user!.provider,
+            logoURI: state.user!.photoURL,
         })
     },
     actions: {

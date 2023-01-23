@@ -166,10 +166,14 @@ const selected  = computed(() => {
     @media (min-width: 640px) {
       padding-left: 1.5rem;
       padding-right: 1.5rem;
-      width: 150px; } }.token-list .views .detail-view .listView-button {
+      width: 150px; } }
+    .token-list .views .detail-view .listView-button {
     opacity: 1;
     background-color: rgba(7, 106, 224, 0);
     color: rgb(71, 85, 105); }
+    .token-list .views .detail-view .listView-button:hover {
+    opacity: 1;
+    color: rgb(7, 106, 224); }
 .token-list .views .detail-view .listView-button.show {
     opacity: 1;
     background-color: rgb(7, 106, 224);

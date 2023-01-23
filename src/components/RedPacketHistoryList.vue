@@ -1,5 +1,10 @@
 <template>
-  <Loading v-if="loading"/>
+  <div v-if="loading" class="loading-state">
+    <Loading />
+  </div>
+  <div v-if="redPackets.length == 0 && !loading" class="no-history">
+    <div style="text-align: center;">You have no luck history yet! Go send some luck~</div>
+  </div>
   <div v-if="!loading" class="token-listDetail">
     <div class="token-table">
       <div style="overflow: visible; border-radius: 0.75rem;">
@@ -23,23 +28,28 @@
                   <div style="display: block; margin-bottom: 0;">
                     <div style="display: flex;">
                       <div class="sent-info">
-                        Sent 
-                        <a-tooltip placement="top">
-                          <template #title>
-                            <span>
-                              Amount: {{ normalizedDbBalance(v) }}
-                            </span>
-                          </template>
-                          <div style="overflow: auto; white-space: nowrap; margin-left: 0.25rem; max-width: 40px;">{{ normalizedDbBalance(v) }}</div>
-                        </a-tooltip>
-                        <div class="token-icon" style="margin-right: 0.25rem; margin-left: 0.25rem;">
-                          <img :src="v.token.logoURI">
+                        <div class="info-1">
+                          Sent
+                          <a-tooltip placement="top">
+                            <template #title>
+                              <span>
+                                Amount: {{ normalizedDbBalance(v) }}
+                              </span>
+                            </template>
+                            <div style="overflow: auto; white-space: nowrap; margin-left: 0.25rem; max-width: 40px;">{{ normalizedDbBalance(v) }}
+                            </div>
+                          </a-tooltip>
+                          <div class="token-icon" style="margin-right: 0.25rem; margin-left: 0.25rem;">
+                            <img :src="v.token.logoURI">
+                          </div>
                         </div>
-                        {{ v.redPacket.metadata.mode }}ly
+                        <div class="info-2">
+                          {{ v.redPacket.metadata.mode }}ly
+                        </div>
                       </div>
                     </div>
                     <div style="color: #6a6d7c; white-space: nowrap; margin-left: 0; font-size: 12px;">
-                      <div style="display: flex;">{{ v.redPacket.createdAt.toLocaleString().split(',')[1] }}</div>
+                      <div style="display: flex;">{{ new Date(v.redPacket.createdAt).toLocaleString().split(',')[1] }}</div>
                     </div>
                   </div>
                 </div>
@@ -103,6 +113,8 @@ import { ethers } from "ethers";
 import Loading from "@/components/Loading.vue";
 import { useAccountStore } from '@/stores/account';
 import { useTokenStore } from '@/stores/token';
+import useClipboard from 'vue-clipboard3';
+import { createToaster } from "@meforma/vue-toaster";
 import { copy } from "@/web3/utils";
 
 import { normalizeBalance } from '@hexlink/common';
@@ -146,6 +158,7 @@ const loadData = async function() {
   }
   loading.value = false;
   extractDate();
+  console.log("Claimed: ", claimed.value);
 };
 
 const extractDate = () => {
@@ -175,6 +188,19 @@ const loading = ref<boolean>(true);
   
 onMounted(loadData);
 watch(() => useChainStore().current, loadData);
+
+// const { toClipboard } = useClipboard();
+// const copy = async (text: string) => {
+//   try {
+//     await toClipboard(text);
+//     const toaster = createToaster({ position: "top", duration: 2000 });
+//     toaster.success(`Copied`);
+//   } catch (e) {
+//     console.error(e)
+//     const toaster = createToaster({ position: "top", duration: 2000 });
+//     toaster.error(`Can not copy`);
+//   }
+// }
 
 const showDetailsEnabled = ref<boolean>(false);
 
@@ -349,12 +375,30 @@ const aggregatedClaimed = async function(
 </script>
 
 <style lang="less" scoped>
+.info-2 {
+  @media (max-width: 990px) {
+    margin-top: -0.25rem; } }
+.info-1 {
+  display: flex; }
+.no-history {
+  display: flex;
+  height: 42vh;
+  justify-content: center;
+  align-items: center; }
+.loading-state {
+  display: flex;
+  padding: 0.5rem;
+  align-items: center;
+  justify-content: center;
+  height: 42vh; }
 .sent-info {
   display: flex;
   flex-shrink: 1;
   white-space: nowrap;
   font-weight: 600;
-  font-size: 12px; }
+  font-size: 12px;
+  @media (max-width: 990px) {
+    flex-direction: column; } }
 .icon {
   display: flex;
   justify-content: center;
@@ -391,6 +435,9 @@ const aggregatedClaimed = async function(
   background-color: rgb(7, 106, 224);
   // border: 2px solid rgb(7, 106, 224);
   color: white; }
+.connect-wallet-button:hover {
+  background-color: rgba(7, 106, 224, 0.6);
+}
 .cta {
   display: flex;
   flex-direction: column;
@@ -427,15 +474,19 @@ const aggregatedClaimed = async function(
   margin: 8px 0; }
 .claim-status {
   display: block;
-  grid-column: span 6/span 6; }
+  grid-column: span 6/span 6;
+  @media (max-width: 990px) {
+    margin-left: 1rem;
+    grid-column: span 4/span 4; } }
 .action-and-time {
   display: flex;
   align-items: center;
   grid-column: span 2/span 2;
-  margin-bottom: 0; }
+  margin-bottom: 0;
+  @media (max-width: 990px) {
+    grid-column: span 1/span 1; } }
 .record-detail {
   display: grid;
-  gap: 1.5rem;
   padding-left: 1rem;
   overflow-x: visible;
   white-space: nowrap;
@@ -444,12 +495,17 @@ const aggregatedClaimed = async function(
   align-items: center;
   grid-template-columns: repeat(10, minmax(0, 1fr));
   flex: 1 1;
-  width: 100%; }
+  width: 100%;
+  @media (min-width: 1280px) {
+    gap: 1.5rem; }
+  @media (min-width: 1024px) {
+    gap: 1.25rem; }
+  @media (max-width: 990px) {
+    grid-template-columns: repeat(7, minmax(0, 1fr)); } }
 .history-record {
   position: relative;
   border-top: 1px solid #e5e7eb;
   padding-left: 1.5rem;
-  padding-right: 0.5rem;
   padding-top: 0.5rem;
   padding-bottom: 0.5rem;
   margin-left: -0.5rem;

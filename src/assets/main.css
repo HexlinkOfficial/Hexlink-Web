@@ -1,13 +1,13 @@
 @import "./base.css";
 
 .token-icon {
-  border-radius: 50%;
-  width: 20px;
-  height: 20px;
-  display: flex;
-  justify-content: center;
-  margin-right: 0.5rem;
-  margin-left: 0.5rem; }
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    justify-content: center;
+    margin-right: 0.5rem;
+    margin-left: 0.5rem; }
 
 .success-arrow {
   display: flex;
@@ -5761,6 +5761,9 @@ p {
 @media only screen and (max-width: 991px) {
     .login-wrapper {
         height: calc(100vh - 100px);
+    }
+    .row {
+      justify-content: center;
     }
 }
 

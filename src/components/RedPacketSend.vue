@@ -179,8 +179,8 @@ import { message } from 'ant-design-vue';
 import { useTokenStore } from "@/stores/token";
 import RedPacketAccount from "@/components/RedPacketAccount.vue";
 
-import type { Token } from "@hexlink/hexlink";
-import { hash } from "@hexlink/hexlink";
+import type { Token } from "@hexlink/common";
+import { hash } from "@hexlink/common";
 import type { RedPacket } from "@hexlink/redpacket";
 
 const chooseTotalDrop = ref<boolean>(false);

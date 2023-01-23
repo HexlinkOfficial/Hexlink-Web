@@ -1,7 +1,7 @@
 import { ethers, BigNumber as EthBigNumber } from "ethers";
 import { BigNumber } from "bignumber.js";
 
-import type { Chain } from "@hexlink/hexlink";
+import type { Chain } from "@hexlink/common";
 import type { PriceInfo } from '@/types';
 import { useWalletStore } from "@/stores/wallet";
 import { useRedPacketStore } from "@/stores/redpacket";

@@ -37,7 +37,7 @@ import { computed } from "vue";
 import { useRedPacketStore } from '@/stores/redpacket';
 import { useChainStore } from "@/stores/chain";
 import { useAccountStore } from '@/stores/account';
-import { isContract } from "@hexlink/hexlink";
+import { isContract } from "@hexlink/common";
 import { deployAndCreateNewRedPacket, createNewRedPacket } from "@/web3/redpacket";
 
 const store = useRedPacketStore();

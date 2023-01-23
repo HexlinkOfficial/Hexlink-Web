@@ -74,7 +74,7 @@ import { useRedPacketStore } from "@/stores/redpacket";
 import { useChainStore } from "@/stores/chain";
 import type { AccountType } from "@/stores/redpacket";
 import { CopyOutlined } from '@ant-design/icons-vue';
-import type { Token } from "@hexlink/hexlink";
+import type { Token } from "@hexlink/common";
 import { useAccountStore } from "@/stores/account";
 import { useWalletStore } from "@/stores/wallet";
 import { copy } from "@/web3/utils";

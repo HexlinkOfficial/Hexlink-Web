@@ -53,8 +53,8 @@ import { claimRedPacket } from "@/web3/redpacket";
 import { loadErc20Token } from "@/web3/tokens";
 import { useTokenStore } from "@/stores/token";
 import { switchNetwork } from "@/web3/network";
-import type { Token } from "@hexlink/hexlink";
-import { getChain } from '@hexlink/hexlink';
+import type { Token } from "@hexlink/common";
+import { getChain } from '@hexlink/common';
 import type { RedPacketDB } from "@/types";
 
 const redPacket = ref<RedPacketDB | undefined>();

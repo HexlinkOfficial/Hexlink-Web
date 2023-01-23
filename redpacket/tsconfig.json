@@ -3,12 +3,13 @@
     "outDir": "./lib/",
     "rootDir": "./src",
     "resolveJsonModule": true,
+    "module": "esnext",
+    "types": ["node"]
   },
   "exclude": [],
-  "extends": "../../tsconfig.package.json",
+  "extends": "@vue/tsconfig/tsconfig.node.json",
   "include": [
     "./src/*.ts",
-    "./src/*.json",
+    "./src/*.json"
   ]
 }
-

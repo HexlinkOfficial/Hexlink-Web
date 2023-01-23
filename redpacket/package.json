@@ -2,7 +2,6 @@
   "author": "shu@hexlink.io",
   "description": "Utilities and classes for hexlink redpacket contract",
   "main": "./lib/index.js",
-  "module": "./lib.esm/index.js",
   "name": "@hexlink/redpacket",
   "scripts": {
     "build": "tsc --build ./tsconfig.json",

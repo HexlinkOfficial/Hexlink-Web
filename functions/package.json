@@ -30,6 +30,7 @@
     "fast-crc32c": "^2.0.0",
     "firebase-admin": "^11.4.1",
     "firebase-functions": "^4.1.1",
+    "firebase-tools": "^10.1.5",
     "graphql": "^16.6.0",
     "node-fetch": "^2.6.8",
     "node-html-parser": "^6.1.4",

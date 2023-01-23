@@ -11,7 +11,6 @@
                 </router-link>
               </div>
             </div>
-
             <div class="header-right">
               <div class="selectnetwork dropdown" @click="activeDropDown('selectnetwork')"
                 :class="active && 'show'">
@@ -72,7 +71,6 @@
                   </div>
                 </div>
               </div>
-
               <div class="profile_log dropdown" @click="activeDropDown('profile')" :class="active && 'show'">
                 <div class="user" data-toggle="dropdown">
                   <img class="profile" :src="user?.photoURL" :size="64" referrerpolicy="no-referrer"/>
@@ -95,7 +93,7 @@
                     </div>
                     <div class="user-balance" style="border-bottom-width: 1px; border-color: #E5E7EB; border-style: dashed; ">
                       <div class="wallet-info">
-                        <h5>Hexlink Account Address </h5>
+                        <h5>Hexlink Account Address</h5>
                         <div class="user-wallet">
                           <div class="user2">
                             <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -114,41 +112,79 @@
                           </div>
                         </div>
                       </div>
-                      <div v-if="walletStore.connected">
-                        <h5>External Account Address </h5>
-                        <div class="user_wallet" style="border: 0 solid #e5e7eb; padding: 10px 0px 0px 0px;">
-                          <div class="user2">
-                            <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <circle cx="15" cy="15" r="15" fill="white" />
-                              <path
-                                d="M17.7734 15.5C17.7734 14.1875 16.7187 13.1328 15.4062 13.1328C14.0938 13.1328 13.0625 14.1875 13.0625 15.5C13.0625 16.8125 14.1172 17.8672 15.4297 17.8672C16.7422 17.8672 17.7734 16.8125 17.7734 15.5ZM15.1719 14.3281V13.6953H15.6641V14.3281H15.1719ZM15.1719 15.8281V15.1953H15.6641V15.8281H15.1719V15.8281ZM15.1719 17.3047V16.6719H15.6641V17.3047H15.1719Z"
-                                fill="#076AE0" />
-                              <path
-                                d="M12.6172 8L10.5312 10.5312H11.5859V18.6406H13.6484V17.75C12.9922 17.2344 12.5703 16.4141 12.5703 15.5234C12.5703 14.6094 12.9922 13.8125 13.6484 13.2969V10.5781H14.7031L12.6172 8ZM18.2656 15.5C18.2656 16.3203 17.9141 17.0703 17.3516 17.5859V20.4687H16.2969L18.3828 23L20.4687 20.4687H19.4141V12.3828H17.3516V13.4375C17.9141 13.9297 18.2656 14.6797 18.2656 15.5Z"
-                                fill="#076AE0" />
-                            </svg>
-                            <div class="user-info">
-                              <span style="margin-bottom: 0;" class="smart-contract-address">
-                                <h5 @click="doCopy(walletStore.wallet?.account.address)">
-                                  {{ addressTextLong(walletStore.wallet?.account.address) }}
-                                </h5>
-                              </span>
-                            </div>
-                            <div> 
-                              <a-tooltip placement="bottom">
+                    </div>
+                    <div v-if="walletStore.connected && ownerAccountAddress == null" class="user-balance">
+                      <h5>External Account Address </h5>
+                      <div class="user_wallet" style="border: 0 solid #e5e7eb; padding: 10px 0px 0px 0px;">
+                        <div class="user2">
+                          <div class="wallet-image-wrapper">
+                            <img class="wallet-image" :src="useWalletStore().wallet?.walletIcon">
+                            <div class="wallet-presence-wrapper">
+                              <a-tooltip placement="right">
                                 <template #title>
-                                  <span>Disconnect</span>
+                                  <span>Start to send money to bind this wallet with Hexlink account</span>
                                 </template>
-                                <svg @click="disconnectWallet" style="margin-left: 0.5rem;" width="30" height="30" viewBox="0 0 30 30" fill="none"
-                                  xmlns="http://www.w3.org/2000/svg">
-                                  <path
-                                    d="M16.8456 10.8141L20.9985 6.77662L16.8456 5.73846V10.8141V10.8141ZM14.9946 9.53076L14.1491 5.65186L11.6972 7.71389L14.9946 9.53076ZM11.7734 13.9805C11.4033 13.7673 11.0102 13.6026 10.6051 13.484C11.0119 13.2137 13.1562 11.9604 13.1562 11.9604L14.31 13.834C14.31 13.834 12.8425 14.6949 12.7799 14.7314C12.4782 14.4463 12.1425 14.1929 11.7734 13.9805ZM26.3524 15.2823L22.077 14.1314C21.4356 13.9588 20.7785 13.9282 20.1414 14.0322C19.5374 13.5326 18.8316 13.1221 18.1345 12.7173L16.8457 11.9677L15.6899 13.8329L17.0295 14.6201C17.3288 14.7939 17.6012 14.9543 17.8494 15.1083C17.1619 15.7042 16.6671 16.4892 16.4257 17.3855C16.2689 17.9681 16.2342 18.5548 16.3014 19.1202H17.1871C17.6985 19.1202 18.1563 18.8932 18.469 18.5358C18.4727 18.3443 18.4985 18.1505 18.5506 17.9574C18.6945 17.4226 19.0118 16.9643 19.4538 16.6417C19.5483 16.8716 19.598 17.1233 19.598 17.4124C19.598 18.1756 19.2148 18.916 18.5979 19.3633C18.5974 19.3619 18.5971 19.3603 18.5966 19.3589C18.2011 19.6429 17.717 19.8117 17.1919 19.8117L13.5624 19.8232C13.7791 19.0515 13.7985 18.214 13.5755 17.3854C13.2604 16.2147 12.4731 15.1943 11.4229 14.5896C10.5556 14.0902 9.51329 13.8828 8.51321 14.0141C7.97192 14.0853 3.64864 15.2821 3.64864 15.2821C2.46094 15.6019 1.46813 16.3665 0.85278 17.4351C0.237429 18.5037 0.0745383 19.7462 0.394343 20.9337C0.71403 22.1213 1.47856 23.1142 2.54708 23.7293C3.25805 24.1388 4.04567 24.3477 4.84313 24.3477C5.24438 24.3477 5.64821 24.2947 6.04571 24.1878L10.3212 23.0369C11.0586 22.8383 11.7054 22.4698 12.2327 21.986C12.4229 22.0101 12.6163 22.0239 12.8129 22.0239C12.8129 22.0239 17.1868 22.0239 17.1873 22.0239C18.3679 21.9947 19.5272 21.5544 20.3825 20.7322C20.7306 20.3972 21.0264 20.0081 21.2562 19.5788C21.2579 19.5755 21.2596 19.572 21.2613 19.5687C21.7134 18.7201 21.8827 17.7331 21.7566 16.7812C21.7344 16.6142 21.7047 16.4533 21.6656 16.2997L25.7801 17.4073C26.4008 17.5743 26.9199 17.974 27.2415 18.5328C27.5632 19.0915 27.6484 19.741 27.4812 20.3618C27.1357 21.6455 25.8102 22.4087 24.5268 22.063L20.9964 21.1126C20.3315 21.797 19.4851 22.304 18.535 22.5532C18.8852 22.7606 19.2675 22.9261 19.6794 23.037L23.9549 24.1879C24.3524 24.2949 24.7561 24.3478 25.1575 24.3478C25.9548 24.3478 26.7425 24.1387 27.4535 23.7294C28.522 23.1142 29.2867 22.1214 29.6064 20.9338C30.2675 18.4785 28.8076 15.9433 26.3524 15.2823ZM11.4028 19.3638C10.8103 18.9345 10.4196 18.244 10.4038 17.4617C10.2819 17.3224 10.1393 17.2006 9.97395 17.1054C9.71321 16.9552 9.41919 16.8637 9.12434 16.8758C8.73458 16.8919 8.21532 17.0601 8.21532 17.0601C8.20723 17.1747 8.20173 17.2915 8.20173 17.4126C8.20173 18.8028 8.82106 20.0503 9.79723 20.8964C9.78094 20.9011 9.76571 20.9076 9.7493 20.912L5.47372 22.0629C4.85309 22.23 4.20352 22.1448 3.64477 21.8231C3.08614 21.5015 2.68641 20.9824 2.5193 20.3617C2.17372 19.078 2.93684 17.7525 4.22051 17.4071C4.88579 17.228 7.22274 16.6098 7.72348 16.4645C8.23958 16.3147 8.76927 16.1597 9.31255 16.1837C9.66634 16.1994 10.0194 16.32 10.325 16.4959C10.8732 16.8116 11.2861 17.3463 11.4505 17.9572C11.5798 18.4383 11.5536 18.925 11.4028 19.3638Z"
-                                    fill="#F46A6A" />
-                                </svg>
+                                <img class="wallet-presence" src="../assets/exclamation-mark.png" alt="" />
                               </a-tooltip>
                             </div>
                           </div>
+                          <div class="user-info">
+                            <span style="margin-bottom: 0;" class="smart-contract-address">
+                              <h5 @click="doCopy(walletStore.wallet?.account.address)">
+                                {{ addressTextLong(walletStore.wallet?.account.address) }}
+                              </h5>
+                            </span>
+                          </div>
+                          <div> 
+                            <a-tooltip placement="bottom">
+                              <template #title>
+                                <span>Disconnect</span>
+                              </template>
+                              <svg @click="disconnectWallet" style="margin-left: 0.1rem;" width="30" height="30" viewBox="0 0 30 30" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                  d="M16.8456 10.8141L20.9985 6.77662L16.8456 5.73846V10.8141V10.8141ZM14.9946 9.53076L14.1491 5.65186L11.6972 7.71389L14.9946 9.53076ZM11.7734 13.9805C11.4033 13.7673 11.0102 13.6026 10.6051 13.484C11.0119 13.2137 13.1562 11.9604 13.1562 11.9604L14.31 13.834C14.31 13.834 12.8425 14.6949 12.7799 14.7314C12.4782 14.4463 12.1425 14.1929 11.7734 13.9805ZM26.3524 15.2823L22.077 14.1314C21.4356 13.9588 20.7785 13.9282 20.1414 14.0322C19.5374 13.5326 18.8316 13.1221 18.1345 12.7173L16.8457 11.9677L15.6899 13.8329L17.0295 14.6201C17.3288 14.7939 17.6012 14.9543 17.8494 15.1083C17.1619 15.7042 16.6671 16.4892 16.4257 17.3855C16.2689 17.9681 16.2342 18.5548 16.3014 19.1202H17.1871C17.6985 19.1202 18.1563 18.8932 18.469 18.5358C18.4727 18.3443 18.4985 18.1505 18.5506 17.9574C18.6945 17.4226 19.0118 16.9643 19.4538 16.6417C19.5483 16.8716 19.598 17.1233 19.598 17.4124C19.598 18.1756 19.2148 18.916 18.5979 19.3633C18.5974 19.3619 18.5971 19.3603 18.5966 19.3589C18.2011 19.6429 17.717 19.8117 17.1919 19.8117L13.5624 19.8232C13.7791 19.0515 13.7985 18.214 13.5755 17.3854C13.2604 16.2147 12.4731 15.1943 11.4229 14.5896C10.5556 14.0902 9.51329 13.8828 8.51321 14.0141C7.97192 14.0853 3.64864 15.2821 3.64864 15.2821C2.46094 15.6019 1.46813 16.3665 0.85278 17.4351C0.237429 18.5037 0.0745383 19.7462 0.394343 20.9337C0.71403 22.1213 1.47856 23.1142 2.54708 23.7293C3.25805 24.1388 4.04567 24.3477 4.84313 24.3477C5.24438 24.3477 5.64821 24.2947 6.04571 24.1878L10.3212 23.0369C11.0586 22.8383 11.7054 22.4698 12.2327 21.986C12.4229 22.0101 12.6163 22.0239 12.8129 22.0239C12.8129 22.0239 17.1868 22.0239 17.1873 22.0239C18.3679 21.9947 19.5272 21.5544 20.3825 20.7322C20.7306 20.3972 21.0264 20.0081 21.2562 19.5788C21.2579 19.5755 21.2596 19.572 21.2613 19.5687C21.7134 18.7201 21.8827 17.7331 21.7566 16.7812C21.7344 16.6142 21.7047 16.4533 21.6656 16.2997L25.7801 17.4073C26.4008 17.5743 26.9199 17.974 27.2415 18.5328C27.5632 19.0915 27.6484 19.741 27.4812 20.3618C27.1357 21.6455 25.8102 22.4087 24.5268 22.063L20.9964 21.1126C20.3315 21.797 19.4851 22.304 18.535 22.5532C18.8852 22.7606 19.2675 22.9261 19.6794 23.037L23.9549 24.1879C24.3524 24.2949 24.7561 24.3478 25.1575 24.3478C25.9548 24.3478 26.7425 24.1387 27.4535 23.7294C28.522 23.1142 29.2867 22.1214 29.6064 20.9338C30.2675 18.4785 28.8076 15.9433 26.3524 15.2823ZM11.4028 19.3638C10.8103 18.9345 10.4196 18.244 10.4038 17.4617C10.2819 17.3224 10.1393 17.2006 9.97395 17.1054C9.71321 16.9552 9.41919 16.8637 9.12434 16.8758C8.73458 16.8919 8.21532 17.0601 8.21532 17.0601C8.20723 17.1747 8.20173 17.2915 8.20173 17.4126C8.20173 18.8028 8.82106 20.0503 9.79723 20.8964C9.78094 20.9011 9.76571 20.9076 9.7493 20.912L5.47372 22.0629C4.85309 22.23 4.20352 22.1448 3.64477 21.8231C3.08614 21.5015 2.68641 20.9824 2.5193 20.3617C2.17372 19.078 2.93684 17.7525 4.22051 17.4071C4.88579 17.228 7.22274 16.6098 7.72348 16.4645C8.23958 16.3147 8.76927 16.1597 9.31255 16.1837C9.66634 16.1994 10.0194 16.32 10.325 16.4959C10.8732 16.8116 11.2861 17.3463 11.4505 17.9572C11.5798 18.4383 11.5536 18.925 11.4028 19.3638Z"
+                                  fill="#F46A6A" />
+                              </svg>
+                            </a-tooltip>
+                          </div>
                         </div>
+                      </div>
+                    </div>
+                    <div v-if="walletStore.connected && ownerAccountAddress != null" class="user-balance">
+                      <h5>External Account Address </h5>
+                      <div class="user_wallet" style="border: 0 solid #e5e7eb; padding: 10px 0px 0px 0px;">
+                        <div class="user2">
+                          <div class="wallet-image-wrapper">
+                            <img class="wallet-image" :src="useWalletStore().wallet?.walletIcon">
+                            <div class="wallet-presence-wrapper">
+                              <a-tooltip placement="right">
+                                <template #title>
+                                  <span>Wallet is Available</span>
+                                </template>
+                                <img class="wallet-presence" src="../assets/presence_green_dot.png" alt="" />
+                              </a-tooltip>
+                            </div>
+                          </div>
+                          <div class="user-info">
+                            <span style="margin-bottom: 0;" class="smart-contract-address">
+                              <h5 @click="doCopy(walletStore.wallet?.account.address)">
+                                {{ addressTextLong(walletStore.wallet?.account.address) }}
+                              </h5>
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div v-if="walletStore.connected == false && ownerAccountAddress == null" style="margin-top: 20px; margin-bottom: 10px; margin-left: 24px; margin-right:24px;">
+                      <button class="connect-wallet-button"  @click="connectWallet">
+                        <svg style="margin-right: 10px;" width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M16 2.50025V3.51125C16.5304 3.51125 17.0391 3.72196 17.4142 4.09703C17.7893 4.47211 18 4.98081 18 5.51125V15.5112C18 16.0416 17.7893 16.5504 17.4142 16.9254C17.0391 17.3005 16.5304 17.5112 16 17.5112H2C1.46957 17.5112 0.96086 17.3005 0.58579 16.9254C0.21071 16.5504 0 16.0416 0 15.5112V5.51125C0 4.46625 0.835 3.51825 1.813 3.23925L12.813 0.0962511C13.1851 -0.0100989 13.5768 -0.0286089 13.9573 0.0421711C14.3377 0.112951 14.6966 0.271091 15.0055 0.504141C15.3145 0.737191 15.5651 1.03878 15.7377 1.38516C15.9102 1.73154 16 2.11326 16 2.50025ZM12.5 9.01123C12.1022 9.01123 11.7206 9.16933 11.4393 9.45063C11.158 9.73193 11 10.1134 11 10.5112C11 10.909 11.158 11.2906 11.4393 11.5719C11.7206 11.8532 12.1022 12.0112 12.5 12.0112C12.8978 12.0112 13.2794 11.8532 13.5607 11.5719C13.842 11.2906 14 10.909 14 10.5112C14 10.1134 13.842 9.73193 13.5607 9.45063C13.2794 9.16933 12.8978 9.01123 12.5 9.01123ZM14 2.50025C14.0001 2.42966 13.9852 2.35986 13.9563 2.29544C13.9274 2.23102 13.8853 2.17345 13.8326 2.1265C13.7798 2.07955 13.7178 2.04429 13.6505 2.02305C13.5832 2.00181 13.5121 1.99506 13.442 2.00325L13.362 2.01925L8.14 3.51125H14V2.50025Z" fill="white" />
+                        </svg>
+                        Connect Wallet
+                      </button>
+                      <div style="font-size: 0.8em; font-weight: 350; margin-top: 15px;">
+                      Connect a wallet for sending tokens, learn more
                       </div>
                     </div>
                     <router-link @click="signOutFirebase" to="signin" class="dropdown-item logout">
@@ -174,16 +210,21 @@ import { prettyPrintAddress } from '@/web3/account';
 import { createToaster } from "@meforma/vue-toaster";
 import { GOERLI, MUMBAI } from "@/configs/network";
 import { switchNetwork } from "@/web3/network";
-import { disconnectWallet } from "@/web3/wallet";
+import { connectWallet, disconnectWallet} from "@/web3/wallet";
 import { useProfileStore } from "@/stores/profile";
 import { signOutFirebase } from "@/services/auth";
+import type { Account } from "@/types";
 import useClipboard from 'vue-clipboard3';
 
+const newLocal = "wallet-presence";
 const authStore = useAuthStore();
 const user = authStore.user!;
 const walletStore = useWalletStore();
 const active = ref<string>("");
 const { toClipboard } = useClipboard();
+const ownerAccountAddress = useProfileStore().account.owner;
+console.log(ownerAccountAddress)
+console.log("testtest")
 
 const addressTextLong = function (address: string | undefined) {
   if (address) {
@@ -850,6 +891,47 @@ cursor: pointer; }
   line-height: 1.25rem;
   border-radius: 0.5rem; }
 .wallet-info {
-  margin-bottom: 1rem;
+  // margin-bottom: 1rem;
 }
+.wallet-image-wrapper {
+  display: flex;  
+  margin-right: 5px; }
+.wallet-image {
+  width: 30px;
+  height: 30px;
+  object-fit: cover;
+  object-position: 50% 50%; }
+.wallet-presence-wrapper {
+  position: relative;
+  top: 15px;
+  right: 10px; }
+.wallet-presence {
+  width: 12px; 
+  height: 12px;
+  border-radius: 100%;}
+.connect-wallet-button {
+  display: flex;
+  justify-content: center;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+  color: #000;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 800;
+  line-height: 1.25rem;
+  width: 50%;
+  border-radius: 50px;
+  @media (min-width: 640px) {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+    width: 200px; }
+  @media (min-width: 768px) {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+    width: 200px; }
+  opacity: 1;
+  background-color: rgb(7, 106, 224);
+  color: white; }
 </style>

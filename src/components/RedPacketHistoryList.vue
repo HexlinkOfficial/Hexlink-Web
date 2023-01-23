@@ -43,9 +43,9 @@
                             <img :src="v.token.logoURI">
                           </div>
                         </div>
-                        <div class="info-2">
+                        <!-- <div class="info-2">
                           {{ v.redPacket.metadata.mode }}ly
-                        </div>
+                        </div> -->
                       </div>
                     </div>
                     <div style="color: #6a6d7c; white-space: nowrap; margin-left: 0; font-size: 12px;">
@@ -67,6 +67,10 @@
                       }}/{{ v.redPacket.metadata.split }}</strong>
                        Share
                     </p>
+                    <p class="claim-mode">
+                      Mode: 
+                      <strong>{{ v.redPacket.metadata.mode }}</strong>
+                    </p>
                     <p class="claimed-number">
                       Left:
                       <strong>{{ normalize(v.redPacket.state.balance, v.token) }}</strong>
@@ -77,10 +81,10 @@
                     </p>
                   </div>
                 </div>
+                <div class="share">
+                  <i class="fa fa-paper-plane" aria-hidden="true" @click="copyShareLink(v.redPacket)"></i>
+                </div>
                 <div class="cta">
-                  <button class="connect-wallet-button" @click="copyShareLink(v.redPacket)">
-                    Share
-                  </button>
                   <button class="connect-wallet-button">
                     Withdraw
                   </button>
@@ -103,7 +107,7 @@
                       <div class="sent-info">
                         <div class="info-1">
                           Claimed
-                          <a-tooltip placement="top">
+                          <!-- <a-tooltip placement="top">
                             <template #title>
                               <span>
                                 Amount: {{ normalizeClaimAmount(v) }}
@@ -112,10 +116,10 @@
                             <div style="overflow: auto; white-space: nowrap; margin-left: 0.25rem; max-width: 45px;">
                               {{ normalizeClaimAmount(v) }}
                             </div>
-                          </a-tooltip>
-                          <div class="token-icon" style="margin-right: 0.25rem; margin-left: 0.25rem;">
+                          </a-tooltip> -->
+                          <!-- <div class="token-icon" style="margin-right: 0.25rem; margin-left: 0.25rem;">
                             <img :src="v.token.logoURI">
-                          </div>
+                          </div> -->
                         </div>
                       </div>
                     </div>
@@ -126,12 +130,52 @@
                 </div>
                 <div class="claim-status">
                   <div style="display: flex; align-items: center;">
-                    <span class="thumb"><img :src="v.redpacket.redPacket.creator.logoURI ? v.redpacket.redPacket.creator.logoURI : 'https://i.postimg.cc/15QJZwkN/profile.png'" :size="64" referrerpolicy="no-referrer" /></span>
-                    <div style="display: flex; flex-direction: column; margin-left: 0.5rem;">
-                      <span style="font-weight: 600; font-size: 12px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; color: rgb(15,23,42)">From</span>
-                      <span style="font-size: 12px; color: rgb(100,116,139)">@{{ v.redpacket.redPacket.creator.handle }}</span>
+                    <div style="display: flex; align-items: center;">
+                      <span class="thumb"><img :src="v.redpacket.redPacket.creator.logoURI ? v.redpacket.redPacket.creator.logoURI : 'https://i.postimg.cc/15QJZwkN/profile.png'" :size="64" referrerpolicy="no-referrer" /></span>
+                      <div style="display: flex; flex-direction: column; margin-left: 0.5rem;">
+                        <span class="from-text">From</span>
+                        <span style="font-size: 12px; color: rgb(100,116,139)">@{{ v.redpacket.redPacket.creator.handle }}</span>
+                      </div>
+                    </div>
+                    <div class="arrow">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                      </svg>
+                    </div>
+                    <div style="display: flex; align-items: center;">
+                      <span class="thumb"><img
+                          :src="v.token.logoURI"
+                          :size="64" referrerpolicy="no-referrer" /></span>
+                      <div style="display: flex; flex-direction: column; margin-left: 0.5rem;">
+                        <span class="from-text" style="color: #0d8838;">
+                          <a-tooltip placement="top">
+                            <template #title>
+                              <span>
+                                Amount: {{ normalizeClaimAmount(v) }}
+                              </span>
+                            </template>
+                            <div style="overflow: auto; white-space: nowrap; max-width: 45px;">
+                              + {{ normalizeClaimAmount(v) }}
+                            </div>
+                          </a-tooltip>
+                        </span>
+                        <span style="font-size: 12px; color: rgb(100,116,139)">{{ v.token.symbol }}</span>
+                      </div>
                     </div>
                   </div>
+                </div>
+                <div class="share">
+                  <i className="fa fa-twitter"></i>
+                </div>
+                <div class="cta">
+                  <!-- <button class="connect-wallet-button" @click="copyShareLink(v.redPacket)">
+                    Share
+                  </button> -->
+                  <!-- <button class="connect-wallet-button">
+                    Withdraw
+                  </button> -->
+                  <i class="fa fa-info-circle" aria-hidden="true"></i>
                 </div>
               </div>
             </div>
@@ -292,7 +336,7 @@ const showDetailsEnabled = ref<boolean>(false);
 
 const route = useRoute();
 const copyShareLink = (redPacket: RedPacketDB) => {
-  return copy(window.location.origin + route.path + "?claim=" + redPacket.id);
+  return copy(window.location.origin + route.path + "?claim=" + redPacket.id, 'Successfully copied your red packet share link!');
 };
 
 const showDetails = () => {
@@ -470,6 +514,30 @@ const aggregatedClaimed = async function(
 </script>
 
 <style lang="less" scoped>
+.claim-mode {
+  display: flex;
+  margin: 0px;
+  font-weight: 400;
+  line-height: 1.5;
+  font-size: 12px;
+  color: #5b7083; }
+i {
+  color: rgba(0,0,0,0.3);
+  font-size: 18px; }
+i:hover {
+  color: #076AE0; }
+.arrow {
+  font-size: .875rem;
+  line-height: 1.25rem;
+  margin-left: 1rem;
+  margin-right: 1rem; }
+.from-text {
+  font-weight: 600;
+  font-size: 12px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  color: rgb(15, 23, 42); }
 .thumb {
   display: flex;
   overflow: hidden;
@@ -487,10 +555,8 @@ const aggregatedClaimed = async function(
   display: flex;
   align-items: center;
   border-top: 1px solid #e5e7eb;
+  height: 4.5rem;
   padding-top: 0.5rem; }
-.info-2 {
-  @media (max-width: 990px) {
-    margin-top: -0.25rem; } }
 .info-1 {
   display: flex; }
 .no-history {
@@ -503,7 +569,7 @@ const aggregatedClaimed = async function(
   padding: 0.5rem;
   align-items: center;
   justify-content: center;
-  height: 42vh; }
+  height: 500px; }
 .sent-info {
   display: flex;
   flex-shrink: 1;
@@ -549,8 +615,15 @@ const aggregatedClaimed = async function(
   // border: 2px solid rgb(7, 106, 224);
   color: white; }
 .connect-wallet-button:hover {
-  background-color: rgba(7, 106, 224, 0.6);
-}
+  background-color: rgba(7, 106, 224, 0.6); }
+.share {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  grid-column: span 1/span 1; }
+.share img {
+  max-width: 20px; }
 .cta {
   display: flex;
   flex-direction: column;
@@ -587,10 +660,10 @@ const aggregatedClaimed = async function(
   margin: 8px 0; }
 .claim-status {
   display: block;
-  grid-column: span 6/span 6;
+  grid-column: span 5/span 5;
   @media (max-width: 990px) {
     margin-left: 1rem;
-    grid-column: span 4/span 4; } }
+    grid-column: span 5/span 5; } }
 .action-and-time {
   display: flex;
   align-items: center;
@@ -621,7 +694,6 @@ const aggregatedClaimed = async function(
   padding-bottom: 0.5rem;
   margin-left: -0.5rem;
   margin-right: -0.5rem;
-  height: 5rem;
   cursor: pointer; }
 .history-date {
   top: 0;

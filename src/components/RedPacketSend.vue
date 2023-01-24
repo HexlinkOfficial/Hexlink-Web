@@ -179,9 +179,9 @@ import { message } from 'ant-design-vue';
 import { useTokenStore } from "@/stores/token";
 import RedPacketAccount from "@/components/RedPacketAccount.vue";
 
-import type { Token } from "@hexlink/common";
-import { hash } from "@hexlink/common";
-import type { RedPacket } from "@hexlink/redpacket";
+import type { Token } from "../../common";
+import { hash } from "../../common";
+import type { RedPacket } from "../../redpacket";
 
 const chooseTotalDrop = ref<boolean>(false);
 const openDropdown = ref<boolean>(false);
@@ -263,7 +263,7 @@ const setDefaultToken = function (getBalance: (t: Token) => string) {
 
 const calcGasSponsorship = async () => {
   redpacket.value.gasTokenAmount = await estimateGasSponsorship(
-    useChainStore().chain, redpacket.value
+    redpacket.value
   );
 };
 

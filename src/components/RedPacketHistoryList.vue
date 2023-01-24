@@ -113,13 +113,11 @@ import { ethers } from "ethers";
 import Loading from "@/components/Loading.vue";
 import { useAccountStore } from '@/stores/account';
 import { useTokenStore } from '@/stores/token';
-import useClipboard from 'vue-clipboard3';
-import { createToaster } from "@meforma/vue-toaster";
 import { copy } from "@/web3/utils";
 
-import { normalizeBalance } from '@hexlink/common';
-import type { Token } from "@hexlink/common";
-import { redPacketAddress } from "@hexlink/redpacket";
+import { normalizeBalance } from "../../common";
+import type { Token } from "../../common";
+import { redPacketAddress } from "../../redpacket";
 
 interface CreatedRedPacket {
   redPacket: RedPacketDB,

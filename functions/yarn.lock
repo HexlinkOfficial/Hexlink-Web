@@ -517,6 +517,19 @@
     "protobufjs" "^7.0.0"
     "yargs" "^16.2.0"
 
+"@hexlink/common@^0.1.5":
+  "integrity" "sha512-Y8I0+79bvJ8fvC+2lFiI2WVW86AF3OvBJuAC/WcooZ4qa/MDYu7AMo7FvOBJFEpCtGeFodaiBzivOWClfhRdRQ=="
+  "resolved" "https://registry.npmjs.org/@hexlink/common/-/common-0.1.5.tgz"
+  "version" "0.1.5"
+  dependencies:
+    "bignumber.js" "^9.1.1"
+    "ethers" "^5.7.2"
+
+"@hexlink/redpacket@^0.1.2":
+  "integrity" "sha512-fbQno/Wc3+PA0b3GySsrnNntSyeNZxmuUKUtSkapbKXK5VWhf1SyVQyuqguFt4gY9myiA8nScKJEUun1iSWeoA=="
+  "resolved" "https://registry.npmjs.org/@hexlink/redpacket/-/redpacket-0.1.2.tgz"
+  "version" "0.1.2"
+
 "@humanwhocodes/config-array@^0.10.4":
   "integrity" "sha512-mXAIHxZT3Vcpg83opl1wGlVZ9xydbfZO3r5YfRSH6Gpp2J/PfdBP0wbDa2sO6/qRbcalpoevVyW6A/fI6LfeMw=="
   "resolved" "https://registry.npmjs.org/@humanwhocodes/config-array/-/config-array-0.10.4.tgz"
@@ -1011,10 +1024,10 @@
   "resolved" "https://registry.npmjs.org/bech32/-/bech32-1.1.4.tgz"
   "version" "1.1.4"
 
-"bignumber.js@^9.0.0", "bignumber.js@^9.1.0":
-  "integrity" "sha512-4LwHK4nfDOraBCtst+wOWIHbu1vhvAPJK8g8nROd4iuc3PSEjWif/qwbkh8jwCJz6yDBvtU4KPynETgrfh7y3A=="
-  "resolved" "https://registry.npmjs.org/bignumber.js/-/bignumber.js-9.1.0.tgz"
-  "version" "9.1.0"
+"bignumber.js@^9.0.0", "bignumber.js@^9.1.0", "bignumber.js@^9.1.1":
+  "integrity" "sha512-pHm4LsMJ6lzgNGVfZHjMoO8sdoRhOzOH4MLmY65Jg70bpxCKu5iOHNJyfF6OyvYw7t8Fpf35RuzUyqnQsj8Vig=="
+  "resolved" "https://registry.npmjs.org/bignumber.js/-/bignumber.js-9.1.1.tgz"
+  "version" "9.1.1"
 
 "bindings@^1.3.0":
   "integrity" "sha512-p2q/t/mhvuOj/UeLlV6566GD/guowlr0hHxClI0W9m7MWYkL1F0hLo+0Aexs9HSPCtR1SXQ0TD3MMKrXZajbiQ=="

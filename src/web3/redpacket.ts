@@ -6,7 +6,7 @@ import { genDeployAuthProof } from "@/web3/oracle";
 import { toEthBigNumber, tokenBase, tokenEqual } from "@/web3/utils";
 import { estimateGas, sendTransaction } from "@/web3/wallet";
 
-import type { Account, Chain, Token } from "@hexlink/common";
+import type { Account, Chain, Token } from "../../common";
 import {
     hash,
     isNativeCoin,
@@ -17,13 +17,13 @@ import {
     getChain,
     hexlAddress,
     hexlInterface,
-} from "@hexlink/common";
-import type { RedPacket } from "@hexlink/redpacket";
+} from "../../common";
+import type { RedPacket } from "../../redpacket";
 import {
     redPacketInterface,
     redPacketAddress,
     redPacketContract
-} from "@hexlink/redpacket";
+} from "../../redpacket";
 
 import { useChainStore } from "@/stores/chain";
 import { useWalletStore } from "@/stores/wallet";
@@ -35,8 +35,6 @@ import { useAccountStore } from "@/stores/account";
 
 import { getFunctions, httpsCallable } from 'firebase/functions'
 const functions = getFunctions();
-
-const chainStore = useChainStore();
 
 export function validator() : string {
     if (import.meta.env.VITE_USE_FUNCTIONS_EMULATOR) {
@@ -52,9 +50,9 @@ function redPacketMode(mode: string) : number {
 export async function estimateGasSponsorship(
     redpacket: RedPacket
 ) : Promise<EthBigNumber> {
-    const sponsorshipGasAmount = EthBigNumber.from(Number(redpacket.split)).mul(200000);
+    const sponsorshipGasAmount = EthBigNumber.from(200000).mul(redpacket.split);
     const gasToken = redpacket.gasToken;
-    const chain = chainStore.chain;
+    const chain = useChainStore().chain;
     const priceInfo = await getPriceInfo(chain);
     if (isNativeCoin(gasToken, chain) || isWrappedCoin(gasToken, chain)) {
         return sponsorshipGasAmount.mul(priceInfo.gasPrice);
@@ -98,7 +96,7 @@ export function redPacketOps(
             op: {
                 to: redPacketAddr,
                 value: packet.balance,
-                callData: redPacketInterface().encodeFunctionData(
+                callData: redPacketInterface.encodeFunctionData(
                     "create", [packet]
                 ),
                 callGasLimit: EthBigNumber.from(0) // no limit
@@ -112,7 +110,7 @@ export function redPacketOps(
             op: {
                 to: input.token.address,
                 value: EthBigNumber.from(0),
-                callData: erc20Interface().encodeFunctionData(
+                callData: erc20Interface.encodeFunctionData(
                     "approve", [redPacketAddr, packet.balance]
                 ),
                 callGasLimit: EthBigNumber.from(0) // no limit
@@ -125,7 +123,7 @@ export function redPacketOps(
             op: {
                 to: redPacketAddr,
                 value: EthBigNumber.from(0),
-                callData: redPacketInterface().encodeFunctionData(
+                callData: redPacketInterface.encodeFunctionData(
                     "create", [packet]
                 ),
                 callGasLimit: EthBigNumber.from(0) // no limit
@@ -140,7 +138,7 @@ async function validAllowance(
     operator: Account,
     requiredAmount: EthBigNumber
 ) {
-    const erc20 = erc20Contract(chainStore.provider, token.address);
+    const erc20 = erc20Contract(useChainStore().provider, token.address);
     const allowance = await erc20.allowance(
         owner.address,
         operator.address
@@ -157,7 +155,7 @@ async function buildApproveTx(
         operator,
         ethers.constants.MaxInt256
     ];
-    const data = erc20Interface().encodeFunctionData(
+    const data = erc20Interface.encodeFunctionData(
         "approve", args
     );
     return {
@@ -213,7 +211,7 @@ async function buildCreateRedPacketTx(
                 op: {
                     to: input.gasToken.address,
                     value: EthBigNumber.from(0),
-                    callData: erc20Interface().encodeFunctionData(
+                    callData: erc20Interface.encodeFunctionData(
                         "transferFrom", args
                     ),
                     callGasLimit: EthBigNumber.from(0) // no limit
@@ -245,7 +243,7 @@ async function buildCreateRedPacketTx(
                 op: {
                     to: input.token.address,
                     value: EthBigNumber.from(0),
-                    callData: erc20Interface().encodeFunctionData(
+                    callData: erc20Interface.encodeFunctionData(
                         "transferFrom", args
                     ),
                     callGasLimit: EthBigNumber.from(0) // no limit
@@ -276,7 +274,7 @@ async function buildCreateRedPacketTx(
                 op: {
                     to: input.token.address,
                     value: EthBigNumber.from(0),
-                    callData: erc20Interface().encodeFunctionData(
+                    callData: erc20Interface.encodeFunctionData(
                         "transferFrom", args
                     ),
                     callGasLimit: EthBigNumber.from(0) // no limit
@@ -307,7 +305,7 @@ async function buildCreateRedPacketTx(
                 op: {
                     to: input.token.address,
                     value: EthBigNumber.from(0),
-                    callData: erc20Interface().encodeFunctionData(
+                    callData: erc20Interface.encodeFunctionData(
                         "transferFrom", args1
                     ),
                     callGasLimit: EthBigNumber.from(0) // no limit
@@ -337,7 +335,7 @@ async function buildCreateRedPacketTx(
                 op: {
                     to: input.gasToken.address,
                     value: EthBigNumber.from(0),
-                    callData: erc20Interface().encodeFunctionData(
+                    callData: erc20Interface.encodeFunctionData(
                         "transferFrom", args2
                     ),
                     callGasLimit: EthBigNumber.from(0) // no limit
@@ -372,7 +370,7 @@ async function buildCreateRedPacketTx(
             op: {
                 to: input.gasToken.address,
                 value: EthBigNumber.from(0),
-                callData: erc20Interface().encodeFunctionData(
+                callData: erc20Interface.encodeFunctionData(
                     "transferFrom", args
                 ),
                 callGasLimit: EthBigNumber.from(0) // no limit
@@ -412,7 +410,7 @@ export async function buildDeployAndCreateRedPacketTx(
         issuedAt: EthBigNumber.from(proof.issuedAt),
         signature: proof.signature
     }];
-    const data = hexlInterface().encodeFunctionData(
+    const data = hexlInterface.encodeFunctionData(
         "deploy", args
     );
     txes.push({

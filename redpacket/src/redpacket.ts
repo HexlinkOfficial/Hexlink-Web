@@ -21,9 +21,7 @@ export interface RedPacket {
     validator: string;
 }
 
-export function redPacketInterface() : ethers.utils.Interface {
-    return new ethers.utils.Interface(RED_PACKET_ABI);
-}
+export const redPacketInterface = new ethers.utils.Interface(RED_PACKET_ABI);
 
 export function redPacketAddress(chain: Chain) : string {
     return (ADDRESSES as any)[chain.name] as string;

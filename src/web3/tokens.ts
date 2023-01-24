@@ -12,13 +12,11 @@ import { useAuthStore } from "@/stores/auth";
 import { useChainStore } from "@/stores/chain";
 import { useTokenStore } from "@/stores/token";
 
-import type { Token, Chain,  NormalizedTokenBalance } from '@hexlink/common';
-import { normalizeBalance, getPopularTokens } from "@hexlink/common";
+import type { Token, Chain,  NormalizedTokenBalance } from "../../common";
+import { normalizeBalance, getPopularTokens } from "../../common";
 import { Alchemy, Network } from "alchemy-sdk";
 import { alchemyKey } from "@/web3/network";
  
-const chainStore = useChainStore();
-
 function alchemyNetwork(chain: Chain) : Network {
     if (chain.chainId == "5") {
         return Network.ETH_GOERLI;
@@ -33,7 +31,7 @@ function alchemyNetwork(chain: Chain) : Network {
 }
 
 function alchemy() {
-    const chain = chainStore.chain;
+    const chain = useChainStore().chain;
     return new Alchemy({
         apiKey: alchemyKey(chain),
         network: alchemyNetwork(chain!)
@@ -55,8 +53,8 @@ export async function loadErc20Token(token: string) : Promise<Token> {
         symbol: metadata.symbol!,
         decimals: metadata.decimals!,
         logoURI: metadata.logo!,
-        chain: chainStore.chain.name,
-        chainId: chainStore.chain.chainId!,
+        chain: useChainStore().chain.name,
+        chainId: useChainStore().chain.chainId!,
     }
 }
 
@@ -74,7 +72,7 @@ export type BalanceMap = {[key: string] : NormalizedTokenBalance};
 export async function getBalances(account: string, balances: BalanceMap = {}) : Promise<BalanceMap> {
     const store = useTokenStore();
     const nativeCoin = useTokenStore().nativeCoin;
-    const balance = await chainStore.provider.getBalance(account);
+    const balance = await useChainStore().provider.getBalance(account);
     balances[nativeCoin.address] = normalizeBalance(
         balance.toString(),
         nativeCoin.decimals
@@ -102,7 +100,7 @@ export async function updatePreferences(balances: BalanceMap) {
         store.tokens.filter(
             t => !t.preference && new BigNumber(balance(t)?.value).gt(0)
         ).map(t => ({
-            chain: chainStore.chain.name,
+            chain: useChainStore().chain.name,
             display: true,
             tokenAddress: t.address.toLowerCase(),
             metadata: t

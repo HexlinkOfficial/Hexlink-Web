@@ -11,7 +11,7 @@ import {
   Signature,
   PopulatedTransaction,
 } from "ethers";
-import RED_PACKET_ABI from "./abi/HappyRedPacket.json";
+import RED_PACKET_ABI from "./abi/HAPPY_RED_PACKET_ABI.json";
 import {
   getInfuraProvider,
   accountAddress,

@@ -12,9 +12,7 @@ export interface Account {
     owner?: string,
 }
 
-export function accountInterface() : ethers.utils.Interface {
-    return new ethers.utils.Interface(ACCOUNT_SIMPLE_ABI);
-}
+export const accountInterface = new ethers.utils.Interface(ACCOUNT_SIMPLE_ABI);
 
 export function nameHash(schema: string, name: string) {
     return hash(`${schema}:${name}`);

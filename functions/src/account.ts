@@ -1,7 +1,7 @@
 /* eslint-disable require-jsdoc */
 import {getAuth} from "firebase-admin/auth";
 import {ethers} from "ethers";
-import HEXLINK_ABI from "./abi/Hexlink.json";
+import HEXLINK_ABI from "./abi/HEXLINK_ABI.json";
 
 import * as functions from "firebase-functions";
 

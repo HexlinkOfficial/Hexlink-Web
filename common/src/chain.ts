@@ -56,12 +56,14 @@ export const MUMBAI : Chain = {
     logoUrl: "https://token.metaswap.codefi.network/assets/networkLogos/polygon.svg"
 };
 
+export const SUPPORTED_CHAINS = [GOERLI, MUMBAI];
+
 export async function getChainFromProvider(provider: ethers.providers.Provider) : Promise<Chain> {
     const network = await provider.getNetwork();
     return getChain(network.chainId);
 }
 
-export const getChain = (chain: string | number) : Chain => {
+export function getChain(chain: string | number) : Chain {
     chain = chain.toString();
     if (chain == "goerli" || chain == "5") {
         return GOERLI;
@@ -72,5 +74,3 @@ export const getChain = (chain: string | number) : Chain => {
     }
     throw new Error("Unsupported chain");
 }
-
-export const SUPPORTED_CHAINS = [GOERLI, MUMBAI];

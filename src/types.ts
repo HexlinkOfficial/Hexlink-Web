@@ -1,8 +1,8 @@
 import type { BigNumber as EthersBigNumber } from "ethers";
 import type { BigNumber } from "bignumber.js";
 
-import type { Token } from "@hexlink/common";
-import type { RedPacket } from "@hexlink/redpacket";
+import type { Token } from "../../common";
+import type { RedPacket } from "../../redpacket";
 
 export interface PriceInfo {
     nativeCurrencyInUsd: BigNumber;

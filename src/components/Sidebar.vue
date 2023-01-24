@@ -58,7 +58,6 @@
 </template>
 
 <script lang="ts" setup>
-import router from '@/router';
 import { signOutFirebase } from "@/services/auth";
 
 const props = defineProps({

@@ -2,16 +2,19 @@
   "author": "shu@hexlink.io",
   "description": "Utilities and Classes for hexlink contracts",
   "main": "./lib/index.js",
+  "types": "./lib/index.d.ts",
   "name": "@hexlink/common",
   "scripts": {
     "build": "tsc --build ./tsconfig.json",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "sideEffects": false,
-  "types": "./lib/index.d.ts",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "dependencies": {
     "bignumber.js": "^9.1.1",
     "ethers": "^5.7.2"
-  }
+  },
+  "files": [
+    "/lib"
+  ]
 }

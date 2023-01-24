@@ -43,13 +43,13 @@ export async function genDeployAuthProof(
     data: string,
     genAuthProof: (request: {requestId: string}) => Promise<AuthProof>,
 ) : Promise<{ initData: string, proof: AuthProof }> {
-    const initData = accountInterface().encodeFunctionData(
+    const initData = accountInterface.encodeFunctionData(
         "init", [owner, data]
     );
     const requestId = await genRequestId(
         provider,
         nameHash,
-        hexlInterface().getSighash("deploy"),
+        hexlInterface.getSighash("deploy"),
         initData
     );
     return {

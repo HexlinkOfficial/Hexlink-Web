@@ -60,7 +60,7 @@
 
 <script lang="ts" setup>
 import { ref, onMounted, watch } from 'vue'
-import type { Token } from "@hexlink/common";
+import type { Token } from "../../common";
 import logo from "../assets/network-icons/hexlink.svg";
 import { useChainStore } from "@/stores/chain";
 import { getBalances, updatePreferences } from "@/web3/tokens";

@@ -1,6 +1,6 @@
 import { BigNumber as EthBigNumber } from "ethers";
 import { BigNumber } from "bignumber.js";
-import type { Token } from "@hexlink/common";
+import type { Token } from "../../common";
 import useClipboard from 'vue-clipboard3';
 import { createToaster } from "@meforma/vue-toaster";
 

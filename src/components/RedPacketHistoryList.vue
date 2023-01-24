@@ -169,12 +169,6 @@
                   <i className="fa fa-twitter"></i>
                 </div>
                 <div class="cta">
-                  <!-- <button class="connect-wallet-button" @click="copyShareLink(v.redPacket)">
-                    Share
-                  </button> -->
-                  <!-- <button class="connect-wallet-button">
-                    Withdraw
-                  </button> -->
                   <i class="fa fa-info-circle" aria-hidden="true"></i>
                 </div>
               </div>

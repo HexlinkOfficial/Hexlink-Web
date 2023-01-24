@@ -3,8 +3,8 @@
 import { ethers, Contract } from "ethers";
 import type { BigNumber as EthBigNumber  } from "ethers";
 import type { Provider } from "@ethersproject/providers";
-import { getChainFromProvider } from "@hexlink/common";
-import type { Token, Chain } from "@hexlink/common";
+import { getChainFromProvider } from "../../common";
+import type { Token, Chain } from "../../common";
 import RED_PACKET_ABI from "./HAPPY_RED_PACKET_ABI.json";
 import ADDRESSES from "./addresses.json";
 

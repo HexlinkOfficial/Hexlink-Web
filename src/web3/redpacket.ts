@@ -17,6 +17,7 @@ import {
     getChain,
     hexlAddress,
     hexlInterface,
+    accountInterface,
 } from "../../common";
 import type { RedPacket } from "../../redpacket";
 import {
@@ -379,7 +380,7 @@ async function buildCreateRedPacketTx(
     }
     ops = ops.concat(redPacketOps(input));
 
-    const data = accountInterface().encodeFunctionData(
+    const data = accountInterface.encodeFunctionData(
         "execBatch",
         [ops.map(op => op.op)]
     );
@@ -538,7 +539,7 @@ export async function queryRedPacketInfo(rp: RedPacketDB) : Promise<{
         useChainStore().provider,
         // rp.metadata.contract
     );
-    const info = redPacket.getPacket(rp.id);
+    const info = await redPacket.getPacket(rp.id);
     return {
         createdAt: new Date(info.createdAt.toNumber() * 1000),
         balance: info.balance,

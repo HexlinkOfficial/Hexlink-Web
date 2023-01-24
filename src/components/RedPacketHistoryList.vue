@@ -203,9 +203,9 @@ import { copy } from "@/web3/utils";
 import { ConsoleSqlOutlined } from '@ant-design/icons-vue';
 import { Console } from 'console';
 
-import { normalizeBalance } from "@hexlink/common";
-import type { Token } from "@hexlink/common";
-import { redPacketAddress } from "@hexlink/redpacket";
+import { normalizeBalance } from "../../functions/common";
+import type { Token } from "../../functions/common";
+import { redPacketAddress } from "../../functions/redpacket";
 
 interface CreatedRedPacket {
   redPacket: RedPacketDB,

@@ -1,9 +1,9 @@
 import { defineStore } from 'pinia';
 import type { PriceInfo } from '@/types';
-import { getChain } from "@hexlink/common";
+import { getChain } from "../../functions/common";
 import type { Provider } from "@ethersproject/providers";
 import { getInfuraProvider } from '@/web3/network';
-import type { Chain } from "@hexlink/common";
+import type { Chain } from "../../functions/common";
 
 export const useChainStore = defineStore({
     id: 'chain',

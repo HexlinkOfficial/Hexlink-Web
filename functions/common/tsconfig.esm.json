@@ -1,20 +1,8 @@
 {
-  "compilerOptions": {
-    "outDir": "./lib.esm/",
-    "rootDir": "./src",
-    "resolveJsonModule": true,
-    "declaration": true,
-    "module": "esnext",
-    "target": "es2015",
-    "esModuleInterop": true,
-    "moduleResolution": "node",
-    "composite": true
-  },
-  "exclude": [],
-  "include": [
-    "./src/*.ts",
-    "./src/*.json",
-    "src/abi/*.json",
-    "src/tokens/*.json"
-  ]
+    "extends": "./tsconfig.base.json",
+    "compilerOptions": {
+      "outDir": "./lib.esm/",
+      "module": "esnext",
+      "target": "esnext"
+    }
 }

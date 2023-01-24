@@ -12,8 +12,8 @@ import { useAuthStore } from "@/stores/auth";
 import { useChainStore } from "@/stores/chain";
 import { useTokenStore } from "@/stores/token";
 
-import type { Token, Chain,  NormalizedTokenBalance } from "@hexlink/common";
-import { normalizeBalance, getPopularTokens } from "@hexlink/common";
+import type { Token, Chain,  NormalizedTokenBalance } from "../../functions/common";
+import { normalizeBalance, getPopularTokens } from "../../functions/common";
 import { Alchemy, Network } from "alchemy-sdk";
 import { alchemyKey } from "@/web3/network";
  

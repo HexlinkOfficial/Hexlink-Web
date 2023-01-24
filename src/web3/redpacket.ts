@@ -6,7 +6,7 @@ import { genDeployAuthProof } from "@/web3/oracle";
 import { toEthBigNumber, tokenBase, tokenEqual } from "@/web3/utils";
 import { estimateGas, sendTransaction } from "@/web3/wallet";
 
-import type { Account, Chain, Token } from "@hexlink/common";
+import type { Account, Chain, Token } from "../../functions/common";
 import {
     hash,
     isNativeCoin,
@@ -18,13 +18,13 @@ import {
     hexlAddress,
     hexlInterface,
     accountInterface,
-} from "@hexlink/common";
-import type { RedPacket } from "@hexlink/redpacket";
+} from "../../functions/common";
+import type { RedPacket } from "../../functions/redpacket";
 import {
     redPacketInterface,
     redPacketAddress,
     redPacketContract
-} from "@hexlink/redpacket";
+} from "../../functions/redpacket";
 
 import { useChainStore } from "@/stores/chain";
 import { useWalletStore } from "@/stores/wallet";

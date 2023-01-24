@@ -2,8 +2,8 @@ import Web3Model from "web3modal";
 import { ethers } from "ethers";
 import { useWalletStore } from "@/stores/wallet"
 import WalletConnect from "@walletconnect/web3-provider";
-import { isContract } from "@hexlink/common";
-import type { Account } from "@hexlink/common";
+import { isContract } from "../../functions/common";
+import type { Account } from "../../functions/common";
 import { useChainStore } from "@/stores/chain";
 
 async function buildAccount(account: string) : Promise<Account> {

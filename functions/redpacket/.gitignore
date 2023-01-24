@@ -13,3 +13,5 @@ typechain
 #hardhat files
 cache
 artifacts
+
+*.tsbuildinfo

@@ -1,12 +1,3 @@
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 export const GOERLI = {
     chainId: "5",
     name: "goerli",
@@ -47,11 +38,9 @@ export const MUMBAI = {
     logoUrl: "https://token.metaswap.codefi.network/assets/networkLogos/polygon.svg",
 };
 export const SUPPORTED_CHAINS = [GOERLI, MUMBAI];
-export function getChainFromProvider(provider) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const network = yield provider.getNetwork();
-        return getChain(network.chainId);
-    });
+export async function getChainFromProvider(provider) {
+    const network = await provider.getNetwork();
+    return getChain(network.chainId);
 }
 export function getChain(chain) {
     chain = chain.toString();

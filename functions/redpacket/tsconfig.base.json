@@ -1,0 +1,20 @@
+{
+    "compilerOptions": {
+      "rootDir": "./src",
+      "resolveJsonModule": true,
+      "declaration": true,
+      "esModuleInterop": true,
+      "moduleResolution": "node",
+      "composite": true
+    },
+    "exclude": [],
+    "include": [
+      "./src/*.ts",
+      "./src/*.json"
+    ],
+    "references": [
+      {
+        "path": "./common/"
+      }
+    ]
+}

@@ -1,5 +1,5 @@
-import { hexlAccount, hexlContract } from "@hexlink/common";
-import type { Chain } from "@hexlink/common";
+import { hexlAccount, hexlContract } from "../../functions/common";
+import type { Chain } from "../../functions/common";
 import { useChainStore } from "@/stores/chain";
 import { useAccountStore } from "@/stores/account";
 

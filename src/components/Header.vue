@@ -171,7 +171,7 @@ import { useAuthStore } from '@/stores/auth';
 import { useWalletStore } from '@/stores/wallet';
 import { useChainStore } from '@/stores/chain';
 import { createToaster } from "@meforma/vue-toaster";
-import { GOERLI, MUMBAI, prettyPrintAddress } from "@hexlink/common";
+import { GOERLI, MUMBAI, prettyPrintAddress } from "../../functions/common";
 import { switchNetwork } from "@/web3/network";
 import { disconnectWallet } from "@/web3/wallet";
 import { useAccountStore } from "@/stores/account";

@@ -1,8 +1,8 @@
 import { defineStore } from 'pinia';
 
-import type { Chain } from "@hexlink/common";
-import { SUPPORTED_CHAINS } from "@hexlink/common";
-import type { Account } from "@hexlink/common";
+import type { Chain } from "../../functions/common";
+import { SUPPORTED_CHAINS } from "../../functions/common";
+import type { Account } from "../../functions/common";
 import { useChainStore } from '@/stores/chain';
 
 export const useAccountStore = defineStore({

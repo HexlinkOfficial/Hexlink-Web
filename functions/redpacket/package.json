@@ -12,6 +12,7 @@
   "types": "./lib/index.d.ts",
   "version": "0.1.2",
   "dependencies": {
-    "@hexlink/common": "file:../common"
+    "@hexlink/common": "file:../common",
+    "@types/node": "^18.11.18"
   }
 }

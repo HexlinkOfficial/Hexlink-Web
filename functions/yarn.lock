@@ -517,7 +517,7 @@
     "protobufjs" "^7.0.0"
     "yargs" "^16.2.0"
 
-"@hexlink/common@file:common":
+"@hexlink/common@file:../common", "@hexlink/common@file:common":
   "resolved" "file:common"
   "version" "0.1.5"
   dependencies:
@@ -527,6 +527,8 @@
 "@hexlink/redpacket@file:redpacket":
   "resolved" "file:redpacket"
   "version" "0.1.2"
+  dependencies:
+    "@hexlink/common" "file:../common"
 
 "@humanwhocodes/config-array@^0.10.4":
   "integrity" "sha512-mXAIHxZT3Vcpg83opl1wGlVZ9xydbfZO3r5YfRSH6Gpp2J/PfdBP0wbDa2sO6/qRbcalpoevVyW6A/fI6LfeMw=="
@@ -762,10 +764,10 @@
     "@types/node" "*"
     "form-data" "^3.0.0"
 
-"@types/node@*", "@types/node@>=12.12.47", "@types/node@>=13.7.0":
-  "integrity" "sha512-aFcUkv7EddxxOa/9f74DINReQ/celqH8DiB3fRYgVDM2Xm5QJL8sl80QKuAnGvwAsMn+H3IFA6WCrQh1CY7m1A=="
-  "resolved" "https://registry.npmjs.org/@types/node/-/node-16.11.56.tgz"
-  "version" "16.11.56"
+"@types/node@*", "@types/node@^18.11.18", "@types/node@>=12.12.47", "@types/node@>=13.7.0":
+  "integrity" "sha512-DHQpWGjyQKSHj3ebjFI/wRKcqQcdR+MoFBygntYOZytCqNfkd2ZC4ARDJ2DQqhjH5p85Nnd3jhUJIXrszFX/JA=="
+  "resolved" "https://registry.npmjs.org/@types/node/-/node-18.11.18.tgz"
+  "version" "18.11.18"
 
 "@types/nodemailer@^6.4.5":
   "integrity" "sha512-zuP3nBRQHI6M2PkXnGGy1Ww4VB+MyYHGgnfV2T+JR9KLkeWqPJuyVUgLpKXuFnA/b7pZaIDFh2sV4759B7jK1g=="
@@ -3561,10 +3563,10 @@
     "media-typer" "0.3.0"
     "mime-types" "~2.1.24"
 
-"typescript@^4.8.0", "typescript@>=2.8.0 || >= 3.2.0-dev || >= 3.3.0-dev || >= 3.4.0-dev || >= 3.5.0-dev || >= 3.6.0-dev || >= 3.6.0-beta || >= 3.7.0-dev || >= 3.7.0-beta":
-  "integrity" "sha512-C0I1UsrrDHo2fYI5oaCGbSejwX4ch+9Y5jTQELvovfmFkK3HHSZJB8MSJcWLmCUBzQBchCrZ9rMRV6GuNrvGtw=="
-  "resolved" "https://registry.npmjs.org/typescript/-/typescript-4.8.2.tgz"
-  "version" "4.8.2"
+"typescript@^4.9.4", "typescript@>=2.8.0 || >= 3.2.0-dev || >= 3.3.0-dev || >= 3.4.0-dev || >= 3.5.0-dev || >= 3.6.0-dev || >= 3.6.0-beta || >= 3.7.0-dev || >= 3.7.0-beta":
+  "integrity" "sha512-Uz+dTXYzxXXbsFpM86Wh3dKCxrQqUcVMxwU54orwlJjOpO3ao8L7j5lH+dWfTwgCwIuM9GQ2kvVotzYJMXTBZg=="
+  "resolved" "https://registry.npmjs.org/typescript/-/typescript-4.9.4.tgz"
+  "version" "4.9.4"
 
 "uc.micro@^1.0.1", "uc.micro@^1.0.5":
   "integrity" "sha512-8Y75pvTYkLJW2hWQHXxoqRgV7qb9B+9vFEtidML+7koHUFapnVJAZ6cKs+Qjz5Aw3aZWHMC6u0wJE3At+nSGwA=="

@@ -1,3 +1,4 @@
+"use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -7,7 +8,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-export const GOERLI = {
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.getChain = exports.getChainFromProvider = exports.SUPPORTED_CHAINS = exports.MUMBAI = exports.POLYGON = exports.GOERLI = void 0;
+exports.GOERLI = {
     chainId: "5",
     name: "goerli",
     fullName: "Goerli Test Network",
@@ -20,7 +23,7 @@ export const GOERLI = {
     blockExplorerUrls: ["https://goerli.etherscan.io"],
     logoUrl: "https://token.metaswap.codefi.network/assets/networkLogos/ethereum.svg",
 };
-export const POLYGON = {
+exports.POLYGON = {
     chainId: "137",
     rpcUrls: ["https://polygon-rpc.com"],
     name: "polygon",
@@ -33,7 +36,7 @@ export const POLYGON = {
     blockExplorerUrls: ["https://polygonscan.com"],
     logoUrl: "https://token.metaswap.codefi.network/assets/networkLogos/polygon.svg",
 };
-export const MUMBAI = {
+exports.MUMBAI = {
     chainId: "80001",
     rpcUrls: ["https://rpc-mumbai.maticvigil.com/"],
     name: "mumbai",
@@ -46,23 +49,25 @@ export const MUMBAI = {
     blockExplorerUrls: ["https://mumbai.polygonscan.com/"],
     logoUrl: "https://token.metaswap.codefi.network/assets/networkLogos/polygon.svg",
 };
-export const SUPPORTED_CHAINS = [GOERLI, MUMBAI];
-export function getChainFromProvider(provider) {
+exports.SUPPORTED_CHAINS = [exports.GOERLI, exports.MUMBAI];
+function getChainFromProvider(provider) {
     return __awaiter(this, void 0, void 0, function* () {
         const network = yield provider.getNetwork();
         return getChain(network.chainId);
     });
 }
-export function getChain(chain) {
+exports.getChainFromProvider = getChainFromProvider;
+function getChain(chain) {
     chain = chain.toString();
     if (chain == "goerli" || chain == "5") {
-        return GOERLI;
+        return exports.GOERLI;
     }
     else if (chain == "polygon" || chain == "137") {
-        return POLYGON;
+        return exports.POLYGON;
     }
     else if (chain == "mumbai" || chain == "80001") {
-        return MUMBAI;
+        return exports.MUMBAI;
     }
     throw new Error("Unsupported chain");
 }
+exports.getChain = getChain;

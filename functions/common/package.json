@@ -6,14 +6,16 @@
   "types": "./lib/index.d.ts",
   "name": "@hexlink/common",
   "scripts": {
-    "build": "rimraf lib && rimraf lib.esm &&  tsc --build ./tsconfig.json && tsc --build ./tsconfig.esm.json",
+    "build": "tsc --build ./tsconfig.json && tsc --build ./tsconfig.esm.json",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "sideEffects": false,
   "version": "0.1.5",
   "dependencies": {
+    "@types/node": "^18.11.18",
     "bignumber.js": "^9.1.1",
-    "ethers": "^5.7.2"
+    "ethers": "^5.7.2",
+    "typescript": "^4.9.4"
   },
   "files": [
     "/lib"

@@ -30,27 +30,29 @@
                       <div class="sent-info">
                         <div class="info-1">
                           Sent
-                          <a-tooltip placement="top">
-                            <template #title>
-                              <span>
-                                Amount: {{ normalizedDbBalance(v) }}
-                              </span>
-                            </template>
-                            <div style="overflow: auto; white-space: nowrap; margin-left: 0.25rem; max-width: 40px;">{{ normalizedDbBalance(v) }}
-                            </div>
-                          </a-tooltip>
-                          <div class="token-icon" style="margin-right: 0.25rem; margin-left: 0.25rem;">
-                            <img :src="v.token.logoURI">
-                          </div>
                         </div>
-                        <!-- <div class="info-2">
-                          {{ v.redPacket.metadata.mode }}ly
-                        </div> -->
                       </div>
                     </div>
                     <div style="color: #6a6d7c; white-space: nowrap; margin-left: 0; font-size: 12px;">
                       <div style="display: flex;">{{ new Date(v.redPacket.createdAt).toLocaleString().split(',')[1] }}</div>
                     </div>
+                  </div>
+                </div>
+                <div class="token-amount">
+                  <div class="sent-info">
+                    <a-tooltip placement="top">
+                      <template #title>
+                        <span>
+                          Amount: {{ normalizedDbBalance(v) }}
+                        </span>
+                      </template>
+                      <div style="overflow: auto; white-space: nowrap; margin-left: 0.25rem; width: 45px;display: flex;justify-content: flex-end;">{{ normalizedDbBalance(v).substring(0,5) }}
+                      </div>
+                    </a-tooltip>
+                    <div class="token-icon" style="margin-right: 0.25rem; margin-left: 0.25rem;">
+                      <img :src="v.token.logoURI">
+                    </div>
+                    {{ v.token.symbol }}
                   </div>
                 </div>
                 <div class="claim-status">
@@ -61,23 +63,20 @@
                   </div>
                   <div class="claimed-data">
                     <p class="claimed-number">
-                      Claimed: 
+                      Claimed:&nbsp;
                       <strong>{{
                         v.redPacket.metadata.split - v.redPacket.state.split
                       }}/{{ v.redPacket.metadata.split }}</strong>
-                       Share
+                      &nbsp;Share
                     </p>
                     <p class="claim-mode">
-                      Mode: 
+                      Mode:&nbsp;
                       <strong>{{ v.redPacket.metadata.mode }}</strong>
                     </p>
                     <p class="claimed-number">
-                      Left:
+                      Left:&nbsp;
                       <strong>{{ normalize(v.redPacket.state.balance, v.token) }}</strong>
-                      <div class="token-icon" style="margin-right: 0.25rem; margin-left: 0.25rem;">
-                        <img :src="v.token.logoURI">
-                      </div>
-                      {{ v.token.symbol }}
+                      &nbsp;{{ v.token.symbol }}
                     </p>
                   </div>
                 </div>
@@ -128,39 +127,34 @@
                     </div>
                   </div>
                 </div>
+                <div class="token-amount">
+                  <div class="sent-info">
+                    <a-tooltip placement="top">
+                      <template #title>
+                        <span>
+                          Amount: {{ normalizeClaimAmount(v) }}
+                        </span>
+                      </template>
+                      <div style="overflow: auto; white-space: nowrap; margin-left: 0.25rem; width: 45px;display: flex;justify-content: flex-end;">{{ normalizeClaimAmount(v).substring(0,5)}}</div>
+                    </a-tooltip>
+                    <div class="token-icon" style="margin-right: 0.25rem; margin-left: 0.25rem;">
+                      <img :src="v.token.logoURI">
+                    </div>
+                    {{ v.token.symbol }}
+                  </div>
+                </div>
                 <div class="claim-status">
                   <div style="display: flex; align-items: center;">
+                    <div class="arrow">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M15 6L9 12L15 18" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                      </svg>
+                    </div>
                     <div style="display: flex; align-items: center;">
                       <span class="thumb"><img :src="v.redpacket.redPacket.creator.logoURI ? v.redpacket.redPacket.creator.logoURI : 'https://i.postimg.cc/15QJZwkN/profile.png'" :size="64" referrerpolicy="no-referrer" /></span>
                       <div style="display: flex; flex-direction: column; margin-left: 0.5rem;">
                         <span class="from-text">From</span>
                         <span style="font-size: 12px; color: rgb(100,116,139)">@{{ v.redpacket.redPacket.creator.handle }}</span>
-                      </div>
-                    </div>
-                    <div class="arrow">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="9 18 15 12 9 6"></polyline>
-                      </svg>
-                    </div>
-                    <div style="display: flex; align-items: center;">
-                      <span class="thumb"><img
-                          :src="v.token.logoURI"
-                          :size="64" referrerpolicy="no-referrer" /></span>
-                      <div style="display: flex; flex-direction: column; margin-left: 0.5rem;">
-                        <span class="from-text" style="color: #0d8838;">
-                          <a-tooltip placement="top">
-                            <template #title>
-                              <span>
-                                Amount: {{ normalizeClaimAmount(v) }}
-                              </span>
-                            </template>
-                            <div style="overflow: auto; white-space: nowrap; max-width: 45px;">
-                              + {{ normalizeClaimAmount(v) }}
-                            </div>
-                          </a-tooltip>
-                        </span>
-                        <span style="font-size: 12px; color: rgb(100,116,139)">{{ v.token.symbol }}</span>
                       </div>
                     </div>
                   </div>
@@ -358,7 +352,7 @@ const normalizedDbBalance = (redPacket: CreatedRedPacket) => {
 
 const normalizeClaimAmount = (claimed: ClaimedRedPacketInfo) => {
   return normalizeBalance(
-    EthBigNumber.from(claimed.redpacket.claim.claimed),
+    EthBigNumber.from(claimed.redpacket.claim.claimed).toString(),
     claimed.token.decimals
   ).normalized;
 }
@@ -594,16 +588,14 @@ i:hover {
   font-size: 12px;
   font-weight: 800;
   line-height: 0.8rem;
-  width: 100px;
+  width: 90px;
   border-radius: 50px;
   @media (min-width: 640px) {
     padding-left: 1.5rem;
-    padding-right: 1.5rem;
-    width: 100px; }
+    padding-right: 1.5rem; }
   @media (min-width: 768px) {
     padding-left: 1.5rem;
-    padding-right: 1.5rem;
-    width: 100px; }
+    padding-right: 1.5rem; }
   opacity: 1;
   background-color: rgb(7, 106, 224);
   // border: 2px solid rgb(7, 106, 224);
@@ -613,7 +605,7 @@ i:hover {
 .share {
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
+  align-items: center;
   justify-content: center;
   grid-column: span 1/span 1; }
 .share img {
@@ -623,7 +615,7 @@ i:hover {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  grid-column: span 2/span 2; }
+  grid-column: span 1/span 1; }
 .claimed-number {
   display: flex;
   margin: 0px;
@@ -654,26 +646,32 @@ i:hover {
   margin: 8px 0; }
 .claim-status {
   display: block;
-  grid-column: span 5/span 5;
+  margin-left: 1rem;
+  grid-column: span 4/span 4;
   @media (max-width: 990px) {
     margin-left: 1rem;
-    grid-column: span 5/span 5; } }
+    grid-column: span 4/span 4; } }
 .action-and-time {
   display: flex;
   align-items: center;
-  grid-column: span 2/span 2;
+  grid-column: span 1/span 1;
+  margin-bottom: 0; }
+.token-amount {
+  display: flex;
+  align-items: center;
+  grid-column: span 1/span 1;
   margin-bottom: 0;
-  @media (max-width: 990px) {
-    grid-column: span 1/span 1; } }
+  margin-left: -1.5rem; }
 .record-detail {
   display: grid;
   padding-left: 1rem;
+  padding-right: 1rem;
   overflow-x: visible;
   white-space: nowrap;
   text-overflow: ellipsis;
   overflow-y: visible;
   align-items: center;
-  grid-template-columns: repeat(10, minmax(0, 1fr));
+  grid-template-columns: repeat(8, minmax(0, 1fr));
   flex: 1 1;
   width: 100%;
   @media (min-width: 1280px) {

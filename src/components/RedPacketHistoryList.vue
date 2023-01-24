@@ -8,12 +8,12 @@
   <div v-if="!loading" class="token-listDetail">
     <div class="token-table">
       <div style="overflow: visible; border-radius: 0.75rem;">
-        <div v-for="(value, name, index) in redPacketByDate" :key="index" style="position: relative; ">
+        <div v-for="(value, name, index) in luckHistoryByDate" :key="index" style="position: relative; ">
           <div class="history-date">
             <div style="font-size: 0.875rem; line-height: 1.25rem;">{{ name }}</div>
           </div>
           <div v-for="(v, i) in value" :key="i" class="history-record">
-            <div style="display: flex; align-items: center;">
+            <div v-if="v.redPacket" class="record-box">
               <div style="display: block; position: relative;">
                 <div class="icon">
                   <svg style="color:white;" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -43,9 +43,9 @@
                             <img :src="v.token.logoURI">
                           </div>
                         </div>
-                        <div class="info-2">
+                        <!-- <div class="info-2">
                           {{ v.redPacket.metadata.mode }}ly
-                        </div>
+                        </div> -->
                       </div>
                     </div>
                     <div style="color: #6a6d7c; white-space: nowrap; margin-left: 0; font-size: 12px;">
@@ -63,9 +63,13 @@
                     <p class="claimed-number">
                       Claimed: 
                       <strong>{{
-                          v.redPacket.metadata.split - v.redPacket.state.split
-                        }}/{{ v.redPacket.metadata.split }}</strong>
+                        v.redPacket.metadata.split - v.redPacket.state.split
+                      }}/{{ v.redPacket.metadata.split }}</strong>
                        Share
+                    </p>
+                    <p class="claim-mode">
+                      Mode: 
+                      <strong>{{ v.redPacket.metadata.mode }}</strong>
                     </p>
                     <p class="claimed-number">
                       Left:
@@ -77,13 +81,95 @@
                     </p>
                   </div>
                 </div>
+                <div class="share">
+                  <i class="fa fa-paper-plane" aria-hidden="true" @click="copyShareLink(v.redPacket)"></i>
+                </div>
                 <div class="cta">
-                  <button class="connect-wallet-button" @click="copyShareLink(v.redPacket)">
-                    Share
-                  </button>
                   <button class="connect-wallet-button">
                     Withdraw
                   </button>
+                </div>
+              </div>
+            </div>
+            <div v-if="v.redpacket" class="record-box">
+              <div style="display: block; position: relative;">
+                <div class="icon" style="background-color: #4BAE4F;">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M7 7L17 17" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="M17 7V17H7" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                </div>
+              </div>
+              <div class="record-detail">
+                <div class="action-and-time">
+                  <div style="display: block; margin-bottom: 0;">
+                    <div style="display: flex;">
+                      <div class="sent-info">
+                        <div class="info-1">
+                          Claimed
+                          <!-- <a-tooltip placement="top">
+                            <template #title>
+                              <span>
+                                Amount: {{ normalizeClaimAmount(v) }}
+                              </span>
+                            </template>
+                            <div style="overflow: auto; white-space: nowrap; margin-left: 0.25rem; max-width: 45px;">
+                              {{ normalizeClaimAmount(v) }}
+                            </div>
+                          </a-tooltip> -->
+                          <!-- <div class="token-icon" style="margin-right: 0.25rem; margin-left: 0.25rem;">
+                            <img :src="v.token.logoURI">
+                          </div> -->
+                        </div>
+                      </div>
+                    </div>
+                    <div style="color: #6a6d7c; white-space: nowrap; margin-left: 0; font-size: 12px;">
+                      <div style="display: flex;">{{ new Date(v.redpacket.redPacket.createdAt).toLocaleString().split(',')[1] }}</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="claim-status">
+                  <div style="display: flex; align-items: center;">
+                    <div style="display: flex; align-items: center;">
+                      <span class="thumb"><img :src="v.redpacket.redPacket.creator.logoURI ? v.redpacket.redPacket.creator.logoURI : 'https://i.postimg.cc/15QJZwkN/profile.png'" :size="64" referrerpolicy="no-referrer" /></span>
+                      <div style="display: flex; flex-direction: column; margin-left: 0.5rem;">
+                        <span class="from-text">From</span>
+                        <span style="font-size: 12px; color: rgb(100,116,139)">@{{ v.redpacket.redPacket.creator.handle }}</span>
+                      </div>
+                    </div>
+                    <div class="arrow">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                      </svg>
+                    </div>
+                    <div style="display: flex; align-items: center;">
+                      <span class="thumb"><img
+                          :src="v.token.logoURI"
+                          :size="64" referrerpolicy="no-referrer" /></span>
+                      <div style="display: flex; flex-direction: column; margin-left: 0.5rem;">
+                        <span class="from-text" style="color: #0d8838;">
+                          <a-tooltip placement="top">
+                            <template #title>
+                              <span>
+                                Amount: {{ normalizeClaimAmount(v) }}
+                              </span>
+                            </template>
+                            <div style="overflow: auto; white-space: nowrap; max-width: 45px;">
+                              + {{ normalizeClaimAmount(v) }}
+                            </div>
+                          </a-tooltip>
+                        </span>
+                        <span style="font-size: 12px; color: rgb(100,116,139)">{{ v.token.symbol }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="share">
+                  <i className="fa fa-twitter"></i>
+                </div>
+                <div class="cta">
+                  <i class="fa fa-info-circle" aria-hidden="true"></i>
                 </div>
               </div>
             </div>
@@ -114,6 +200,8 @@ import Loading from "@/components/Loading.vue";
 import { useAccountStore } from '@/stores/account';
 import { useTokenStore } from '@/stores/token';
 import { copy } from "@/web3/utils";
+import { ConsoleSqlOutlined } from '@ant-design/icons-vue';
+import { Console } from 'console';
 
 import { normalizeBalance } from "@hexlink/common";
 import type { Token } from "@hexlink/common";
@@ -124,8 +212,13 @@ interface CreatedRedPacket {
   token: Token,
 };
 
+interface ClaimedRedPacketInfo {
+  redpacket: ClaimedRedPacket,
+  token: Token,
+}
+
 const redPackets = ref<CreatedRedPacket[]>([]);
-const claimed = ref<ClaimedRedPacket[]>([]);
+const claimed = ref<ClaimedRedPacketInfo[]>([]);
 const loadClaimInfo = async (provider: ethers.providers.Provider) => {
   const claims : ClaimedRedPacket[] = await getClaimedRedPackets();
   claimed.value = await Promise.all(
@@ -144,6 +237,8 @@ const loadClaimsForOnePacket = async (
 }
 
 const redPacketByDate = ref<any>([]);
+const claimedByDate = ref<any>([]);
+const luckHistoryByDate = ref<any>([]);
 
 const loadData = async function() {
   loading.value = true;
@@ -156,30 +251,74 @@ const loadData = async function() {
   }
   loading.value = false;
   extractDate();
-  console.log("Claimed: ", claimed.value);
 };
 
 const extractDate = () => {
-  const group: any = {};
-  redPackets.value.forEach(async (val) => {
-    const date = new Date(val.redPacket.createdAt).toLocaleString().split(',')[0];
-    if (date in group) {
-      group[date].push(val);
+  const sentGroup: any = {};
+  const claimGroup: any = {};
+  const sentOrderedGroup: any = {}
+  const claimedOrderedGroup: any = {}
+  claimed.value.forEach((c) => {
+    const date = new Date(c.redpacket.claim.createdAt).toLocaleString().split(',')[0];
+    if (date in claimGroup) {
+      claimGroup[date].push(c);
     } else {
-      group[date] = new Array(val);
+      claimGroup[date] = new Array(c);
     }
 
-    // sort the object
-    const ordered_group: any = {}
+    // sort the claimed red packet
     var isDescending = true;
-    const d_group = Object.keys(group).sort((a, b) => isDescending
+    const d_group = Object.keys(claimGroup).sort((a, b) => isDescending
       ? new Date(b).getTime() - new Date(a).getTime()
       : new Date(a).getTime() - new Date(b).getTime());
     d_group.forEach((v) => {
-      ordered_group[v] = group[v];
+      claimedOrderedGroup[v] = claimGroup[v];
     })
-    redPacketByDate.value = ordered_group;
+    claimedByDate.value = JSON.parse(JSON.stringify(claimedOrderedGroup));
   });
+
+  redPackets.value.forEach((val) => {
+    const date = new Date(val.redPacket.createdAt).toLocaleString().split(',')[0];
+    if (date in sentGroup) {
+      sentGroup[date].push(val);
+    } else {
+      sentGroup[date] = new Array(val);
+    }
+
+    // sort the object
+    var isDescending = true;
+    const d_group = Object.keys(sentGroup).sort((a, b) => isDescending
+      ? new Date(b).getTime() - new Date(a).getTime()
+      : new Date(a).getTime() - new Date(b).getTime());
+    d_group.forEach((v) => {
+      sentOrderedGroup[v] = sentGroup[v];
+    })
+    redPacketByDate.value = JSON.parse(JSON.stringify(sentOrderedGroup));
+    console.log("redpacket: ", redPacketByDate.value);
+  });
+
+  const luckHistoryGroup: any = {};
+  // merge two objects together
+  Object.keys(sentOrderedGroup).forEach((sog) => {
+    if (sog in luckHistoryGroup) {
+      sentOrderedGroup[sog].forEach((value: any) => {
+        luckHistoryGroup[sog].push(value);
+      })
+    } else {
+      luckHistoryGroup[sog] = sentOrderedGroup[sog];
+    }
+  })
+  Object.keys(claimedOrderedGroup).forEach((cog) => {
+    if (cog in luckHistoryGroup) {
+      claimedOrderedGroup[cog].forEach((value: any) => {
+        luckHistoryGroup[cog].push(value);
+      })
+    } else {
+      luckHistoryGroup[cog] = claimedOrderedGroup[cog];
+    }
+  })
+  luckHistoryByDate.value = JSON.parse(JSON.stringify(luckHistoryGroup));
+  console.log("luck history: ", luckHistoryByDate.value);
 };
 
 const loading = ref<boolean>(true);
@@ -187,24 +326,11 @@ const loading = ref<boolean>(true);
 onMounted(loadData);
 watch(() => useChainStore().current, loadData);
 
-// const { toClipboard } = useClipboard();
-// const copy = async (text: string) => {
-//   try {
-//     await toClipboard(text);
-//     const toaster = createToaster({ position: "top", duration: 2000 });
-//     toaster.success(`Copied`);
-//   } catch (e) {
-//     console.error(e)
-//     const toaster = createToaster({ position: "top", duration: 2000 });
-//     toaster.error(`Can not copy`);
-//   }
-// }
-
 const showDetailsEnabled = ref<boolean>(false);
 
 const route = useRoute();
 const copyShareLink = (redPacket: RedPacketDB) => {
-  return copy(window.location.origin + route.path + "?claim=" + redPacket.id);
+  return copy(window.location.origin + route.path + "?claim=" + redPacket.id, 'Successfully copied your red packet share link!');
 };
 
 const showDetails = () => {
@@ -228,6 +354,13 @@ const normalizedDbBalance = (redPacket: CreatedRedPacket) => {
       redPacket.redPacket.metadata.balance,
       redPacket.token
     );
+}
+
+const normalizeClaimAmount = (claimed: ClaimedRedPacketInfo) => {
+  return normalizeBalance(
+    EthBigNumber.from(claimed.redpacket.claim.claimed),
+    claimed.token.decimals
+  ).normalized;
 }
 
 const tokenStore = useTokenStore();
@@ -366,16 +499,58 @@ const validateClaimStatus = async (
 const aggregatedClaimed = async function(
   provider: ethers.providers.Provider,
   redpacket: ClaimedRedPacket
-) : Promise<ClaimedRedPacket> {
+) : Promise<ClaimedRedPacketInfo> {
+  const tokenAddr = redpacket.redPacket.metadata.token.toLowerCase();
+  const token = await loadAndSaveERC20Token(tokenAddr);
   redpacket.claim = await validateClaimStatus(provider, redpacket.claim);
-  return redpacket;
+  return { redpacket, token };
 }
 </script>
 
 <style lang="less" scoped>
-.info-2 {
-  @media (max-width: 990px) {
-    margin-top: -0.25rem; } }
+.claim-mode {
+  display: flex;
+  margin: 0px;
+  font-weight: 400;
+  line-height: 1.5;
+  font-size: 12px;
+  color: #5b7083; }
+i {
+  color: rgba(0,0,0,0.3);
+  font-size: 18px; }
+i:hover {
+  color: #076AE0; }
+.arrow {
+  font-size: .875rem;
+  line-height: 1.25rem;
+  margin-left: 1rem;
+  margin-right: 1rem; }
+.from-text {
+  font-weight: 600;
+  font-size: 12px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  color: rgb(15, 23, 42); }
+.thumb {
+  display: flex;
+  overflow: hidden;
+  width: 40px;
+  height: 40px;
+  border-radius: 50px;
+  align-items: center;
+  justify-content: center;
+  &:hover {
+    transform: translateY(-0.125rem); } }
+.thumb img {
+  border-radius: 50px;
+  max-width: 30px; }
+.record-box {
+  display: flex;
+  align-items: center;
+  border-top: 1px solid #e5e7eb;
+  height: 4.5rem;
+  padding-top: 0.5rem; }
 .info-1 {
   display: flex; }
 .no-history {
@@ -388,7 +563,7 @@ const aggregatedClaimed = async function(
   padding: 0.5rem;
   align-items: center;
   justify-content: center;
-  height: 42vh; }
+  height: 500px; }
 .sent-info {
   display: flex;
   flex-shrink: 1;
@@ -434,8 +609,15 @@ const aggregatedClaimed = async function(
   // border: 2px solid rgb(7, 106, 224);
   color: white; }
 .connect-wallet-button:hover {
-  background-color: rgba(7, 106, 224, 0.6);
-}
+  background-color: rgba(7, 106, 224, 0.6); }
+.share {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  grid-column: span 1/span 1; }
+.share img {
+  max-width: 20px; }
 .cta {
   display: flex;
   flex-direction: column;
@@ -472,10 +654,10 @@ const aggregatedClaimed = async function(
   margin: 8px 0; }
 .claim-status {
   display: block;
-  grid-column: span 6/span 6;
+  grid-column: span 5/span 5;
   @media (max-width: 990px) {
     margin-left: 1rem;
-    grid-column: span 4/span 4; } }
+    grid-column: span 5/span 5; } }
 .action-and-time {
   display: flex;
   align-items: center;
@@ -502,9 +684,7 @@ const aggregatedClaimed = async function(
     grid-template-columns: repeat(7, minmax(0, 1fr)); } }
 .history-record {
   position: relative;
-  border-top: 1px solid #e5e7eb;
   padding-left: 1.5rem;
-  padding-top: 0.5rem;
   padding-bottom: 0.5rem;
   margin-left: -0.5rem;
   margin-right: -0.5rem;

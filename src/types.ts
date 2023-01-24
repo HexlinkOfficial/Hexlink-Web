@@ -111,6 +111,7 @@ export interface HexlinkUserInfo {
     provider: string;
     handle: string;
     displayName?: string;
+    logoURI?: string;
 }
 
 export interface RedPacketDBMetadata {

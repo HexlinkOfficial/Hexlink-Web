@@ -6,8 +6,8 @@ import {
     wrappedCoinAddress,
     stableCoinAddresses,
     getChain
-} from "../../common";
-import type { Token, TokenPreference } from "../../common";
+} from "@hexlink/common";
+import type { Token, TokenPreference } from "@hexlink/common";
 
 interface TokenMap {
     [key: string]: Token

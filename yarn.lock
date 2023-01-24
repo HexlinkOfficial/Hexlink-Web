@@ -1219,6 +1219,17 @@
   dependencies:
     "@hapi/hoek" "^9.0.0"
 
+"@hexlink/common@file:functions/common":
+  "resolved" "file:functions/common"
+  "version" "0.1.5"
+  dependencies:
+    "bignumber.js" "^9.1.1"
+    "ethers" "^5.7.2"
+
+"@hexlink/redpacket@file:functions/redpacket":
+  "resolved" "file:functions/redpacket"
+  "version" "0.1.2"
+
 "@humanwhocodes/config-array@^0.11.8":
   "integrity" "sha512-UybHIJzJnR5Qc/MsD9Kr+RpO2h+/P1GhOwdiLPXK5TWk5sgTdu88bTD9UP+CKbPPh5Rni1u0GjAdYQLemG8g+g=="
   "resolved" "https://registry.npmjs.org/@humanwhocodes/config-array/-/config-array-0.11.8.tgz"
@@ -4672,7 +4683,7 @@
     "rustbn.js" "~0.2.0"
     "safe-buffer" "^5.1.1"
 
-"ethers@^5.7.1":
+"ethers@^5.7.1", "ethers@^5.7.2":
   "integrity" "sha512-wswUsmWo1aOK8rR7DIKiWSw9DbLWe6x98Jrn8wcTflTVvaXhAMaB5zGAXy0GYQEQp9iO1iSHWVyARQm11zUtyg=="
   "resolved" "https://registry.npmjs.org/ethers/-/ethers-5.7.2.tgz"
   "version" "5.7.2"

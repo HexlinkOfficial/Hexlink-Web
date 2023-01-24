@@ -1,0 +1,21 @@
+{
+    "compilerOptions": {
+      "outDir": "./lib.esm/",
+      "rootDir": "./src",
+      "resolveJsonModule": true,
+      "declaration": true,
+      "module": "esnext",
+      "target": "esnext",
+      "esModuleInterop": true,
+      "moduleResolution": "node",
+      "composite": true
+    },
+    "exclude": [],
+    "include": [
+      "./src/*.ts",
+      "./src/*.json",
+      "src/abi/*.json",
+      "src/tokens/*.json",
+    ]
+  }
+  

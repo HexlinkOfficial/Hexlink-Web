@@ -115,9 +115,9 @@ import { useAccountStore } from '@/stores/account';
 import { useTokenStore } from '@/stores/token';
 import { copy } from "@/web3/utils";
 
-import { normalizeBalance } from "../../common";
-import type { Token } from "../../common";
-import { redPacketAddress } from "../../redpacket";
+import { normalizeBalance } from "@hexlink/common";
+import type { Token } from "@hexlink/common";
+import { redPacketAddress } from "@hexlink/redpacket";
 
 interface CreatedRedPacket {
   redPacket: RedPacketDB,

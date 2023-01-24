@@ -1,0 +1,17 @@
+{
+  "author": "shu@hexlink.io",
+  "description": "Utilities and classes for hexlink redpacket contract",
+  "main": "./lib/index.js",
+  "module": "./lib.esm/index.js",
+  "name": "@hexlink/redpacket",
+  "scripts": {
+    "build": "rimraf lib && rimraf lib.esm && tsc --build ./tsconfig.json &&  tsc --build ./tsconfig.esm.json",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "sideEffects": false,
+  "types": "./lib/index.d.ts",
+  "version": "0.1.2",
+  "dependencies": {
+    "@hexlink/common": "file:../common"
+  }
+}

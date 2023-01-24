@@ -517,17 +517,15 @@
     "protobufjs" "^7.0.0"
     "yargs" "^16.2.0"
 
-"@hexlink/common@^0.1.5":
-  "integrity" "sha512-Y8I0+79bvJ8fvC+2lFiI2WVW86AF3OvBJuAC/WcooZ4qa/MDYu7AMo7FvOBJFEpCtGeFodaiBzivOWClfhRdRQ=="
-  "resolved" "https://registry.npmjs.org/@hexlink/common/-/common-0.1.5.tgz"
+"@hexlink/common@file:common":
+  "resolved" "file:common"
   "version" "0.1.5"
   dependencies:
     "bignumber.js" "^9.1.1"
     "ethers" "^5.7.2"
 
-"@hexlink/redpacket@^0.1.2":
-  "integrity" "sha512-fbQno/Wc3+PA0b3GySsrnNntSyeNZxmuUKUtSkapbKXK5VWhf1SyVQyuqguFt4gY9myiA8nScKJEUun1iSWeoA=="
-  "resolved" "https://registry.npmjs.org/@hexlink/redpacket/-/redpacket-0.1.2.tgz"
+"@hexlink/redpacket@file:redpacket":
+  "resolved" "file:redpacket"
   "version" "0.1.2"
 
 "@humanwhocodes/config-array@^0.10.4":

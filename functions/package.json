@@ -17,8 +17,8 @@
   "main": "lib/index.js",
   "dependencies": {
     "@google-cloud/kms": "^3.1.0",
-    "@hexlink/common": "^0.1.5",
-    "@hexlink/redpacket": "^0.1.2",
+    "@hexlink/common": "file:common",
+    "@hexlink/redpacket": "file:redpacket",
     "@sendgrid/mail": "^7.7.0",
     "@types/node-fetch": "^2.6.2",
     "@types/nodemailer": "^6.4.5",

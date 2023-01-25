@@ -19,13 +19,9 @@ import {resolveProperties} from "@ethersproject/properties";
 import {serialize, UnsignedTransaction} from "@ethersproject/transactions";
 import {KMS_KEY_TYPE, PriceConfig} from "./config";
 
-import {redPacketContract} from "../redpacket";
+import {redPacketContract, redPacketMode} from "../redpacket";
 
 const secrets = functions.config().doppler || {};
-
-function redPacketMode(mode: string) : number {
-  return mode == "random" ? 2 : 1;
-}
 
 async function signRaw(signer: string, message: string) : Promise<Signature> {
   const validator = new ethers.Wallet(secrets.HARDHAT_VALIDATOR);

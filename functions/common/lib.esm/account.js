@@ -1,4 +1,3 @@
-/* eslint-disable require-jsdoc */
 "use strict";
 import { ethers } from "ethers";
 import ACCOUNT_SIMPLE_ABI from "./abi/ACCOUNT_SIMPLE_ABI.json";
@@ -21,4 +20,22 @@ export async function hexlAccount(provider, hexlink, nameHash) {
         acc.owner = await contract.owner();
     }
     return acc;
+}
+export function encodeInit(owner, data) {
+    return accountInterface.encodeFunctionData("init", [owner, data]);
+}
+export function encodeExec(op) {
+    return accountInterface.encodeFunctionData("execBatch", [op]);
+}
+export function encodeExecBatch(ops) {
+    return accountInterface.encodeFunctionData("execBatch", [ops]);
+}
+export function encodeValidateAndCall(params) {
+    const txData = encodeExecBatch(params.ops);
+    if (params.gas) {
+        return accountInterface.encodeFunctionData("validateAndCall", [txData, params.nonce, params.signature]);
+    }
+    else {
+        return accountInterface.encodeFunctionData("validateAndCallWithGasRefund", [txData, params.nonce, params.signature, params.gas]);
+    }
 }

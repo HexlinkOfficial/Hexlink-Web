@@ -23,7 +23,8 @@ import type { RedPacket } from "../../functions/redpacket";
 import {
     redPacketInterface,
     redPacketAddress,
-    redPacketContract
+    redPacketContract,
+    redPacketMode
 } from "../../functions/redpacket";
 
 import { useChainStore } from "@/stores/chain";
@@ -42,10 +43,6 @@ export function validator() : string {
         return "0xEF2e3F91209F88A3143e36Be10D52502162426B3";
     }
     return "0x030ffbc193c3f9f4c6378beb506eecb0933fd457";
-}
-
-function redPacketMode(mode: string) : number {
-    return mode == "random" ? 2 : 1;
 }
 
 export async function estimateGasSponsorship(

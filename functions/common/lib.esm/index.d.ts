@@ -5,3 +5,4 @@ export * from "./tokens";
 export * from "./contracts";
 export * from "./utils";
 export * from "./account";
+export * from "./types";

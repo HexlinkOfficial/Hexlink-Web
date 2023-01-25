@@ -174,14 +174,16 @@ import { vOnClickOutside } from '@/services/directive';
 import { getBalances } from "@/web3/tokens";
 import type { BalanceMap } from  "@/web3/tokens";
 import { BigNumber } from "bignumber.js";
-import { estimateGasSponsorship, validator } from "@/web3/redpacket";
+import { validator } from "@/web3/redpacket";
 import { message } from 'ant-design-vue';
 import { useTokenStore } from "@/stores/token";
 import RedPacketAccount from "@/components/RedPacketAccount.vue";
+import { getPriceInfo } from "@/web3/network";
 
 import type { Token } from "../../functions/common";
 import { hash } from "../../functions/common";
 import type { RedPacket } from "../../functions/redpacket";
+import { calcGasSponsorship as calcGasSponsorshipFunc } from "../../functions/redpacket";
 
 const chooseTotalDrop = ref<boolean>(false);
 const openDropdown = ref<boolean>(false);
@@ -262,8 +264,12 @@ const setDefaultToken = function (getBalance: (t: Token) => string) {
 }
 
 const calcGasSponsorship = async () => {
-  redpacket.value.gasTokenAmount = await estimateGasSponsorship(
-    redpacket.value
+  const chain = useChainStore().chain;
+  const priceInfo = await getPriceInfo(chain);
+  redpacket.value.gasTokenAmount = calcGasSponsorshipFunc(
+    chain,
+    redpacket.value,
+    priceInfo,
   );
 };
 
@@ -287,6 +293,7 @@ onMounted(genTokenList);
 onMounted(calcGasSponsorship);
 
 watch(() => useChainStore().current, genTokenList);
+watch(() => useWalletStore().connected, genTokenList);
 watch([
   () => redpacket.value.gasToken,
   () => redpacket.value.split

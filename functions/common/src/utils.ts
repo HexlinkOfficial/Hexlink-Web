@@ -1,6 +1,6 @@
 "use strict";
 
-import {ethers} from "ethers";
+import {ethers, BigNumber as EthBigNumber} from "ethers";
 import type {Provider} from "@ethersproject/providers";
 import {BigNumber} from "bignumber.js";
 
@@ -94,4 +94,11 @@ export async function isContract(
   // eslint-disable-next-line no-empty
   } catch (error) { }
   return false;
+}
+
+export function toEthBigNumber(value: BigNumber | string | number) : EthBigNumber {
+  if (value instanceof BigNumber) {
+    return EthBigNumber.from(value.toString(10));
+  }
+  return EthBigNumber.from(value);
 }

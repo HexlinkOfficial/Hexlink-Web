@@ -12,11 +12,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.isStableCoin = exports.isWrappedCoin = exports.isNativeCoin = exports.getPopularTokens = exports.allowedGasToken = exports.stableCoinAddresses = exports.wrappedCoinAddress = exports.nativeCoinAddress = void 0;
+exports.tokenAmount = exports.tokenBase = exports.isStableCoin = exports.isWrappedCoin = exports.isNativeCoin = exports.getPopularTokens = exports.allowedGasToken = exports.stableCoinAddresses = exports.wrappedCoinAddress = exports.nativeCoinAddress = void 0;
 const GOERLI_TOKENS_json_1 = __importDefault(require("./tokens/GOERLI_TOKENS.json"));
 const MUMBAI_TOKENS_json_1 = __importDefault(require("./tokens/MUMBAI_TOKENS.json"));
 const POLYGON_TOKENS_json_1 = __importDefault(require("./tokens/POLYGON_TOKENS.json"));
 const addresses_json_1 = __importDefault(require("./addresses.json"));
+const bignumber_js_1 = require("bignumber.js");
+const utils_1 = require("./utils");
 function nativeCoinAddress(chain) {
     return addresses_json_1.default[chain.name].nativeCoin.toLowerCase();
 }
@@ -80,3 +82,11 @@ function isStableCoin(token, chain) {
     return stableCoinAddresses(chain).includes(token.address);
 }
 exports.isStableCoin = isStableCoin;
+function tokenBase(token) {
+    return new bignumber_js_1.BigNumber(10).pow(token.decimals);
+}
+exports.tokenBase = tokenBase;
+function tokenAmount(balance, token) {
+    return (0, utils_1.toEthBigNumber)(tokenBase(token).times(balance));
+}
+exports.tokenAmount = tokenAmount;

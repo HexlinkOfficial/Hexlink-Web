@@ -68,43 +68,10 @@ export interface CreatedRedPacket {
     claimHistory: Claim[]
 }
 
-export interface AuthProof {
-    name: string,
-    requestId: string,
-    authType: string, // non-hashed
-    identityType: string, // non-hashed
-    issuedAt: number, // timestamp
-    signature: string // encoded with validator address
-}
-
 export interface EstimatedTxCost {
     sponsorship: EthersBigNumber;
     currentTx: EthersBigNumber;
     total: EthersBigNumber;
-}
-
-export interface Transaction {
-    name: string,
-    function: string,
-    args: any[],
-    tx: {
-        to: string
-        from: string,
-        value?: string,
-        data: string,
-    }
-}
-
-export interface UserOp {
-    name: string,
-    function: string,
-    args: any[],
-    op: {
-        to: string;
-        value: EthersBigNumber;
-        callData: string | [];
-        callGasLimit: EthersBigNumber;
-    }
 }
 
 export interface HexlinkUserInfo {

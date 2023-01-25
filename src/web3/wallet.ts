@@ -1,10 +1,17 @@
 import Web3Model from "web3modal";
 import { ethers } from "ethers";
 import { useWalletStore } from "@/stores/wallet"
-import { buildAccountFromAddress } from "./account";
 import WalletConnect from "@walletconnect/web3-provider";
-import type { Wallet } from "@/types";
-import { updateWalletBalances } from "@/web3/tokens";
+import { isContract } from "../../functions/common";
+import type { Account } from "../../functions/common";
+import { useChainStore } from "@/stores/chain";
+
+async function buildAccount(account: string) : Promise<Account> {
+  return {
+    address: account,
+    isContract: await isContract(useChainStore().provider, account),
+  };
+}
 
 export const providerOptions = {
   walletconnect: {
@@ -21,7 +28,7 @@ export const web3Modal = new Web3Model({
 });
 
 export async function disconnectWallet() {
-  await web3Modal.clearCachedProvider();
+  web3Modal.clearCachedProvider();
   const store = useWalletStore();
   store.disconnectWallet();
 }
@@ -51,17 +58,14 @@ export async function connectWallet() {
     }
   }
   const store = useWalletStore();
-  store.connectWallet({
-    account: await buildAccountFromAddress(accounts[0]),
+  store.connectWallet(
     wallet,
     walletIcon,
-  } as Wallet);
-  await updateWalletBalances();
+    await buildAccount(accounts[0])
+  );
 
   window.ethereum.on('accountsChanged', async function (accounts: string[]) {
-    const account = await buildAccountFromAddress(accounts[0]);
-    store.switchAccount(account);
-    await updateWalletBalances();
+    store.switchAccount(await buildAccount(accounts[0]));
   });
 }
 

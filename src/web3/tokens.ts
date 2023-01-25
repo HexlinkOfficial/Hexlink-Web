@@ -7,22 +7,39 @@ import {
 import type {
     PreferenceInput,
 } from "@/graphql/preference";
-import type {
-    TokenMetadata,
-    Token,
-    Network,
-    NormalizedTokenBalance
-} from '@/types';
-import { getPopularTokens } from "@/configs/tokens";
-import { alchemy, getProvider } from "@/web3/network";
-import { useProfileStore } from "@/stores/profile";
+
 import { useAuthStore } from "@/stores/auth";
-import { useNetworkStore } from "@/stores/network";
-import { useWalletStore } from "@/stores/wallet";
-import { BigNumber as EthBigNumber } from 'ethers';
+import { useChainStore } from "@/stores/chain";
+import { useTokenStore } from "@/stores/token";
+
+import type { Token, Chain,  NormalizedTokenBalance } from "../../functions/common";
+import { normalizeBalance, getPopularTokens } from "../../functions/common";
+import { Alchemy, Network } from "alchemy-sdk";
+import { alchemyKey } from "@/web3/network";
  
-export async function getERC20Metadata(token: string, network?: Network) : Promise<TokenMetadata> {
-    const metadata = await alchemy(network).core.getTokenMetadata(token);
+function alchemyNetwork(chain: Chain) : Network {
+    if (chain.chainId == "5") {
+        return Network.ETH_GOERLI;
+    }
+    if (chain.chainId == "137") {
+        return Network.MATIC_MAINNET;
+    }
+    if (chain.chainId == "80001") {
+        return Network.MATIC_MUMBAI;
+    }
+    throw new Error("Unsupported network");
+}
+
+function alchemy() {
+    const chain = useChainStore().chain;
+    return new Alchemy({
+        apiKey: alchemyKey(chain),
+        network: alchemyNetwork(chain!)
+    });
+}
+
+export async function loadErc20Token(token: string) : Promise<Token> {
+    const metadata = await alchemy().core.getTokenMetadata(token);
     if (metadata.name == null
         || metadata.symbol == null
         || metadata.decimals == null) {
@@ -35,146 +52,68 @@ export async function getERC20Metadata(token: string, network?: Network) : Promi
         name: metadata.name!,
         symbol: metadata.symbol!,
         decimals: metadata.decimals!,
-        logoURI: metadata.logo!
+        logoURI: metadata.logo!,
+        chain: useChainStore().chain.name,
+        chainId: useChainStore().chain.chainId!,
     }
 }
 
-export function normalizeBalance(balance: EthBigNumber, decimals: number) : NormalizedTokenBalance {
-    const normalized = new BigNumber(
-        balance.toString()
-    ).div(BigNumber(10).pow(decimals));
-    if (normalized.gt(1)) {
-        return {
-            value: balance,
-            normalized: normalized.dp(3).toString(10),
-            updatedAt: new Date()
-        };
-    } else {
-        return {
-            value: balance,
-            normalized: normalized.dp(4).toString(10),
-            updatedAt: new Date()
-        }
-    }
-}
-
-export async function initTokenList(network: Network) {
+export async function initTokenList(chain: Chain) {
     const auth = useAuthStore();
-    let tokens : { [key: string]: Token } = {};
-    const DEFAULT_TOKENS = await getPopularTokens(network);
-    DEFAULT_TOKENS.tokens.forEach(t => tokens[t.address.toLowerCase()] = {metadata: t});
-    const preferences : Token[] = await getTokenPreferences(auth.user!, network);
-    preferences.forEach(p => {
-        const address = p.metadata.address.toLowerCase();
-        tokens[address] = {
-            metadata: p.metadata,
-            preference: p.preference
-        };
-    });
-    return tokens;
+    const tokens = useTokenStore();
+    const DEFAULT_TOKENS = await getPopularTokens(chain);
+    DEFAULT_TOKENS.tokens.forEach(t => tokens.set(t));
+    const preferences : Token[] = await getTokenPreferences(auth.user!, chain);
+    preferences.forEach(p => tokens.set(p));
 }
 
-export async function updateProfileBalances() {
-    const store = useProfileStore();
-    if (!store.profile?.initiated) { return };
-    const account = store.profile!.account.address;
-    await updateBalances(
-        account,
-        (address) => store.balance(address),
-        (address, balance) => store.updateBalance(address, balance)
+export type BalanceMap = {[key: string] : NormalizedTokenBalance};
+
+export async function getBalances(account: string, balances: BalanceMap = {}) : Promise<BalanceMap> {
+    const store = useTokenStore();
+    const nativeCoin = useTokenStore().nativeCoin;
+    const balance = await useChainStore().provider.getBalance(account);
+    balances[nativeCoin.address] = normalizeBalance(
+        balance.toString(),
+        nativeCoin.decimals
     );
-    await updatePreferences();
-}
 
-export async function updateWalletBalances() {
-    const wallet = useWalletStore();
-    if (!wallet.connected) { return; }
-    const account = wallet.wallet!.account.address;
-    await updateBalances(
-        account,
-        (address: string) => wallet.balance(address.toLowerCase()),
-        (
-            address: string,
-            balance: NormalizedTokenBalance
-        ) => wallet.updateBalance(address.toLowerCase(), balance)
-    );
-}
-
-async function updateBalances(
-    account: string,
-    getPrevBalance: (tokenAddr: string) => NormalizedTokenBalance | undefined,
-    update: (tokenAddr: string, balance: NormalizedTokenBalance) => void,
-) : Promise<void> {
-    const profile = useProfileStore().profile;
-    const tokens = Object.values(profile.tokens || []);
-    const nativeCoin = useNetworkStore().nativeCoinAddress;
-    const decimals = profile.tokens[nativeCoin].metadata.decimals;
-    let balance = getPrevBalance(nativeCoin) || normalizeBalance(EthBigNumber.from(0), decimals);
-    try {
-        const nativeCoinBalance = await getProvider().getBalance(account);
-        balance = normalizeBalance(
-            nativeCoinBalance,
-            decimals
-        );
-    } catch(error) {
-        console.log(error);
-    };
-    update(nativeCoin, balance);
-
-    const erc20s = tokens.map(
-        t => t.metadata.address
-    ).filter(addr => addr != nativeCoin);
+    const erc20s = store.tokens.map(
+        t => t.address
+    ).filter(addr => addr != nativeCoin.address);
     const result = await alchemy().core.getTokenBalances(account, erc20s);
     result.tokenBalances.map((b, i) => {
-        const decimals = profile.tokens[
-            b.contractAddress.toLowerCase()
-        ].metadata.decimals;
-        let balance = getPrevBalance(
-            b.contractAddress
-        ) || normalizeBalance(EthBigNumber.from(0), decimals);
+        const decimals = store.token(b.contractAddress).decimals;
         if (b.tokenBalance && !b.error) {
-            balance = normalizeBalance(EthBigNumber.from(b.tokenBalance), decimals);
+            balances[b.contractAddress] = normalizeBalance(
+                b.tokenBalance, decimals
+            );
         }
-        update(b.contractAddress, balance);
     });
+    return balances;
 }
 
-async function updatePreferences() {
-    const store = useProfileStore();
+export async function updatePreferences(balances: BalanceMap) {
+    const store = useTokenStore();
+    const balance = (t: Token) => balances[t.address.toLowerCase()];
     const tokensToSetPreference : PreferenceInput[] = 
-        Object.values(store.profile?.tokens || []).filter(
-            t => !t.preference && t.balance?.value.gt(0)
+        store.tokens.filter(
+            t => !t.preference && new BigNumber(balance(t)?.value).gt(0)
         ).map(t => ({
-            chain: useNetworkStore().network!.name,
+            chain: useChainStore().chain.name,
             display: true,
-            tokenAddress: t.metadata.address,
-            metadata: t.metadata
+            tokenAddress: t.address.toLowerCase(),
+            metadata: t
         }));
     const inserted = await insertTokenPreferences(
         useAuthStore().user!, tokensToSetPreference
     );
-    for (let i = 0; i < tokensToSetPreference.length; i++) {
-        const p = tokensToSetPreference[i];
-        const preference = {id: inserted[i].id, display: p.display};
-        store.updatePreference(p.metadata.address, preference);
-    }
-}
-
-export async function loadERC20Token(
-    address: string,
-    wallet: string,
-    network?: Network
-): Promise<Token> {
-    const token = await getERC20Metadata(address, network);
-    const balances = await alchemy().core.getTokenBalances(wallet, [address]);
-    const [balance] = balances.tokenBalances;
-    return {
-        metadata: token,
-        balance: normalizeBalance(
-            EthBigNumber.from(balance.tokenBalance!),
-            token.decimals
-        )
-    };
+    inserted.forEach(res => {
+        store.setPreference(
+            res.metadata,
+            {id: res.id, display: res.display}
+        );
+    });
 }
 
 export interface Transaction {
@@ -192,7 +131,7 @@ export interface Action {
 
 export interface AssetTransfer {
     tx: Transaction;
-    asset: TokenMetadata;
+    asset: Token;
     amount: {
         value: BigNumber,
         normalized: BigNumber,
@@ -231,7 +170,7 @@ const toAssetTransfer = (
             decimals: Number(transfer.rawContract.decimal) || -1,
             symbol: transfer.asset || "",
             name: "",
-        } as TokenMetadata,
+        } as Token,
         amount: {
             value: BigNumber(transfer.rawContract.value || 0),
             normalized: BigNumber(transfer.value || 0),

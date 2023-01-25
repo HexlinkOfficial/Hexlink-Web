@@ -15,8 +15,8 @@
               <div class="selectnetwork dropdown" @click="activeDropDown('selectnetwork')"
                 :class="active && 'show'">
                 <div class="network" data-toggle="dropdown">
-                  <img :src="useNetworkStore().network?.logoUrl" height=25 style="margin-left: 0.5rem;">
-                  <span>{{ useNetworkStore().network?.chainName }}</span>
+                  <img :src="useChainStore().chain.logoUrl" height=25 style="margin-left: 0.5rem;">
+                  <span>{{ useChainStore().chain.fullName }}</span>
                   <svg width="14" height="8" viewBox="0 0 14 8" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 0.5rem; width: 1rem">
                     <path d="M1 1L7 7L13 1" stroke="#475569" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                   </svg>
@@ -33,7 +33,7 @@
                       <div class="network-items" @click="switchNetwork({...MUMBAI})">
                         <button>
                           <div style="display: flex; margin-right: 0.75rem; align-items: center; height: 1.25rem; width: 1.25rem;">
-                            <svg v-if="useNetworkStore().network?.name == 'mumbai'" width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <svg v-if="useChainStore().chain.name == 'mumbai'" width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg">
                               <path d="M17 1L6 12L1 7" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                             </svg>
                           </div>
@@ -42,7 +42,7 @@
                               <img src="https://token.metaswap.codefi.network/assets/networkLogos/polygon.svg" height=25 style="margin-left: 0.5rem; margin-right: 0.5rem;" />
                             </div>
                             <div class="items-name">
-                              <span class="item-title">{{ MUMBAI.chainName }}</span>
+                              <span class="item-title">{{ MUMBAI.fullName }}</span>
                               <span class="item-balance">$11.39</span>
                             </div>
                           </div>
@@ -52,7 +52,7 @@
                       <div class="network-items" @click="switchNetwork({...GOERLI})">
                         <button>
                           <div style="display: flex; margin-right: 0.75rem; align-items: center; height: 1.25rem; width: 1.25rem;">
-                            <svg v-if="useNetworkStore().network?.name == 'goerli'" width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <svg v-if="useChainStore().chain.name == 'goerli'" width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg">
                               <path d="M17 1L6 12L1 7" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                             </svg>
                           </div>
@@ -61,7 +61,7 @@
                               <img src="https://token.metaswap.codefi.network/assets/networkLogos/ethereum.svg" height=25 style="margin-left: 0.5rem; margin-right: 0.5rem;" />
                             </div>
                             <div class="items-name">
-                              <span class="item-title">{{ GOERLI.chainName }}</span>
+                              <span class="item-title">{{ GOERLI.fullName }}</span>
                               <span class="item-balance">$11.39</span>
                             </div>
                           </div>
@@ -104,8 +104,8 @@
                             </svg>
                             <div class="user-info">
                               <span style="margin-bottom: 0;" class="smart-contract-address">
-                                <h5 @click="doCopy(useProfileStore().profile?.account.address)">
-                                  {{ addressTextLong(useProfileStore().profile?.account.address) }}
+                                <h5 @click="doCopy(useAccountStore().account?.address)">
+                                  {{ addressTextLong(useAccountStore().account?.address) }}
                                 </h5>
                               </span>
                             </div>
@@ -130,8 +130,8 @@
                           </div>
                           <div class="user-info">
                             <span style="margin-bottom: 0;" class="smart-contract-address">
-                              <h5 @click="doCopy(walletStore.wallet?.account.address)">
-                                {{ addressTextLong(walletStore.wallet?.account.address) }}
+                              <h5 @click="doCopy(walletStore.wallet?.address)">
+                                {{ addressTextLong(walletStore.wallet?.address) }}
                               </h5>
                             </span>
                           </div>
@@ -205,13 +205,13 @@
 import { ref, onMounted, onBeforeUnmount } from 'vue';
 import { useAuthStore } from '@/stores/auth';
 import { useWalletStore } from '@/stores/wallet';
-import { useNetworkStore } from '@/stores/network';
-import { prettyPrintAddress } from '@/web3/account';
+import { useChainStore } from '@/stores/chain';
 import { createToaster } from "@meforma/vue-toaster";
-import { GOERLI, MUMBAI } from "@/configs/network";
+import { GOERLI, MUMBAI, prettyPrintAddress } from "../../functions/common";
 import { switchNetwork } from "@/web3/network";
 import { connectWallet, disconnectWallet} from "@/web3/wallet";
 import { useProfileStore } from "@/stores/profile";
+import { useAccountStore } from "@/stores/account";
 import { signOutFirebase } from "@/services/auth";
 import type { Account } from "@/types";
 import useClipboard from 'vue-clipboard3';

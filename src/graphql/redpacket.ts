@@ -1,8 +1,13 @@
 import { gql } from '@urql/core';
 import { useAuthStore } from '@/stores/auth';
 import { handleUrqlResponse, setUrqlClientIfNecessary } from './urql';
-import { useNetworkStore } from '@/stores/network';
-import type { HexlinkUserInfo} from "@/types";
+import { useChainStore } from '@/stores/chain';
+import type {
+  HexlinkUserInfo,
+  RedPacketDB,
+  RedPacketDBMetadata,
+  RedPacketOnchainState
+} from "@/types";
 
 export const GET_REDPACKET = gql`
   query GetRedPacket($id: String!) {
@@ -37,6 +42,8 @@ export const GET_CREATED_REDPACKETS = gql`
             creator
             metadata
             created_at
+            status
+            state
         }
     }
 `
@@ -54,43 +61,20 @@ export const INSERT_REDPACKET = gql`
     }
 `
 
-export const UPDATE_REDPACKET = gql`
+export const UPDATE_REDPACKET_STATUS = gql`
     mutation (
         $id: String!
-        $tx: String!
+        $status: String!
+        $state: jsonb
     ) {
         update_redpacket_by_pk (
             pk_columns: {id: $id},
-            _set: { tx: $tx }
+            _set: { status: $status, state: $state }
         ) {
             id
         }
     }
 `
-
-export interface RedPacketDBMetadata {
-  token: string
-  salt: string,
-  mode: string,
-  split: number,
-  balance: string,
-  validator: string,
-  contract: string,
-  creator: string,
-  tokenAmount: string,
-  gasToken: string,
-  gasTokenAmount: string
-}
-
-export interface RedPacketDB {
-  id: string,
-  userId: string,
-  chain: string,
-  metadata: RedPacketDBMetadata,
-  creator: HexlinkUserInfo,
-  tx?: string,
-  createdAt: string,
-}
 
 export async function getRedPacket(
   redPacketId: string
@@ -127,7 +111,7 @@ export async function getCreatedRedPackets() : Promise<RedPacketDB[]> {
     GET_CREATED_REDPACKETS,
     {
       userId: useAuthStore().user!.uid,
-      chain: useNetworkStore().network!.chainId.toString()
+      chain: useChainStore().chain.name,
     }
   ).toPromise();
   if (await handleUrqlResponse(result)) {
@@ -138,7 +122,10 @@ export async function getCreatedRedPackets() : Promise<RedPacketDB[]> {
         userId: r.user_id,
         metadata: JSON.parse(r.metadata),
         creator: JSON.parse(r.creator),
-        createdAt: r.created_at
+        createdAt: r.created_at,
+        tx: r.tx,
+        status: r.status,
+        state: r.state ? JSON.parse(r.state) : r.state,
       } as RedPacketDB;
     });
   } else {
@@ -176,15 +163,19 @@ export async function insertRedPacket(
   }
 }
 
-export async function updateRedPacket(
-  data: {id: string, tx: string},
+export async function updateRedPacketStatus(
+  data: {id: string, status: string, state?: RedPacketOnchainState},
 ) : Promise<void> {
   const client = setUrqlClientIfNecessary(useAuthStore().user!.idToken!)
   const result = await client.mutation(
-      UPDATE_REDPACKET,
-      data
+      UPDATE_REDPACKET_STATUS,
+      {
+        id: data.id,
+        status: data.status,
+        state: data.state ? JSON.stringify(data.state) : undefined
+      }
   ).toPromise();
   if (!await handleUrqlResponse(result)) {
-    await updateRedPacket(data);
-}
+      await updateRedPacketStatus(data);
+  }
 }

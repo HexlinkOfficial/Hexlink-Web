@@ -1583,10 +1583,10 @@
     "@types/node" "*"
     "form-data" "^3.0.0"
 
-"@types/node@*", "@types/node@>=12.12.47", "@types/node@>=13.7.0":
-  "integrity" "sha512-aFcUkv7EddxxOa/9f74DINReQ/celqH8DiB3fRYgVDM2Xm5QJL8sl80QKuAnGvwAsMn+H3IFA6WCrQh1CY7m1A=="
-  "resolved" "https://registry.npmjs.org/@types/node/-/node-16.11.56.tgz"
-  "version" "16.11.56"
+"@types/node@*", "@types/node@^18.11.18", "@types/node@>=12.12.47", "@types/node@>=13.7.0":
+  "integrity" "sha512-DHQpWGjyQKSHj3ebjFI/wRKcqQcdR+MoFBygntYOZytCqNfkd2ZC4ARDJ2DQqhjH5p85Nnd3jhUJIXrszFX/JA=="
+  "resolved" "https://registry.npmjs.org/@types/node/-/node-18.11.18.tgz"
+  "version" "18.11.18"
 
 "@types/node@^10.10.0":
   "integrity" "sha512-F0KIgDJfy2nA3zMLmWGKxcH2ZVEtCZXHHdOQs2gSaQ27+lNeEfGxzkIw90aXswATX7AZ33tahPbzy6KAfUreVw=="
@@ -2308,28 +2308,10 @@
   "resolved" "https://registry.npmjs.org/bech32/-/bech32-1.1.4.tgz"
   "version" "1.1.4"
 
-"better-ajv-errors@^0.6.1", "better-ajv-errors@^0.6.7":
-  "integrity" "sha512-PYgt/sCzR4aGpyNy5+ViSQ77ognMnWq7745zM+/flYO4/Yisdtp9wDQW2IKCyVYPUxQt3E/b5GBSwfhd1LPdlg=="
-  "resolved" "https://registry.npmjs.org/better-ajv-errors/-/better-ajv-errors-0.6.7.tgz"
-  "version" "0.6.7"
-  dependencies:
-    "@babel/code-frame" "^7.0.0"
-    "@babel/runtime" "^7.0.0"
-    "chalk" "^2.4.1"
-    "core-js" "^3.2.1"
-    "json-to-ast" "^2.0.3"
-    "jsonpointer" "^4.0.1"
-    "leven" "^3.1.0"
-
-"big-integer@^1.6.17":
-  "integrity" "sha512-j51egjPa7/i+RdiRuJbPdJ2FIUYYPhvYLjzoYbcMMm62ooO6F94fETG4MTs46zPAF9Brs04OajboA/qTGuz78w=="
-  "resolved" "https://registry.npmjs.org/big-integer/-/big-integer-1.6.48.tgz"
-  "version" "1.6.48"
-
-"bignumber.js@^9.0.0", "bignumber.js@^9.1.0":
-  "integrity" "sha512-4LwHK4nfDOraBCtst+wOWIHbu1vhvAPJK8g8nROd4iuc3PSEjWif/qwbkh8jwCJz6yDBvtU4KPynETgrfh7y3A=="
-  "resolved" "https://registry.npmjs.org/bignumber.js/-/bignumber.js-9.1.0.tgz"
-  "version" "9.1.0"
+"bignumber.js@^9.0.0", "bignumber.js@^9.1.0", "bignumber.js@^9.1.1":
+  "integrity" "sha512-pHm4LsMJ6lzgNGVfZHjMoO8sdoRhOzOH4MLmY65Jg70bpxCKu5iOHNJyfF6OyvYw7t8Fpf35RuzUyqnQsj8Vig=="
+  "resolved" "https://registry.npmjs.org/bignumber.js/-/bignumber.js-9.1.1.tgz"
+  "version" "9.1.1"
 
 "binary-extensions@^2.0.0":
   "integrity" "sha512-Phlt0plgpIIBOGTT/ehfFnbNlfsDEiqmzE2KRXoX1bLIlir4X/MR+zSyBEkL05ffWgnRSf/DXv+WrUAVr93/ow=="
@@ -9337,22 +9319,10 @@
     "media-typer" "0.3.0"
     "mime-types" "~2.1.24"
 
-"type@^1.0.1":
-  "integrity" "sha512-MAM5dBMJCJNKs9E7JXo4CXRAansRfG0nlJxW7Wf6GZzSOvH31zClSaHdIMWLehe/EGMBkqeC55rrkaOr5Oo7Nw=="
-  "resolved" "https://registry.npmjs.org/type/-/type-1.0.1.tgz"
-  "version" "1.0.1"
-
-"typedarray-to-buffer@^3.1.5":
-  "integrity" "sha512-zdu8XMNEDepKKR+XYOXAVPtWui0ly0NtohUscw+UmaHiAWT8hrV1rr//H6V+0DvJ3OQ19S979M0laLfX8rm82Q=="
-  "resolved" "https://registry.npmjs.org/typedarray-to-buffer/-/typedarray-to-buffer-3.1.5.tgz"
-  "version" "3.1.5"
-  dependencies:
-    "is-typedarray" "^1.0.0"
-
-"typescript@^4.8.0", "typescript@>=2.8.0 || >= 3.2.0-dev || >= 3.3.0-dev || >= 3.4.0-dev || >= 3.5.0-dev || >= 3.6.0-dev || >= 3.6.0-beta || >= 3.7.0-dev || >= 3.7.0-beta":
-  "integrity" "sha512-C0I1UsrrDHo2fYI5oaCGbSejwX4ch+9Y5jTQELvovfmFkK3HHSZJB8MSJcWLmCUBzQBchCrZ9rMRV6GuNrvGtw=="
-  "resolved" "https://registry.npmjs.org/typescript/-/typescript-4.8.2.tgz"
-  "version" "4.8.2"
+"typescript@^4.9.4", "typescript@>=2.8.0 || >= 3.2.0-dev || >= 3.3.0-dev || >= 3.4.0-dev || >= 3.5.0-dev || >= 3.6.0-dev || >= 3.6.0-beta || >= 3.7.0-dev || >= 3.7.0-beta":
+  "integrity" "sha512-Uz+dTXYzxXXbsFpM86Wh3dKCxrQqUcVMxwU54orwlJjOpO3ao8L7j5lH+dWfTwgCwIuM9GQ2kvVotzYJMXTBZg=="
+  "resolved" "https://registry.npmjs.org/typescript/-/typescript-4.9.4.tgz"
+  "version" "4.9.4"
 
 "typescript@>=2.7":
   "integrity" "sha512-VgYs2A2QIRuGphtzFV7aQJduJ2gyfTljngLzjpfW9FoYZF6xuw1W0vW9ghCKLfcWrCFxK81CSGRAvS1pn4fIUg=="

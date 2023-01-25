@@ -1,40 +1,41 @@
 
 import { defineStore } from 'pinia';
-import type { RedPacket, Network } from "@/types";
-import { useNetworkStore } from './network';
+import type { RedPacket } from "../../functions/redpacket";
+
+type Status = "" | "confirming" | "processing" | "error" | "success";
+export type AccountType = "hexlink" | "wallet";
+
+interface CreatingRedPacket {
+  status: Status;
+  redpacket: RedPacket | undefined;
+  account: AccountType;
+}
 
 export const useRedPacketStore = defineStore({
   id: 'redpacket',
-  state: (): {
-    [key: string]: {
-      status: boolean
-      creating: RedPacket
-      useHexlink: boolean
-    }
-  } => ({}),
+  state: (): CreatingRedPacket => ({
+    status: "",
+    redpacket: undefined,
+    account: "hexlink",
+  }),
   persist: true,
-  getters: {
-    redpacket(state) : RedPacket {
-      const network = useNetworkStore().network;
-      return state[network!.name]?.creating;
-    },
-    useHex(state) : boolean {
-      const network = useNetworkStore().network;
-      return state[network!.name]?.useHexlink;
-    },
-    packetStatus(state): boolean {
-      const network = useNetworkStore().network;
-      return state[network!.name]?.status;
-    }
-  },
   actions: {
-    beforeCreate(network: Network, redpacket: RedPacket, useHex: boolean) {
-      this[network.name] = { status: true, creating: redpacket, useHexlink: useHex };
+    beforeCreate(redpacket: RedPacket) {
+      this.status = "confirming";
+      this.redpacket = redpacket;
     },
-    closeModal(network: Network) {
-      this[network.name].status = false;
+    setStatus(status: Status) {
+      this.status = status;
+    },
+    setAccount(account: AccountType) {
+      this.account = account;
+    },
+    reset() {
+      this.status = "";
+      this.redpacket = undefined;
+      this.account = "hexlink";
     }
   },
-})
+});
 
 

@@ -19,6 +19,8 @@ module.exports = {
   },
   ignorePatterns: [
     "/lib/**/*", // Ignore built files.
+    "/common/**/*", // Ignore referenced projects.
+    "/redpacket/**/*", // Ignore referenced projects.
   ],
   plugins: [
     "@typescript-eslint",
@@ -27,5 +29,6 @@ module.exports = {
   rules: {
     "quotes": ["error", "double"],
     "import/no-unresolved": 0,
+    "require-jsdoc": 0,
   },
 };

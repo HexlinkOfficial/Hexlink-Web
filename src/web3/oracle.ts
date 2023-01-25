@@ -1,37 +1,13 @@
-import type { Network, AuthProof } from "@/types";
 import { useWalletStore } from "@/stores/wallet";
-import ACCOUNT_ABI from "@/configs/abi/AccountSimple.json";
-import HEXLINK_ABI from "@/configs/abi/Hexlink.json";
-import { hexlinkContract } from "@/web3/hexlink";
-import { ethers } from "ethers";
+import { genDeployAuthProof as genProof } from "../../functions/common";
+import type { AuthProof } from "../../functions/common";
 import { getFunctions, httpsCallable } from 'firebase/functions'
 import { useAuthStore } from "@/stores/auth";
+import { useChainStore } from "@/stores/chain"
 
-const functions = getFunctions()
-
-const genRequestId = async function(
-    network: Network,
-    func: string,
-    data: string | [],
-) {
-    const hexlink = hexlinkContract(network);
-    const result = ethers.utils.keccak256(
-      ethers.utils.defaultAbiCoder.encode(
-        ["bytes4", "bytes", "address", "uint256", "uint256"],
-        [
-            func,
-            data,
-            hexlink.address,
-            network.chainId,
-            await hexlink.nonce(useAuthStore().user!.nameHash)
-        ]
-      )
-    );
-    return result;
-};
+const functions = getFunctions();
 
 export async function genDeployAuthProof(
-    network: Network,
     data: string
 ) : Promise<{ initData: string, proof: AuthProof }> {
     const wallet = useWalletStore();
@@ -39,20 +15,15 @@ export async function genDeployAuthProof(
         throw new Error("Not connected");
     }
 
-    const accountIface = new ethers.utils.Interface(ACCOUNT_ABI);
-    const initData = accountIface.encodeFunctionData(
-        "init", [wallet.wallet!.account.address, data]
-    );
-    const hexlinkIface = new ethers.utils.Interface(HEXLINK_ABI);
-    const requestId = await genRequestId(
-        network,
-        hexlinkIface.getSighash("deploy"),
-        initData
-    );
     const genAuthProof = httpsCallable(functions, 'genTwitterOAuthProof');
-    const result = await genAuthProof({requestId});
-    return {
-        initData,
-        proof: (result.data as any).authProof as AuthProof
-    };
+    return await genProof(
+        useChainStore().provider,
+        useAuthStore().user!.nameHash,
+        wallet.account!.address,
+        data,
+        async (param) => {
+            const result = await genAuthProof(param);
+            return (result.data as any).authProof as AuthProof;
+        }
+    );
 }

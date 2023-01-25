@@ -1,55 +1,65 @@
 import { ethers, BigNumber as EthBigNumber } from "ethers";
 import { BigNumber } from "bignumber.js";
-import { Alchemy, Network as AlchemyNetwork } from "alchemy-sdk";
 
-import type { Network, PriceInfo } from '@/types';
+import type { Chain } from "../../functions/common";
+import type { PriceInfo } from '@/types';
 import { useWalletStore } from "@/stores/wallet";
-import { initProfile } from "@/web3/account";
-import { useNetworkStore } from '@/stores/network';
+import { useRedPacketStore } from "@/stores/redpacket";
+import { useChainStore } from '@/stores/chain';
 import { getFunctions, httpsCallable } from 'firebase/functions'
 
-async function doSwitch(network: Network) {
-    await initProfile(network);
-    useNetworkStore().switchNetwork(network);
+const ALCHEMY_KEY = {
+    "goerli": "U4LBbkMIAKCf4GpjXn7nB7H1_P9GiU4b",
+    "polygon": "1GmfWOSlYIlUI0UcCu4Y2O-8DmFJrlqA",
+    "mumbai": "Fj__UEjuIj0Xym6ofwZfJbehuuXGpDxe",
+};
+
+async function doSwitch(chain: Chain) {
+    useRedPacketStore().reset();
+    useChainStore().switchNetwork(chain);
 }
 
-export async function switchNetwork(network: Network) {
-    const currentNetwork = useNetworkStore().network;
-    if (network.chainId == currentNetwork?.chainId) {
+export function alchemyKey(chain: Chain) : string {
+    return (ALCHEMY_KEY as any)[chain.name] as string;
+}
+
+export async function switchNetwork(chain: Chain) {
+    const currentChain = useChainStore().chain;
+    if (chain.chainId == currentChain?.chainId) {
         return;
     }
 
-    if (!currentNetwork || !useWalletStore().connected
-        || Number(network.chainId) == window.ethereum.networkVersion) {
-        doSwitch(network);
+    const connected = useWalletStore().connected;
+    if (!currentChain || !connected || Number(chain.chainId) == window.ethereum.networkVersion) {
+        doSwitch(chain);
         return;
     }
 
-    if (useWalletStore().connected) {
-        const hexifyChainId = ethers.utils.hexValue(Number(network.chainId));
+    if (connected) {
+        const hexifyChainId = ethers.utils.hexValue(Number(chain.chainId));
         try {
             await window.ethereum.request({
                 method: 'wallet_switchEthereumChain',
                 params: [{ chainId: hexifyChainId }],
             });
-            doSwitch(network);
+            doSwitch(chain);
         } catch (error: any) {
             if (error.code === 4902) {
                 await window.ethereum.request({
                     method: "wallet_addEthereumChain",
                     params: [{
                         chainId: hexifyChainId,
-                        chainName: network.chainName,
-                        blockExplorerUrls: [...network.blockExplorerUrls],
-                        nativeCurrency: {...network.nativeCurrency},
-                        rpcUrls: [...network.rpcUrls],
+                        chainName: chain.fullName,
+                        blockExplorerUrls: [...chain.blockExplorerUrls],
+                        nativeCurrency: {...chain.nativeCurrency},
+                        rpcUrls: [...chain.rpcUrls],
                     }],
                 });
                 await window.ethereum.request({
                     method: 'wallet_switchEthereumChain',
                     params: [{ chainId: hexifyChainId }],
                 });
-                doSwitch(network);
+                doSwitch(chain);
             } else {
                 console.log(error);
             }
@@ -57,59 +67,36 @@ export async function switchNetwork(network: Network) {
     }
 }
 
-export function alchemyNetwork(network: Network) : AlchemyNetwork {
-    if (network.chainId == "5") {
-        return AlchemyNetwork.ETH_GOERLI;
-    }
-    if (network.chainId == "137") {
-        return AlchemyNetwork.MATIC_MAINNET;
-    }
-    if (network.chainId == "80001") {
-        return AlchemyNetwork.MATIC_MUMBAI;
-    }
-    throw new Error("Unsupported network");
-}
-
-export function alchemy(network?: Network) {
-    network = network || useNetworkStore().network;
-    return new Alchemy({
-        apiKey: network!.alchemy.key,
-        network: alchemyNetwork(network!)
-    });
-}
-
-export function getProvider(network?: Network) {
-    network = network || useNetworkStore().network;
+export function getProvider(chain: Chain) {
     return new ethers.providers.AlchemyProvider(
-        Number(network!.chainId),
-        network!.alchemy.key
+        Number(chain!.chainId),
+        alchemyKey(chain),
     );
 }
 
-export function getInfuraProvider(network?: Network) {
-    network = network || useNetworkStore().network;
+export function getInfuraProvider(chain: Chain) {
     return new ethers.providers.InfuraProvider(
-        Number(network!.chainId),
+        Number(chain.chainId),
         import.meta.env.VITE_INFURA_API_KEY
     );
 }
 
 const functions = getFunctions();
-export async function getPriceInfo(network: Network) : Promise<PriceInfo> {
-    const priceInfo = useNetworkStore().priceInfo[network.name];
+export async function getPriceInfo(chain: Chain) : Promise<PriceInfo> {
+    const priceInfo = useChainStore().priceInfos[chain.name];
     // refresh every 15 mins
     if (!priceInfo || priceInfo.updatedAt < new Date().getTime() - 900000) {
         const getPriceInfo = httpsCallable(functions, 'priceInfo');
-        const result = await getPriceInfo({chainId: network.chainId});
+        const result = await getPriceInfo({chainId: chain.chainId});
         const info : {
             nativeCurrencyInUsd: string,
             gasPrice: string
         } = (result.data as any).priceInfo;
-        useNetworkStore().refreshPriceInfo(network, {
+        useChainStore().refreshPriceInfo(chain, {
             nativeCurrencyInUsd: new BigNumber(info.nativeCurrencyInUsd),
             gasPrice: EthBigNumber.from(info.gasPrice),
             updatedAt: new Date().getTime()
         });
     }
-    return useNetworkStore().priceInfo[network.name];
+    return useChainStore().priceInfos[chain.name];
 }

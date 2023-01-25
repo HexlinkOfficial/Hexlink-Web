@@ -1,6 +1,6 @@
 <template>
   <div v-if="claimStatus == ''" class="claim-card transition">
-    <router-link to="/redpacket/claim">
+    <router-link to="/redpackets">
       <svg class="redpacket_close transition" width="30" height="30" viewBox="0 0 30 30" fill="none"
         xmlns="http://www.w3.org/2000/svg">
         <path
@@ -31,14 +31,13 @@
   </div>
   <div v-if="claimStatus !== ''" class="claim-success-card transition">
     <h2 class="transition">
-      <!-- <i class="fa fa-check-circle-o fa-5x" aria-hidden="true"></i> -->
       <div class="spinner-lg" :class="claimStatus">
         <div class="check"></div>
       </div>
       <span style="font-size: 20px; margin-top: 1rem;">{{ loadText() }}</span><br>
     </h2>
     <div class="cta-container transition" style="margin-top: 340px;">
-      <router-link to="/redpacket/claim">
+      <router-link to="/redpackets">
         <button class="cta">OK</button>
       </router-link>
     </div>
@@ -48,36 +47,31 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
-import type { RedPacketDB } from '@/graphql/redpacket';
 import { getRedPacket } from '@/graphql/redpacket';
 import { useRoute } from "vue-router";
 import { claimRedPacket } from "@/web3/redpacket";
-import { getERC20Metadata } from "@/web3/tokens";
-import { getNetwork } from "@/configs/network";
-import { useProfileStore } from "@/stores/profile";
+import { loadErc20Token } from "@/web3/tokens";
+import { useTokenStore } from "@/stores/token";
 import { switchNetwork } from "@/web3/network";
-import type { TokenMetadata, Network } from "@/types";
+import type { Token } from "../../functions/common";
+import { getChain } from "../../functions/common";
+import type { RedPacketDB } from "@/types";
 
 const redPacket = ref<RedPacketDB | undefined>();
 const redPacketTokenIcon = ref<string>("");
 const redPacketToken = ref<string>("");
 const claimStatus = ref<string>("");
 
-async function loadTokenMetadata(
-  tokenAddr: string,
-  network: Network
-) : Promise<TokenMetadata> {
-  const token = useProfileStore().profiles[
-    network.name
-  ].tokens[tokenAddr.toLowerCase()];
-  return token?.metadata || await getERC20Metadata(tokenAddr, network);
+async function loadToken(tokenAddr: string) : Promise<Token> {
+  const token = useTokenStore().token(tokenAddr);
+  return token || await loadErc20Token(tokenAddr);
 }
 
 onMounted(async () => {
-  redPacket.value = await getRedPacket(useRoute().query.id!.toString());
-  const network = getNetwork(redPacket.value!.chain);
-  switchNetwork(network);
-  const metadata = await loadTokenMetadata(redPacket.value!.metadata.token, network);
+  redPacket.value = await getRedPacket(useRoute().query.claim!.toString());
+  const network = getChain(redPacket.value!.chain);
+  await switchNetwork(network);
+  const metadata = await loadToken(redPacket.value!.metadata.token);
   redPacketToken.value = metadata.symbol;
   redPacketTokenIcon.value = metadata.logoURI || "";
 });

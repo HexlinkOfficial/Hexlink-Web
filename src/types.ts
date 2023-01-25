@@ -1,41 +1,13 @@
 import type { BigNumber as EthersBigNumber } from "ethers";
 import type { BigNumber } from "bignumber.js";
 
-export interface Network {
-    chainId: string,
-    rpcUrls: string[],
-    name: string,
-    chainName: string,
-    alchemy: {
-        rpcUrl: string,
-        key: string,
-    },
-    nativeCurrency: {
-        name: string,
-        symbol: string,
-        decimals: number,
-    },
-    blockExplorerUrls: string[],
-    logoUrl: string,
-    address: {[key : string]: string | string[]}
-}
+import type { Token } from "../../functions/common";
+import type { RedPacket } from "../../functions/redpacket";
 
 export interface PriceInfo {
     nativeCurrencyInUsd: BigNumber;
     gasPrice: EthersBigNumber;
     updatedAt: number;
-}
-
-export interface Account {
-    address: string;
-    isContract: boolean;
-    owner?: string;
-}
-
-export interface Wallet {
-    wallet: string;
-    walletIcon: string;
-    account: Account;
 }
 
 // if uid exists, use uid as key to
@@ -59,62 +31,10 @@ export interface IAuth {
     returnUrl?: string,
 }
 
-export interface TokenMetadata {
-    chain?: string,
-    address: string,
-    name: string,
-    symbol: string,
-    decimals: number,
-    logoURI?: string,
-    tags?: string[],
-    extensions?: {
-        "rootAddress": string
-    }
-}
-
-export interface TokenDataList {
-    tags?: {[key: string]: {name: string, description: string}}
-    tokens: TokenMetadata[],
-    timestamp: string,
-    error?: string,
-}
-
 export interface Preference {
     id: number;
     tokenAlias?: string;
     display: boolean;
-}
-
-export interface NormalizedTokenBalance {
-    value: EthersBigNumber;
-    normalized: string;
-    updatedAt?: Date;
-}
-
-export interface Token {
-    metadata: TokenMetadata,
-    balance?: NormalizedTokenBalance;
-    preference?: Preference;
-    price?: number;
-}
-
-export interface Profile {
-    initiated: boolean;
-    account: Account;
-    tokens: { [key: string]: Token };
-}
-
-export interface RedPacket {
-    id?: string;
-    token: Token;
-    salt: string;
-    gasToken: Token;
-    gasTokenAmount?: EthersBigNumber;
-    tokenAmount?: EthersBigNumber;
-    mode: "random" | "equal";
-    split: number;
-    balance: string;
-    validator: string;
 }
 
 export interface Claim {
@@ -146,15 +66,6 @@ export interface CreatedRedPacket {
         txCost: EthersBigNumber;
     },
     claimHistory: Claim[]
-}
-
-export interface AuthProof {
-    name: string,
-    requestId: string,
-    authType: string, // non-hashed
-    identityType: string, // non-hashed
-    issuedAt: number, // timestamp
-    signature: string // encoded with validator address
 }
 
 export interface AuthProof {
@@ -200,6 +111,7 @@ export interface HexlinkUserInfo {
     provider: string;
     handle: string;
     displayName?: string;
+    logoURI?: string;
 }
 
 export interface RedPacketDBMetadata {
@@ -214,14 +126,44 @@ export interface RedPacketDBMetadata {
     gasToken: string,
     tokenAmount?: string,
     gasTokenAmount?: string,
-  }
-  
-  export interface RedPacketDB {
+}
+
+export type RedPacketStatus = "pending" | "error" | "alive" | "finalized";
+
+export interface RedPacketOnchainState {
+    balance: string,
+    split: number,
+    createdAt: string
+}
+
+export interface RedPacketDB {
     id: string,
     userId: string,
     chain: string,
     metadata: RedPacketDBMetadata,
     creator: HexlinkUserInfo,
-    tx?: string,
+    tx: string,
     createdAt: string,
-  }
+    status?: RedPacketStatus,
+    state?: RedPacketOnchainState
+}
+
+export interface RedPacketClaimInput {
+    redPacketId: string,
+    tx: string,
+}
+  
+export type TxStatus = "" | "pending" | "error" | "success";
+  
+export interface RedPacketClaim extends RedPacketClaimInput {
+    createdAt: Date,
+    id: number,
+    claimer: HexlinkUserInfo,
+    txStatus?: TxStatus,
+    claimed?: EthersBigNumber,
+}
+  
+export interface ClaimedRedPacket {
+    claim: RedPacketClaim,
+    redPacket: RedPacketDB
+}

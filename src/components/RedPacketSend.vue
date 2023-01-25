@@ -1,6 +1,6 @@
 <template>
-  <div v-if="!walletStore.connected && useRoute().params.action?.toString() == 'send'" class="connectWallet">
-    <button v-if="walletStore.connected == false" class="connect-wallet-button" @click="connectOrDisconnectWallet">
+  <div v-if="!walletStore.connected" class="connectWallet">
+    <button v-if="!walletStore.connected" class="connect-wallet-button" @click="tryConnectWallet">
       <svg style="margin-right: 10px;" width="18" height="18" viewBox="0 0 18 18" fill="none"
         xmlns="http://www.w3.org/2000/svg">
         <path
@@ -10,14 +10,14 @@
       Connect Wallet
     </button>
   </div>
-  <div v-if="walletStore.connected && useRoute().params.action?.toString() == 'send'">
+  <div v-if="walletStore.connected">
     <div class="red-packet">
       <p v-if="hasBalanceWarning" class="balance-warning-mobile"><i class="icofont-warning-alt" style="margin-right: 0.25rem;"></i>Insufficient balance</p>
       <div class="total-amount">
         <div class="box">
           <p class="total-amount-text">Total Amount</p>
           <div style="display: flex; width: 100%;">
-            <input v-model="redPacketBalance" @change="setRedPBalance" :style="hasBalanceWarning && 'color: #FE646F;'" id="red-packet-amount" class="amount-input"
+            <input v-model="redpacket.balance" :style="hasBalanceWarning ? 'color: #FE646F;' : ''" id="red-packet-amount" class="amount-input"
               autocomplete="off" placeholder="0.0" required="true" type="number" autocorrect="off" title="Token Amount"
               inputmode="decimal" min="0" minlength="1" maxlength="79" pattern="^[0-9]*[.,]?[0-9]*$" spellcheck="false">
             <p v-if="hasBalanceWarning" class="balance-warning"><i class="icofont-warning-alt" style="margin-right: 0.25rem;"></i>Insufficient balance</p>
@@ -25,12 +25,12 @@
           <div class="input-info-show">
             <p class="token-available-balance">
               Available Balance:
-              <span class="balance-amount">{{ redpacket.token.balance?.normalized.substring(0,6) }}</span>
+              <span class="balance-amount">{{ redPacketTokenBalance.substring(0,6) }}</span>
             </p>
             <div class="total-choose-token">
               <div class="token-select">
                 <div class="max-amount-button">
-                  <span class="button-text" @click="setMaxAmount">MAX</span>
+                  <span class="button-text" @click="redpacket.balance = redPacketTokenBalance">MAX</span>
                   <span class="button-outline"></span>
                 </div>
               </div>
@@ -38,19 +38,19 @@
                 <div class="mode-dropdown" :class="chooseTotalDrop && 'active'"
                   @click.stop="chooseTotalDrop = !chooseTotalDrop;" v-on-click-outside.bubble="chooseTotalHandle">
                   <div class="token-icon">
-                    <img :src="redpacket.token.metadata.logoURI" />
+                    <img :src="redpacket.token.logoURI" />
                   </div>
-                  <div class="mode-text2">{{ redpacket.token.metadata.symbol }}</div>
+                  <div class="mode-text2">{{ redpacket.token.symbol }}</div>
                   <input class="mode-input" type="text" placeholder="select" readonly>
                   <div class="mode-options">
                     <div class="mode-option" v-for="(token, index) of tokens" :key="index"
                       @click="tokenChoose('token', token)">
                       <div class="token-icon">
-                        <img :src="token.metadata.logoURI" />
+                        <img :src="token.logoURI" />
                       </div>
                       <div style="display: flex; flex-direction: column; align-items: flex-start;">
-                        <b>{{ token.metadata.symbol }}</b>
-                        <div style="margin-right:0.5rem;">balance {{ calcRemainingBalance(token) }}</div>
+                        <b>{{ token.symbol }}</b>
+                        <div style="margin-right:0.5rem;">balance {{ tokenBalance(token) }}</div>
                       </div>
                     </div>
                   </div>
@@ -89,29 +89,29 @@
             Service Fee: 
             <a-tooltip placement="top">
               <template #title>
-                <span>Service Fee: <b>{{ gasAmount }}</b></span>
+                <span>Service Fee: <b>{{ gasSponsorship }}</b></span>
               </template>
-              <b>{{ gasAmount.substring(0,6) }}</b>
+              <b>{{ gasSponsorship.substring(0,6) }}</b>
             </a-tooltip>
           </p>
           <div class="total-choose-token">
             <div class="token-select">
               <div class="mode-dropdown" :class="chooseGasDrop && 'active'" @click.stop="chooseGasDrop = !chooseGasDrop;" v-on-click-outside.bubble="chooseGasHandle">
                 <div class="token-icon">
-                  <img :src="redpacket.gasToken.metadata.logoURI" />
+                  <img :src="redpacket.gasToken.logoURI" />
                 </div>
-                <div class="mode-text2">{{ redpacket.gasToken.metadata.symbol }}</div>
+                <div class="mode-text2">{{ redpacket.gasToken.symbol }}</div>
                 <input class="mode-input" type="text" placeholder="select" readonly>
                 <div class="mode-options">
                   <div class="mode-option" v-for="(token, index) of tokens" :key="index"
                     @click="tokenChoose('gas', token)">
                     <div class="token-icon">
-                      <img :src="token.metadata.logoURI" />
+                      <img :src="token.logoURI" />
                     </div>
                     <div style="display: flex; flex-direction: column; align-items: flex-start;">
-                      <b>{{ token.metadata.symbol }}</b>
+                      <b>{{ token.symbol }}</b>
                       <div style="margin-right:0.5rem;">
-                        Balance {{ calcRemainingBalance(token) }}
+                        Balance {{ tokenBalance(token) }}
                       </div>
                     </div>
                   </div>
@@ -131,143 +131,22 @@
       </div>
     </div>
     <div class="choose-account">
-      <div class="HexlinkAccount">
-        <div style="position: relative; top: 35px; left: -10px; display: flex; justify-content: flex-end; z-index: 50;">
-          <img :style="accountChosen == 0 ? 'opacity: 1' : 'opacity: 0' " style="width: 20px; height: 20px;"
-            src="https://i.postimg.cc/SRjdzYHP/check.png" />
-        </div>
-        <div
-          :style="accountChosen == 0 ? 'box-shadow: 8px 28px 50px rgb(39 44 49 / 7%), 1px 6px 12px rgb(39 44 49 / 4%); transform: translate3D(0, -1px, 0) scale(1.02); transition: all 0.2s ease; border: 2px solid #4BAE4F;' : ''"
-          class="account-card" @click="chooseAccount(0)">
-          <div class="left">
-            <div>
-              <img class="wallet-image" src="https://i.postimg.cc/kXgZCB4L/hexlink.png">
-              <div class="chain_wrapper">
-                <img class="chain" :src="useNetworkStore().network?.logoUrl" />
-              </div>
-            </div>
-          </div>
-          <div class="right">
-            <div style="min-width: 100px; margin-left: 0.5rem;">
-              <h2>Hexlink</h2>
-              <p>Available Balance</p>
-            </div>
-            <div class="balances">
-              <span style="display: flex; align-items: center; margin-bottom: 5px;">
-                <a-tooltip placement="top">
-                  <template #title>
-                    <span>
-                      Balance:
-                      <b>{{ tokenBalance?.normalized }}</b>
-                      <copy-outlined style="margin-left: 0.5rem; margin-right: 0.5rem;"
-                        @click="copy(String(tokenBalance?.normalized))" />
-                    </span>
-                  </template>
-                  <span class="balance_item">
-                    <p style="font-weight:600; display: flex; justify-content: flex-end;">
-                      {{ tokenBalance?.normalized.substring(0,6) }}
-                    </p>
-                  </span>
-                </a-tooltip>
-                <img style="width:20px; height: 20px; margin-left: 5px; margin-right: 5px;"
-                  :src="redpacket.token.metadata.logoURI" />
-                <span style="font-size: 12px;"><b>{{ redpacket.token.metadata.symbol }}</b></span>
-              </span>
-              <!-- gas -->
-              <span v-if="showGasToken()" style="display: flex; align-items: center;">
-                <a-tooltip placement="bottom">
-                  <template #title>
-                    <span>
-                      Balance:
-                      <b>{{ gasTokenBalance?.normalized }}</b>
-                      <copy-outlined style="margin-left: 0.5rem; margin-right: 0.5rem;"
-                        @click="copy(String(gasTokenBalance?.normalized))" />
-                    </span>
-                  </template>
-                  <span class="balance_item">
-                    <p style="font-weight:600; display: flex; justify-content: flex-end;">
-                      {{ gasTokenBalance?.normalized.substring(0, 6) }}
-                    </p>
-                  </span>
-                </a-tooltip>
-                <img style="width:20px; height: 20px; margin-left: 5px; margin-right: 5px;"
-                  :src="redpacket.gasToken.metadata.logoURI" />
-                <span style="font-size: 12px;"><b>{{ redpacket.gasToken.metadata.symbol }}</b></span>
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="ExternalAccount">
-        <div style="position: relative; top: 35px; left: -10px; display: flex; justify-content: flex-end; z-index: 50;">
-          <img :style="accountChosen == 1 ? 'opacity: 1' : 'opacity: 0' " style="width: 20px; height: 20px;"
-            src="https://i.postimg.cc/SRjdzYHP/check.png" />
-        </div>
-        <div
-          :style="accountChosen == 1 ? 'box-shadow: 8px 28px 50px rgb(39 44 49 / 7%), 1px 6px 12px rgb(39 44 49 / 4%); transform: translate3D(0, -1px, 0) scale(1.02); transition: all 0.2s ease; border: 2px solid #4BAE4F;' : ''"
-          class="account-card" @click="chooseAccount(1)">
-          <div class="left">
-            <div>
-              <img class="wallet-image" :src="useWalletStore().wallet?.walletIcon">
-              <div class="chain_wrapper">
-                <img class="chain" :src="useNetworkStore().network?.logoUrl" />
-              </div>
-            </div>
-          </div>
-          <div class="right">
-            <div style="min-width: 100px; margin-left: 0.5rem;">
-              <h2>Metamask</h2>
-              <p>Available Balance</p>
-            </div>
-            <div class="balances">
-              <span style="display: flex; align-items: center; margin-bottom: 5px;">
-                <a-tooltip placement="top">
-                  <template #title>
-                    <span>
-                      Balance:
-                      <b>{{ eoaTokenBalance?.normalized }}</b>
-                      <copy-outlined style="margin-left: 0.5rem; margin-right: 0.5rem;"
-                        @click="copy(eoaTokenBalance?.normalized)" />
-                    </span>
-                  </template>
-                  <span class="balance_item">
-                    <p style="font-weight:600; display: flex; justify-content: flex-end;">
-                      {{ eoaTokenBalance?.normalized.substring(0, 6) }}
-                    </p>
-                  </span>
-                </a-tooltip>
-                <img style="width:20px; height: 20px; margin-left: 5px; margin-right: 5px;"
-                  :src="redpacket.token.metadata.logoURI" />
-                <span style="font-size: 12px;"><b>{{ redpacket.token.metadata.symbol }}</b></span>
-              </span>
-              <!-- gas -->
-              <span v-if="showGasToken()" style="display: flex; align-items: center;">
-                <a-tooltip placement="bottom">
-                  <template #title>
-                    <span>
-                      Balance:
-                      <b>{{ eoaGasTokenBalance?.normalized }}</b>
-                      <copy-outlined style="margin-left: 0.5rem; margin-right: 0.5rem;"
-                        @click="copy(String(eoaGasTokenBalance?.normalized))" />
-                    </span>
-                  </template>
-                  <span class="balance_item">
-                    <p style="font-weight:600; display: flex; justify-content: flex-end;">
-                      {{eoaGasTokenBalance?.normalized.substring(0,6) }}
-                    </p>
-                  </span>
-                </a-tooltip>
-                <img style="width:20px; height: 20px; margin-left: 5px; margin-right: 5px;"
-                  :src="redpacket.gasToken.metadata.logoURI" />
-                <span style="font-size: 12px;"><b>{{ redpacket.gasToken.metadata.symbol }}</b></span>
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
+      <RedPacketAccount
+        account="hexlink"
+        :token="redpacket.token"
+        :gasToken="redpacket.gasToken"
+        :tokenBalance="hexlAccountBalance(redpacket.token)"
+        :gasTokenBalance="hexlAccountBalance(redpacket.gasToken)"
+      ></RedPacketAccount>
+      <RedPacketAccount
+        account="wallet"
+        :token="redpacket.token"
+        :gasToken="redpacket.gasToken"
+        :tokenBalance="walletAccountBalance(redpacket.token)"
+        :gasTokenBalance="walletAccountBalance(redpacket.gasToken)"
+      ></RedPacketAccount>
     </div>
     <div class="create">
-      <router-link to="/redpacket/send?id=confirm">
         <button class="connect-wallet-button" @click="confirmRedPacket" style="width: auto;">
           <svg style="margin-right: 10px;" width="18" height="18" viewBox="0 0 18 18" fill="none"
             xmlns="http://www.w3.org/2000/svg">
@@ -277,7 +156,6 @@
           </svg>
           Confirm Red Packet
         </button>
-      </router-link>
     </div>
   </div>
 </template>
@@ -285,179 +163,115 @@
 <script setup lang="ts">
 import { ref, onMounted, watch, computed } from "vue";
 import { useWalletStore } from '@/stores/wallet';
-import { useProfileStore } from '@/stores/profile';
-import { useNetworkStore } from '@/stores/network';
+import { useAccountStore } from '@/stores/account';
+import { useChainStore } from "@/stores/chain";
 import { useRedPacketStore } from '@/stores/redpacket';
-import { connectWallet, disconnectWallet } from "@/web3/wallet";
-import type { Token, RedPacket } from "@/types";
-import { hash, tokenBase } from "@/web3/utils";
+import { connectWallet } from "@/web3/wallet";
+import { tokenBase } from "@/web3/utils";
 import type { OnClickOutsideHandler } from '@vueuse/core';
 import { onClickOutside } from '@vueuse/core'
 import { vOnClickOutside } from '@/services/directive';
-import { updateProfileBalances, updateWalletBalances, normalizeBalance } from "@/web3/tokens";
-import { BigNumber as EthBigNumber } from "ethers";
+import { getBalances } from "@/web3/tokens";
+import type { BalanceMap } from  "@/web3/tokens";
 import { BigNumber } from "bignumber.js";
 import { estimateGasSponsorship, validator } from "@/web3/redpacket";
 import { message } from 'ant-design-vue';
-import useClipboard from 'vue-clipboard3';
-import { createToaster } from "@meforma/vue-toaster";
-import { CopyOutlined } from '@ant-design/icons-vue';
-import { useRoute } from "vue-router";
+import { useTokenStore } from "@/stores/token";
+import RedPacketAccount from "@/components/RedPacketAccount.vue";
+
+import type { Token } from "../../functions/common";
+import { hash } from "../../functions/common";
+import type { RedPacket } from "../../functions/redpacket";
 
 const chooseTotalDrop = ref<boolean>(false);
 const openDropdown = ref<boolean>(false);
 const chooseGasDrop = ref<boolean>(false);
 const tokens = ref<Token[]>([]);
-const accountChosen = ref<number>(0);
 const modalRef = ref<any>(null);
-const gasSponsorship = ref<EthBigNumber>(EthBigNumber.from(0));
 const modal = ref<boolean>(false);
-const gasAmount = ref<string>("0");
-const redPacketBalance = ref<string>("0");
 const hasBalanceWarning = ref<boolean>(false);
-const nativeToken = useProfileStore().nativeToken;
-const { toClipboard } = useClipboard()
+
+const tokenStore = useTokenStore();
+const walletStore = useWalletStore();
+const redPacketStore = useRedPacketStore();
+
+const hexlAccountBalances = ref<BalanceMap>({});
+const hexlAccountBalance = (token: Token) : string => {
+  return hexlAccountBalances.value[token.address]?.normalized || "0";
+}
+
+const walletAccountBalances = ref<BalanceMap>({});
+const walletAccountBalance = (token: Token) : string => {
+  return walletAccountBalances.value[token.address]?.normalized || "0";
+}
 
 const redpacket = ref<RedPacket>({
   mode: "random",
   salt: hash(new Date().toISOString()),
   split: 1,
   balance: "0",
-  token: nativeToken as Token,
-  gasToken: nativeToken as Token,
+  token: tokenStore.nativeCoin,
+  gasToken: tokenStore.nativeCoin,
   validator: validator(),
 });
 
-const setRedPBalance = () => {
-  if (Number(redPacketBalance.value) > Number(redpacket.value.token.balance?.normalized)) {
-    redpacket.value.balance = "0";
-    hasBalanceWarning.value = true;
-  } else {
-    redpacket.value.balance = redPacketBalance.value;
-    hasBalanceWarning.value = false;
+const tokenBalance = (token: Token) => {
+  if (redPacketStore.account == "hexlink") {
+    return hexlAccountBalance(token);
   }
-}
-
-const showGasToken = () => {
-  const token = redpacket.value.token.metadata.address;
-  const gasToken = redpacket.value.gasToken.metadata.address;
-  if (token.toLowerCase() == gasToken.toLowerCase()) return false;
-  return true;
-}
-
-const walletStore = useWalletStore();
-if (walletStore.connected) {
-  walletStore.wallet;
-}
-
-const genTokenListToSelect = function (): Token[] {
-  // construct new token list so it's not affecting the store
-  if (accountChosen.value) {
-    const profileTokens = useProfileStore().profile?.tokens;
-    const walletTokenBalances = useWalletStore().balances;
-    return Object.values(profileTokens!).map(token => {
-      const address = token.metadata.address.toLowerCase();
-      const decimals = token.metadata.decimals;
-      const defaultBalance = EthBigNumber.from(0);
-      const walletBalance = walletTokenBalances[address]?.value || defaultBalance;
-      return {
-        metadata: token.metadata,
-        balance: normalizeBalance(walletBalance, decimals)
-      }
-    }).filter(t => {
-      const balance = EthBigNumber.from(t.balance.value);
-      return balance.gt(EthBigNumber.from(0))
-    });
-  } else {
-    return useProfileStore().feasibleTokens.map(t => ({
-      metadata: t.metadata,
-      balance: normalizeBalance(
-        EthBigNumber.from(t.balance?.value || 0),
-        t.metadata.decimals
-      )
-    }))
-  }
-}
-
-function defaultToken(token: Token) {
-  return {
-    metadata: token.metadata,
-    balance: normalizeBalance(
-      EthBigNumber.from(0),
-      token.metadata.decimals
-    )
-  };
-}
-
-const refresh = async function () {
-  if (useProfileStore().profile?.initiated) {
-    await updateProfileBalances();
-    if (useWalletStore().connected) {
-      await updateWalletBalances();
-    }
-    tokens.value = genTokenListToSelect();
-
-    // set default token
-    const nativeCoinAddr = useNetworkStore().nativeCoinAddress;
-    const nativeToken = tokens.value.find(
-      t => t.metadata.address == nativeCoinAddr
-    ) || defaultToken(useProfileStore().nativeToken!);
-    const toSelect = Object.values(tokens.value);
-    if (nativeToken.balance?.value.gt(0) || toSelect.length == 0) {
-      redpacket.value.token = nativeToken!;
-      redpacket.value.gasToken = nativeToken!;
-    } else {
-      redpacket.value.token = toSelect[0];
-      redpacket.value.gasToken = toSelect[0];
-    }
-  }
+  return walletAccountBalance(token);
 };
 
+const redPacketTokenBalance = computed(
+  () => tokenBalance(redpacket.value.token)
+);
 
-const connectOrDisconnectWallet = async function () {
-  if (walletStore.connected) {
-    await disconnectWallet();
-  } else {
-    if (typeof window.ethereum == 'undefined') {
-      console.log('MetaMask is not installed!');
-    }
-    await connectWallet();
-  }
-};
-
-const modeLabels = {
-  "random": "Randomly",
-  "equal": "Equally",
-};
-
-const modeChoose = (gameMode: "random" | "equal") => {
-  redpacket.value.mode = gameMode;
-}
-
-const confirmRedPacket = function () {
-  // make sure input is right
-  if (redpacket.value.balance != "0" && redpacket.value.split > 0) {
-    useRedPacketStore().beforeCreate(
-      useNetworkStore().network!,
-      redpacket.value,
-      accountChosen.value == 0
+const genTokenList = async function () {
+    hexlAccountBalances.value = await getBalances(
+      useAccountStore().account!.address, 
+      hexlAccountBalances.value,
     );
-  }
+    if (walletStore.connected) {
+      walletAccountBalances.value = await getBalances(
+        walletStore.account!.address,
+        walletAccountBalances.value,
+      );
+    }
+    if (redPacketStore.account == "hexlink") {
+      tokens.value = tokenStore.tokens.filter(
+        t => Number(hexlAccountBalance(t)) > 0
+      );
+      setDefaultToken(walletAccountBalance);
+    } else {
+      tokens.value = tokenStore.tokens.filter(
+        t => Number(walletAccountBalance(t)) > 0
+      );
+      setDefaultToken(hexlAccountBalance);
+    }
+}
+
+const setDefaultToken = function (getBalance: (t: Token) => string) {
+    const nativeCoin = tokenStore.nativeCoin;
+    if (Number(getBalance(nativeCoin)) > 0 || tokens.value.length == 0) {
+      redpacket.value.token = nativeCoin;
+      redpacket.value.gasToken = nativeCoin;
+    } else {
+      redpacket.value.token = tokens.value[0];
+      redpacket.value.gasToken = tokens.value[0]
+    }
+}
+
+const calcGasSponsorship = async () => {
+  redpacket.value.gasTokenAmount = await estimateGasSponsorship(
+    redpacket.value
+  );
 };
 
-const setMaxAmount = () => {
-  redPacketBalance.value = redpacket.value.token.balance?.normalized || "0";
-}
-
-const chooseTotalHandle: OnClickOutsideHandler = (event) => {
-  chooseTotalDrop.value = false;
-}
-const dropdownHandle: OnClickOutsideHandler = (event) => {
-  openDropdown.value = false;
-}
-const chooseGasHandle: OnClickOutsideHandler = (event) => {
-  chooseGasDrop.value = false;
-}
+const gasSponsorship = computed(() => {
+  return new BigNumber(
+    redpacket.value.gasTokenAmount?.toString() || 0
+  ).div(tokenBase(redpacket.value.gasToken)).toString(10);
+});
 
 const tokenChoose =
   async (mode: "token" | "gas", token: Token) => {
@@ -469,104 +283,67 @@ const tokenChoose =
     }
   };
 
-const calcGasSponsorship = async () => {
-  gasSponsorship.value = await estimateGasSponsorship(
-    useNetworkStore().network!, redpacket.value
-  );
-  const result = new BigNumber(
-    gasSponsorship.value.toString()
-  ).div(tokenBase(redpacket.value.gasToken)).toString(10);
-  gasAmount.value = result;
-};
+onMounted(genTokenList);
+onMounted(calcGasSponsorship);
 
-onMounted(async () => {
-  await refresh();
-  calcGasSponsorship();
-});
-
-watch(() => useNetworkStore().network, refresh);
-watch(() => [redpacket.value.split, redpacket.value.balance], calcGasSponsorship);
-watch(() => [redpacket.value.balance, redpacket.value.split], calcGasSponsorship);
-
-const chooseAccount = function (value: number) {
-  accountChosen.value = value;
-  tokens.value = genTokenListToSelect();
-
-  // reset redpacket token balance
-  const token = tokens.value.find(
-    t => t.metadata.address == redpacket.value.token.metadata.address
-  );
-  if (token?.balance) {
-    redpacket.value.token.balance = token.balance;
-  } else {
-    redpacket.value.token = defaultToken(redpacket.value.token as Token);
-  }
-
-  // reset redpacket gas token balance
-  const gasToken = tokens.value.find(
-    t => t.metadata.address == redpacket.value.gasToken.metadata.address
-  );
-  if (gasToken?.balance) {
-    redpacket.value.gasToken.balance = gasToken.balance;
-  } else {
-    redpacket.value.gasToken = defaultToken(redpacket.value.gasToken as Token);
-  }
-
-  setRedPBalance();
-}
-
-const tokenBalance = computed(() => {
-  return useProfileStore().balance(
-    redpacket.value.token.metadata.address.toLowerCase()
-  );
-});
-
-const gasTokenBalance = computed(() => {
-  return useProfileStore().balance(
-    redpacket.value.gasToken.metadata.address.toLowerCase()
-  );
-});
-
-const eoaTokenBalance = computed(() => {
-  return useWalletStore().balance(
-    redpacket.value.token.metadata.address.toLowerCase()
-  );
-});
-
-const eoaGasTokenBalance = computed(() => {
-  return useWalletStore().balance(
-    redpacket.value.gasToken.metadata.address.toLowerCase()
-  );
-});
-
-const calcRemainingBalance = (token: Token) => {
-  if (redpacket.value.token == token) {
-    if (new BigNumber(token.balance?.normalized || 0).minus(redpacket.value.balance || 0).gt(0)) {
-      return new BigNumber(token.balance?.normalized || 0).minus(redpacket.value.balance || 0);
+watch(() => useChainStore().current, genTokenList);
+watch([
+  () => redpacket.value.gasToken,
+  () => redpacket.value.split
+], calcGasSponsorship);
+watch(
+  [() => redpacket.value.balance, redPacketTokenBalance],
+  ([newBalance, newTokenBalance], _old) => {
+    if (Number(newBalance) > Number(newTokenBalance)) {
+      hasBalanceWarning.value = true;
     } else {
-      // balanceEnough.value = false;
-      warning();
-      return 0;
+      hasBalanceWarning.value = false;
     }
-  } else {
-    return token.balance?.normalized;
   }
-}
+);
 
-const warning = () => {
-  message.warning('This is a warning message');
+const tryConnectWallet = async function () {
+  if (typeof window.ethereum == 'undefined') {
+    console.log('MetaMask is not installed!');
+  }
+  await connectWallet();
 };
 
-const copy = async (text: string) => {
-  try {
-    await toClipboard(text);
-    const toaster = createToaster({ position: "top", duration: 2000 });
-    toaster.success(`Copied`);
-  } catch (e) {
-    console.error(e)
-    const toaster = createToaster({ position: "top", duration: 2000 });
-    toaster.error(`Can not copy`);
+const modeLabels = {
+  "random": "Randomly",
+  "equal": "Equally",
+};
+
+const modeChoose = (gameMode: "random" | "equal") => {
+  redpacket.value.mode = gameMode;
+}
+
+const validateInput = () => {
+  if (Number(redpacket.value.balance) == 0) {
+    message.error("Number of tokens to deposit cannot be 0");
+    return false;
   }
+  if (Number(redpacket.value.split) == 0) {
+    message.error("Number of claimers cannot be 0");
+    return false;
+  }
+  return true;
+};
+
+const confirmRedPacket = function () {
+  if (validateInput()) {
+    useRedPacketStore().beforeCreate(redpacket.value);
+  }
+};
+
+const chooseTotalHandle: OnClickOutsideHandler = (event) => {
+  chooseTotalDrop.value = false;
+}
+const dropdownHandle: OnClickOutsideHandler = (event) => {
+  openDropdown.value = false;
+}
+const chooseGasHandle: OnClickOutsideHandler = (event) => {
+  chooseGasDrop.value = false;
 }
 
 onClickOutside(
@@ -770,43 +547,35 @@ onClickOutside(
   box-sizing: border-box;
   -webkit-tap-highlight-color: transparent;
   margin-bottom: 0.2rem;
-  .token-icon {
-    border-radius: 50%;
-    width: 20px;
-    height: 20px;
-    display: flex;
-    justify-content: center;
-    margin-right: 0.5rem;
-    margin-left: 0.5rem; }
-  .token-name {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    padding-left: 8px;
-    padding-right: 8px;
-    white-space: nowrap;
-    cursor: pointer;
-    font-size: 14px;
-    line-height: 18px;
-    font-weight: 700;
-    color: rgb(7, 16, 27);
-    user-select: none;
-    -webkit-tap-highlight-color: transparent; }
-  .token-dropdown {
-    -webkit-tap-highlight-color: transparent;
-    font-size: 16px;
-    cursor: pointer;
-    margin: 0px 4px 0px -4px;
-    color: rgb(118, 127, 141) !important;
-    display: inline-block;
-    background-repeat: no-repeat;
-    background-position: center center;
-    flex-shrink: 0;
-    aspect-ratio: 1 / 1;
-    height: 24px;
-    width: 24px;
-    line-height: 18px;
-    font-weight: 700;
-    user-select: none; } }
+.token-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-left: 8px;
+  padding-right: 8px;
+  white-space: nowrap;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 18px;
+  font-weight: 700;
+  color: rgb(7, 16, 27);
+  user-select: none;
+  -webkit-tap-highlight-color: transparent; }
+.token-dropdown {
+  -webkit-tap-highlight-color: transparent;
+  font-size: 16px;
+  cursor: pointer;
+  margin: 0px 4px 0px -4px;
+  color: rgb(118, 127, 141) !important;
+  display: inline-block;
+  background-repeat: no-repeat;
+  background-position: center center;
+  flex-shrink: 0;
+  aspect-ratio: 1 / 1;
+  height: 24px;
+  width: 24px;
+  line-height: 18px;
+  font-weight: 700;
+  user-select: none; } }
 .max-amount-button {
   position: relative;
   margin: 0px;
@@ -1151,73 +920,6 @@ input[type=number] {
     margin-left: 0.75rem; }
   @media (max-width: 768px) {
     flex-direction: column; } }
-.account-card {
-  background-color: #fff;
-  box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.1);
-  border-radius: 15px;
-  display: flex;
-  flex-direction: row;
-  padding: 30px;
-  max-width: 400px;
-  min-height: 130px;
-  margin: 20px;
-  margin-right: 1rem;
-  transition: all 0.2s ease; }
-.account-card:hover {
-  box-shadow: 8px 28px 50px rgba(39, 44, 49, 0.07),
-    1px 6px 12px rgba(39, 44, 49, 0.04);
-  transform: translate3D(0, -1px, 0) scale(1.02);
-  transition: all 0.2s ease; }
-.left {
-  display: flex;
-  align-items: center;
-  margin-right: 0.5rem;
-  margin-top: 10px; }
-.wallet-image {
-  width: 40px;
-  height: 40px;
-  object-fit: cover;
-  object-position: 50% 50%; }
-.chain_wrapper {
-  width: 15px;
-  height: 15px;
-  background-color: #f2f2f2;
-  border-radius: 100%;
-  position: relative;
-  top: -13px;
-  left: 25px; }
-.chain_wrapper .chain {
-  width: 15px;
-  height: 15px;
-  position: absolute;
-  right: 0;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  margin: auto auto; }
-.right {
-  display: flex;
-  align-items: center;
-  h2 {
-    font-weight: 500;
-    font-size: 16px;
-    margin: 3px 0; }
-  p {
-    font-size: 12px;
-    color: black;
-    margin-bottom: 0rem; }
-  .balances {
-    display: flex;
-    flex-direction: column; } }
-.balance_item {
-  width: 4rem;
-  overflow: auto;
-  white-space: nowrap;
-  line-height: 30px;
-  p {
-    margin-bottom: 0rem;
-    overflow: auto;
-    font-size: 14px; } }
 .create {
   display: flex;
   margin: 16px;

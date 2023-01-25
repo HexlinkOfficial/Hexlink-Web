@@ -74,10 +74,20 @@ export const GET_REDPACKET = gql`
   }
 `;
 
+export interface RedPacketMetadata {
+  token: string,
+  salt: string,
+  tokenAmount: string,
+  validator: string,
+  creator: string,
+  split: number,
+  mode: string
+}
+
 export interface RedPacket {
   id: string,
   user_id: string,
-  metadata: string,
+  metadata: RedPacketMetadata,
   chain: string,
   creator: string,
 }
@@ -93,5 +103,12 @@ export async function getRedPacket(
     console.log("Failed to get red packet", result.error);
     return undefined;
   }
-  return result.data?.redpacket_by_pk;
+  const rp = result.data?.redpacket_by_pk;
+  return {
+    id: rp.id,
+    user_id: rp.user_id,
+    metadata: JSON.parse(rp.metadata),
+    chain: rp.chain,
+    creator: JSON.parse(rp.creator),
+  };
 }

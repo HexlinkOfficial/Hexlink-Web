@@ -1,6 +1,6 @@
 "use strict";
 import { ethers } from "ethers";
-import { getChainFromProvider } from "@hexlink/common";
+import { getChainFromProvider } from "../../common";
 import RED_PACKET_ABI from "./HAPPY_RED_PACKET_ABI.json";
 import ADDRESSES from "./addresses.json";
 export const redPacketInterface = new ethers.utils.Interface(RED_PACKET_ABI);

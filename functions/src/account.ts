@@ -1,6 +1,6 @@
 import {getAuth} from "firebase-admin/auth";
 import {ethers} from "ethers";
-import {hexlContract} from "@hexlink/common";
+import {hexlContract, nameHash} from "../common";
 
 import * as functions from "firebase-functions";
 
@@ -12,10 +12,6 @@ const ALCHEMY_KEYS : {[key: string]: string} = {
 const secrets = functions.config().doppler || {};
 
 const TWITTER_PROVIDER_ID = "twitter.com";
-
-const nameHash = function(prefix: string, uid: string) {
-  return ethers.utils.keccak256(ethers.utils.toUtf8Bytes(`${prefix}:${uid}`));
-};
 
 export async function genNameHash(uid: string) : Promise<
     {code: number, message?: string, nameHash?: string}

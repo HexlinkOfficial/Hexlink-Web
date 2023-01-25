@@ -14,7 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.redPacketContract = exports.redPacketAddress = exports.redPacketInterface = void 0;
 const ethers_1 = require("ethers");
-const common_1 = require("@hexlink/common");
+const common_1 = require("../../common");
 const HAPPY_RED_PACKET_ABI_json_1 = __importDefault(require("./HAPPY_RED_PACKET_ABI.json"));
 const addresses_json_1 = __importDefault(require("./addresses.json"));
 exports.redPacketInterface = new ethers_1.ethers.utils.Interface(HAPPY_RED_PACKET_ABI_json_1.default);

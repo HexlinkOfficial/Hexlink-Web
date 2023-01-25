@@ -1,4 +1,3 @@
-/* eslint-disable require-jsdoc */
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -13,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.hexlAccount = exports.accountContract = exports.nameHash = exports.accountInterface = void 0;
+exports.encodeValidateAndCall = exports.encodeExecBatch = exports.encodeExec = exports.encodeInit = exports.hexlAccount = exports.accountContract = exports.nameHash = exports.accountInterface = void 0;
 const ethers_1 = require("ethers");
 const ACCOUNT_SIMPLE_ABI_json_1 = __importDefault(require("./abi/ACCOUNT_SIMPLE_ABI.json"));
 const utils_1 = require("./utils");
@@ -41,3 +40,25 @@ function hexlAccount(provider, hexlink, nameHash) {
     });
 }
 exports.hexlAccount = hexlAccount;
+function encodeInit(owner, data) {
+    return exports.accountInterface.encodeFunctionData("init", [owner, data]);
+}
+exports.encodeInit = encodeInit;
+function encodeExec(op) {
+    return exports.accountInterface.encodeFunctionData("execBatch", [op]);
+}
+exports.encodeExec = encodeExec;
+function encodeExecBatch(ops) {
+    return exports.accountInterface.encodeFunctionData("execBatch", [ops]);
+}
+exports.encodeExecBatch = encodeExecBatch;
+function encodeValidateAndCall(params) {
+    const txData = encodeExecBatch(params.ops);
+    if (params.gas) {
+        return exports.accountInterface.encodeFunctionData("validateAndCall", [txData, params.nonce, params.signature]);
+    }
+    else {
+        return exports.accountInterface.encodeFunctionData("validateAndCallWithGasRefund", [txData, params.nonce, params.signature, params.gas]);
+    }
+}
+exports.encodeValidateAndCall = encodeValidateAndCall;

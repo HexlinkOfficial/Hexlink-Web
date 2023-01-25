@@ -1,10 +1,10 @@
-/* eslint-disable require-jsdoc */
 "use strict";
 
-import {ethers, Contract} from "ethers";
+import {ethers, Contract, BigNumber as EthBigNumber } from "ethers";
 import type {Provider} from "@ethersproject/providers";
 import ACCOUNT_SIMPLE_ABI from "./abi/ACCOUNT_SIMPLE_ABI.json";
 import {hash, isContract} from "./utils";
+import {GasObject, UserOpInput} from "./types";
 
 export interface Account {
     address: string,
@@ -41,4 +41,43 @@ export async function hexlAccount(
     acc.owner = await contract.owner();
   }
   return acc;
+}
+
+export function encodeInit(owner: string, data: string) {
+  return accountInterface.encodeFunctionData(
+    "init",
+    [owner, data]
+  );
+}
+
+export function encodeExec(op: UserOpInput) {
+  return accountInterface.encodeFunctionData(
+    "execBatch", [op]
+  );
+}
+
+export function encodeExecBatch(ops: UserOpInput[]) {
+  return accountInterface.encodeFunctionData(
+    "execBatch", [ops]
+  );
+}
+
+export function encodeValidateAndCall(params: {
+  ops: UserOpInput[],
+  signature: string,
+  nonce: EthBigNumber,
+  gas?: GasObject
+}) {
+  const txData = encodeExecBatch(params.ops);
+  if (params.gas) {
+    return accountInterface.encodeFunctionData(
+      "validateAndCall",
+      [txData, params.nonce, params.signature]
+    );
+  } else {
+    return accountInterface.encodeFunctionData(
+      "validateAndCallWithGasRefund",
+      [txData, params.nonce, params.signature, params.gas]
+    );
+  }
 }

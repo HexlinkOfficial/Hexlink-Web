@@ -10,7 +10,8 @@
     "exclude": [],
     "include": [
       "./src/*.ts",
-      "./src/*.json"
+      "./src/*.json",
+      "./src/**/*.json"
     ],
     "references": [
       {

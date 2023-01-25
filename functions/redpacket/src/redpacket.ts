@@ -5,7 +5,7 @@ import type {BigNumber as EthBigNumber} from "ethers";
 import type {Provider} from "@ethersproject/providers";
 import {getChainFromProvider} from "../../common";
 import type {Token, Chain} from "../../common";
-import RED_PACKET_ABI from "./HAPPY_RED_PACKET_ABI.json";
+import RED_PACKET_ABI from "./abi/HAPPY_RED_PACKET_ABI.json";
 import ADDRESSES from "./addresses.json";
 
 export interface RedPacket {
@@ -35,4 +35,8 @@ export async function redPacketContract(
       RED_PACKET_ABI,
       provider
   );
+}
+
+export function redPacketMode(mode: string) : number {
+  return mode == "random" ? 2 : 1;
 }

@@ -21,3 +21,4 @@ __exportStar(require("./tokens"), exports);
 __exportStar(require("./contracts"), exports);
 __exportStar(require("./utils"), exports);
 __exportStar(require("./account"), exports);
+__exportStar(require("./types"), exports);

@@ -30,7 +30,6 @@ import { useChainStore } from "@/stores/chain";
 import { useWalletStore } from "@/stores/wallet";
 import { insertRedPacket } from "@/graphql/redpacket";
 import { getPriceInfo } from "@/web3/network";
-import { updateRedPacketClaimer } from "@/graphql/redpacketClaim";
 import { useAccountStore } from "@/stores/account";
 
 import { getFunctions, httpsCallable } from 'firebase/functions'
@@ -74,107 +73,82 @@ async function buildApproveTx(
     }];
 }
 
-function buildDepositErc20TokenOp(
+async function buildDepositErc20TokenOp(
     token: Token,
     from: string,
     to: string,
     amount: EthBigNumber
-) {
+): Promise<{tx: Transaction[], op: UserOp[]}> {
     const args = [from, to, amount]
     return {
-        name: "depositErc20",
-        function: "transferFrom",
-        args,
-        input: {
-            to: token.address,
-            value: EthBigNumber.from(0),
-            callData: erc20Interface.encodeFunctionData(
-                "transferFrom", args
-            ),
-            callGasLimit: EthBigNumber.from(0) // no limit
-        }
-    };
+        tx: await buildApproveTx(token, from, to, amount),
+        op: [{
+            name: "depositErc20",
+            function: "transferFrom",
+            args,
+            input: {
+                to: token.address,
+                value: EthBigNumber.from(0),
+                callData: erc20Interface.encodeFunctionData(
+                    "transferFrom", args
+                ),
+                callGasLimit: EthBigNumber.from(0) // no limit
+            }
+        }]
+    }
 }
 
 async function buildCreateRedPacketTxForMetamask(input: RedPacket) {
     const walletAccount = useWalletStore().account!;
     const hexlAccount = useAccountStore().account!;
     const chain = useChainStore().chain;
-    let ops : UserOp[] = [];
-    let txes : any[] = [];
-    let value : EthBigNumber = EthBigNumber.from(0);
+
     const priceInfo = await getPriceInfo(chain);
     input.tokenAmount = tokenAmount(input.balance, input.token);
     input.gasTokenAmount = calcGasSponsorship(chain, input, priceInfo);
 
-    if (isNativeCoin(input.token, chain) && isNativeCoin(input.gasToken, chain)) {
-        value = value.add(input.tokenAmount).add(input.gasTokenAmount)
-    } else if (isNativeCoin(input.token, chain)) {
-        value = value.add(input.tokenAmount);
-        txes.concat(await buildApproveTx(
-            input.gasToken,
-            walletAccount.address,
-            hexlAccount.address,
-            input.gasTokenAmount
-        ));
-        ops.push(buildDepositErc20TokenOp(
-            input.gasToken,
-            walletAccount.address,
-            hexlAccount.address,
-            input.gasTokenAmount
-        ));
-    } else if (isNativeCoin(input.gasToken, chain)) {
-        value = value.add(input.gasTokenAmount);
-        txes.concat(await buildApproveTx(
-            input.token,
-            walletAccount.address,
-            hexlAccount.address,
-            input.tokenAmount
-        ));
-        ops.push(buildDepositErc20TokenOp(
-            input.token,
-            walletAccount.address,
-            hexlAccount.address,
-            input.tokenAmount
-        ));
-    } else if (tokenEqual(input.token, input.gasToken)) {
-        txes.concat(await buildApproveTx(
-            input.token,
-            walletAccount.address,
-            hexlAccount.address,
-            input.tokenAmount.add(input.gasTokenAmount)
-        ));
-        ops.push(buildDepositErc20TokenOp(
-            input.token,
-            walletAccount.address,
-            hexlAccount.address,
-            input.tokenAmount.add(input.gasTokenAmount),
-        ));
+    let ops : UserOp[] = [];
+    let txes : any[] = [];
+    let value : EthBigNumber = EthBigNumber.from(0);
+
+    if (tokenEqual(input.token, input.gasToken)) {
+        if (isNativeCoin(input.token, chain)) {
+            value = value.add(input.tokenAmount).add(input.gasTokenAmount)
+        } else {
+            const {tx, op} = await buildDepositErc20TokenOp(
+                input.token,
+                walletAccount.address,
+                hexlAccount.address,
+                input.tokenAmount.add(input.gasTokenAmount)
+            );
+            txes.concat(tx);
+            ops.concat(op);
+        }
     } else {
-        txes.concat(await buildApproveTx(
-            input.token,
-            walletAccount.address,
-            hexlAccount.address,
-            input.tokenAmount
-        ));
-        ops.push(buildDepositErc20TokenOp(
-            input.token,
-            walletAccount.address,
-            hexlAccount.address,
-            input.tokenAmount,
-        ));
-        txes.concat(await buildApproveTx(
-            input.gasToken,
-            walletAccount.address,
-            hexlAccount.address,
-            input.gasTokenAmount
-        ));
-        ops.push(buildDepositErc20TokenOp(
-            input.gasToken,
-            walletAccount.address,
-            hexlAccount.address,
-            input.gasTokenAmount,
-        ));
+        if (isNativeCoin(input.gasToken, chain)) {
+            value = value.add(input.tokenAmount);
+        } else {
+            const {tx, op} = await buildDepositErc20TokenOp(
+                input.token,
+                walletAccount.address,
+                hexlAccount.address,
+                input.tokenAmount
+            );
+            txes.concat(tx);
+            ops.concat(op);
+        }
+        if (isNativeCoin(input.gasToken, chain)) {
+            value = value.add(input.gasTokenAmount);
+        } else {
+            const {tx, op} = await buildDepositErc20TokenOp(
+                input.gasToken,
+                walletAccount.address,
+                hexlAccount.address,
+                input.gasTokenAmount
+            );
+            txes.concat(tx);
+            ops.concat(op);
+        }
     }
     txes.push(buildCreateRedPacketTx(
         chain,
@@ -312,9 +286,11 @@ export async function createNewRedPacket(
 export async function claimRedPacket(redPacket: RedPacketDB) : Promise<void> {
     const claimRedPacket = httpsCallable(functions, 'claimRedPacket');
     const chain = getChain(redPacket.chain);
-    const result = await claimRedPacket({chainId: chain.chainId, redPacketId: redPacket.id});
-    const {id} = result.data as {id: number, tx: string};
-    await updateRedPacketClaimer(id, useAuthStore().userInfo);
+    await claimRedPacket({
+        chainId: chain.chainId,
+        redPacketId: redPacket.id,
+        claimer: useAuthStore().userInfo,
+    });
 }
 
 export async function queryRedPacketInfo(rp: RedPacketDB) : Promise<{

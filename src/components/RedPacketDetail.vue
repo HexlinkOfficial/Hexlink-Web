@@ -20,7 +20,13 @@
         </a>
       </span>
       <small style="margin-top: 0.5rem;">Best Wishes!</small>
-      <div class="claimers-list" v-for="(v, i) in claimers" :key="i">
+      <div v-if="loading" class="claimers-list">
+        <Loading style="margin-top: 25%;"/>
+      </div>
+      <div v-if="!loading && claimers?.length == 0" class="claimers-list">
+        <div style="text-align: center;margin-top: 25%;">You have no luck history yet! Go send some luck~</div>
+      </div>
+      <div v-if="!loading" class="claimers-list" v-for="(v, i) in claimers" :key="i">
         <div class="claimer-card">
           <div class="profile-pic">
             <div class="thumb">
@@ -58,16 +64,22 @@ import { redPacketAddress } from "../../redpacket";
 import { useChainStore } from "@/stores/chain";
 import { BigNumber as EthBigNumber } from "ethers";
 import { getInfuraProvider } from "@/web3/network";
+import Loading from "@/components/Loading.vue";
 
 const redPacket = ref<RedPacketDB | undefined>();
 const claimers = ref<RedPacketClaim[]>();
 const provider = getInfuraProvider(useChainStore().chain);
+const loading = ref<boolean>(true);
 
-onMounted(async () => {
+const loadData = async function() {
+  loading.value = true;
   const id = useRoute().query.details!.toString();
   redPacket.value = await getRedPacket(id);
   claimers.value = await loadClaimsForOnePacket(provider, id);
-});
+  loading.value = false;
+};
+
+onMounted(loadData);
 
 const loadClaimsForOnePacket = async (
   provider: ethers.providers.Provider,

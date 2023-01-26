@@ -220,7 +220,7 @@ export async function updateRedPacketClaimer(
       {id, claimer: JSON.stringify(claimer)}
   ).toPromise();
   if (!await handleUrqlResponse(result)) {
-      await updateRedPacketClaimer(id, claimer);
+    await updateRedPacketClaimer(id, claimer);
   }
 }
 

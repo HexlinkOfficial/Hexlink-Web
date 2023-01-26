@@ -60,7 +60,7 @@ import { ethers } from "ethers";
 import type { RedPacketDB, RedPacketClaim } from "@/types";
 import { getRedPacket } from '@/graphql/redpacket';
 import { updateRedPacketTxStatus, getRedPacketClaims } from '@/graphql/redpacketClaim';
-import { redPacketAddress } from "../../redpacket";
+import { redPacketAddress } from "../../functions/redpacket";
 import { useChainStore } from "@/stores/chain";
 import { BigNumber as EthBigNumber } from "ethers";
 import { getInfuraProvider } from "@/web3/network";

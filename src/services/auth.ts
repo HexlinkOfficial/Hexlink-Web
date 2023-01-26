@@ -12,7 +12,7 @@ import { app } from '@/services/firebase';
 import { useAuthStore } from "@/stores/auth";
 import { useWalletStore } from "@/stores/wallet";
 import { switchNetwork } from "@/web3/network";
-import { nameHash, GOERLI, SUPPORTED_CHAINS} from "../../common";
+import { nameHash, GOERLI, SUPPORTED_CHAINS} from "../../functions/common";
 import { initHexlAccount } from "@/web3/account";
 import { useChainStore } from '@/stores/chain';
 import { initTokenList } from "@/web3/tokens";

@@ -198,7 +198,8 @@ import type {
   RedPacketClaim,
 } from '@/types';
 import { BigNumber as EthBigNumber } from "ethers";
-import { calcTokenAmount, queryRedPacketInfo } from "@/web3/redpacket";
+import { queryRedPacketInfo } from "@/web3/redpacket";
+import { tokenAmount } from "../../functions/common";
 import { getInfuraProvider } from "@/web3/network";
 import { ethers } from "ethers";
 import Loading from "@/components/Loading.vue";
@@ -208,9 +209,9 @@ import { copy } from "@/web3/utils";
 import { ConsoleSqlOutlined } from '@ant-design/icons-vue';
 import { Console } from 'console';
 
-import { normalizeBalance } from "../../common";
-import type { Token } from "../../common";
-import { redPacketAddress } from "../../redpacket";
+import { normalizeBalance } from "../../functions/common";
+import type { Token } from "../../functions/common";
+import { redPacketAddress } from "../../functions/redpacket";
 
 interface CreatedRedPacket {
   redPacket: RedPacketDB,
@@ -398,7 +399,7 @@ const normalizedDbBalance = (redPacket: CreatedRedPacket) => {
 
 const normalizeClaimAmount = (claimed: ClaimedRedPacketInfo) => {
   return normalizeBalance(
-    EthBigNumber.from(claimed.redpacket.claim.claimed).toString(),
+    claimed.redpacket.claim.claimed?.toString() || '0',
     claimed.token.decimals
   ).normalized;
 }
@@ -471,7 +472,7 @@ const aggregateCreated = async function(
 
   // not mined or error
   redPacket.state = {
-    balance: calcTokenAmount(
+    balance: tokenAmount(
         redPacket.metadata.balance,
         token
     ).toString(),

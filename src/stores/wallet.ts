@@ -1,4 +1,4 @@
-import type { Account } from "../../common";
+import type { Account } from "../../functions/common";
 import { defineStore } from 'pinia'
 
 export const useWalletStore = defineStore({

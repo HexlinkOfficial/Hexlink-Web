@@ -53,8 +53,8 @@ import { claimRedPacket } from "@/web3/redpacket";
 import { loadErc20Token } from "@/web3/tokens";
 import { useTokenStore } from "@/stores/token";
 import { switchNetwork } from "@/web3/network";
-import type { Token } from "../../common";
-import { getChain } from "../../common";
+import type { Token } from "../../functions/common";
+import { getChain } from "../../functions/common";
 import type { RedPacketDB } from "@/types";
 
 const redPacket = ref<RedPacketDB | undefined>();

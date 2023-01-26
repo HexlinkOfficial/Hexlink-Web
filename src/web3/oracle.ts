@@ -1,6 +1,6 @@
 import { useWalletStore } from "@/stores/wallet";
-import { genDeployAuthProof as genProof } from "../../common";
-import type { AuthProof } from "../../common";
+import { genDeployAuthProof as genProof } from "../../functions/common";
+import type { AuthProof } from "../../functions/common";
 import { getFunctions, httpsCallable } from 'firebase/functions'
 import { useAuthStore } from "@/stores/auth";
 import { useChainStore } from "@/stores/chain"

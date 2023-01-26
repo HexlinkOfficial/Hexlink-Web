@@ -11,10 +11,10 @@
       "path": "./tsconfig.vitest.json"
     },
     {
-      "path": "./common/"
+      "path": "./functions/common/"
     },
     {
-      "path": "./redpacket/"
+      "path": "./functions/redpacket/"
     }
   ]
 }

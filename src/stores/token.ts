@@ -6,8 +6,8 @@ import {
     wrappedCoinAddress,
     stableCoinAddresses,
     getChain
-} from "../../common";
-import type { Token, TokenPreference } from "../../common";
+} from "../../functions/common";
+import type { Token, TokenPreference } from "../../functions/common";
 
 interface TokenMap {
     [key: string]: Token

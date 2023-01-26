@@ -1,6 +1,6 @@
 import { gql } from '@urql/core'
 import type { IUser } from '@/types';
-import type { Token, Chain } from "../../common";
+import type { Token, Chain } from "../../functions/common";
 import { handleUrqlResponse, setUrqlClientIfNecessary } from './urql'
 
 export const GET_TOKEN_PREFERENCES = gql`

@@ -17,9 +17,8 @@
   "main": "lib/index.js",
   "dependencies": {
     "@google-cloud/kms": "^3.1.0",
-    "@hexlink/common": "^0.1.5",
-    "@hexlink/redpacket": "^0.1.2",
     "@sendgrid/mail": "^7.7.0",
+    "@types/node": "^18.11.18",
     "@types/node-fetch": "^2.6.2",
     "@types/nodemailer": "^6.4.5",
     "@urql/core": "^3.1.1",
@@ -41,12 +40,12 @@
   },
   "devDependencies": {
     "@types/oauth": "^0.9.1",
+    "typescript": "^4.9.4",
     "@typescript-eslint/parser": "^5.12.0",
     "eslint": "^8.9.0",
     "eslint-config-google": "^0.14.0",
     "eslint-plugin-import": "^2.25.4",
-    "firebase-functions-test": "^0.2.0",
-    "typescript": "^4.8.0"
+    "firebase-functions-test": "^0.2.0"
   },
   "private": true
 }

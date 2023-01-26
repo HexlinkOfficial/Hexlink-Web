@@ -97,9 +97,9 @@ import {
     updateTokenPreference
 } from '@/graphql/preference';
 import { loadErc20Token } from "@/web3/tokens";
-import type { Token } from "../../common";
+import type { Token } from "../../functions/common";
 import * as ethers from "ethers";
-import { prettyPrintAddress, isContract } from "../../common";
+import { prettyPrintAddress, isContract } from "../../functions/common";
 import { message } from "ant-design-vue";
 import { useChainStore } from "@/stores/chain";
 

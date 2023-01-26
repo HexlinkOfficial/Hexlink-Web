@@ -1,8 +1,8 @@
 import { defineStore } from 'pinia';
 
-import type { Chain } from "../../common";
-import { SUPPORTED_CHAINS } from "../../common";
-import type { Account } from "../../common";
+import type { Chain } from "../../functions/common";
+import { SUPPORTED_CHAINS } from "../../functions/common";
+import type { Account } from "../../functions/common";
 import { useChainStore } from '@/stores/chain';
 
 export const useAccountStore = defineStore({

@@ -258,7 +258,7 @@ const loadText = () => {
   background-color: #fff;
   height: 400px;
   width: 300px;
-  position: absolute;
+  position: fixed;
   margin: auto;
   left: 50%;
   top: 45%;

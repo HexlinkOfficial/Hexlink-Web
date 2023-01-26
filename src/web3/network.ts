@@ -2,7 +2,7 @@ import { ethers, BigNumber as EthBigNumber } from "ethers";
 import { BigNumber } from "bignumber.js";
 
 import type { Chain } from "../../functions/common";
-import type { PriceInfo } from '@/types';
+import type { PriceInfo } from "../../functions/redpacket";
 import { useWalletStore } from "@/stores/wallet";
 import { useRedPacketStore } from "@/stores/redpacket";
 import { useChainStore } from '@/stores/chain';

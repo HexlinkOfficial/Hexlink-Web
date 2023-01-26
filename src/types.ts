@@ -1,14 +1,7 @@
 import type { BigNumber as EthersBigNumber } from "ethers";
-import type { BigNumber } from "bignumber.js";
 
 import type { Token } from "../../functions/common";
 import type { RedPacket } from "../../functions/redpacket";
-
-export interface PriceInfo {
-    nativeCurrencyInUsd: BigNumber;
-    gasPrice: EthersBigNumber;
-    updatedAt: number;
-}
 
 // if uid exists, use uid as key to
 // generate address otherwise use handle
@@ -29,12 +22,6 @@ export interface IAuth {
     authenticated: boolean,
     user?: IUser,
     returnUrl?: string,
-}
-
-export interface Preference {
-    id: number;
-    tokenAlias?: string;
-    display: boolean;
 }
 
 export interface Claim {

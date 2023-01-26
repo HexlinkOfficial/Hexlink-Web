@@ -74,7 +74,7 @@ async function buildTx(
 export async function buildClaimTx(
     provider: ethers.providers.Provider,
     redPacket: RedPacket,
-    data: {chainId: string, claimer: string, creator?: string},
+    data: {chainId: string, claimerAddress: string, creator?: string},
 ) : Promise<string> {
   const {metadata} = redPacket;
   const creator = metadata.creator || data.creator;
@@ -89,7 +89,7 @@ export async function buildClaimTx(
       split: metadata.split,
       mode: redPacketMode(metadata.mode),
     },
-    claimer: data.claimer,
+    claimer: data.claimerAddress,
     signature: [],
   });
   unsignedTx = await buildTx(provider, unsignedTx, metadata.validator);
@@ -111,7 +111,7 @@ export const claimRedPacket = functions.https.onCall(
       if (!account.address) {
         return account;
       }
-      data.claimer = account.address;
+      data.claimerAddress = account.address;
       const redPacket = await getRedPacket(data.redPacketId);
       if (!redPacket) {
         return {code: 400, message: "Failed to load redpacket"};
@@ -120,7 +120,7 @@ export const claimRedPacket = functions.https.onCall(
         const message = ethers.utils.keccak256(
             ethers.utils.defaultAbiCoder.encode(
                 ["bytes32", "address"],
-                [redPacket.id, data.claimer]
+                [redPacket.id, data.claimerAddress]
             )
         );
         const signature = await sign(redPacket.metadata.validator, message);
@@ -128,6 +128,7 @@ export const claimRedPacket = functions.https.onCall(
           redPacketId: redPacket.id,
           creatorId: redPacket.user_id,
           claimerId: uid,
+          claimer: data.claimer,
         }]);
         return {code: 200, id, signature};
       } else {
@@ -138,6 +139,7 @@ export const claimRedPacket = functions.https.onCall(
           redPacketId: redPacket.id,
           creatorId: redPacket.user_id,
           claimerId: uid,
+          claimer: data.claimer,
           tx: txHash,
         }]);
         await provider.sendTransaction(signedTx);

@@ -30,6 +30,7 @@ export interface RedPacketClaimInput {
   creatorId: string,
   tx?: string,
   claimerId: string,
+  claimer: HexlinkUserInfo
 }
 
 export interface HexlinkUserInfo {
@@ -56,7 +57,8 @@ export async function insertRedPacketClaim(
           redpacket_id: d.redPacketId,
           claimer_id: d.claimerId,
           creator_id: d.creatorId,
-          tx: d.tx || "",
+          claimer: JSON.stringify(d.claimer),
+          tx: d.tx,
         })),
       }
   ).toPromise();

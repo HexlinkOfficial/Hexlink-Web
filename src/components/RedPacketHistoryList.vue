@@ -15,9 +15,19 @@
           <div v-for="(v, i) in value" :key="i" class="history-record">
             <div v-if="v.redPacket" class="record-box">
               <div style="display: block; position: relative;">
-                <div class="icon">
-                  <svg style="color:white;" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 text-subdued">
+                <svg v-if="showStatus(v.redPacket.tx, v.redPacket.status) != 'Sent'" version="1.1" id="loader-1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px"
+                  y="0px" width="40px" height="40px" viewBox="0 0 50 50" style="enable-background:new 0 0 50 50;"
+                  xml:space="preserve">
+                  <path fill="#FD4755"
+                    d="M25.251,6.461c-10.318,0-18.683,8.365-18.683,18.683h4.068c0-8.071,6.543-14.615,14.615-14.615V6.461z">
+                    <animateTransform attributeType="xml" attributeName="transform" type="rotate" from="0 25 25" to="360 25 25"
+                      dur="0.6s" repeatCount="indefinite"></animateTransform>
+                  </path>
+                </svg>
+                <div v-if="showStatus(v.redPacket.tx, v.redPacket.status) == 'Sent'" class="icon">
+                  <svg style="color:white;" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="w-4 h-4 text-subdued">
                     <line x1="7" y1="17" x2="17" y2="7"></line>
                     <polyline points="7 7 17 7 17 17"></polyline>
                   </svg>
@@ -29,7 +39,7 @@
                     <div style="display: flex;">
                       <div class="sent-info">
                         <div class="info-1">
-                          Sent
+                          {{ showStatus(v.redPacket.tx, v.redPacket.status) }}
                         </div>
                       </div>
                     </div>
@@ -46,7 +56,9 @@
                           Amount: {{ normalizedDbBalance(v) }}
                         </span>
                       </template>
-                      <div style="overflow: auto; white-space: nowrap; margin-left: 0.25rem; width: 45px;display: flex;justify-content: flex-end;">{{ normalizedDbBalance(v).substring(0,5) }}
+                      <div
+                        style="overflow: auto; white-space: nowrap; margin-left: 0.25rem; width: 45px;display: flex;justify-content: flex-end;">
+                        - {{ normalizedDbBalance(v).toString().substring(0,5) }}
                       </div>
                     </a-tooltip>
                     <div class="token-icon" style="margin-right: 0.25rem; margin-left: 0.25rem;">
@@ -65,7 +77,7 @@
                     <p class="claimed-number">
                       Claimed:&nbsp;
                       <strong>{{
-                        v.redPacket.metadata.split - v.redPacket.state.split
+                      v.redPacket.metadata.split - v.redPacket.state.split
                       }}/{{ v.redPacket.metadata.split }}</strong>
                       &nbsp;Share
                     </p>
@@ -81,12 +93,16 @@
                   </div>
                 </div>
                 <div class="share">
-                  <i class="fa fa-paper-plane" aria-hidden="true" @click="copyShareLink(v.redPacket)"></i>
+                  <i v-if="showStatus(v.redPacket.tx, v.redPacket.status) == 'Sent'" class="fa fa-paper-plane share-button" aria-hidden="true" @click="copyShareLink(v.redPacket)"></i>
+                  <span v-if="showStatus(v.redPacket.tx, v.redPacket.status) != 'Sent'" class="pending-text">{{ showDetailStatus(v.redPacket.tx, v.redPacket.status) }}</span>
                 </div>
-                <div class="cta">
-                  <button class="connect-wallet-button">
+                <div v-if="showStatus(v.redPacket.tx, v.redPacket.status) == 'Sent'" class="cta">
+                  <!-- <button class="connect-wallet-button" :href="href">
                     Withdraw
-                  </button>
+                  </button> -->
+                  <router-link :to="{ query: { details: v.redPacket ? v.redPacket.id : v.redpacket.id } }">
+                    <i class="fa fa-get-pocket" aria-hidden="true"></i>
+                  </router-link>
                 </div>
               </div>
             </div>
@@ -106,24 +122,12 @@
                       <div class="sent-info">
                         <div class="info-1">
                           Claimed
-                          <!-- <a-tooltip placement="top">
-                            <template #title>
-                              <span>
-                                Amount: {{ normalizeClaimAmount(v) }}
-                              </span>
-                            </template>
-                            <div style="overflow: auto; white-space: nowrap; margin-left: 0.25rem; max-width: 45px;">
-                              {{ normalizeClaimAmount(v) }}
-                            </div>
-                          </a-tooltip> -->
-                          <!-- <div class="token-icon" style="margin-right: 0.25rem; margin-left: 0.25rem;">
-                            <img :src="v.token.logoURI">
-                          </div> -->
                         </div>
                       </div>
                     </div>
                     <div style="color: #6a6d7c; white-space: nowrap; margin-left: 0; font-size: 12px;">
-                      <div style="display: flex;">{{ new Date(v.redpacket.redPacket.createdAt).toLocaleString().split(',')[1] }}</div>
+                      <div style="display: flex;">{{ new Date(v.redpacket.redPacket.createdAt).toLocaleString().split(',')[1] }}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -135,7 +139,9 @@
                           Amount: {{ normalizeClaimAmount(v) }}
                         </span>
                       </template>
-                      <div style="overflow: auto; white-space: nowrap; margin-left: 0.25rem; width: 45px;display: flex;justify-content: flex-end;">{{ normalizeClaimAmount(v).substring(0,5)}}</div>
+                      <div
+                        style="overflow: auto; white-space: nowrap; margin-left: 0.25rem; width: 45px;display: flex;justify-content: flex-end;">
+                        + {{ normalizeClaimAmount(v).toString().substring(0,5)}}</div>
                     </a-tooltip>
                     <div class="token-icon" style="margin-right: 0.25rem; margin-left: 0.25rem;">
                       <img :src="v.token.logoURI">
@@ -151,7 +157,12 @@
                       </svg>
                     </div>
                     <div style="display: flex; align-items: center;">
-                      <span class="thumb"><img :src="v.redpacket.redPacket.creator.logoURI ? v.redpacket.redPacket.creator.logoURI : 'https://i.postimg.cc/15QJZwkN/profile.png'" :size="64" referrerpolicy="no-referrer" /></span>
+                      <span class="thumb">
+                        <img
+                          :src="v.redpacket.redPacket.creator.logoURI ? v.redpacket.redPacket.creator.logoURI : 'https://i.postimg.cc/15QJZwkN/profile.png'"
+                          :size="64" referrerpolicy="no-referrer" 
+                        />
+                      </span>
                       <div style="display: flex; flex-direction: column; margin-left: 0.5rem;">
                         <span class="from-text">From</span>
                         <span style="font-size: 12px; color: rgb(100,116,139)">@{{ v.redpacket.redPacket.creator.handle }}</span>
@@ -228,7 +239,7 @@ const loadClaimsForOnePacket = async (
   return await Promise.all(
     claims.map(c => validateClaimStatus(provider, c))
   );
-}
+};
 
 const redPacketByDate = ref<any>([]);
 const claimedByDate = ref<any>([]);
@@ -246,6 +257,16 @@ const loadData = async function() {
   loading.value = false;
   extractDate();
 };
+
+const pullRedpacketData = async function() {
+  if (useAccountStore().account) {
+    const provider = getInfuraProvider(useChainStore().chain);
+    const rps: RedPacketDB[] = await getCreatedRedPackets();
+    redPackets.value = await Promise.all(rps.map(r => aggregateCreated(provider, r)));
+    await loadClaimInfo(provider);
+  }
+  extractDate();
+}
 
 const extractDate = () => {
   const sentGroup: any = {};
@@ -319,6 +340,31 @@ const loading = ref<boolean>(true);
   
 onMounted(loadData);
 watch(() => useChainStore().current, loadData);
+setInterval(() => {
+  pullRedpacketData()
+}, 20 * 1000);
+
+const showStatus = (tx: string, status: string) => {
+  if(tx == null) {
+    return 'Pending';
+  };
+  if(tx != null && status == null) {
+    return 'Pending';
+  } else {
+    return 'Sent';
+  }
+}
+
+const showDetailStatus = (tx: string, status: string) => {
+  if (tx == null) {
+    return 'Pending Transaction';
+  };
+  if (tx != null && status == null) {
+    return 'Transaction sent, wait mining';
+  } else {
+    return 'Sent';
+  }
+}
 
 const showDetailsEnabled = ref<boolean>(false);
 
@@ -502,6 +548,23 @@ const aggregatedClaimed = async function(
 </script>
 
 <style lang="less" scoped>
+.loader {
+  margin: 0 0 2em;
+  height: 100px;
+  width: 20%;
+  text-align: center;
+  padding: 1em;
+  margin: 0 auto 1em;
+  display: inline-block;
+  vertical-align: top; }
+.share-button:hover {
+  color: #076AE0; }
+.pending-text {
+  font-size: 12px;
+  font-weight: 800;
+  margin-left: 5.5rem;
+  text-align: center;
+  color: #076AE0; }
 .claim-mode {
   display: flex;
   margin: 0px;
@@ -512,8 +575,8 @@ const aggregatedClaimed = async function(
 i {
   color: rgba(0,0,0,0.3);
   font-size: 18px; }
-i:hover {
-  color: #076AE0; }
+// i:hover {
+//   color: #076AE0; }
 .arrow {
   font-size: .875rem;
   line-height: 1.25rem;
@@ -564,6 +627,7 @@ i:hover {
   white-space: nowrap;
   font-weight: 600;
   font-size: 12px;
+  color: #000;
   @media (max-width: 990px) {
     flex-direction: column; } }
 .icon {
@@ -607,6 +671,7 @@ i:hover {
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  margin-left: 2rem;
   grid-column: span 1/span 1; }
 .share img {
   max-width: 20px; }
@@ -622,6 +687,7 @@ i:hover {
   font-weight: 400;
   line-height: 1.5;
   font-size: 12px;
+  width: 100px;
   color: rgb(91, 112, 131); }
 .claimed-number strong {
   font-weight: bold; }
@@ -687,6 +753,10 @@ i:hover {
   margin-left: -0.5rem;
   margin-right: -0.5rem;
   cursor: pointer; }
+.history-record:hover {
+  box-shadow: rgb(39 44 49 / 7%) 8px 28px 50px, rgb(39 44 49 / 4%) 1px 6px 12px;
+  transform: translate3d(0px, -1px, 0px) scale(1.01);
+  transition: all 0.2s ease 0s; }
 .history-date {
   top: 0;
   padding-top: 1rem;
@@ -700,7 +770,7 @@ tr:hover td {background:rgb(230, 227, 227)}
   border-radius: 0.75rem;
   margin-top: 1rem;
   padding: 0.5rem;
-  overflow: auto; }
+  overflow: visible; }
   .token-listDetail .token-table {
     display: flex;
     margin-left: -1rem;

@@ -38,14 +38,14 @@
           <div class="profile-info">
             <div class="profile-username">
               <div>
-                {{ v.claimer.handle }}
+                {{ v.claimer.displayName }}
                 <a class="twitter-link" :href="'https://twitter.com/' + redPacket?.creator.handle">
                   <i className="fa fa-twitter"></i>
                 </a>
               </div>
               <div class="claimed-amount">233.333ETH</div>
             </div>
-            <div class="claim-date">01-22 20:23</div>
+            <div class="claim-date">@{{ v.claimer.handle }}</div>
           </div>
         </div>
       </div>
@@ -65,6 +65,7 @@ import { useChainStore } from "@/stores/chain";
 import { BigNumber as EthBigNumber } from "ethers";
 import { getInfuraProvider } from "@/web3/network";
 import Loading from "@/components/Loading.vue";
+import { normalizeBalance } from "../../functions/common";
 
 const redPacket = ref<RedPacketDB | undefined>();
 const claimers = ref<RedPacketClaim[]>();

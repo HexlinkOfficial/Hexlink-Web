@@ -6,7 +6,7 @@ import * as ethers from "ethers";
 import * as crc32c from "fast-crc32c";
 import * as BN from "bn.js";
 import {Signature} from "ethers";
-import {KMS_KEY_TYPE, KMS_CONFIG, KMS_CONFIG_TYPE} from "./config";
+import {KMS_KEY_TYPE, kmsConfig, KMS_CONFIG_TYPE} from "./config";
 
 const client = new kms.KeyManagementServiceClient();
 
@@ -33,7 +33,7 @@ const getVersionName = async function(keyType: string) {
         ", while getting version name.");
   }
 
-  const config: KMS_CONFIG_TYPE = KMS_CONFIG.get(keyType)!;
+  const config: KMS_CONFIG_TYPE = kmsConfig().get(keyType)!;
   return client.cryptoKeyVersionPath(
       config.projectId,
       config.locationId,
@@ -67,7 +67,7 @@ export const signWithKmsKey = async function(
 ) : Promise<Signature | string> {
   const digestBuffer = Buffer.from(ethers.utils.arrayify(message));
   const signature = await getKmsSignature(digestBuffer, keyType);
-  const address = KMS_CONFIG.get(keyType)!.publicAddress;
+  const address = kmsConfig().get(keyType)!.publicAddress;
   const [r, s] = await calculateRS(signature as Buffer);
   const v = calculateRecoveryParam(
       digestBuffer,

@@ -3,7 +3,7 @@ import {gql, createClient} from "@urql/core";
 import * as functions from "firebase-functions";
 
 const secrets = functions.config().doppler || {};
-const client = createClient({
+const client = () => createClient({
   url: secrets.VITE_HASURA_URL,
   fetchOptions: () => {
     return {
@@ -50,7 +50,7 @@ export interface RedPacketClaim extends RedPacketClaimInput {
 export async function insertRedPacketClaim(
     data: RedPacketClaimInput[],
 ) : Promise<{id: string}[]> {
-  const result = await client.mutation(
+  const result = await client().mutation(
       INSERT_REDPACKET_CLAIM,
       {
         objects: data.map((d) => ({
@@ -98,7 +98,7 @@ export interface RedPacket {
 export async function getRedPacket(
     redPacketId: string
 ) : Promise<RedPacket | undefined> {
-  const result = await client.query(
+  const result = await client().query(
       GET_REDPACKET,
       {id: redPacketId}
   ).toPromise();

@@ -30,5 +30,6 @@ module.exports = {
     "quotes": ["error", "double"],
     "import/no-unresolved": 0,
     "require-jsdoc": 0,
+    "@typescript-eslint/no-non-null-assertion": "off",
   },
 };

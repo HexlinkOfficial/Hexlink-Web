@@ -1,7 +1,7 @@
 import * as functions from "firebase-functions";
 import * as ethers from "ethers";
 import {signWithKmsKey} from "./kms";
-import {KMS_CONFIG, KMS_KEY_TYPE} from "./config";
+import {kmsConfig, KMS_KEY_TYPE} from "./config";
 import {env} from "process";
 import {genNameHash, toEthSignedMessageHash} from "./account";
 import {Firebase} from "./firebase";
@@ -64,7 +64,7 @@ export const genTwitterOAuthProof = functions.https.onCall(
             KMS_KEY_TYPE[KMS_KEY_TYPE.operator],
             toEthSignedMessageHash(message)
         ) as string;
-        const validatorAddr = KMS_CONFIG.get(
+        const validatorAddr = kmsConfig().get(
             KMS_KEY_TYPE[KMS_KEY_TYPE.operator]
         )?.publicAddress;
         encodedSig = ethers.utils.defaultAbiCoder.encode(

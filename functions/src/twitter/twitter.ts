@@ -11,16 +11,16 @@ import {
   GET_FRIENDSHIPS_URL,
   GET_TWEET_V2_URL,
   GET_USER_V2_URL,
-  TWITTER_CONFIG_1,
+  twitterConfig1,
   TWITTER_URL} from "./config";
 import {parseHtmlString} from "./utils";
 import {Firebase} from "../firebase";
 
-const oauth = new OAuth.OAuth(
+const oauth = () => new OAuth.OAuth(
     "https://api.twitter.com/oauth/request_token",
     "https://api.twitter.com/oauth/access_token",
-    TWITTER_CONFIG_1.twitterApiKey,
-    TWITTER_CONFIG_1.twitterApiSecret,
+    twitterConfig1().twitterApiKey,
+    twitterConfig1().twitterApiSecret,
     "1.0A",
     null,
     "HMAC-SHA1"
@@ -157,10 +157,10 @@ const twitterApiCall =
   async function(requestUrl: string) : Promise<TwitterFriendship |
       TwitterTweet | TwitterUser | TwitterFollowers> {
     return new Promise((resolve, reject) => {
-      oauth.get(
+      oauth().get(
           requestUrl,
-          TWITTER_CONFIG_1.twitterAccessKey,
-          TWITTER_CONFIG_1.twitterAccessSecret,
+          twitterConfig1().twitterAccessKey,
+          twitterConfig1().twitterAccessSecret,
           (err: { statusCode: number; data?: any },
               body?: string | Buffer) => {
             if (err) {

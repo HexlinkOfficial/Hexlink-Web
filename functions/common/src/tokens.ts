@@ -6,6 +6,10 @@ import MUMBAI_TOKENS from "./tokens/MUMBAI_TOKENS.json";
 import POLYGON_TOEKNS from "./tokens/POLYGON_TOKENS.json";
 import ADDRESSES from "./addresses.json";
 
+import {BigNumber as EthBigNumber} from "ethers";
+import {BigNumber} from "bignumber.js";
+import {toEthBigNumber} from "./utils";
+
 export interface Token {
     chain?: string,
     chainId: string | number,
@@ -91,4 +95,15 @@ export function isWrappedCoin(token: Token, chain: Chain) {
 
 export function isStableCoin(token: Token, chain: Chain) {
   return stableCoinAddresses(chain).includes(token.address);
+}
+
+export function tokenBase(token: Token) : BigNumber {
+  return new BigNumber(10).pow(token.decimals);
+}
+
+export function tokenAmount(
+  balance: string | number,
+  token: Token
+) : EthBigNumber {
+  return toEthBigNumber(tokenBase(token).times(balance));
 }

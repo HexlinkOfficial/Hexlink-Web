@@ -1,5 +1,5 @@
 "use strict";
-import { ethers } from "ethers";
+import { ethers, BigNumber as EthBigNumber } from "ethers";
 import { BigNumber } from "bignumber.js";
 export function hash(value) {
     return ethers.utils.keccak256(ethers.utils.toUtf8Bytes(value));
@@ -69,4 +69,10 @@ export async function isContract(provider, address) {
     }
     catch (error) { }
     return false;
+}
+export function toEthBigNumber(value) {
+    if (value instanceof BigNumber) {
+        return EthBigNumber.from(value.toString(10));
+    }
+    return EthBigNumber.from(value);
 }

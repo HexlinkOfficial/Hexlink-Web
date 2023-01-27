@@ -1,29 +1,42 @@
 import { BigNumber as EthBigNumber, ethers } from "ethers";
-import { isNativeCoin, erc20Interface, encodeExecBatch } from "../../common";
+import { isNativeCoin, isWrappedCoin, isStableCoin, erc20Interface, encodeExecBatch, toEthBigNumber, tokenAmount, tokenBase } from "../../common";
 import { redPacketInterface, redPacketAddress, redPacketMode } from "./redpacket";
-export function buildCreateRedPacketTx(chain, refunder, hexlAccount, from, input) {
-    let ops = [];
-    let txes = [];
+export function calcGasSponsorship(chain, redpacket, priceInfo) {
+    const sponsorshipGasAmount = EthBigNumber.from(200000).mul(redpacket.split);
+    const gasToken = redpacket.gasToken;
+    if (isNativeCoin(gasToken, chain) || isWrappedCoin(gasToken, chain)) {
+        return sponsorshipGasAmount.mul(priceInfo.gasPrice);
+    }
+    else if (isStableCoin(gasToken, chain)) {
+        // calculate usd value of tokens
+        const normalizedUsd = tokenBase(gasToken).times(priceInfo.nativeCurrencyInUsd);
+        const nativeCoinBase = EthBigNumber.from(10).pow(chain.nativeCurrency.decimals);
+        return toEthBigNumber(normalizedUsd).mul(sponsorshipGasAmount).mul(priceInfo.gasPrice).div(nativeCoinBase);
+    }
+    throw new Error("Unsupported gas token");
+}
+function buildGasSponsorshipOp(chain, input, refunder, hexlAccount, priceInfo) {
+    const gasTokenAmount = calcGasSponsorship(chain, input, priceInfo);
     if (isNativeCoin(input.gasToken, chain)) {
-        ops.push({
+        return {
             name: "refundGasToken",
             function: "",
             args: [],
             input: {
                 to: refunder,
-                value: input.gasTokenAmount,
+                value: gasTokenAmount,
                 callData: [],
                 callGasLimit: EthBigNumber.from(0) // no limit
             }
-        });
+        };
     }
     else {
         const args = [
             hexlAccount,
             refunder,
-            input.gasTokenAmount
+            gasTokenAmount
         ];
-        ops.push({
+        return {
             name: "refundGasToken",
             function: "transferFrom",
             args,
@@ -33,28 +46,14 @@ export function buildCreateRedPacketTx(chain, refunder, hexlAccount, from, input
                 callData: erc20Interface.encodeFunctionData("transferFrom", args),
                 callGasLimit: EthBigNumber.from(0) // no limit
             }
-        });
+        };
     }
-    ops = ops.concat(redPacketOps(chain, input));
-    const data = encodeExecBatch(ops.map(op => op.input));
-    txes.push({
-        name: "createRedPacket",
-        function: "execBatch",
-        args: ops,
-        input: {
-            to: hexlAccount,
-            from,
-            data,
-            value: ethers.utils.hexValue(0)
-        }
-    });
-    return txes;
 }
-export function redPacketOps(chain, input) {
+export function buildRedPacketOps(chain, input) {
     const packet = {
         token: input.token.address,
         salt: input.salt,
-        balance: input.tokenAmount,
+        balance: tokenAmount(input.balance, input.token),
         validator: input.validator,
         split: input.split,
         mode: redPacketMode(input.mode),
@@ -97,4 +96,20 @@ export function redPacketOps(chain, input) {
                 }
             }];
     }
+}
+export function buildCreateRedPacketTx(chain, refunder, hexlAccount, ops, input, from, priceInfo) {
+    ops.push(buildGasSponsorshipOp(chain, input, refunder, hexlAccount, priceInfo));
+    ops = ops.concat(buildRedPacketOps(chain, input));
+    const data = encodeExecBatch(ops.map(op => op.input));
+    return {
+        name: "createRedPacket",
+        function: "execBatch",
+        args: ops,
+        input: {
+            to: hexlAccount,
+            from,
+            data,
+            value: ethers.utils.hexValue(0)
+        }
+    };
 }

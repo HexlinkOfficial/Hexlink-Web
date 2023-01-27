@@ -3,6 +3,8 @@ import GOERLI_TOKENS from "./tokens/GOERLI_TOKENS.json";
 import MUMBAI_TOKENS from "./tokens/MUMBAI_TOKENS.json";
 import POLYGON_TOEKNS from "./tokens/POLYGON_TOKENS.json";
 import ADDRESSES from "./addresses.json";
+import { BigNumber } from "bignumber.js";
+import { toEthBigNumber } from "./utils";
 export function nativeCoinAddress(chain) {
     return ADDRESSES[chain.name].nativeCoin.toLowerCase();
 }
@@ -55,4 +57,10 @@ export function isWrappedCoin(token, chain) {
 }
 export function isStableCoin(token, chain) {
     return stableCoinAddresses(chain).includes(token.address);
+}
+export function tokenBase(token) {
+    return new BigNumber(10).pow(token.decimals);
+}
+export function tokenAmount(balance, token) {
+    return toEthBigNumber(tokenBase(token).times(balance));
 }

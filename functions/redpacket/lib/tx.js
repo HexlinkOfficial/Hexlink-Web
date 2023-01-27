@@ -1,32 +1,46 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.redPacketOps = exports.buildCreateRedPacketTx = void 0;
+exports.buildCreateRedPacketTx = exports.buildRedPacketOps = exports.calcGasSponsorship = void 0;
 const ethers_1 = require("ethers");
 const common_1 = require("../../common");
 const redpacket_1 = require("./redpacket");
-function buildCreateRedPacketTx(chain, refunder, hexlAccount, from, input) {
-    let ops = [];
-    let txes = [];
+function calcGasSponsorship(chain, redpacket, priceInfo) {
+    const sponsorshipGasAmount = ethers_1.BigNumber.from(200000).mul(redpacket.split);
+    const gasToken = redpacket.gasToken;
+    if ((0, common_1.isNativeCoin)(gasToken, chain) || (0, common_1.isWrappedCoin)(gasToken, chain)) {
+        return sponsorshipGasAmount.mul(priceInfo.gasPrice);
+    }
+    else if ((0, common_1.isStableCoin)(gasToken, chain)) {
+        // calculate usd value of tokens
+        const normalizedUsd = (0, common_1.tokenBase)(gasToken).times(priceInfo.nativeCurrencyInUsd);
+        const nativeCoinBase = ethers_1.BigNumber.from(10).pow(chain.nativeCurrency.decimals);
+        return (0, common_1.toEthBigNumber)(normalizedUsd).mul(sponsorshipGasAmount).mul(priceInfo.gasPrice).div(nativeCoinBase);
+    }
+    throw new Error("Unsupported gas token");
+}
+exports.calcGasSponsorship = calcGasSponsorship;
+function buildGasSponsorshipOp(chain, input, refunder, hexlAccount, priceInfo) {
+    const gasTokenAmount = calcGasSponsorship(chain, input, priceInfo);
     if ((0, common_1.isNativeCoin)(input.gasToken, chain)) {
-        ops.push({
+        return {
             name: "refundGasToken",
             function: "",
             args: [],
             input: {
                 to: refunder,
-                value: input.gasTokenAmount,
+                value: gasTokenAmount,
                 callData: [],
                 callGasLimit: ethers_1.BigNumber.from(0) // no limit
             }
-        });
+        };
     }
     else {
         const args = [
             hexlAccount,
             refunder,
-            input.gasTokenAmount
+            gasTokenAmount
         ];
-        ops.push({
+        return {
             name: "refundGasToken",
             function: "transferFrom",
             args,
@@ -36,29 +50,14 @@ function buildCreateRedPacketTx(chain, refunder, hexlAccount, from, input) {
                 callData: common_1.erc20Interface.encodeFunctionData("transferFrom", args),
                 callGasLimit: ethers_1.BigNumber.from(0) // no limit
             }
-        });
+        };
     }
-    ops = ops.concat(redPacketOps(chain, input));
-    const data = (0, common_1.encodeExecBatch)(ops.map(op => op.input));
-    txes.push({
-        name: "createRedPacket",
-        function: "execBatch",
-        args: ops,
-        input: {
-            to: hexlAccount,
-            from,
-            data,
-            value: ethers_1.ethers.utils.hexValue(0)
-        }
-    });
-    return txes;
 }
-exports.buildCreateRedPacketTx = buildCreateRedPacketTx;
-function redPacketOps(chain, input) {
+function buildRedPacketOps(chain, input) {
     const packet = {
         token: input.token.address,
         salt: input.salt,
-        balance: input.tokenAmount,
+        balance: (0, common_1.tokenAmount)(input.balance, input.token),
         validator: input.validator,
         split: input.split,
         mode: (0, redpacket_1.redPacketMode)(input.mode),
@@ -102,4 +101,21 @@ function redPacketOps(chain, input) {
             }];
     }
 }
-exports.redPacketOps = redPacketOps;
+exports.buildRedPacketOps = buildRedPacketOps;
+function buildCreateRedPacketTx(chain, refunder, hexlAccount, ops, input, from, priceInfo) {
+    ops.push(buildGasSponsorshipOp(chain, input, refunder, hexlAccount, priceInfo));
+    ops = ops.concat(buildRedPacketOps(chain, input));
+    const data = (0, common_1.encodeExecBatch)(ops.map(op => op.input));
+    return {
+        name: "createRedPacket",
+        function: "execBatch",
+        args: ops,
+        input: {
+            to: hexlAccount,
+            from,
+            data,
+            value: ethers_1.ethers.utils.hexValue(0)
+        }
+    };
+}
+exports.buildCreateRedPacketTx = buildCreateRedPacketTx;

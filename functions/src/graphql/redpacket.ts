@@ -30,12 +30,14 @@ export interface RedPacketClaimInput {
   creatorId: string,
   tx?: string,
   claimerId: string,
+  claimer: HexlinkUserInfo
 }
 
 export interface HexlinkUserInfo {
   provider: string;
   handle: string;
   displayName?: string;
+  logoURI?: string;
 }
 
 export interface RedPacketClaim extends RedPacketClaimInput {
@@ -55,7 +57,8 @@ export async function insertRedPacketClaim(
           redpacket_id: d.redPacketId,
           claimer_id: d.claimerId,
           creator_id: d.creatorId,
-          tx: d.tx || "",
+          claimer: JSON.stringify(d.claimer),
+          tx: d.tx,
         })),
       }
   ).toPromise();

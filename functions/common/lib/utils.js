@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.isContract = exports.normalizeBalance = exports.toHex = exports.truncateAddress = exports.prettyPrintTimestamp = exports.prettyPrintTxHash = exports.prettyPrintAddress = exports.hash = void 0;
+exports.toEthBigNumber = exports.isContract = exports.normalizeBalance = exports.toHex = exports.truncateAddress = exports.prettyPrintTimestamp = exports.prettyPrintTxHash = exports.prettyPrintAddress = exports.hash = void 0;
 const ethers_1 = require("ethers");
 const bignumber_js_1 = require("bignumber.js");
 function hash(value) {
@@ -91,3 +91,10 @@ function isContract(provider, address) {
     });
 }
 exports.isContract = isContract;
+function toEthBigNumber(value) {
+    if (value instanceof bignumber_js_1.BigNumber) {
+        return ethers_1.BigNumber.from(value.toString(10));
+    }
+    return ethers_1.BigNumber.from(value);
+}
+exports.toEthBigNumber = toEthBigNumber;

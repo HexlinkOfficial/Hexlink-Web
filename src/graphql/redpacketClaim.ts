@@ -79,23 +79,7 @@ export const GET_REDPACKET_CLAIMS_BY_CLAIMER = gql`
             }
         }
     }
-`
-
-export const UPDATE_REDPACKET_CLAIM = gql`
-    mutation (
-        $id: Int!
-        $claimer: jsonb!
-    ) {
-        update_redpacket_claim_by_pk (
-            pk_columns: {id: $id},
-            _set: {
-              claimer: $claimer,
-            }
-        ) {
-            id
-        }
-    }
-`
+  `
 
 export const UPDATE_REDPACKET_CLAIM_TX = gql`
     mutation (
@@ -205,22 +189,6 @@ export async function getClaimedRedPackets() : Promise<ClaimedRedPacket[]> {
     });
   } else {
     return await getClaimedRedPackets();
-  }
-}
-
-export async function updateRedPacketClaimer(
-  id: number,
-  claimer: HexlinkUserInfo
-) : Promise<void> {
-  const client = setUrqlClientIfNecessary(
-    useAuthStore().user!.idToken!
-  );
-  const result = await client.mutation(
-      UPDATE_REDPACKET_CLAIM,
-      {id, claimer: JSON.stringify(claimer)}
-  ).toPromise();
-  if (!await handleUrqlResponse(result)) {
-      await updateRedPacketClaimer(id, claimer);
   }
 }
 

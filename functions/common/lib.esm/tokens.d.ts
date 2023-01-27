@@ -1,4 +1,6 @@
 import type { Chain } from "./chain";
+import { BigNumber as EthBigNumber } from "ethers";
+import { BigNumber } from "bignumber.js";
 export interface Token {
     chain?: string;
     chainId: string | number;
@@ -33,3 +35,5 @@ export declare function getPopularTokens(chain: Chain): Promise<TokenDataList>;
 export declare function isNativeCoin(token: Token, chain: Chain): boolean;
 export declare function isWrappedCoin(token: Token, chain: Chain): boolean;
 export declare function isStableCoin(token: Token, chain: Chain): boolean;
+export declare function tokenBase(token: Token): BigNumber;
+export declare function tokenAmount(balance: string | number, token: Token): EthBigNumber;

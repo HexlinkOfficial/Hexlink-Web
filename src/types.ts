@@ -1,14 +1,7 @@
 import type { BigNumber as EthersBigNumber } from "ethers";
-import type { BigNumber } from "bignumber.js";
 
 import type { Token } from "../../functions/common";
 import type { RedPacket } from "../../functions/redpacket";
-
-export interface PriceInfo {
-    nativeCurrencyInUsd: BigNumber;
-    gasPrice: EthersBigNumber;
-    updatedAt: number;
-}
 
 // if uid exists, use uid as key to
 // generate address otherwise use handle
@@ -29,12 +22,6 @@ export interface IAuth {
     authenticated: boolean,
     user?: IUser,
     returnUrl?: string,
-}
-
-export interface Preference {
-    id: number;
-    tokenAlias?: string;
-    display: boolean;
 }
 
 export interface Claim {
@@ -68,43 +55,10 @@ export interface CreatedRedPacket {
     claimHistory: Claim[]
 }
 
-export interface AuthProof {
-    name: string,
-    requestId: string,
-    authType: string, // non-hashed
-    identityType: string, // non-hashed
-    issuedAt: number, // timestamp
-    signature: string // encoded with validator address
-}
-
 export interface EstimatedTxCost {
     sponsorship: EthersBigNumber;
     currentTx: EthersBigNumber;
     total: EthersBigNumber;
-}
-
-export interface Transaction {
-    name: string,
-    function: string,
-    args: any[],
-    tx: {
-        to: string
-        from: string,
-        value?: string,
-        data: string,
-    }
-}
-
-export interface UserOp {
-    name: string,
-    function: string,
-    args: any[],
-    op: {
-        to: string;
-        value: EthersBigNumber;
-        callData: string | [];
-        callGasLimit: EthersBigNumber;
-    }
 }
 
 export interface HexlinkUserInfo {

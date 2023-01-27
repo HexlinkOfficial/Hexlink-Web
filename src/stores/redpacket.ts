@@ -6,34 +6,40 @@ type Status = "" | "confirming" | "processing" | "error" | "success";
 export type AccountType = "hexlink" | "wallet";
 
 interface CreatingRedPacket {
-  status: Status;
+  creatingStatus: Status;
   redpacket: RedPacket | undefined;
   account: AccountType;
+  claimingStatus: {[key: string]: Status};
 }
 
 export const useRedPacketStore = defineStore({
   id: 'redpacket',
   state: (): CreatingRedPacket => ({
-    status: "",
+    creatingStatus: "",
     redpacket: undefined,
     account: "hexlink",
+    claimingStatus: {},
   }),
   persist: true,
   actions: {
     beforeCreate(redpacket: RedPacket) {
-      this.status = "confirming";
+      this.creatingStatus = "confirming";
       this.redpacket = redpacket;
     },
-    setStatus(status: Status) {
-      this.status = status;
+    setCreatingStatus(status: Status) {
+      this.creatingStatus = status;
+    },
+    setClaimingStatus(redPacketId: string, status: Status) {
+      this.claimingStatus[redPacketId] = status;
     },
     setAccount(account: AccountType) {
       this.account = account;
     },
     reset() {
-      this.status = "";
+      this.creatingStatus = "";
       this.redpacket = undefined;
       this.account = "hexlink";
+      this.claimingStatus = {};
     }
   },
 });

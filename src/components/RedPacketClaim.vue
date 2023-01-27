@@ -1,5 +1,5 @@
 <template>
-  <div v-if="claimStatus == ''" class="claim-card transition">
+  <div v-if="status == ''" class="claim-card transition">
     <router-link to="/redpackets">
       <svg class="redpacket_close transition" width="30" height="30" viewBox="0 0 30 30" fill="none"
         xmlns="http://www.w3.org/2000/svg">
@@ -29,15 +29,15 @@
     </div>
     <div class="card_circle transition"></div>
   </div>
-  <div v-if="claimStatus !== ''" class="claim-success-card transition">
+  <div v-if="status !== ''" class="claim-success-card transition">
     <h2 class="transition">
-      <div class="spinner-lg" :class="claimStatus">
+      <div class="spinner-lg" :class="store.claimingStatus">
         <div class="check"></div>
       </div>
       <span style="font-size: 20px; margin-top: 1rem;">{{ loadText() }}</span><br>
     </h2>
     <div class="cta-container transition" style="margin-top: 340px;">
-      <router-link to="/redpackets" @click.native="$router.go(-1)">
+      <router-link to="/redpackets">
         <button class="cta">OK</button>
       </router-link>
     </div>
@@ -46,13 +46,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { getRedPacket } from '@/graphql/redpacket';
 import { useRoute } from "vue-router";
 import { claimRedPacket } from "@/web3/redpacket";
 import { loadErc20Token } from "@/web3/tokens";
 import { useTokenStore } from "@/stores/token";
 import { switchNetwork } from "@/web3/network";
+import { useRedPacketStore } from "@/stores/redpacket";
 import type { Token } from "../../functions/common";
 import { getChain } from "../../functions/common";
 import type { RedPacketDB } from "@/types";
@@ -60,15 +61,26 @@ import type { RedPacketDB } from "@/types";
 const redPacket = ref<RedPacketDB | undefined>();
 const redPacketTokenIcon = ref<string>("");
 const redPacketToken = ref<string>("");
-const claimStatus = ref<string>("");
+const store = useRedPacketStore();
 
 async function loadToken(tokenAddr: string) : Promise<Token> {
   const token = useTokenStore().token(tokenAddr);
   return token || await loadErc20Token(tokenAddr);
 }
 
+const status = computed(() => {
+  if (redPacket.value) {
+    return store.claimingStatus[redPacket.value.id] || ""
+  }
+  return "";
+});
+
+const id = computed(() => {
+  return useRoute().query.claim!.toString()
+});
+
 onMounted(async () => {
-  redPacket.value = await getRedPacket(useRoute().query.claim!.toString());
+  redPacket.value = await getRedPacket(id.value);
   const network = getChain(redPacket.value!.chain);
   await switchNetwork(network);
   const metadata = await loadToken(redPacket.value!.metadata.token);
@@ -77,20 +89,20 @@ onMounted(async () => {
 });
 
 const claim = async () => {
-  claimStatus.value = 'loading';
+  store.setClaimingStatus(id.value, "confirming");
   try {
     await claimRedPacket(redPacket.value!);
-    claimStatus.value = 'success';
+    store.setClaimingStatus(id.value, "success");
   } catch (e) {
     console.log("Failed to claim redpacket with error " + JSON.stringify(e));
-    claimStatus.value = 'error';
+    store.setClaimingStatus(id.value, "error");
   }
 }
 
 const loadText = () => {
-  if (claimStatus.value == 'success') {
+  if (status.value == 'success') {
     return 'Claim Successful!';
-  } else if (claimStatus.value == 'error') {
+  } else if (status.value == 'error') {
     return 'Uhmmmm, something went wrong!';
   } else {
     return 'Processing...';
@@ -124,7 +136,7 @@ const loadText = () => {
     .context-class('success'); }
   &.error {
     .context-class('error'); }
-  &.loading {
+  &.confirming {
     border-color: @background-color;
     &:before {
       opacity: 1; }

@@ -1,5 +1,5 @@
 <template>
-  <div v-if="store.status == 'confirming'" class="claim-success-card transition">
+  <div v-if="store.creatingStatus == 'confirming'" class="claim-success-card transition">
     <router-link to="/redpacket/send">
       <svg @click="closeModal" class="redpacket_close transition" width="30" height="30" viewBox="0 0 30 30" fill="none"
         xmlns="http://www.w3.org/2000/svg">
@@ -16,9 +16,9 @@
     </div>
     <div class="card_circle transition" style="margin-top: -100px;"></div>
   </div>
-  <div v-if="store.status !== 'confirming'" class="claim-success-card transition">
+  <div v-if="store.creatingStatus !== 'confirming'" class="claim-success-card transition">
     <h2 class="transition">
-      <div class="spinner-lg" :class="store.status">
+      <div class="spinner-lg" :class="store.creatingStatus">
           <div class="check"></div>
         </div>
       <span style="font-size: 20px; margin-top: 1rem;">{{ message }}</span><br>
@@ -42,7 +42,7 @@ import { deployAndCreateNewRedPacket, createNewRedPacket } from "@/web3/redpacke
 
 const store = useRedPacketStore();
 const createRedPacket = async () => {
-  store.setStatus("processing");
+  store.setCreatingStatus("processing");
   try {
     if (await isContract(
       useChainStore().provider,
@@ -58,26 +58,26 @@ const createRedPacket = async () => {
         store.account == "hexlink"
       );
     }
-    store.setStatus("success");
+    store.setCreatingStatus("success");
   } catch (e) {
     console.log("Failed to claim redpacket with error " + e);
-    store.setStatus("error");
+    store.setCreatingStatus("error");
   }
 }
 
-const closeModal = () => store.setStatus("");
+const closeModal = () => store.setCreatingStatus("");
 
 const message = computed(() => {
-  if (store.status == 'error') {
+  if (store.creatingStatus == 'error') {
     return "Something went wrong";
   }
-  if (store.status == 'success') {
+  if (store.creatingStatus == 'success') {
     return "RedPacket sent succesfully!";
   }
-  if (store.status == "processing") {
+  if (store.creatingStatus == "processing") {
     return "Processing";
   }
-  if (store.status == "confirming") {
+  if (store.creatingStatus == "confirming") {
     return "Let's go!";
   }
   return "";

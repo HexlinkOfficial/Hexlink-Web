@@ -18,6 +18,7 @@ import { useChainStore } from '@/stores/chain';
 import { initTokenList } from "@/web3/tokens";
 import { useAccountStore } from '@/stores/account';
 import { useTokenStore } from '@/stores/token';
+import { useRedPacketStore } from "@/stores/redpacket";
 
 const auth = getAuth(app)
 const functions = getFunctions()
@@ -105,6 +106,7 @@ export function signOutFirebase() {
     useAccountStore().reset();
     useTokenStore().reset();
     useChainStore().reset();
+    useRedPacketStore().reset();
     return signOut(auth);
 }
 

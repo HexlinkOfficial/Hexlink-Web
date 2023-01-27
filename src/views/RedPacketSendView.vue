@@ -1,11 +1,11 @@
 <template>
-  <Layout :hidden="status !== ''" :active="1">
+  <Layout :hidden="creatingStatus !== ''" :active="1">
     <h1 style="margin-bottom: 1rem;">Red Packet</h1>
     <RedPacketBase>
       <RedPacketSend></RedPacketSend>
     </RedPacketBase>
   </Layout>
-  <RedpacketConfirm v-if="status !== ''"></RedpacketConfirm>
+  <RedpacketConfirm v-if="creatingStatus !== ''"></RedpacketConfirm>
 </template>
 
 <script setup lang="ts">
@@ -17,5 +17,5 @@ import Layout from "@/components/Layout.vue";
 import { useRedPacketStore } from '@/stores/redpacket';
 import { storeToRefs } from 'pinia'
 
-const { status } = storeToRefs(useRedPacketStore());
+const { creatingStatus } = storeToRefs(useRedPacketStore());
 </script>

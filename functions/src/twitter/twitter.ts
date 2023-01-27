@@ -14,6 +14,7 @@ import {
   TWITTER_CONFIG_1,
   TWITTER_URL} from "./config";
 import {parseHtmlString} from "./utils";
+import {Firebase} from "../firebase";
 
 const oauth = new OAuth.OAuth(
     "https://api.twitter.com/oauth/request_token",
@@ -31,6 +32,7 @@ const oauth = new OAuth.OAuth(
  */
 export const isFollowing = functions.https.onCall(
     async (data, context) => {
+      Firebase.getInstance();
       const uid = context.auth?.uid;
       if (!uid) {
         return {code: 401, message: "Unauthorized Call"};
@@ -48,6 +50,7 @@ export const isFollowing = functions.https.onCall(
  */
 export const autoCaptureFollowers = functions.https.onCall(
     async (data, context) => {
+      Firebase.getInstance();
       const uid = context.auth?.uid;
       if (!uid) {
         return {code: 401, message: "Unauthorized Call"};
@@ -96,6 +99,7 @@ const getFriendshipsFromTwitter = async function(
  */
 export const hasRetweeted = functions.https.onCall(
     async (data, context) => {
+      Firebase.getInstance();
       const uid = context.auth?.uid;
       if (!uid) {
         return {code: 401, message: "Unauthorized Call"};

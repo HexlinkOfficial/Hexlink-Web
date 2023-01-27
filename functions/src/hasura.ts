@@ -1,5 +1,6 @@
 import {getAuth} from "firebase-admin/auth";
 import * as functions from "firebase-functions";
+import {Firebase} from "./firebase";
 
 // eslint-disable-next-line require-jsdoc
 async function updateClaims(uid: string) {
@@ -14,10 +15,12 @@ async function updateClaims(uid: string) {
 }
 
 export const processSignUp = functions.auth.user().onCreate((user) => {
+  Firebase.getInstance();
   return updateClaims(user.uid);
 });
 
 export const refreshToken = functions.https.onCall(async (_data, context) => {
+  Firebase.getInstance();
   const uid = context.auth?.uid;
   if (!uid) {
     return {code: 401, message: "Unauthorized"};

@@ -4,6 +4,7 @@ import {signWithKmsKey} from "./kms";
 import {KMS_CONFIG, KMS_KEY_TYPE} from "./config";
 import {env} from "process";
 import {genNameHash, toEthSignedMessageHash} from "./account";
+import {Firebase} from "./firebase";
 
 const TWITTER_PROVIDER_ID = "twitter.com";
 const OAUTH_AUTH_TYPE = "oauth";
@@ -21,6 +22,7 @@ export interface AuthProof {
 
 export const genTwitterOAuthProof = functions.https.onCall(
     async (data, context) => {
+      Firebase.getInstance();
       const uid = context.auth?.uid;
       if (!uid) {
         return {code: 401, message: "Unauthorized Call"};

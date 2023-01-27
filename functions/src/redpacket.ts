@@ -20,6 +20,7 @@ import {serialize, UnsignedTransaction} from "@ethersproject/transactions";
 import {KMS_KEY_TYPE, PriceConfig} from "./config";
 
 import {redPacketContract, redPacketMode} from "../redpacket";
+import {Firebase} from "./firebase";
 
 const secrets = functions.config().doppler || {};
 
@@ -103,6 +104,7 @@ export async function buildClaimTx(
 
 export const claimRedPacket = functions.https.onCall(
     async (data, context) => {
+      Firebase.getInstance();
       const uid = context.auth?.uid;
       if (!uid) {
         return {code: 401, message: "Unauthorized"};

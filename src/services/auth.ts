@@ -10,11 +10,14 @@ import type { IUser } from "@/types";
 import { getFunctions, httpsCallable } from 'firebase/functions';
 import { app } from '@/services/firebase';
 import { useAuthStore } from "@/stores/auth";
-import { useProfileStore } from "@/stores/profile";
 import { useWalletStore } from "@/stores/wallet";
-import { useNetworkStore } from "@/stores/network";
-import { genNameHash } from '@/web3/account';
-import { initProfile } from "@/web3/account";
+import { switchNetwork } from "@/web3/network";
+import { nameHash, GOERLI, SUPPORTED_CHAINS} from "../../functions/common";
+import { initHexlAccount } from "@/web3/account";
+import { useChainStore } from '@/stores/chain';
+import { initTokenList } from "@/web3/tokens";
+import { useAccountStore } from '@/stores/account';
+import { useTokenStore } from '@/stores/token';
 
 const auth = getAuth(app)
 const functions = getFunctions()
@@ -49,7 +52,6 @@ export async function googleSocialLogin() {
     try {
         const result = await signInWithPopup(auth, provider)
         const idToken = await getIdTokenAndSetClaimsIfNecessary(result.user)
-        const nameHash = genNameHash("mailto", result.user.email!);
         const user : IUser = {
             provider: "google.com",
             identityType: "email",
@@ -59,11 +61,12 @@ export async function googleSocialLogin() {
             handle: result.user.email!,
             displayName: result.user.displayName || undefined,
             photoURL: result.user.photoURL || undefined,
-            nameHash,
+            nameHash: nameHash("mailto", result.user.email!),
             idToken
         };
         useAuthStore().signIn(user);
-        await initProfile(useNetworkStore().network);
+        await init();
+        await switchNetwork(GOERLI);
     } catch (error: any) {
         if (error.code == 'auth/popup-closed-by-user') {
             return
@@ -77,7 +80,6 @@ export async function twitterSocialLogin() {
         const result = await signInWithPopup(auth, provider);
         const idToken = await getIdTokenAndSetClaimsIfNecessary(result.user);
         const providerUid = result.user.providerData[0].uid;
-        const nameHash = genNameHash("twitter.com", providerUid);
         const user : IUser = {
             provider: "twitter.com",
             identityType: "twitter.com",
@@ -87,11 +89,11 @@ export async function twitterSocialLogin() {
             handle: result.user.reloadUserInfo.screenName,
             displayName: result.user.displayName || undefined,
             photoURL: result.user.photoURL || undefined,
-            nameHash,
+            nameHash: nameHash("twitter.com", providerUid),
             idToken,
         };
         useAuthStore().signIn(user);
-        await initProfile(useNetworkStore().network);
+        await init();
     } catch (error) {
         console.log(error);
     }
@@ -99,8 +101,20 @@ export async function twitterSocialLogin() {
 
 export function signOutFirebase() {
     useWalletStore().disconnectWallet();
-    useProfileStore().clear();
     useAuthStore().signOut();
-    useNetworkStore().reset();
+    useAccountStore().reset();
+    useTokenStore().reset();
+    useChainStore().reset();
     return signOut(auth);
+}
+
+export async function init() {
+    const user = useAuthStore().user!;
+    await Promise.all(
+        SUPPORTED_CHAINS.map(chain => initHexlAccount(chain, user.nameHash))
+    );
+    await Promise.all(
+        SUPPORTED_CHAINS.map(chain => initTokenList(chain))
+    );
+    await switchNetwork(GOERLI);
 }

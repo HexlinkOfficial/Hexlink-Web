@@ -7,7 +7,7 @@
     <div class="menu">
       <ul>
         <li>
-          <router-link to="/redpacket/claim" data-toggle="tooltip" data-placement="right" title="Wallet" :class="active === 1 && 'active'">
+          <router-link to="/redpackets" data-toggle="tooltip" data-placement="right" title="Wallet" :class="active === 1 && 'active'">
             <span class="icon-grey">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
                 xmlns:xlink="http://www.w3.org/1999/xlink">
@@ -58,7 +58,6 @@
 </template>
 
 <script lang="ts" setup>
-import router from '@/router';
 import { signOutFirebase } from "@/services/auth";
 
 const props = defineProps({

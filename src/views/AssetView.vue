@@ -278,7 +278,10 @@
       .token-list .views .detail-view .listView-button {
         opacity: 1;
         background-color: rgba(7, 106, 224,0);
-        color: rgb(71, 85, 105); }
+  color: rgb(71, 85, 105); }
+      .token-list .views .detail-view .listView-button:hover {
+        opacity: 1;
+        color: rgb(7, 106, 224); }
       .token-list .views .detail-view .listView-button.show {
         opacity: 1;
         background-color: rgb(7, 106, 224);
@@ -426,7 +429,7 @@ svg {
                   </div>
                 </div>
               </div>
-              <div class="price">$ {{ totalAssets }}</div>
+              <div class="price">$ {{ price }}</div>
             </div>
           </div>
         </div>
@@ -484,8 +487,8 @@ import { ref, computed } from "vue";
 import Layout from "../components/Layout.vue";
 import WalletTokenList from "@/components/WalletTokenList.vue";
 import WalletNFTGrid from "@/components/WalletNFTGrid.vue";
-import { useProfileStore } from '@/stores/profile';
-import { useNetworkStore } from '@/stores/network';
+import { useChainStore } from '@/stores/chain';
+import { useAccountStore } from "@/stores/account";
 import { BigNumber } from "bignumber.js";
 
 const nftView = ref<boolean>(false);
@@ -493,21 +496,11 @@ const tokenView = ref<boolean>(true);
 const showInfo = ref<boolean>(true);
 
 const blockExplorer = computed(() => {
-  const account = useProfileStore().profile?.account.address;
-  return `${useNetworkStore().network.blockExplorerUrls[0]}/address/${account}`;
+  const account = useAccountStore().account?.address;
+  return `${useChainStore().chain.blockExplorerUrls[0]}/address/${account}`;
 });
 
-const totalAssets = computed(() => {
-  let total: BigNumber = BigNumber(0);
-  for (const token of useProfileStore().visiableTokens) {
-    if (token.balance && token.price) {
-      total = total.plus(token.balance.normalized.times(token.price));
-    }
-  }
-  return total;
-});
-
-const dynamicBalance = computed(() => {
-  return BigNumber(Math.floor(Math.random() * 100));
+const price = computed(() => {
+  return BigNumber(0);
 });
 </script>

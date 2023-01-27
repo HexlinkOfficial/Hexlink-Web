@@ -1,12 +1,13 @@
-# Compiled JavaScript files
+# compiled javascript files
 lib/**/*.js
 lib/**/*.d.ts
 lib/**/*.js.map
+lib/**/*.json
 
-# TypeScript v1 declaration files
+# typescript v1 declaration files
 typings/
 
-# Node.js dependency directory
+# node.js dependency directory
 node_modules/
 
 node_modules
@@ -15,6 +16,6 @@ coverage
 coverage.json
 typechain
 
-#Hardhat files
+#hardhat files
 cache
 artifacts

@@ -1,6 +1,6 @@
 <template>
-  <div class="claim-card transition">
-    <router-link to="/redpacket/claim">
+  <div v-if="claimStatus == ''" class="claim-card transition">
+    <router-link to="/redpackets">
       <svg class="redpacket_close transition" width="30" height="30" viewBox="0 0 30 30" fill="none"
         xmlns="http://www.w3.org/2000/svg">
         <path
@@ -16,12 +16,6 @@
           <i className="fa fa-twitter"></i>
         </a>
       </div>
-      <div class="claim-tokens" style="margin-top: 0.5rem;">
-        <div class="token-icon">
-          <img :src="getNetwork(redPacketChain)?.logoUrl" />
-        </div>
-        <b class="mode-text2">{{ getNetwork(redPacketChain)?.chainName }}</b>
-      </div>
       <div class="claim-tokens">
         <div class="token-icon">
           <img :src="redPacketTokenIcon" />
@@ -31,55 +25,243 @@
       <small>Best Wishes!</small>
     </h2>
     <div class="cta-container transition">
-      <button class="cta">Claim</button>
+      <button class="cta" @click="claim">Claim</button>
     </div>
     <div class="card_circle transition"></div>
+  </div>
+  <div v-if="claimStatus !== ''" class="claim-success-card transition">
+    <h2 class="transition">
+      <div class="spinner-lg" :class="claimStatus">
+        <div class="check"></div>
+      </div>
+      <span style="font-size: 20px; margin-top: 1rem;">{{ loadText() }}</span><br>
+    </h2>
+    <div class="cta-container transition" style="margin-top: 340px;">
+      <router-link to="/redpackets" @click.native="$router.go(-1)">
+        <button class="cta">OK</button>
+      </router-link>
+    </div>
+    <div class="card_circle transition" style="margin-top: -100px;"></div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
-import type { ClaimCardData } from "@/types";
-import type { RedPacketDB } from '@/graphql/redpacket';
-import { useProfileStore } from '@/stores/profile';
 import { getRedPacket } from '@/graphql/redpacket';
 import { useRoute } from "vue-router";
-import { getNetwork } from "@/configs/network";
-import GOERLI_TOKENS from "@/configs/tokens/GOERLI_TOKENS.json";
+import { claimRedPacket } from "@/web3/redpacket";
+import { loadErc20Token } from "@/web3/tokens";
+import { useTokenStore } from "@/stores/token";
+import { switchNetwork } from "@/web3/network";
+import type { Token } from "../../functions/common";
+import { getChain } from "../../functions/common";
+import type { RedPacketDB } from "@/types";
 
-const nativeToken = useProfileStore().nativeToken;
-const claimcard = ref<ClaimCardData>({
-  twitter: "https://mobile.twitter.com/dreambig_peter",
-  token: nativeToken,
-  from: "dreambig_peter"
-})
-const redPacket = ref<RedPacketDB>();
-const redPacketChain = ref<string>("");
+const redPacket = ref<RedPacketDB | undefined>();
 const redPacketTokenIcon = ref<string>("");
 const redPacketToken = ref<string>("");
+const claimStatus = ref<string>("");
+
+async function loadToken(tokenAddr: string) : Promise<Token> {
+  const token = useTokenStore().token(tokenAddr);
+  return token || await loadErc20Token(tokenAddr);
+}
 
 onMounted(async () => {
-  redPacket.value = await getRedPacket(useRoute().query.id!.toString());
-  redPacketChain.value = redPacket.value.chain;
-  GOERLI_TOKENS.map(t => {
-    if (t.address == redPacket.value?.metadata.token) {
-      redPacketToken.value = t.symbol;
-      redPacketTokenIcon.value = t.logoURI;
-    }
-  });
-  console.log(redPacket.value);
+  redPacket.value = await getRedPacket(useRoute().query.claim!.toString());
+  const network = getChain(redPacket.value!.chain);
+  await switchNetwork(network);
+  const metadata = await loadToken(redPacket.value!.metadata.token);
+  redPacketToken.value = metadata.symbol;
+  redPacketTokenIcon.value = metadata.logoURI || "";
 });
+
+const claim = async () => {
+  claimStatus.value = 'loading';
+  try {
+    await claimRedPacket(redPacket.value!);
+    claimStatus.value = 'success';
+  } catch (e) {
+    console.log("Failed to claim redpacket with error " + JSON.stringify(e));
+    claimStatus.value = 'error';
+  }
+}
+
+const loadText = () => {
+  if (claimStatus.value == 'success') {
+    return 'Claim Successful!';
+  } else if (claimStatus.value == 'error') {
+    return 'Uhmmmm, something went wrong!';
+  } else {
+    return 'Processing...';
+  }
+};
 </script>
 
 <style lang="less" scoped>
+.spinner-lg {
+  .generate-spinner(); }
+.generate-spinner(
+  @radius: 60px,
+  @border-width: 12px,
+  @check-thickness: 12px,
+  @success-color: #fff,
+  @error-color: #fff,
+  @default-color: #fff,
+  @background-color: #FD4755,
+) {
+  @check-size: @radius * .57;
+  display: inline-block;
+  // background-color: @background-color;
+  width: (@radius * 2);
+  height: (@radius * 2);
+  position: relative;
+  box-sizing: border-box;
+  border: @border-width solid @default-color;
+  border-radius: @radius;
+  transition: border-color 200ms;
+  &.success {
+    .context-class('success'); }
+  &.error {
+    .context-class('error'); }
+  &.loading {
+    border-color: @background-color;
+    &:before {
+      opacity: 1; }
+    > div {
+      opacity: 0; } }
+  @check-height: 1.8837209302 * @check-size;
+  .check {
+    opacity: 1;
+    transition: opacity 200ms;
+    position: absolute;
+    top: @radius - (@check-height / 1.8) - @border-width;
+    left: @radius - (@check-size / 2) - @border-width;
+    height: @check-height;
+    width: @check-size;
+    transform: rotate(45deg);
+    transition-property: transform, height, width, top, left;
+    transition-duration: 200ms, 200ms, 200ms, 200ms, 200ms;
+    &:before, &:after {
+      .pseudo-block();
+      position: absolute;
+      background-color: @default-color;
+      transition-property: left, top, height, width;
+      transition-duration: 200ms, 200ms, 200ms, 200ms;
+      border-radius: 20px; }
+    &:before {
+      width: @check-thickness;
+      height: @check-height;
+      left: @check-size - @check-thickness;
+      top: 0; }
+    &:after {
+      width: @check-size;
+      height: @check-thickness;
+      left: 0;
+      top: @check-height - @check-thickness; } }
+  &.error .check {
+    transform: rotate(-135deg);
+    height: @check-height;
+    width: @check-height;
+    top: @radius - (@check-height / 2) - @border-width;
+    left: @radius - (@check-height / 2) - @border-width;
+    &:before {
+      height: @check-height;
+      left: 25.7116279064px; }
+    &:after {
+      width: @check-height;
+      top: 25.7116279064px; } }
+  // spinning part
+  &:before {
+    .pseudo-block();
+    opacity: 0;
+    background: none;
+    padding: 0;
+    margin: 0;
+    position: absolute;
+    top: -@border-width;
+    left: -@border-width;
+    box-sizing: border-box;
+    height: @radius;
+    width: @radius;
+    border-radius: @radius 0 0 0;
+    border: @border-width solid @default-color;
+    border-bottom: none;
+    border-right: none;
+    transform: rotate(0deg);
+    transform-origin: bottom right;
+    transition: opacity 200ms;
+    animation-name: check-loading-spinner;
+    animation-duration: 1s;
+    animation-iteration-count: infinite;
+    animation-timing-function: linear; }
+  // @mixin
+  .context-class(@name) {
+    @color: color(~"@{@{name}-color}");
+    border-color: @color;
+    &:before {
+      border-color: @color; }
+    > div {
+      &:before, &:after {
+        background-color: @color; } } } }
+@keyframes check-loading-spinner {
+  from {
+    transform: rotate(0deg); }
+  to {
+    transform: rotate(360deg); } }
+.pseudo-block() {
+  content: '';
+  display: block; }
+.claim-success-card {
+  background-color: #fff;
+  position: absolute;
+  margin: auto;
+  left: 50%;
+  top: 45%;
+  transform: translate(-50%, -50%);
+  border-radius: 15px;
+  overflow: hidden;
+  z-index: 55; 
+  box-shadow: 0px 10px 20px rgb(0 0 0 / 10%);
+  height: 430px;
+  width: 330px;
+  color: white;
+  @media (max-width: 990px) {
+    top: 50vh;
+    left: 50%; } }
+.claim-success-card .card_circle {
+  height: 400px;
+  width: 450px;
+  background-color: #FD4755;
+  position: absolute;
+  border-radius: 0;
+  margin-left: -80px;
+  margin-top: -130px; }
+.claim-success-card h2 {
+  text-align: center;
+  position: absolute;
+  z-index: 55;
+  font-size: 26px;
+  width: 100%;
+  margin-top: 80px;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  flex-direction: column; }
+.claim-success-card h2 small {
+  font-weight: normal;
+  font-size: 65%;
+  color: #fff; }
+.claim-success-card h2 i {
+  color: #fff; }
 .claim-card {
   background-color: #fff;
   height: 400px;
   width: 300px;
-  position: absolute;
+  position: fixed;
   margin: auto;
-  left: 55%;
-  top: 55%;
+  left: 50%;
+  top: 45%;
   transform: translate(-50%, -50%);
   box-shadow: 0px 10px 20px rgb(0 0 0 / 10%);
   border-radius: 15px;
@@ -94,7 +276,7 @@ onMounted(async () => {
   width: 330px;
   color: white; }
 .claim-card:hover h2 {
-  margin-top: 80px;
+  margin-top: 90px;
   color: #fff; }
 .claim-card:hover h2 small {
   color: #fff; }
@@ -109,7 +291,7 @@ onMounted(async () => {
   width: 100%;}
 .claim-card h2 {
   text-align: center;
-  margin-top: 45%;
+  margin-top: 50%;
   position: absolute;
   z-index: 55;
   font-size: 26px;
@@ -121,7 +303,7 @@ onMounted(async () => {
   color: rgba(0, 0, 0, 0.5); }
 .claim-card:hover .card_circle {
   border-radius: 0;
-  margin-top: -130px; }
+  margin-top: -100px; }
 .card_circle {
   height: 400px;
   width: 450px;
@@ -151,7 +333,7 @@ onMounted(async () => {
   z-index: 55;
   width: 100%; }
 .claim-card:hover .cta-container {
-  margin-top: 320px; }
+  margin-top: 340px; }
 .cta {
   color: #fff;
   background-color: #FD4755;

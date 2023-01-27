@@ -1,7 +1,13 @@
 import { gql } from '@urql/core';
 import { useAuthStore } from '@/stores/auth';
 import { handleUrqlResponse, setUrqlClientIfNecessary } from './urql';
-import { useNetworkStore } from '@/stores/network';
+import { useChainStore } from '@/stores/chain';
+import type {
+  HexlinkUserInfo,
+  RedPacketDB,
+  RedPacketDBMetadata,
+  RedPacketOnchainState
+} from "@/types";
 
 export const GET_REDPACKET = gql`
   query GetRedPacket($id: String!) {
@@ -12,11 +18,12 @@ export const GET_REDPACKET = gql`
         tx
         creator
         metadata
+        created_at
     }
   }
 `
 
-export const GET_REDPACKETS = gql`
+export const GET_CREATED_REDPACKETS = gql`
     query GetRedPacketByUser (
         $userId: String!,
         $chain: String!,
@@ -25,7 +32,8 @@ export const GET_REDPACKETS = gql`
             where: {
               user_id: { _eq: $userId },
               chain: { _eq: $chain },
-            }
+            },
+            limit: 100
         ) {
             id
             user_id
@@ -33,6 +41,9 @@ export const GET_REDPACKETS = gql`
             tx
             creator
             metadata
+            created_at
+            status
+            state
         }
     }
 `
@@ -50,49 +61,24 @@ export const INSERT_REDPACKET = gql`
     }
 `
 
-export const UPDATE_REDPACKET = gql`
+export const UPDATE_REDPACKET_STATUS = gql`
     mutation (
         $id: String!
-        $tx: String!
+        $status: String!
+        $state: jsonb
     ) {
         update_redpacket_by_pk (
             pk_columns: {id: $id},
-            _set: { tx: $tx }
+            _set: { status: $status, state: $state }
         ) {
             id
         }
     }
 `
 
-export interface RedPacketDBMetadata {
-  token: string
-  salt: string,
-  mode: string,
-  split: number,
-  balance: string,
-  validator: string,
-  expiredAt: number,
-  contract: string
-}
-
-export interface RedPacketDBCreator {
-  provider: string;
-  handle: string;
-  displayName?: string;
-}
-
-export interface RedPacketDB {
-  id: string,
-  userId: string,
-  chain: string,
-  metadata: RedPacketDBMetadata,
-  creator: RedPacketDBCreator,
-  tx?: string
-}
-
 export async function getRedPacket(
   redPacketId: string
-) : Promise<RedPacketDB> {
+) : Promise<RedPacketDB | undefined> {
   const client = setUrqlClientIfNecessary(useAuthStore().user!.idToken!);
   const result = await client.query(
     GET_REDPACKET,
@@ -106,66 +92,51 @@ export async function getRedPacket(
         userId: rp.user_id,
         chain: rp.chain,
         metadata: JSON.parse(rp.metadata),
-        creator: JSON.parse(rp.creator)
+        creator: JSON.parse(rp.creator),
+        createdAt: rp.created_at
       } as RedPacketDB;
     } else {
-      return {
-        id: "0",
-        userId: "0",
-        chain: "0",
-        metadata: {
-          token: "",
-          salt: "",
-          mode: "",
-          split: 0,
-          balance: "",
-          validator: "",
-          expiredAt: 0,
-          contract: ""
-        },
-        creator: {
-          provider: "",
-          handle: "",
-          displayName: ""
-        }
-      }
+      return undefined;
     }
   } else {
     return await getRedPacket(redPacketId);
   }
 }
 
-export async function getRedPacketsByUser(
-  userId: string
-) : Promise<RedPacketDB[]> {
+export async function getCreatedRedPackets() : Promise<RedPacketDB[]> {
   const client = setUrqlClientIfNecessary(
     useAuthStore().user!.idToken!
   );
   const result = await client.query(
-    GET_REDPACKETS,
+    GET_CREATED_REDPACKETS,
     {
       userId: useAuthStore().user!.uid,
-      chain: useNetworkStore().network.name
+      chain: useChainStore().chain.name,
     }
   ).toPromise();
   if (await handleUrqlResponse(result)) {
     return result.data.redpacket.map((r : any) => {
       return {
         id: r.id,
+        chain: r.chain,
         userId: r.user_id,
         metadata: JSON.parse(r.metadata),
-        creator: JSON.parse(r.creator)
+        creator: JSON.parse(r.creator),
+        createdAt: r.created_at,
+        tx: r.tx,
+        status: r.status,
+        state: r.state ? JSON.parse(r.state) : r.state,
       } as RedPacketDB;
     });
   } else {
-    return await getRedPacketsByUser(userId);
+    return await getCreatedRedPackets();
   }
 }
 
 export async function insertRedPacket(
   data: {
     id: string,
-    creator: RedPacketDBCreator,
+    creator: HexlinkUserInfo,
     metadata: RedPacketDBMetadata,
     chain: string,
     tx: string
@@ -192,15 +163,19 @@ export async function insertRedPacket(
   }
 }
 
-export async function updateRedPacket(
-  data: {id: string, tx: string},
+export async function updateRedPacketStatus(
+  data: {id: string, status: string, state?: RedPacketOnchainState},
 ) : Promise<void> {
   const client = setUrqlClientIfNecessary(useAuthStore().user!.idToken!)
   const result = await client.mutation(
-      UPDATE_REDPACKET,
-      data
+      UPDATE_REDPACKET_STATUS,
+      {
+        id: data.id,
+        status: data.status,
+        state: data.state ? JSON.stringify(data.state) : undefined
+      }
   ).toPromise();
   if (!await handleUrqlResponse(result)) {
-    await updateRedPacket(data);
-}
+      await updateRedPacketStatus(data);
+  }
 }

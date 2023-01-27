@@ -1,0 +1,17 @@
+# typescript v1 declaration files
+typings/
+
+# node.js dependency directory
+node_modules/
+
+node_modules
+.env
+coverage
+coverage.json
+typechain
+
+#hardhat files
+cache
+artifacts
+
+*.tsbuildinfo

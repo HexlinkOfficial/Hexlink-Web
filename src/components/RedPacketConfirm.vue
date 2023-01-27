@@ -1,5 +1,5 @@
 <template>
-  <div v-if="store.creatingStatus == 'confirming'" class="claim-success-card transition">
+  <div v-if="store.status == 'confirming'" class="claim-success-card transition">
     <router-link to="/redpacket/send">
       <svg @click="closeModal" class="redpacket_close transition" width="30" height="30" viewBox="0 0 30 30" fill="none"
         xmlns="http://www.w3.org/2000/svg">
@@ -16,9 +16,9 @@
     </div>
     <div class="card_circle transition" style="margin-top: -100px;"></div>
   </div>
-  <div v-if="store.creatingStatus !== 'confirming'" class="claim-success-card transition">
+  <div v-if="store.status !== 'confirming'" class="claim-success-card transition">
     <h2 class="transition">
-      <div class="spinner-lg" :class="store.creatingStatus">
+      <div class="spinner-lg" :class="store.status">
           <div class="check"></div>
         </div>
       <span style="font-size: 20px; margin-top: 1rem;">{{ message }}</span><br>
@@ -42,7 +42,7 @@ import { deployAndCreateNewRedPacket, createNewRedPacket } from "@/web3/redpacke
 
 const store = useRedPacketStore();
 const createRedPacket = async () => {
-  store.setCreatingStatus("processing");
+  store.setStatus("processing");
   try {
     if (await isContract(
       useChainStore().provider,
@@ -58,26 +58,26 @@ const createRedPacket = async () => {
         store.account == "hexlink"
       );
     }
-    store.setCreatingStatus("success");
+    store.setStatus("success");
   } catch (e) {
     console.log("Failed to claim redpacket with error " + e);
-    store.setCreatingStatus("error");
+    store.setStatus("error");
   }
 }
 
-const closeModal = () => store.setCreatingStatus("");
+const closeModal = () => store.setStatus("");
 
 const message = computed(() => {
-  if (store.creatingStatus == 'error') {
+  if (store.status == 'error') {
     return "Something went wrong";
   }
-  if (store.creatingStatus == 'success') {
+  if (store.status == 'success') {
     return "RedPacket sent succesfully!";
   }
-  if (store.creatingStatus == "processing") {
+  if (store.status == "processing") {
     return "Processing";
   }
-  if (store.creatingStatus == "confirming") {
+  if (store.status == "confirming") {
     return "Let's go!";
   }
   return "";

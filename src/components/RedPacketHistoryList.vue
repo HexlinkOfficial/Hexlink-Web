@@ -108,10 +108,23 @@
             </div>
             <div v-if="v.redpacket" class="record-box">
               <div style="display: block; position: relative;">
-                <div class="icon" style="background-color: #4BAE4F;">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <div class="icon" :style="showClaimStatus(v.redpacket.claim.txStatus) == 'Error' ? 'background-color: #FD4755;' : 'background-color: #4BAE4F;'">
+                  <svg v-if="showClaimStatus(v.redpacket.claim.txStatus) != 'Claimed' && showClaimStatus(v.redpacket.claim.txStatus) != 'Error'" version="1.1" id="loader-1"
+                    xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="40px"
+                    height="40px" viewBox="0 0 50 50" style="enable-background:new 0 0 50 50; background-color: none;" xml:space="preserve">
+                    <path fill="#FFFFFF"
+                      d="M25.251,6.461c-10.318,0-18.683,8.365-18.683,18.683h4.068c0-8.071,6.543-14.615,14.615-14.615V6.461z">
+                      <animateTransform attributeType="xml" attributeName="transform" type="rotate" from="0 25 25" to="360 25 25"
+                        dur="0.6s" repeatCount="indefinite"></animateTransform>
+                    </path>
+                  </svg>
+                  <svg v-if="showClaimStatus(v.redpacket.claim.txStatus) == 'Claimed'" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M7 7L17 17" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                     <path d="M17 7V17H7" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                  <svg v-if="showClaimStatus(v.redpacket.claim.txStatus) == 'Error'" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M7 17L17 7" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="M7 7L17 17" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                   </svg>
                 </div>
               </div>
@@ -121,7 +134,7 @@
                     <div style="display: flex;">
                       <div class="sent-info">
                         <div class="info-1">
-                          Claimed
+                          {{ showClaimStatus(v.redpacket.claim.txStatus) }}
                         </div>
                       </div>
                     </div>
@@ -132,7 +145,7 @@
                   </div>
                 </div>
                 <div class="token-amount">
-                  <div class="sent-info">
+                  <div class="sent-info" v-if="v.redpacket.claim.txStatus == 'success'">
                     <a-tooltip placement="top">
                       <template #title>
                         <span>
@@ -147,6 +160,11 @@
                       <img :src="v.token.logoURI">
                     </div>
                     {{ v.token.symbol }}
+                  </div>
+                  <div class="sent-info" v-if="v.redpacket.claim.txStatus != 'success'">
+                    <div style="overflow: auto; white-space: nowrap; margin-left: 0.25rem; width: 50px;display: flex;justify-content: flex-end;">
+                      {{ showClaimStatus(v.redpacket.claim.txStatus) }}
+                    </div>
                   </div>
                 </div>
                 <div class="claim-status">
@@ -171,10 +189,12 @@
                   </div>
                 </div>
                 <div class="share">
-                  <i className="fa fa-twitter"></i>
+                  <i v-if="showClaimStatus(v.redpacket.claim.txStatus) == 'Claimed'" class="fa fa-paper-plane share-button" aria-hidden="true" @click="copyShareLink(v.redpacket.redPacket)"></i>
+                  <span v-if="showClaimStatus(v.redpacket.claim.txStatus) != 'Claimed' && showClaimStatus(v.redpacket.claim.txStatus) != 'Error'" class="pending-text">{{ showClaimStatus(v.redpacket.claim.txStatus) }}</span>
+                  <span v-if="showClaimStatus(v.redpacket.claim.txStatus) == 'Error'" class="pending-text" style="color:#FD4755;">{{ showClaimStatus(v.redpacket.claim.txStatus) }}</span>
                 </div>
-                <div class="cta">
-                  <i class="fa fa-info-circle" aria-hidden="true"></i>
+                <div class="cta" v-if="showClaimStatus(v.redpacket.claim.txStatus) == 'Claimed'">
+                  <i className="fa fa-twitter"></i>
                 </div>
               </div>
             </div>
@@ -372,6 +392,7 @@ const extractDate = () => {
 };
 
 const loading = ref<boolean>(true);
+const route = useRoute();
   
 onMounted(loadData);
 watch(() => useChainStore().current, loadData);
@@ -390,6 +411,16 @@ const showStatus = (tx: string, status: string) => {
   }
 }
 
+const showClaimStatus = (tx_status: string) => {
+  if(tx_status == null){
+    return 'Pending';
+  } else if (tx_status == 'error') {
+    return 'Error';
+  } else {
+    return 'Claimed';
+  }
+}
+
 const showDetailStatus = (tx: string, status: string) => {
   if (tx == null) {
     return 'Pending Transaction';
@@ -403,7 +434,6 @@ const showDetailStatus = (tx: string, status: string) => {
 
 const showDetailsEnabled = ref<boolean>(false);
 
-const route = useRoute();
 const copyShareLink = (redPacket: RedPacketDB) => {
   return copy(window.location.origin + route.path + "?claim=" + redPacket.id, 'Successfully copied your red packet share link!');
 };
@@ -759,6 +789,7 @@ i {
   margin-bottom: 0; }
 .token-amount {
   display: flex;
+  justify-content: center;
   align-items: center;
   grid-column: span 1/span 1;
   margin-bottom: 0;

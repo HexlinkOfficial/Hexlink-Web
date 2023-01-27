@@ -37,7 +37,7 @@
       <span style="font-size: 20px; margin-top: 1rem;">{{ loadText() }}</span><br>
     </h2>
     <div class="cta-container transition" style="margin-top: 340px;">
-      <router-link to="/redpackets">
+      <router-link to="/redpackets" @click.native="$router.go(-1)">
         <button class="cta">OK</button>
       </router-link>
     </div>

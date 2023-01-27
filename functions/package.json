@@ -11,9 +11,6 @@
     "deploy": "npm run secrets-sync && firebase deploy --only functions",
     "logs": "firebase functions:log"
   },
-  "engines": {
-    "node": "16"
-  },
   "main": "lib/index.js",
   "dependencies": {
     "@google-cloud/kms": "^3.1.0",

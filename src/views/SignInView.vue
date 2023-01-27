@@ -88,9 +88,6 @@ import loginbg from "@/assets/bg-login.jpg"
 const store = useAuthStore();
 const router = useRouter();
 
-// sign out first to ensure we clear all old data
-signOutFirebase();
-
 const twitter_login = async () => {
     await twitterSocialLogin();
     router.push(store.returnUrl || "/");

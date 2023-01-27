@@ -283,7 +283,7 @@ const extractDate = () => {
     }
 
     // sort the claimed red packet
-    var isDescending = true;
+    var isDescending = false;
     const d_group = Object.keys(claimGroup).sort((a, b) => isDescending
       ? new Date(b).getTime() - new Date(a).getTime()
       : new Date(a).getTime() - new Date(b).getTime());
@@ -302,15 +302,14 @@ const extractDate = () => {
     }
 
     // sort the object
-    var isDescending = true;
-    const d_group = Object.keys(sentGroup).sort((a, b) => isDescending
+    var isDescending = false;
+    Object.keys(sentGroup).sort((a, b) => isDescending
       ? new Date(b).getTime() - new Date(a).getTime()
-      : new Date(a).getTime() - new Date(b).getTime());
-    d_group.forEach((v) => {
+      : new Date(a).getTime() - new Date(b).getTime()
+    ).forEach((v) => {
       sentOrderedGroup[v] = sentGroup[v];
-    })
+    });
     redPacketByDate.value = JSON.parse(JSON.stringify(sentOrderedGroup));
-    console.log("redpacket: ", redPacketByDate.value);
   });
 
   const luckHistoryGroup: any = {};
@@ -333,8 +332,17 @@ const extractDate = () => {
       luckHistoryGroup[cog] = claimedOrderedGroup[cog];
     }
   })
-  luckHistoryByDate.value = JSON.parse(JSON.stringify(luckHistoryGroup));
-  console.log("luck history: ", luckHistoryByDate.value);
+
+  const sortedLuckHistory: any = {};
+  var isDescending = true;
+  Object.keys(luckHistoryGroup).sort((a, b) => isDescending
+    ? new Date(b).getTime() - new Date(a).getTime()
+    : new Date(a).getTime() - new Date(b).getTime()
+  ).forEach((v) => {
+    sortedLuckHistory[v] = luckHistoryGroup[v];
+  });
+  luckHistoryByDate.value = JSON.parse(JSON.stringify(sortedLuckHistory));
+  console.log("History: ", luckHistoryByDate.value);
 };
 
 const loading = ref<boolean>(true);
@@ -399,7 +407,7 @@ const normalizedDbBalance = (redPacket: CreatedRedPacket) => {
 
 const normalizeClaimAmount = (claimed: ClaimedRedPacketInfo) => {
   return normalizeBalance(
-    claimed.redpacket.claim.claimed?.toString() || '0',
+    EthBigNumber.from(claimed.redpacket.claim.claimed).toString() || '0',
     claimed.token.decimals
   ).normalized;
 }

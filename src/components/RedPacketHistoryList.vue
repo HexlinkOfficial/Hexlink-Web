@@ -125,8 +125,8 @@
                         </div>
                       </div>
                     </div>
-                    <div style="color: #6a6d7c; white-space: nowrap; margin-left: 0; font-size: 12px;">
-                      <div style="display: flex;">{{ new Date(v.redpacket.redPacket.createdAt).toLocaleString().split(',')[1] }}
+                    <div style="color: #6a6d7c; white-space: nowrap; margin-left: 0; font-size: 11px;">
+                      <div style="display: flex;">{{ new Date(v.redpacket.claim.createdAt).toLocaleString().split(',')[1] }}
                       </div>
                     </div>
                   </div>
@@ -284,10 +284,10 @@ const extractDate = () => {
 
     // sort the claimed red packet
     var isDescending = false;
-    const d_group = Object.keys(claimGroup).sort((a, b) => isDescending
+    Object.keys(claimGroup).sort((a, b) => isDescending
       ? new Date(b).getTime() - new Date(a).getTime()
-      : new Date(a).getTime() - new Date(b).getTime());
-    d_group.forEach((v) => {
+      : new Date(a).getTime() - new Date(b).getTime()
+    ).forEach((v) => {
       claimedOrderedGroup[v] = claimGroup[v];
     })
     claimedByDate.value = JSON.parse(JSON.stringify(claimedOrderedGroup));
@@ -342,6 +342,32 @@ const extractDate = () => {
     sortedLuckHistory[v] = luckHistoryGroup[v];
   });
   luckHistoryByDate.value = JSON.parse(JSON.stringify(sortedLuckHistory));
+
+  // sort each tx
+  const fullysortedHistory: any = {}
+  Object.keys(luckHistoryByDate.value).forEach(v => {
+    const time: any = [];
+    luckHistoryByDate.value[v].forEach((w: any) => {
+      if(w.redPacket) {
+        time.push(new Date(w.redPacket.createdAt).getTime());
+      } else {
+        time.push(new Date(w.redpacket.claim.createdAt).getTime());
+      }
+    })
+    const sortedArray: any[] = []
+    time.sort((a: number, b: number) => b - a).forEach((t: number) => {
+      luckHistoryByDate.value[v].forEach((w: any) => {
+        if (w.redPacket) {
+          new Date(w.redPacket.createdAt).getTime() == t && sortedArray.push(w);
+        } else if (w.redpacket) {
+          new Date(w.redpacket.claim.createdAt).getTime() == t && sortedArray.push(w);
+        } else {}
+      })
+    })
+    fullysortedHistory[v] = sortedArray;
+  })
+
+  luckHistoryByDate.value = JSON.parse(JSON.stringify(fullysortedHistory));
   console.log("History: ", luckHistoryByDate.value);
 };
 

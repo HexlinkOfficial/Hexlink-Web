@@ -8,5 +8,6 @@ export interface PriceInfo {
     updatedAt: number;
 }
 export declare function calcGasSponsorship(chain: Chain, redpacket: RedPacket, priceInfo: PriceInfo): EthBigNumber;
+export declare function buildGasSponsorshipOp(chain: Chain, input: RedPacket, refunder: string, hexlAccount: string, priceInfo: PriceInfo): UserOp;
 export declare function buildRedPacketOps(chain: Chain, input: RedPacket): UserOp[];
 export declare function buildCreateRedPacketTx(chain: Chain, refunder: string, hexlAccount: string, ops: UserOp[], input: RedPacket, from: string, priceInfo: PriceInfo): Transaction;

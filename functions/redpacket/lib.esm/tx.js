@@ -15,7 +15,7 @@ export function calcGasSponsorship(chain, redpacket, priceInfo) {
     }
     throw new Error("Unsupported gas token");
 }
-function buildGasSponsorshipOp(chain, input, refunder, hexlAccount, priceInfo) {
+export function buildGasSponsorshipOp(chain, input, refunder, hexlAccount, priceInfo) {
     const gasTokenAmount = calcGasSponsorship(chain, input, priceInfo);
     if (isNativeCoin(input.gasToken, chain)) {
         return {

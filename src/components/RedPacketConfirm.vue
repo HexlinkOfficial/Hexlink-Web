@@ -50,12 +50,12 @@ const createRedPacket = async () => {
     )) {
       await createNewRedPacket(
         store.redpacket!,
-        store.account == "hexlink"
+        store.account == "hexlink",
       );
     } else {
       await deployAndCreateNewRedPacket(
         store.redpacket!,
-        store.account == "hexlink"
+        store.account == "hexlink",
       );
     }
     store.setStatus("success");

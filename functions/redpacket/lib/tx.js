@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.buildCreateRedPacketTx = exports.buildRedPacketOps = exports.calcGasSponsorship = void 0;
+exports.buildCreateRedPacketTx = exports.buildRedPacketOps = exports.buildGasSponsorshipOp = exports.calcGasSponsorship = void 0;
 const ethers_1 = require("ethers");
 const common_1 = require("../../common");
 const redpacket_1 = require("./redpacket");
@@ -53,6 +53,7 @@ function buildGasSponsorshipOp(chain, input, refunder, hexlAccount, priceInfo) {
         };
     }
 }
+exports.buildGasSponsorshipOp = buildGasSponsorshipOp;
 function buildRedPacketOps(chain, input) {
     const packet = {
         token: input.token.address,

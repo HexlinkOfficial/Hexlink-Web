@@ -121,8 +121,8 @@ async function buildCreateRedPacketTxForMetamask(input: RedPacket) {
                 hexlAccount.address,
                 input.tokenAmount.add(input.gasTokenAmount)
             );
-            txes.concat(tx);
-            ops.concat(op);
+            txes = txes.concat(tx);
+            ops = ops.concat(op);
         }
     } else {
         if (isNativeCoin(input.gasToken, chain)) {
@@ -134,8 +134,8 @@ async function buildCreateRedPacketTxForMetamask(input: RedPacket) {
                 hexlAccount.address,
                 input.tokenAmount
             );
-            txes.concat(tx);
-            ops.concat(op);
+            txes = txes.concat(tx);
+            ops = ops.concat(op);
         }
         if (isNativeCoin(input.gasToken, chain)) {
             value = value.add(input.gasTokenAmount);
@@ -146,8 +146,8 @@ async function buildCreateRedPacketTxForMetamask(input: RedPacket) {
                 hexlAccount.address,
                 input.gasTokenAmount
             );
-            txes.concat(tx);
-            ops.concat(op);
+            txes = txes.concat(tx);
+            ops = ops.concat(op);
         }
     }
     txes.push(buildCreateRedPacketTx(

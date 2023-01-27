@@ -137,6 +137,7 @@ export const claimRedPacket = functions.https.onCall(
         const provider = getInfuraProvider(data.chainId);
         const signedTx = await buildClaimTx(provider, redPacket, data);
         const txHash = ethers.utils.keccak256(signedTx);
+        await provider.sendTransaction(signedTx);
         const [{id}] = await insertRedPacketClaim([{
           redPacketId: redPacket.id,
           creatorId: redPacket.user_id,
@@ -144,7 +145,6 @@ export const claimRedPacket = functions.https.onCall(
           claimer: data.claimer,
           tx: txHash,
         }]);
-        await provider.sendTransaction(signedTx);
         return {code: 200, id, tx: txHash};
       }
     }

@@ -226,8 +226,6 @@ import Loading from "@/components/Loading.vue";
 import { useAccountStore } from '@/stores/account';
 import { useTokenStore } from '@/stores/token';
 import { copy } from "@/web3/utils";
-import { ConsoleSqlOutlined } from '@ant-design/icons-vue';
-import { Console } from 'console';
 
 import { normalizeBalance } from "../../functions/common";
 import type { Token } from "../../functions/common";
@@ -245,7 +243,8 @@ interface ClaimedRedPacketInfo {
 
 const redPackets = ref<CreatedRedPacket[]>([]);
 const claimed = ref<ClaimedRedPacketInfo[]>([]);
-const loadClaimInfo = async (provider: ethers.providers.Provider) => {
+const loadClaimInfo = async () => {
+  const provider = getInfuraProvider(useChainStore().chain);
   const claims : ClaimedRedPacket[] = await getClaimedRedPackets();
   claimed.value = await Promise.all(
     claims.map(c => aggregatedClaimed(provider, c))
@@ -272,7 +271,7 @@ const loadData = async function() {
     const provider = getInfuraProvider(useChainStore().chain);
     const rps : RedPacketDB[] = await getCreatedRedPackets();
     redPackets.value = await Promise.all(rps.map(r => aggregateCreated(provider, r)));
-    await loadClaimInfo(provider);
+    await loadClaimInfo();
     // await loadClaimsForOnePacket(provider, redPackets.value[0]?.redPacket.id);
   }
   loading.value = false;
@@ -284,7 +283,7 @@ const pullRedpacketData = async function() {
     const provider = getInfuraProvider(useChainStore().chain);
     const rps: RedPacketDB[] = await getCreatedRedPackets();
     redPackets.value = await Promise.all(rps.map(r => aggregateCreated(provider, r)));
-    await loadClaimInfo(provider);
+    await loadClaimInfo();
   }
   extractDate();
 }
@@ -388,14 +387,18 @@ const extractDate = () => {
   })
 
   luckHistoryByDate.value = JSON.parse(JSON.stringify(fullysortedHistory));
-  console.log("History: ", luckHistoryByDate.value);
 };
 
 const loading = ref<boolean>(true);
 const route = useRoute();
-  
 onMounted(loadData);
 watch(() => useChainStore().current, loadData);
+watch(() => route.query?.claim, async() => {
+  loading.value = true;
+  await loadClaimInfo();
+  loading.value = false;
+});
+
 setInterval(() => {
   pullRedpacketData()
 }, 20 * 1000);

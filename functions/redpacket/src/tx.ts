@@ -41,7 +41,7 @@ export function calcGasSponsorship(
     throw new Error("Unsupported gas token");
 }
 
-function buildGasSponsorshipOp(
+export function buildGasSponsorshipOp(
     chain: Chain,
     input: RedPacket,
     refunder: string,

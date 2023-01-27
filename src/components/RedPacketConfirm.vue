@@ -72,7 +72,7 @@ const message = computed(() => {
     return "Something went wrong";
   }
   if (store.status == 'success') {
-    return "RedPacket claimed succesfully!";
+    return "RedPacket sent succesfully!";
   }
   if (store.status == "processing") {
     return "Processing";

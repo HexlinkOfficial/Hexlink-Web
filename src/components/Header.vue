@@ -113,13 +113,13 @@
                         </div>
                       </div>
                     </div>
-                    <div v-if="walletStore.connected && ownerAccountAddress == null" class="user-balance">
+                    <div v-if="walletStore.connected || ownerAccountAddress != null" class="user-balance">
                       <h5>External Account Address </h5>
                       <div class="user_wallet" style="border: 0 solid #e5e7eb; padding: 10px 0px 0px 0px;">
                         <div class="user2">
                           <div class="wallet-image-wrapper">
-                            <img class="wallet-image" :src="useWalletStore().wallet?.walletIcon">
-                            <div class="wallet-presence-wrapper">
+                            <img class="wallet-image" :src="useWalletStore().walletIcon">
+                            <div v-if="ownerAccountAddress == null" class="wallet-presence-wrapper">
                               <a-tooltip placement="right">
                                 <template #title>
                                   <span>Start to send money to bind this wallet with Hexlink account</span>
@@ -127,15 +127,31 @@
                                 <img class="wallet-presence" src="../assets/exclamation-mark.png" alt="" />
                               </a-tooltip>
                             </div>
+                            <div v-if="ownerAccountAddress != null && walletStore.connected" class="wallet-presence-wrapper">
+                              <a-tooltip placement="right">
+                                <template #title>
+                                  <span>Wallet is Available</span>
+                                </template>
+                                <img class="wallet-presence" src="../assets/presence_green_dot.png" alt="" />
+                              </a-tooltip>
+                            </div>
+                            <div v-if="ownerAccountAddress != null && !walletStore.connected" class="wallet-presence-wrapper">
+                              <a-tooltip placement="right">
+                                <template #title>
+                                  <span>You connect wallet is unavailable in this browser</span>
+                                </template>
+                                <img class="wallet-presence" src="../assets/presence_grey_dot.png" alt="" />
+                              </a-tooltip>
+                            </div>
                           </div>
                           <div class="user-info">
                             <span style="margin-bottom: 0;" class="smart-contract-address">
-                              <h5 @click="doCopy(walletStore.wallet?.address)">
-                                {{ addressTextLong(walletStore.wallet?.address) }}
+                              <h5 @click="doCopy(walletStore.account?.address)">
+                                {{ addressTextLong(walletStore.account?.address) }}
                               </h5>
                             </span>
                           </div>
-                          <div> 
+                          <div v-if="ownerAccountAddress == null"> 
                             <a-tooltip placement="bottom">
                               <template #title>
                                 <span>Disconnect</span>
@@ -147,31 +163,6 @@
                                   fill="#F46A6A" />
                               </svg>
                             </a-tooltip>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div v-if="walletStore.connected && ownerAccountAddress != null" class="user-balance">
-                      <h5>External Account Address </h5>
-                      <div class="user_wallet" style="border: 0 solid #e5e7eb; padding: 10px 0px 0px 0px;">
-                        <div class="user2">
-                          <div class="wallet-image-wrapper">
-                            <img class="wallet-image" :src="useWalletStore().wallet?.walletIcon">
-                            <div class="wallet-presence-wrapper">
-                              <a-tooltip placement="right">
-                                <template #title>
-                                  <span>Wallet is Available</span>
-                                </template>
-                                <img class="wallet-presence" src="../assets/presence_green_dot.png" alt="" />
-                              </a-tooltip>
-                            </div>
-                          </div>
-                          <div class="user-info">
-                            <span style="margin-bottom: 0;" class="smart-contract-address">
-                              <h5 @click="doCopy(walletStore.wallet?.account.address)">
-                                {{ addressTextLong(walletStore.wallet?.account.address) }}
-                              </h5>
-                            </span>
                           </div>
                         </div>
                       </div>
@@ -210,10 +201,9 @@ import { createToaster } from "@meforma/vue-toaster";
 import { GOERLI, MUMBAI, prettyPrintAddress } from "../../functions/common";
 import { switchNetwork } from "@/web3/network";
 import { connectWallet, disconnectWallet} from "@/web3/wallet";
-import { useProfileStore } from "@/stores/profile";
 import { useAccountStore } from "@/stores/account";
 import { signOutFirebase } from "@/services/auth";
-import type { Account } from "@/types";
+import type { Account } from "../../functions/common";
 import useClipboard from 'vue-clipboard3';
 
 const newLocal = "wallet-presence";
@@ -222,9 +212,8 @@ const user = authStore.user!;
 const walletStore = useWalletStore();
 const active = ref<string>("");
 const { toClipboard } = useClipboard();
-const ownerAccountAddress = useProfileStore().account.owner;
+const ownerAccountAddress = useAccountStore().account?.owner;
 console.log(ownerAccountAddress)
-console.log("testtest")
 
 const addressTextLong = function (address: string | undefined) {
   if (address) {
@@ -908,6 +897,7 @@ cursor: pointer; }
 .wallet-presence {
   width: 12px; 
   height: 12px;
+  border: 1px solid white;
   border-radius: 100%;}
 .connect-wallet-button {
   display: flex;

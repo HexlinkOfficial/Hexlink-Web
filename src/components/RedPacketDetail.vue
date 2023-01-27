@@ -8,9 +8,9 @@
           fill="white" />
       </svg>
     </router-link>
-    <button class="withdraw-button">
+    <!-- <button class="withdraw-button">
       <span style="padding: 5px;">Withdraw</span>
-    </button>
+    </button> -->
     <div class="card_circle transition"></div>
     <h2 class="transition">
       <span>

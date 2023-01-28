@@ -1,8 +1,10 @@
 import express from "express";
 import Queue from "bull";
+import cache from "node-cache";
 import {ethers} from "ethers";
 import {recordClaimTx, recordTx, updateTx} from "./operation";
 import {RedPacketClaimInput, TxStatus, Operation} from "./types";
+import {validatorKeyIds, validatorMap} from "./sender";
 import {getChain} from "../../functions/common";
 import type {Chain} from "../../functions/common";
 
@@ -11,6 +13,9 @@ const port = 8080;
 
 const operationQueue = new Queue("operationQueue");
 const transactionQueue = new Queue("transactionQueue");
+const sendersInProcessCache = "senders_in_process";
+const senderCache = new cache();
+senderCache.set(sendersInProcessCache, []);
 
 const getInfuraProvider = (
   chain: Chain
@@ -34,8 +39,7 @@ app.post('/submitClaimTx', async (req, res) => {
   await operationQueue.add({
       id,
       chainId: req.query.chainId as string,
-      signedTx: req.query.signedTx as string,
-      from: req.query.from as string
+      signedTx: req.query.signedTx as string
   });
 });
 
@@ -54,6 +58,14 @@ app.listen(port, () => {
 });
 
 operationQueue.process(async (job: any) => {
+  // get the list of senders in process
+  const sendersInProcess: string[] = senderCache.get(sendersInProcessCache)!;
+  const sendersInIdle = validatorKeyIds.filter(k => !sendersInProcess.includes(k));
+  // use the first sender in idle;
+  // if there is no available one, select a sender randomly from the senders pool
+  const sender = sendersInIdle.length > 0 ? sendersInIdle[0]
+      : validatorKeyIds[Math.floor(Math.random() * validatorKeyIds.length)];
+
   const chain: Chain = getChain(job.data.chain);
   const provider: ethers.providers.Provider = getInfuraProvider(chain);
 
@@ -61,18 +73,27 @@ operationQueue.process(async (job: any) => {
   const txHash = await provider.sendTransaction(tx);
 
   const id = await recordTx(chain.name, job.data.tx);
-  await transactionQueue.add({id, chain, txHash, from});
+  await transactionQueue.add({id, chain, txHash, sender});
+
+  // cache the new occupied sender to the senders in process list
+  senderCache.set(sendersInProcessCache, sendersInProcess.push(sender));
 });
 
 transactionQueue.process(async (job: any) => {
   const provider: ethers.providers.Provider = getInfuraProvider(job.data.chain);
   const tx = await provider.getTransaction(job.data.txHash);
 
-  if (!tx || !tx.to || tx.from !== job.data.from) {
+  if (!tx || !tx.to || tx.from !== validatorMap.get(job.data.from)) {
     const errorStatus: TxStatus = "error";
     updateTx(job.data.id, errorStatus);
     return;
   }
+
+  // remove the new released sender from the senders in process list cache
+  const senders: string[] = senderCache.get(sendersInProcessCache)!;
+  const idx = senders.findIndex(s => s === job.data.from);
+  const newSenders = senders.splice(idx,1);
+  senderCache.set(sendersInProcessCache, newSenders);
 
   const successStatus: TxStatus = "success";
   updateTx(job.data.id, successStatus);

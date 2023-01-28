@@ -1,5 +1,6 @@
 import express from "express";
 import Queue from "bull";
+import cache from "node-cache";
 import {ethers} from "ethers";
 import {recordClaimTx, recordTx, updateTx} from "./operation";
 import {RedPacketClaimInput, TxStatus, Operation} from "./types";
@@ -11,6 +12,10 @@ const port = 8080;
 
 const operationQueue = new Queue("operationQueue");
 const transactionQueue = new Queue("transactionQueue");
+const senderCache = new cache();
+
+export const senderPool: Map<string, string> = JSON.parse(process.env.TX_SENDER_POOL!);
+export const senderAddr =[ ...senderPool.keys() ];
 
 const getInfuraProvider = (
   chain: Chain
@@ -34,8 +39,7 @@ app.post('/submitClaimTx', async (req, res) => {
   await operationQueue.add({
       id,
       chainId: req.query.chainId as string,
-      signedTx: req.query.signedTx as string,
-      from: req.query.from as string
+      signedTx: req.query.signedTx as string
   });
 });
 
@@ -53,7 +57,28 @@ app.listen(port, () => {
   console.log( `server started at http://localhost:${ port }` );
 });
 
+const getSenderInIdle = () : string => {
+  const sendersInProcess: string[] = Object.values(senderCache.mget(senderCache.keys()));
+  const sendersInIdle = senderAddr.filter(k => !sendersInProcess.includes(k));
+  return sendersInIdle.length > 0 ? sendersInIdle[0] : "";
+};
+
+const removeSenderCompletedJob = (sender: string) => {
+  const keys: string[] = senderCache.keys();
+  for (const key of keys) {
+    if (<string>senderCache.get(key) === sender) {
+      senderCache.del(key);
+      break;
+    }
+  }
+}
+
 operationQueue.process(async (job: any) => {
+  const sender = getSenderInIdle();
+  if (sender === "") {
+    return;
+  }
+
   const chain: Chain = getChain(job.data.chain);
   const provider: ethers.providers.Provider = getInfuraProvider(chain);
 
@@ -61,18 +86,24 @@ operationQueue.process(async (job: any) => {
   const txHash = await provider.sendTransaction(tx);
 
   const id = await recordTx(chain.name, job.data.tx);
-  await transactionQueue.add({id, chain, txHash, from});
+  await transactionQueue.add({id, chain, txHash, sender});
+
+  // cache the new occupied sender to the senders in process list
+  senderCache.set(Date.now(), sender);
 });
 
 transactionQueue.process(async (job: any) => {
   const provider: ethers.providers.Provider = getInfuraProvider(job.data.chain);
   const tx = await provider.getTransaction(job.data.txHash);
 
-  if (!tx || !tx.to || tx.from !== job.data.from) {
+  if (!tx || !tx.to || tx.from !== validatorMap.get(job.data.sender)) {
     const errorStatus: TxStatus = "error";
     updateTx(job.data.id, errorStatus);
     return;
   }
+
+  // remove the new released sender from the senders in process list cache
+  removeSenderCompletedJob(job.data.sender);
 
   const successStatus: TxStatus = "success";
   updateTx(job.data.id, successStatus);

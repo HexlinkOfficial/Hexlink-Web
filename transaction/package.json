@@ -14,7 +14,9 @@
   "license": "ISC",
   "dependencies": {
     "bull": "^4.10.2",
-    "express": "^4.18.2"
+    "express": "^4.18.2",
+    "node-cache": "^5.1.2",
+    "save": "^2.9.0"
   },
   "devDependencies": {
     "tslint": "^6.1.3",

@@ -57,10 +57,15 @@ app.listen(port, () => {
   console.log( `server started at http://localhost:${ port }` );
 });
 
-const getSenderInIdle = () : string => {
+const getSenderInIdle = (provider: ethers.providers.Provider) => {
   const sendersInProcess: string[] = Object.values(senderCache.mget(senderCache.keys()));
   const sendersInIdle = senderAddr.filter(k => !sendersInProcess.includes(k));
-  return sendersInIdle.length > 0 ? sendersInIdle[0] : "";
+  
+  if (sendersInIdle.length > 0) {
+    return new ethers.Wallet(senderPool.get(sendersInIdle[0])!, provider);
+  }
+
+  return;
 };
 
 const removeSenderCompletedJob = (sender: string) => {
@@ -74,13 +79,12 @@ const removeSenderCompletedJob = (sender: string) => {
 }
 
 operationQueue.process(async (job: any) => {
-  const sender = getSenderInIdle();
-  if (sender === "") {
-    return;
-  }
-
   const chain: Chain = getChain(job.data.chain);
   const provider: ethers.providers.Provider = getInfuraProvider(chain);
+  const signer = getSenderInIdle(provider);
+  if (!signer) {
+    return;
+  }
 
   const tx = buildTxFromOp(job.data.op);
   const txHash = await provider.sendTransaction(tx);

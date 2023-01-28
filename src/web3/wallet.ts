@@ -5,6 +5,7 @@ import WalletConnect from "@walletconnect/web3-provider";
 import { isContract } from "../../functions/common";
 import type { Account } from "../../functions/common";
 import { useChainStore } from "@/stores/chain";
+import { useAccountStore } from "@/stores/account";
 
 async function buildAccount(account: string) : Promise<Account> {
   return {
@@ -34,6 +35,7 @@ export async function disconnectWallet() {
 }
 
 export async function connectWallet() {
+  const ownerAccountAddress = useAccountStore().account?.owner;
   if (typeof window.ethereum == 'undefined') {
     console.log('MetaMask is not installed!');
   }
@@ -57,16 +59,32 @@ export async function connectWallet() {
       walletIcon = "https://i.postimg.cc/j29hn62F/9035092-wallet-icon.png";
     }
   }
-  const store = useWalletStore();
-  store.connectWallet(
-    wallet,
-    walletIcon,
-    await buildAccount(accounts[0])
-  );
+  console.log("Account 0: ", accounts[0]);
+  if (ownerAccountAddress != null && ownerAccountAddress == accounts[0]) {
+    const store = useWalletStore();
+    store.connectWallet(
+      wallet,
+      walletIcon,
+      await buildAccount(accounts[0])
+    );
 
-  window.ethereum.on('accountsChanged', async function (accounts: string[]) {
-    store.switchAccount(await buildAccount(accounts[0]));
-  });
+    window.ethereum.on('accountsChanged', async function (accounts: string[]) {
+      store.switchAccount(await buildAccount(accounts[0]));
+    });
+  } else if (ownerAccountAddress == null) {
+    const store = useWalletStore();
+    store.connectWallet(
+      wallet,
+      walletIcon,
+      await buildAccount(accounts[0])
+    );
+
+    window.ethereum.on('accountsChanged', async function (accounts: string[]) {
+      store.switchAccount(await buildAccount(accounts[0]));
+    });
+  } else {
+    console.log("Not your owner account!");
+  }
 }
 
 export async function signMessage(account: string, message: string) {

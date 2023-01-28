@@ -43,8 +43,18 @@ const getVersionName = async function(keyType: string) {
   );
 };
 
-export const getEthAddressFromPublicKey = async function(keyType: string) {
-  const versionName = await getVersionName(keyType);
+export const getEthAddressFromPublicKey = async function(
+    keyId: string,
+    keyType: string
+) {
+  const config: KMS_CONFIG_TYPE = kmsConfig().get(keyType)!;
+  const versionName = client.cryptoKeyVersionPath(
+      config.projectId,
+      config.locationId,
+      config.keyRingId,
+      keyId,
+      config.versionId
+  );
   const publicKey = await getPublicKey(versionName);
   const publicKeyPem = publicKey.pem || "";
   const publicKeyDer = crypto.createPublicKey(publicKeyPem)

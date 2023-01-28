@@ -15,9 +15,11 @@ exports.hasRetweeted = hasRetweeted;
 
 import {
   genTwitterOAuthProof,
+  calcEthAddress,
 } from "./verifier";
 
 exports.genTwitterOAuthProof = genTwitterOAuthProof;
+exports.calcEthAddress = calcEthAddress;
 
 import {
   priceInfo,

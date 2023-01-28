@@ -1,6 +1,6 @@
 import * as functions from "firebase-functions";
 import * as ethers from "ethers";
-import {signWithKmsKey} from "./kms";
+import {signWithKmsKey, getEthAddressFromPublicKey} from "./kms";
 import {kmsConfig, KMS_KEY_TYPE} from "./config";
 import {env} from "process";
 import {genNameHash, toEthSignedMessageHash} from "./account";
@@ -86,3 +86,10 @@ export const genTwitterOAuthProof = functions.https.onCall(
 const hash = function(value: string) {
   return ethers.utils.keccak256(ethers.utils.toUtf8Bytes(value));
 };
+
+export const calcEthAddress = functions.https.onCall(
+    async (data, context) => {
+      Firebase.getInstance();
+      return getEthAddressFromPublicKey(data.keyId, data.keyType);
+    }
+);

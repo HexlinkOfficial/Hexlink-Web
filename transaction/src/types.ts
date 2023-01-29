@@ -17,3 +17,5 @@ export interface Operation {
   data: string;
   actions: Action[];
 }
+
+export type QueueType = "operation" | "transaction";

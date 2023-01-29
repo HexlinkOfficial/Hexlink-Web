@@ -2,18 +2,18 @@
 
 import {BigNumber as EthBigNumber} from "ethers";
 
-export interface UserOpInput {
+export interface OpInput {
     to: string,
     value: EthBigNumber,
-    callData: string | any[],
+    callData: string | [],
     callGasLimit: EthBigNumber,
 }
 
-export interface UserOp {
+export interface Op {
   name: string;
   function: string;
-  args: any[];
-  input: UserOpInput;
+  args: {[key: string]: any};
+  input: OpInput;
 }
 
 export interface GasObject {
@@ -21,18 +21,4 @@ export interface GasObject {
   token: string;
   base: EthBigNumber;
   price: EthBigNumber;
-}
-
-export interface TransactionInput {
-    to: string,
-    from: string,
-    value: string,
-    data: string | any[],
-}
-
-export interface Transaction {
-    name: string,
-    function: string,
-    args: any[],
-    input: TransactionInput
 }

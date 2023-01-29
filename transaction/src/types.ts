@@ -10,28 +10,10 @@ export interface RedPacketClaimInput {
   claimed?: string
 }
 
-export type OperationType = {
-  app: string;
-  op: string;
-}
-
-export const createRedPacket : OperationType = {
-  app: "redpacket",
-  op: "create",
-}
-
-export const claimRedPacket : OperationType = {
-  app: "redpacket",
-  op: "claim",
-}
-
-export const deployAccount : OperationType = {
-  app: "hexlink",
-  op: "deploy",
-}
+type Action = "claim_redpacket" | "create_redpacket";
 
 export interface Operation {
   to: string;
   data: string;
-  types: OperationType[];
+  actions: Action[];
 }

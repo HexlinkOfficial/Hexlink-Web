@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.buildCreateRedPacketTx = exports.buildRedPacketOps = exports.buildGasSponsorshipOp = exports.calcGasSponsorship = void 0;
+exports.buildRedPacketOps = exports.buildGasSponsorshipOp = exports.calcGasSponsorship = void 0;
 const ethers_1 = require("ethers");
 const common_1 = require("../../common");
 const redpacket_1 = require("./redpacket");
@@ -20,15 +20,15 @@ function calcGasSponsorship(chain, redpacket, priceInfo) {
 }
 exports.calcGasSponsorship = calcGasSponsorship;
 function buildGasSponsorshipOp(chain, input, refunder, hexlAccount, priceInfo) {
-    const gasTokenAmount = calcGasSponsorship(chain, input, priceInfo);
+    const sponsorship = calcGasSponsorship(chain, input, priceInfo);
     if ((0, common_1.isNativeCoin)(input.gasToken, chain)) {
         return {
-            name: "refundGasToken",
+            name: "depositGasSponsorship",
             function: "",
             args: [],
             input: {
                 to: refunder,
-                value: gasTokenAmount,
+                value: sponsorship,
                 callData: [],
                 callGasLimit: ethers_1.BigNumber.from(0) // no limit
             }
@@ -38,10 +38,10 @@ function buildGasSponsorshipOp(chain, input, refunder, hexlAccount, priceInfo) {
         const args = [
             hexlAccount,
             refunder,
-            gasTokenAmount
+            sponsorship
         ];
         return {
-            name: "refundGasToken",
+            name: "depositGasSponsorship",
             function: "transferFrom",
             args,
             input: {
@@ -103,20 +103,3 @@ function buildRedPacketOps(chain, input) {
     }
 }
 exports.buildRedPacketOps = buildRedPacketOps;
-function buildCreateRedPacketTx(chain, refunder, hexlAccount, ops, input, from, priceInfo) {
-    ops.push(buildGasSponsorshipOp(chain, input, refunder, hexlAccount, priceInfo));
-    ops = ops.concat(buildRedPacketOps(chain, input));
-    const data = (0, common_1.encodeExecBatch)(ops.map(op => op.input));
-    return {
-        name: "createRedPacket",
-        function: "execBatch",
-        args: ops,
-        input: {
-            to: hexlAccount,
-            from,
-            data,
-            value: ethers_1.ethers.utils.hexValue(0)
-        }
-    };
-}
-exports.buildCreateRedPacketTx = buildCreateRedPacketTx;

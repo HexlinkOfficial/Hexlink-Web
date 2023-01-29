@@ -56,11 +56,12 @@ const createRedPacket = async () => {
       await deployAndCreateNewRedPacket(
         store.redpacket!,
         store.account == "hexlink",
+        true
       );
     }
     store.setStatus("success");
   } catch (e) {
-    console.log("Failed to claim redpacket with error " + e);
+    console.log("Failed to create redpacket with error " + e);
     store.setStatus("error");
   }
 }

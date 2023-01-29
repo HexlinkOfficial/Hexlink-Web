@@ -9,8 +9,15 @@ import type {Chain} from "../../functions/common";
 const app = express();
 const port = 8080;
 
-const operationQueue = new Queue("operationQueue");
-const transactionQueue = new Queue("transactionQueue");
+const operationQueues: {[key: string]: Queue.Queue} = {
+  "mumbai": new Queue("mumbaiOpQueue"),
+  "goerli": new Queue("goerliOpQueue"),
+};
+const transactionQueues: {[key: string]: Queue.Queue} = {
+  "mumbai": new Queue("mumbaiTxQueue"),
+  "goerli": new Queue("goerliTxQueue"),
+};
+const txStatusQueue = new Queue("txStatusQueue");
 
 const getInfuraProvider = (
   chain: Chain
@@ -31,9 +38,9 @@ app.post('/submitClaimTx', async (req, res) => {
     txStatus: queuedStatus
   };
   const id = await recordClaimTx(claimRequest);
-  await operationQueue.add({
+  await operationQueues[req.query.chain as string].add({
       id,
-      chainId: req.query.chainId as string,
+      chain: req.query.chain as string,
       signedTx: req.query.signedTx as string,
       from: req.query.from as string
   });
@@ -42,7 +49,7 @@ app.post('/submitClaimTx', async (req, res) => {
 app.post('/submitTx', async (req: {
   query: {chain: string, op: Operation}
 }, _res) => {
-  await operationQueue.add({
+  await operationQueues[req.query.chain as string].add({
     chain: req.query.chain,
     op: req.query.op,
   });
@@ -53,18 +60,41 @@ app.listen(port, () => {
   console.log( `server started at http://localhost:${ port }` );
 });
 
-operationQueue.process(async (job: any) => {
+const getSender = async (chain: Chain) => {
+  return undefined;
+};
+
+const buildTxFromOps = (ops: any[]) : string => {
+  return "";
+};
+
+const processor = async (job: any) => {
   const chain: Chain = getChain(job.data.chain);
+  const sender = await getSender(chain);
+  if (!sender) { return; }
+
   const provider: ethers.providers.Provider = getInfuraProvider(chain);
+  const opQueue = operationQueues[job.data.chain as string];
+  const ops = await opQueue.getJobs(['waiting'], 0, 100);
 
-  const tx = buildTxFromOp(job.data.op);
+  const tx: string = buildTxFromOps(ops);
   const txHash = await provider.sendTransaction(tx);
-
   const id = await recordTx(chain.name, job.data.tx);
-  await transactionQueue.add({id, chain, txHash, from});
+  await txStatusQueue.add({id, chain, txHash});
+}
+
+transactionQueues["mumbai"].process(processor);
+transactionQueues["goerli"].process(processor);
+transactionQueues["mumbai"].add(
+  {chain: "mumbai"},
+  { repeat: { every: 1000, } }
+);
+transactionQueues["goerli"].add(
+  {chain: "goerli"},
+  { repeat: { every: 1000, }
 });
 
-transactionQueue.process(async (job: any) => {
+const postProcessor = async (job: any) => {
   const provider: ethers.providers.Provider = getInfuraProvider(job.data.chain);
   const tx = await provider.getTransaction(job.data.txHash);
 
@@ -77,4 +107,7 @@ transactionQueue.process(async (job: any) => {
   const successStatus: TxStatus = "success";
   updateTx(job.data.id, successStatus);
   provider.removeAllListeners();
-});
+}
+
+transactionQueues["mumbai"].on('completed', postProcessor);
+transactionQueues["goerli"].on('completed', postProcessor);

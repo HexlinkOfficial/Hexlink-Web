@@ -8,7 +8,7 @@ import { useChainStore } from "@/stores/chain"
 const functions = getFunctions();
 
 export async function genDeployAuthProof(
-    data: string
+    data: string | []
 ) : Promise<{ initData: string, proof: AuthProof }> {
     const wallet = useWalletStore();
     if (!wallet.connected) {
@@ -21,7 +21,7 @@ export async function genDeployAuthProof(
         useAuthStore().user!.nameHash,
         wallet.account!.address,
         data,
-        async (param) => {
+        async (param: any) => {
             const result = await genAuthProof(param);
             return (result.data as any).authProof as AuthProof;
         }

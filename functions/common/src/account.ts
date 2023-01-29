@@ -4,7 +4,7 @@ import {ethers, Contract, BigNumber as EthBigNumber } from "ethers";
 import type {Provider} from "@ethersproject/providers";
 import ACCOUNT_SIMPLE_ABI from "./abi/ACCOUNT_SIMPLE_ABI.json";
 import {hash, isContract} from "./utils";
-import {GasObject, UserOpInput} from "./types";
+import {GasObject, OpInput} from "./types";
 
 export interface Account {
     address: string,
@@ -50,20 +50,20 @@ export function encodeInit(owner: string, data: string) {
   );
 }
 
-export function encodeExec(op: UserOpInput) {
+export function encodeExec(op: OpInput) {
   return accountInterface.encodeFunctionData(
     "execBatch", [op]
   );
 }
 
-export function encodeExecBatch(ops: UserOpInput[]) {
+export function encodeExecBatch(ops: OpInput[]) {
   return accountInterface.encodeFunctionData(
     "execBatch", [ops]
   );
 }
 
 export function encodeValidateAndCall(params: {
-  ops: UserOpInput[],
+  ops: OpInput[],
   signature: string,
   nonce: EthBigNumber,
   gas?: GasObject

@@ -40,7 +40,7 @@ export async function genDeployAuthProof(
     provider: Provider,
     nameHash: string,
     owner: string,
-    data: string,
+    data: string | [],
     genAuthProof: (request: {requestId: string}) => Promise<AuthProof>,
 ) : Promise<{ initData: string, proof: AuthProof }> {
   const initData = accountInterface.encodeFunctionData(

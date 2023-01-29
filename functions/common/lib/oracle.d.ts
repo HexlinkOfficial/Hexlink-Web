@@ -7,7 +7,7 @@ export interface AuthProof {
     issuedAt: number;
     signature: string;
 }
-export declare function genDeployAuthProof(provider: Provider, nameHash: string, owner: string, data: string, genAuthProof: (request: {
+export declare function genDeployAuthProof(provider: Provider, nameHash: string, owner: string, data: string | [], genAuthProof: (request: {
     requestId: string;
 }) => Promise<AuthProof>): Promise<{
     initData: string;

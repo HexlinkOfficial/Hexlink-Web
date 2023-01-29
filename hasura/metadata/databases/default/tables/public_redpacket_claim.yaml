@@ -2,30 +2,12 @@ table:
   name: redpacket_claim
   schema: public
 object_relationships:
+  - name: operation
+    using:
+      foreign_key_constraint_on: op_id
   - name: redpacket
     using:
       foreign_key_constraint_on: redpacket_id
-select_permissions:
-  - role: user
-    permission:
-      columns:
-        - id
-        - created_at
-        - updated_at
-        - redpacket_id
-        - claimer_id
-        - tx
-        - claimer
-        - tx_status
-        - claimed
-        - creator_id
-      filter:
-        _or:
-          - claimer_id:
-              _eq: X-Hasura-User-Id
-          - creator_id:
-              _eq: X-Hasura-User-Id
-      limit: 1000
 update_permissions:
   - role: user
     permission:

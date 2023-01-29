@@ -1,0 +1,8 @@
+table:
+  name: transaction
+  schema: public
+select_permissions:
+  - role: user
+    permission:
+      columns: []
+      filter: {}

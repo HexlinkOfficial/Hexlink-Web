@@ -6,7 +6,7 @@ import { genDeployAuthProof } from "@/web3/oracle";
 import { tokenEqual } from "@/web3/utils";
 import { estimateGas, sendTransaction } from "@/web3/wallet";
 
-import type { Chain, Token, UserOp, Transaction } from "../../functions/common";
+import type { Chain, Token, Op, OpInput } from "../../functions/common";
 import {
     hash,
     isNativeCoin,
@@ -16,6 +16,7 @@ import {
     hexlAddress,
     hexlInterface,
     tokenAmount,
+    encodeExecBatch,
 } from "../../functions/common";
 import type { RedPacket } from "../../functions/redpacket";
 import {
@@ -23,7 +24,8 @@ import {
     redPacketContract,
     redPacketMode,
     calcGasSponsorship,
-    buildCreateRedPacketTx
+    buildGasSponsorshipOp,
+    buildRedPacketOps,
 } from "../../functions/redpacket";
 
 import { useChainStore } from "@/stores/chain";
@@ -35,11 +37,42 @@ import { useAccountStore } from "@/stores/account";
 import { getFunctions, httpsCallable } from 'firebase/functions'
 const functions = getFunctions();
 
+export interface Transaction {
+    name: string,
+    function: string,
+    args: {[key: string]: any},
+    input: TransactionInput
+}
+
+export interface TransactionInput {
+    to: string,
+    from: string,
+    value: string,
+    data: string | [],
+}
+
 export function validator() : string {
     if (import.meta.env.VITE_USE_FUNCTIONS_EMULATOR) {
         return "0xEF2e3F91209F88A3143e36Be10D52502162426B3";
     }
     return "0x030ffbc193c3f9f4c6378beb506eecb0933fd457";
+}
+
+function buildOpInput(params: {
+    to: string,
+    value?: EthBigNumber,
+    callData?: string | [],
+    callGasLimit?: EthBigNumber,
+}) : OpInput {
+    if (!params.value && !params.callData) {
+        throw new Error("Neither value or data is set");
+    }
+    return {
+        to: params.to,
+        value: params.value || EthBigNumber.from(0),
+        callData: params.callData || [],
+        callGasLimit: params.callGasLimit || EthBigNumber.from(0),
+    }
 }
 
 async function buildApproveTx(
@@ -53,17 +86,13 @@ async function buildApproveTx(
     if (allowance.gte(requiredAmount)) {
         return [];
     }
-    const args = [
-        operator,
-        ethers.constants.MaxInt256
-    ];
     const data = erc20Interface.encodeFunctionData(
-        "approve", args
+        "approve", [operator, ethers.constants.MaxInt256]
     );
     return [{
         name: "approveHexlAccount",
         function: "approve",
-        args,
+        args: {operator, amount: ethers.constants.MaxInt256},
         input: {
             to: token.address,
             from: owner,
@@ -78,22 +107,17 @@ async function buildDepositErc20TokenOp(
     from: string,
     to: string,
     amount: EthBigNumber
-): Promise<{tx: Transaction[], op: UserOp[]}> {
-    const args = [from, to, amount]
+): Promise<{tx: Transaction[], op: Op[]}> {
+    const callData = erc20Interface.encodeFunctionData(
+        "transferFrom", [from, to, amount]
+    );
     return {
         tx: await buildApproveTx(token, from, to, amount),
         op: [{
             name: "depositErc20",
             function: "transferFrom",
-            args,
-            input: {
-                to: token.address,
-                value: EthBigNumber.from(0),
-                callData: erc20Interface.encodeFunctionData(
-                    "transferFrom", args
-                ),
-                callGasLimit: EthBigNumber.from(0) // no limit
-            }
+            args: {from, to, amount},
+            input: buildOpInput({to: token.address, callData}),
         }]
     }
 }
@@ -107,22 +131,23 @@ async function buildCreateRedPacketTxForMetamask(input: RedPacket) {
     input.tokenAmount = tokenAmount(input.balance, input.token);
     input.gasTokenAmount = calcGasSponsorship(chain, input, priceInfo);
 
-    let ops : UserOp[] = [];
+    let userOps : Op[] = [];
+    let hexlOps: Op[] = [];
     let txes : any[] = [];
     let value : EthBigNumber = EthBigNumber.from(0);
 
     if (tokenEqual(input.token, input.gasToken)) {
         if (isNativeCoin(input.token, chain)) {
-            value = value.add(input.tokenAmount).add(input.gasTokenAmount)
+            value = value.add(input.tokenAmount!).add(input.gasTokenAmount)
         } else {
             const {tx, op} = await buildDepositErc20TokenOp(
                 input.token,
                 walletAccount.address,
                 hexlAccount.address,
-                input.tokenAmount.add(input.gasTokenAmount)
+                input.tokenAmount!.add(input.gasTokenAmount)
             );
             txes = txes.concat(tx);
-            ops = ops.concat(op);
+            userOps = userOps.concat(op);
         }
     } else {
         if (isNativeCoin(input.gasToken, chain)) {
@@ -135,7 +160,7 @@ async function buildCreateRedPacketTxForMetamask(input: RedPacket) {
                 input.tokenAmount
             );
             txes = txes.concat(tx);
-            ops = ops.concat(op);
+            userOps = userOps.concat(op);
         }
         if (isNativeCoin(input.gasToken, chain)) {
             value = value.add(input.gasTokenAmount);
@@ -147,42 +172,95 @@ async function buildCreateRedPacketTxForMetamask(input: RedPacket) {
                 input.gasTokenAmount
             );
             txes = txes.concat(tx);
-            ops = ops.concat(op);
+            userOps = userOps.concat(op);
         }
     }
-    txes.push(buildCreateRedPacketTx(
-        chain,
-        useChainStore().refunder,
-        hexlAccount.address,
-        ops,
-        input,
-        walletAccount.address,
-        priceInfo
+
+    const refunder = useChainStore().refunder;
+    if (value.gt(0)) {
+        hexlOps.push({
+            name: "depositGasSponsorship",
+            function: "",
+            args: {},
+            input: buildOpInput({to: refunder, value}),
+        });
+    }
+    userOps.push(buildGasSponsorshipOp(
+        chain, input, refunder, hexlAccount.address, priceInfo
     ));
+    userOps = userOps.concat(buildRedPacketOps(chain, input));
+    const callData = encodeExecBatch(userOps.map(userOp => userOp.input));
+    hexlOps.push({
+        name: "createRedPacket",
+        function: "execBatch",
+        args: {ops: userOps},
+        input: buildOpInput({to: hexlAccount.address, callData}),
+    });
+
+    const hexlAddr = hexlAddress(useChainStore().chain);
+    const data = hexlInterface.encodeFunctionData(
+        "process", [hexlOps.map(hexlOp => hexlOp.input)]
+    );
+    const totalValue = hexlOps.reduce(
+        (sum, hexlOp) => sum.add(hexlOp.input.value),
+        EthBigNumber.from(0)
+    );
+    txes.push({
+        name: "depositAndCreateRedPacket",
+        function: "process",
+        args: {ops: hexlOps},
+        input: {
+            to: hexlAddr,
+            from: useWalletStore().account!.address,
+            value: ethers.utils.hexValue(totalValue),
+            data,
+        }
+    });
     return txes;
 }
 
 export async function buildDeployAndCreateRedPacketTx(input: RedPacket) : Promise<any> {
     const txes = await buildCreateRedPacketTxForMetamask(input);
-    const tx = txes.pop(); // last tx is the redpacket creation tx
-    const { initData, proof } = await genDeployAuthProof(tx.tx.data);
-    const args = [useAuthStore().user!.nameHash, initData, {
+
+    // pop execBatch op and encode it to init
+    const tx = txes.pop(); 
+    const ops: Op[] = tx.args.ops;
+    const op = ops.pop();
+
+    const { initData, proof } = await genDeployAuthProof(op!.input.callData);
+    const name = useAuthStore().user!.nameHash;
+    const authProof = {
         authType: hash(proof.authType),
         identityType: hash(proof.identityType),
         issuedAt: EthBigNumber.from(proof.issuedAt),
         signature: proof.signature
-    }];
-    const data = hexlInterface.encodeFunctionData(
-        "deploy", args
+    };
+    const callData = hexlInterface.encodeFunctionData(
+        "deploy", [name, initData, authProof]
     );
+    const hexlAddr = hexlAddress(useChainStore().chain);
+    ops.push({
+        name: "depositAndDeployAndCreateRedPacket",
+        function: "deploy",
+        args: {
+            name: useAuthStore().user!.nameHash,
+            initData: op,
+            authProof
+        },
+        input: buildOpInput({to: hexlAddr, callData}),
+    });
+    const data = hexlInterface.encodeFunctionData(
+        "process", [ops.map(op => op.input)]
+    );
+    const value = ops.reduce((sum, op) => sum.add(op.input.value), EthBigNumber.from(0));
     txes.push({
         name: "deployAndCreateRedPacket",
-        function: "deploy",
-        args,
+        function: "process",
+        args: ops,
         input: {
-            to: hexlAddress(useChainStore().chain),
+            to: hexlAddr,
             from: useWalletStore().account!.address,
-            value: tx.tx.value,
+            value: ethers.utils.hexValue(value),
             data,
         }
     });

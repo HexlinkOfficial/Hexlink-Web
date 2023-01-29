@@ -35,7 +35,6 @@ export async function disconnectWallet() {
 }
 
 export async function connectWallet() {
-  const ownerAccountAddress = useAccountStore().account?.owner;
   if (typeof window.ethereum == 'undefined') {
     console.log('MetaMask is not installed!');
   }
@@ -59,32 +58,46 @@ export async function connectWallet() {
       walletIcon = "https://i.postimg.cc/j29hn62F/9035092-wallet-icon.png";
     }
   }
+
+  const ownerAccountAddress = useAccountStore().account?.owner;
+  const store = useWalletStore();
   console.log("Account 0: ", accounts[0]);
-  if (ownerAccountAddress != null && ownerAccountAddress == accounts[0]) {
-    const store = useWalletStore();
+  if (ownerAccountAddress != null && accounts.map(acc => acc.toLowerCase()).includes(ownerAccountAddress.toLowerCase())) {
     store.connectWallet(
       wallet,
       walletIcon,
-      await buildAccount(accounts[0])
+      await buildAccount(ownerAccountAddress)
     );
-
-    window.ethereum.on('accountsChanged', async function (accounts: string[]) {
-      store.switchAccount(await buildAccount(accounts[0]));
-    });
   } else if (ownerAccountAddress == null) {
-    const store = useWalletStore();
     store.connectWallet(
       wallet,
       walletIcon,
       await buildAccount(accounts[0])
     );
-
-    window.ethereum.on('accountsChanged', async function (accounts: string[]) {
-      store.switchAccount(await buildAccount(accounts[0]));
-    });
   } else {
-    console.log("Not your owner account!");
+    try {
+      const result = await window.ethereum.request({
+        method: 'wallet_requestPermissions',
+        params: [{ eth_accounts: {} }],
+      });
+      console.log(result);
+    } catch (error: any) {
+      console.log(error);
+    }
   }
+
+  window.ethereum.on('accountsChanged', async function (accounts: string[]) {
+    const ownerAccountAddress = useAccountStore().account?.owner;
+    if (ownerAccountAddress != null && accounts.includes(ownerAccountAddress)) {
+      // pass
+    } else if (ownerAccountAddress != null) {
+      // pop out error and disconnect
+    } else if (accounts.length > 0) {
+      store.switchAccount(await buildAccount(accounts[0]));
+    } else {
+      // pop out error and disconnect
+    }
+  });
 }
 
 export async function signMessage(account: string, message: string) {

@@ -1,5 +1,5 @@
-import { BigNumber as EthBigNumber, ethers } from "ethers";
-import { isNativeCoin, isWrappedCoin, isStableCoin, erc20Interface, encodeExecBatch, toEthBigNumber, tokenAmount, tokenBase } from "../../common";
+import { BigNumber as EthBigNumber } from "ethers";
+import { isNativeCoin, isWrappedCoin, isStableCoin, erc20Interface, toEthBigNumber, tokenAmount, tokenBase } from "../../common";
 import { redPacketInterface, redPacketAddress, redPacketMode } from "./redpacket";
 export function calcGasSponsorship(chain, redpacket, priceInfo) {
     const sponsorshipGasAmount = EthBigNumber.from(200000).mul(redpacket.split);
@@ -16,15 +16,15 @@ export function calcGasSponsorship(chain, redpacket, priceInfo) {
     throw new Error("Unsupported gas token");
 }
 export function buildGasSponsorshipOp(chain, input, refunder, hexlAccount, priceInfo) {
-    const gasTokenAmount = calcGasSponsorship(chain, input, priceInfo);
+    const sponsorship = calcGasSponsorship(chain, input, priceInfo);
     if (isNativeCoin(input.gasToken, chain)) {
         return {
-            name: "refundGasToken",
+            name: "depositGasSponsorship",
             function: "",
             args: [],
             input: {
                 to: refunder,
-                value: gasTokenAmount,
+                value: sponsorship,
                 callData: [],
                 callGasLimit: EthBigNumber.from(0) // no limit
             }
@@ -34,10 +34,10 @@ export function buildGasSponsorshipOp(chain, input, refunder, hexlAccount, price
         const args = [
             hexlAccount,
             refunder,
-            gasTokenAmount
+            sponsorship
         ];
         return {
-            name: "refundGasToken",
+            name: "depositGasSponsorship",
             function: "transferFrom",
             args,
             input: {
@@ -96,20 +96,4 @@ export function buildRedPacketOps(chain, input) {
                 }
             }];
     }
-}
-export function buildCreateRedPacketTx(chain, refunder, hexlAccount, ops, input, from, priceInfo) {
-    ops.push(buildGasSponsorshipOp(chain, input, refunder, hexlAccount, priceInfo));
-    ops = ops.concat(buildRedPacketOps(chain, input));
-    const data = encodeExecBatch(ops.map(op => op.input));
-    return {
-        name: "createRedPacket",
-        function: "execBatch",
-        args: ops,
-        input: {
-            to: hexlAccount,
-            from,
-            data,
-            value: ethers.utils.hexValue(0)
-        }
-    };
 }

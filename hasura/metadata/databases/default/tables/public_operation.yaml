@@ -1,0 +1,21 @@
+table:
+  name: operation
+  schema: public
+object_relationships:
+  - name: transaction
+    using:
+      foreign_key_constraint_on: tx_id
+select_permissions:
+  - role: user
+    permission:
+      columns:
+        - callData
+        - callGasLimit
+        - chain
+        - created_at
+        - id
+        - to
+        - tx_id
+        - updated_at
+        - value
+      filter: {}

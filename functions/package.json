@@ -2,7 +2,8 @@
   "name": "functions",
   "scripts": {
     "lint": "eslint --ext .js,.ts .",
-    "build": "rimraf lib && npm run lint && tsc",
+    "build-deps": "cd common && npm run build && cd ../redpacket && npm run build && cd ..",
+    "build": "rimraf lib && npm run build-deps && npm run lint && tsc",
     "build:watch": "tsc --watch",
     "serve": "CLOUD_RUNTIME_CONFIG=\"$(doppler secrets download --no-file | jq '{doppler: .}')\" firebase emulators:start --only functions",
     "shell": "CLOUD_RUNTIME_CONFIG=\"$(doppler secrets download --no-file | jq '{doppler: .}')\" firebase functions:shell",

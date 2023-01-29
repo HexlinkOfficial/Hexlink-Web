@@ -1,4 +1,6 @@
 - "!include public_nft.yaml"
+- "!include public_operation.yaml"
 - "!include public_preference.yaml"
 - "!include public_redpacket.yaml"
 - "!include public_redpacket_claim.yaml"
+- "!include public_transaction.yaml"

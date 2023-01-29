@@ -5,7 +5,7 @@ const ethers_1 = require("ethers");
 const common_1 = require("../../common");
 const redpacket_1 = require("./redpacket");
 function calcGasSponsorship(chain, redpacket, priceInfo) {
-    const sponsorshipGasAmount = ethers_1.BigNumber.from(200000).mul(redpacket.split);
+    const sponsorshipGasAmount = ethers_1.BigNumber.from(200000).mul(redpacket.split || 0);
     const gasToken = redpacket.gasToken;
     if ((0, common_1.isNativeCoin)(gasToken, chain) || (0, common_1.isWrappedCoin)(gasToken, chain)) {
         return sponsorshipGasAmount.mul(priceInfo.gasPrice);
@@ -25,7 +25,7 @@ function buildGasSponsorshipOp(chain, input, refunder, hexlAccount, priceInfo) {
         return {
             name: "depositGasSponsorship",
             function: "",
-            args: [],
+            args: {},
             input: {
                 to: refunder,
                 value: sponsorship,
@@ -35,19 +35,22 @@ function buildGasSponsorshipOp(chain, input, refunder, hexlAccount, priceInfo) {
         };
     }
     else {
-        const args = [
-            hexlAccount,
-            refunder,
-            sponsorship
-        ];
         return {
             name: "depositGasSponsorship",
             function: "transferFrom",
-            args,
+            args: {
+                from: hexlAccount,
+                to: refunder,
+                amount: sponsorship
+            },
             input: {
                 to: input.gasToken.address,
                 value: ethers_1.BigNumber.from(0),
-                callData: common_1.erc20Interface.encodeFunctionData("transferFrom", args),
+                callData: common_1.erc20Interface.encodeFunctionData("transferFrom", [
+                    hexlAccount,
+                    refunder,
+                    sponsorship
+                ]),
                 callGasLimit: ethers_1.BigNumber.from(0) // no limit
             }
         };
@@ -68,7 +71,7 @@ function buildRedPacketOps(chain, input) {
         return [{
                 name: "createRedPacket",
                 function: "create",
-                args: [packet],
+                args: { packet },
                 input: {
                     to: redPacketAddr,
                     value: packet.balance,
@@ -81,7 +84,10 @@ function buildRedPacketOps(chain, input) {
         return [{
                 name: "approveRedPacket",
                 function: "approve",
-                args: [redPacketAddr, packet.balance],
+                args: {
+                    operator: redPacketAddr,
+                    amount: packet.balance
+                },
                 input: {
                     to: input.token.address,
                     value: ethers_1.BigNumber.from(0),
@@ -92,7 +98,7 @@ function buildRedPacketOps(chain, input) {
             {
                 name: "createRedPacket",
                 function: "create",
-                args: [packet],
+                args: { packet },
                 input: {
                     to: redPacketAddr,
                     value: ethers_1.BigNumber.from(0),

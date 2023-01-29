@@ -30,12 +30,17 @@ export function encodeExec(op) {
 export function encodeExecBatch(ops) {
     return accountInterface.encodeFunctionData("execBatch", [ops]);
 }
-export function encodeValidateAndCall(params) {
+export async function encodeValidateAndCall(params) {
+    const nonce = await params.account.nonce();
     const txData = encodeExecBatch(params.ops);
+    const message = ethers.utils.keccak256(ethers.utils.defaultAbiCoder.encode(["bytes", "uint256"], [txData, nonce]));
+    const signature = await params.sign(message);
+    let data;
     if (params.gas) {
-        return accountInterface.encodeFunctionData("validateAndCall", [txData, params.nonce, params.signature]);
+        data = params.account.interface.encodeFunctionData("validateAndCallWithGasRefund", [txData, nonce, signature, params.gas]);
     }
     else {
-        return accountInterface.encodeFunctionData("validateAndCallWithGasRefund", [txData, params.nonce, params.signature, params.gas]);
+        data = params.account.interface.encodeFunctionData("validateAndCall", [txData, nonce, signature]);
     }
+    return { data, signature, nonce };
 }

@@ -53,12 +53,19 @@ function encodeExecBatch(ops) {
 }
 exports.encodeExecBatch = encodeExecBatch;
 function encodeValidateAndCall(params) {
-    const txData = encodeExecBatch(params.ops);
-    if (params.gas) {
-        return exports.accountInterface.encodeFunctionData("validateAndCall", [txData, params.nonce, params.signature]);
-    }
-    else {
-        return exports.accountInterface.encodeFunctionData("validateAndCallWithGasRefund", [txData, params.nonce, params.signature, params.gas]);
-    }
+    return __awaiter(this, void 0, void 0, function* () {
+        const nonce = yield params.account.nonce();
+        const txData = encodeExecBatch(params.ops);
+        const message = ethers_1.ethers.utils.keccak256(ethers_1.ethers.utils.defaultAbiCoder.encode(["bytes", "uint256"], [txData, nonce]));
+        const signature = yield params.sign(message);
+        let data;
+        if (params.gas) {
+            data = params.account.interface.encodeFunctionData("validateAndCallWithGasRefund", [txData, nonce, signature, params.gas]);
+        }
+        else {
+            data = params.account.interface.encodeFunctionData("validateAndCall", [txData, nonce, signature]);
+        }
+        return { data, signature, nonce };
+    });
 }
 exports.encodeValidateAndCall = encodeValidateAndCall;

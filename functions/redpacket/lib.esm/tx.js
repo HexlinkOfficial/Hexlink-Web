@@ -2,7 +2,7 @@ import { BigNumber as EthBigNumber } from "ethers";
 import { isNativeCoin, isWrappedCoin, isStableCoin, erc20Interface, toEthBigNumber, tokenAmount, tokenBase } from "../../common";
 import { redPacketInterface, redPacketAddress, redPacketMode } from "./redpacket";
 export function calcGasSponsorship(chain, redpacket, priceInfo) {
-    const sponsorshipGasAmount = EthBigNumber.from(200000).mul(redpacket.split);
+    const sponsorshipGasAmount = EthBigNumber.from(200000).mul(redpacket.split || 0);
     const gasToken = redpacket.gasToken;
     if (isNativeCoin(gasToken, chain) || isWrappedCoin(gasToken, chain)) {
         return sponsorshipGasAmount.mul(priceInfo.gasPrice);
@@ -21,7 +21,7 @@ export function buildGasSponsorshipOp(chain, input, refunder, hexlAccount, price
         return {
             name: "depositGasSponsorship",
             function: "",
-            args: [],
+            args: {},
             input: {
                 to: refunder,
                 value: sponsorship,
@@ -31,19 +31,22 @@ export function buildGasSponsorshipOp(chain, input, refunder, hexlAccount, price
         };
     }
     else {
-        const args = [
-            hexlAccount,
-            refunder,
-            sponsorship
-        ];
         return {
             name: "depositGasSponsorship",
             function: "transferFrom",
-            args,
+            args: {
+                from: hexlAccount,
+                to: refunder,
+                amount: sponsorship
+            },
             input: {
                 to: input.gasToken.address,
                 value: EthBigNumber.from(0),
-                callData: erc20Interface.encodeFunctionData("transferFrom", args),
+                callData: erc20Interface.encodeFunctionData("transferFrom", [
+                    hexlAccount,
+                    refunder,
+                    sponsorship
+                ]),
                 callGasLimit: EthBigNumber.from(0) // no limit
             }
         };
@@ -63,7 +66,7 @@ export function buildRedPacketOps(chain, input) {
         return [{
                 name: "createRedPacket",
                 function: "create",
-                args: [packet],
+                args: { packet },
                 input: {
                     to: redPacketAddr,
                     value: packet.balance,
@@ -76,7 +79,10 @@ export function buildRedPacketOps(chain, input) {
         return [{
                 name: "approveRedPacket",
                 function: "approve",
-                args: [redPacketAddr, packet.balance],
+                args: {
+                    operator: redPacketAddr,
+                    amount: packet.balance
+                },
                 input: {
                     to: input.token.address,
                     value: EthBigNumber.from(0),
@@ -87,7 +93,7 @@ export function buildRedPacketOps(chain, input) {
             {
                 name: "createRedPacket",
                 function: "create",
-                args: [packet],
+                args: { packet },
                 input: {
                     to: redPacketAddr,
                     value: EthBigNumber.from(0),

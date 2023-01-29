@@ -62,22 +62,36 @@ export function encodeExecBatch(ops: OpInput[]) {
   );
 }
 
-export function encodeValidateAndCall(params: {
+export async function encodeValidateAndCall(params: {
+  account: Contract,
   ops: OpInput[],
-  signature: string,
-  nonce: EthBigNumber,
+  sign: (msg: string) => Promise<string>,
   gas?: GasObject
-}) {
+}) : Promise<{
+  data: string,
+  signature: string,
+  nonce: EthBigNumber
+}> {
+  const nonce = await params.account.nonce();
   const txData = encodeExecBatch(params.ops);
+  const message = ethers.utils.keccak256(
+    ethers.utils.defaultAbiCoder.encode(
+        ["bytes", "uint256"],
+        [txData, nonce]
+    )
+  );
+  const signature = await params.sign(message);
+  let data: string;
   if (params.gas) {
-    return accountInterface.encodeFunctionData(
-      "validateAndCall",
-      [txData, params.nonce, params.signature]
+    data = params.account.interface.encodeFunctionData(
+      "validateAndCallWithGasRefund",
+      [txData, nonce, signature, params.gas]
     );
   } else {
-    return accountInterface.encodeFunctionData(
-      "validateAndCallWithGasRefund",
-      [txData, params.nonce, params.signature, params.gas]
+    data = params.account.interface.encodeFunctionData(
+      "validateAndCall",
+      [txData, nonce, signature]
     );
   }
+  return { data, signature, nonce}
 }

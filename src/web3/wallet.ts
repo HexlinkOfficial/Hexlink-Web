@@ -100,11 +100,10 @@ export async function connectWallet() {
   });
 }
 
-export async function signMessage(account: string, message: string) {
-  await window.ethereum.request({
-      method: 'eth_signTypedData_v4',
-      params: [{ account, message }],
-      from: account
+export async function signMessage(account: string, message: string) : Promise<string> {
+  return await window.ethereum.request({
+      method: 'personal_sign',
+      params: [message, account],
   });
 }
 

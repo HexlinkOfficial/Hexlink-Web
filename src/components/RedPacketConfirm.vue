@@ -24,9 +24,7 @@
       <span style="font-size: 20px; margin-top: 1rem;">{{ message }}</span><br>
     </h2>
     <div class="cta-container transition" style="margin-top: 340px;">
-      <router-link to="/redpackets">
-        <button @click="closeModal" class="cta">Close</button>
-      </router-link>
+      <button @click="closeModal" class="cta">Close</button>
     </div>
     <div class="card_circle transition" style="margin-top: -100px;"></div>
   </div>
@@ -34,6 +32,7 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
+import { useRouter } from "vue-router";
 import { useRedPacketStore } from '@/stores/redpacket';
 import { useChainStore } from "@/stores/chain";
 import { useAccountStore } from '@/stores/account';
@@ -56,17 +55,23 @@ const createRedPacket = async () => {
       await deployAndCreateNewRedPacket(
         store.redpacket!,
         store.account == "hexlink",
-        true
       );
     }
     store.setStatus("success");
   } catch (e) {
-    console.log("Failed to create redpacket with error " + e);
+    console.log("Failed to create redpacket with");
+    console.log(e);
     store.setStatus("error");
   }
 }
 
-const closeModal = () => store.setStatus("");
+const router = useRouter();
+const closeModal = () => {
+  if (store.status == 'success') {
+    router.push("/redpackets");
+  }
+  store.setStatus("");
+}
 
 const message = computed(() => {
   if (store.status == 'error') {

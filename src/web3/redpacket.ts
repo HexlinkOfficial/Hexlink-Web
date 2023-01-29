@@ -4,7 +4,7 @@ import { useAuthStore } from "@/stores/auth";
 
 import { genDeployAuthProof } from "@/web3/oracle";
 import { tokenEqual } from "@/web3/utils";
-import { estimateGas, sendTransaction } from "@/web3/wallet";
+import { estimateGas, sendTransaction, signMessage } from "@/web3/wallet";
 
 import type { Chain, Token, Op, OpInput } from "../../functions/common";
 import {
@@ -17,6 +17,8 @@ import {
     hexlInterface,
     tokenAmount,
     encodeExecBatch,
+    accountContract,
+    encodeValidateAndCall,
 } from "../../functions/common";
 import type { RedPacket } from "../../functions/redpacket";
 import {
@@ -123,8 +125,8 @@ async function buildDepositErc20TokenOp(
 }
 
 async function buildCreateRedPacketTxForMetamask(input: RedPacket) {
-    const walletAccount = useWalletStore().account!;
-    const hexlAccount = useAccountStore().account!;
+    const walletAccount = useWalletStore().account!.address;
+    const hexlAccount = useAccountStore().account!.address;
     const chain = useChainStore().chain;
 
     const priceInfo = await getPriceInfo(chain);
@@ -142,21 +144,21 @@ async function buildCreateRedPacketTxForMetamask(input: RedPacket) {
         } else {
             const {tx, op} = await buildDepositErc20TokenOp(
                 input.token,
-                walletAccount.address,
-                hexlAccount.address,
+                walletAccount,
+                hexlAccount,
                 input.tokenAmount!.add(input.gasTokenAmount)
             );
             txes = txes.concat(tx);
             userOps = userOps.concat(op);
         }
     } else {
-        if (isNativeCoin(input.gasToken, chain)) {
+        if (isNativeCoin(input.token, chain)) {
             value = value.add(input.tokenAmount);
         } else {
             const {tx, op} = await buildDepositErc20TokenOp(
                 input.token,
-                walletAccount.address,
-                hexlAccount.address,
+                walletAccount,
+                hexlAccount,
                 input.tokenAmount
             );
             txes = txes.concat(tx);
@@ -167,8 +169,8 @@ async function buildCreateRedPacketTxForMetamask(input: RedPacket) {
         } else {
             const {tx, op} = await buildDepositErc20TokenOp(
                 input.gasToken,
-                walletAccount.address,
-                hexlAccount.address,
+                walletAccount,
+                hexlAccount,
                 input.gasTokenAmount
             );
             txes = txes.concat(tx);
@@ -182,21 +184,28 @@ async function buildCreateRedPacketTxForMetamask(input: RedPacket) {
             name: "depositGasSponsorship",
             function: "",
             args: {},
-            input: buildOpInput({to: refunder, value}),
+            input: buildOpInput({to: hexlAccount, value}),
         });
     }
     userOps.push(buildGasSponsorshipOp(
-        chain, input, refunder, hexlAccount.address, priceInfo
+        chain, input, refunder, hexlAccount, priceInfo
     ));
     userOps = userOps.concat(buildRedPacketOps(chain, input));
-    const callData = encodeExecBatch(userOps.map(userOp => userOp.input));
+    const {data: callData, signature, nonce} = await encodeValidateAndCall({
+        account: accountContract(useChainStore().provider, hexlAccount),
+        ops: userOps.map(op => op.input),
+        sign: async (msg: string) => await signMessage(walletAccount, msg)
+    });
     hexlOps.push({
         name: "createRedPacket",
-        function: "execBatch",
-        args: {ops: userOps},
-        input: buildOpInput({to: hexlAccount.address, callData}),
+        function: "validateAndCall",
+        args: {
+            txData: userOps,
+            nonce,
+            signature,
+        },
+        input: buildOpInput({to: hexlAccount, callData}),
     });
-
     const hexlAddr = hexlAddress(useChainStore().chain);
     const data = hexlInterface.encodeFunctionData(
         "process", [hexlOps.map(hexlOp => hexlOp.input)]
@@ -206,7 +215,7 @@ async function buildCreateRedPacketTxForMetamask(input: RedPacket) {
         EthBigNumber.from(0)
     );
     txes.push({
-        name: "depositAndCreateRedPacket",
+        name: "createRedPacket",
         function: "process",
         args: {ops: hexlOps},
         input: {
@@ -240,7 +249,7 @@ export async function buildDeployAndCreateRedPacketTx(input: RedPacket) : Promis
     );
     const hexlAddr = hexlAddress(useChainStore().chain);
     ops.push({
-        name: "depositAndDeployAndCreateRedPacket",
+        name: "deployAndCreateRedPacket",
         function: "deploy",
         args: {
             name: useAuthStore().user!.nameHash,
@@ -306,30 +315,27 @@ async function processTxAndSave(
         }
         return id;
     }
-
-    const toInsert = {
-        id,
-        chain: chain.name,
-        metadata: {
-            token: redpacket.token.address,
-            salt: redpacket.salt,
-            split: redpacket.split,
-            balance: redpacket.balance,
-            tokenAmount: redpacket.tokenAmount!.toString(),
-            mode: redpacket.mode,
-            validator: redpacket.validator,
-            gasToken: redpacket.gasToken.address,
-            gasTokenAmount: redpacket.gasTokenAmount!.toString(),
-            contract: redPacketAddress(chain),
-            creator: useAccountStore().account!.address
-        },
-        creator: useAuthStore().userInfo
-    };
+    
     for (let i = 0; i < txes.length; i++) {
         let txHash = await sendTransaction(txes[i].input);
         if (txes[i].name == "createRedPacket" || txes[i].name == "deployAndCreateRedPacket") {
             await insertRedPacket([{
-                ...toInsert,
+                id,
+                chain: chain.name,
+                metadata: {
+                    token: redpacket.token.address,
+                    salt: redpacket.salt,
+                    split: redpacket.split,
+                    balance: redpacket.balance,
+                    tokenAmount: redpacket.tokenAmount!.toString(),
+                    mode: redpacket.mode,
+                    validator: redpacket.validator,
+                    gasToken: redpacket.gasToken.address,
+                    gasTokenAmount: redpacket.gasTokenAmount!.toString(),
+                    contract: redPacketAddress(chain),
+                    creator: useAccountStore().account!.address
+                },
+                creator: useAuthStore().userInfo,
                 tx: txHash
             }]);
         }
@@ -358,6 +364,7 @@ export async function createNewRedPacket(
         throw new Error("not supported yet")
     }
     const txes = await buildCreateRedPacketTxForMetamask(redpacket);
+    console.log(txes);
     return await processTxAndSave(redpacket, txes, dryrun);
 }
 

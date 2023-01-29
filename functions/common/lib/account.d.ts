@@ -14,8 +14,12 @@ export declare function encodeInit(owner: string, data: string): string;
 export declare function encodeExec(op: OpInput): string;
 export declare function encodeExecBatch(ops: OpInput[]): string;
 export declare function encodeValidateAndCall(params: {
+    account: Contract;
     ops: OpInput[];
+    sign: (msg: string) => Promise<string>;
+    gas?: GasObject;
+}): Promise<{
+    data: string;
     signature: string;
     nonce: EthBigNumber;
-    gas?: GasObject;
-}): string;
+}>;

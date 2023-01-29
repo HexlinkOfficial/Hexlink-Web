@@ -1,4 +1,4 @@
-import { BigNumber as EthBigNumber, ethers } from "ethers";
+import { BigNumber as EthBigNumber } from "ethers";
 
 import type { Chain, Op } from "../../common";
 import {
@@ -6,7 +6,6 @@ import {
     isWrappedCoin,
     isStableCoin,
     erc20Interface,
-    encodeExecBatch,
     toEthBigNumber,
     tokenAmount,
     tokenBase
@@ -26,7 +25,7 @@ export function calcGasSponsorship(
     redpacket: RedPacket,
     priceInfo: PriceInfo,
 ) : EthBigNumber {
-    const sponsorshipGasAmount = EthBigNumber.from(200000).mul(redpacket.split);
+    const sponsorshipGasAmount = EthBigNumber.from(200000).mul(redpacket.split || 0);
     const gasToken = redpacket.gasToken;
     if (isNativeCoin(gasToken, chain) || isWrappedCoin(gasToken, chain)) {
         return sponsorshipGasAmount.mul(priceInfo.gasPrice);
@@ -53,7 +52,7 @@ export function buildGasSponsorshipOp(
         return {
             name: "depositGasSponsorship",
             function: "",
-            args: [],
+            args: {},
             input: {
                 to: refunder,
                 value: sponsorship,
@@ -62,20 +61,23 @@ export function buildGasSponsorshipOp(
             }
         };
     } else {
-        const args = [
-            hexlAccount,
-            refunder,
-            sponsorship
-        ];
         return {
             name: "depositGasSponsorship",
             function: "transferFrom",
-            args,
+            args: {
+                from: hexlAccount,
+                to: refunder,
+                amount: sponsorship
+            },
             input: {
                 to: input.gasToken.address,
                 value: EthBigNumber.from(0),
                 callData: erc20Interface.encodeFunctionData(
-                    "transferFrom", args
+                    "transferFrom", [
+                        hexlAccount,
+                        refunder,
+                        sponsorship
+                    ]
                 ),
                 callGasLimit: EthBigNumber.from(0) // no limit
             }
@@ -100,7 +102,7 @@ export function buildRedPacketOps(
         return [{
             name: "createRedPacket",
             function: "create",
-            args: [packet],
+            args: {packet},
             input: {
                 to: redPacketAddr,
                 value: packet.balance,
@@ -114,7 +116,10 @@ export function buildRedPacketOps(
         return [{
             name: "approveRedPacket",
             function: "approve",
-            args: [redPacketAddr, packet.balance],
+            args: {
+                operator: redPacketAddr,
+                amount: packet.balance
+            },
             input: {
                 to: input.token.address,
                 value: EthBigNumber.from(0),
@@ -127,7 +132,7 @@ export function buildRedPacketOps(
         {
             name: "createRedPacket",
             function: "create",
-            args: [packet],
+            args: {packet},
             input: {
                 to: redPacketAddr,
                 value: EthBigNumber.from(0),

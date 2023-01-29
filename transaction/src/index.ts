@@ -15,7 +15,7 @@ const transactionQueue = new Queue("transactionQueue");
 const senderCache = new cache();
 
 export const senderPool: Map<string, string> = JSON.parse(process.env.TX_SENDER_POOL!);
-export const senderAddr =[ ...senderPool.keys() ];
+export const senderPoolAddr =[ ...senderPool.keys() ];
 
 const getInfuraProvider = (
   chain: Chain
@@ -57,9 +57,15 @@ app.listen(port, () => {
   console.log( `server started at http://localhost:${ port }` );
 });
 
-const getSenderInIdle = (provider: ethers.providers.Provider) => {
-  const sendersInProcess: string[] = Object.values(senderCache.mget(senderCache.keys()));
-  const sendersInIdle = senderAddr.filter(k => !sendersInProcess.includes(k));
+const getSenderInProcess = (chainStr: string) : string[] => {
+  return senderCache.has(chainStr) ? senderCache.get(chainStr)! : [];
+}
+
+const getSenderInIdle = (chainStr: string) => {
+  const chain: Chain = getChain(chainStr);
+  const provider: ethers.providers.Provider = getInfuraProvider(chain);
+  const sendersInProcess: string[] = getSenderInProcess(chainStr);
+  const sendersInIdle = senderPoolAddr.filter(k => !sendersInProcess.includes(k));
   
   if (sendersInIdle.length > 0) {
     return new ethers.Wallet(senderPool.get(sendersInIdle[0])!, provider);
@@ -68,20 +74,24 @@ const getSenderInIdle = (provider: ethers.providers.Provider) => {
   return;
 };
 
-const removeSenderCompletedJob = (sender: string) => {
-  const keys: string[] = senderCache.keys();
-  for (const key of keys) {
-    if (<string>senderCache.get(key) === sender) {
-      senderCache.del(key);
-      break;
-    }
+const addSenderAssignedTx = (chainStr: string, sender: string) => {
+  const sendersInProcess: string[] = getSenderInProcess(chainStr);
+  senderCache.set(chainStr, sendersInProcess.push(sender));
+}
+
+const removeSenderCompletedJob = (chainStr: string, sender: string) => {
+  const sendersInProcess: string[] = getSenderInProcess(chainStr);
+
+  const index = sendersInProcess.indexOf(sender, 0);
+  if (index > -1) {
+    senderCache.set(chainStr, sendersInProcess.splice(index, 1));
   }
 }
 
 operationQueue.process(async (job: any) => {
   const chain: Chain = getChain(job.data.chain);
   const provider: ethers.providers.Provider = getInfuraProvider(chain);
-  const signer = getSenderInIdle(provider);
+  const signer = getSenderInIdle(job.data.chain);
   if (!signer) {
     return;
   }
@@ -90,24 +100,24 @@ operationQueue.process(async (job: any) => {
   const txHash = await provider.sendTransaction(tx);
 
   const id = await recordTx(chain.name, job.data.tx);
-  await transactionQueue.add({id, chain, txHash, sender});
+  await transactionQueue.add({id, chain, txHash, signer});
 
   // cache the new occupied sender to the senders in process list
-  senderCache.set(Date.now(), sender);
+  addSenderAssignedTx(job.data.chain, signer.address);
 });
 
 transactionQueue.process(async (job: any) => {
   const provider: ethers.providers.Provider = getInfuraProvider(job.data.chain);
   const tx = await provider.getTransaction(job.data.txHash);
 
-  if (!tx || !tx.to || tx.from !== validatorMap.get(job.data.sender)) {
+  if (!tx || !tx.to || tx.from !== job.data.signer.address) {
     const errorStatus: TxStatus = "error";
     updateTx(job.data.id, errorStatus);
     return;
   }
 
   // remove the new released sender from the senders in process list cache
-  removeSenderCompletedJob(job.data.sender);
+  removeSenderCompletedJob(job.data.chain, job.data.signer.address);
 
   const successStatus: TxStatus = "success";
   updateTx(job.data.id, successStatus);

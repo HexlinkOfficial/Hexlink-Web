@@ -1,5 +1,6 @@
 import {gql} from "@urql/core";
 import {client} from "./client";
+import type {OperationInput} from "../types";
 
 const INSERT_OPERATION = gql`
 mutation ($objects: [operation_insert_input!]!) {
@@ -8,7 +9,10 @@ mutation ($objects: [operation_insert_input!]!) {
     ) {
         affected_rows
         returning {
-            id
+            id,
+            transaction: {
+                id
+            }
         }
     }
 }
@@ -30,26 +34,16 @@ const UPDATE_OPERATION = gql`
     }
 `
 
-interface OperationInput {
-    to: string,
-    value?: string,
-    callData?: string,
-    callGasLimit?: string,
-    chain: string,
-    args: any,
-    actions: string[],
-}
-
 export async function insertOp(
   inputs: OperationInput[]
 ) : Promise<{id: number}[]> {
     const result = await client.mutation(
         INSERT_OPERATION,
         {objects: inputs.map(i => ({
-            to: i.to,
-            value: i.value || "0",
-            callData: i.callData || "",
-            callGasLimit: i.callGasLimit || "0",
+            to: i.input.to,
+            value: i.input.value || "0",
+            callData: i.input.callData || "",
+            callGasLimit: i.input.callGasLimit || "0",
             chain: i.chain,
             args: JSON.stringify(i.args),
             actions: i.actions.join(","),

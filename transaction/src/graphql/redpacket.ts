@@ -23,16 +23,14 @@ mutation ($objects: [redpacket_claim_insert_input!]!) {
 }
 `
 
-export const UPDATE_REDPACKET_CLAIM_TX = gql`
+export const UPDATE_REDPACKET_CLAIM = gql`
     mutation (
         $id: Int!
-        $txStatus: String!
         $claimed: String
     ) {
         update_redpacket_claim_by_pk (
             pk_columns: {id: $id},
             _set: {
-              tx_status: $txStatus,
               claimed: $claimed,
             }
         ) {
@@ -61,14 +59,13 @@ const result = await client.mutation(
 return result.data.insert_redpacket_claim.returning;
 }
 
-export async function updateRedPacketTxStatus(
+export async function updateRedPacketClaim(
   id: number,
-  txStatus: TxStatus,
   claimed?: string
 ) : Promise<void> {
 const result = await client.mutation(
-    UPDATE_REDPACKET_CLAIM_TX,
-    {id, txStatus, claimed}
+    UPDATE_REDPACKET_CLAIM,
+    {id, claimed}
 ).toPromise();
 return result.data.update_redpacket_claim_by_pk.returning;
 }

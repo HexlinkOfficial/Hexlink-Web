@@ -2,6 +2,7 @@ import "express-async-errors";
 import express from "express";
 import {Queues} from "./queue";
 import {insertOp} from "./graphql/operation";
+import type {OperationInput} from "./types";
 
 const app = express();
 const port = 8080;
@@ -9,15 +10,24 @@ const queues = Queues.getInstance();
 
 app.post('/submit/:chain', async (req: any, _res) => {
   const opQueue = queues.getOpQueue(req.params.chain)!;
-  await insertOp(req.query.op);
+  const input = {
+    chain: req.params.chain,
+    input: req.query.op.input,
+    args: req.query.op.args,
+    actions: req.query.actions,
+  } as OperationInput;
   if (req.query.op.transaction) {
+    input.transaction = req.query.op.transaction;
+    const [{id}] = await insertOp([input]);
     const txQueue = queues.getTxQueue(req.params.chain)!;
     await txQueue.add({
-      ops: [req.query.op],
-      tx: req.query.op.transaction
+      id,
+      tx: req.query.op.transaction.tx,
+      ops: [{id, ...input}],
     });
   } else {
-    await opQueue.add({op: req.query.op});
+    const [{id}] = await insertOp([input]);
+    await opQueue.add({id, ...input});
   }
 });
 

@@ -8,9 +8,7 @@ export interface OpInput {
 export interface Op {
     name: string;
     function: string;
-    args: {
-        [key: string]: any;
-    };
+    args: {[key: string]: any};
     input: OpInput;
 }
 export interface GasObject {

@@ -48,7 +48,6 @@ export async function insertTx(
             objects: data.map((d) => ({
                 tx: d.tx,
                 chain: d.chain,
-                status: "pending",
             })),
         }
     ).toPromise();

@@ -2,12 +2,13 @@ import Queue from "bull";
 import {ethers} from "ethers";
 import {insertTx, updateTx} from "./graphql/transaction";
 import {updateOp} from "./graphql/operation";
-import {buildTxFromOps} from "./operation";
-import type {TxStatus, QueueType} from "./types";
+import {buildTxFromOps, processActions} from "./operation";
+import type {QueueType} from "./types";
 import { getInfuraProvider } from "./utils";
 import {SUPPORTED_CHAINS} from "../../functions/common";
 import type {Chain} from "../../functions/common";
 import {SenderPool} from "./sender";
+import type { Operation } from "./types";
 
 class PrivateQueues {
     opQueues : Map<string, Queue.Queue> = new Map<string, Queue.Queue>();
@@ -34,15 +35,32 @@ class PrivateQueues {
             const signer = senderPool.getSenderInIdle(chain);
             if (!signer) { return; }
 
-            const ops = await queue.getJobs(['waiting'], 0, 100);
-            if (ops.length == 0) { return; }
+            const jobs = await queue.getJobs(['waiting'], 0, 100);
+            if (jobs.length == 0) { return; }
+            const ops = jobs.map(job => job.data as Operation);
 
-            const tx: string = buildTxFromOps(chain, ops, signer);
+            const provider = getInfuraProvider(chain);
+            const signedTx: string = await buildTxFromOps(
+                provider, ops.map(op => op.input), signer
+            );
+            const txHash = ethers.utils.keccak256(signedTx);
+            const [{id}] = await insertTx([{chain: chain.name, tx: txHash}]);
             senderPool.addSenderAssignedTx(chain, signer.address);
-            const [{id}] = await insertTx([{chain: chain.name, tx: tx.hash}]);
-            txQueue.add({id, tx, ops, signer: signer.address});
-            await Promise.all(ops.map(op => op.moveToCompleted("", false, true)));
+            try {
+                await provider.sendTransaction(signedTx);
+                txQueue.add({id, tx: txHash, ops, signer: signer.address});
+            } catch(err) {
+                console.log(err);
+                await updateTx(id, "error");
+                senderPool.removeSenderCompletedJob(chain, job.data.signer);
+            }
+            await Promise.all(
+                jobs.map(job => job.moveToCompleted(id.toString(), false, true))
+            );
         });
+        queue.on("completed", async(job, txId) => {
+            await updateOp(job.data.id, Number(txId));
+        })
         queue.add({}, { jobId: 'poll', repeat: { every: 1000, } });
         return queue;
     }
@@ -51,16 +69,23 @@ class PrivateQueues {
         const senderPool = SenderPool.getInstance();
         const queue = new Queue(this.queueName(chain, "transaction"));
         queue.process(async(job: any) => {
-            const provider: ethers.providers.Provider = getInfuraProvider(chain);
-            const tx = await provider.sendTransaction(job.data.tx);
-            return await tx.wait();
+            const provider = getInfuraProvider(chain);
+            const tx = await provider.getTransaction(job.data.tx);
+            const receipt = await tx.wait();
+            await Promise.all(job.data.ops.map(
+                (op: Operation) => processActions(op.actions, receipt)
+            ));
         });
         const onSuccess = async (job: any) => {
-            senderPool.removeSenderCompletedJob(chain, job.data.signer);
+            if (job.data.signer) {
+                senderPool.removeSenderCompletedJob(chain, job.data.signer);
+            }
             await updateTx(job.data.id, "success");
         }
         const onFail = async (job: any) => {
-            senderPool.removeSenderCompletedJob(chain, job.data.signer);
+            if (job.data.signer) {
+                senderPool.removeSenderCompletedJob(chain, job.data.signer);
+            }
             await updateTx(job.data.id, "error");
         };
         queue.on("completed", onSuccess);

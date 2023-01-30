@@ -17,10 +17,11 @@ import {
 } from "./account";
 import {resolveProperties} from "@ethersproject/properties";
 import {serialize, UnsignedTransaction} from "@ethersproject/transactions";
-import {KMS_KEY_TYPE, PriceConfig} from "./config";
+import {KMS_KEY_TYPE} from "./config";
 
 import {redPacketContract, redPacketMode} from "../redpacket";
 import {Firebase} from "./firebase";
+import {PriceConfig} from "../common";
 
 const secrets = functions.config().doppler || {};
 

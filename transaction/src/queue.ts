@@ -71,10 +71,14 @@ class PrivateQueues {
         queue.process(async(job: any) => {
             const provider = getInfuraProvider(chain);
             const tx = await provider.getTransaction(job.data.tx);
-            const receipt = await tx.wait();
-            await Promise.all(job.data.ops.map(
-                (op: Operation) => processActions(op.actions, receipt)
-            ));
+            if (tx) {
+                const receipt = await tx.wait();
+                await Promise.all(job.data.ops.map(
+                    (op: Operation) => processActions(op.actions, receipt)
+                ));
+            } else {
+                throw new Error("tx not found: " + job.data.tx);
+            }
         });
         const onSuccess = async (job: any) => {
             if (job.data.signer) {
@@ -82,11 +86,11 @@ class PrivateQueues {
             }
             await updateTx(job.data.id, "success");
         }
-        const onFail = async (job: any) => {
+        const onFail = async (job: any, error: any) => {
             if (job.data.signer) {
                 senderPool.removeSenderCompletedJob(chain, job.data.signer);
             }
-            await updateTx(job.data.id, "error");
+            await updateTx(job.data.id, "error", error.message);
         };
         queue.on("completed", onSuccess);
         queue.on("failed", onFail);

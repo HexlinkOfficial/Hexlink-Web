@@ -26,7 +26,7 @@ export interface OperationInput {
   chain: string,
   args: any,
   actions: Action[],
-  transaction?: {tx: string, chain: string};
+  txId?: number,
 }
 
 export interface Operation extends OperationInput {

@@ -1,14 +1,6 @@
-import {gql, createClient} from "@urql/core";
+import {gql} from "@urql/core";
+import {client} from "./client";
 import type {RedPacketClaimInput} from "../types";
-
-const client = createClient({
-  url: process.env.VITE_HASURA_URL!,
-  fetchOptions: () => {
-    return {
-      headers: {"x-hasura-admin-secret": process.env.HASURA_GRAPHQL_ADMIN_SECRET!},
-    };
-  },
-});
 
 const INSERT_REDPACKET_CLAIM = gql`
 mutation ($objects: [redpacket_claim_insert_input!]!) {
@@ -42,30 +34,30 @@ export const UPDATE_REDPACKET_CLAIM = gql`
 export async function insertRedPacketClaim(
   data: RedPacketClaimInput[],
 ) : Promise<{id: string}[]> {
-const result = await client.mutation(
-    INSERT_REDPACKET_CLAIM,
-    {
-      objects: data.map((d) => ({
-        redpacket_id: d.redPacketId,
-        claimer_id: d.claimerId,
-        creator_id: d.creatorId,
-        tx: d.tx,
-        tx_status: d.txStatus || "",
-        claimer: d.claimer || "",
-        claimed: d.claimed || "",
-      })),
-    }
-).toPromise();
-return result.data.insert_redpacket_claim.returning;
+  const result = await client.mutation(
+      INSERT_REDPACKET_CLAIM,
+      {
+        objects: data.map((d) => ({
+          redpacket_id: d.redPacketId,
+          claimer_id: d.claimerId,
+          creator_id: d.creatorId,
+          tx: d.tx,
+          tx_status: d.txStatus || "",
+          claimer: d.claimer || "",
+          claimed: d.claimed || "",
+        })),
+      }
+  ).toPromise();
+  return result.data.insert_redpacket_claim.returning;
 }
 
 export async function updateRedPacketClaim(
   id: number,
   claimed?: string
 ) : Promise<void> {
-const result = await client.mutation(
-    UPDATE_REDPACKET_CLAIM,
-    {id, claimed}
-).toPromise();
-return result.data.update_redpacket_claim_by_pk.returning;
+  const result = await client.mutation(
+      UPDATE_REDPACKET_CLAIM,
+      {id, claimed}
+  ).toPromise();
+  return result.data.update_redpacket_claim_by_pk.returning;
 }

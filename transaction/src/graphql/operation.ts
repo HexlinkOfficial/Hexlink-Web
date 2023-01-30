@@ -9,10 +9,7 @@ mutation ($objects: [operation_insert_input!]!) {
     ) {
         affected_rows
         returning {
-            id,
-            transaction: {
-                id
-            }
+            id
         }
     }
 }
@@ -47,15 +44,13 @@ export async function insertOp(
             chain: i.chain,
             args: JSON.stringify(i.args),
             actions: i.actions.join(","),
+            txId: i.txId,
         }))}
     ).toPromise();
     return result.data.insert_operation.returning;
 }
 
-export async function updateOp(
-  id: number,
-  tx: number,
-) : Promise<void> {
+export async function updateOp(id: number, tx: number) : Promise<void> {
     const result = await client.mutation(
         UPDATE_OPERATION,
         {id, tx}

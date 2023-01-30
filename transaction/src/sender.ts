@@ -9,7 +9,9 @@ class PrivateSenderPool {
     senderCache: cache;
 
     constructor() {
-        this.senders = JSON.parse(process.env.TX_SENDER_POOL!);
+        this.senders = new Map<string, string>(
+            Object.entries(JSON.parse(process.env.TX_SENDER_POOL!))
+        );
         this.senderPoolAddr =[ ...this.senders.keys() ]
         this.senderCache = new cache();
         // TODO set blocked senders

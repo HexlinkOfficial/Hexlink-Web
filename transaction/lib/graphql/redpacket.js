@@ -2,14 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.updateRedPacketClaim = exports.insertRedPacketClaim = exports.UPDATE_REDPACKET_CLAIM = void 0;
 const core_1 = require("@urql/core");
-const client = (0, core_1.createClient)({
-    url: process.env.VITE_HASURA_URL,
-    fetchOptions: () => {
-        return {
-            headers: { "x-hasura-admin-secret": process.env.HASURA_GRAPHQL_ADMIN_SECRET },
-        };
-    },
-});
+const client_1 = require("./client");
 const INSERT_REDPACKET_CLAIM = (0, core_1.gql) `
 mutation ($objects: [redpacket_claim_insert_input!]!) {
     insert_redpacket_claim (
@@ -38,7 +31,7 @@ exports.UPDATE_REDPACKET_CLAIM = (0, core_1.gql) `
     }
 `;
 async function insertRedPacketClaim(data) {
-    const result = await client.mutation(INSERT_REDPACKET_CLAIM, {
+    const result = await client_1.client.mutation(INSERT_REDPACKET_CLAIM, {
         objects: data.map((d) => ({
             redpacket_id: d.redPacketId,
             claimer_id: d.claimerId,
@@ -53,7 +46,7 @@ async function insertRedPacketClaim(data) {
 }
 exports.insertRedPacketClaim = insertRedPacketClaim;
 async function updateRedPacketClaim(id, claimed) {
-    const result = await client.mutation(exports.UPDATE_REDPACKET_CLAIM, { id, claimed }).toPromise();
+    const result = await client_1.client.mutation(exports.UPDATE_REDPACKET_CLAIM, { id, claimed }).toPromise();
     return result.data.update_redpacket_claim_by_pk.returning;
 }
 exports.updateRedPacketClaim = updateRedPacketClaim;

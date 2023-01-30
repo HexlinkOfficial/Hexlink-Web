@@ -2,33 +2,40 @@ import "express-async-errors";
 import express from "express";
 import {Queues} from "./queue";
 import {insertOp} from "./graphql/operation";
-import type {OperationInput} from "./types";
+import type {OperationInput, Action} from "./types";
+import { insertTx } from "./graphql/transaction";
 
 const app = express();
-const port = 8080;
+const port = 9000;
 const queues = Queues.getInstance();
 
-app.post('/submit/:chain', async (req: any, _res) => {
+app.post('/submit/:chain', async (req: express.Request, res: express.Response) => {
   const opQueue = queues.getOpQueue(req.params.chain)!;
+  if (!req.body.op) {
+    res.status(400).json({success: false, message: "invalid op"});
+    return;
+  }
+  const op = req.body.op as any;
   const input = {
     chain: req.params.chain,
-    input: req.query.op.input,
-    args: req.query.op.args,
-    actions: req.query.actions,
+    input: op.input,
+    args: op.args,
+    actions: (op.actions || []).map((a : string) => JSON.parse(a) as Action),
   } as OperationInput;
-  if (req.query.op.transaction) {
-    input.transaction = req.query.op.transaction;
-    const [{id}] = await insertOp([input]);
+  if (op.tx) {
+    const [{id: txId}] = await insertTx(op.tx);
+    const [{id: opId}] = await insertOp([{txId, ...input}]);
     const txQueue = queues.getTxQueue(req.params.chain)!;
     await txQueue.add({
-      id,
-      tx: req.query.op.transaction.tx,
-      ops: [{id, ...input}],
+      id: opId,
+      tx: op.tx.tx,
+      ops: [{id: opId, ...input}],
     });
   } else {
     const [{id}] = await insertOp([input]);
     await opQueue.add({id, ...input});
   }
+  res.status(200).json({ success: true });
 });
 
 // start the Express server

@@ -1,14 +1,6 @@
-import {gql, createClient} from "@urql/core";
+import {gql} from "@urql/core";
+import {client} from "./client";
 import type {TxStatus} from "../types";
-
-const client = createClient({
-  url: process.env.VITE_HASURA_URL!,
-  fetchOptions: () => {
-    return {
-      headers: {"x-hasura-admin-secret": process.env.HASURA_GRAPHQL_ADMIN_SECRET!},
-    };
-  },
-});
 
 const INSERT_TRANSACTION = gql`
 mutation ($objects: [transaction_insert_input!]!) {
@@ -27,11 +19,13 @@ const UPDATE_TRANSACTION = gql`
     mutation (
         $id: Int!
         $status: String!
+        $error: String
     ) {
         update_transaction_by_pk (
             pk_columns: {id: $id},
             _set: {
               status: $status,
+              error: $error
             }
         ) {
             id
@@ -57,10 +51,11 @@ export async function insertTx(
 export async function updateTx(
   id: number,
   status: TxStatus,
+  error?: string,
 ) : Promise<void> {
     const result = await client.mutation(
         UPDATE_TRANSACTION,
-        {id, status}
+        {id, status, error}
     ).toPromise();
     return result.data.update_transaction_by_pk.returning;
 }

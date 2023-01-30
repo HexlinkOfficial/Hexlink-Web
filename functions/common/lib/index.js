@@ -22,3 +22,4 @@ __exportStar(require("./contracts"), exports);
 __exportStar(require("./utils"), exports);
 __exportStar(require("./account"), exports);
 __exportStar(require("./types"), exports);
+__exportStar(require("./price"), exports);

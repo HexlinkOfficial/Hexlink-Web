@@ -87,7 +87,7 @@ export async function getPriceInfo(chain: Chain) : Promise<PriceInfo> {
     // refresh every 15 mins
     if (!priceInfo || priceInfo.updatedAt < new Date().getTime() - 900000) {
         const getPriceInfo = httpsCallable(functions, 'priceInfo');
-        const result = await getPriceInfo({chainId: chain.chainId});
+        const result = await getPriceInfo({chain: chain.name});
         const info : {
             nativeCurrencyInUsd: string,
             gasPrice: string

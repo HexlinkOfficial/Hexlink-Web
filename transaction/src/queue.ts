@@ -1,6 +1,8 @@
 import Queue from "bull";
 import {ethers} from "ethers";
-import {recordTx, updateTx} from "./operation";
+import {insertTx, updateTx} from "./graphql/transaction";
+import {updateOp} from "./graphql/operation";
+import {buildTxFromOps} from "./operation";
 import type {TxStatus, QueueType} from "./types";
 import { getInfuraProvider } from "./utils";
 import {SUPPORTED_CHAINS} from "../../functions/common";
@@ -17,6 +19,7 @@ class PrivateQueues {
           this.txQueues.set(chain.name, txQueue);
           const opQueue = this.initOperationQueue(chain, txQueue);
           this.opQueues.set(chain.name, opQueue);
+          // TODO recover pending operations and transactions from database
         });
     }
     
@@ -24,55 +27,44 @@ class PrivateQueues {
         return chain.name + "_" + type;
     }
 
-    private buildTxFromOps(ops: any): string {
-        return "";
-    }
-
     private initOperationQueue(chain: Chain, txQueue: Queue.Queue) : Queue.Queue {
         const senderPool = SenderPool.getInstance();
         const queue = new Queue(this.queueName(chain, "operation"));
-        queue.process(async (job: any) => {
+        queue.process("poll", senderPool.size(), async (job: any) => {
             const signer = senderPool.getSenderInIdle(chain);
-            if (!signer) {
-                return;
-            }
-            
-            const provider: ethers.providers.Provider = getInfuraProvider(chain);
+            if (!signer) { return; }
+
             const ops = await queue.getJobs(['waiting'], 0, 100);
-            const tx: string = this.buildTxFromOps(ops);
-            const txHash = await provider.sendTransaction(tx);
-            const id = await recordTx(chain.name, job.data.tx);
-            txQueue.add({id, txHash})
-            // cache the new occupied sender to the senders in process list
+            if (ops.length == 0) { return; }
+
+            const tx: string = buildTxFromOps(chain, ops, signer);
             senderPool.addSenderAssignedTx(chain, signer.address);
+            const [{id}] = await insertTx([{chain: chain.name, tx: tx.hash}]);
+            txQueue.add({id, tx, ops, signer: signer.address});
+            await Promise.all(ops.map(op => op.moveToCompleted("", false, true)));
         });
-        queue.add(null, { repeat: { every: 1000, } });
+        queue.add({}, { jobId: 'poll', repeat: { every: 1000, } });
         return queue;
     }
-        
+
     private initTransactionQueue(chain: Chain) : Queue.Queue {
         const senderPool = SenderPool.getInstance();
         const queue = new Queue(this.queueName(chain, "transaction"));
-        queue.process(async(job: any) => {});
-        const postProcessor = async (job: any) => {
-            const provider: ethers.providers.Provider = getInfuraProvider(job.data.chain);
-            const tx = await provider.getTransaction(job.data.txHash);
-            
-            if (!tx || !tx.to || tx.from !== job.data.signer.address) {
-                const errorStatus: TxStatus = "error";
-                updateTx(job.data.id, errorStatus);
-                return;
-            }
-            
-            // remove the new released sender from the senders in process list cache
-            senderPool.removeSenderCompletedJob(chain, job.data.signer.address);
-            
-            const successStatus: TxStatus = "success";
-            updateTx(job.data.id, successStatus);
-            provider.removeAllListeners();
+        queue.process(async(job: any) => {
+            const provider: ethers.providers.Provider = getInfuraProvider(chain);
+            const tx = await provider.sendTransaction(job.data.tx);
+            return await tx.wait();
+        });
+        const onSuccess = async (job: any) => {
+            senderPool.removeSenderCompletedJob(chain, job.data.signer);
+            await updateTx(job.data.id, "success");
         }
-        queue.on("completed", postProcessor);
-        queue.on("failed", postProcessor);
+        const onFail = async (job: any) => {
+            senderPool.removeSenderCompletedJob(chain, job.data.signer);
+            await updateTx(job.data.id, "error");
+        };
+        queue.on("completed", onSuccess);
+        queue.on("failed", onFail);
         return queue;
     }
 

@@ -12,6 +12,11 @@ class PrivateSenderPool {
         this.senders = JSON.parse(process.env.TX_SENDER_POOL!);
         this.senderPoolAddr =[ ...this.senders.keys() ]
         this.senderCache = new cache();
+        // TODO set blocked senders
+    }
+
+    size() : number {
+        return this.senderPoolAddr.length;
     }
 
     getSenderInProcess(chain: Chain) : string[] {

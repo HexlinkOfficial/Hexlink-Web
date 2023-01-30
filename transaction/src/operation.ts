@@ -1,25 +1,45 @@
-import {insertRedPacketClaim, updateRedPacketTxStatus} from "./graphql/redpacket";
-import type {RedPacketClaimInput, TxStatus, Operation, OperationType} from "./types";
-import {updateTxStatus, insertTx} from "./graphql/transaction";
+import {
+  ethers,
+  BigNumber as EthBigNumber,
+  PopulatedTransaction,
+} from "ethers";
+import {resolveProperties} from "@ethersproject/properties";
+import {serialize, UnsignedTransaction} from "@ethersproject/transactions";
 
-export const recordClaimTx = async (input: RedPacketClaimInput) => {
-  const ids = await insertRedPacketClaim([input]);
-  return ids[0].id;
+import type {OpInput} from "../../functions/common";
+import {hexlContract, PriceConfig} from "../../functions/common";
+
+async function buildTx(
+  provider: ethers.providers.Provider,
+  unsignedTx: PopulatedTransaction,
+  from: string
+) : Promise<ethers.PopulatedTransaction> {
+  const {chainId} = await provider.getNetwork();
+  unsignedTx.chainId = chainId;
+  unsignedTx.from = from;
+  unsignedTx.type = 2;
+  unsignedTx.nonce = await provider.getTransactionCount(unsignedTx.from);
+  unsignedTx.gasLimit = EthBigNumber.from(500000);
+  const feeData = await provider.getFeeData();
+  unsignedTx.maxPriorityFeePerGas =
+    feeData.maxPriorityFeePerGas || EthBigNumber.from(0);
+  const defaultGasPrice = EthBigNumber.from(
+      PriceConfig[chainId.toString()].gasPrice);
+  unsignedTx.maxFeePerGas = defaultGasPrice;
+  return unsignedTx;
 }
 
-export const updateClaimTx = async (id: number, txStatus: TxStatus) => {
-  await updateRedPacketTxStatus(id, txStatus);
-}
-
-export const recordTx = async (chain: string, tx: string) : Promise<number> => {
-  const [{id}] = await insertTx([{chain, tx}]);
-  return id;
-}
-
-export const updateTx = async (id: number, status: TxStatus) => {
-  await updateTxStatus(id, status);
-}
-
-export const buildTxFromOp = async (op: Operation) => {
-
+export async function buildTxFromOps(
+  provider: ethers.providers.Provider,
+  ops: OpInput[],
+  signer: ethers.Wallet,
+) : Promise<string> {
+  const contract = await hexlContract(provider);
+  let unsignedTx = await contract.populateTransaction.process(ops);
+  unsignedTx = await buildTx(provider, unsignedTx, signer.address);
+  const tx = await resolveProperties(unsignedTx);
+  const signature = signer._signingKey().signDigest(
+    ethers.utils.keccak256(serialize(<UnsignedTransaction>tx))
+  );
+  return serialize(<UnsignedTransaction>tx, signature);
 }

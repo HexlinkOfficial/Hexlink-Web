@@ -26,12 +26,12 @@ mutation ($objects: [transaction_insert_input!]!) {
 const UPDATE_TRANSACTION = gql`
     mutation (
         $id: Int!
-        $txStatus: String!
+        $status: String!
     ) {
         update_transaction_by_pk (
             pk_columns: {id: $id},
             _set: {
-              tx_status: $txStatus,
+              status: $status,
             }
         ) {
             id
@@ -55,7 +55,7 @@ export async function insertTx(
     return result.data.insert_transaction.returning;
 }
 
-export async function updateTxStatus(
+export async function updateTx(
   id: number,
   status: TxStatus,
 ) : Promise<void> {

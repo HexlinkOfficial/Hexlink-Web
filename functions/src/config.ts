@@ -1,4 +1,5 @@
 import * as functions from "firebase-functions";
+import {PriceConfig} from "../common";
 
 const secrets = functions.config().doppler;
 
@@ -39,38 +40,12 @@ export const kmsConfig = () => new Map<string, KMS_CONFIG_TYPE>([
   [KMS_KEY_TYPE[KMS_KEY_TYPE.validator], identityVerifierValidatorConfig()],
 ]);
 
-interface PriceInfo {
-  nativeCurrencyInUsd: string,
-  gasPrice: string,
-}
-
-const GOERLI : PriceInfo = {
-  nativeCurrencyInUsd: "1500.0",
-  gasPrice: "10000000000", // 10 gwei
-};
-
-const POLYGON : PriceInfo = {
-  nativeCurrencyInUsd: "1.0",
-  gasPrice: "100000000000", // 100 gwei
-};
-
-const MUMBAI : PriceInfo= {
-  nativeCurrencyInUsd: "1.0",
-  gasPrice: "2000000000", // 2 gwei
-};
-
-export const PriceConfig : {[key: string]: PriceInfo} = {
-  "5": GOERLI,
-  "137": POLYGON,
-  "80001": MUMBAI,
-};
-
 export const priceInfo = functions.https.onCall(
     (data, context) => {
       const uid = context.auth?.uid;
       if (!uid) {
         return {code: 401, message: "Unauthorized Call"};
       }
-      return {priceInfo: PriceConfig[data.chainId.toString()]};
+      return {priceInfo: PriceConfig[data.chain.toString()]};
     }
 );

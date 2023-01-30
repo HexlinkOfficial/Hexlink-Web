@@ -221,15 +221,15 @@ import { BigNumber as EthBigNumber } from "ethers";
 import { queryRedPacketInfo } from "@/web3/redpacket";
 import { tokenAmount } from "../../functions/common";
 import { getInfuraProvider } from "@/web3/network";
-import { ethers } from "ethers";
 import Loading from "@/components/Loading.vue";
 import { useAccountStore } from '@/stores/account';
 import { useTokenStore } from '@/stores/token';
 import { copy } from "@/web3/utils";
+import type {ethers} from "ethers";
 
 import { normalizeBalance } from "../../functions/common";
 import type { Token } from "../../functions/common";
-import { redPacketAddress } from "../../functions/redpacket";
+import { parseClaimed } from "../../functions/redpacket";
 
 interface CreatedRedPacket {
   redPacket: RedPacketDB,
@@ -556,21 +556,6 @@ const aggregateCreated = async function(
   return { redPacket, token };
 };
 
-const iface = new ethers.utils.Interface([
-  "event Claimed(bytes32 indexed PacketId, address claimer, uint256 amount)",
-]);
-const legacyIface = new ethers.utils.Interface([
-  "event Claimed(bytes32 indexed PacketId, address indexed claimer, uint256 amount)",
-]);
-
-const parseLog = (log: any) => {
-  try {
-    return iface.parseLog(log);
-  } catch(e) {
-    return legacyIface.parseLog(log);
-  }
-}
-
 const validateClaimStatus = async (
   provider: ethers.providers.Provider,
   claim: RedPacketClaim
@@ -583,13 +568,12 @@ const validateClaimStatus = async (
     return claim;
   } // not mined
   if (receipt.status) { // success
-    const events = receipt.logs.filter(
-      (log: any) => log.address.toLowerCase() == (
-        redPacketAddress(useChainStore().chain)
-      ).toLowerCase()
-    ).map((log: any) => parseLog(log));
-    const event = events.find((e: any) => e.name == "Claimed");
-    const claimedAmount = event?.args.amount || EthBigNumber.from(0);
+    const claimedAmount = parseClaimed(
+      useChainStore().chain,
+      receipt,
+      claim.redPacketId,
+      useAccountStore().account!.address,
+    ) || EthBigNumber.from(0);
     await updateRedPacketTxStatus(
       claim.id,
       "success",

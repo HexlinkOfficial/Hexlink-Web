@@ -23,7 +23,7 @@ class PrivateQueues {
           // TODO recover pending operations and transactions from database
         });
     }
-    
+
     private queueName(chain: Chain, type: QueueType) {
         return chain.name + "_" + type;
     }
@@ -36,8 +36,8 @@ class PrivateQueues {
             if (!signer) { return; }
 
             const jobs = await queue.getJobs(['waiting'], 0, 100);
-            if (jobs.length == 0) { return; }
-            const ops = jobs.map(job => job.data as Operation);
+            if (jobs.length === 0) { return; }
+            const ops = jobs.map((j: any) => j.data as Operation);
 
             const provider = getInfuraProvider(chain);
             const signedTx: string = await buildTxFromOps(
@@ -55,7 +55,7 @@ class PrivateQueues {
                 senderPool.removeSenderCompletedJob(chain, job.data.signer);
             }
             await Promise.all(
-                jobs.map(job => job.moveToCompleted(id.toString(), false, true))
+                jobs.map(j => j.moveToCompleted(id.toString(), false, true))
             );
         });
         queue.on("completed", async(job, txId) => {
@@ -102,13 +102,14 @@ class PrivateQueues {
     }
 }
 
+/* tslint:disable:max-classes-per-file */
 export class Queues {
     private static instance : PrivateQueues;
 
     private constructor() {
       throw new Error("Use Queues.getInstance()");
     }
-  
+
     static getInstance() {
       if (!Queues.instance) {
         Queues.instance = new PrivateQueues();
@@ -116,4 +117,4 @@ export class Queues {
       return Queues.instance;
     }
 }
-  
+

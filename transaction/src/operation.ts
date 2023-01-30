@@ -26,7 +26,7 @@ async function buildTx(
   const feeData = await provider.getFeeData();
   unsignedTx.maxPriorityFeePerGas =
     feeData.maxPriorityFeePerGas || EthBigNumber.from(0);
-  unsignedTx.maxFeePerGas = feeData.maxFeePerGas || 
+  unsignedTx.maxFeePerGas = feeData.maxFeePerGas ||
     EthBigNumber.from(PriceConfig[chainId.toString()].gasPrice);
   return unsignedTx;
 }
@@ -41,20 +41,20 @@ export async function buildTxFromOps(
   unsignedTx = await buildTx(provider, unsignedTx, signer.address);
   const tx = await resolveProperties(unsignedTx);
   const signature = signer._signingKey().signDigest(
-    ethers.utils.keccak256(serialize(<UnsignedTransaction>tx))
+    ethers.utils.keccak256(serialize(tx as UnsignedTransaction))
   );
-  return serialize(<UnsignedTransaction>tx, signature);
+  return serialize(tx as UnsignedTransaction, signature);
 }
 
 async function processAction(
   action: Action,
   receipt: ethers.providers.TransactionReceipt
 ) {
-  if (action.type == "claim_redpacket") {
+  if (action.type === "claim_redpacket") {
     const params = action.params;
     const chain = getChain(params.chain);
     const claimed = parseClaimed(chain, receipt, params.packetId, params.claimer);
-    await updateRedPacketClaim(params.id, claimed || EthBigNumber.from(0));
+    await updateRedPacketClaim(params.id, claimed?.toString() || "0");
   }
 }
 

@@ -1,1 +1,1 @@
-export {};
+import "express-async-errors";

@@ -18,12 +18,15 @@ const parseClaimedLog = (log) => {
     }
 };
 function equal(one, two) {
-    return one.toLowerCase() == two.toLowerCase();
+    return (one || "").toLowerCase() == (two || "").toLowerCase();
 }
 function parseClaimed(chain, receipt, packetId, claimer) {
     const redpacketAddress = (0, redpacket_1.redPacketAddress)(chain).toLowerCase();
     const events = receipt.logs.filter((log) => log.address.toLowerCase() == redpacketAddress).map((log) => parseClaimedLog(log));
-    const event = events.find((e) => e.name == "Claimed" && equal(e.args.packetId, packetId) && equal(e.args.claimer, claimer));
+    console.log(packetId);
+    console.log(claimer);
+    console.log(events);
+    const event = events.find((e) => e.name == "Claimed" && equal(e.args.PacketId, packetId) && equal(e.args.claimer, claimer));
     return event === null || event === void 0 ? void 0 : event.args.amount;
 }
 exports.parseClaimed = parseClaimed;

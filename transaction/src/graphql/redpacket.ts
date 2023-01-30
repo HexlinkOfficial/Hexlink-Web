@@ -1,5 +1,5 @@
 import {gql, createClient} from "@urql/core";
-import type {TxStatus, RedPacketClaimInput} from "../types";
+import type {RedPacketClaimInput} from "../types";
 
 const client = createClient({
   url: process.env.VITE_HASURA_URL!,

@@ -21,7 +21,7 @@ import {KMS_KEY_TYPE} from "./config";
 
 import {redPacketContract, redPacketMode} from "../redpacket";
 import {Firebase} from "./firebase";
-import {PriceConfig} from "../common";
+import {PriceConfig, getChain} from "../common";
 
 const secrets = functions.config().doppler || {};
 
@@ -67,7 +67,7 @@ async function buildTx(
   unsignedTx.maxPriorityFeePerGas =
     feeData.maxPriorityFeePerGas || EthBigNumber.from(0);
   const defaultGasPrice = EthBigNumber.from(
-      PriceConfig[chainId.toString()].gasPrice);
+      PriceConfig[getChain(chainId).name].gasPrice);
   unsignedTx.maxFeePerGas =
     feeData.maxFeePerGas || feeData.maxPriorityFeePerGas?.add(defaultGasPrice);
   return unsignedTx;

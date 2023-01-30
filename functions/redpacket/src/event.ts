@@ -20,8 +20,8 @@ const parseClaimedLog = (log: any) => {
     }
 }
 
-function equal(one: string, two: string) : boolean {
-    return one.toLowerCase() == two.toLowerCase();
+function equal(one: string | undefined, two: string | undefined) : boolean {
+    return (one || "").toLowerCase() == (two || "").toLowerCase();
 }
 
 export function parseClaimed(
@@ -29,13 +29,16 @@ export function parseClaimed(
     receipt: TransactionReceipt,
     packetId: string,
     claimer: string,
-) {
+) : EthBigNumber | undefined {
     const redpacketAddress = redPacketAddress(chain).toLowerCase();
     const events = receipt.logs.filter(
         (log: any) => log.address.toLowerCase() == redpacketAddress
     ).map((log: any) => parseClaimedLog(log));
+    console.log(packetId);
+    console.log(claimer);
+    console.log(events);
     const event = events.find(
-        (e: any) => e.name == "Claimed" && equal(e.args.packetId, packetId) && equal(e.args.claimer, claimer)
+        (e: any) => e.name == "Claimed" && equal(e.args.PacketId, packetId) && equal(e.args.claimer, claimer)
     );
     return event?.args.amount;
 }

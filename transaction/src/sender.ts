@@ -40,7 +40,7 @@ class PrivateSenderPool {
 
     removeSenderCompletedJob(chain: Chain, sender: string) {
         const sendersInProcess: string[] = this.getSenderInProcess(chain);
-    
+
         const index = sendersInProcess.indexOf(sender, 0);
         if (index > -1) {
             this.senderCache.set(chain.name, sendersInProcess.splice(index, 1));
@@ -48,13 +48,14 @@ class PrivateSenderPool {
     }
 }
 
+/* tslint:disable:max-classes-per-file */
 export class SenderPool {
     private static instance : PrivateSenderPool;
 
     private constructor() {
       throw new Error("Use SenderPool.getInstance()");
     }
-  
+
     static getInstance() {
       if (!SenderPool.instance) {
         SenderPool.instance = new PrivateSenderPool();
@@ -62,4 +63,3 @@ export class SenderPool {
       return SenderPool.instance;
     }
 }
-  

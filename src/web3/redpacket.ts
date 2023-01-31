@@ -181,7 +181,7 @@ async function buildCreateRedPacketTxForMetamask(input: RedPacket) {
     const refunder = useChainStore().refunder;
     if (value.gt(0)) {
         hexlOps.push({
-            name: "depositGasSponsorship",
+            name: "depositAll",
             function: "",
             args: {},
             input: buildOpInput({to: hexlAccount, value}),

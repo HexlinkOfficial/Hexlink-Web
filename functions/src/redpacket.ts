@@ -152,7 +152,6 @@ async function buildClaimOp(
   };
 }
 
-
 export const claimRedPacket = functions.https.onCall(
     async (data, context) => {
       Firebase.getInstance();
@@ -180,13 +179,11 @@ export const claimRedPacket = functions.https.onCall(
       if (data.serverUpdate) {
         const [{id: claimId}] = await insertRedPacketClaim([claimInput]);
         const action = {
-          actions: {
-            type: "claim_redpacket",
-            params: {
-              claimer: account.address,
-              claimId,
-              redPacketId: redPacket.id,
-            },
+          type: "claim_redpacket",
+          params: {
+            claimer: account.address,
+            claimId,
+            redPacketId: redPacket.id,
           },
         };
         const postData = await buildClaimOp(

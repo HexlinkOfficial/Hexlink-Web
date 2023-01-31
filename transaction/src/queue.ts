@@ -2,7 +2,7 @@ import Queue from "bull";
 import {ethers} from "ethers";
 import {insertTx, updateTx} from "./graphql/transaction";
 import {updateOp} from "./graphql/operation";
-import {buildTxFromOps, processActions} from "./operation";
+import {processActions, buildTxFromOps} from "./operation";
 import type {QueueType} from "./types";
 import { getInfuraProvider } from "./utils";
 import {SUPPORTED_CHAINS} from "../../functions/common";
@@ -13,13 +13,16 @@ import type { Operation } from "./types";
 class PrivateQueues {
     opQueues : Map<string, Queue.Queue> = new Map<string, Queue.Queue>();
     txQueues : Map<string, Queue.Queue> = new Map<string, Queue.Queue>();
+    coordinatorQueues : Map<string, Queue.Queue> = new Map<string, Queue.Queue>();
 
     constructor() {
         SUPPORTED_CHAINS.forEach(chain => {
           const txQueue = this.initTransactionQueue(chain);
           this.txQueues.set(chain.name, txQueue);
-          const opQueue = this.initOperationQueue(chain, txQueue);
+          const opQueue = this.initOperationQueue(chain);
           this.opQueues.set(chain.name, opQueue);
+          const coordinatorQueue = this.initCoordinatorQueue(chain, opQueue, txQueue);
+          this.coordinatorQueues.set(chain.name, coordinatorQueue);
           // TODO recover pending operations and transactions from database
         });
     }
@@ -28,15 +31,30 @@ class PrivateQueues {
         return chain.name + "_" + type;
     }
 
-    private initOperationQueue(chain: Chain, txQueue: Queue.Queue) : Queue.Queue {
+    private initCoordinatorQueue(
+        chain: Chain,
+        opQueue: Queue.Queue,
+        txQueue: Queue.Queue
+    ) : Queue.Queue {
         const senderPool = SenderPool.getInstance();
-        const queue = new Queue(this.queueName(chain, "operation"));
-        queue.process("poll", senderPool.size(), async (job: any) => {
+        const queue = new Queue(this.queueName(chain, "coordinator"));
+        console.log("Initiating coordinator queue " + queue.name);
+        queue.process("poll", senderPool.size(), async (job) => {
             const signer = senderPool.getSenderInIdle(chain);
-            if (!signer) { return; }
+            if (!signer) {
+                console.log("No signer available...");
+                return;
+            }
 
-            const jobs = await queue.getJobs(['waiting'], 0, 100);
-            if (jobs.length === 0) { return; }
+            const jobs = [];
+            for (let i = 0; i < 50; i++) {
+                const j = await opQueue.getNextJob();
+                if (!j) { break; }
+                jobs.push(j);
+            }
+            if (jobs.length === 0) {
+                return;
+            }
             const ops = jobs.map((j: any) => j.data as Operation);
 
             const provider = getInfuraProvider(chain);
@@ -44,56 +62,65 @@ class PrivateQueues {
                 provider, ops.map(op => op.input), signer
             );
             const txHash = ethers.utils.keccak256(signedTx);
-            const [{id}] = await insertTx([{chain: chain.name, tx: txHash}]);
-            senderPool.addSenderAssignedTx(chain, signer.address);
             try {
-                await provider.sendTransaction(signedTx);
-                txQueue.add({id, tx: txHash, ops, signer: signer.address});
+                const [{id}] = await insertTx([{chain: chain.name, tx: txHash}]);
+                senderPool.addSenderAssignedTx(chain, signer.address);
+                try {
+                    await provider.sendTransaction(signedTx);
+                    await txQueue.add({id, tx: txHash, ops, signer: signer.address});
+                } catch(err) {
+                    console.log(err);
+                    await updateTx(id, "error", "failed to send tx");
+                    senderPool.removeSenderCompletedJob(chain, signer.address);
+                }
+                const postPorgress = async (j: any) => {
+                    await updateOp(j.data.id, id);
+                    await j.moveToCompleted("success", false, true);
+                }
+                await Promise.all(jobs.map(j => postPorgress(j)));
             } catch(err) {
                 console.log(err);
-                await updateTx(id, "error");
-                senderPool.removeSenderCompletedJob(chain, job.data.signer);
+                const postPorgress = async (j: any) => {
+                    await updateOp(j.data.id, undefined, "failed to store tx");
+                    await j.moveToCompleted("success", false, true);
+                }
+                await Promise.all(jobs.map(j => postPorgress(j)));
             }
-            await Promise.all(
-                jobs.map(j => j.moveToCompleted(id.toString(), false, true))
-            );
         });
-        queue.on("completed", async(job, txId) => {
-            await updateOp(job.data.id, Number(txId));
-        })
-        queue.add({}, { jobId: 'poll', repeat: { every: 1000, } });
+        queue.add("poll", {}, { repeat: { every: 1000, } });
+        return queue;
+    }
+
+    private initOperationQueue(chain: Chain) : Queue.Queue {
+        const queue = new Queue(
+            this.queueName(chain, "operation"),
+            { settings: {maxStalledCount: 0} }
+        );
+        console.log("Initiating operation queue " + queue.name);
         return queue;
     }
 
     private initTransactionQueue(chain: Chain) : Queue.Queue {
         const senderPool = SenderPool.getInstance();
         const queue = new Queue(this.queueName(chain, "transaction"));
+        console.log("Initiating transaction queue " + queue.name);
         queue.process(async(job: any) => {
             const provider = getInfuraProvider(chain);
-            const tx = await provider.getTransaction(job.data.tx);
-            if (tx) {
+            try {
+                const tx = await provider.getTransaction(job.data.tx);
+                if (!tx) {
+                    throw new Error("tx not found");
+                }
                 const receipt = await tx.wait();
+                await updateTx(job.data.id, "success");
                 await Promise.all(job.data.ops.map(
-                    (op: Operation) => processActions(op.actions, receipt)
+                    (op: Operation) => processActions(chain, op.actions, receipt)
                 ));
-            } else {
-                throw new Error("tx not found: " + job.data.tx);
+            } catch(err: any) {
+                await updateTx(job.data.id, "error", err.message);
             }
+            senderPool.removeSenderCompletedJob(chain, job.data.signer);
         });
-        const onSuccess = async (job: any) => {
-            if (job.data.signer) {
-                senderPool.removeSenderCompletedJob(chain, job.data.signer);
-            }
-            await updateTx(job.data.id, "success");
-        }
-        const onFail = async (job: any, error: any) => {
-            if (job.data.signer) {
-                senderPool.removeSenderCompletedJob(chain, job.data.signer);
-            }
-            await updateTx(job.data.id, "error", error.message);
-        };
-        queue.on("completed", onSuccess);
-        queue.on("failed", onFail);
         return queue;
     }
 

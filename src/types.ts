@@ -107,7 +107,19 @@ export interface RedPacketClaimInput {
     tx: string,
 }
   
-export type TxStatus = "" | "pending" | "error" | "success";
+export type TxStatus = "" | "processing" | "error" | "success";
+
+interface TxState {
+    status: TxStatus,
+    tx: string,
+    chain: string,
+    error?: string,
+    updatedAt: Date,
+}
+
+interface TxStateError {
+    error: string,
+}
   
 export interface RedPacketClaim extends RedPacketClaimInput {
     createdAt: Date,
@@ -115,6 +127,7 @@ export interface RedPacketClaim extends RedPacketClaimInput {
     claimer: HexlinkUserInfo,
     txStatus?: TxStatus,
     claimed?: EthersBigNumber,
+    txState?: TxState | TxStateError | undefined,
 }
   
 export interface ClaimedRedPacket {

@@ -7,30 +7,42 @@ require("express-async-errors");
 const express_1 = __importDefault(require("express"));
 const queue_1 = require("./queue");
 const operation_1 = require("./graphql/operation");
+const transaction_1 = require("./graphql/transaction");
+const body_parser_1 = __importDefault(require("body-parser"));
 const app = (0, express_1.default)();
 const port = 9000;
 const queues = queue_1.Queues.getInstance();
-app.post('/submit/:chain', async (req, _res) => {
+// parse application/x-www-form-urlencoded
+app.use(body_parser_1.default.urlencoded({ extended: false }));
+// parse application/json
+app.use(body_parser_1.default.json());
+app.post('/submit/:chain', async (req, res) => {
     const opQueue = queues.getOpQueue(req.params.chain);
+    if (!req.body.op) {
+        res.status(400).json({ success: false, message: "invalid op" });
+        return;
+    }
     const input = {
         chain: req.params.chain,
-        input: req.query.op.input,
-        args: req.query.op.args,
-        actions: req.query.actions,
+        input: req.body.op,
+        args: req.body.args,
+        actions: req.body.actions,
     };
-    if (req.query.op.transaction) {
-        input.transaction = req.query.op.transaction;
-        const [{ id }] = await (0, operation_1.insertOp)([input]);
+    if (req.body.tx) {
+        const [{ id: txId }] = await (0, transaction_1.insertTx)(req.body.tx);
+        const [{ id: opId }] = await (0, operation_1.insertOp)([{ txId, ...input }]);
         const txQueue = queues.getTxQueue(req.params.chain);
         await txQueue.add({
-            id,
-            tx: req.query.op.transaction.tx,
-            ops: [{ id, ...input }],
+            id: opId,
+            tx: req.body.tx.tx,
+            ops: [{ id: opId, ...input }],
         });
+        res.status(200).json({ id: opId });
     }
     else {
         const [{ id }] = await (0, operation_1.insertOp)([input]);
         await opQueue.add({ id, ...input });
+        res.status(200).json({ id });
     }
 });
 // start the Express server

@@ -14,6 +14,9 @@ class PrivateSenderPool {
         );
         this.senderPoolAddr =[ ...this.senders.keys() ]
         this.senderCache = new cache();
+        console.log(
+            `${this.senderPoolAddr.length} senders initiated: \n${this.senderPoolAddr.join(",\n")}`
+        );
         // TODO set blocked senders
     }
 
@@ -37,12 +40,12 @@ class PrivateSenderPool {
 
     addSenderAssignedTx(chain: Chain, sender: string) {
         const sendersInProcess: string[] = this.getSenderInProcess(chain);
-        this.senderCache.set(chain.name, sendersInProcess.push(sender));
+        sendersInProcess.push(sender)
+        this.senderCache.set(chain.name, sendersInProcess);
     }
 
     removeSenderCompletedJob(chain: Chain, sender: string) {
         const sendersInProcess: string[] = this.getSenderInProcess(chain);
-
         const index = sendersInProcess.indexOf(sender, 0);
         if (index > -1) {
             this.senderCache.set(chain.name, sendersInProcess.splice(index, 1));

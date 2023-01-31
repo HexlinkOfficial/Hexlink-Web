@@ -9,7 +9,7 @@ export interface RedPacketClaimInput {
     claimer?: string;
     claimed?: string;
 }
-export type QueueType = "operation" | "transaction";
+export type QueueType = "operation" | "transaction" | "coordinator";
 export type ActionType = "claim_redpacket" | "create_redpacket";
 export interface Action {
     type: ActionType;
@@ -20,10 +20,7 @@ export interface OperationInput {
     chain: string;
     args: any;
     actions: Action[];
-    transaction?: {
-        tx: string;
-        chain: string;
-    };
+    txId?: number;
 }
 export interface Operation extends OperationInput {
     id: number;

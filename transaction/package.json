@@ -7,18 +7,20 @@
     "prebuild": "tslint -c tslint.json -p tsconfig.json --fix",
     "build": "tsc",
     "prestart": "npm run build",
-    "start": "node .",
+    "start": "nodemon .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@urql/core": "^3.1.1",
+    "axios": "^1.2.6",
+    "body-parser": "^1.20.1",
     "bull": "^4.10.2",
     "express": "^4.18.2",
     "express-async-errors": "^3.1.1",
     "node-cache": "^5.1.2",
-    "save": "^2.9.0",
-    "@urql/core": "^3.1.1"
+    "save": "^2.9.0"
   },
   "devDependencies": {
     "tslint": "^6.1.3",

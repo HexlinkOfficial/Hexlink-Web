@@ -1,6 +1,7 @@
 import {getAuth} from "firebase-admin/auth";
 import {ethers} from "ethers";
 import {hexlContract, nameHash} from "../common";
+import type {Chain} from "../common";
 
 import * as functions from "firebase-functions";
 
@@ -43,28 +44,28 @@ export const getAlchemyProvider = (
 };
 
 export const getInfuraProvider = (
-    chainId: string
+    chain: Chain
 ) : ethers.providers.Provider => {
   return new ethers.providers.InfuraProvider(
-      Number(chainId),
+      Number(chain.chainId!),
       secrets.VITE_INFURA_API_KEY,
   );
 };
 
 export const accountAddress = async function(
-    chainId: string,
+    chain: Chain,
     uid: string
 ) : Promise<{code: number, message?: string, address?: string}> {
   const result = await genNameHash(uid);
   if (result.nameHash == undefined) {
     return result;
   }
-  const hexlink = await hexlContract(getInfuraProvider(chainId));
+  const hexlink = await hexlContract(getInfuraProvider(chain));
   try {
     const address = await hexlink.addressOfName(result.nameHash);
     return {code: 200, address};
   } catch (e : unknown) {
-    const data = {uid, nameHash: result.nameHash, chainId};
+    const data = {uid, nameHash: result.nameHash, chain: chain.name};
     console.log("Failed to get address of name for " + JSON.stringify(data));
     console.log("Error is " + JSON.stringify(e));
     return {code: 500, message: "Internal Error"};

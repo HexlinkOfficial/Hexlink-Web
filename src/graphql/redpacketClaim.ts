@@ -47,6 +47,18 @@ export const GET_REDPACKET_CLAIMS = gql`
             created_at
             tx_status
             claimed
+            op_error
+            operation {
+              tx_error
+              transaction {
+                chain
+                tx
+                status
+                created_at
+                updated_at
+                error
+              }
+            }
         }
     }
 `
@@ -77,6 +89,18 @@ export const GET_REDPACKET_CLAIMS_BY_CLAIMER = gql`
               creator
               created_at
             }
+            op_error
+            operation {
+              tx_error
+              transaction {
+                chain
+                tx
+                status
+                created_at
+                updated_at
+                error
+              }
+            }
         }
     }
   `
@@ -99,6 +123,32 @@ export const UPDATE_REDPACKET_CLAIM_TX = gql`
     }
 `
 
+function buildTxState(claim: any) {
+  if (claim.op_error) {
+    return {error: claim.op_error};
+  }
+  const op = claim.operation;
+  if (!op) {
+    return undefined;
+  }
+
+  if (op.tx_error) {
+    return {error: op.tx_error};
+  }
+  const tx = op.transaction;
+  if (tx) {
+    return { 
+      chain: tx.chain,
+      tx: tx.tx,
+      status: tx.status,
+      updatedAt: new Date(tx.updatedAt),
+      createdAt: new Date(tx.updatedAt),
+      error: claim.op_error || claim.operation?.tx_error || tx.error
+    }
+  }
+  return undefined;
+}
+
 function parseRedPacketClaim(claim: any) : RedPacketClaim {
   return {
     id: claim.id,
@@ -109,6 +159,7 @@ function parseRedPacketClaim(claim: any) : RedPacketClaim {
     createdAt: new Date(claim.createdAt),
     txStatus: claim.tx_status,
     claimed: claim.claimed,
+    txState: buildTxState(claim),
   } as RedPacketClaim;
 }
 
@@ -123,6 +174,7 @@ function parseClaimedRedPacket(claim: any) {
       redPacketId: claim.redpacket.id,
       txStatus: claim.tx_status,
       claimed: claim.claimed ? EthBigNumber.from(claim.claimed) : undefined,
+      txState: buildTxState(claim),
     },
     redPacket: {
       id: claim.redpacket.id,

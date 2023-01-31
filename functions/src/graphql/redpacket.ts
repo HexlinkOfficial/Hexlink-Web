@@ -30,7 +30,8 @@ export interface RedPacketClaimInput {
   creatorId: string,
   tx?: string,
   claimerId: string,
-  claimer: HexlinkUserInfo
+  claimer: HexlinkUserInfo,
+  opId?: number,
 }
 
 export interface HexlinkUserInfo {
@@ -49,7 +50,7 @@ export interface RedPacketClaim extends RedPacketClaimInput {
 
 export async function insertRedPacketClaim(
     data: RedPacketClaimInput[],
-) : Promise<{id: string}[]> {
+) : Promise<{id: number}[]> {
   const result = await client().mutation(
       INSERT_REDPACKET_CLAIM,
       {
@@ -59,10 +60,43 @@ export async function insertRedPacketClaim(
           creator_id: d.creatorId,
           claimer: JSON.stringify(d.claimer),
           tx: d.tx,
+          op_id: d.opId,
         })),
       }
   ).toPromise();
   return result.data.insert_redpacket_claim.returning;
+}
+
+export const UPDATE_REDPACKET_CLAIM = gql`
+    mutation (
+        $id: Int!
+        $opId: Int,
+        $opError: String,
+    ) {
+        update_redpacket_claim_by_pk (
+            pk_columns: {id: $id},
+            _set: {
+              op_id: $opId,
+              op_error: $opError
+            }
+        ) {
+            id
+        }
+    }
+`;
+
+export async function updateRedPacketClaim(
+    id: number,
+    opId?: number,
+    opError?: string,
+) : Promise<void> {
+  if (!opId && !opError) {
+    throw new Error("Neither op_id and op_error is set");
+  }
+  await client().mutation(
+      UPDATE_REDPACKET_CLAIM,
+      {id, opId, opError}
+  ).toPromise();
 }
 
 export const GET_REDPACKET = gql`

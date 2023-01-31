@@ -372,9 +372,10 @@ export async function claimRedPacket(redPacket: RedPacketDB) : Promise<void> {
     const claimRedPacket = httpsCallable(functions, 'claimRedPacket');
     const chain = getChain(redPacket.chain);
     await claimRedPacket({
-        chainId: chain.chainId,
+        chain: chain.name,
         redPacketId: redPacket.id,
         claimer: useAuthStore().userInfo,
+        serverUpdate: true,
     });
 }
 

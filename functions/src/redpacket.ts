@@ -1,8 +1,12 @@
 /* eslint-disable require-jsdoc */
 import * as functions from "firebase-functions";
 
-import {insertRedPacketClaim, getRedPacket} from "./graphql/redpacket";
-import type {RedPacket} from "./graphql/redpacket";
+import {
+  insertRedPacketClaim,
+  getRedPacket,
+  updateRedPacketClaim,
+} from "./graphql/redpacket";
+import type {RedPacket, RedPacketClaimInput} from "./graphql/redpacket";
 import {signWithKmsKey} from "./kms";
 import {
   ethers,
@@ -19,9 +23,16 @@ import {resolveProperties} from "@ethersproject/properties";
 import {serialize, UnsignedTransaction} from "@ethersproject/transactions";
 import {KMS_KEY_TYPE} from "./config";
 
-import {redPacketContract, redPacketMode} from "../redpacket";
+import {
+  redPacketContract,
+  redPacketAddress,
+  redPacketInterface,
+  redPacketMode,
+} from "../redpacket";
 import {Firebase} from "./firebase";
 import {PriceConfig, getChain} from "../common";
+import type {Chain} from "../common";
+import {submit} from "./services/operation";
 
 const secrets = functions.config().doppler || {};
 
@@ -76,7 +87,7 @@ async function buildTx(
 export async function buildClaimTx(
     provider: ethers.providers.Provider,
     redPacket: RedPacket,
-    data: {chainId: string, claimerAddress: string, creator?: string},
+    data: {claimerAddress: string, creator?: string},
 ) : Promise<string> {
   const {metadata} = redPacket;
   const creator = metadata.creator || data.creator;
@@ -103,6 +114,45 @@ export async function buildClaimTx(
   return serialize(<UnsignedTransaction>tx, signature);
 }
 
+async function buildClaimOp(
+    chain: Chain,
+    redPacket: RedPacket,
+    claimer: string,
+    action: any,
+) {
+  const message = ethers.utils.keccak256(
+      ethers.utils.defaultAbiCoder.encode(
+          ["bytes32", "address"],
+          [redPacket.id, claimer]
+      )
+  );
+  const args = {
+    creator: redPacket.metadata.creator,
+    packet: {
+      token: redPacket.metadata.token,
+      salt: redPacket.metadata.salt,
+      balance: EthBigNumber.from(redPacket.metadata.tokenAmount),
+      validator: redPacket.metadata.validator,
+      split: redPacket.metadata.split,
+      mode: redPacketMode(redPacket.metadata.mode),
+    },
+    claimer,
+    signature: await sign(redPacket.metadata.validator, message),
+  };
+  const callData = redPacketInterface.encodeFunctionData( "claim", [args]);
+  return {
+    op: {
+      to: redPacketAddress(chain),
+      value: ethers.utils.hexValue(0),
+      callData,
+      callGasLimit: "0",
+    },
+    args,
+    actions: [action],
+  };
+}
+
+
 export const claimRedPacket = functions.https.onCall(
     async (data, context) => {
       Firebase.getInstance();
@@ -110,42 +160,56 @@ export const claimRedPacket = functions.https.onCall(
       if (!uid) {
         return {code: 401, message: "Unauthorized"};
       }
-      const account = await accountAddress(data.chainId, uid);
+
+      const chain = getChain(data.chain);
+      const account = await accountAddress(chain, uid);
       if (!account.address) {
         return account;
       }
-      data.claimerAddress = account.address;
       const redPacket = await getRedPacket(data.redPacketId);
       if (!redPacket) {
         return {code: 400, message: "Failed to load redpacket"};
       }
-      if (data.signOnly) {
-        const message = ethers.utils.keccak256(
-            ethers.utils.defaultAbiCoder.encode(
-                ["bytes32", "address"],
-                [redPacket.id, data.claimerAddress]
-            )
+
+      const claimInput : RedPacketClaimInput = {
+        redPacketId: redPacket.id,
+        creatorId: redPacket.user_id,
+        claimerId: uid,
+        claimer: data.claimer,
+      };
+      if (data.serverUpdate) {
+        const [{id: claimId}] = await insertRedPacketClaim([claimInput]);
+        const action = {
+          actions: {
+            type: "claim_redpacket",
+            params: {
+              claimer: account.address,
+              claimId,
+              redPacketId: redPacket.id,
+            },
+          },
+        };
+        const postData = await buildClaimOp(
+            chain, redPacket, account.address, action
         );
-        const signature = await sign(redPacket.metadata.validator, message);
-        const [{id}] = await insertRedPacketClaim([{
-          redPacketId: redPacket.id,
-          creatorId: redPacket.user_id,
-          claimerId: uid,
-          claimer: data.claimer,
-        }]);
-        return {code: 200, id, signature};
+        try {
+          const result = await submit(chain, postData);
+          await updateRedPacketClaim(claimId, result.id);
+          return {code: 200, id: result.id};
+        } catch (err: any) {
+          console.log("Failed to submit op");
+          console.log(err);
+          await updateRedPacketClaim(claimId, undefined, "failed to submit op");
+          return {code: 400, message: "failed to submit operation"};
+        }
       } else {
-        const provider = getInfuraProvider(data.chainId);
+        const provider = getInfuraProvider(chain);
+        data.claimerAddress = account.address;
         const signedTx = await buildClaimTx(provider, redPacket, data);
         const txHash = ethers.utils.keccak256(signedTx);
         await provider.sendTransaction(signedTx);
-        const [{id}] = await insertRedPacketClaim([{
-          redPacketId: redPacket.id,
-          creatorId: redPacket.user_id,
-          claimerId: uid,
-          claimer: data.claimer,
-          tx: txHash,
-        }]);
+        claimInput.tx = txHash;
+        const [{id}] = await insertRedPacketClaim([claimInput]);
         return {code: 200, id, tx: txHash};
       }
     }

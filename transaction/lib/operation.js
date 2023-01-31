@@ -30,16 +30,15 @@ async function buildTxFromOps(provider, ops, signer) {
     return (0, transactions_1.serialize)(tx, signature);
 }
 exports.buildTxFromOps = buildTxFromOps;
-async function processAction(action, receipt) {
+async function processAction(chain, action, receipt) {
     if (action.type === "claim_redpacket") {
         const params = action.params;
-        const chain = (0, common_1.getChain)(params.chain);
-        const claimed = (0, redpacket_2.parseClaimed)(chain, receipt, params.packetId, params.claimer);
-        await (0, redpacket_1.updateRedPacketClaim)(params.id, (claimed === null || claimed === void 0 ? void 0 : claimed.toString()) || "0");
+        const claimed = (0, redpacket_2.parseClaimed)(chain, receipt, params.redPacketId, params.claimer);
+        await (0, redpacket_1.updateRedPacketClaim)(params.claimId, (claimed === null || claimed === void 0 ? void 0 : claimed.toString()) || "0");
     }
 }
-async function processActions(actions, receipt) {
-    await Promise.all(actions.map(action => processAction(action, receipt)));
+async function processActions(chain, actions, receipt) {
+    await Promise.all(actions.map(action => processAction(chain, action, receipt)));
 }
 exports.processActions = processActions;
 //# sourceMappingURL=operation.js.map

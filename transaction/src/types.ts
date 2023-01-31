@@ -12,7 +12,7 @@ export interface RedPacketClaimInput {
   claimed?: string
 }
 
-export type QueueType = "operation" | "transaction";
+export type QueueType = "operation" | "transaction" | "coordinator";
 
 export type ActionType = "claim_redpacket" | "create_redpacket";
 

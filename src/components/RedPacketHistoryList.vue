@@ -108,8 +108,8 @@
             </div>
             <div v-if="v.redpacket" class="record-box">
               <div style="display: block; position: relative;">
-                <div class="icon" :style="showClaimStatus(v.redpacket.claim.txStatus) == 'Error' ? 'background-color: #FD4755;' : 'background-color: #4BAE4F;'">
-                  <svg v-if="showClaimStatus(v.redpacket.claim.txStatus) != 'Claimed' && showClaimStatus(v.redpacket.claim.txStatus) != 'Error'" version="1.1" id="loader-1"
+                <div class="icon" :style="showClaimStatus(v.redpacket.claim) == 'Error' ? 'background-color: #FD4755;' : 'background-color: #4BAE4F;'">
+                  <svg v-if="showClaimStatus(v.redpacket.claim) != 'Claimed' && showClaimStatus(v.redpacket.claim) != 'Error'" version="1.1" id="loader-1"
                     xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="40px"
                     height="40px" viewBox="0 0 50 50" style="enable-background:new 0 0 50 50; background-color: none;" xml:space="preserve">
                     <path fill="#FFFFFF"
@@ -118,11 +118,11 @@
                         dur="0.6s" repeatCount="indefinite"></animateTransform>
                     </path>
                   </svg>
-                  <svg v-if="showClaimStatus(v.redpacket.claim.txStatus) == 'Claimed'" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <svg v-if="showClaimStatus(v.redpacket.claim) == 'Claimed'" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M7 7L17 17" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                     <path d="M17 7V17H7" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                   </svg>
-                  <svg v-if="showClaimStatus(v.redpacket.claim.txStatus) == 'Error'" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <svg v-if="showClaimStatus(v.redpacket.claim) == 'Error'" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M7 17L17 7" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                     <path d="M7 7L17 17" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                   </svg>
@@ -134,7 +134,7 @@
                     <div style="display: flex;">
                       <div class="sent-info">
                         <div class="info-1">
-                          {{ showClaimStatus(v.redpacket.claim.txStatus) }}
+                          {{ showClaimStatus(v.redpacket.claim) }}
                         </div>
                       </div>
                     </div>
@@ -163,7 +163,7 @@
                   </div>
                   <div class="sent-info" v-if="v.redpacket.claim.txStatus != 'success'">
                     <div style="overflow: auto; white-space: nowrap; margin-left: 0.25rem; width: 50px;display: flex;justify-content: flex-end;">
-                      {{ showClaimStatus(v.redpacket.claim.txStatus) }}
+                      {{ showClaimStatus(v.redpacket.claim) }}
                     </div>
                   </div>
                 </div>
@@ -189,11 +189,11 @@
                   </div>
                 </div>
                 <div class="share">
-                  <i v-if="showClaimStatus(v.redpacket.claim.txStatus) == 'Claimed'" class="fa fa-paper-plane share-button" aria-hidden="true" @click="copyShareLink(v.redpacket.redPacket)"></i>
-                  <span v-if="showClaimStatus(v.redpacket.claim.txStatus) != 'Claimed' && showClaimStatus(v.redpacket.claim.txStatus) != 'Error'" class="pending-text">{{ showClaimStatus(v.redpacket.claim.txStatus) }}</span>
-                  <span v-if="showClaimStatus(v.redpacket.claim.txStatus) == 'Error'" class="pending-text" style="color:#FD4755;">{{ showClaimStatus(v.redpacket.claim.txStatus) }}</span>
+                  <i v-if="showClaimStatus(v.redpacket.claim) == 'Claimed'" class="fa fa-paper-plane share-button" aria-hidden="true" @click="copyShareLink(v.redpacket.redPacket)"></i>
+                  <span v-if="showClaimStatus(v.redpacket.claim) != 'Claimed' && showClaimStatus(v.redpacket.claim) != 'Error'" class="pending-text">{{ showClaimStatus(v.redpacket.claim) }}</span>
+                  <span v-if="showClaimStatus(v.redpacket.claim) == 'Error'" class="pending-text" style="color:#FD4755;">{{ showClaimStatus(v.redpacket.claim) }}</span>
                 </div>
-                <div class="cta" v-if="showClaimStatus(v.redpacket.claim.txStatus) == 'Claimed'">
+                <div class="cta" v-if="showClaimStatus(v.redpacket.claim) == 'Claimed'">
                   <i className="fa fa-twitter"></i>
                 </div>
               </div>
@@ -244,11 +244,8 @@ interface ClaimedRedPacketInfo {
 const redPackets = ref<CreatedRedPacket[]>([]);
 const claimed = ref<ClaimedRedPacketInfo[]>([]);
 const loadClaimInfo = async () => {
-  const provider = getInfuraProvider(useChainStore().chain);
   const claims : ClaimedRedPacket[] = await getClaimedRedPackets();
-  claimed.value = await Promise.all(
-    claims.map(c => aggregatedClaimed(provider, c))
-  );
+  claimed.value = await Promise.all(claims.map(c => aggregatedClaimed(c)));
 }
 
 const loadClaimsForOnePacket = async (
@@ -399,10 +396,6 @@ watch(() => route.query?.claim, async() => {
   loading.value = false;
 });
 
-setInterval(() => {
-  pullRedpacketData()
-}, 20 * 1000);
-
 const showStatus = (tx: string, status: string) => {
   if(tx == null) {
     return 'Pending';
@@ -414,10 +407,24 @@ const showStatus = (tx: string, status: string) => {
   }
 }
 
-const showClaimStatus = (tx_status: string) => {
-  if(tx_status == null){
+const showClaimStatus = (claim: any) => {
+  if (claim.txState) {
+    if (claim.txState.error) {
+      return "Error";
+    }
+    if (claim.txState.status == null) {
+      return 'Pending';
+    } else if (claim.txState.status == "error") {
+      return "Error";
+    } else {
+      return "Claimed";
+    }
+  }
+
+  // for legacy check
+  if(claim.txStatus == null){
     return 'Pending';
-  } else if (tx_status == 'error') {
+  } else if (claim.txStatus == 'error') {
     return 'Error';
   } else {
     return 'Claimed';
@@ -589,12 +596,10 @@ const validateClaimStatus = async (
 }
 
 const aggregatedClaimed = async function(
-  provider: ethers.providers.Provider,
   redpacket: ClaimedRedPacket
 ) : Promise<ClaimedRedPacketInfo> {
   const tokenAddr = redpacket.redPacket.metadata.token.toLowerCase();
   const token = await loadAndSaveERC20Token(tokenAddr);
-  redpacket.claim = await validateClaimStatus(provider, redpacket.claim);
   return { redpacket, token };
 }
 </script>

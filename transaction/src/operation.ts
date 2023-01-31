@@ -7,8 +7,8 @@ import {resolveProperties} from "@ethersproject/properties";
 import {serialize, UnsignedTransaction} from "@ethersproject/transactions";
 import {updateRedPacketClaim} from "./graphql/redpacket";
 
-import type {OpInput} from "../../functions/common";
-import {hexlContract, PriceConfig, getChain} from "../../functions/common";
+import type {Chain, OpInput} from "../../functions/common";
+import {hexlContract, PriceConfig} from "../../functions/common";
 import {parseClaimed} from "../../functions/redpacket";
 import type {Action} from "./types";
 
@@ -47,22 +47,31 @@ export async function buildTxFromOps(
 }
 
 async function processAction(
+  chain: Chain,
   action: Action,
   receipt: ethers.providers.TransactionReceipt
 ) {
   if (action.type === "claim_redpacket") {
     const params = action.params;
-    const chain = getChain(params.chain);
-    const claimed = parseClaimed(chain, receipt, params.packetId, params.claimer);
-    await updateRedPacketClaim(params.id, claimed?.toString() || "0");
+    const claimed = parseClaimed(
+      chain,
+      receipt,
+      params.redPacketId,
+      params.claimer
+    );
+    await updateRedPacketClaim(
+      params.claimId,
+      claimed?.toString() || "0"
+    );
   }
 }
 
 export async function processActions(
+  chain: Chain,
   actions: Action[],
   receipt: ethers.providers.TransactionReceipt
 ) {
   await Promise.all(
-    actions.map(action => processAction(action, receipt))
+    actions.map(action => processAction(chain, action, receipt))
   );
 }

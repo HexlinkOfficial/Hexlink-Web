@@ -3,8 +3,8 @@
   "scripts": {
     "lint": "eslint --ext .js,.ts .",
     "build-deps": "cd common && npm run build && cd ../redpacket && npm run build && cd ..",
-    "build": "rimraf lib && npm run lint && tsc",
-    "build-all": "rimraf lib && npm run build-deps && npm run lint && tsc",
+    "build": "rimraf lib && npm run lint && tsc -w",
+    "build-all": "rimraf lib && npm run build-deps && npm run lint && tsc -w",
     "build:watch": "tsc --watch",
     "serve": "CLOUD_RUNTIME_CONFIG=\"$(doppler secrets download --no-file | jq '{doppler: .}')\" firebase emulators:start --only functions",
     "shell": "CLOUD_RUNTIME_CONFIG=\"$(doppler secrets download --no-file | jq '{doppler: .}')\" firebase functions:shell",

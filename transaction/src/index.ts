@@ -25,15 +25,16 @@ app.post('/submit/:chain', async (req: express.Request, res: express.Response) =
   const input = {
     chain: req.params.chain,
     input: req.body.op,
-    args: req.body.args,
     actions: req.body.actions,
+    userId: req.body.userId,
+    type: req.body.type,
   } as OperationInput;
   if (req.body.tx) {
     const [{id: txId}] = await insertTx(req.body.tx);
     const [{id: opId}] = await insertOp([{txId, ...input}]);
     const txQueue = queues.getTxQueue(req.params.chain)!;
     await txQueue.add({
-      id: opId,
+      id: txId,
       tx: req.body.tx.tx,
       ops: [{id: opId, ...input}],
     });

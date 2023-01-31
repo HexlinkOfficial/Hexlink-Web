@@ -114,7 +114,7 @@ class PrivateQueues {
                 const receipt = await tx.wait();
                 await updateTx(job.data.id, "success");
                 await Promise.all(job.data.ops.map(
-                    (op: Operation) => processActions(chain, op.actions, receipt)
+                    (op: Operation) => processActions(chain, op, receipt)
                 ));
             } catch(err: any) {
                 await updateTx(job.data.id, "error", err.message);

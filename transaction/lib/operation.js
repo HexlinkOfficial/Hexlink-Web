@@ -30,15 +30,30 @@ async function buildTxFromOps(provider, ops, signer) {
     return (0, transactions_1.serialize)(tx, signature);
 }
 exports.buildTxFromOps = buildTxFromOps;
-async function processAction(chain, action, receipt) {
-    if (action.type === "claim_redpacket") {
-        const params = action.params;
+async function processAction(opId, chain, action, receipt) {
+    const params = action.params;
+    if (action.type === "insert_redpacket_claim") {
         const claimed = (0, redpacket_2.parseClaimed)(chain, receipt, params.redPacketId, params.claimer);
-        await (0, redpacket_1.updateRedPacketClaim)(params.claimId, (claimed === null || claimed === void 0 ? void 0 : claimed.toString()) || "0");
+        await (0, redpacket_1.insertRedPacketClaim)({
+            ...params,
+            claimed,
+            opId,
+        });
+    }
+    if (action.type == "insert_redpacket") {
+        const created = (0, redpacket_2.parseCreated)(chain, receipt, params.redPacketId);
+        console.log(created.packet);
+        await (0, redpacket_1.insertRedPacket)(params.userId, [{
+                id: params.redPacketId,
+                creator: created.creator,
+                metadata: created.packet,
+                chain: chain.name,
+                opId,
+            }]);
     }
 }
-async function processActions(chain, actions, receipt) {
-    await Promise.all(actions.map(action => processAction(chain, action, receipt)));
+async function processActions(chain, op, receipt) {
+    await Promise.all(op.actions.map(action => processAction(op.id, chain, action, receipt)));
 }
 exports.processActions = processActions;
 //# sourceMappingURL=operation.js.map

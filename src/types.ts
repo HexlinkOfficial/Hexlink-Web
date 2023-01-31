@@ -1,7 +1,7 @@
 import type { BigNumber as EthersBigNumber } from "ethers";
 
-import type { Token } from "../../functions/common";
-import type { RedPacket } from "../../functions/redpacket";
+import type { Token } from "../functions/common";
+import type { RedPacket, RedPacketDBMetadata } from "../functions/redpacket";
 
 // if uid exists, use uid as key to
 // generate address otherwise use handle
@@ -68,20 +68,6 @@ export interface HexlinkUserInfo {
     logoURI?: string;
 }
 
-export interface RedPacketDBMetadata {
-    token: string
-    salt: string,
-    mode: string,
-    split: number,
-    balance: string,
-    validator: string,
-    contract: string,
-    creator: string,
-    gasToken: string,
-    tokenAmount?: string,
-    gasTokenAmount?: string,
-}
-
 export type RedPacketStatus = "pending" | "error" | "alive" | "finalized";
 
 export interface RedPacketOnchainState {
@@ -101,11 +87,6 @@ export interface RedPacketDB {
     status?: RedPacketStatus,
     state?: RedPacketOnchainState
 }
-
-export interface RedPacketClaimInput {
-    redPacketId: string,
-    tx: string,
-}
   
 export type TxStatus = "" | "processing" | "error" | "success";
 
@@ -121,7 +102,9 @@ interface TxStateError {
     error: string,
 }
   
-export interface RedPacketClaim extends RedPacketClaimInput {
+export interface RedPacketClaim {
+    redPacketId: string,
+    tx: string,
     createdAt: Date,
     id: number,
     claimer: HexlinkUserInfo,

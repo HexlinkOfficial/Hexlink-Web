@@ -3,9 +3,7 @@ import { useAuthStore } from '@/stores/auth';
 import { handleUrqlResponse, setUrqlClientIfNecessary } from './urql';
 import { useChainStore } from '@/stores/chain';
 import type {
-  HexlinkUserInfo,
   RedPacketDB,
-  RedPacketDBMetadata,
   RedPacketOnchainState
 } from "@/types";
 
@@ -44,19 +42,6 @@ export const GET_CREATED_REDPACKETS = gql`
             created_at
             status
             state
-        }
-    }
-`
-
-export const INSERT_REDPACKET = gql`
-    mutation ($objects: [redpacket_insert_input!]!) {
-        insert_redpacket (
-            objects: $objects
-        ) {
-            affected_rows
-            returning {
-                id
-            }
         }
     }
 `
@@ -130,36 +115,6 @@ export async function getCreatedRedPackets() : Promise<RedPacketDB[]> {
     });
   } else {
     return await getCreatedRedPackets();
-  }
-}
-
-export async function insertRedPacket(
-  data: {
-    id: string,
-    creator: HexlinkUserInfo,
-    metadata: RedPacketDBMetadata,
-    chain: string,
-    tx: string
-  }[],
-) : Promise<{id: string}[]> {
-  const client = setUrqlClientIfNecessary(useAuthStore().user!.idToken!)
-  const result = await client.mutation(
-      INSERT_REDPACKET,
-      {
-          objects: data.map(d => ({
-              user_id: useAuthStore().user!.uid,
-              id: d.id,
-              metadata: JSON.stringify(d.metadata),
-              chain: d.chain,
-              creator: JSON.stringify(d.creator),
-              tx: d.tx
-          }))
-      }
-  ).toPromise();
-  if (await handleUrqlResponse(result)) {
-      return result.data.insert_redpacket.returning;
-  } else {
-      return await insertRedPacket(data);
   }
 }
 

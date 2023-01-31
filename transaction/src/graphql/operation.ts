@@ -44,8 +44,8 @@ export async function insertOp(
             callData: i.input.callData || "",
             callGasLimit: i.input.callGasLimit || "0",
             chain: i.chain,
-            args: JSON.stringify(i.args),
-            actions: JSON.stringify(i.actions),
+            user_id: i.userId,
+            type: i.type,
             txId: i.txId,
         }))}
     ).toPromise();

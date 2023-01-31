@@ -1,6 +1,14 @@
 import type { RedPacketClaimInput } from "../types";
-export declare const UPDATE_REDPACKET_CLAIM: import("@urql/core").TypedDocumentNode<any, import("@urql/core").AnyVariables>;
+import type { RedPacketDBMetadata, HexlinkUserInfo } from "../../../functions/redpacket";
 export declare function insertRedPacketClaim(data: RedPacketClaimInput[]): Promise<{
     id: string;
 }[]>;
-export declare function updateRedPacketClaim(id: number, claimed?: string): Promise<void>;
+export declare function insertRedPacket(uid: string, data: {
+    id: string;
+    creator: HexlinkUserInfo;
+    metadata: RedPacketDBMetadata;
+    chain: string;
+    opId: number;
+}[]): Promise<{
+    id: string;
+}[]>;

@@ -10,15 +10,9 @@ import {
     tokenAmount,
     tokenBase
 } from "../../common";
-import type { RedPacket } from "./redpacket";
+import type {RedPacket} from "./types";
 import { redPacketInterface, redPacketAddress, redPacketMode } from "./redpacket";
-import { BigNumber } from "bignumber.js";
-
-export interface PriceInfo {
-    nativeCurrencyInUsd: BigNumber;
-    gasPrice: EthBigNumber;
-    updatedAt: number;
-}
+import {PriceInfo} from "./types";
 
 export function calcGasSponsorship(
     chain: Chain,

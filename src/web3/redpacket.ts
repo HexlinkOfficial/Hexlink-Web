@@ -6,7 +6,7 @@ import { genDeployAuthProof } from "@/web3/oracle";
 import { tokenEqual } from "@/web3/utils";
 import { estimateGas, sendTransaction, signMessage } from "@/web3/wallet";
 
-import type { Chain, Token, Op, OpInput } from "../../functions/common";
+import type { Token, Op, OpInput } from "../../functions/common";
 import {
     hash,
     isNativeCoin,
@@ -21,9 +21,8 @@ import {
 } from "../../functions/common";
 import type { RedPacket } from "../../functions/redpacket";
 import {
-    redPacketAddress,
     redPacketContract,
-    redPacketMode,
+    redpacketId,
     calcGasSponsorship,
     buildGasSponsorshipOp,
     buildRedPacketOps,
@@ -31,7 +30,6 @@ import {
 
 import { useChainStore } from "@/stores/chain";
 import { useWalletStore } from "@/stores/wallet";
-import { insertRedPacket } from "@/graphql/redpacket";
 import { getPriceInfo } from "@/web3/network";
 import { useAccountStore } from "@/stores/account";
 
@@ -275,35 +273,13 @@ export async function buildDeployAndCreateRedPacketTx(input: RedPacket) : Promis
     return txes;
 }
 
-function redpacketId(chain: Chain, input: RedPacket) {
-    const redPacketType = "tuple(address,bytes32,uint256,address,uint32,uint8)";
-    return ethers.utils.keccak256(
-        ethers.utils.defaultAbiCoder.encode(
-            ["uint256", "address", "address", redPacketType],
-            [
-                Number(chain.chainId),
-                redPacketAddress(chain),
-                useAccountStore().account!.address,
-                [
-                    input.token.address,
-                    input.salt,
-                    tokenAmount(input.balance, input.token),
-                    input.validator,
-                    input.split,
-                    redPacketMode(input.mode)
-                ]
-            ]
-        )
-    );
-}
-
 async function processTxAndSave(
     redpacket: RedPacket,
     txes: any[],
     dryrun: boolean
 ) : Promise<string> {
     const chain = useChainStore().chain;
-    const id = redpacketId(chain, redpacket);
+    const id = redpacketId(chain, useAccountStore().account!.address, redpacket);
     if (dryrun) {
         for (let i = 0; i < txes.length; i++) {
             const gasUsed = await estimateGas(txes[i].tx);
@@ -316,28 +292,7 @@ async function processTxAndSave(
     }
     
     for (let i = 0; i < txes.length; i++) {
-        let txHash = await sendTransaction(txes[i].input);
-        if (txes[i].name == "createRedPacket" || txes[i].name == "deployAndCreateRedPacket") {
-            await insertRedPacket([{
-                id,
-                chain: chain.name,
-                metadata: {
-                    token: redpacket.token.address,
-                    salt: redpacket.salt,
-                    split: redpacket.split,
-                    balance: redpacket.balance,
-                    tokenAmount: redpacket.tokenAmount!.toString(),
-                    mode: redpacket.mode,
-                    validator: redpacket.validator,
-                    gasToken: redpacket.gasToken.address,
-                    gasTokenAmount: redpacket.gasTokenAmount!.toString(),
-                    contract: redPacketAddress(chain),
-                    creator: useAccountStore().account!.address
-                },
-                creator: useAuthStore().userInfo,
-                tx: txHash
-            }]);
-        }
+        await sendTransaction(txes[i].input);
     }
     return id;
 }
@@ -385,7 +340,6 @@ export async function queryRedPacketInfo(rp: RedPacketDB) : Promise<{
 }> {
     const redPacket = await redPacketContract(
         useChainStore().provider,
-        // rp.metadata.contract
     );
     const info = await redPacket.getPacket(rp.id);
     return {

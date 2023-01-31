@@ -1,6 +1,10 @@
 import {gql} from "@urql/core";
 import {client} from "./client";
 import type {RedPacketClaimInput} from "../types";
+import type {
+  RedPacketDBMetadata,
+  HexlinkUserInfo
+} from "../../../functions/redpacket";
 
 const INSERT_REDPACKET_CLAIM = gql`
 mutation ($objects: [redpacket_claim_insert_input!]!) {
@@ -15,22 +19,6 @@ mutation ($objects: [redpacket_claim_insert_input!]!) {
 }
 `
 
-export const UPDATE_REDPACKET_CLAIM = gql`
-    mutation (
-        $id: Int!
-        $claimed: String
-    ) {
-        update_redpacket_claim_by_pk (
-            pk_columns: {id: $id},
-            _set: {
-              claimed: $claimed,
-            }
-        ) {
-            id
-        }
-    }
-`
-
 export async function insertRedPacketClaim(
   data: RedPacketClaimInput[],
 ) : Promise<{id: string}[]> {
@@ -41,23 +29,50 @@ export async function insertRedPacketClaim(
           redpacket_id: d.redPacketId,
           claimer_id: d.claimerId,
           creator_id: d.creatorId,
-          tx: d.tx,
-          tx_status: d.txStatus || "",
-          claimer: d.claimer || "",
-          claimed: d.claimed || "",
+          claimer: JSON.stringify(d.claimer || {}),
+          claimed: d.claimed.toString() || "0",
+          op_id: d.opId,
         })),
       }
   ).toPromise();
   return result.data.insert_redpacket_claim.returning;
 }
 
-export async function updateRedPacketClaim(
-  id: number,
-  claimed?: string
-) : Promise<void> {
+const INSERT_REDPACKET = gql`
+    mutation ($objects: [redpacket_insert_input!]!) {
+        insert_redpacket (
+            objects: $objects
+        ) {
+            affected_rows
+            returning {
+                id
+            }
+        }
+    }
+`;
+
+export async function insertRedPacket(
+    uid: string,
+    data: {
+      id: string,
+      creator: HexlinkUserInfo,
+      metadata: RedPacketDBMetadata,
+      chain: string,
+      opId: number
+    }[],
+) : Promise<{id: string}[]> {
   const result = await client.mutation(
-      UPDATE_REDPACKET_CLAIM,
-      {id, claimed}
+      INSERT_REDPACKET,
+      {
+        objects: data.map((d) => ({
+          user_id: uid,
+          id: d.id,
+          metadata: JSON.stringify(d.metadata),
+          chain: d.chain,
+          creator: JSON.stringify(d.creator),
+          opI: d.opId,
+        })),
+      }
   ).toPromise();
-  return result.data.update_redpacket_claim_by_pk.returning;
+  return result.data.insert_redpacket.returning;
 }

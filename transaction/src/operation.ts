@@ -5,12 +5,13 @@ import {
 } from "ethers";
 import {resolveProperties} from "@ethersproject/properties";
 import {serialize, UnsignedTransaction} from "@ethersproject/transactions";
-import {updateRedPacketClaim} from "./graphql/redpacket";
+import {insertRedPacketClaim, insertRedPacket} from "./graphql/redpacket";
 
 import type {Chain, OpInput} from "../../functions/common";
 import {hexlContract, PriceConfig} from "../../functions/common";
-import {parseClaimed} from "../../functions/redpacket";
-import type {Action} from "./types";
+import {HexlinkUserInfo} from "../../functions/redpacket";
+import {RedPacketDBMetadata, parseClaimed, parseCreated} from "../../functions/redpacket";
+import type {Action, Operation} from "./types";
 
 async function buildTx(
   provider: ethers.providers.Provider,
@@ -47,31 +48,54 @@ export async function buildTxFromOps(
 }
 
 async function processAction(
+  opId: number,
   chain: Chain,
   action: Action,
   receipt: ethers.providers.TransactionReceipt
 ) {
-  if (action.type === "claim_redpacket") {
-    const params = action.params;
+  const params = action.params;
+  if (action.type === "insert_redpacket_claim") {
     const claimed = parseClaimed(
       chain,
       receipt,
       params.redPacketId,
       params.claimer
     );
-    await updateRedPacketClaim(
-      params.claimId,
-      claimed?.toString() || "0"
+    await insertRedPacketClaim({
+      ...params,
+      claimed,
+      opId,
+    });
+  }
+
+  if (action.type == "insert_redpacket") {
+    const created = parseCreated(
+      chain,
+      receipt,
+      params.redPacketId,
+    );
+    console.log(created.packet);
+    await insertRedPacket(
+      params.userId,
+      [{
+        id: params.redPacketId,
+        creator: created.creator,
+        metadata: created.packet,
+        chain: chain.name,
+        opId,
+      }]
     );
   }
 }
 
 export async function processActions(
   chain: Chain,
-  actions: Action[],
+  op: Operation,
   receipt: ethers.providers.TransactionReceipt
 ) {
   await Promise.all(
-    actions.map(action => processAction(chain, action, receipt))
+    op.actions.map(
+      action => processAction(op.id, chain, action, receipt)
+    )
   );
 }

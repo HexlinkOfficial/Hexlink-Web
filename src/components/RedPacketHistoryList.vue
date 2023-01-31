@@ -211,7 +211,7 @@ import { useRoute } from 'vue-router';
 import { loadErc20Token } from '@/web3/tokens';
 import { useChainStore } from "@/stores/chain";
 import { getCreatedRedPackets, updateRedPacketStatus } from '@/graphql/redpacket';
-import { getClaimedRedPackets, updateRedPacketTxStatus, getRedPacketClaims } from '@/graphql/redpacketClaim';
+import { getClaimedRedPackets, getRedPacketClaims } from '@/graphql/redpacketClaim';
 import type {
   RedPacketDB,
   ClaimedRedPacket,
@@ -247,16 +247,6 @@ const loadClaimInfo = async () => {
   const claims : ClaimedRedPacket[] = await getClaimedRedPackets();
   claimed.value = await Promise.all(claims.map(c => aggregatedClaimed(c)));
 }
-
-const loadClaimsForOnePacket = async (
-  provider: ethers.providers.Provider,
-  redPacketId: string
-) : Promise<RedPacketClaim[]> => {
-  const claims = await getRedPacketClaims(redPacketId);
-  return await Promise.all(
-    claims.map(c => validateClaimStatus(provider, c))
-  );
-};
 
 const redPacketByDate = ref<any>([]);
 const claimedByDate = ref<any>([]);
@@ -562,38 +552,6 @@ const aggregateCreated = async function(
   }
   return { redPacket, token };
 };
-
-const validateClaimStatus = async (
-  provider: ethers.providers.Provider,
-  claim: RedPacketClaim
-) : Promise<RedPacketClaim> => {
-  if (claim.txStatus == "success" || claim.txStatus == "error") {
-    return claim;
-  }
-  const receipt = await provider.getTransactionReceipt(claim.tx);
-  if (!receipt) {
-    return claim;
-  } // not mined
-  if (receipt.status) { // success
-    const claimedAmount = parseClaimed(
-      useChainStore().chain,
-      receipt,
-      claim.redPacketId,
-      useAccountStore().account!.address,
-    ) || EthBigNumber.from(0);
-    await updateRedPacketTxStatus(
-      claim.id,
-      "success",
-      claimedAmount.toString()
-    );
-    claim.txStatus = "success";
-    claim.claimed = claimedAmount;
-  } else { // reverted
-    await updateRedPacketTxStatus(claim.id, "error");
-    claim.txStatus = "error";
-  }
-  return claim;
-}
 
 const aggregatedClaimed = async function(
   redpacket: ClaimedRedPacket

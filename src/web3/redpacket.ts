@@ -16,7 +16,6 @@ import {
     hexlAddress,
     hexlInterface,
     tokenAmount,
-    encodeExecBatch,
     accountContract,
     encodeValidateAndCall,
 } from "../../functions/common";

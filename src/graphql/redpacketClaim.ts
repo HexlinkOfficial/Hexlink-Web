@@ -105,24 +105,6 @@ export const GET_REDPACKET_CLAIMS_BY_CLAIMER = gql`
     }
   `
 
-export const UPDATE_REDPACKET_CLAIM_TX = gql`
-    mutation (
-        $id: Int!
-        $txStatus: String!
-        $claimed: String
-    ) {
-        update_redpacket_claim_by_pk (
-            pk_columns: {id: $id},
-            _set: {
-              tx_status: $txStatus,
-              claimed: $claimed,
-            }
-        ) {
-            id
-        }
-    }
-`
-
 function buildTxState(claim: any) {
   if (claim.op_error) {
     return {error: claim.op_error};
@@ -241,22 +223,5 @@ export async function getClaimedRedPackets() : Promise<ClaimedRedPacket[]> {
     });
   } else {
     return await getClaimedRedPackets();
-  }
-}
-
-export async function updateRedPacketTxStatus(
-  id: number,
-  txStatus: TxStatus,
-  claimed?: string
-) : Promise<void> {
-  const client = setUrqlClientIfNecessary(
-    useAuthStore().user!.idToken!
-  );
-  const result = await client.mutation(
-      UPDATE_REDPACKET_CLAIM_TX,
-      {id, txStatus, claimed}
-  ).toPromise();
-  if (!await handleUrqlResponse(result)) {
-      await updateRedPacketTxStatus(id, txStatus, claimed);
   }
 }

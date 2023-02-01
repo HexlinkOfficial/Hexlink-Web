@@ -1,5 +1,5 @@
 
-interface PriceInfo {
+export interface PriceInfo {
     nativeCurrencyInUsd: string,
     gasPrice: string,
 }
@@ -14,7 +14,7 @@ const POLYGON : PriceInfo = {
     gasPrice: "100000000000", // 100 gwei
 };
 
-const MUMBAI : PriceInfo= {
+const MUMBAI : PriceInfo = {
     nativeCurrencyInUsd: "1.0",
     gasPrice: "2000000000", // 2 gwei
 };

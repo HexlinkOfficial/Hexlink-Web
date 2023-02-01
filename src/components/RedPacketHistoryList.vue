@@ -210,16 +210,13 @@ import { ref, watch, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { loadErc20Token } from '@/web3/tokens';
 import { useChainStore } from "@/stores/chain";
-import { getCreatedRedPackets, updateRedPacketStatus } from '@/graphql/redpacket';
-import { getClaimedRedPackets, getRedPacketClaims } from '@/graphql/redpacketClaim';
+import { getCreatedRedPackets } from '@/graphql/redpacket';
+import { getClaimedRedPackets } from '@/graphql/redpacketClaim';
 import type {
   RedPacketDB,
   ClaimedRedPacket,
-  RedPacketClaim,
 } from '@/types';
 import { BigNumber as EthBigNumber } from "ethers";
-import { queryRedPacketInfo } from "@/web3/redpacket";
-import { tokenAmount } from "../../functions/common";
 import { getInfuraProvider } from "@/web3/network";
 import Loading from "@/components/Loading.vue";
 import { useAccountStore } from '@/stores/account';
@@ -229,7 +226,7 @@ import type {ethers} from "ethers";
 
 import { normalizeBalance } from "../../functions/common";
 import type { Token } from "../../functions/common";
-import { parseClaimed } from "../../functions/redpacket";
+import {redPacketContract} from "../../functions/redpacket";
 
 interface CreatedRedPacket {
   redPacket: RedPacketDB,
@@ -482,74 +479,13 @@ const aggregateCreated = async function(
 ) : Promise<CreatedRedPacket> {
   const tokenAddr = redPacket.metadata.token.toLowerCase();
   const token = await loadAndSaveERC20Token(tokenAddr);
-
-  const redPacketState = async () => {
-    const state = await queryRedPacketInfo(redPacket);
-    return {
-      balance: state.balance.toString(),
-      split: state.split,
-      createdAt: state.createdAt.toISOString(),
-    };
+  const contract = await redPacketContract(provider);
+  const state = contract.getPacket(redPacket.id);
+  redPacket.state =  {
+    balance: state.balance.toString(),
+    split: state.split,
+    createdAt: state.createdAt.toISOString(),
   };
-
-  if (redPacket.status == 'finalized') {
-    if (!redPacket.state) {
-      redPacket.state = await redPacketState();
-      await updateRedPacketStatus({
-        id: redPacket.id,
-        status: "finalized",
-        state: redPacket.state,
-      });
-    }
-    return { redPacket, token };
-  }
-
-  const checkIfFinalized = async (forceUpdate: boolean) => {
-    redPacket.state = await redPacketState();
-    if (EthBigNumber.from(redPacket.state.balance).eq(0) || redPacket.state.split == 0) {
-      redPacket.status = "finalized";
-      await updateRedPacketStatus({
-        id: redPacket.id,
-        status: "finalized",
-        state: redPacket.state,
-      });
-    } else if (forceUpdate) {
-      await updateRedPacketStatus({
-        id: redPacket.id,
-        status: "alive",
-      });
-    }
-    return redPacket;
-  };
-
-  if (redPacket.status == "alive") {
-    redPacket = await checkIfFinalized(false);
-    return { redPacket, token };
-  }
-
-  const receipt = await provider.getTransactionReceipt(redPacket.tx);
-  if (receipt?.status == 1) {
-    redPacket.status = "alive";
-    redPacket = await checkIfFinalized(true);
-    return { redPacket, token };
-  }
-
-  // not mined or error
-  redPacket.state = {
-    balance: tokenAmount(
-        redPacket.metadata.balance,
-        token
-    ).toString(),
-    split: redPacket.metadata.split,
-    createdAt: redPacket.createdAt,
-  };
-  if (receipt?.status == 0) {
-    redPacket.status = "error";
-    await updateRedPacketStatus({
-      id: redPacket.id,
-      status: "error",
-    });
-  }
   return { redPacket, token };
 };
 

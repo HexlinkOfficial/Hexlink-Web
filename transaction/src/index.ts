@@ -24,9 +24,9 @@ app.post('/submit/:chain', async (req: express.Request, res: express.Response) =
 
   const input = {
     chain: req.params.chain,
+    userId: req.body.userId,
     input: req.body.op,
     actions: req.body.actions,
-    userId: req.body.userId,
     type: req.body.type,
   } as OperationInput;
   if (req.body.tx) {

@@ -22,3 +22,10 @@ export interface GasObject {
   base: EthBigNumber;
   price: EthBigNumber;
 }
+
+export interface Deposit {
+  ref: string,
+  receipt: string,
+  token: string,
+  amount: string,
+}

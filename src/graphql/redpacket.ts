@@ -46,21 +46,6 @@ export const GET_CREATED_REDPACKETS = gql`
     }
 `
 
-export const UPDATE_REDPACKET_STATUS = gql`
-    mutation (
-        $id: String!
-        $status: String!
-        $state: jsonb
-    ) {
-        update_redpacket_by_pk (
-            pk_columns: {id: $id},
-            _set: { status: $status, state: $state }
-        ) {
-            id
-        }
-    }
-`
-
 export async function getRedPacket(
   redPacketId: string
 ) : Promise<RedPacketDB | undefined> {
@@ -115,22 +100,5 @@ export async function getCreatedRedPackets() : Promise<RedPacketDB[]> {
     });
   } else {
     return await getCreatedRedPackets();
-  }
-}
-
-export async function updateRedPacketStatus(
-  data: {id: string, status: string, state?: RedPacketOnchainState},
-) : Promise<void> {
-  const client = setUrqlClientIfNecessary(useAuthStore().user!.idToken!)
-  const result = await client.mutation(
-      UPDATE_REDPACKET_STATUS,
-      {
-        id: data.id,
-        status: data.status,
-        state: data.state ? JSON.stringify(data.state) : undefined
-      }
-  ).toPromise();
-  if (!await handleUrqlResponse(result)) {
-      await updateRedPacketStatus(data);
   }
 }

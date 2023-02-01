@@ -9,6 +9,7 @@ export declare function insertRedPacket(uid: string, data: {
     metadata: RedPacketDBMetadata;
     chain: string;
     opId: number;
+    deposit: any;
 }[]): Promise<{
     id: string;
 }[]>;

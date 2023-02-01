@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import type { PriceInfo } from '@/types';
+import type { PriceInfo } from '../../functions/common';
 import { getChain } from "../../functions/common";
 import type { Provider } from "@ethersproject/providers";
 import { getInfuraProvider } from '@/web3/network';

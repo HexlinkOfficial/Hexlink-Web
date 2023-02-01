@@ -41,6 +41,7 @@ async function processAction(opId, chain, action, receipt) {
         });
     }
     if (action.type == "insert_redpacket") {
+        const deposit = (0, common_1.parseDeposit)(receipt, params.redPacketId, params.account, params.refunder);
         const created = (0, redpacket_2.parseCreated)(chain, receipt, params.redPacketId);
         console.log(created.packet);
         await (0, redpacket_1.insertRedPacket)(params.userId, [{
@@ -49,6 +50,11 @@ async function processAction(opId, chain, action, receipt) {
                 metadata: created.packet,
                 chain: chain.name,
                 opId,
+                deposit: {
+                    receipt: deposit.receipt,
+                    token: deposit.token,
+                    amount: deposit.amount.toString(),
+                }
             }]);
     }
 }

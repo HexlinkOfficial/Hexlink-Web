@@ -7,10 +7,9 @@ import {resolveProperties} from "@ethersproject/properties";
 import {serialize, UnsignedTransaction} from "@ethersproject/transactions";
 import {insertRedPacketClaim, insertRedPacket} from "./graphql/redpacket";
 
-import type {Chain, OpInput} from "../../functions/common";
-import {hexlContract, PriceConfig} from "../../functions/common";
-import {HexlinkUserInfo} from "../../functions/redpacket";
-import {RedPacketDBMetadata, parseClaimed, parseCreated} from "../../functions/redpacket";
+import type {Chain, OpInput, Deposit} from "../../functions/common";
+import {hexlContract, PriceConfig, parseDeposit} from "../../functions/common";
+import {parseClaimed, parseCreated} from "../../functions/redpacket";
 import type {Action, Operation} from "./types";
 
 async function buildTx(
@@ -69,6 +68,12 @@ async function processAction(
   }
 
   if (action.type == "insert_redpacket") {
+    const deposit = parseDeposit(
+      receipt,
+      params.redPacketId,
+      params.account,
+      params.refunder,
+    );
     const created = parseCreated(
       chain,
       receipt,
@@ -83,6 +88,11 @@ async function processAction(
         metadata: created.packet,
         chain: chain.name,
         opId,
+        deposit: {
+          receipt: deposit.receipt,
+          token: deposit.token,
+          amount: deposit.amount.toString(),
+        }
       }]
     );
   }

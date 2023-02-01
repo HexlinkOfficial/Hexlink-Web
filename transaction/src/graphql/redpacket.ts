@@ -1,6 +1,7 @@
 import {gql} from "@urql/core";
 import {client} from "./client";
 import type {RedPacketClaimInput} from "../types";
+import type {Deposit} from "../../../functions/common";
 import type {
   RedPacketDBMetadata,
   HexlinkUserInfo
@@ -58,7 +59,8 @@ export async function insertRedPacket(
       creator: HexlinkUserInfo,
       metadata: RedPacketDBMetadata,
       chain: string,
-      opId: number
+      opId: number,
+      deposit: any
     }[],
 ) : Promise<{id: string}[]> {
   const result = await client.mutation(
@@ -70,7 +72,8 @@ export async function insertRedPacket(
           metadata: JSON.stringify(d.metadata),
           chain: d.chain,
           creator: JSON.stringify(d.creator),
-          opI: d.opId,
+          op_id: d.opId,
+          deposit: JSON.stringify(d.deposit),
         })),
       }
   ).toPromise();

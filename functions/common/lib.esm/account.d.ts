@@ -1,6 +1,7 @@
 import { ethers, Contract, BigNumber as EthBigNumber } from "ethers";
 import type { Provider } from "@ethersproject/providers";
-import { GasObject, OpInput } from "./types";
+import type { GasObject, OpInput } from "./types";
+import type { TransactionReceipt } from "@ethersproject/providers";
 export interface Account {
     address: string;
     isContract: boolean;
@@ -23,3 +24,4 @@ export declare function encodeValidateAndCall(params: {
     signature: string;
     nonce: EthBigNumber;
 }>;
+export declare function parseDeposit(receipt: TransactionReceipt, ref: string, from: string, to: string): ethers.utils.Result;

@@ -30,12 +30,9 @@ function parseClaimed(chain, receipt, packetId, claimer) {
 exports.parseClaimed = parseClaimed;
 function parseCreated(chain, receipt, packetId) {
     const redpacketAddress = (0, redpacket_1.redPacketAddress)(chain).toLowerCase();
-    const events = receipt.logs.filter((log) => log.address.toLowerCase() == redpacketAddress).map((log) => parseClaimedLog(log));
+    const events = receipt.logs.filter((log) => log.address.toLowerCase() == redpacketAddress).map((log) => redpacket_1.redPacketInterface.parseLog(log));
     const event = events.find((e) => e.name == "Created" && equal(e.args.PacketId, packetId));
-    return event ? {
-        creator: event.args.creator,
-        packet: event.args.packet
-    } : undefined;
+    return event === null || event === void 0 ? void 0 : event.args;
 }
 exports.parseCreated = parseCreated;
 function redpacketId(chain, account, input) {

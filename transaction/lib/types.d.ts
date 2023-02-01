@@ -17,13 +17,12 @@ export interface Action {
     params: any;
 }
 export interface OperationInput {
-    input: OpInput;
     chain: string;
-    args: any;
+    type: string;
+    userId: string;
+    input: OpInput;
     actions: Action[];
     txId?: number;
-    userId: string;
-    type: string;
 }
 export interface Operation extends OperationInput {
     id: number;

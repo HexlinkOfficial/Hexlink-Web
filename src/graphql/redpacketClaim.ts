@@ -7,7 +7,6 @@ import { useChainStore } from '@/stores/chain';
 import type {
   RedPacketClaim,
   ClaimedRedPacket,
-  TxStatus,
 } from "@/types";
 
 export const GET_REDPACKET_CLAIM = gql`

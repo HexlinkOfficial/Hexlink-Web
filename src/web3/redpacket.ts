@@ -150,7 +150,7 @@ async function buildCreateRedPacketTxForMetamask(input: RedPacket) {
         }
     } else {
         if (isNativeCoin(input.token, chain)) {
-            value = value.add(input.tokenAmount);
+            value = value.add(input.tokenAmount!);
         } else {
             const {tx, op} = await buildDepositErc20TokenOp(
                 input.token,

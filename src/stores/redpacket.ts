@@ -5,9 +5,13 @@ import type { RedPacket } from "../../functions/redpacket";
 type Status = "" | "confirming" | "processing" | "error" | "success";
 export type AccountType = "hexlink" | "wallet";
 
+export interface RedPacketInput extends RedPacket {
+  balanceInput: string,
+}
+
 interface CreatingRedPacket {
   status: Status;
-  redpacket: RedPacket | undefined;
+  redpacket: RedPacketInput | undefined;
   account: AccountType;
 }
 
@@ -20,7 +24,7 @@ export const useRedPacketStore = defineStore({
   }),
   persist: true,
   actions: {
-    beforeCreate(redpacket: RedPacket) {
+    beforeCreate(redpacket: RedPacketInput) {
       this.status = "confirming";
       this.redpacket = redpacket;
     },

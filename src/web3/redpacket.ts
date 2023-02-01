@@ -15,7 +15,6 @@ import {
     getChain,
     hexlAddress,
     hexlInterface,
-    tokenAmount,
     accountContract,
     encodeValidateAndCall,
 } from "../../functions/common";
@@ -23,14 +22,12 @@ import type { RedPacket } from "../../functions/redpacket";
 import {
     redPacketContract,
     redpacketId,
-    calcGasSponsorship,
     buildGasSponsorshipOp,
     buildRedPacketOps,
 } from "../../functions/redpacket";
 
 import { useChainStore } from "@/stores/chain";
 import { useWalletStore } from "@/stores/wallet";
-import { getPriceInfo } from "@/web3/network";
 import { useAccountStore } from "@/stores/account";
 
 import { getFunctions, httpsCallable } from 'firebase/functions'
@@ -128,10 +125,6 @@ async function buildCreateRedPacketTxForMetamask(input: RedPacket) {
     const hexlAccount = useAccountStore().account!.address;
     const chain = useChainStore().chain;
 
-    const priceInfo = await getPriceInfo(chain);
-    input.tokenAmount = tokenAmount(input.balance, input.token);
-    input.gasTokenAmount = calcGasSponsorship(chain, input, priceInfo);
-
     let userOps : Op[] = [];
     let hexlOps: Op[] = [];
     let txes : any[] = [];
@@ -139,44 +132,43 @@ async function buildCreateRedPacketTxForMetamask(input: RedPacket) {
 
     if (tokenEqual(input.token, input.gasToken)) {
         if (isNativeCoin(input.token, chain)) {
-            value = value.add(input.tokenAmount!).add(input.gasTokenAmount)
+            value = value.add(input.balance!).add(input.gasTokenAmount!)
         } else {
             const {tx, op} = await buildDepositErc20TokenOp(
                 input.token,
                 walletAccount,
                 hexlAccount,
-                input.tokenAmount!.add(input.gasTokenAmount)
+                input.gasTokenAmount!.add(input.balance),
             );
             txes = txes.concat(tx);
             userOps = userOps.concat(op);
         }
     } else {
         if (isNativeCoin(input.token, chain)) {
-            value = value.add(input.tokenAmount!);
+            value = value.add(input.balance!);
         } else {
             const {tx, op} = await buildDepositErc20TokenOp(
                 input.token,
                 walletAccount,
                 hexlAccount,
-                input.tokenAmount
+                input.balance
             );
             txes = txes.concat(tx);
             userOps = userOps.concat(op);
         }
         if (isNativeCoin(input.gasToken, chain)) {
-            value = value.add(input.gasTokenAmount);
+            value = value.add(input.gasTokenAmount!);
         } else {
             const {tx, op} = await buildDepositErc20TokenOp(
                 input.gasToken,
                 walletAccount,
                 hexlAccount,
-                input.gasTokenAmount
+                input.gasTokenAmount!
             );
             txes = txes.concat(tx);
             userOps = userOps.concat(op);
         }
     }
-
     if (value.gt(0)) {
         hexlOps.push({
             name: "depositAll",
@@ -185,9 +177,7 @@ async function buildCreateRedPacketTxForMetamask(input: RedPacket) {
             input: buildOpInput({to: hexlAccount, value}),
         });
     }
-    userOps.push(buildGasSponsorshipOp(
-        chain, input, refunder, hexlAccount, priceInfo
-    ));
+    userOps.push(buildGasSponsorshipOp(hexlAccount, refunder, input));
     userOps = userOps.concat(buildRedPacketOps(chain, input));
     const {data: callData, signature, nonce} = await encodeValidateAndCall({
         account: accountContract(useChainStore().provider, hexlAccount),
@@ -204,6 +194,7 @@ async function buildCreateRedPacketTxForMetamask(input: RedPacket) {
         },
         input: buildOpInput({to: hexlAccount, callData}),
     });
+
     const hexlAddr = hexlAddress(useChainStore().chain);
     const data = hexlInterface.encodeFunctionData(
         "process", [hexlOps.map(hexlOp => hexlOp.input)]
@@ -223,6 +214,7 @@ async function buildCreateRedPacketTxForMetamask(input: RedPacket) {
             data,
         }
     });
+    console.log(txes);
     return txes;
 }
 
@@ -329,7 +321,7 @@ export async function createNewRedPacket(
 
 export async function callClaimRedPacket(redPacket: RedPacketDB) : Promise<void> {
     const claimRedPacket = httpsCallable(functions, 'claimRedPacket');
-    const chain = getChain(redPacket.chain);
+    const chain = getChain(redPacket.chain!);
     await claimRedPacket({
         chain: chain.name,
         redPacketId: redPacket.id,

@@ -124,10 +124,7 @@ export const claimRedPacket = functions.https.onCall(
     }
 );
 
-async function buildCreateOp(
-    chain: Chain,
-    redPacket: RedPacket,
-) {
+async function buildCreateOp(chain: Chain, redPacket: RedPacket) {
   const args = {
     token: redPacket.metadata.token,
     salt: redPacket.metadata.salt,
@@ -177,6 +174,7 @@ export const createRedPacket = functions.https.onCall(
         postData.tx = data.txHash;
       }
       try {
+        console.log(postData);
         const result = await submit(chain, postData);
         return {code: 200, id: result.id};
       } catch (err: any) {

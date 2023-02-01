@@ -38,24 +38,26 @@ import { useChainStore } from "@/stores/chain";
 import { useAccountStore } from '@/stores/account';
 import { isContract } from "../../functions/common";
 import { deployAndCreateNewRedPacket, createNewRedPacket } from "@/web3/redpacket";
+import { calcGasSponsorship, redpacketId } from "../../functions/redpacket";
+import { tokenAmount } from "../../functions/common";
+import { getPriceInfo } from "@/web3/network";
 
 const store = useRedPacketStore();
 const createRedPacket = async () => {
   store.setStatus("processing");
   try {
-    if (await isContract(
-      useChainStore().provider,
-      useAccountStore().account!.address
-    )) {
-      await createNewRedPacket(
-        store.redpacket!,
-        store.account == "hexlink",
-      );
+    const chain = useChainStore().chain;
+    const account = useAccountStore().account!.address;
+
+    const input = store.redpacket!;
+    input.balance = tokenAmount(input.balanceInput, input.token);
+    const priceInfo = await getPriceInfo(chain);
+    input.gasTokenAmount = calcGasSponsorship(chain, input, priceInfo);
+    input.id = redpacketId(chain, account, input);
+    if (await isContract(useChainStore().provider, account)) {
+      await createNewRedPacket(input, store.account == "hexlink");
     } else {
-      await deployAndCreateNewRedPacket(
-        store.redpacket!,
-        store.account == "hexlink",
-      );
+      await deployAndCreateNewRedPacket(input, store.account == "hexlink");
     }
     store.setStatus("success");
   } catch (e) {

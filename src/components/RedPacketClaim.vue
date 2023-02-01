@@ -50,10 +50,8 @@ import { ref, onMounted } from "vue";
 import { getRedPacket } from '@/graphql/redpacket';
 import { useRoute } from "vue-router";
 import { callClaimRedPacket } from "@/web3/redpacket";
-import { loadErc20Token } from "@/web3/tokens";
-import { useTokenStore } from "@/stores/token";
+import { loadAndSetErc20Token } from '@/web3/tokens';
 import { switchNetwork } from "@/web3/network";
-import type { Token } from "../../functions/common";
 import { getChain } from "../../functions/common";
 import type { RedPacketDB } from "@/types";
 
@@ -62,18 +60,19 @@ const redPacketTokenIcon = ref<string>("");
 const redPacketToken = ref<string>("");
 const claimStatus = ref<string>("");
 
-async function loadToken(tokenAddr: string) : Promise<Token> {
-  const token = useTokenStore().token(tokenAddr);
-  return token || await loadErc20Token(tokenAddr);
-}
-
 onMounted(async () => {
   redPacket.value = await getRedPacket(useRoute().query.claim!.toString());
-  const network = getChain(redPacket.value!.chain!);
-  await switchNetwork(network);
-  const metadata = await loadToken(redPacket.value!.metadata.token);
-  redPacketToken.value = metadata.symbol;
-  redPacketTokenIcon.value = metadata.logoURI || "";
+  if (redPacket.value) {
+    const network = getChain(redPacket.value.chain!);
+    await switchNetwork(network);
+    const metadata = await loadAndSetErc20Token(
+      redPacket.value!.metadata.token
+    );
+    redPacketToken.value = metadata.symbol;
+    redPacketTokenIcon.value = metadata.logoURI || "";
+  } else {
+    claimStatus.value = "error";
+  }
 });
 
 const claim = async () => {

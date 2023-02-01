@@ -20,16 +20,15 @@ function calcGasSponsorship(chain, redpacket, priceInfo) {
     throw new Error("Unsupported gas token");
 }
 exports.calcGasSponsorship = calcGasSponsorship;
-function buildGasSponsorshipOp(chain, input, refunder, hexlAccount, priceInfo) {
-    const sponsorship = calcGasSponsorship(chain, input, priceInfo);
+function buildGasSponsorshipOp(hexlAccount, refunder, input) {
     return {
         name: "depositGasSponsorship",
         function: "deposit",
         args: {
             ref: input.id,
             receipt: refunder,
-            token: input.gasToken,
-            amount: sponsorship
+            token: input.gasToken.address,
+            amount: input.gasTokenAmount
         },
         input: {
             to: hexlAccount,
@@ -37,8 +36,8 @@ function buildGasSponsorshipOp(chain, input, refunder, hexlAccount, priceInfo) {
             callData: common_1.accountInterface.encodeFunctionData("deposit", [
                 input.id,
                 refunder,
-                input.gasToken,
-                sponsorship
+                input.gasToken.address,
+                input.gasTokenAmount
             ]),
             callGasLimit: ethers_1.BigNumber.from(0) // no limit
         }
@@ -49,7 +48,7 @@ function buildRedPacketOps(chain, input) {
     const packet = {
         token: input.token.address,
         salt: input.salt,
-        balance: (0, common_2.tokenAmount)(input.balance, input.token),
+        balance: input.balance,
         validator: input.validator,
         split: input.split,
         mode: (0, redpacket_1.redPacketMode)(input.mode),

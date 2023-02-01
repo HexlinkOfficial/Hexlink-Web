@@ -67,27 +67,18 @@ import type { RedPacketDB, RedPacketClaim } from "@/types";
 import { getRedPacket } from '@/graphql/redpacket';
 import { getRedPacketClaims } from '@/graphql/redpacketClaim';
 import Loading from "@/components/Loading.vue";
-import { loadErc20Token } from '@/web3/tokens';
-import { useTokenStore } from '@/stores/token';
+import { loadAndSetErc20Token } from '@/web3/tokens';
 
 const redPacket = ref<RedPacketDB | undefined>();
 const claimers = ref<RedPacketClaim[]>();
 const loading = ref<boolean>(true);
-
-const tokenStore = useTokenStore();
-const loadAndSaveERC20Token = async (tokenAddr: string) : Promise<Token> => {
-  if (!tokenStore.token(tokenAddr)) {
-    tokenStore.set(await loadErc20Token(tokenAddr));
-  }
-  return tokenStore.token(tokenAddr);
-}
 
 const loadData = async function() {
   loading.value = true;
   const id = useRoute().query.details!.toString();
   redPacket.value = await getRedPacket(id);
   if (redPacket.value) {
-    redPacket.value.token = await loadAndSaveERC20Token(
+    redPacket.value.token = await loadAndSetErc20Token(
       redPacket.value.metadata.token
     );
     claimers.value = await getRedPacketClaims(id);

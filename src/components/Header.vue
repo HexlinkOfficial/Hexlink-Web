@@ -265,7 +265,6 @@ const doCopy = (address: string | undefined) => {
 
 onMounted(() => {
   document.addEventListener('click', closeDropDown);
-  console.log(user);
 });
 
 onBeforeUnmount(() => {

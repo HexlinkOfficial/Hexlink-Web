@@ -1,6 +1,6 @@
 import { BigNumber as EthBigNumber } from "ethers";
 import { accountInterface } from "../../common";
-import { isNativeCoin, isWrappedCoin, isStableCoin, erc20Interface, toEthBigNumber, tokenAmount, tokenBase } from "../../common";
+import { isNativeCoin, isWrappedCoin, isStableCoin, erc20Interface, toEthBigNumber, tokenBase } from "../../common";
 import { redPacketInterface, redPacketAddress, redPacketMode } from "./redpacket";
 export function calcGasSponsorship(chain, redpacket, priceInfo) {
     const sponsorshipGasAmount = EthBigNumber.from(200000).mul(redpacket.split || 0);
@@ -16,16 +16,15 @@ export function calcGasSponsorship(chain, redpacket, priceInfo) {
     }
     throw new Error("Unsupported gas token");
 }
-export function buildGasSponsorshipOp(chain, input, refunder, hexlAccount, priceInfo) {
-    const sponsorship = calcGasSponsorship(chain, input, priceInfo);
+export function buildGasSponsorshipOp(hexlAccount, refunder, input) {
     return {
         name: "depositGasSponsorship",
         function: "deposit",
         args: {
             ref: input.id,
             receipt: refunder,
-            token: input.gasToken,
-            amount: sponsorship
+            token: input.gasToken.address,
+            amount: input.gasTokenAmount
         },
         input: {
             to: hexlAccount,
@@ -33,8 +32,8 @@ export function buildGasSponsorshipOp(chain, input, refunder, hexlAccount, price
             callData: accountInterface.encodeFunctionData("deposit", [
                 input.id,
                 refunder,
-                input.gasToken,
-                sponsorship
+                input.gasToken.address,
+                input.gasTokenAmount
             ]),
             callGasLimit: EthBigNumber.from(0) // no limit
         }
@@ -44,7 +43,7 @@ export function buildRedPacketOps(chain, input) {
     const packet = {
         token: input.token.address,
         salt: input.salt,
-        balance: tokenAmount(input.balance, input.token),
+        balance: input.balance,
         validator: input.validator,
         split: input.split,
         mode: redPacketMode(input.mode),

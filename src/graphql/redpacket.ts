@@ -14,6 +14,7 @@ export const GET_REDPACKET = gql`
           chain
         }
     }
+  }
 `
 
 export const GET_CREATED_REDPACKETS = gql`
@@ -25,7 +26,7 @@ export const GET_CREATED_REDPACKETS = gql`
             where: {
               user_id: { _eq: $userId },
               chain: { _eq: $chain },
-              type: "create_redpacket",
+              type: { _eq: "create_redpacket" },
             },
             limit: 100
         ) {

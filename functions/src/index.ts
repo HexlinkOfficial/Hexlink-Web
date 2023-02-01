@@ -31,6 +31,8 @@ exports.refunder = refunder;
 
 import {
   claimRedPacket,
+  createRedPacket,
 } from "./redpacket";
 
 exports.claimRedPacket = claimRedPacket;
+exports.createRedPacket = createRedPacket;

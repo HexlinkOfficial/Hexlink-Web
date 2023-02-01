@@ -16,9 +16,8 @@ export interface RedPacket {
     salt: string;
     mode: "random" | "equal";
     split: number;
-    balance: string;
+    balance: EthBigNumber;
     token: Token;
-    tokenAmount?: EthBigNumber;
     gasToken: Token;
     gasTokenAmount?: EthBigNumber;
     validator: string;
@@ -33,9 +32,6 @@ export interface RedPacketDBMetadata {
     validator: string,
     contract: string,
     creator: string,
-    gasToken: string,
-    tokenAmount?: string,
-    gasTokenAmount?: string,
 }
 
 export interface PriceInfo {

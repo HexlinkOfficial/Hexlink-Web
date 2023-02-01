@@ -38,6 +38,14 @@ function alchemy() {
     });
 }
 
+export async function loadAndSetErc20Token(token: string) : Promise<Token> {
+    const tokenStore = useTokenStore();
+    if (!tokenStore.token(token)) {
+        tokenStore.set(await loadErc20Token(token));
+    }
+    return tokenStore.token(token);
+}
+
 export async function loadErc20Token(token: string) : Promise<Token> {
     const metadata = await alchemy().core.getTokenMetadata(token);
     if (metadata.name == null

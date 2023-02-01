@@ -17,7 +17,7 @@
         <div class="box">
           <p class="total-amount-text">Total Amount</p>
           <div style="display: flex; width: 100%;">
-            <input v-model="redpacket.balance" :style="hasBalanceWarning ? 'color: #FE646F;' : ''" id="red-packet-amount" class="amount-input"
+            <input v-model="redpacket.balanceInput" :style="hasBalanceWarning ? 'color: #FE646F;' : ''" id="red-packet-amount" class="amount-input"
               autocomplete="off" placeholder="0.0" required="true" type="number" autocorrect="off" title="Token Amount"
               inputmode="decimal" min="0" minlength="1" maxlength="79" pattern="^[0-9]*[.,]?[0-9]*$" spellcheck="false">
             <p v-if="hasBalanceWarning" class="balance-warning"><i class="icofont-warning-alt" style="margin-right: 0.25rem;"></i>Insufficient balance</p>
@@ -30,7 +30,7 @@
             <div class="total-choose-token">
               <div class="token-select">
                 <div class="max-amount-button">
-                  <span class="button-text" @click="redpacket.balance = redPacketTokenBalance">MAX</span>
+                  <span class="button-text" @click="redpacket.balanceInput = redPacketTokenBalance">MAX</span>
                   <span class="button-outline"></span>
                 </div>
               </div>
@@ -168,6 +168,7 @@ import { useChainStore } from "@/stores/chain";
 import { useRedPacketStore } from '@/stores/redpacket';
 import { connectWallet } from "@/web3/wallet";
 import { tokenBase } from "@/web3/utils";
+import { BigNumber as EthBigNumber } from "ethers";
 import type { OnClickOutsideHandler } from '@vueuse/core';
 import { onClickOutside } from '@vueuse/core'
 import { vOnClickOutside } from '@/services/directive';
@@ -182,7 +183,7 @@ import { getPriceInfo } from "@/web3/network";
 
 import type { Token } from "../../functions/common";
 import { hash } from "../../functions/common";
-import type { RedPacket } from "../../functions/redpacket";
+import type { RedPacketInput } from "@/stores/redpacket";
 import { calcGasSponsorship as calcGasSponsorshipFunc } from "../../functions/redpacket";
 
 const chooseTotalDrop = ref<boolean>(false);
@@ -207,11 +208,12 @@ const walletAccountBalance = (token: Token) : string => {
   return walletAccountBalances.value[token.address]?.normalized || "0";
 }
 
-const redpacket = ref<RedPacket>({
+const redpacket = ref<RedPacketInput>({
   mode: "random",
   salt: hash(new Date().toISOString()),
   split: 1,
-  balance: "0",
+  balance: EthBigNumber.from(0),
+  balanceInput: "0",
   token: tokenStore.nativeCoin,
   gasToken: tokenStore.nativeCoin,
   validator: validator(),
@@ -299,9 +301,9 @@ watch([
   () => redpacket.value.split
 ], calcGasSponsorship);
 watch(
-  [() => redpacket.value.balance, redPacketTokenBalance],
-  ([newBalance, newTokenBalance], _old) => {
-    if (Number(newBalance) > Number(newTokenBalance)) {
+  [() => redpacket.value.balanceInput, redPacketTokenBalance],
+  ([newBalanceInput, newTokenBalance], _old) => {
+    if (Number(newBalanceInput) > Number(newTokenBalance)) {
       hasBalanceWarning.value = true;
     } else {
       hasBalanceWarning.value = false;
@@ -326,7 +328,7 @@ const modeChoose = (gameMode: "random" | "equal") => {
 }
 
 const validateInput = () => {
-  if (Number(redpacket.value.balance) == 0) {
+  if (Number(redpacket.value.balanceInput) == 0) {
     message.error("Number of tokens to deposit cannot be 0");
     return false;
   }

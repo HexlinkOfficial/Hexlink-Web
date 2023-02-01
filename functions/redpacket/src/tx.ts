@@ -7,7 +7,6 @@ import {
     isStableCoin,
     erc20Interface,
     toEthBigNumber,
-    tokenAmount,
     tokenBase
 } from "../../common";
 import type {RedPacket} from "./types";
@@ -35,21 +34,18 @@ export function calcGasSponsorship(
 }
 
 export function buildGasSponsorshipOp(
-    chain: Chain,
-    input: RedPacket,
-    refunder: string,
     hexlAccount: string,
-    priceInfo: PriceInfo,
+    refunder: string,
+    input: RedPacket,
 ) : Op {
-    const sponsorship = calcGasSponsorship(chain, input, priceInfo);
     return {
         name: "depositGasSponsorship",
         function: "deposit",
         args: {
             ref: input.id,
             receipt: refunder,
-            token: input.gasToken,
-            amount: sponsorship
+            token: input.gasToken.address,
+            amount: input.gasTokenAmount
         },
         input: {
             to: hexlAccount,
@@ -58,8 +54,8 @@ export function buildGasSponsorshipOp(
                 "deposit", [
                     input.id,
                     refunder,
-                    input.gasToken,
-                    sponsorship
+                    input.gasToken.address,
+                    input.gasTokenAmount
                 ]
             ),
             callGasLimit: EthBigNumber.from(0) // no limit
@@ -74,7 +70,7 @@ export function buildRedPacketOps(
     const packet = {
        token: input.token.address,
        salt: input.salt,
-       balance: tokenAmount(input.balance, input.token),
+       balance: input.balance,
        validator: input.validator,
        split: input.split,
        mode: redPacketMode(input.mode),

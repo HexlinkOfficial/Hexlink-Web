@@ -69,7 +69,7 @@ export function redpacketId(chain: Chain, account: string, input: RedPacket) {
                 [
                     input.token.address,
                     input.salt,
-                    input.tokenAmount,
+                    input.balance,
                     input.validator,
                     input.split,
                     redPacketMode(input.mode)

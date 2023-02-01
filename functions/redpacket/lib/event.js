@@ -44,7 +44,7 @@ function redpacketId(chain, account, input) {
         [
             input.token.address,
             input.salt,
-            input.tokenAmount,
+            input.balance,
             input.validator,
             input.split,
             (0, redpacket_2.redPacketMode)(input.mode)

@@ -31,7 +31,7 @@ export const GET_REDPACKET_CLAIMS_BY_CLAIMER = gql`
         where: {
           user_id: { _eq: $userId },
           chain: { _eq: $chain },
-          type: "claim_redpacket",
+          type: { _eq: "claim_redpacket" },
         },
         limit: 100
     ) {

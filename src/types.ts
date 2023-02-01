@@ -1,4 +1,5 @@
 import type { BigNumber as EthersBigNumber } from "ethers";
+import type { BigNumber } from "bignumber.js";
 
 import type { Token } from "../functions/common";
 import type { RedPacket, RedPacketDBMetadata } from "../functions/redpacket";

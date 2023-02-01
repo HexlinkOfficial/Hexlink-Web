@@ -30,7 +30,7 @@ import {
 
 import { useChainStore } from "@/stores/chain";
 import { useWalletStore } from "@/stores/wallet";
-import { getPriceInfo } from "@/web3/network";
+import { getPriceInfo, getRefunder } from "@/web3/network";
 import { useAccountStore } from "@/stores/account";
 
 import { getFunctions, httpsCallable } from 'firebase/functions'
@@ -175,7 +175,7 @@ async function buildCreateRedPacketTxForMetamask(input: RedPacket) {
         }
     }
 
-    const refunder = useChainStore().refunder;
+    const refunder = await getRefunder(chain);
     if (value.gt(0)) {
         hexlOps.push({
             name: "depositAll",
@@ -318,7 +318,6 @@ export async function createNewRedPacket(
         throw new Error("not supported yet")
     }
     const txes = await buildCreateRedPacketTxForMetamask(redpacket);
-    console.log(txes);
     return await processTxAndSave(redpacket, txes, dryrun);
 }
 

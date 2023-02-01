@@ -1,7 +1,6 @@
 import {gql} from "@urql/core";
 import {client} from "./client";
 import type {RedPacketClaimInput} from "../types";
-import type {Deposit} from "../../../functions/common";
 import type {
   RedPacketDBMetadata,
   HexlinkUserInfo
@@ -31,7 +30,7 @@ export async function insertRedPacketClaim(
           claimer_id: d.claimerId,
           creator_id: d.creatorId,
           claimer: JSON.stringify(d.claimer || {}),
-          claimed: d.claimed.toString() || "0",
+          claimed: d.claimed?.toString() || "0",
           op_id: d.opId,
         })),
       }
@@ -56,9 +55,9 @@ export async function insertRedPacket(
     uid: string,
     data: {
       id: string,
+      userId: string,
       creator: HexlinkUserInfo,
       metadata: RedPacketDBMetadata,
-      chain: string,
       opId: number,
       deposit: any
     }[],

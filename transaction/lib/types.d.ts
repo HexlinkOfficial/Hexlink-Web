@@ -23,6 +23,7 @@ export interface OperationInput {
     input: OpInput;
     actions: Action[];
     txId?: number;
+    account: string;
 }
 export interface Operation extends OperationInput {
     id: number;

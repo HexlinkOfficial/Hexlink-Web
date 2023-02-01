@@ -1,7 +1,7 @@
 "use strict";
 
-import { BigNumber as EthBigNumber } from "ethers";
 import { BigNumber } from "bignumber.js";
+import { BigNumber as EthBigNumber } from "ethers";
 import type {Token} from "../../common";
 
 export interface HexlinkUserInfo {
@@ -9,12 +9,6 @@ export interface HexlinkUserInfo {
     handle: string;
     displayName?: string;
     logoURI?: string;
-}
-
-export interface PriceInfo {
-    nativeCurrencyInUsd: BigNumber;
-    gasPrice: EthBigNumber;
-    updatedAt: number;
 }
 
 export interface RedPacket {
@@ -42,4 +36,10 @@ export interface RedPacketDBMetadata {
     gasToken: string,
     tokenAmount?: string,
     gasTokenAmount?: string,
+}
+
+export interface PriceInfo {
+    nativeCurrencyInUsd: BigNumber,
+    gasPrice: EthBigNumber,
+    updatedAt: number,
 }

@@ -18,7 +18,7 @@ async function buildTx(provider, unsignedTx, from) {
     unsignedTx.maxPriorityFeePerGas =
         feeData.maxPriorityFeePerGas || ethers_1.BigNumber.from(0);
     unsignedTx.maxFeePerGas = feeData.maxFeePerGas ||
-        ethers_1.BigNumber.from(common_1.PriceConfig[chainId.toString()].gasPrice);
+        ethers_1.BigNumber.from(common_1.PriceConfigs[chainId.toString()].gasPrice);
     return unsignedTx;
 }
 async function buildTxFromOps(provider, ops, signer) {
@@ -30,36 +30,36 @@ async function buildTxFromOps(provider, ops, signer) {
     return (0, transactions_1.serialize)(tx, signature);
 }
 exports.buildTxFromOps = buildTxFromOps;
-async function processAction(opId, chain, action, receipt) {
+async function processAction(op, chain, action, receipt) {
     const params = action.params;
     if (action.type === "insert_redpacket_claim") {
-        const claimed = (0, redpacket_2.parseClaimed)(chain, receipt, params.redPacketId, params.claimer);
+        const claimed = (0, redpacket_2.parseClaimed)(chain, receipt, params.redPacketId, op.account);
         await (0, redpacket_1.insertRedPacketClaim)({
             ...params,
             claimed,
-            opId,
+            opId: op.id,
         });
     }
     if (action.type == "insert_redpacket") {
-        const deposit = (0, common_1.parseDeposit)(receipt, params.redPacketId, params.account, params.refunder);
+        const deposit = (0, common_1.parseDeposit)(receipt, params.redPacketId, op.account, params.refunder);
         const created = (0, redpacket_2.parseCreated)(chain, receipt, params.redPacketId);
         console.log(created.packet);
         await (0, redpacket_1.insertRedPacket)(params.userId, [{
                 id: params.redPacketId,
-                creator: created.creator,
+                creator: params.creator,
+                userId: op.userId,
                 metadata: created.packet,
-                chain: chain.name,
-                opId,
+                opId: op.id,
                 deposit: {
-                    receipt: deposit.receipt,
-                    token: deposit.token,
-                    amount: deposit.amount.toString(),
+                    receipt: deposit === null || deposit === void 0 ? void 0 : deposit.receipt,
+                    token: deposit === null || deposit === void 0 ? void 0 : deposit.token,
+                    amount: deposit === null || deposit === void 0 ? void 0 : deposit.amount.toString(),
                 }
             }]);
     }
 }
 async function processActions(chain, op, receipt) {
-    await Promise.all(op.actions.map(action => processAction(op.id, chain, action, receipt)));
+    await Promise.all(op.actions.map(action => processAction(op, chain, action, receipt)));
 }
 exports.processActions = processActions;
 //# sourceMappingURL=operation.js.map

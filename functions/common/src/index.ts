@@ -10,4 +10,3 @@ export * from "./utils";
 
 export * from "./account";
 export * from "./types";
-export * from "./price";

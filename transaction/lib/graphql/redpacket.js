@@ -17,14 +17,17 @@ mutation ($objects: [redpacket_claim_insert_input!]!) {
 `;
 async function insertRedPacketClaim(data) {
     const result = await client_1.client.mutation(INSERT_REDPACKET_CLAIM, {
-        objects: data.map((d) => ({
-            redpacket_id: d.redPacketId,
-            claimer_id: d.claimerId,
-            creator_id: d.creatorId,
-            claimer: JSON.stringify(d.claimer || {}),
-            claimed: d.claimed.toString() || "0",
-            op_id: d.opId,
-        })),
+        objects: data.map((d) => {
+            var _a;
+            return ({
+                redpacket_id: d.redPacketId,
+                claimer_id: d.claimerId,
+                creator_id: d.creatorId,
+                claimer: JSON.stringify(d.claimer || {}),
+                claimed: ((_a = d.claimed) === null || _a === void 0 ? void 0 : _a.toString()) || "0",
+                op_id: d.opId,
+            });
+        }),
     }).toPromise();
     return result.data.insert_redpacket_claim.returning;
 }

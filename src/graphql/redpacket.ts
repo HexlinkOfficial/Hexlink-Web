@@ -2,10 +2,7 @@ import { gql } from '@urql/core';
 import { useAuthStore } from '@/stores/auth';
 import { handleUrqlResponse, setUrqlClientIfNecessary } from './urql';
 import { useChainStore } from '@/stores/chain';
-import type {
-  RedPacketDB,
-  RedPacketOnchainState
-} from "@/types";
+import type { RedPacketDB } from "@/types";
 
 export const GET_REDPACKET = gql`
   query GetRedPacket($id: String!) {

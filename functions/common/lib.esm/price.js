@@ -10,7 +10,7 @@ const MUMBAI = {
     nativeCurrencyInUsd: "1.0",
     gasPrice: "2000000000", // 2 gwei
 };
-export const PriceConfig = {
+export const PriceConfigs = {
     "goerli": GOERLI,
     "polygon": POLYGON,
     "mumbai": MUMBAI,

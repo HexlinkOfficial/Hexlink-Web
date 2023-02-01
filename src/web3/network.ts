@@ -85,7 +85,7 @@ const functions = getFunctions();
 export async function getPriceInfo(chain: Chain) : Promise<PriceInfo> {
     const priceInfo = useChainStore().priceInfos[chain.name];
     // refresh every 15 mins
-    if (!priceInfo || priceInfo.updatedAt < new Date().getTime() - 900000) {
+    if (!priceInfo.updatedAt || priceInfo.updatedAt < new Date().getTime() - 900000) {
         const getPriceInfo = httpsCallable(functions, 'priceInfo');
         const result = await getPriceInfo({chain: chain.name});
         const info : {
@@ -99,4 +99,10 @@ export async function getPriceInfo(chain: Chain) : Promise<PriceInfo> {
         });
     }
     return useChainStore().priceInfos[chain.name];
+}
+
+export async function getRefunder(chain: Chain) : Promise<string> {
+    const getRefunder = httpsCallable(functions, 'priceInfo');
+    const result = await getRefunder({chain: chain.name});
+    return (result.data as any).refunder as string;
 }

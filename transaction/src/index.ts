@@ -30,12 +30,14 @@ app.post('/submit/:chain', async (req: express.Request, res: express.Response) =
     type: req.body.type,
   } as OperationInput;
   if (req.body.tx) {
-    const [{id: txId}] = await insertTx(req.body.tx);
+    const [{id: txId}] = await insertTx([
+      {tx: req.body.tx, chain: req.params.chain}
+    ]);
     const [{id: opId}] = await insertOp([{txId, ...input}]);
     const txQueue = queues.getTxQueue(req.params.chain)!;
     await txQueue.add({
       id: txId,
-      tx: req.body.tx.tx,
+      tx: req.body.tx,
       ops: [{id: opId, ...input}],
     });
     res.status(200).json({ id: opId });

@@ -7,8 +7,8 @@ import {resolveProperties} from "@ethersproject/properties";
 import {serialize, UnsignedTransaction} from "@ethersproject/transactions";
 import {insertRedPacketClaim, insertRedPacket} from "./graphql/redpacket";
 
-import type {Chain, OpInput, Deposit} from "../../functions/common";
-import {hexlContract, PriceConfig, parseDeposit} from "../../functions/common";
+import type {Chain, OpInput} from "../../functions/common";
+import {hexlContract, PriceConfigs, parseDeposit} from "../../functions/common";
 import {parseClaimed, parseCreated} from "../../functions/redpacket";
 import type {Action, Operation} from "./types";
 
@@ -27,7 +27,7 @@ async function buildTx(
   unsignedTx.maxPriorityFeePerGas =
     feeData.maxPriorityFeePerGas || EthBigNumber.from(0);
   unsignedTx.maxFeePerGas = feeData.maxFeePerGas ||
-    EthBigNumber.from(PriceConfig[chainId.toString()].gasPrice);
+    EthBigNumber.from(PriceConfigs[chainId.toString()].gasPrice);
   return unsignedTx;
 }
 
@@ -47,7 +47,7 @@ export async function buildTxFromOps(
 }
 
 async function processAction(
-  opId: number,
+  op: Operation,
   chain: Chain,
   action: Action,
   receipt: ethers.providers.TransactionReceipt
@@ -58,12 +58,12 @@ async function processAction(
       chain,
       receipt,
       params.redPacketId,
-      params.claimer
+      op.account,
     );
     await insertRedPacketClaim({
       ...params,
       claimed,
-      opId,
+      opId: op.id,
     });
   }
 
@@ -71,7 +71,7 @@ async function processAction(
     const deposit = parseDeposit(
       receipt,
       params.redPacketId,
-      params.account,
+      op.account,
       params.refunder,
     );
     const created = parseCreated(
@@ -84,14 +84,14 @@ async function processAction(
       params.userId,
       [{
         id: params.redPacketId,
-        creator: created.creator,
+        creator: params.creator,
+        userId: op.userId,
         metadata: created.packet,
-        chain: chain.name,
-        opId,
+        opId: op.id,
         deposit: {
-          receipt: deposit.receipt,
-          token: deposit.token,
-          amount: deposit.amount.toString(),
+          receipt: deposit?.receipt,
+          token: deposit?.token,
+          amount: deposit?.amount.toString(),
         }
       }]
     );
@@ -105,7 +105,7 @@ export async function processActions(
 ) {
   await Promise.all(
     op.actions.map(
-      action => processAction(op.id, chain, action, receipt)
+      action => processAction(op, chain, action, receipt)
     )
   );
 }

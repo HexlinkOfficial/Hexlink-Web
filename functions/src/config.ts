@@ -1,5 +1,4 @@
 import * as functions from "firebase-functions";
-import {PriceConfig} from "../common";
 
 const secrets = functions.config().doppler;
 
@@ -40,12 +39,55 @@ export const kmsConfig = () => new Map<string, KMS_CONFIG_TYPE>([
   [KMS_KEY_TYPE[KMS_KEY_TYPE.validator], identityVerifierValidatorConfig()],
 ]);
 
+export interface PriceConfig {
+  nativeCurrencyInUsd: string,
+  gasPrice: string,
+  updatedAt?: Date,
+}
+
+const GOERLI : PriceConfig = {
+  nativeCurrencyInUsd: "1500.0",
+  gasPrice: "10000000000", // 10 gwei
+};
+
+const POLYGON : PriceConfig = {
+  nativeCurrencyInUsd: "1.0",
+  gasPrice: "100000000000", // 100 gwei
+};
+
+const MUMBAI : PriceConfig = {
+  nativeCurrencyInUsd: "1.0",
+  gasPrice: "2000000000", // 2 gwei
+};
+
+export const PriceConfigs : {[key: string]: PriceConfig} = {
+  "goerli": GOERLI,
+  "polygon": POLYGON,
+  "mumbai": MUMBAI,
+};
+
 export const priceInfo = functions.https.onCall(
     (data, context) => {
       const uid = context.auth?.uid;
       if (!uid) {
         return {code: 401, message: "Unauthorized Call"};
       }
-      return {priceInfo: PriceConfig[data.chain.toString()]};
+      return {priceInfo: PriceConfigs[data.chain]};
+    }
+);
+
+export const Refunders : {[key: string]: string} = {
+  "goerli": "0x1A811678eEEDF16a1D0dF4b12e290F78a61A28F9",
+  "polygon": "0x1A811678eEEDF16a1D0dF4b12e290F78a61A28F9",
+  "mumbai": "0x1A811678eEEDF16a1D0dF4b12e290F78a61A28F9",
+};
+
+export const refunder = functions.https.onCall(
+    (data, context) => {
+      const uid = context.auth?.uid;
+      if (!uid) {
+        return {code: 401, message: "Unauthorized Call"};
+      }
+      return {refunder: Refunders[data.chain]};
     }
 );

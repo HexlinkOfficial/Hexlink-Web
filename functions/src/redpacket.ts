@@ -12,7 +12,7 @@ import {
   accountAddress,
   toEthSignedMessageHash,
 } from "./account";
-import {KMS_KEY_TYPE} from "./config";
+import {KMS_KEY_TYPE, Refunders, kmsConfig} from "./config";
 
 import {
   redPacketAddress,
@@ -29,15 +29,19 @@ const secrets = functions.config().doppler || {};
 
 async function sign(signer: string, message: string) : Promise<string> {
   const validator = new ethers.Wallet(secrets.HARDHAT_VALIDATOR);
-  if (signer == validator.address) {
+  const keyType = KMS_KEY_TYPE[KMS_KEY_TYPE.validator];
+  const kmsValidator = kmsConfig().get(keyType)!.publicAddress;
+  if (signer.toLowerCase() == validator.address.toLowerCase()) {
     return await validator.signMessage(
         ethers.utils.arrayify(message)
     );
-  } else {
+  } else if (signer.toLowerCase() == kmsValidator.toLowerCase()) {
     return await signWithKmsKey(
-        KMS_KEY_TYPE[KMS_KEY_TYPE.validator],
+        keyType,
         toEthSignedMessageHash(message)
     ) as string;
+  } else {
+    throw new Error("invalid validator");
   }
 }
 
@@ -107,6 +111,7 @@ export const claimRedPacket = functions.https.onCall(
         const result = await submit(chain, {
           type: "claim_redpacket",
           op,
+          account: account.address,
           userId: uid,
           actions: [action],
         });
@@ -158,16 +163,18 @@ export const createRedPacket = functions.https.onCall(
           userId: uid,
           redPacketId: redpacketId(chain, account.address, data.redPacket),
           creator: data.creator,
+          refunder: Refunders[chain.name],
         },
       };
       const postData: any = {
         type: "create_redpacket",
         userId: uid,
         actions: [action],
+        account: account.address,
         op: buildCreateOp(chain, data.redPacket),
       };
       if (data.txHash) {
-        postData.tx = {tx: data.txHash, chain: chain.name};
+        postData.tx = data.txHash;
       }
       try {
         const result = await submit(chain, postData);

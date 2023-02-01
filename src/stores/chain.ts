@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import type { PriceInfo } from '../../functions/common';
+import type { PriceInfo } from '../../functions/redpacket';
 import { getChain } from "../../functions/common";
 import type { Provider } from "@ethersproject/providers";
 import { getInfuraProvider } from '@/web3/network';
@@ -22,9 +22,6 @@ export const useChainStore = defineStore({
         priceInfo: (state) : PriceInfo => {
             const network = getChain(state.current);
             return state.priceInfos[network.name];
-        },
-        refunder(): string {
-            return "0x1A811678eEEDF16a1D0dF4b12e290F78a61A28F9";
         },
         provider() : Provider {
             return getInfuraProvider(this.chain);

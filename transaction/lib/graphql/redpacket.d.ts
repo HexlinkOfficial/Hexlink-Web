@@ -5,9 +5,9 @@ export declare function insertRedPacketClaim(data: RedPacketClaimInput[]): Promi
 }[]>;
 export declare function insertRedPacket(uid: string, data: {
     id: string;
+    userId: string;
     creator: HexlinkUserInfo;
     metadata: RedPacketDBMetadata;
-    chain: string;
     opId: number;
     deposit: any;
 }[]): Promise<{

@@ -60,11 +60,13 @@ async function processAction(
       params.redPacketId,
       op.account,
     );
-    await insertRedPacketClaim({
-      ...params,
-      claimed,
-      opId: op.id,
-    });
+    if (claimed !== undefined) {
+      await insertRedPacketClaim({
+        ...params,
+        claimed,
+        opId: op.id,
+      });
+    }
   }
 
   if (action.type == "insert_redpacket") {
@@ -79,22 +81,24 @@ async function processAction(
       receipt,
       params.redPacketId,
     );
-    console.log(created.packet);
-    await insertRedPacket(
-      params.userId,
-      [{
-        id: params.redPacketId,
-        creator: params.creator,
-        userId: op.userId,
-        metadata: created.packet,
-        opId: op.id,
-        deposit: {
-          receipt: deposit?.receipt,
-          token: deposit?.token,
-          amount: deposit?.amount.toString(),
-        }
-      }]
-    );
+    if (created !== undefined) {
+      console.log(created.packet);
+      await insertRedPacket(
+        params.userId,
+        [{
+          id: params.redPacketId,
+          creator: params.creator,
+          userId: op.userId,
+          metadata: created.packet,
+          opId: op.id,
+          deposit: {
+            receipt: deposit?.receipt,
+            token: deposit?.token,
+            amount: deposit?.amount.toString(),
+          }
+        }]
+      );
+    }
   }
 }
 

@@ -1,4 +1,4 @@
-import type { RedPacketDB } from "@/types";
+import type { RedPacketDB, RedPacketOnchainState } from "@/types";
 import { ethers, BigNumber as EthBigNumber } from "ethers";
 import { useAuthStore } from "@/stores/auth";
 
@@ -6,7 +6,7 @@ import { genDeployAuthProof } from "@/web3/oracle";
 import { tokenEqual } from "@/web3/utils";
 import { estimateGas, sendTransaction, signMessage } from "@/web3/wallet";
 
-import type { Token, Op, OpInput } from "../../functions/common";
+import type { Token, Op, OpInput, Chain } from "../../functions/common";
 import {
     hash,
     isNativeCoin,
@@ -30,7 +30,7 @@ import {
 
 import { useChainStore } from "@/stores/chain";
 import { useWalletStore } from "@/stores/wallet";
-import { getPriceInfo, getRefunder } from "@/web3/network";
+import { getPriceInfo } from "@/web3/network";
 import { useAccountStore } from "@/stores/account";
 
 import { getFunctions, httpsCallable } from 'firebase/functions'
@@ -56,6 +56,8 @@ export function validator() : string {
     }
     return "0x030ffbc193c3f9f4c6378beb506eecb0933fd457";
 }
+
+const refunder = "0x1A811678eEEDF16a1D0dF4b12e290F78a61A28F9";
 
 function buildOpInput(params: {
     to: string,
@@ -175,7 +177,6 @@ async function buildCreateRedPacketTxForMetamask(input: RedPacket) {
         }
     }
 
-    const refunder = await getRefunder(chain);
     if (value.gt(0)) {
         hexlOps.push({
             name: "depositAll",
@@ -277,7 +278,7 @@ async function processTxAndSave(
     redpacket: RedPacket,
     txes: any[],
     dryrun: boolean
-) : Promise<string> {
+) : Promise<{id: string, opId?: number}> {
     const chain = useChainStore().chain;
     const id = redpacketId(chain, useAccountStore().account!.address, redpacket);
     if (dryrun) {
@@ -288,13 +289,18 @@ async function processTxAndSave(
                 gasUsed: EthBigNumber.from(gasUsed).toString()
             })
         }
-        return id;
+        return {id};
     }
     
     for (let i = 0; i < txes.length; i++) {
-        await sendTransaction(txes[i].input);
+        const txHash = await sendTransaction(txes[i].input);
+        if (txes[i].name == "createRedPacket" ||
+            txes[i].name == "deployAndCreateRedPacket") {
+            const opId = await callCreateRedPacket(chain, redpacket, txHash);
+            return {id, opId};
+        }
     }
-    return id;
+    return {id};
 }
 
 export async function deployAndCreateNewRedPacket(
@@ -313,7 +319,7 @@ export async function createNewRedPacket(
     redpacket: RedPacket,
     useHexlinkAccount: boolean,
     dryrun: boolean = false
-) : Promise<string> {
+) : Promise<{id: string, opId?: number}> {
     if (useHexlinkAccount) {
         throw new Error("not supported yet")
     }
@@ -321,7 +327,7 @@ export async function createNewRedPacket(
     return await processTxAndSave(redpacket, txes, dryrun);
 }
 
-export async function claimRedPacket(redPacket: RedPacketDB) : Promise<void> {
+export async function callClaimRedPacket(redPacket: RedPacketDB) : Promise<void> {
     const claimRedPacket = httpsCallable(functions, 'claimRedPacket');
     const chain = getChain(redPacket.chain);
     await claimRedPacket({
@@ -332,18 +338,31 @@ export async function claimRedPacket(redPacket: RedPacketDB) : Promise<void> {
     });
 }
 
-export async function queryRedPacketInfo(rp: RedPacketDB) : Promise<{
-    balance: EthBigNumber,
-    split: number,
-    createdAt: Date
-}> {
+export async function callCreateRedPacket(
+    chain: Chain,
+    redPacket: RedPacket,
+    txHash: string
+) : Promise<number> {
+    const createRedPacket = httpsCallable(functions, 'createRedPacket');
+    const result = await createRedPacket({
+        chain: chain.name,
+        redPacket: redPacket,
+        creator: useAuthStore().userInfo,
+        txHash
+    });
+    return (result.data as any).id;
+}
+
+export async function queryRedPacketInfo(
+    rp: RedPacketDB
+) : Promise<RedPacketOnchainState> {
     const redPacket = await redPacketContract(
         useChainStore().provider,
     );
     const info = await redPacket.getPacket(rp.id);
     return {
         createdAt: new Date(info.createdAt.toNumber() * 1000),
-        balance: info.balance,
+        balance: info.balance.toString(),
         split: info.split
-    }
+    } as RedPacketOnchainState;
 }

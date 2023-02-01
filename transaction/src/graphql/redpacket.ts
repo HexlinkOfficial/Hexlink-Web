@@ -30,7 +30,7 @@ export async function insertRedPacketClaim(
           claimer_id: d.claimerId,
           creator_id: d.creatorId,
           claimer: JSON.stringify(d.claimer || {}),
-          claimed: d.claimed?.toString() || "0",
+          claimed: d.claimed?.toString() ||  "0",
           op_id: d.opId,
         })),
       }

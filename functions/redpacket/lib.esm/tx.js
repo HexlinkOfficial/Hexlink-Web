@@ -1,4 +1,5 @@
 import { BigNumber as EthBigNumber } from "ethers";
+import { accountInterface } from "../../common";
 import { isNativeCoin, isWrappedCoin, isStableCoin, erc20Interface, toEthBigNumber, tokenAmount, tokenBase } from "../../common";
 import { redPacketInterface, redPacketAddress, redPacketMode } from "./redpacket";
 export function calcGasSponsorship(chain, redpacket, priceInfo) {
@@ -17,40 +18,27 @@ export function calcGasSponsorship(chain, redpacket, priceInfo) {
 }
 export function buildGasSponsorshipOp(chain, input, refunder, hexlAccount, priceInfo) {
     const sponsorship = calcGasSponsorship(chain, input, priceInfo);
-    if (isNativeCoin(input.gasToken, chain)) {
-        return {
-            name: "depositGasSponsorship",
-            function: "",
-            args: {},
-            input: {
-                to: refunder,
-                value: sponsorship,
-                callData: [],
-                callGasLimit: EthBigNumber.from(0) // no limit
-            }
-        };
-    }
-    else {
-        return {
-            name: "depositGasSponsorship",
-            function: "transferFrom",
-            args: {
-                from: hexlAccount,
-                to: refunder,
-                amount: sponsorship
-            },
-            input: {
-                to: input.gasToken.address,
-                value: EthBigNumber.from(0),
-                callData: erc20Interface.encodeFunctionData("transferFrom", [
-                    hexlAccount,
-                    refunder,
-                    sponsorship
-                ]),
-                callGasLimit: EthBigNumber.from(0) // no limit
-            }
-        };
-    }
+    return {
+        name: "depositGasSponsorship",
+        function: "deposit",
+        args: {
+            ref: input.id,
+            receipt: refunder,
+            token: input.gasToken,
+            amount: sponsorship
+        },
+        input: {
+            to: hexlAccount,
+            value: EthBigNumber.from(0),
+            callData: accountInterface.encodeFunctionData("deposit", [
+                input.id,
+                refunder,
+                input.gasToken,
+                sponsorship
+            ]),
+            callGasLimit: EthBigNumber.from(0) // no limit
+        }
+    };
 }
 export function buildRedPacketOps(chain, input) {
     const packet = {

@@ -1,6 +1,6 @@
 import { BigNumber as EthBigNumber } from "ethers";
 
-import type { Chain, Op } from "../../common";
+import { Chain, Op, accountInterface } from "../../common";
 import {
     isNativeCoin,
     isWrappedCoin,
@@ -42,41 +42,29 @@ export function buildGasSponsorshipOp(
     priceInfo: PriceInfo,
 ) : Op {
     const sponsorship = calcGasSponsorship(chain, input, priceInfo);
-    if (isNativeCoin(input.gasToken, chain)) {
-        return {
-            name: "depositGasSponsorship",
-            function: "",
-            args: {},
-            input: {
-                to: refunder,
-                value: sponsorship,
-                callData: [],
-                callGasLimit: EthBigNumber.from(0) // no limit
-            }
-        };
-    } else {
-        return {
-            name: "depositGasSponsorship",
-            function: "transferFrom",
-            args: {
-                from: hexlAccount,
-                to: refunder,
-                amount: sponsorship
-            },
-            input: {
-                to: input.gasToken.address,
-                value: EthBigNumber.from(0),
-                callData: erc20Interface.encodeFunctionData(
-                    "transferFrom", [
-                        hexlAccount,
-                        refunder,
-                        sponsorship
-                    ]
-                ),
-                callGasLimit: EthBigNumber.from(0) // no limit
-            }
-        };
-    }
+    return {
+        name: "depositGasSponsorship",
+        function: "deposit",
+        args: {
+            ref: input.id,
+            receipt: refunder,
+            token: input.gasToken,
+            amount: sponsorship
+        },
+        input: {
+            to: hexlAccount,
+            value: EthBigNumber.from(0),
+            callData: accountInterface.encodeFunctionData(
+                "deposit", [
+                    input.id,
+                    refunder,
+                    input.gasToken,
+                    sponsorship
+                ]
+            ),
+            callGasLimit: EthBigNumber.from(0) // no limit
+        }
+    };
 }
 
 export function buildRedPacketOps(

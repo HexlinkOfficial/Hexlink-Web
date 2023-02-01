@@ -2,7 +2,7 @@
   <div v-if="loading" class="loading-state">
     <Loading />
   </div>
-  <div v-if="redPackets.length == 0 && !loading" class="no-history">
+  <div v-if="createdRpOps.length == 0 && !loading" class="no-history">
     <div style="text-align: center;">You have no luck history yet! Go send some luck~</div>
   </div>
   <div v-if="!loading" class="token-listDetail">
@@ -12,10 +12,10 @@
           <div class="history-date">
             <div style="font-size: 0.875rem; line-height: 1.25rem;">{{ name }}</div>
           </div>
-          <div v-for="(v, i) in value" :key="i" class="history-record">
-            <div v-if="v.redPacket" class="record-box">
+          <div v-for="(op, i) in value" :key="i" class="history-record">
+            <div v-if="op.type == 'create_redpacket'" class="record-box">
               <div style="display: block; position: relative;">
-                <svg v-if="showStatus(v.redPacket.tx, v.redPacket.status) != 'Sent'" version="1.1" id="loader-1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px"
+                <svg v-if="showStatus(op) != 'Sent'" version="1.1" id="loader-1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px"
                   y="0px" width="40px" height="40px" viewBox="0 0 50 50" style="enable-background:new 0 0 50 50;"
                   xml:space="preserve">
                   <path fill="#FD4755"
@@ -24,7 +24,7 @@
                       dur="0.6s" repeatCount="indefinite"></animateTransform>
                   </path>
                 </svg>
-                <div v-if="showStatus(v.redPacket.tx, v.redPacket.status) == 'Sent'" class="icon">
+                <div v-if="showStatus(op) == 'Sent'" class="icon">
                   <svg style="color:white;" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
                     fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                     class="w-4 h-4 text-subdued">
@@ -39,77 +39,77 @@
                     <div style="display: flex;">
                       <div class="sent-info">
                         <div class="info-1">
-                          {{ showStatus(v.redPacket.tx, v.redPacket.status) }}
+                          {{ showStatus(op) }}
                         </div>
                       </div>
                     </div>
                     <div style="color: #6a6d7c; white-space: nowrap; margin-left: 0; font-size: 12px;">
-                      <div style="display: flex;">{{ new Date(v.redPacket.createdAt).toLocaleString().split(',')[1] }}</div>
+                      <div style="display: flex;">{{ new Date(op.createdAt).toLocaleString().split(',')[1] }}</div>
                     </div>
                   </div>
                 </div>
-                <div class="token-amount">
+                <div class="token-amount" v-if="op.redpacket">
                   <div class="sent-info">
                     <a-tooltip placement="top">
                       <template #title>
                         <span>
-                          Amount: {{ normalizedDbBalance(v) }}
+                          Amount: {{ normalizedDbBalance(op) }}
                         </span>
                       </template>
                       <div
                         style="overflow: auto; white-space: nowrap; margin-left: 0.25rem; width: 45px;display: flex;justify-content: flex-end;">
-                        - {{ normalizedDbBalance(v).toString().substring(0,5) }}
+                        - {{ normalizedDbBalance(op).toString().substring(0,5) }}
                       </div>
                     </a-tooltip>
                     <div class="token-icon" style="margin-right: 0.25rem; margin-left: 0.25rem;">
-                      <img :src="v.token.logoURI">
+                      <img :src="op.redpacket.token.logoURI">
                     </div>
-                    {{ v.token.symbol }}
+                    {{ op.redpacket.token.symbol }}
                   </div>
                 </div>
-                <div class="claim-status">
+                <div class="claim-status" v-if="op.redpacket">
                   <div class="progress-bar">
                     <span class="box-progress" :style="{
-                      width: (v.redPacket.metadata.split - v.redPacket.state.split)/v.redPacket.metadata.split*100 + '%'
+                      width: progress(op.redpacket) + '%'
                     }"></span>
                   </div>
                   <div class="claimed-data">
                     <p class="claimed-number">
                       Claimed:&nbsp;
                       <strong>{{
-                      v.redPacket.metadata.split - v.redPacket.state.split
-                      }}/{{ v.redPacket.metadata.split }}</strong>
+                        op.redpacket.metadata.split - op.redpacket.state.split
+                      }}/{{ op.redpacket.metadata.split }}</strong>
                       &nbsp;Share
                     </p>
                     <p class="claim-mode">
                       Mode:&nbsp;
-                      <strong>{{ v.redPacket.metadata.mode }}</strong>
+                      <strong>{{ op.redpacket.metadata.mode }}</strong>
                     </p>
                     <p class="claimed-number">
                       Left:&nbsp;
-                      <strong>{{ normalize(v.redPacket.state.balance, v.token) }}</strong>
-                      &nbsp;{{ v.token.symbol }}
+                      <strong>{{ normalize(op.redpacket.state.balance, op.redpacket.token) }}</strong>
+                      &nbsp;{{ op.redpacket.token.symbol }}
                     </p>
                   </div>
                 </div>
-                <div class="share">
-                  <i v-if="showStatus(v.redPacket.tx, v.redPacket.status) == 'Sent'" class="fa fa-paper-plane share-button" aria-hidden="true" @click="copyShareLink(v.redPacket)"></i>
-                  <span v-if="showStatus(v.redPacket.tx, v.redPacket.status) != 'Sent'" class="pending-text">{{ showDetailStatus(v.redPacket.tx, v.redPacket.status) }}</span>
+                <div class="share" v-if="op.redpacket">
+                  <i v-if="showStatus(op) == 'Sent'" class="fa fa-paper-plane share-button" aria-hidden="true" @click="copyShareLink(op.redpacket)"></i>
+                  <span v-if="showStatus(op) != 'Sent'" class="pending-text">{{ showDetailStatus(op) }}</span>
                 </div>
-                <div v-if="showStatus(v.redPacket.tx, v.redPacket.status) == 'Sent'" class="cta">
+                <div v-if="showStatus(op) == 'Sent'" class="cta">
                   <!-- <button class="connect-wallet-button" :href="href">
                     Withdraw
                   </button> -->
-                  <router-link :to="{ query: { details: v.redPacket ? v.redPacket.id : v.redpacket.id } }">
+                  <router-link :to="{ query: { details: op.redpacket.id } }">
                     <i class="fa fa-get-pocket" aria-hidden="true"></i>
                   </router-link>
                 </div>
               </div>
             </div>
-            <div v-if="v.redpacket" class="record-box">
+            <div v-if="op.type == 'claim_redpacket'" class="record-box">
               <div style="display: block; position: relative;">
-                <div class="icon" :style="showClaimStatus(v.redpacket.claim) == 'Error' ? 'background-color: #FD4755;' : 'background-color: #4BAE4F;'">
-                  <svg v-if="showClaimStatus(v.redpacket.claim) != 'Claimed' && showClaimStatus(v.redpacket.claim) != 'Error'" version="1.1" id="loader-1"
+                <div class="icon" :style="showClaimStatus(op) == 'Error' ? 'background-color: #FD4755;' : 'background-color: #4BAE4F;'">
+                  <svg v-if="showClaimStatus(op) != 'Claimed' && showClaimStatus(op) != 'Error'" version="1.1" id="loader-1"
                     xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="40px"
                     height="40px" viewBox="0 0 50 50" style="enable-background:new 0 0 50 50; background-color: none;" xml:space="preserve">
                     <path fill="#FFFFFF"
@@ -118,11 +118,11 @@
                         dur="0.6s" repeatCount="indefinite"></animateTransform>
                     </path>
                   </svg>
-                  <svg v-if="showClaimStatus(v.redpacket.claim) == 'Claimed'" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <svg v-if="showClaimStatus(op) == 'Claimed'" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M7 7L17 17" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                     <path d="M17 7V17H7" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                   </svg>
-                  <svg v-if="showClaimStatus(v.redpacket.claim) == 'Error'" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <svg v-if="showClaimStatus(op) == 'Error'" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M7 17L17 7" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                     <path d="M7 7L17 17" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                   </svg>
@@ -134,40 +134,40 @@
                     <div style="display: flex;">
                       <div class="sent-info">
                         <div class="info-1">
-                          {{ showClaimStatus(v.redpacket.claim) }}
+                          {{ showClaimStatus(op) }}
                         </div>
                       </div>
                     </div>
                     <div style="color: #6a6d7c; white-space: nowrap; margin-left: 0; font-size: 11px;">
-                      <div style="display: flex;">{{ new Date(v.redpacket.claim.createdAt).toLocaleString().split(',')[1] }}
+                      <div style="display: flex;">{{ new Date(op.createdAt).toLocaleString().split(',')[1] }}
                       </div>
                     </div>
                   </div>
                 </div>
-                <div class="token-amount">
-                  <div class="sent-info" v-if="v.redpacket.claim.txStatus == 'success'">
+                <div class="token-amount" v-if="op.claim">
+                  <div class="sent-info" v-if="showClaimStatus(op) == 'Claimed'">
                     <a-tooltip placement="top">
                       <template #title>
                         <span>
-                          Amount: {{ normalizeClaimAmount(v) }}
+                          Amount: {{ normalizeClaimAmount(op) }}
                         </span>
                       </template>
                       <div
                         style="overflow: auto; white-space: nowrap; margin-left: 0.25rem; width: 45px;display: flex;justify-content: flex-end;">
-                        + {{ normalizeClaimAmount(v).toString().substring(0,5)}}</div>
+                        + {{ normalizeClaimAmount(op).toString().substring(0,5)}}</div>
                     </a-tooltip>
                     <div class="token-icon" style="margin-right: 0.25rem; margin-left: 0.25rem;">
-                      <img :src="v.token.logoURI">
+                      <img :src="op.claim.redpacket.token.logoURI">
                     </div>
-                    {{ v.token.symbol }}
+                    {{ op.claim.redpacket.token.symbol }}
                   </div>
-                  <div class="sent-info" v-if="v.redpacket.claim.txStatus != 'success'">
+                  <div class="sent-info" v-if="showClaimStatus(op) == 'Claimed'">
                     <div style="overflow: auto; white-space: nowrap; margin-left: 0.25rem; width: 50px;display: flex;justify-content: flex-end;">
-                      {{ showClaimStatus(v.redpacket.claim) }}
+                      {{ showClaimStatus(op) }}
                     </div>
                   </div>
                 </div>
-                <div class="claim-status">
+                <div class="claim-status" v-if="op.claim">
                   <div style="display: flex; align-items: center;">
                     <div class="arrow">
                       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -177,23 +177,23 @@
                     <div style="display: flex; align-items: center;">
                       <span class="thumb">
                         <img
-                          :src="v.redpacket.redPacket.creator.logoURI ? v.redpacket.redPacket.creator.logoURI : 'https://i.postimg.cc/15QJZwkN/profile.png'"
+                          :src="op.claim.redpacket.creator.logoURI ? op.redpacket.creator.logoURI : 'https://i.postimg.cc/15QJZwkN/profile.png'"
                           :size="64" referrerpolicy="no-referrer" 
                         />
                       </span>
                       <div style="display: flex; flex-direction: column; margin-left: 0.5rem;">
                         <span class="from-text">From</span>
-                        <span style="font-size: 12px; color: rgb(100,116,139)">@{{ v.redpacket.redPacket.creator.handle }}</span>
+                        <span style="font-size: 12px; color: rgb(100,116,139)">@{{ op.claim.redpacket.creator.handle }}</span>
                       </div>
                     </div>
                   </div>
                 </div>
-                <div class="share">
-                  <i v-if="showClaimStatus(v.redpacket.claim) == 'Claimed'" class="fa fa-paper-plane share-button" aria-hidden="true" @click="copyShareLink(v.redpacket.redPacket)"></i>
-                  <span v-if="showClaimStatus(v.redpacket.claim) != 'Claimed' && showClaimStatus(v.redpacket.claim) != 'Error'" class="pending-text">{{ showClaimStatus(v.redpacket.claim) }}</span>
-                  <span v-if="showClaimStatus(v.redpacket.claim) == 'Error'" class="pending-text" style="color:#FD4755;">{{ showClaimStatus(v.redpacket.claim) }}</span>
+                <div class="share" v-if="op.claim">
+                  <i v-if="showClaimStatus(op) == 'Claimed'" class="fa fa-paper-plane share-button" aria-hidden="true" @click="copyShareLink(op.claim.redpacket)"></i>
+                  <span v-if="showClaimStatus(op) != 'Claimed' && showClaimStatus(op) != 'Error'" class="pending-text">{{ showClaimStatus(op) }}</span>
+                  <span v-if="showClaimStatus(op) == 'Error'" class="pending-text" style="color:#FD4755;">{{ showClaimStatus(op) }}</span>
                 </div>
-                <div class="cta" v-if="showClaimStatus(v.redpacket.claim) == 'Claimed'">
+                <div class="cta" v-if="showClaimStatus(op) == 'Claimed'">
                   <i className="fa fa-twitter"></i>
                 </div>
               </div>
@@ -212,37 +212,21 @@ import { loadErc20Token } from '@/web3/tokens';
 import { useChainStore } from "@/stores/chain";
 import { getCreatedRedPackets } from '@/graphql/redpacket';
 import { getClaimedRedPackets } from '@/graphql/redpacketClaim';
-import type {
-  RedPacketDB,
-  ClaimedRedPacket,
-} from '@/types';
-import { BigNumber as EthBigNumber } from "ethers";
-import { getInfuraProvider } from "@/web3/network";
+import type { ClaimRedPacketOp, CreateRedPacketOp, RedPacketDB } from '@/types';
 import Loading from "@/components/Loading.vue";
 import { useAccountStore } from '@/stores/account';
 import { useTokenStore } from '@/stores/token';
 import { copy } from "@/web3/utils";
-import type {ethers} from "ethers";
+import { queryRedPacketInfo } from "@/web3/redpacket";
 
 import { normalizeBalance } from "../../functions/common";
 import type { Token } from "../../functions/common";
-import {redPacketContract} from "../../functions/redpacket";
 
-interface CreatedRedPacket {
-  redPacket: RedPacketDB,
-  token: Token,
-};
-
-interface ClaimedRedPacketInfo {
-  redpacket: ClaimedRedPacket,
-  token: Token,
-}
-
-const redPackets = ref<CreatedRedPacket[]>([]);
-const claimed = ref<ClaimedRedPacketInfo[]>([]);
+const createdRpOps = ref<CreateRedPacketOp[]>([]);
+const claimedRpOps = ref<ClaimRedPacketOp[]>([]);
 const loadClaimInfo = async () => {
-  const claims : ClaimedRedPacket[] = await getClaimedRedPackets();
-  claimed.value = await Promise.all(claims.map(c => aggregatedClaimed(c)));
+  const claims : ClaimRedPacketOp[] = await getClaimedRedPackets();
+  claimedRpOps.value = await Promise.all(claims.map(c => aggregatedClaimed(c)));
 }
 
 const redPacketByDate = ref<any>([]);
@@ -252,9 +236,8 @@ const luckHistoryByDate = ref<any>([]);
 const loadData = async function() {
   loading.value = true;
   if (useAccountStore().account) {
-    const provider = getInfuraProvider(useChainStore().chain);
-    const rps : RedPacketDB[] = await getCreatedRedPackets();
-    redPackets.value = await Promise.all(rps.map(r => aggregateCreated(provider, r)));
+    const rps : CreateRedPacketOp[] = await getCreatedRedPackets();
+    createdRpOps.value = await Promise.all(rps.map(r => aggregateCreated(r)));
     await loadClaimInfo();
     // await loadClaimsForOnePacket(provider, redPackets.value[0]?.redPacket.id);
   }
@@ -262,23 +245,13 @@ const loadData = async function() {
   extractDate();
 };
 
-const pullRedpacketData = async function() {
-  if (useAccountStore().account) {
-    const provider = getInfuraProvider(useChainStore().chain);
-    const rps: RedPacketDB[] = await getCreatedRedPackets();
-    redPackets.value = await Promise.all(rps.map(r => aggregateCreated(provider, r)));
-    await loadClaimInfo();
-  }
-  extractDate();
-}
-
 const extractDate = () => {
   const sentGroup: any = {};
   const claimGroup: any = {};
   const sentOrderedGroup: any = {}
   const claimedOrderedGroup: any = {}
-  claimed.value.forEach((c) => {
-    const date = new Date(c.redpacket.claim.createdAt).toLocaleString().split(',')[0];
+  claimedRpOps.value.forEach((op) => {
+    const date = new Date(op.createdAt).toLocaleString().split(',')[0];
     if (date in claimGroup) {
       claimGroup[date].push(c);
     } else {
@@ -296,12 +269,12 @@ const extractDate = () => {
     claimedByDate.value = JSON.parse(JSON.stringify(claimedOrderedGroup));
   });
 
-  redPackets.value.forEach((val) => {
-    const date = new Date(val.redPacket.createdAt).toLocaleString().split(',')[0];
+  createdRpOps.value.forEach((op) => {
+    const date = new Date(op.createdAt).toLocaleString().split(',')[0];
     if (date in sentGroup) {
-      sentGroup[date].push(val);
+      sentGroup[date].push(op);
     } else {
-      sentGroup[date] = new Array(val);
+      sentGroup[date] = new Array(op);
     }
 
     // sort the object
@@ -350,20 +323,20 @@ const extractDate = () => {
   const fullysortedHistory: any = {}
   Object.keys(luckHistoryByDate.value).forEach(v => {
     const time: any = [];
-    luckHistoryByDate.value[v].forEach((w: any) => {
-      if(w.redPacket) {
-        time.push(new Date(w.redPacket.createdAt).getTime());
+    luckHistoryByDate.value[v].forEach((op: any) => {
+      if(op.type === "create_redpacket") {
+        time.push(new Date(op.createdAt).getTime());
       } else {
-        time.push(new Date(w.redpacket.claim.createdAt).getTime());
+        time.push(new Date(op.redpacket.claim.createdAt).getTime());
       }
     })
     const sortedArray: any[] = []
     time.sort((a: number, b: number) => b - a).forEach((t: number) => {
-      luckHistoryByDate.value[v].forEach((w: any) => {
-        if (w.redPacket) {
-          new Date(w.redPacket.createdAt).getTime() == t && sortedArray.push(w);
-        } else if (w.redpacket) {
-          new Date(w.redpacket.claim.createdAt).getTime() == t && sortedArray.push(w);
+      luckHistoryByDate.value[v].forEach((op: any) => {
+        if (op.type === "create_redpacket") {
+          new Date(op.createdAt).getTime() == t && sortedArray.push(op);
+        } else if (op.redpacket) {
+          new Date(op.redpacket.claim.createdAt).getTime() == t && sortedArray.push(op);
         } else {}
       })
     })
@@ -383,86 +356,51 @@ watch(() => route.query?.claim, async() => {
   loading.value = false;
 });
 
-const showStatus = (tx: string, status: string) => {
-  if(tx == null) {
-    return 'Pending';
-  };
-  if(tx != null && status == null) {
-    return 'Pending';
-  } else {
-    return 'Sent';
-  }
+const progress = (redpacket: RedPacketDB) => {
+  return (
+    redpacket.metadata.split - redpacket.state!.split
+  ) / redpacket.metadata.split*100
 }
 
-const showClaimStatus = (claim: any) => {
-  if (claim.txState) {
-    if (claim.txState.error) {
-      return "Error";
-    }
-    if (claim.txState.status == null) {
-      return 'Pending';
-    } else if (claim.txState.status == "error") {
-      return "Error";
-    } else {
-      return "Claimed";
-    }
-  }
-
-  // for legacy check
-  if(claim.txStatus == null){
-    return 'Pending';
-  } else if (claim.txStatus == 'error') {
-    return 'Error';
-  } else {
-    return 'Claimed';
-  }
+const showStatus = (op: any) => {
+  if (op.error) { return "Error"; }
+  if (!op.tx || !op.txStatus) { return "Pending"; }
+  return op.txStatus == "success" ? "Sent" : "Error";
 }
 
-const showDetailStatus = (tx: string, status: string) => {
-  if (tx == null) {
-    return 'Pending Transaction';
-  };
-  if (tx != null && status == null) {
-    return 'Transaction sent, wait mining';
-  } else {
-    return 'Sent';
-  }
+const showDetailStatus = (op: any) => {
+  if (op.error) { return "Error"; }
+  if (!op.tx) { return "Queued"; }
+  if (!op.txStatus) { return 'Transaction sent, wait mining'; }
+  return op.txStatus == "success" ? "Sent" : "Error";
 }
 
-const showDetailsEnabled = ref<boolean>(false);
+const showClaimStatus = (op: any) => {
+  if (op.error) { return "Error"; }
+  if (!op.tx || !op.txStatus) { return "Pending"; }
+  return op.txStatus == "success" ? "Claimed" : "Error";
+}
 
-const copyShareLink = (redPacket: RedPacketDB) => {
-  return copy(window.location.origin + route.path + "?claim=" + redPacket.id, 'Successfully copied your red packet share link!');
+const copyShareLink = (redPacket: RedPacketDB | undefined) => {
+  return copy(window.location.origin + route.path + "?claim=" + redPacket?.id, 'Successfully copied your red packet share link!');
 };
 
-const showDetails = () => {
-  showDetailsEnabled.value = showDetailsEnabled.value ? false : true;
-};
-
-const normalize = (balance: string | undefined, token: Token) => {
+const normalize = (balance: string | undefined, token: Token) : string => {
   const normalized = normalizeBalance(balance || "0", token.decimals);
   return normalized.normalized;
 }
 
-const normalizedDbBalance = (redPacket: CreatedRedPacket) => {
-  return redPacket.redPacket.metadata.tokenAmount
-    ? (
-      redPacket.redPacket.metadata.balance || 
-        normalize(
-          redPacket.redPacket.metadata.tokenAmount,
-          redPacket.token
-        )
-    ) : normalize(
-      redPacket.redPacket.metadata.balance,
-      redPacket.token
-    );
+const normalizedDbBalance = (op: CreateRedPacketOp) : string => {
+  return op.redpacket?.metadata.balance
+    ? normalize(op.redpacket.metadata.balance, op.redpacket.token!)
+    : "0";
 }
 
-const normalizeClaimAmount = (claimed: ClaimedRedPacketInfo) => {
-  return normalizeBalance(
-    EthBigNumber.from(claimed.redpacket.claim.claimed).toString() || '0',
-    claimed.token.decimals
-  ).normalized;
+const normalizeClaimAmount = (op: ClaimRedPacketOp) => {
+  return op.claim ? normalizeBalance(
+    op.claim.claimed?.toString() || '0',
+    op.claim.redpacket.token!.decimals
+  ).normalized : 0;
 }
 
 const tokenStore = useTokenStore();
@@ -474,27 +412,25 @@ const loadAndSaveERC20Token = async (tokenAddr: string) : Promise<Token> => {
 }
 
 const aggregateCreated = async function(
-  provider: ethers.providers.Provider,
-  redPacket: RedPacketDB
-) : Promise<CreatedRedPacket> {
-  const tokenAddr = redPacket.metadata.token.toLowerCase();
-  const token = await loadAndSaveERC20Token(tokenAddr);
-  const contract = await redPacketContract(provider);
-  const state = contract.getPacket(redPacket.id);
-  redPacket.state =  {
-    balance: state.balance.toString(),
-    split: state.split,
-    createdAt: state.createdAt.toISOString(),
-  };
-  return { redPacket, token };
+  op: CreateRedPacketOp
+) : Promise<CreateRedPacketOp> {
+  if (op.redpacket) {
+    const tokenAddr = op.redpacket.metadata.token.toLowerCase();
+    op.redpacket.token = await loadAndSaveERC20Token(tokenAddr);
+    op.redpacket.state = await queryRedPacketInfo(op.redpacket);
+  }
+  return op;
 };
 
 const aggregatedClaimed = async function(
-  redpacket: ClaimedRedPacket
-) : Promise<ClaimedRedPacketInfo> {
-  const tokenAddr = redpacket.redPacket.metadata.token.toLowerCase();
-  const token = await loadAndSaveERC20Token(tokenAddr);
-  return { redpacket, token };
+  op: ClaimRedPacketOp
+) : Promise<ClaimRedPacketOp> {
+  if (op.claim) {
+    const tokenAddr = op.claim.redpacket.metadata.token.toLowerCase();
+    const token = await loadAndSaveERC20Token(tokenAddr);
+    op.claim.redpacket.token = token;
+  }
+  return op;
 }
 </script>
 

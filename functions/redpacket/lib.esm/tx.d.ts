@@ -1,5 +1,5 @@
 import { BigNumber as EthBigNumber } from "ethers";
-import type { Chain, Op } from "../../common";
+import { Chain, Op } from "../../common";
 import type { RedPacket } from "./types";
 import { PriceInfo } from "./types";
 export declare function calcGasSponsorship(chain: Chain, redpacket: RedPacket, priceInfo: PriceInfo): EthBigNumber;

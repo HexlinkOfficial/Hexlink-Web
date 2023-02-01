@@ -11,8 +11,8 @@
     <h2 class="transition">
       <span style="font-size: 20px;">Sent by</span><br>
       <div style="display: flex; align-items: center; justify-content: center;">
-        @{{ redPacket?.creator.handle }}
-        <a class="twitter-link" :href="'https://twitter.com/' + redPacket?.creator.handle">
+        @{{ redPacket?.creator?.handle }}
+        <a class="twitter-link" :href="'https://twitter.com/' + redPacket?.creator?.handle">
           <i className="fa fa-twitter"></i>
         </a>
       </div>
@@ -49,7 +49,7 @@
 import { ref, onMounted } from "vue";
 import { getRedPacket } from '@/graphql/redpacket';
 import { useRoute } from "vue-router";
-import { claimRedPacket } from "@/web3/redpacket";
+import { callClaimRedPacket } from "@/web3/redpacket";
 import { loadErc20Token } from "@/web3/tokens";
 import { useTokenStore } from "@/stores/token";
 import { switchNetwork } from "@/web3/network";
@@ -69,7 +69,7 @@ async function loadToken(tokenAddr: string) : Promise<Token> {
 
 onMounted(async () => {
   redPacket.value = await getRedPacket(useRoute().query.claim!.toString());
-  const network = getChain(redPacket.value!.chain);
+  const network = getChain(redPacket.value!.chain!);
   await switchNetwork(network);
   const metadata = await loadToken(redPacket.value!.metadata.token);
   redPacketToken.value = metadata.symbol;
@@ -79,7 +79,7 @@ onMounted(async () => {
 const claim = async () => {
   claimStatus.value = 'loading';
   try {
-    await claimRedPacket(redPacket.value!);
+    await callClaimRedPacket(redPacket.value!);
     claimStatus.value = 'success';
   } catch (e) {
     console.log("Failed to claim redpacket with error " + JSON.stringify(e));

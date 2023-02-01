@@ -14,8 +14,8 @@
     <div class="card_circle transition"></div>
     <h2 class="transition">
       <span>
-        Sent by @{{ redPacket?.creator.handle }}
-        <a class="twitter-link" :href="'https://twitter.com/' + redPacket?.creator.handle">
+        Sent by @{{ redPacket!.creator!.handle }}
+        <a class="twitter-link" :href="'https://twitter.com/' + redPacket?.creator!.handle">
           <i className="fa fa-twitter"></i>
         </a>
       </span>
@@ -39,11 +39,14 @@
             <div class="profile-username">
               <div>
                 {{ v.claimer.displayName }}
-                <a class="twitter-link" :href="'https://twitter.com/' + redPacket?.creator.handle">
+                <a class="twitter-link" :href="'https://twitter.com/' + redPacket!.creator!.handle">
                   <i className="fa fa-twitter"></i>
                 </a>
               </div>
-              <div class="claimed-amount">233.333ETH</div>
+              <div class="claimed-amount">{{
+                normalizeBalance(v.claimed!.toString(),
+                redPacket!.token!.decimals)
+              }}</div>
             </div>
             <div class="claim-date">@{{ v.claimer.handle }}</div>
           </div>
@@ -56,90 +59,43 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
-import { ethers } from "ethers";
+
+import { normalizeBalance } from "../../functions/common";
+import type { Token } from "../../functions/common";
+
 import type { RedPacketDB, RedPacketClaim } from "@/types";
 import { getRedPacket } from '@/graphql/redpacket';
-import { updateRedPacketTxStatus, getRedPacketClaims } from '@/graphql/redpacketClaim';
-import { redPacketAddress } from "../../functions/redpacket";
-import { useChainStore } from "@/stores/chain";
-import { BigNumber as EthBigNumber } from "ethers";
-import { getInfuraProvider } from "@/web3/network";
+import { getRedPacketClaims } from '@/graphql/redpacketClaim';
 import Loading from "@/components/Loading.vue";
-import { normalizeBalance } from "../../functions/common";
+import { loadErc20Token } from '@/web3/tokens';
+import { useTokenStore } from '@/stores/token';
 
 const redPacket = ref<RedPacketDB | undefined>();
 const claimers = ref<RedPacketClaim[]>();
-const provider = getInfuraProvider(useChainStore().chain);
 const loading = ref<boolean>(true);
+
+const tokenStore = useTokenStore();
+const loadAndSaveERC20Token = async (tokenAddr: string) : Promise<Token> => {
+  if (!tokenStore.token(tokenAddr)) {
+    tokenStore.set(await loadErc20Token(tokenAddr));
+  }
+  return tokenStore.token(tokenAddr);
+}
 
 const loadData = async function() {
   loading.value = true;
   const id = useRoute().query.details!.toString();
   redPacket.value = await getRedPacket(id);
-  claimers.value = await loadClaimsForOnePacket(provider, id);
+  if (redPacket.value) {
+    redPacket.value.token = await loadAndSaveERC20Token(
+      redPacket.value.metadata.token
+    );
+    claimers.value = await getRedPacketClaims(id);
+  }
   loading.value = false;
 };
 
 onMounted(loadData);
-
-const loadClaimsForOnePacket = async (
-  provider: ethers.providers.Provider,
-  redPacketId: string
-): Promise<RedPacketClaim[]> => {
-  const claims = await getRedPacketClaims(redPacketId);
-  console.log(claims);
-  return await Promise.all(
-    claims.map(c => validateClaimStatus(provider, c))
-  );
-};
-
-const iface = new ethers.utils.Interface([
-  "event Claimed(bytes32 indexed PacketId, address claimer, uint256 amount)",
-]);
-const legacyIface = new ethers.utils.Interface([
-  "event Claimed(bytes32 indexed PacketId, address indexed claimer, uint256 amount)",
-]);
-
-const parseLog = (log: any) => {
-  try {
-    return iface.parseLog(log);
-  } catch (e) {
-    return legacyIface.parseLog(log);
-  }
-}
-
-const validateClaimStatus = async (
-  provider: ethers.providers.Provider,
-  claim: RedPacketClaim
-): Promise<RedPacketClaim> => {
-  if (claim.txStatus == "success" || claim.txStatus == "error") {
-    return claim;
-  }
-  const receipt = await provider.getTransactionReceipt(claim.tx);
-  if (!receipt) {
-    return claim;
-  } // not mined
-  if (receipt.status) { // success
-    const events = receipt.logs.filter(
-      (log: any) => log.address.toLowerCase() == (
-        redPacketAddress(useChainStore().chain)
-      ).toLowerCase()
-    ).map((log: any) => parseLog(log));
-    const event = events.find((e: any) => e.name == "Claimed");
-    const claimedAmount = event?.args.amount || EthBigNumber.from(0);
-    await updateRedPacketTxStatus(
-      claim.id,
-      "success",
-      claimedAmount.toString()
-    );
-    claim.txStatus = "success";
-    claim.claimed = claimedAmount;
-  } else { // reverted
-    await updateRedPacketTxStatus(claim.id, "error");
-    claim.txStatus = "error";
-  }
-  return claim;
-}
 </script>
 
 <style lang="less" scoped>

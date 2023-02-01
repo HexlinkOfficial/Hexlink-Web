@@ -43,6 +43,7 @@ export async function insertOp(
             value: i.input.value || "0",
             callData: i.input.callData || "",
             callGasLimit: i.input.callGasLimit || "0",
+            actions: JSON.stringify(i.actions),
             chain: i.chain,
             user_id: i.userId,
             type: i.type,

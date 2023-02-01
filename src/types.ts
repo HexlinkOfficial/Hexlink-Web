@@ -1,8 +1,7 @@
 import type { BigNumber as EthersBigNumber } from "ethers";
-import type { BigNumber } from "bignumber.js";
 
-import type { Token } from "../functions/common";
-import type { RedPacket, RedPacketDBMetadata } from "../functions/redpacket";
+import type { Token, Deposit } from "../functions/common";
+import type { RedPacketDBMetadata } from "../functions/redpacket";
 
 // if uid exists, use uid as key to
 // generate address otherwise use handle
@@ -42,26 +41,6 @@ export interface ClaimCardData {
     from: string
 }
 
-export interface CreatedRedPacket {
-    id: string;
-    salt: string;
-    data: RedPacket,
-    balanceLeft: EthersBigNumber;
-    splitLeft: number;
-    gasSponsorshipCost: EthersBigNumber;
-    tx: {
-        hash: string;
-        txCost: EthersBigNumber;
-    },
-    claimHistory: Claim[]
-}
-
-export interface EstimatedTxCost {
-    sponsorship: EthersBigNumber;
-    currentTx: EthersBigNumber;
-    total: EthersBigNumber;
-}
-
 export interface HexlinkUserInfo {
     provider: string;
     handle: string;
@@ -69,52 +48,47 @@ export interface HexlinkUserInfo {
     logoURI?: string;
 }
 
-export type RedPacketStatus = "pending" | "error" | "alive" | "finalized";
+export interface RedPacketClaim {
+    createdAt: Date,
+    claimer: HexlinkUserInfo,
+    claimed?: EthersBigNumber,
+    redpacket: RedPacketDB,
+}
 
 export interface RedPacketOnchainState {
     balance: string,
     split: number,
-    createdAt: string
+    createdAt: Date
 }
 
 export interface RedPacketDB {
     id: string,
-    userId: string,
-    chain: string,
     metadata: RedPacketDBMetadata,
-    creator: HexlinkUserInfo,
-    tx: string,
-    createdAt: string,
-    status?: RedPacketStatus,
-    state?: RedPacketOnchainState
-}
-  
-export type TxStatus = "" | "processing" | "error" | "success";
-
-interface TxState {
-    status: TxStatus,
-    tx: string,
-    chain: string,
-    error?: string,
-    updatedAt: Date,
-}
-
-interface TxStateError {
-    error: string,
-}
-  
-export interface RedPacketClaim {
-    redPacketId: string,
-    tx: string,
+    creator?: HexlinkUserInfo,
+    deposit?: Deposit,
     createdAt: Date,
+    state?: RedPacketOnchainState,
+    token?: Token,
+    chain?: string,
+}
+
+export interface Op {
     id: number,
-    claimer: HexlinkUserInfo,
-    txStatus?: TxStatus,
-    claimed?: EthersBigNumber,
-    txState?: TxState | TxStateError | undefined,
+    createdAt: Date,
+    tx?: string,
+    txStatus?: string,
+    chain?: string,
+    error?: string,
 }
   
-export interface ClaimedRedPacket {
-    claim: RedPacketClaim,
-    redPacket: RedPacketDB
+export interface CreateRedPacketOp extends Op {
+    type: "create_redpacket",
+    redpacket?: RedPacketDB,
 }
+
+export interface ClaimRedPacketOp extends Op {
+    type: "claim_redpacket",
+    createdAt: Date,
+    claim?: RedPacketClaim,
+}
+  

@@ -5,7 +5,7 @@
         <!-- <div v-for="(nft, index) in props.nfts" :key="index" class="nft_card">
           <h1>{{ nft }}</h1>
         </div> -->
-        <div class="nft_card">
+        <!-- <div class="nft_card">
           <div class="nft_pic">
             <div class="default-pic">
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -30,17 +30,16 @@
             </div>
             <p class="nft_title">invisible mfers #2725</p>
           </div>
-        </div>
-        <!-- :style="cssProps(getBackcgroundColor('https://openseauserdata.com/files/0e07d4fb4ef0272ccb309437ec3310ce.svg'))" -->
-        <div style="display: block; width: 100%; height: 100%; border-radius: 14px;  transition: transform .2s cubic-bezier(.5,1,.89,1); box-shadow: 8px 28px 50px rgb(39 44 49 / 7%), 1px 6px 12px rgb(39 44 49 / 4%);">
-          <header style="position: relative; overflow: hidden; width: 100%; height: 0; padding-bottom: 100%; border-radius: 14px;">
-            <img src="https://openseauserdata.com/files/0e07d4fb4ef0272ccb309437ec3310ce.svg" style="width: 90%; opacity: 1; position: absolute; top: 0; left: 0; width: 100%; height: 100%; transition: opacity .3s ease-out; border-radius: 14px" width="540" height="540" />
+        </div> -->
+        <div v-for="(value, index) in nftImages" :key="index" class="nfts" :style=" 'background:' + value.color">
+          <header class="nft_header">
+            <img :src="value.url" width="540" height="540" />
           </header>
-          <footer style="padding: 0 16px 16px; display: block; position: relative; box-sizing: border-box; margin-top: 1rem;">
+          <footer class="nft_footer">
             <div class="card_footer">
-              <div class="card_details" style="position: relative; z-index: 1; border-radius: 10px; background-color: #ffffff; transform: scale(1); transition: transform .3s cubic-bezier(.195,1.085,.575,1.555);">
-                <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; transition: opacity .3s ease-out;">
-                  <div class="nft-info">
+              <div class="card_details">
+                <div class="card_details_box">
+                  <div>
                     <div style="font-size: 0.75rem; line-height: 1rem; color: #6a6d7c;">
                       <div class="collection_name_text">Invisible Mfers</div>
                     </div>
@@ -58,33 +57,105 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { FastAverageColor } from 'fast-average-color';
 
-const getBackcgroundColor = (url: string) => {
-  const fac = new FastAverageColor();
+interface nftImage {
+  url: string,
+  color: string
+}
+
+const nfts = [
+  'https://i.seadn.io/gcs/files/e98dad5dbac144288475ab0d152cb45a.gif?auto=format&w=1000',
+  'https://i.seadn.io/gcs/files/4afadc510eb17a8c96d25aecd23b001a.png?auto=format&w=1000',
+  'https://i.seadn.io/gcs/files/503e8f8bd33777a560b3335689c9151f.png?auto=format&w=1000',
+  'https://i.seadn.io/gcs/files/17c7e2250fb40d56525b23bcc7b53cbe.png?auto=format&w=1000',
+  'https://i.seadn.io/gcs/files/649cd263c9518915328df38b2db1a6f3.png?auto=format&w=1000',
+  'https://i.seadn.io/gae/QujNj-aJYUhkvETUDl0nGE95RI6uZtk023bCQwlInY62JVrZjMm7rbfFKCat0e0AybncAGElLlhsvarHIUf__G23IpFTbkLwVHm-kQ?auto=format&w=1000',
+  'https://i.seadn.io/gcs/files/ea43d5579c02a90a77041fb6a36c1762.png?auto=format&w=1000',
+  'https://i.seadn.io/gae/YVyDrv2lF27IX8G7spx3rHXs89G_DYhupoRlcBqRWo5-peJckMhQ-9W831ROMWLQPkqjRptHzF9pUaPB9kMaZEZEMy_s8vQhXgoYrg?auto=format&w=1000',
+  'https://i.seadn.io/gae/Hjsjmua_NJtdJ5TXkYm7YsJqPqUX4hwBG5FpQi6g9oekbYuQMB6U894sHbB6bhgc9tyjNTqO8zG5uDfEv8Fj5df7M7dlpg_ng4yJ?auto=format&w=1000'
+]
+const imageColor = ref<string[]>([]);
+const nftImages = ref<nftImage[]>([]);
+
+const getBackcgroundColor = async (url: string) => {
   var output: string = "";
-  fac.getColorAsync(url)
+  const fac = new FastAverageColor();
+  await fac.getColorAsync(url)
     .then(color => {
       // container.style.backgroundColor = color.rgba;
       // container.style.color = color.isDark ? '#fff' : '#000';
-      output = color.hex.toString()
+      output = color.hex.toString();
     })
     .catch(e => {
       console.log(e);
       return e;
     });
-  return output;
+  if (!imageColor.value.includes(output)) {
+    imageColor.value.push(output);
+    nftImages.value.push({
+      url: url,
+      color: output
+    })
+  }
 }
 
-const cssProps = computed(
-  (output: string) => {
-    return 'background-color: ' + output;
-  }
-)
+const preloadColors = () => {
+  nfts.map((n: string) => {
+    getBackcgroundColor(n);
+  });
+  console.log(nftImages.value);
+};
+
+onMounted(() => {
+  preloadColors();
+})
 </script>
 
 <style lang="less" scoped>
+.card_details_box {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  transition: opacity .3s ease-out; }
+.card_details {
+  position: relative;
+  z-index: 1;
+  border-radius: 10px;
+  background-color: #ffffff;
+  transform: scale(1);
+  transition: transform .3s cubic-bezier(.195, 1.085, .575, 1.555); }
+.nft_footer {
+  padding: 0 16px 16px;
+  display: block;
+  position: relative;
+  box-sizing: border-box;
+  margin-top: 1rem; }
+.nft_header {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  height: 0;
+  padding-bottom: 100%;
+  border-radius: 14px; }
+.nft_header img {
+  width: 100%;
+  opacity: 1;
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  transition: opacity .3s ease-out;
+  border-radius: 14px }
+.nfts {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 14px;
+  transition: transform .2s cubic-bezier(.5, 1, .89, 1);
+  box-shadow: 8px 28px 50px rgb(39 44 49 / 7%), 1px 6px 12px rgb(39 44 49 / 4%); }
 .box {
   padding: 1rem;
   @media (min-width: 640px) {

@@ -314,10 +314,6 @@ export async function createNewRedPacket(
     if (useHexlinkAccount) {
         throw new Error("not supported yet")
     }
-    // const chain = useChainStore().chain;
-    // const id = redpacketId(chain, useAccountStore().account!.address, redpacket);
-    // const opId = await callCreateRedPacket(chain, redpacket, "0x9d67e4fb663971988732189bf745da2899f54de9039572012006ec75cf7fe4bb");
-    // return {id, opId};
     const txes = await buildCreateRedPacketTxForMetamask(redpacket);
     return await processTxAndSave(redpacket, txes, dryrun);
 }

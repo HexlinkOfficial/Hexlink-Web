@@ -62,16 +62,18 @@ function parseClaims(claims: any[]) {
   const claim = claims.length > 0 ? claims[0] : undefined;
   if (claim) {
     return {
-      claimer: JSON.parse(claim.claimer) as HexlinkUserInfo,
-      createdAt: new Date(claim.created_at),
-      claimed: claim.claimed ? EthBigNumber.from(claim.claimed) : undefined,
-      redPacket: {
+      claim: {
+        claimer: JSON.parse(claim.claimer) as HexlinkUserInfo,
+        createdAt: new Date(claim.created_at),
+        claimed: claim.claimed ? EthBigNumber.from(claim.claimed) : undefined,
+      },
+      redpacket: {
         id: claim.redpacket.id,
         metadata: JSON.parse(claim.redpacket.metadata),
         creator: JSON.parse(claim.redpacket.creator),
         createdAt: claim.redpacket.created_at
-      } as RedPacketDB
-    };
+      } as RedPacketDB,
+    }
   }
 }
 
@@ -88,10 +90,12 @@ export async function getClaimedRedPackets() : Promise<ClaimRedPacketOp[]> {
   ).toPromise();
   if (await handleUrqlResponse(result)) {
     return result.data.operation.map((op : any) => {
+      const parsed = parseClaims(op.redpacket_claims || []);
       return {
         id: op.id,
         createdAt: new Date(op.created_at),
-        claim: parseClaims(op.redpacket_claims || []),
+        claim: parsed?.claim,
+        redpacket: parsed?.redpacket,
         tx: op.transaction?.tx,
         txStatus: op.transaction?.status,
         error: op.tx_error || op.transaction?.error,

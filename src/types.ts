@@ -52,7 +52,6 @@ export interface RedPacketClaim {
     createdAt: Date,
     claimer: HexlinkUserInfo,
     claimed?: EthersBigNumber,
-    redpacket: RedPacketDB,
 }
 
 export interface RedPacketOnchainState {
@@ -88,7 +87,7 @@ export interface CreateRedPacketOp extends Op {
 
 export interface ClaimRedPacketOp extends Op {
     type: "claim_redpacket",
-    createdAt: Date,
     claim?: RedPacketClaim,
+    redpacket?: RedPacketDB,
 }
   

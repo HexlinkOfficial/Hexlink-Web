@@ -29,7 +29,6 @@ app.post('/submit/:chain', async (req, res) => {
         chain: req.params.chain,
         ...req.body
     };
-    console.log(input);
     if (req.body.tx) {
         const [{ id: txId }] = await (0, transaction_1.insertTx)([
             { tx: req.body.tx, chain: req.params.chain }

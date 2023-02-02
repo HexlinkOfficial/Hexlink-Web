@@ -11,7 +11,6 @@ import type {Chain} from "../../functions/common";
 import {hexlContract, parseDeposit, PriceConfigs} from "../../functions/common";
 import {parseClaimed, parseCreated, redPacketAddress} from "../../functions/redpacket";
 import type {Action, Operation} from "./types";
-import { create } from "domain";
 
 async function buildTx(
   provider: ethers.providers.Provider,

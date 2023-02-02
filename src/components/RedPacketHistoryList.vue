@@ -157,9 +157,9 @@
                         + {{ normalizeClaimAmount(op).toString().substring(0,5)}}</div>
                     </a-tooltip>
                     <div class="token-icon" style="margin-right: 0.25rem; margin-left: 0.25rem;">
-                      <img :src="op.claim.redpacket.token.logoURI">
+                      <img :src="op.redpacket.token.logoURI">
                     </div>
-                    {{ op.claim.redpacket.token.symbol }}
+                    {{ op.redpacket.token.symbol }}
                   </div>
                   <div class="sent-info" v-if="showClaimStatus(op) == 'Claimed'">
                     <div style="overflow: auto; white-space: nowrap; margin-left: 0.25rem; width: 50px;display: flex;justify-content: flex-end;">
@@ -177,19 +177,19 @@
                     <div style="display: flex; align-items: center;">
                       <span class="thumb">
                         <img
-                          :src="op.claim.redpacket.creator.logoURI ? op.redpacket.creator.logoURI : 'https://i.postimg.cc/15QJZwkN/profile.png'"
+                          :src="op.redpacket.creator.logoURI ? op.redpacket.creator.logoURI : 'https://i.postimg.cc/15QJZwkN/profile.png'"
                           :size="64" referrerpolicy="no-referrer" 
                         />
                       </span>
                       <div style="display: flex; flex-direction: column; margin-left: 0.5rem;">
                         <span class="from-text">From</span>
-                        <span style="font-size: 12px; color: rgb(100,116,139)">@{{ op.claim.redpacket.creator.handle }}</span>
+                        <span style="font-size: 12px; color: rgb(100,116,139)">@{{ op.redpacket.creator.handle }}</span>
                       </div>
                     </div>
                   </div>
                 </div>
                 <div class="share" v-if="op.claim">
-                  <i v-if="showClaimStatus(op) == 'Claimed'" class="fa fa-paper-plane share-button" aria-hidden="true" @click="copyShareLink(op.claim.redpacket)"></i>
+                  <i v-if="showClaimStatus(op) == 'Claimed'" class="fa fa-paper-plane share-button" aria-hidden="true" @click="copyShareLink(op.redpacket)"></i>
                   <span v-if="showClaimStatus(op) != 'Claimed' && showClaimStatus(op) != 'Error'" class="pending-text">{{ showClaimStatus(op) }}</span>
                   <span v-if="showClaimStatus(op) == 'Error'" class="pending-text" style="color:#FD4755;">{{ showClaimStatus(op) }}</span>
                 </div>
@@ -253,9 +253,9 @@ const extractDate = () => {
   claimedRpOps.value.forEach((op) => {
     const date = new Date(op.createdAt).toLocaleString().split(',')[0];
     if (date in claimGroup) {
-      claimGroup[date].push(c);
+      claimGroup[date].push(op);
     } else {
-      claimGroup[date] = new Array(c);
+      claimGroup[date] = new Array(op);
     }
 
     // sort the claimed red packet
@@ -391,7 +391,7 @@ const normalizedDbBalance = (op: CreateRedPacketOp) : string => {
 const normalizeClaimAmount = (op: ClaimRedPacketOp) => {
   return op.claim ? normalizeBalance(
     op.claim.claimed?.toString() || '0',
-    op.claim.redpacket.token!.decimals
+    op.redpacket!.token!.decimals
   ).normalized : 0;
 }
 
@@ -417,10 +417,10 @@ const aggregateCreated = async function(
 const aggregatedClaimed = async function(
   op: ClaimRedPacketOp
 ) : Promise<ClaimRedPacketOp> {
-  if (op.claim) {
-    const tokenAddr = op.claim.redpacket.metadata.token.toLowerCase();
+  if (op.redpacket) {
+    const tokenAddr = op.redpacket!.metadata.token.toLowerCase();
     const token = await loadAndSaveERC20Token(tokenAddr);
-    op.claim.redpacket.token = token;
+    op.redpacket.token = token;
   }
   return op;
 }

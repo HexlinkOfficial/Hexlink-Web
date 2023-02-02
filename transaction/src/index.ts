@@ -29,7 +29,6 @@ app.post('/submit/:chain', async (req: express.Request, res: express.Response) =
     chain: req.params.chain,
     ...req.body
   } as OperationInput;
-  console.log(input);
   if (req.body.tx) {
     const [{id: txId}] = await insertTx([
       {tx: req.body.tx, chain: req.params.chain}

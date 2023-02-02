@@ -50,7 +50,6 @@ async function insertRedPacket(uid, data) {
             user_id: uid,
             id: d.id,
             metadata: JSON.stringify(d.metadata),
-            chain: d.chain,
             creator: JSON.stringify(d.creator),
             op_id: d.opId,
             deposit: JSON.stringify(d.deposit),

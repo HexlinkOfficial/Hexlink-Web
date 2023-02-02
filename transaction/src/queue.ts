@@ -58,9 +58,7 @@ class PrivateQueues {
             const ops = jobs.map((j: any) => j.data as Operation);
 
             const provider = getInfuraProvider(chain);
-            const signedTx: string = await buildTxFromOps(
-                provider, ops.map(op => op.input), signer
-            );
+            const signedTx: string = await buildTxFromOps(provider, chain, ops, signer);
             const txHash = ethers.utils.keccak256(signedTx);
             try {
                 const [{id}] = await insertTx([{chain: chain.name, tx: txHash}]);
@@ -112,10 +110,10 @@ class PrivateQueues {
                     throw new Error("tx not found");
                 }
                 const receipt = await tx.wait();
-                await updateTx(job.data.id, "success");
                 await Promise.all(job.data.ops.map(
                     (op: Operation) => processActions(chain, op, receipt)
                 ));
+                await updateTx(job.data.id, "success");
             } catch(err: any) {
                 await updateTx(job.data.id, "error", err.message);
             }

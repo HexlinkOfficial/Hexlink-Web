@@ -3,6 +3,7 @@ import * as functions from "firebase-functions";
 
 import {getRedPacket} from "./graphql/redpacket";
 import type {RedPacket} from "./graphql/redpacket";
+import type {RedPacket as RedPacketInput} from "../redpacket";
 import {signWithKmsKey} from "./kms";
 import {
   ethers,
@@ -97,7 +98,7 @@ export const claimRedPacket = functions.https.onCall(
         return {code: 400, message: "Failed to load redpacket"};
       }
 
-      const op = await buildClaimOp(chain, redPacket, account.address);
+      const input = await buildClaimOp(chain, redPacket, account.address);
       const action = {
         type: "insert_redpacket_claim",
         params: {
@@ -107,36 +108,30 @@ export const claimRedPacket = functions.https.onCall(
           claimer: data.claimer,
         },
       };
-      try {
-        const result = await submit(chain, {
-          type: "claim_redpacket",
-          op,
-          account: account.address,
-          userId: uid,
-          actions: [action],
-        });
-        return {code: 200, id: result.id};
-      } catch (err: any) {
-        console.log("Failed to submit op");
-        console.log(err);
-        return {code: 400, message: "failed to submit operation"};
-      }
+      const result = await submit(chain, {
+        type: "claim_redpacket",
+        input,
+        account: account.address,
+        userId: uid,
+        actions: [action],
+      });
+      return {code: 200, id: result.id};
     }
 );
 
-async function buildCreateOp(chain: Chain, redPacket: RedPacket) {
+async function buildCreateOp(chain: Chain, redPacket: RedPacketInput) {
   const args = {
-    token: redPacket.metadata.token,
-    salt: redPacket.metadata.salt,
-    balance: EthBigNumber.from(redPacket.metadata.tokenAmount),
-    validator: redPacket.metadata.validator,
-    split: redPacket.metadata.split,
-    mode: redPacketMode(redPacket.metadata.mode),
+    token: redPacket.token.address,
+    salt: redPacket.salt,
+    balance: redPacket.balance,
+    validator: redPacket.validator,
+    split: redPacket.split,
+    mode: redPacketMode(redPacket.mode),
   };
   const callData = redPacketInterface.encodeFunctionData("create", [args]);
   return {
     to: redPacketAddress(chain),
-    value: ethers.utils.hexValue(0),
+    value: "0",
     callData,
     callGasLimit: "0",
   };
@@ -163,24 +158,19 @@ export const createRedPacket = functions.https.onCall(
           refunder: Refunders[chain.name],
         },
       };
+      console.log(action);
       const postData: any = {
         type: "create_redpacket",
         userId: uid,
         actions: [action],
         account: account.address,
-        op: buildCreateOp(chain, data.redPacket),
       };
       if (data.txHash) {
         postData.tx = data.txHash;
+      } else {
+        postData.input = await buildCreateOp(chain, data.redPacket);
       }
-      try {
-        console.log(postData);
-        const result = await submit(chain, postData);
-        return {code: 200, id: result.id};
-      } catch (err: any) {
-        console.log("Failed to submit op");
-        console.log(err);
-        return {code: 400, message: "failed to submit operation"};
-      }
+      const result = await submit(chain, postData);
+      return {code: 200, id: result.id};
     }
 );

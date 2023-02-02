@@ -213,7 +213,7 @@ const redpacket = ref<RedPacketInput>({
   salt: hash(new Date().toISOString()),
   split: 1,
   balance: EthBigNumber.from(0),
-  balanceInput: "0",
+  balanceInput: "1",
   token: tokenStore.nativeCoin,
   gasToken: tokenStore.nativeCoin,
   validator: validator(),

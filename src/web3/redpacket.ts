@@ -214,7 +214,6 @@ async function buildCreateRedPacketTxForMetamask(input: RedPacket) {
             data,
         }
     });
-    console.log(txes);
     return txes;
 }
 
@@ -283,7 +282,7 @@ async function processTxAndSave(
         }
         return {id};
     }
-    
+
     for (let i = 0; i < txes.length; i++) {
         const txHash = await sendTransaction(txes[i].input);
         if (txes[i].name == "createRedPacket" ||
@@ -315,6 +314,10 @@ export async function createNewRedPacket(
     if (useHexlinkAccount) {
         throw new Error("not supported yet")
     }
+    // const chain = useChainStore().chain;
+    // const id = redpacketId(chain, useAccountStore().account!.address, redpacket);
+    // const opId = await callCreateRedPacket(chain, redpacket, "0x9d67e4fb663971988732189bf745da2899f54de9039572012006ec75cf7fe4bb");
+    // return {id, opId};
     const txes = await buildCreateRedPacketTxForMetamask(redpacket);
     return await processTxAndSave(redpacket, txes, dryrun);
 }
@@ -340,7 +343,7 @@ export async function callCreateRedPacket(
         chain: chain.name,
         redPacket: redPacket,
         creator: useAuthStore().userInfo,
-        txHash
+        txHash,
     });
     return (result.data as any).id;
 }

@@ -18,16 +18,16 @@ app.use(body_parser_1.default.urlencoded({ extended: false }));
 app.use(body_parser_1.default.json());
 app.post('/submit/:chain', async (req, res) => {
     const opQueue = queues.getOpQueue(req.params.chain);
-    if (!req.body.op) {
-        res.status(400).json({ success: false, message: "invalid op" });
+    if (!req.body.input && !req.body.tx) {
+        res.status(400).json({
+            success: false,
+            message: "Neither op nor tx is set"
+        });
         return;
     }
     const input = {
         chain: req.params.chain,
-        userId: req.body.userId,
-        input: req.body.op,
-        actions: req.body.actions,
-        type: req.body.type,
+        ...req.body
     };
     console.log(input);
     if (req.body.tx) {

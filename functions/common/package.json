@@ -7,6 +7,7 @@
   "name": "@hexlink/common",
   "scripts": {
     "build": "rimraf lib && rimraf lib.esm && rimraf tsconfig.esm.tsbuildinfo && rimraf tsconfig.tsbuildinfo && tsc --build ./tsconfig.json && tsc --build ./tsconfig.esm.json",
+    "build:watch": "rimraf lib && rimraf lib.esm && rimraf tsconfig.esm.tsbuildinfo && rimraf tsconfig.tsbuildinfo && tsc --build ./tsconfig.json && tsc --build ./tsconfig.esm.json --watch",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "sideEffects": false,

@@ -17,17 +17,17 @@ app.use(bodyParser.json())
 
 app.post('/submit/:chain', async (req: express.Request, res: express.Response) => {
   const opQueue = queues.getOpQueue(req.params.chain)!;
-  if (!req.body.op) {
-    res.status(400).json({success: false, message: "invalid op"});
+  if (!req.body.input && !req.body.tx) {
+    res.status(400).json({
+      success: false,
+      message: "Neither op nor tx is set"
+    });
     return;
   }
 
   const input = {
     chain: req.params.chain,
-    userId: req.body.userId,
-    input: req.body.op,
-    actions: req.body.actions,
-    type: req.body.type,
+    ...req.body
   } as OperationInput;
   console.log(input);
   if (req.body.tx) {

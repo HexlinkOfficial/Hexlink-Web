@@ -24,14 +24,14 @@ function equal(one, two) {
 function parseClaimed(chain, receipt, packetId, claimer) {
     const redpacketAddress = (0, redpacket_1.redPacketAddress)(chain).toLowerCase();
     const events = receipt.logs.filter((log) => log.address.toLowerCase() == redpacketAddress).map((log) => parseClaimedLog(log));
-    const event = events.find((e) => e.name == "Claimed" && equal(e.args.PacketId, packetId) && equal(e.args.claimer, claimer));
+    const event = events.find((e) => e.name === "Claimed" && equal(e.args.PacketId, packetId) && equal(e.args.claimer, claimer));
     return event === null || event === void 0 ? void 0 : event.args.amount;
 }
 exports.parseClaimed = parseClaimed;
 function parseCreated(chain, receipt, packetId) {
     const redpacketAddress = (0, redpacket_1.redPacketAddress)(chain).toLowerCase();
-    const events = receipt.logs.filter((log) => log.address.toLowerCase() == redpacketAddress).map((log) => redpacket_1.redPacketInterface.parseLog(log));
-    const event = events.find((e) => e.name == "Created" && equal(e.args.PacketId, packetId));
+    const events = receipt.logs.filter((log) => log.address.toLowerCase() === redpacketAddress).map((log) => redpacket_1.redPacketInterface.parseLog(log));
+    const event = events.find((e) => e.name === "Created" && equal(e.args.PacketId, packetId));
     return event === null || event === void 0 ? void 0 : event.args;
 }
 exports.parseCreated = parseCreated;

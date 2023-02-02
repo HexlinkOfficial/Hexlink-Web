@@ -21,6 +21,7 @@ export async function submit(chain: Chain, data: any) {
     return response.data;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (err: any) {
+    console.log(data);
     throw new Error(`Error in 'axiosGetJsonData(${url})': ${err.message}`);
   }
 }

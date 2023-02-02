@@ -39,15 +39,12 @@ export async function insertOp(
     const result = await client.mutation(
         INSERT_OPERATION,
         {objects: inputs.map(i => ({
-            to: i.input.to,
-            value: i.input.value || "0",
-            callData: i.input.callData || "",
-            callGasLimit: i.input.callGasLimit || "0",
+            op: JSON.stringify(i.input || {}),
             actions: JSON.stringify(i.actions),
             chain: i.chain,
             user_id: i.userId,
             type: i.type,
-            txId: i.txId,
+            tx_id: i.txId,
         }))}
     ).toPromise();
     return result.data.insert_operation.returning;

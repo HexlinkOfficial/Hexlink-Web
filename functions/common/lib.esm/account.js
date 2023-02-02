@@ -45,10 +45,10 @@ export async function encodeValidateAndCall(params) {
     return { data, signature, nonce };
 }
 function equal(one, two) {
-    return (one || "").toLowerCase() == (two || "").toLowerCase();
+    return (one || "").toLowerCase() === (two || "").toLowerCase();
 }
 export function parseDeposit(receipt, ref, from, to) {
     const events = receipt.logs.filter((log) => log.address.toLowerCase() == from.toLowerCase()).map((log) => accountInterface.parseLog(log));
-    const event = events.find((e) => e.name == "Created" && equal(e.args.ref, ref) && equal(e.args.receipt, to));
+    const event = events.find((e) => e.name === "Deposit" && equal(e.args.ref, ref) && equal(e.args.receipt, to));
     return event?.args;
 }

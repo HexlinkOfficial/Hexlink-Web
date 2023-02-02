@@ -4,7 +4,7 @@ import {ethers, Contract, BigNumber as EthBigNumber } from "ethers";
 import type {Provider} from "@ethersproject/providers";
 import ACCOUNT_SIMPLE_ABI from "./abi/ACCOUNT_SIMPLE_ABI.json";
 import {hash, isContract} from "./utils";
-import type {GasObject, OpInput, Deposit} from "./types";
+import type {GasObject, OpInput} from "./types";
 import type {TransactionReceipt} from "@ethersproject/providers";
 
 export interface Account {
@@ -98,7 +98,7 @@ export async function encodeValidateAndCall(params: {
 }
 
 function equal(one: string | undefined, two: string | undefined) : boolean {
-  return (one || "").toLowerCase() == (two || "").toLowerCase();
+  return (one || "").toLowerCase() === (two || "").toLowerCase();
 }
 
 export function parseDeposit(
@@ -111,7 +111,7 @@ export function parseDeposit(
       (log: any) => log.address.toLowerCase() == from.toLowerCase()
   ).map((log: any) => accountInterface.parseLog(log));
   const event = events.find(
-      (e: any) => e.name == "Created" && equal(e.args.ref, ref) && equal(e.args.receipt, to)
+      (e: any) => e.name === "Deposit" && equal(e.args.ref, ref) && equal(e.args.receipt, to)
   );
   return event?.args;
 }

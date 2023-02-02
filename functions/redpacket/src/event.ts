@@ -37,7 +37,7 @@ export function parseClaimed(
         (log: any) => log.address.toLowerCase() == redpacketAddress
     ).map((log: any) => parseClaimedLog(log));
     const event = events.find(
-        (e: any) => e.name == "Claimed" && equal(e.args.PacketId, packetId) && equal(e.args.claimer, claimer)
+        (e: any) => e.name === "Claimed" && equal(e.args.PacketId, packetId) && equal(e.args.claimer, claimer)
     );
     return event?.args.amount;
 }
@@ -49,10 +49,10 @@ export function parseCreated(
 ) {
     const redpacketAddress = redPacketAddress(chain).toLowerCase();
     const events = receipt.logs.filter(
-        (log: any) => log.address.toLowerCase() == redpacketAddress
+        (log: any) => log.address.toLowerCase() === redpacketAddress
     ).map((log: any) => redPacketInterface.parseLog(log));
     const event = events.find(
-        (e: any) => e.name == "Created" && equal(e.args.PacketId, packetId)
+        (e: any) => e.name === "Created" && equal(e.args.PacketId, packetId)
     );
     return event?.args;
 }

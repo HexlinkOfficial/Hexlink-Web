@@ -77,3 +77,23 @@ export function getChain(chain: string | number) : Chain {
   }
   throw new Error("Unsupported chain");
 }
+
+export interface PriceConfig {
+  nativeCurrencyInUsd: string,
+  gasPrice: string,
+}
+
+export const PriceConfigs : {[key: string]: PriceConfig} = {
+  "goerli": {
+    nativeCurrencyInUsd: "1500.0",
+    gasPrice: "10000000000", // 10 gwei
+  },
+  "polygon": {
+    nativeCurrencyInUsd: "1.0",
+    gasPrice: "100000000000", // 100 gwei
+  },
+  "mumbai": {
+    nativeCurrencyInUsd: "1.0",
+    gasPrice: "2000000000", // 2 gwei
+  },
+};

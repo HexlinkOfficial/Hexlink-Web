@@ -22,13 +22,13 @@ function equal(one, two) {
 export function parseClaimed(chain, receipt, packetId, claimer) {
     const redpacketAddress = redPacketAddress(chain).toLowerCase();
     const events = receipt.logs.filter((log) => log.address.toLowerCase() == redpacketAddress).map((log) => parseClaimedLog(log));
-    const event = events.find((e) => e.name == "Claimed" && equal(e.args.PacketId, packetId) && equal(e.args.claimer, claimer));
+    const event = events.find((e) => e.name === "Claimed" && equal(e.args.PacketId, packetId) && equal(e.args.claimer, claimer));
     return event?.args.amount;
 }
 export function parseCreated(chain, receipt, packetId) {
     const redpacketAddress = redPacketAddress(chain).toLowerCase();
-    const events = receipt.logs.filter((log) => log.address.toLowerCase() == redpacketAddress).map((log) => redPacketInterface.parseLog(log));
-    const event = events.find((e) => e.name == "Created" && equal(e.args.PacketId, packetId));
+    const events = receipt.logs.filter((log) => log.address.toLowerCase() === redpacketAddress).map((log) => redPacketInterface.parseLog(log));
+    const event = events.find((e) => e.name === "Created" && equal(e.args.PacketId, packetId));
     return event?.args;
 }
 export function redpacketId(chain, account, input) {

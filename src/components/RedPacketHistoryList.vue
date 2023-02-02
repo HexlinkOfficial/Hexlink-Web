@@ -324,20 +324,12 @@ const extractDate = () => {
   Object.keys(luckHistoryByDate.value).forEach(v => {
     const time: any = [];
     luckHistoryByDate.value[v].forEach((op: any) => {
-      if(op.type === "create_redpacket") {
-        time.push(new Date(op.createdAt).getTime());
-      } else {
-        time.push(new Date(op.redpacket.claim.createdAt).getTime());
-      }
+      time.push(new Date(op.createdAt).getTime());
     })
     const sortedArray: any[] = []
     time.sort((a: number, b: number) => b - a).forEach((t: number) => {
       luckHistoryByDate.value[v].forEach((op: any) => {
-        if (op.type === "create_redpacket") {
           new Date(op.createdAt).getTime() == t && sortedArray.push(op);
-        } else if (op.redpacket) {
-          new Date(op.redpacket.claim.createdAt).getTime() == t && sortedArray.push(op);
-        } else {}
       })
     })
     fullysortedHistory[v] = sortedArray;

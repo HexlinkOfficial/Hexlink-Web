@@ -4834,6 +4834,11 @@
   dependencies:
     "checkpoint-store" "^1.1.0"
 
+"fast-average-color@^9.3.0":
+  "integrity" "sha512-FlPROSqDMOnoBgkFhWMHJODPvpS0Od0WDpedcKq4U/t0JVapGAkblNwxOr75qT+ZNd0dQM4qlgqrtnXbCJ8cNg=="
+  "resolved" "https://registry.npmjs.org/fast-average-color/-/fast-average-color-9.3.0.tgz"
+  "version" "9.3.0"
+
 "fast-deep-equal@^3.1.1", "fast-deep-equal@^3.1.3":
   "integrity" "sha512-f3qQ9oQy9j2AhBe/H9VC91wLmKBCCU/gDOnKNAYG5hswO7BLKj09Hc5HYNz9cGI++xlpDCIgDaitVs03ATR84Q=="
   "resolved" "https://registry.npmjs.org/fast-deep-equal/-/fast-deep-equal-3.1.3.tgz"

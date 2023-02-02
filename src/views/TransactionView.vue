@@ -595,7 +595,7 @@ svg {
           margin-bottom: 0; }
 </style>
 <template>
-  <layout :active="1">
+  <layout :active="3">
     <div class="content-body">
       <div class="container">
         <h1 style="margin-bottom: 1rem;">Transactions</h1>

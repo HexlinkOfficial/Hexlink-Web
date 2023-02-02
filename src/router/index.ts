@@ -38,6 +38,11 @@ const router = createRouter({
       component: () => import('@/views/RedPacketSendView.vue')
     },
     {
+      path: '/collectables',
+      name: 'collectable view',
+      component: () => import('@/views/CollectablesView.vue')
+    },
+    {
       path: '/:pathMatch(.*)*',
       name: 'error404',
       component: Error404

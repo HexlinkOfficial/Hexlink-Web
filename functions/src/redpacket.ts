@@ -30,19 +30,19 @@ const secrets = functions.config().doppler || {};
 
 async function sign(signer: string, message: string) : Promise<string> {
   const validator = new ethers.Wallet(secrets.HARDHAT_VALIDATOR);
-  const keyType = KMS_KEY_TYPE[KMS_KEY_TYPE.validator];
-  const kmsValidator = kmsConfig().get(keyType)!.publicAddress;
   if (signer.toLowerCase() == validator.address.toLowerCase()) {
-    return await validator.signMessage(
-        ethers.utils.arrayify(message)
-    );
-  } else if (signer.toLowerCase() == kmsValidator.toLowerCase()) {
-    return await signWithKmsKey(
-        keyType,
-        toEthSignedMessageHash(message)
-    ) as string;
+    return await validator.signMessage(ethers.utils.arrayify(message));
   } else {
-    throw new Error("invalid validator");
+    const keyType = KMS_KEY_TYPE[KMS_KEY_TYPE.validator];
+    const kmsValidator = kmsConfig().get(keyType)!.publicAddress;
+    if (signer.toLowerCase() == kmsValidator.toLowerCase()) {
+      return await signWithKmsKey(
+          keyType,
+          toEthSignedMessageHash(message)
+      ) as string;
+    } else {
+      throw new Error("invalid validator");
+    }
   }
 }
 
@@ -51,6 +51,8 @@ async function buildClaimOp(
     redPacket: RedPacket,
     claimer: string,
 ) {
+  console.log(redPacket.id);
+  console.log(claimer);
   const message = ethers.utils.keccak256(
       ethers.utils.defaultAbiCoder.encode(
           ["bytes32", "address"],
@@ -62,7 +64,7 @@ async function buildClaimOp(
     packet: {
       token: redPacket.metadata.token,
       salt: redPacket.metadata.salt,
-      balance: EthBigNumber.from(redPacket.metadata.tokenAmount),
+      balance: EthBigNumber.from(redPacket.metadata.balance),
       validator: redPacket.metadata.validator,
       split: redPacket.metadata.split,
       mode: redPacketMode(redPacket.metadata.mode),

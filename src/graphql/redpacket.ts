@@ -82,6 +82,7 @@ export async function getCreatedRedPackets() : Promise<CreateRedPacketOp[]> {
     return result.data.operation.map((op : any) => {
       return {
         id: op.id,
+        type: op.type,
         createdAt: new Date(op.created_at),
         redpacket: parseRedPacket(op.redpackets || []),
         tx: op.transaction?.tx,

@@ -93,6 +93,7 @@ export async function getClaimedRedPackets() : Promise<ClaimRedPacketOp[]> {
       const parsed = parseClaims(op.redpacket_claims || []);
       return {
         id: op.id,
+        type: op.type,
         createdAt: new Date(op.created_at),
         claim: parsed?.claim,
         redpacket: parsed?.redpacket,

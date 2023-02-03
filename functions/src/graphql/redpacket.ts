@@ -18,7 +18,6 @@ export const GET_REDPACKET = gql`
         id
         user_id
         metadata
-        chain
         creator
     }
   }
@@ -27,7 +26,7 @@ export const GET_REDPACKET = gql`
 export interface RedPacketMetadata {
   token: string,
   salt: string,
-  tokenAmount: string,
+  balance: string,
   validator: string,
   creator: string,
   split: number,
@@ -38,7 +37,6 @@ export interface RedPacket {
   id: string,
   user_id: string,
   metadata: RedPacketMetadata,
-  chain: string,
   creator: string,
 }
 
@@ -58,7 +56,6 @@ export async function getRedPacket(
     id: rp.id,
     user_id: rp.user_id,
     metadata: JSON.parse(rp.metadata),
-    chain: rp.chain,
     creator: JSON.parse(rp.creator),
   };
 }

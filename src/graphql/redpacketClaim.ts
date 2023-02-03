@@ -37,6 +37,7 @@ export const GET_REDPACKET_CLAIMS_BY_CLAIMER = gql`
     ) {
         id
         type
+        request
         created_at
         transaction {
           tx
@@ -58,8 +59,10 @@ export const GET_REDPACKET_CLAIMS_BY_CLAIMER = gql`
   }
 `
 
-function parseClaims(claims: any[]) {
-  const claim = claims.length > 0 ? claims[0] : undefined;
+function parseClaims(op: any) {
+  const claim = (op.redpacket_claims || []).length > 0
+    ? op.redpacket_claims[0]
+    : undefined;
   if (claim) {
     return {
       claim: {
@@ -73,6 +76,16 @@ function parseClaims(claims: any[]) {
         creator: JSON.parse(claim.redpacket.creator),
         createdAt: claim.redpacket.created_at
       } as RedPacketDB,
+    }
+  } else {
+    const request = JSON.parse(op.request);
+    return {
+      claim: {
+        claimer: JSON.parse(request.claimer) as HexlinkUserInfo,
+        createdAt: new Date(op.created_at),
+        claimed: undefined,
+      },
+      redpacket: request.redpacket,
     }
   }
 }
@@ -90,7 +103,7 @@ export async function getClaimedRedPackets() : Promise<ClaimRedPacketOp[]> {
   ).toPromise();
   if (await handleUrqlResponse(result)) {
     return result.data.operation.map((op : any) => {
-      const parsed = parseClaims(op.redpacket_claims || []);
+      const parsed = parseClaims(op);
       return {
         id: op.id,
         createdAt: new Date(op.created_at),

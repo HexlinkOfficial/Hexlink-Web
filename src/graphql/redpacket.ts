@@ -33,6 +33,7 @@ export const GET_CREATED_REDPACKETS = gql`
             id
             type
             created_at
+            request
             transaction {
               tx
               status
@@ -55,14 +56,24 @@ export interface RedPacketDBRaw {
   created_at: string
 }
 
-function parseRedPacket(redPackets: RedPacketDBRaw[]) : RedPacketDB | undefined {
-  const r = redPackets.length > 0 ? redPackets[0] : undefined;
+function parseRedPacket(op: any) : RedPacketDB {
+  const r = (op.claim.redPackets || []).length > 0
+    ? op.claim.redPackets[0]
+    : undefined;
   if (r) {
     return {
       id: r.id,
       metadata: JSON.parse(r.metadata),
       deposit: JSON.parse(r.deposit),
       createdAt: new Date(r.created_at),
+    };
+  } else {
+    const request = JSON.parse(op.request);
+    return {
+      id: request.id,
+      metadata: JSON.parse(request.metadata),
+      deposit: JSON.parse(request.deposit),
+      createdAt: new Date(op.created_at),
     };
   }
 }
@@ -83,7 +94,7 @@ export async function getCreatedRedPackets() : Promise<CreateRedPacketOp[]> {
       return {
         id: op.id,
         createdAt: new Date(op.created_at),
-        redpacket: parseRedPacket(op.redpackets || []),
+        redpacket: parseRedPacket(op),
         tx: op.transaction?.tx,
         txStatus: op.transaction?.status,
         error: op.tx_error || op.transaction?.error,

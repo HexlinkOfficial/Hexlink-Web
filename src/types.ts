@@ -74,6 +74,7 @@ export interface RedPacketDB {
 export interface Op {
     id: number,
     createdAt: Date,
+    type: string
     tx?: string,
     txStatus?: string,
     chain?: string,

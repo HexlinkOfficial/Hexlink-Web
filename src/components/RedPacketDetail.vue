@@ -14,7 +14,7 @@
     <div class="card_circle transition"></div>
     <h2 class="transition">
       <span>
-        Sent by @{{ redPacket!.creator!.handle }}
+        Sent by @{{ redPacket!.creator?.handle }}
         <a class="twitter-link" :href="'https://twitter.com/' + redPacket?.creator!.handle">
           <i className="fa fa-twitter"></i>
         </a>

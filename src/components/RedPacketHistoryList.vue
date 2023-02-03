@@ -243,6 +243,7 @@ const loadData = async function() {
   }
   loading.value = false;
   extractDate();
+  console.log(claimedRpOps.value);
 };
 
 const extractDate = () => {

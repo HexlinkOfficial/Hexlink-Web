@@ -82,11 +82,12 @@ const nftImages = ref<nftImage[]>([]);
 const getBackcgroundColor = async (url: string) => {
   var output: string = "";
   const fac = new FastAverageColor();
-  await fac.getColorAsync(url)
+  await fac.getColorAsync(url, { algorithm: 'dominant' })
     .then(color => {
       // container.style.backgroundColor = color.rgba;
       // container.style.color = color.isDark ? '#fff' : '#000';
       output = color.hex.toString();
+      console.log(color);
     })
     .catch(e => {
       console.log(e);
@@ -155,7 +156,7 @@ onMounted(() => {
   height: 100%;
   border-radius: 14px;
   transition: transform .2s cubic-bezier(.5, 1, .89, 1);
-  box-shadow: 8px 28px 50px rgb(39 44 49 / 7%), 1px 6px 12px rgb(39 44 49 / 4%); }
+  box-shadow: 0 0 15px 1px rgb(0 0 0 / 10%); }
 .box {
   padding: 1rem;
   @media (min-width: 640px) {

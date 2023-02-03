@@ -5,9 +5,9 @@
   "main": "lib/index.js",
   "scripts": {
     "prebuild": "tslint -c tslint.json -p tsconfig.json --fix",
-    "build": "tsc",
+    "build": "npm run prebuild && tsc",
     "prestart": "npm run build",
-    "start": "nodemon .",
+    "start": "npm run prestart && nodemon .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",

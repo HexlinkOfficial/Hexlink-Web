@@ -30,11 +30,11 @@ spec:
       - name: transaction-app
         # Replace $LOCATION with your Artifact Registry location (e.g., us-west1).
         # Replace $GCLOUD_PROJECT with your project ID.
-        image: $us-central1-docker.pkg.dev/$bridge23-27764/hexlink/hexlink-transaction:latest
+        image: us-central1-docker.pkg.dev/bridge23-27764/hexlink/hexlink-transaction:latest
         # This app listens on port 8080 for web traffic by default.
         ports:
-        - containerPort: 8080
+        - containerPort: 9000
         env:
           - name: PORT
-            value: "8080"
+            value: "9000"
 ---

@@ -45,6 +45,9 @@ export const GET_CREATED_REDPACKETS = gql`
               deposit,
               created_at
             }
+            request {
+              args
+            }
         }
     }
 `
@@ -67,6 +70,13 @@ function parseRedPacket(op: any) : RedPacketDB | undefined {
       deposit: JSON.parse(r.deposit),
       createdAt: new Date(r.created_at),
     };
+  } else if (op.request?.args) {
+    const {redpacketId, metadata} = JSON.parse(op.request.args);
+    return {
+      id: redpacketId,
+      metadata,
+      createdAt: new Date(op.created_at),
+    }
   }
 }
 

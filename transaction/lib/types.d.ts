@@ -27,6 +27,7 @@ export interface OperationInput {
     priceInfo?: {
         gasPrice: string;
     };
+    requestId: number;
 }
 export interface Operation extends OperationInput {
     id: number;

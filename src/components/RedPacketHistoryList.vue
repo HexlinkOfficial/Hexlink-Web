@@ -83,7 +83,7 @@
                     <p class="claimed-number">
                       Claimed:&nbsp;
                       <strong>{{
-                        op.redpacket.metadata.split - op.redpacket.state.split
+                        op.redpacket.metadata.split - (op.redpacket.state?.split || op.redpacket.metadata.split)
                       }}/{{ op.redpacket.metadata.split }}</strong>
                       &nbsp;Share
                     </p>
@@ -93,7 +93,7 @@
                     </p>
                     <p class="claimed-number">
                       Left:&nbsp;
-                      <strong>{{ normalize(op.redpacket.state.balance, op.redpacket.token) }}</strong>
+                      <strong>{{ normalize(op.redpacket.state?.balance || op.redpacket.metadata.balance, op.redpacket.token) }}</strong>
                       &nbsp;{{ op.redpacket.token.symbol }}
                     </p>
                   </div>
@@ -356,7 +356,7 @@ watch(() => route.query?.claim, async() => {
 
 const progress = (redpacket: RedPacketDB) => {
   return (
-    redpacket.metadata.split - redpacket.state!.split
+    redpacket.metadata.split - (redpacket.state?.split || redpacket.metadata.split)
   ) / redpacket.metadata.split*100
 }
 
@@ -389,6 +389,7 @@ const normalize = (balance: string | undefined, token: Token) : string => {
 }
 
 const normalizedDbBalance = (op: CreateRedPacketOp) : string => {
+  console.log(op.redpacket?.metadata.balance);
   return op.redpacket?.metadata.balance
     ? normalize(op.redpacket.metadata.balance, op.redpacket.token!)
     : "0";
@@ -415,7 +416,9 @@ const aggregateCreated = async function(
   if (op.redpacket) {
     const tokenAddr = op.redpacket.metadata.token.toLowerCase();
     op.redpacket.token = await loadAndSaveERC20Token(tokenAddr);
-    op.redpacket.state = await queryRedPacketInfo(op.redpacket);
+    if (op.tx && op.txStatus === 'success') {
+      op.redpacket.state = await queryRedPacketInfo(op.redpacket);
+    }
   }
   return op;
 };

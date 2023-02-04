@@ -238,7 +238,7 @@ export async function buildDeployAndCreateRedPacketTx(input: RedPacket) : Promis
     );
     const hexlAddr = hexlAddress(useChainStore().chain);
     ops.push({
-        name: "deployAndCreateRedPacket",
+        name: "createRedPacket",
         function: "deploy",
         args: {
             name: useAuthStore().user!.nameHash,
@@ -252,7 +252,7 @@ export async function buildDeployAndCreateRedPacketTx(input: RedPacket) : Promis
     );
     const value = ops.reduce((sum, op) => sum.add(op.input.value), EthBigNumber.from(0));
     txes.push({
-        name: "deployAndCreateRedPacket",
+        name: "createRedPacket",
         function: "process",
         args: ops,
         input: {
@@ -285,8 +285,7 @@ async function processTxAndSave(
 
     for (let i = 0; i < txes.length; i++) {
         const txHash = await sendTransaction(txes[i].input);
-        if (txes[i].name == "createRedPacket" ||
-            txes[i].name == "deployAndCreateRedPacket") {
+        if (txes[i].name == "createRedPacket") {
             const opId = await callCreateRedPacket(chain, redpacket, txHash);
             return {id, opId};
         }
@@ -325,7 +324,6 @@ export async function callClaimRedPacket(redPacket: RedPacketDB) : Promise<void>
         chain: chain.name,
         redPacketId: redPacket.id,
         claimer: useAuthStore().userInfo,
-        serverUpdate: true,
     });
 }
 

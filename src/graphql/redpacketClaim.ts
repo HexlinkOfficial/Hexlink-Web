@@ -1,10 +1,11 @@
 import { gql } from '@urql/core';
 import { useAuthStore } from '@/stores/auth';
 import { handleUrqlResponse, setUrqlClientIfNecessary } from './urql';
-import type { HexlinkUserInfo, RedPacketDB } from "@/types";
+import type { RedPacketDB } from "@/types";
 import { BigNumber as EthBigNumber } from "ethers";
 import { useChainStore } from '@/stores/chain';
 import type { ClaimRedPacketOp, RedPacketClaim } from "@/types";
+import {getRedPacket} from "./redpacket";
 
 export const GET_REDPACKET_CLAIMS = gql`
     query GetClaimsByRedPacket($redPacketId: String!) {
@@ -56,11 +57,14 @@ export const GET_REDPACKET_CLAIMS_BY_CLAIMER = gql`
             created_at
           }
         }
+        request {
+          args
+        }
     }
   }
 `
 
-function parseClaims(op: any) {
+async function parseClaims(op: any) {
   const claim = (op.redpacket_claims || []).length > 0
     ? op.redpacket_claims[0]
     : undefined;
@@ -77,6 +81,20 @@ function parseClaims(op: any) {
         createdAt: claim.redpacket.created_at
       } as RedPacketDB,
     }
+  } else if (op.request?.args) {
+    const {redpacketId} = JSON.parse(op.request.args);
+    const redpacket = await getRedPacket(redpacketId);
+    return {
+      claim: {
+        createdAt: new Date(op.created_at),
+      },
+      redpacket: {
+        id: redpacketId,
+        metadata: redpacket?.metadata,
+        creator: redpacket?.creator,
+        createdAt: new Date(op.created_at),
+      }
+    }
   }
 }
 
@@ -92,19 +110,21 @@ export async function getClaimedRedPackets() : Promise<ClaimRedPacketOp[]> {
     }
   ).toPromise();
   if (await handleUrqlResponse(result)) {
-    return result.data.operation.map((op : any) => {
-      const parsed = parseClaims(op);
-      return {
-        id: op.id,
-        type: op.type,
-        createdAt: new Date(op.created_at),
-        claim: parsed?.claim,
-        redpacket: parsed?.redpacket,
-        tx: op.transaction?.tx,
-        txStatus: op.transaction?.status,
-        error: op.tx_error || op.transaction?.error,
-      };
-    });
+    return await Promise.all(
+      result.data.operation.map(async (op : any) => {
+        const parsed = await parseClaims(op);
+        return {
+          id: op.id,
+          type: op.type,
+          createdAt: new Date(op.created_at),
+          claim: parsed?.claim,
+          redpacket: parsed?.redpacket,
+          tx: op.transaction?.tx,
+          txStatus: op.transaction?.status,
+          error: op.tx_error || op.transaction?.error,
+        };
+      })
+    );
   } else {
     return await getClaimedRedPackets();
   }

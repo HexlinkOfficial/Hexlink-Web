@@ -31,6 +31,7 @@ export interface OperationInput {
   txId?: number;
   account: string,
   priceInfo?: {gasPrice: string},
+  requestId: number,
 }
 
 export interface Operation extends OperationInput {

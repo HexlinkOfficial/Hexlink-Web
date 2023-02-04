@@ -1,16 +1,5 @@
-/* eslint-disable require-jsdoc */
-import {gql, createClient} from "@urql/core";
-import * as functions from "firebase-functions";
-
-const secrets = functions.config().doppler || {};
-const client = () => createClient({
-  url: secrets.VITE_HASURA_URL,
-  fetchOptions: () => {
-    return {
-      headers: {"x-hasura-admin-secret": secrets.HASURA_GRAPHQL_ADMIN_SECRET},
-    };
-  },
-});
+import {gql} from "@urql/core";
+import {client} from "./client";
 
 export const GET_REDPACKET = gql`
   query GetRedPacket($id: String!) {

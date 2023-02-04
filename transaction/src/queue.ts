@@ -53,7 +53,7 @@ class PrivateQueues {
         const senderPool = SenderPool.getInstance();
         const queue = new Queue(this.queueName(chain, "coordinator"));
         console.log("Initiating coordinator queue " + queue.name);
-        queue.process("poll", senderPool.size(), async (job) => {
+        queue.process("poll", 1, async (job) => {
             const signer = senderPool.getSenderInIdle(chain);
             if (signer === undefined) {
                 console.log("No signer available...");

@@ -21,7 +21,7 @@ export interface RedPacket {
 export interface RedPacketDBMetadata {
     token: string;
     salt: string;
-    mode: string;
+    mode: number;
     split: number;
     balance: string;
     validator: string;

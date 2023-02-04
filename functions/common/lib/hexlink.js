@@ -24,9 +24,7 @@ function hexlAddress(chain) {
 exports.hexlAddress = hexlAddress;
 function hexlContract(provider) {
     return __awaiter(this, void 0, void 0, function* () {
-        const address = hexlAddress(yield (0, chain_1.getChainFromProvider)(provider));
-        const contract = new ethers_1.ethers.Contract(address, HEXLINK_ABI_json_1.default, provider);
-        return contract;
+        return new ethers_1.ethers.Contract(hexlAddress(yield (0, chain_1.getChainFromProvider)(provider)), HEXLINK_ABI_json_1.default, provider);
     });
 }
 exports.hexlContract = hexlContract;

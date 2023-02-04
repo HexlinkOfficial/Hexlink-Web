@@ -8,7 +8,5 @@ export function hexlAddress(chain) {
     return ADDRESSES[chain.name].hexlink;
 }
 export async function hexlContract(provider) {
-    const address = hexlAddress(await getChainFromProvider(provider));
-    const contract = new ethers.Contract(address, HEXLINK_ABI, provider);
-    return contract;
+    return new ethers.Contract(hexlAddress(await getChainFromProvider(provider)), HEXLINK_ABI, provider);
 }

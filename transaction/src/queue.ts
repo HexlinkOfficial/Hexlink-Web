@@ -11,10 +11,17 @@ import {SenderPool} from "./sender";
 import type { Operation } from "./types";
 import {hexlContract} from "../../functions/common";
 
-async function sendTx(provider: ethers.providers.Provider, tx: string) {
-    const hash = ethers.utils.keccak256(tx);
-    const found = await provider.getTransaction(hash);
-    return found || await provider.sendTransaction(tx);
+async function trySendTx(
+    provider: ethers.providers.Provider,
+    data: any
+) : Promise<ethers.providers.TransactionResponse> {
+    if (data.txHash) {
+        return await provider.getTransaction(data.txHash);
+    } else {
+        const hash = ethers.utils.keccak256(data.tx);
+        const found = await provider.getTransaction(hash);
+        return found || await provider.sendTransaction(data.tx);
+    }
 }
 
 class PrivateQueues {
@@ -109,7 +116,7 @@ class PrivateQueues {
         queue.process(async(job: any) => {
             try {
                 const provider: ethers.providers.Provider = getInfuraProvider(chain);
-                const tx = await sendTx(provider, job.data.tx);
+                const tx = await trySendTx(provider, job.data);
                 const receipt = await tx.wait();
                 await Promise.all(job.data.ops.map(
                     (op: Operation) => processActions(chain, op, receipt)

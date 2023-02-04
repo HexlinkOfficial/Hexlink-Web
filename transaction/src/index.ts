@@ -37,7 +37,7 @@ app.post('/submit/:chain', async (req: express.Request, res: express.Response) =
     const txQueue = queues.getTxQueue(req.params.chain)!;
     await txQueue.add({
       id: txId,
-      tx: req.body.tx,
+      txHash: req.body.tx,
       ops: [{id: opId, ...input}],
     });
     res.status(200).json({ id: opId });

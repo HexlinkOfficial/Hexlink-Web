@@ -110,7 +110,6 @@ class PrivateQueues {
             try {
                 const provider: ethers.providers.Provider = getInfuraProvider(chain);
                 const tx = await sendTx(provider, job.data.tx);
-                console.log("waiting");
                 const receipt = await tx.wait();
                 await Promise.all(job.data.ops.map(
                     (op: Operation) => processActions(chain, op, receipt)

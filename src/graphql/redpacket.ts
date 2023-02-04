@@ -56,7 +56,7 @@ export interface RedPacketDBRaw {
   created_at: string
 }
 
-function parseRedPacket(op: any) : RedPacketDB {
+function parseRedPacket(op: any) : RedPacketDB | undefined {
   const r = (op.redpackets || []).length > 0
     ? op.redpackets[0]
     : undefined;
@@ -66,14 +66,6 @@ function parseRedPacket(op: any) : RedPacketDB {
       metadata: JSON.parse(r.metadata),
       deposit: JSON.parse(r.deposit),
       createdAt: new Date(r.created_at),
-    };
-  } else {
-    const request = JSON.parse(op.request);
-    return {
-      id: request.id,
-      metadata: JSON.parse(request.metadata),
-      deposit: JSON.parse(request.deposit),
-      createdAt: new Date(op.created_at),
     };
   }
 }

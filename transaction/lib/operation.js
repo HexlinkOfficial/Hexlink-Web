@@ -1,9 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.processActions = exports.buildTxFromOps = void 0;
+exports.processActions = exports.buildTx = void 0;
 const ethers_1 = require("ethers");
-const properties_1 = require("@ethersproject/properties");
-const transactions_1 = require("@ethersproject/transactions");
 const redpacket_1 = require("./graphql/redpacket");
 const common_1 = require("../../functions/common");
 const redpacket_2 = require("../../functions/redpacket");
@@ -13,7 +11,6 @@ async function buildTx(provider, chain, unsignedTx, from) {
     unsignedTx.from = from;
     unsignedTx.type = 2;
     unsignedTx.nonce = await provider.getTransactionCount(unsignedTx.from);
-    unsignedTx.gasLimit = ethers_1.BigNumber.from(500000);
     const feeData = await provider.getFeeData();
     unsignedTx.maxPriorityFeePerGas =
         feeData.maxPriorityFeePerGas || ethers_1.BigNumber.from(0);
@@ -21,25 +18,17 @@ async function buildTx(provider, chain, unsignedTx, from) {
         ethers_1.BigNumber.from(common_1.PriceConfigs[chain.name]);
     return unsignedTx;
 }
-async function buildTxFromOps(provider, chain, ops, signer) {
-    const contract = await (0, common_1.hexlContract)(provider);
-    let unsignedTx = await contract.populateTransaction.process(ops.map(op => op.input));
-    unsignedTx = await buildTx(provider, chain, unsignedTx, signer.address);
-    const tx = await (0, properties_1.resolveProperties)(unsignedTx);
-    const signature = signer._signingKey().signDigest(ethers_1.ethers.utils.keccak256((0, transactions_1.serialize)(tx)));
-    return (0, transactions_1.serialize)(tx, signature);
-}
-exports.buildTxFromOps = buildTxFromOps;
+exports.buildTx = buildTx;
 async function processAction(op, chain, action, receipt) {
     const params = action.params;
     if (action.type === "insert_redpacket_claim") {
         const claimed = (0, redpacket_2.parseClaimed)(chain, receipt, params.redPacketId, op.account);
         if (claimed !== undefined) {
-            await (0, redpacket_1.insertRedPacketClaim)({
-                ...params,
-                claimed,
-                opId: op.id,
-            });
+            await (0, redpacket_1.insertRedPacketClaim)([{
+                    ...params,
+                    claimed,
+                    opId: op.id,
+                }]);
         }
     }
     if (action.type === "insert_redpacket") {

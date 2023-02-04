@@ -2,13 +2,20 @@ import Queue from "bull";
 import {ethers} from "ethers";
 import {insertTx, updateTx} from "./graphql/transaction";
 import {updateOp} from "./graphql/operation";
-import {processActions, buildTxFromOps} from "./operation";
+import {processActions, buildTx} from "./operation";
 import type {QueueType} from "./types";
 import { getInfuraProvider } from "./utils";
 import {SUPPORTED_CHAINS} from "../../functions/common";
 import type {Chain} from "../../functions/common";
 import {SenderPool} from "./sender";
 import type { Operation } from "./types";
+import {hexlContract} from "../../functions/common";
+
+async function sendTx(provider: ethers.providers.Provider, tx: string) {
+    const hash = ethers.utils.keccak256(tx);
+    const found = await provider.getTransaction(hash);
+    return found || await provider.sendTransaction(tx);
+}
 
 class PrivateQueues {
     opQueues : Map<string, Queue.Queue> = new Map<string, Queue.Queue>();
@@ -41,7 +48,7 @@ class PrivateQueues {
         console.log("Initiating coordinator queue " + queue.name);
         queue.process("poll", senderPool.size(), async (job) => {
             const signer = senderPool.getSenderInIdle(chain);
-            if (!signer) {
+            if (signer === undefined) {
                 console.log("No signer available...");
                 return;
             }
@@ -53,36 +60,33 @@ class PrivateQueues {
                 jobs.push(j);
             }
             if (jobs.length === 0) {
+                senderPool.removeSenderCompletedJob(chain, signer.address);
                 return;
             }
             const ops = jobs.map((j: any) => j.data as Operation);
 
             const provider = getInfuraProvider(chain);
-            const signedTx: string = await buildTxFromOps(provider, chain, ops, signer);
-            const txHash = ethers.utils.keccak256(signedTx);
+            const postPorgress = async (j: any, txId?: number, error?: string) => {
+                await updateOp(j.data.id, txId, error);
+                await j.moveToCompleted("success", false, true);
+            }
             try {
+                const hexlink = await hexlContract(provider);
+                const args = ops.map(op => op.input);
+                const estimatedGas = await hexlink.estimateGas.process(args);
+                const unsignedTx = await hexlink.populateTransaction.process(
+                    args, {gasLimit: estimatedGas},
+                );
+                const tx = await buildTx(provider, chain, unsignedTx, signer.address);
+                const signedTx = await signer.signTransaction(tx);
+                const txHash = ethers.utils.keccak256(signedTx);
                 const [{id}] = await insertTx([{chain: chain.name, tx: txHash}]);
-                senderPool.addSenderAssignedTx(chain, signer.address);
-                try {
-                    await provider.sendTransaction(signedTx);
-                    await txQueue.add({id, tx: txHash, ops, signer: signer.address});
-                } catch(err) {
-                    console.log(err);
-                    await updateTx(id, "error", "failed to send tx");
-                    senderPool.removeSenderCompletedJob(chain, signer.address);
-                }
-                const postPorgress = async (j: any) => {
-                    await updateOp(j.data.id, id);
-                    await j.moveToCompleted("success", false, true);
-                }
-                await Promise.all(jobs.map(j => postPorgress(j)));
+                await txQueue.add({id, tx: signedTx, ops, signer: signer.address});
+                await Promise.all(jobs.map(j => postPorgress(j, id)));
             } catch(err) {
                 console.log(err);
-                const postPorgress = async (j: any) => {
-                    await updateOp(j.data.id, undefined, "failed to store tx");
-                    await j.moveToCompleted("success", false, true);
-                }
-                await Promise.all(jobs.map(j => postPorgress(j)));
+                await Promise.all(jobs.map(j => postPorgress(j, undefined, "failed to insert tx")));
+                senderPool.removeSenderCompletedJob(chain, signer.address);
             }
         });
         queue.add("poll", {}, { repeat: { every: 1000, } });
@@ -103,18 +107,17 @@ class PrivateQueues {
         const queue = new Queue(this.queueName(chain, "transaction"));
         console.log("Initiating transaction queue " + queue.name);
         queue.process(async(job: any) => {
-            const provider = getInfuraProvider(chain);
             try {
-                const tx = await provider.getTransaction(job.data.tx);
-                if (!tx) {
-                    throw new Error("tx not found");
-                }
+                const provider: ethers.providers.Provider = getInfuraProvider(chain);
+                const tx = await sendTx(provider, job.data.tx);
+                console.log("waiting");
                 const receipt = await tx.wait();
                 await Promise.all(job.data.ops.map(
                     (op: Operation) => processActions(chain, op, receipt)
                 ));
                 await updateTx(job.data.id, "success");
             } catch(err: any) {
+                console.log(err);
                 await updateTx(job.data.id, "error", err.message);
             }
             senderPool.removeSenderCompletedJob(chain, job.data.signer);

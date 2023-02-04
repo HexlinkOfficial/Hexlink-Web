@@ -1,18 +1,11 @@
-import {
-  ethers,
-  BigNumber as EthBigNumber,
-  PopulatedTransaction,
-} from "ethers";
-import {resolveProperties} from "@ethersproject/properties";
-import {serialize, UnsignedTransaction} from "@ethersproject/transactions";
+import {ethers, BigNumber as EthBigNumber, PopulatedTransaction } from "ethers";
 import {insertRedPacketClaim, insertRedPacket} from "./graphql/redpacket";
-
 import type {Chain} from "../../functions/common";
-import {hexlContract, parseDeposit, PriceConfigs} from "../../functions/common";
+import {PriceConfigs, parseDeposit} from "../../functions/common";
 import {parseClaimed, parseCreated, redPacketAddress} from "../../functions/redpacket";
 import type {Action, Operation} from "./types";
 
-async function buildTx(
+export async function buildTx(
   provider: ethers.providers.Provider,
   chain: Chain,
   unsignedTx: PopulatedTransaction,
@@ -23,31 +16,12 @@ async function buildTx(
   unsignedTx.from = from;
   unsignedTx.type = 2;
   unsignedTx.nonce = await provider.getTransactionCount(unsignedTx.from);
-  unsignedTx.gasLimit = EthBigNumber.from(500000);
   const feeData = await provider.getFeeData();
   unsignedTx.maxPriorityFeePerGas =
     feeData.maxPriorityFeePerGas || EthBigNumber.from(0);
   unsignedTx.maxFeePerGas = feeData.maxFeePerGas ||
     EthBigNumber.from(PriceConfigs[chain.name]);
   return unsignedTx;
-}
-
-export async function buildTxFromOps(
-  provider: ethers.providers.Provider,
-  chain: Chain,
-  ops: Operation[],
-  signer: ethers.Wallet,
-) : Promise<string> {
-  const contract = await hexlContract(provider);
-  let unsignedTx = await contract.populateTransaction.process(
-    ops.map(op => op.input)
-  );
-  unsignedTx = await buildTx(provider, chain, unsignedTx, signer.address);
-  const tx = await resolveProperties(unsignedTx);
-  const signature = signer._signingKey().signDigest(
-    ethers.utils.keccak256(serialize(tx as UnsignedTransaction))
-  );
-  return serialize(tx as UnsignedTransaction, signature);
 }
 
 async function processAction(
@@ -65,11 +39,11 @@ async function processAction(
       op.account,
     );
     if (claimed !== undefined) {
-      await insertRedPacketClaim({
+      await insertRedPacketClaim([{
         ...params,
         claimed,
         opId: op.id,
-      });
+      }]);
     }
   }
 

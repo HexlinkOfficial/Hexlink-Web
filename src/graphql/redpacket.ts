@@ -57,8 +57,8 @@ export interface RedPacketDBRaw {
 }
 
 function parseRedPacket(op: any) : RedPacketDB {
-  const r = (op.claim.redPackets || []).length > 0
-    ? op.claim.redPackets[0]
+  const r = (op.redpackets || []).length > 0
+    ? op.redpackets[0]
     : undefined;
   if (r) {
     return {

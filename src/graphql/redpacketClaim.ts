@@ -39,6 +39,7 @@ export const GET_REDPACKET_CLAIMS_BY_CLAIMER = gql`
         type
         request
         created_at
+        tx_error
         transaction {
           tx
           status
@@ -66,7 +67,6 @@ function parseClaims(op: any) {
   if (claim) {
     return {
       claim: {
-        claimer: JSON.parse(claim.claimer) as HexlinkUserInfo,
         createdAt: new Date(claim.created_at),
         claimed: claim.claimed ? EthBigNumber.from(claim.claimed) : undefined,
       },
@@ -76,16 +76,6 @@ function parseClaims(op: any) {
         creator: JSON.parse(claim.redpacket.creator),
         createdAt: claim.redpacket.created_at
       } as RedPacketDB,
-    }
-  } else {
-    const request = JSON.parse(op.request);
-    return {
-      claim: {
-        claimer: JSON.parse(request.claimer) as HexlinkUserInfo,
-        createdAt: new Date(op.created_at),
-        claimed: undefined,
-      },
-      redpacket: request.redpacket,
     }
   }
 }

@@ -51,14 +51,13 @@ async function buildClaimOp(
     redPacket: RedPacket,
     claimer: string,
 ) {
-  console.log(redPacket.id);
-  console.log(claimer);
   const message = ethers.utils.keccak256(
       ethers.utils.defaultAbiCoder.encode(
           ["bytes32", "address"],
           [redPacket.id, claimer]
       )
   );
+  const signature = await sign(redPacket.metadata.validator, message);
   const args = {
     creator: redPacket.metadata.creator,
     packet: {
@@ -67,17 +66,17 @@ async function buildClaimOp(
       balance: EthBigNumber.from(redPacket.metadata.balance),
       validator: redPacket.metadata.validator,
       split: redPacket.metadata.split,
-      mode: redPacketMode(redPacket.metadata.mode),
+      mode: redPacket.metadata.mode,
     },
     claimer,
-    signature: await sign(redPacket.metadata.validator, message),
+    signature,
   };
-  const callData = redPacketInterface.encodeFunctionData( "claim", [args]);
+  const callData = redPacketInterface.encodeFunctionData("claim", [args]);
   return {
     to: redPacketAddress(chain),
-    value: ethers.utils.hexValue(0),
+    value: "0x0",
     callData,
-    callGasLimit: "0",
+    callGasLimit: "0x0",
   };
 }
 
@@ -160,7 +159,6 @@ export const createRedPacket = functions.https.onCall(
           refunder: Refunders[chain.name],
         },
       };
-      console.log(action);
       const postData: any = {
         type: "create_redpacket",
         userId: uid,

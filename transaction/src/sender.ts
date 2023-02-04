@@ -1,7 +1,6 @@
 import {ethers} from "ethers";
 import cache from "node-cache";
 import type {Chain} from "../../functions/common";
-import {getInfuraProvider} from "./utils";
 
 class PrivateSenderPool {
     senders : Map<string, string>;
@@ -10,9 +9,11 @@ class PrivateSenderPool {
 
     constructor() {
         this.senders = new Map<string, string>(
-            Object.entries(JSON.parse(process.env.TX_SENDER_POOL!))
+            Object.entries(JSON.parse(process.env.TX_SENDER_POOL!)).map(
+                item => [item[0].toLowerCase(), item[1] as string]
+            )
         );
-        this.senderPoolAddr =[ ...this.senders.keys() ]
+        this.senderPoolAddr =[ ...this.senders.keys() ].map(addr => addr.toLowerCase());
         this.senderCache = new cache();
         console.log(
             `${this.senderPoolAddr.length} senders initiated: \n${this.senderPoolAddr.join(",\n")}`
@@ -29,24 +30,20 @@ class PrivateSenderPool {
     }
 
     getSenderInIdle(chain: Chain) : ethers.Wallet | undefined {
-        const provider: ethers.providers.Provider = getInfuraProvider(chain);
         const sendersInProcess: string[] = this.getSenderInProcess(chain);
         const sendersInIdle = this.senderPoolAddr.filter(k => !sendersInProcess.includes(k));
         if (sendersInIdle.length > 0) {
-            return new ethers.Wallet(this.senders.get(sendersInIdle[0])!, provider);
+            const sender = sendersInIdle[0];
+            sendersInProcess.push(sender);
+            this.senderCache.set(chain.name, sendersInProcess);
+            return new ethers.Wallet(this.senders.get(sender)!);
         }
-        return;
+        return undefined;
     };
-
-    addSenderAssignedTx(chain: Chain, sender: string) {
-        const sendersInProcess: string[] = this.getSenderInProcess(chain);
-        sendersInProcess.push(sender)
-        this.senderCache.set(chain.name, sendersInProcess);
-    }
 
     removeSenderCompletedJob(chain: Chain, sender: string) {
         const sendersInProcess: string[] = this.getSenderInProcess(chain);
-        const index = sendersInProcess.indexOf(sender, 0);
+        const index = sendersInProcess.indexOf(sender.toLowerCase(), 0);
         if (index > -1) {
             this.senderCache.set(chain.name, sendersInProcess.splice(index, 1));
         }

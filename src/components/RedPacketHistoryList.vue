@@ -165,11 +165,6 @@
                     </div>
                     {{ op.redpacket.token.symbol }}
                   </div>
-                  <div class="sent-info" v-if="showClaimStatus(op) == 'Claimed'">
-                    <div style="overflow: auto; white-space: nowrap; margin-left: 0.25rem; width: 50px;display: flex;justify-content: flex-end;">
-                      {{ showClaimStatus(op) }}
-                    </div>
-                  </div>
                 </div>
                 <div class="claim-status" v-if="op.claim">
                   <div style="display: flex; align-items: center;">
@@ -381,7 +376,10 @@ const showClaimStatus = (op: any) => {
 }
 
 const copyShareLink = (redPacket: RedPacketDB | undefined) => {
-  return copy(window.location.origin + route.path + "?claim=" + redPacket?.id, 'Successfully copied your red packet share link!');
+  return copy(
+    window.location.origin + route.path + "?claim=" + redPacket?.id,
+    'Successfully copied your red packet share link!'
+  );
 };
 
 const normalize = (balance: string | undefined, token: Token) : string => {

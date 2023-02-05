@@ -43,10 +43,19 @@
                   <i className="fa fa-twitter"></i>
                 </a>
               </div>
-              <div class="claimed-amount">{{
-                normalizeBalance(v.claimed!.toString(),
-                redPacket!.token!.decimals)
-              }}</div>
+              <div class="claimed-amount">
+                <a-tooltip placement="top">
+                  <template #title>
+                    <span>
+                      Amount: {{ normalizeBalance(v.claimed!.toString(), redPacket!.token!.decimals).normalized }}
+                    </span>
+                  </template>
+                  {{ normalizeBalance(v.claimed!.toString(), redPacket!.token!.decimals).normalized.substring(0, 5) }}
+                </a-tooltip>
+                <div class="token-icon" style="margin-right: 0.25rem; margin-left: 0.25rem;">
+                  <img src="https://token.metaswap.codefi.network/assets/networkLogos/ethereum.svg">
+                </div>
+              </div>
             </div>
             <div class="claim-date">@{{ v.claimer.handle }}</div>
           </div>
@@ -82,6 +91,7 @@ const loadData = async function() {
       redPacket.value.metadata.token
     );
     claimers.value = await getRedPacketClaims(id);
+    console.log(claimers.value);
   }
   loading.value = false;
 };
@@ -118,9 +128,10 @@ onMounted(loadData);
   font-size: 12px;
   display: flex;
   justify-content: flex-start;
-  color: rgba(7, 16, 27, 0.5);
-  margin-top: 5px; }
+  color: rgba(7, 16, 27, 0.5); }
 .claimed-amount {
+  display: flex;
+  align-items: center;
   font-size: 13px;
   font-weight: 500; }
 .profile-username {

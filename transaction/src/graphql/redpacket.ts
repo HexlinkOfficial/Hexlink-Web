@@ -2,7 +2,7 @@ import {gql} from "@urql/core";
 import {client} from "./client";
 import type {RedPacketClaimInput} from "../types";
 import type {
-  RedPacketDBMetadata,
+  RedPacket,
   HexlinkUserInfo
 } from "../../../functions/redpacket";
 
@@ -57,7 +57,7 @@ export async function insertRedPacket(
       id: string,
       userId: string,
       creator: HexlinkUserInfo,
-      metadata: RedPacketDBMetadata,
+      metadata: RedPacket,
       opId: number,
       deposit: any
     }[],

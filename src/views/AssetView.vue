@@ -457,10 +457,10 @@ svg {
                 </div>
                 <div class="views">
                   <div class="detail-view">
-                    <button class="listView-button" @click="nftView = false; tokenView = true"
+                    <button class="listView-button" @click="tokenTransaction = false; tokenView = true"
                       :class="tokenView && 'show'">Tokens</button>
-                    <button class="listView-button" @click="tokenView = false; nftView = true"
-                      :class="nftView && 'show'">Collectables</button>
+                    <button class="listView-button" @click="tokenView = false; tokenTransaction = true"
+                      :class="tokenTransaction && 'show'">Transactions</button>
                   </div>
                 </div>
               </div>
@@ -471,8 +471,8 @@ svg {
                   </div>
                 </div>
               </div>
-              <div v-if="nftView" class="nft-gridDetail">
-                <WalletNFTGrid></WalletNFTGrid>
+              <div v-if="tokenTransaction" class="nft-gridDetail">
+                <!-- <WalletNFTGrid></WalletNFTGrid> -->
               </div>
             </div>
           </div>
@@ -491,7 +491,7 @@ import { useChainStore } from '@/stores/chain';
 import { useAccountStore } from "@/stores/account";
 import { BigNumber } from "bignumber.js";
 
-const nftView = ref<boolean>(false);
+const tokenTransaction = ref<boolean>(false);
 const tokenView = ref<boolean>(true);
 const showInfo = ref<boolean>(true);
 

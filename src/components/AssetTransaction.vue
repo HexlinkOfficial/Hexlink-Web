@@ -92,8 +92,17 @@
 import { ref, watch, onMounted } from 'vue';
 import Loading from "@/components/Loading.vue";
 import { copy } from "@/web3/utils";
+import { getAssetTransfers } from '@/web3/tokens';
 
 const loading = ref<boolean>(false);
+const transfer = ref<any>();
+
+onMounted(async () => {
+  await getAssetTransfers({
+    wallet: '0x4dD92D3b036a10733E85C2C3775935AAb515A653',
+    category: ["external", "internal", "erc20", "erc721", "erc1155"],
+  })
+})
 
 </script>
 

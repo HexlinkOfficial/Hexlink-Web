@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.redPacketMode = exports.redPacketContract = exports.redPacketAddress = exports.redPacketInterface = void 0;
+exports.redPacketContract = exports.redPacketAddress = exports.redPacketInterface = void 0;
 const ethers_1 = require("ethers");
 const common_1 = require("../../common");
 const HAPPY_RED_PACKET_ABI_json_1 = __importDefault(require("./abi/HAPPY_RED_PACKET_ABI.json"));
@@ -28,7 +28,3 @@ function redPacketContract(provider) {
     });
 }
 exports.redPacketContract = redPacketContract;
-function redPacketMode(mode) {
-    return mode == "random" ? 2 : 1;
-}
-exports.redPacketMode = redPacketMode;

@@ -1,13 +1,9 @@
 
 import { defineStore } from 'pinia';
-import type { RedPacket } from "../../functions/redpacket";
+import type { RedPacketInput } from "../../functions/redpacket";
 
 type Status = "" | "confirming" | "processing" | "error" | "success";
 export type AccountType = "hexlink" | "wallet";
-
-export interface RedPacketInput extends RedPacket {
-  balanceInput: string,
-}
 
 interface CreatingRedPacket {
   status: Status;

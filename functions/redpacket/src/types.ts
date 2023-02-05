@@ -14,24 +14,18 @@ export interface HexlinkUserInfo {
 export interface RedPacket {
     id?: string;
     salt: string;
-    mode: "random" | "equal";
+    mode: number;
     split: number;
-    balance: EthBigNumber;
-    token: Token;
-    gasToken: Token;
-    gasTokenAmount?: EthBigNumber;
+    balance: string;
+    token: string;
     validator: string;
+    contract?: string,
+    creator?: string,
 }
 
-export interface RedPacketDBMetadata {
-    token: string
-    salt: string,
-    mode: string,
-    split: number,
-    balance: string,
-    validator: string,
-    contract: string,
-    creator: string,
+export interface RedPacketInput extends RedPacket {
+    gasToken: string,
+    gasTokenAmount?: string,
 }
 
 export interface PriceInfo {

@@ -85,16 +85,20 @@ export async function getPopularTokens(chain: Chain) : Promise<TokenDataList> {
   };
 }
 
-export function isNativeCoin(token: Token, chain: Chain) {
-  return token.address == nativeCoinAddress(chain);
+function equal(a: string, b: string) {
+  return a.toLowerCase() == b.toLowerCase();
 }
 
-export function isWrappedCoin(token: Token, chain: Chain) {
-  return token.address == wrappedCoinAddress(chain);
+export function isNativeCoin(token: string, chain: Chain) {
+  return equal(token, nativeCoinAddress(chain));
 }
 
-export function isStableCoin(token: Token, chain: Chain) {
-  return stableCoinAddresses(chain).includes(token.address);
+export function isWrappedCoin(token: string, chain: Chain) {
+  return equal(token, wrappedCoinAddress(chain));
+}
+
+export function isStableCoin(token: string, chain: Chain) {
+  return stableCoinAddresses(chain).includes(token.toLowerCase());
 }
 
 export function tokenBase(token: Token) : BigNumber {
@@ -103,7 +107,9 @@ export function tokenBase(token: Token) : BigNumber {
 
 export function tokenAmount(
   balance: string | number,
-  token: Token
+  decimals: number,
 ) : EthBigNumber {
-  return toEthBigNumber(tokenBase(token).times(balance));
+  return toEthBigNumber(
+    new BigNumber(10).pow(decimals).times(balance)
+  );
 }

@@ -49,18 +49,21 @@ export async function getPopularTokens(chain) {
         error: "Unsupported network " + chain.chainId,
     };
 }
+function equal(a, b) {
+    return a.toLowerCase() == b.toLowerCase();
+}
 export function isNativeCoin(token, chain) {
-    return token.address == nativeCoinAddress(chain);
+    return equal(token, nativeCoinAddress(chain));
 }
 export function isWrappedCoin(token, chain) {
-    return token.address == wrappedCoinAddress(chain);
+    return equal(token, wrappedCoinAddress(chain));
 }
 export function isStableCoin(token, chain) {
-    return stableCoinAddresses(chain).includes(token.address);
+    return stableCoinAddresses(chain).includes(token.toLowerCase());
 }
 export function tokenBase(token) {
     return new BigNumber(10).pow(token.decimals);
 }
-export function tokenAmount(balance, token) {
-    return toEthBigNumber(tokenBase(token).times(balance));
+export function tokenAmount(balance, decimals) {
+    return toEthBigNumber(new BigNumber(10).pow(decimals).times(balance));
 }

@@ -12,10 +12,8 @@ export function tokenBase(token: Token) : BigNumber {
     return new BigNumber(10).pow(token!.decimals);
 }
 
-export function tokenEqual(token1: Token, token2: Token) {
-    return EthBigNumber.from(token1.address).eq(
-        EthBigNumber.from(token2.address)
-    );
+export function tokenEqual(token1: string, token2: string) {
+    return EthBigNumber.from(token1).eq(EthBigNumber.from(token2));
 }
     
 const { toClipboard } = useClipboard();

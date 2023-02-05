@@ -18,7 +18,7 @@ import {
     accountContract,
     encodeValidateAndCall,
 } from "../../functions/common";
-import type { RedPacket } from "../../functions/redpacket";
+import type { RedPacketInput } from "../../functions/redpacket";
 import {
     redPacketContract,
     redpacketId,
@@ -74,12 +74,12 @@ function buildOpInput(params: {
 }
 
 async function buildApproveTx(
-    token: Token,
+    token: string,
     owner: string,
     operator: string,
-    requiredAmount: EthBigNumber,
+    requiredAmount: EthBigNumber | string,
 ) : Promise<Transaction[]> {
-    const erc20 = erc20Contract(useChainStore().provider, token.address);
+    const erc20 = erc20Contract(useChainStore().provider, token);
     const allowance = await erc20.allowance(owner, operator);
     if (allowance.gte(requiredAmount)) {
         return [];
@@ -92,7 +92,7 @@ async function buildApproveTx(
         function: "approve",
         args: {operator, amount: ethers.constants.MaxInt256},
         input: {
-            to: token.address,
+            to: token,
             from: owner,
             data,
             value: ethers.utils.hexValue(0),
@@ -101,10 +101,10 @@ async function buildApproveTx(
 }
 
 async function buildDepositErc20TokenOp(
-    token: Token,
+    token: string,
     from: string,
     to: string,
-    amount: EthBigNumber
+    amount: EthBigNumber | string
 ): Promise<{tx: Transaction[], op: Op[]}> {
     const callData = erc20Interface.encodeFunctionData(
         "transferFrom", [from, to, amount]
@@ -115,12 +115,12 @@ async function buildDepositErc20TokenOp(
             name: "depositErc20",
             function: "transferFrom",
             args: {from, to, amount},
-            input: buildOpInput({to: token.address, callData}),
+            input: buildOpInput({to: token, callData}),
         }]
     }
 }
 
-async function buildCreateRedPacketTxForMetamask(input: RedPacket) {
+async function buildCreateRedPacketTxForMetamask(input: RedPacketInput) {
     const walletAccount = useWalletStore().account!.address;
     const hexlAccount = useAccountStore().account!.address;
     const chain = useChainStore().chain;
@@ -138,7 +138,7 @@ async function buildCreateRedPacketTxForMetamask(input: RedPacket) {
                 input.token,
                 walletAccount,
                 hexlAccount,
-                input.gasTokenAmount!.add(input.balance),
+                EthBigNumber.from(input.gasTokenAmount).add(input.balance),
             );
             txes = txes.concat(tx);
             userOps = userOps.concat(op);
@@ -217,7 +217,7 @@ async function buildCreateRedPacketTxForMetamask(input: RedPacket) {
     return txes;
 }
 
-export async function buildDeployAndCreateRedPacketTx(input: RedPacket) : Promise<any> {
+export async function buildDeployAndCreateRedPacketTx(input: RedPacketInput) : Promise<any> {
     const txes = await buildCreateRedPacketTxForMetamask(input);
 
     // pop execBatch op and encode it to init
@@ -266,7 +266,7 @@ export async function buildDeployAndCreateRedPacketTx(input: RedPacket) : Promis
 }
 
 async function processTxAndSave(
-    redpacket: RedPacket,
+    redpacket: RedPacketInput,
     txes: any[],
     dryrun: boolean
 ) : Promise<{id: string, opId?: number}> {
@@ -294,7 +294,7 @@ async function processTxAndSave(
 }
 
 export async function deployAndCreateNewRedPacket(
-    redpacket: RedPacket,
+    redpacket: RedPacketInput,
     useHexlinkAccount: boolean,
     dryrun: boolean = false
 ) {
@@ -306,7 +306,7 @@ export async function deployAndCreateNewRedPacket(
 }
 
 export async function createNewRedPacket(
-    redpacket: RedPacket,
+    redpacket: RedPacketInput,
     useHexlinkAccount: boolean,
     dryrun: boolean = false
 ) : Promise<{id: string, opId?: number}> {
@@ -329,7 +329,7 @@ export async function callClaimRedPacket(redPacket: RedPacketDB) : Promise<void>
 
 export async function callCreateRedPacket(
     chain: Chain,
-    redPacket: RedPacket,
+    redPacket: RedPacketInput,
     txHash: string
 ) : Promise<number> {
     const createRedPacket = httpsCallable(functions, 'createRedPacket');

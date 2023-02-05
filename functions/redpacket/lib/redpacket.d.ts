@@ -4,4 +4,3 @@ import type { Chain } from "../../common";
 export declare const redPacketInterface: ethers.utils.Interface;
 export declare function redPacketAddress(chain: Chain): string;
 export declare function redPacketContract(provider: Provider): Promise<Contract>;
-export declare function redPacketMode(mode: string): number;

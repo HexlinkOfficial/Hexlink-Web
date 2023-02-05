@@ -70,23 +70,26 @@ function getPopularTokens(chain) {
     });
 }
 exports.getPopularTokens = getPopularTokens;
+function equal(a, b) {
+    return a.toLowerCase() == b.toLowerCase();
+}
 function isNativeCoin(token, chain) {
-    return token.address == nativeCoinAddress(chain);
+    return equal(token, nativeCoinAddress(chain));
 }
 exports.isNativeCoin = isNativeCoin;
 function isWrappedCoin(token, chain) {
-    return token.address == wrappedCoinAddress(chain);
+    return equal(token, wrappedCoinAddress(chain));
 }
 exports.isWrappedCoin = isWrappedCoin;
 function isStableCoin(token, chain) {
-    return stableCoinAddresses(chain).includes(token.address);
+    return stableCoinAddresses(chain).includes(token.toLowerCase());
 }
 exports.isStableCoin = isStableCoin;
 function tokenBase(token) {
     return new bignumber_js_1.BigNumber(10).pow(token.decimals);
 }
 exports.tokenBase = tokenBase;
-function tokenAmount(balance, token) {
-    return (0, utils_1.toEthBigNumber)(tokenBase(token).times(balance));
+function tokenAmount(balance, decimals) {
+    return (0, utils_1.toEthBigNumber)(new bignumber_js_1.BigNumber(10).pow(decimals).times(balance));
 }
 exports.tokenAmount = tokenAmount;

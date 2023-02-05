@@ -3,7 +3,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.redpacketId = exports.parseCreated = exports.parseClaimed = void 0;
 const ethers_1 = require("ethers");
 const redpacket_1 = require("./redpacket");
-const redpacket_2 = require("./redpacket");
 const iface = new ethers_1.ethers.utils.Interface([
     "event Claimed(bytes32 indexed PacketId, address claimer, uint256 amount)",
 ]);
@@ -42,12 +41,12 @@ function redpacketId(chain, account, input) {
         (0, redpacket_1.redPacketAddress)(chain),
         account,
         [
-            input.token.address,
+            input.token,
             input.salt,
             input.balance,
             input.validator,
             input.split,
-            (0, redpacket_2.redPacketMode)(input.mode)
+            input.mode
         ]
     ]));
 }

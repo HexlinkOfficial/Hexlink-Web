@@ -1,4 +1,5 @@
 import { BigNumber as EthBigNumber } from "ethers";
+import { BigNumber } from "bignumber.js";
 
 import { Chain, Op, accountInterface } from "../../common";
 import {
@@ -7,26 +8,34 @@ import {
     isStableCoin,
     erc20Interface,
     toEthBigNumber,
-    tokenBase
 } from "../../common";
-import type {RedPacket} from "./types";
-import { redPacketInterface, redPacketAddress, redPacketMode } from "./redpacket";
+import type {RedPacket, RedPacketInput} from "./types";
+import { redPacketInterface, redPacketAddress } from "./redpacket";
 import {PriceInfo} from "./types";
 
 export function calcGasSponsorship(
     chain: Chain,
-    redpacket: RedPacket,
+    gasToken: {
+        address: string,
+        decimals: number,
+    },
+    split: number,
     priceInfo: PriceInfo,
 ) : EthBigNumber {
-    const sponsorshipGasAmount = EthBigNumber.from(200000).mul(redpacket.split || 0);
-    const gasToken = redpacket.gasToken;
-    if (isNativeCoin(gasToken, chain) || isWrappedCoin(gasToken, chain)) {
+    const sponsorshipGasAmount = EthBigNumber.from(200000).mul(split || 0);
+    if (isNativeCoin(gasToken.address, chain) || isWrappedCoin(gasToken.address, chain)) {
         return sponsorshipGasAmount.mul(priceInfo.gasPrice);
-    } else if (isStableCoin(gasToken, chain)) {
+    } else if (isStableCoin(gasToken.address, chain)) {
         // calculate usd value of tokens
-        const normalizedUsd = tokenBase(gasToken).times(priceInfo.nativeCurrencyInUsd);
-        const nativeCoinBase = EthBigNumber.from(10).pow(chain.nativeCurrency.decimals);
-        return toEthBigNumber(normalizedUsd).mul(sponsorshipGasAmount).mul(
+        const normalizedUsd = new BigNumber(10).pow(
+            gasToken.decimals
+        ).times(priceInfo.nativeCurrencyInUsd);
+        const nativeCoinBase = EthBigNumber.from(
+            10
+        ).pow(chain.nativeCurrency.decimals);
+        return toEthBigNumber(normalizedUsd).mul(
+            sponsorshipGasAmount
+        ).mul(
             priceInfo.gasPrice
         ).div(nativeCoinBase);
     }
@@ -36,7 +45,7 @@ export function calcGasSponsorship(
 export function buildGasSponsorshipOp(
     hexlAccount: string,
     refunder: string,
-    input: RedPacket,
+    input: RedPacketInput,
 ) : Op {
     return {
         name: "depositGasSponsorship",
@@ -44,7 +53,7 @@ export function buildGasSponsorshipOp(
         args: {
             ref: input.id,
             receipt: refunder,
-            token: input.gasToken.address,
+            token: input.gasToken,
             amount: input.gasTokenAmount
         },
         input: {
@@ -54,7 +63,7 @@ export function buildGasSponsorshipOp(
                 "deposit", [
                     input.id,
                     refunder,
-                    input.gasToken.address,
+                    input.gasToken,
                     input.gasTokenAmount
                 ]
             ),
@@ -68,12 +77,12 @@ export function buildRedPacketOps(
     input: RedPacket
 ) : Op[] {
     const packet = {
-       token: input.token.address,
+       token: input.token,
        salt: input.salt,
        balance: input.balance,
        validator: input.validator,
        split: input.split,
-       mode: redPacketMode(input.mode),
+       mode: input.mode,
     };
     const redPacketAddr = redPacketAddress(chain);
     if (isNativeCoin(input.token, chain)) {
@@ -83,7 +92,7 @@ export function buildRedPacketOps(
             args: {packet},
             input: {
                 to: redPacketAddr,
-                value: packet.balance,
+                value: EthBigNumber.from(packet.balance),
                 callData: redPacketInterface.encodeFunctionData(
                     "create", [packet]
                 ),
@@ -99,7 +108,7 @@ export function buildRedPacketOps(
                 amount: packet.balance
             },
             input: {
-                to: input.token.address,
+                to: input.token,
                 value: EthBigNumber.from(0),
                 callData: erc20Interface.encodeFunctionData(
                     "approve", [redPacketAddr, packet.balance]

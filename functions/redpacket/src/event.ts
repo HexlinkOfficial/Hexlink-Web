@@ -5,7 +5,6 @@ import {redPacketAddress, redPacketInterface} from "./redpacket";
 import type {Chain} from "../../common";
 import type {TransactionReceipt} from "@ethersproject/providers";
 import type {RedPacket} from "./types";
-import {redPacketMode} from "./redpacket";
 
 const iface = new ethers.utils.Interface([
     "event Claimed(bytes32 indexed PacketId, address claimer, uint256 amount)",
@@ -67,12 +66,12 @@ export function redpacketId(chain: Chain, account: string, input: RedPacket) {
                 redPacketAddress(chain),
                 account,
                 [
-                    input.token.address,
+                    input.token,
                     input.salt,
                     input.balance,
                     input.validator,
                     input.split,
-                    redPacketMode(input.mode)
+                    input.mode
                 ]
             ]
         )

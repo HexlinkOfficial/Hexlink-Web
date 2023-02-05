@@ -38,9 +38,7 @@ import { useChainStore } from "@/stores/chain";
 import { useAccountStore } from '@/stores/account';
 import { isContract } from "../../functions/common";
 import { deployAndCreateNewRedPacket, createNewRedPacket } from "@/web3/redpacket";
-import { calcGasSponsorship, redpacketId } from "../../functions/redpacket";
-import { tokenAmount } from "../../functions/common";
-import { getPriceInfo } from "@/web3/network";
+import { redpacketId } from "../../functions/redpacket";
 
 const store = useRedPacketStore();
 const createRedPacket = async () => {
@@ -50,9 +48,6 @@ const createRedPacket = async () => {
     const account = useAccountStore().account!.address;
 
     const input = store.redpacket!;
-    input.balance = tokenAmount(input.balanceInput, input.token);
-    const priceInfo = await getPriceInfo(chain);
-    input.gasTokenAmount = calcGasSponsorship(chain, input, priceInfo);
     input.id = redpacketId(chain, account, input);
     if (await isContract(useChainStore().provider, account)) {
       await createNewRedPacket(input, store.account == "hexlink");

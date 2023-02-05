@@ -5,10 +5,7 @@ import {getRedPacket} from "./graphql/redpacket";
 import type {RedPacket} from "./graphql/redpacket";
 import type {RedPacket as RedPacketInput} from "../redpacket";
 import {signWithKmsKey} from "./kms";
-import {
-  ethers,
-  BigNumber as EthBigNumber,
-} from "ethers";
+import {ethers} from "ethers";
 import {
   accountAddress,
   toEthSignedMessageHash,
@@ -18,7 +15,6 @@ import {KMS_KEY_TYPE, Refunders, kmsConfig} from "./config";
 import {
   redPacketAddress,
   redPacketInterface,
-  redPacketMode,
   redpacketId,
 } from "../redpacket";
 import {Firebase} from "./firebase";
@@ -64,7 +60,7 @@ async function buildClaimOp(
     packet: {
       token: redPacket.metadata.token,
       salt: redPacket.metadata.salt,
-      balance: EthBigNumber.from(redPacket.metadata.balance),
+      balance: redPacket.metadata.balance,
       validator: redPacket.metadata.validator,
       split: redPacket.metadata.split,
       mode: redPacket.metadata.mode,
@@ -133,12 +129,12 @@ export const claimRedPacket = functions.https.onCall(
 
 async function buildCreateOp(chain: Chain, redPacket: RedPacketInput) {
   const args = {
-    token: redPacket.token.address,
+    token: redPacket.token,
     salt: redPacket.salt,
     balance: redPacket.balance,
     validator: redPacket.validator,
     split: redPacket.split,
-    mode: redPacketMode(redPacket.mode),
+    mode: redPacket.mode,
   };
   const callData = redPacketInterface.encodeFunctionData("create", [args]);
   return {
@@ -177,14 +173,7 @@ export const createRedPacket = functions.https.onCall(
             to: redPacketAddress(chain),
             args: {
               redPacketId: rpId,
-              metadata: {
-                token: data.redPacket.token.address,
-                salt: data.redPacket.salt,
-                balance: data.redPacket.balance.toString(),
-                split: data.redPacket.split,
-                mode: redPacketMode(data.redPacket.mode),
-                validator: data.redPacket.validator,
-              },
+              metadata: data.redPacket,
             },
           }]
       );

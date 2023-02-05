@@ -38,9 +38,9 @@
                 <div class="mode-dropdown" :class="chooseTotalDrop && 'active'"
                   @click.stop="chooseTotalDrop = !chooseTotalDrop;" v-on-click-outside.bubble="chooseTotalHandle">
                   <div class="token-icon">
-                    <img :src="redpacket.token.logoURI" />
+                    <img :src="token.logoURI" />
                   </div>
-                  <div class="mode-text2">{{ redpacket.token.symbol }}</div>
+                  <div class="mode-text2">{{ token.symbol }}</div>
                   <input class="mode-input" type="text" placeholder="select" readonly>
                   <div class="mode-options">
                     <div class="mode-option" v-for="(token, index) of tokens" :key="index"
@@ -50,7 +50,7 @@
                       </div>
                       <div style="display: flex; flex-direction: column; align-items: flex-start;">
                         <b>{{ token.symbol }}</b>
-                        <div style="margin-right:0.5rem;">balance {{ tokenBalance(token) }}</div>
+                        <div style="margin-right:0.5rem;">balance {{ tokenBalance(token.address) }}</div>
                       </div>
                     </div>
                   </div>
@@ -67,8 +67,8 @@
             <div class="mode-text">{{ modeLabels[redpacket.mode] }}</div>
             <input class="mode-input" type="text" placeholder="select" readonly>
             <div class="mode-options" style="width:100%;">
-              <div class="mode-option" @click="modeChoose('random')">Randomly</div>
-              <div class="mode-option" @click="modeChoose('equal')">Equally</div>
+              <div class="mode-option" @click="modeChoose(2)">Randomly</div>
+              <div class="mode-option" @click="modeChoose(1)">Equally</div>
             </div>
           </div>
           <p>Shared among</p>
@@ -98,9 +98,9 @@
             <div class="token-select">
               <div class="mode-dropdown" :class="chooseGasDrop && 'active'" @click.stop="chooseGasDrop = !chooseGasDrop;" v-on-click-outside.bubble="chooseGasHandle">
                 <div class="token-icon">
-                  <img :src="redpacket.gasToken.logoURI" />
+                  <img :src="gasToken.logoURI" />
                 </div>
-                <div class="mode-text2">{{ redpacket.gasToken.symbol }}</div>
+                <div class="mode-text2">{{ gasToken.symbol }}</div>
                 <input class="mode-input" type="text" placeholder="select" readonly>
                 <div class="mode-options">
                   <div class="mode-option" v-for="(token, index) of tokens" :key="index"
@@ -111,7 +111,7 @@
                     <div style="display: flex; flex-direction: column; align-items: flex-start;">
                       <b>{{ token.symbol }}</b>
                       <div style="margin-right:0.5rem;">
-                        Balance {{ tokenBalance(token) }}
+                        Balance {{ tokenBalance(token.address) }}
                       </div>
                     </div>
                   </div>
@@ -168,7 +168,6 @@ import { useChainStore } from "@/stores/chain";
 import { useRedPacketStore } from '@/stores/redpacket';
 import { connectWallet } from "@/web3/wallet";
 import { tokenBase } from "@/web3/utils";
-import { BigNumber as EthBigNumber } from "ethers";
 import type { OnClickOutsideHandler } from '@vueuse/core';
 import { onClickOutside } from '@vueuse/core'
 import { vOnClickOutside } from '@/services/directive';
@@ -182,8 +181,8 @@ import RedPacketAccount from "@/components/RedPacketAccount.vue";
 import { getPriceInfo } from "@/web3/network";
 
 import type { Token } from "../../functions/common";
-import { hash } from "../../functions/common";
-import type { RedPacketInput } from "@/stores/redpacket";
+import { hash, tokenAmount } from "../../functions/common";
+import type { RedPacketInput } from "../../functions/redpacket";
 import { calcGasSponsorship as calcGasSponsorshipFunc } from "../../functions/redpacket";
 
 const chooseTotalDrop = ref<boolean>(false);
@@ -199,27 +198,34 @@ const walletStore = useWalletStore();
 const redPacketStore = useRedPacketStore();
 
 const hexlAccountBalances = ref<BalanceMap>({});
-const hexlAccountBalance = (token: Token) : string => {
-  return hexlAccountBalances.value[token.address]?.normalized || "0";
+const hexlAccountBalance = (token: string) : string => {
+  return hexlAccountBalances.value[token]?.normalized || "0";
 }
 
 const walletAccountBalances = ref<BalanceMap>({});
-const walletAccountBalance = (token: Token) : string => {
-  return walletAccountBalances.value[token.address]?.normalized || "0";
+const walletAccountBalance = (token: string) : string => {
+  return walletAccountBalances.value[token]?.normalized || "0";
 }
 
-const redpacket = ref<RedPacketInput>({
-  mode: "random",
+interface RawRedPacketInput extends RedPacketInput {
+  balanceInput: string,
+}
+
+const redpacket = ref<RawRedPacketInput>({
+  mode: 2,
   salt: hash(new Date().toISOString()),
   split: 1,
-  balance: EthBigNumber.from(0),
+  balance: "0",
   balanceInput: "1",
-  token: tokenStore.nativeCoin,
-  gasToken: tokenStore.nativeCoin,
+  token: tokenStore.nativeCoin.address,
+  gasToken: tokenStore.nativeCoin.address,
   validator: validator(),
 });
 
-const tokenBalance = (token: Token) => {
+const token = computed(() => tokenStore.token(redpacket.value.token));
+const gasToken = computed(() => tokenStore.token(redpacket.value.gasToken));
+
+const tokenBalance = (token: string) => {
   if (redPacketStore.account == "hexlink") {
     return hexlAccountBalance(token);
   }
@@ -243,25 +249,25 @@ const genTokenList = async function () {
     }
     if (redPacketStore.account == "hexlink") {
       tokens.value = tokenStore.tokens.filter(
-        t => Number(hexlAccountBalance(t)) > 0
+        t => Number(hexlAccountBalance(t.address)) > 0
       );
       setDefaultToken(walletAccountBalance);
     } else {
       tokens.value = tokenStore.tokens.filter(
-        t => Number(walletAccountBalance(t)) > 0
+        t => Number(walletAccountBalance(t.address)) > 0
       );
       setDefaultToken(hexlAccountBalance);
     }
 }
 
-const setDefaultToken = function (getBalance: (t: Token) => string) {
+const setDefaultToken = function (getBalance: (t: string) => string) {
     const nativeCoin = tokenStore.nativeCoin;
-    if (Number(getBalance(nativeCoin)) > 0 || tokens.value.length == 0) {
-      redpacket.value.token = nativeCoin;
-      redpacket.value.gasToken = nativeCoin;
+    if (Number(getBalance(nativeCoin.address)) > 0 || tokens.value.length == 0) {
+      redpacket.value.token = nativeCoin.address;
+      redpacket.value.gasToken = nativeCoin.address;
     } else {
-      redpacket.value.token = tokens.value[0];
-      redpacket.value.gasToken = tokens.value[0]
+      redpacket.value.token = tokens.value[0].address;
+      redpacket.value.gasToken = tokens.value[0].address
     }
 }
 
@@ -270,23 +276,25 @@ const calcGasSponsorship = async () => {
   const priceInfo = await getPriceInfo(chain);
   redpacket.value.gasTokenAmount = calcGasSponsorshipFunc(
     chain,
-    redpacket.value,
+    tokenStore.token(redpacket.value.gasToken),
+    redpacket.value.split,
     priceInfo,
-  );
+  ).toString();
 };
 
 const gasSponsorship = computed(() => {
+ const gasToken = tokenStore.token(redpacket.value.gasToken);
   return new BigNumber(
     redpacket.value.gasTokenAmount?.toString() || 0
-  ).div(tokenBase(redpacket.value.gasToken)).toString(10);
+  ).div(tokenBase(gasToken)).toString(10);
 });
 
 const tokenChoose =
   async (mode: "token" | "gas", token: Token) => {
     if (mode === "token") {
-      redpacket.value.token = token;
+      redpacket.value.token = token.address;
     } else {
-      redpacket.value.gasToken = token;
+      redpacket.value.gasToken = token.address;
       calcGasSponsorship();
     }
   };
@@ -318,12 +326,8 @@ const tryConnectWallet = async function () {
   await connectWallet();
 };
 
-const modeLabels = {
-  "random": "Randomly",
-  "equal": "Equally",
-};
-
-const modeChoose = (gameMode: "random" | "equal") => {
+const modeLabels = ["", "Equally", "Randomly"];
+const modeChoose = (gameMode: 1 | 2) => {
   redpacket.value.mode = gameMode;
 }
 
@@ -339,8 +343,13 @@ const validateInput = () => {
   return true;
 };
 
-const confirmRedPacket = function () {
+const confirmRedPacket = async function () {
   if (validateInput()) {
+    redpacket.value.balance = tokenAmount(
+      redpacket.value.balanceInput,
+      tokenStore.token(redpacket.value.token).decimals
+    ).toString();
+    await calcGasSponsorship();
     useRedPacketStore().beforeCreate(redpacket.value);
   }
 };

@@ -22,7 +22,3 @@ export async function redPacketContract(
       provider
   );
 }
-
-export function redPacketMode(mode: string) : number {
-  return mode == "random" ? 2 : 1;
-}

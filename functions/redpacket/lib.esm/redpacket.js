@@ -10,6 +10,3 @@ export function redPacketAddress(chain) {
 export async function redPacketContract(provider) {
     return new ethers.Contract(redPacketAddress(await getChainFromProvider(provider)), RED_PACKET_ABI, provider);
 }
-export function redPacketMode(mode) {
-    return mode == "random" ? 2 : 1;
-}

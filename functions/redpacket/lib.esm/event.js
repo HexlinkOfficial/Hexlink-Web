@@ -1,7 +1,6 @@
 "use strict";
 import { ethers } from "ethers";
 import { redPacketAddress, redPacketInterface } from "./redpacket";
-import { redPacketMode } from "./redpacket";
 const iface = new ethers.utils.Interface([
     "event Claimed(bytes32 indexed PacketId, address claimer, uint256 amount)",
 ]);
@@ -38,12 +37,12 @@ export function redpacketId(chain, account, input) {
         redPacketAddress(chain),
         account,
         [
-            input.token.address,
+            input.token,
             input.salt,
             input.balance,
             input.validator,
             input.split,
-            redPacketMode(input.mode)
+            input.mode
         ]
     ]));
 }

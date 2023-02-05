@@ -33,7 +33,6 @@ export const GET_CREATED_REDPACKETS = gql`
             id
             type
             created_at
-            request
             transaction {
               tx
               status

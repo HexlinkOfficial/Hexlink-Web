@@ -54,6 +54,7 @@ async function processAction(op, chain, action, receipt) {
                         receipt: deposit === null || deposit === void 0 ? void 0 : deposit.receipt,
                         token: deposit === null || deposit === void 0 ? void 0 : deposit.token,
                         amount: deposit === null || deposit === void 0 ? void 0 : deposit.amount.toString(),
+                        priceInfo: params.priceInfo,
                     }
                 }]);
         }

@@ -12,11 +12,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.tokenAmount = exports.tokenBase = exports.isStableCoin = exports.isWrappedCoin = exports.isNativeCoin = exports.getPopularTokens = exports.allowedGasToken = exports.stableCoinAddresses = exports.wrappedCoinAddress = exports.nativeCoinAddress = void 0;
+exports.calcGas = exports.tokenAmount = exports.tokenBase = exports.isStableCoin = exports.isWrappedCoin = exports.isNativeCoin = exports.getPopularTokens = exports.allowedGasToken = exports.stableCoinAddresses = exports.wrappedCoinAddress = exports.nativeCoinAddress = void 0;
 const GOERLI_TOKENS_json_1 = __importDefault(require("./tokens/GOERLI_TOKENS.json"));
 const MUMBAI_TOKENS_json_1 = __importDefault(require("./tokens/MUMBAI_TOKENS.json"));
 const POLYGON_TOKENS_json_1 = __importDefault(require("./tokens/POLYGON_TOKENS.json"));
 const addresses_json_1 = __importDefault(require("./addresses.json"));
+const ethers_1 = require("ethers");
 const bignumber_js_1 = require("bignumber.js");
 const utils_1 = require("./utils");
 function nativeCoinAddress(chain) {
@@ -93,3 +94,16 @@ function tokenAmount(balance, decimals) {
     return (0, utils_1.toEthBigNumber)(new bignumber_js_1.BigNumber(10).pow(decimals).times(balance));
 }
 exports.tokenAmount = tokenAmount;
+function calcGas(chain, gasToken, amount, priceInfo) {
+    if (isNativeCoin(gasToken.address, chain) || isWrappedCoin(gasToken.address, chain)) {
+        return amount.mul(priceInfo.gasPrice);
+    }
+    else if (isStableCoin(gasToken.address, chain)) {
+        // calculate usd value of tokens
+        const normalizedUsd = new bignumber_js_1.BigNumber(10).pow(gasToken.decimals).times(priceInfo.nativeCurrencyInUsd);
+        const nativeCoinBase = ethers_1.BigNumber.from(10).pow(chain.nativeCurrency.decimals);
+        return (0, utils_1.toEthBigNumber)(normalizedUsd).mul(amount).mul(priceInfo.gasPrice).div(nativeCoinBase);
+    }
+    throw new Error("Unsupported gas token");
+}
+exports.calcGas = calcGas;

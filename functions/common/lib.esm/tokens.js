@@ -3,6 +3,7 @@ import GOERLI_TOKENS from "./tokens/GOERLI_TOKENS.json";
 import MUMBAI_TOKENS from "./tokens/MUMBAI_TOKENS.json";
 import POLYGON_TOEKNS from "./tokens/POLYGON_TOKENS.json";
 import ADDRESSES from "./addresses.json";
+import { BigNumber as EthBigNumber } from "ethers";
 import { BigNumber } from "bignumber.js";
 import { toEthBigNumber } from "./utils";
 export function nativeCoinAddress(chain) {
@@ -66,4 +67,16 @@ export function tokenBase(token) {
 }
 export function tokenAmount(balance, decimals) {
     return toEthBigNumber(new BigNumber(10).pow(decimals).times(balance));
+}
+export function calcGas(chain, gasToken, amount, priceInfo) {
+    if (isNativeCoin(gasToken.address, chain) || isWrappedCoin(gasToken.address, chain)) {
+        return amount.mul(priceInfo.gasPrice);
+    }
+    else if (isStableCoin(gasToken.address, chain)) {
+        // calculate usd value of tokens
+        const normalizedUsd = new BigNumber(10).pow(gasToken.decimals).times(priceInfo.nativeCurrencyInUsd);
+        const nativeCoinBase = EthBigNumber.from(10).pow(chain.nativeCurrency.decimals);
+        return toEthBigNumber(normalizedUsd).mul(amount).mul(priceInfo.gasPrice).div(nativeCoinBase);
+    }
+    throw new Error("Unsupported gas token");
 }

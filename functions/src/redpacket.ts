@@ -165,6 +165,7 @@ export const createRedPacket = functions.https.onCall(
           redPacketId: rpId,
           creator: data.creator,
           refunder: Refunders[chain.name],
+          priceInfo: data.redPacket.priceInfo,
         },
       };
       const [{id: reqId}] = await insertRequest(

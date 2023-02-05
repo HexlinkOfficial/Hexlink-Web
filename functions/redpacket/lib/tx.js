@@ -1,25 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.buildRedPacketOps = exports.buildGasSponsorshipOp = exports.calcGasSponsorship = void 0;
+exports.buildRedPacketOps = exports.buildGasSponsorshipOp = void 0;
 const ethers_1 = require("ethers");
-const bignumber_js_1 = require("bignumber.js");
 const common_1 = require("../../common");
 const common_2 = require("../../common");
 const redpacket_1 = require("./redpacket");
-function calcGasSponsorship(chain, gasToken, split, priceInfo) {
-    const sponsorshipGasAmount = ethers_1.BigNumber.from(200000).mul(split || 0);
-    if ((0, common_2.isNativeCoin)(gasToken.address, chain) || (0, common_2.isWrappedCoin)(gasToken.address, chain)) {
-        return sponsorshipGasAmount.mul(priceInfo.gasPrice);
-    }
-    else if ((0, common_2.isStableCoin)(gasToken.address, chain)) {
-        // calculate usd value of tokens
-        const normalizedUsd = new bignumber_js_1.BigNumber(10).pow(gasToken.decimals).times(priceInfo.nativeCurrencyInUsd);
-        const nativeCoinBase = ethers_1.BigNumber.from(10).pow(chain.nativeCurrency.decimals);
-        return (0, common_2.toEthBigNumber)(normalizedUsd).mul(sponsorshipGasAmount).mul(priceInfo.gasPrice).div(nativeCoinBase);
-    }
-    throw new Error("Unsupported gas token");
-}
-exports.calcGasSponsorship = calcGasSponsorship;
 function buildGasSponsorshipOp(hexlAccount, refunder, input) {
     return {
         name: "depositGasSponsorship",

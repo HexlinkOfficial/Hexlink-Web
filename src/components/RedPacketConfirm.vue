@@ -1,5 +1,5 @@
 <template>
-  <div v-if="store.status == 'confirming'" class="claim-success-card transition">
+  <div v-if="store.status === 'confirming'" class="claim-success-card transition">
     <router-link to="/redpacket/send">
       <svg @click="closeModal" class="redpacket_close transition" width="30" height="30" viewBox="0 0 30 30" fill="none"
         xmlns="http://www.w3.org/2000/svg">
@@ -9,7 +9,8 @@
       </svg>
     </router-link>
     <h2 class="transition">
-      <span style="font-size: 20px; margin-top: 4rem;">{{ message }}</span><br>
+      <span style="font-size: 20px; margin-top: 4rem;"> ServiceFee: {{ serviceFee }}</span><br>
+      <span style="font-size: 20px;">{{ message }}</span><br>
     </h2>
     <div class="cta-container transition" style="margin-top: 340px;">
       <button class="cta" @click="createRedPacket">Confirm</button>
@@ -31,36 +32,47 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useRedPacketStore } from '@/stores/redpacket';
 import { useChainStore } from "@/stores/chain";
 import { useAccountStore } from '@/stores/account';
 import { isContract } from "../../functions/common";
 import { deployAndCreateNewRedPacket, createNewRedPacket } from "@/web3/redpacket";
-import { redpacketId } from "../../functions/redpacket";
+import { buildCreateRedPacketRequest } from "@/web3/redpacket";
+import { BigNumber as EthBigNumber } from "ethers";
+import { useTokenStore } from "@/stores/token";
 
+const estimatedGas = ref<string>("0");
+const message = ref<string>("Let's go!");
 const store = useRedPacketStore();
 const createRedPacket = async () => {
   store.setStatus("processing");
+  message.value = "Processing";
   try {
-    const chain = useChainStore().chain;
     const account = useAccountStore().account!.address;
-
-    const input = store.redpacket!;
-    input.id = redpacketId(chain, account, input);
     if (await isContract(useChainStore().provider, account)) {
-      await createNewRedPacket(input, store.account == "hexlink");
+      await createNewRedPacket(store.redpacket!, store.account == "hexlink", true);
     } else {
-      await deployAndCreateNewRedPacket(input, store.account == "hexlink");
+      await deployAndCreateNewRedPacket(store.redpacket!, store.account == "hexlink");
     }
+    message.value = "Done!";
     store.setStatus("success");
   } catch (e) {
     console.log("Failed to create redpacket with");
     console.log(e);
     store.setStatus("error");
+    message.value = "Something went wrong...";
   }
 }
+
+const serviceFee = computed(() => {
+  return EthBigNumber.from(
+    store.redpacket!.gasTokenAmount
+  ).add(estimatedGas.value).div(EthBigNumber.from(10).pow(
+    useTokenStore().token(store.redpacket!.gasToken).decimals
+  )).toString();
+})
 
 const router = useRouter();
 const closeModal = () => {
@@ -69,22 +81,6 @@ const closeModal = () => {
   }
   store.setStatus("");
 }
-
-const message = computed(() => {
-  if (store.status == 'error') {
-    return "Something went wrong";
-  }
-  if (store.status == 'success') {
-    return "RedPacket sent succesfully!";
-  }
-  if (store.status == "processing") {
-    return "Processing";
-  }
-  if (store.status == "confirming") {
-    return "Let's go!";
-  }
-  return "";
-});
 </script>
 
 <style lang="less" scoped>

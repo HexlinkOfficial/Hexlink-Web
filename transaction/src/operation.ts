@@ -83,6 +83,7 @@ async function processAction(
             receipt: deposit?.receipt,
             token: deposit?.token,
             amount: deposit?.amount.toString(),
+            priceInfo: params.priceInfo,
           }
         }]
       );

@@ -18,6 +18,7 @@ __exportStar(require("./hexlink"), exports);
 __exportStar(require("./oracle"), exports);
 __exportStar(require("./chain"), exports);
 __exportStar(require("./tokens"), exports);
+__exportStar(require("./price"), exports);
 __exportStar(require("./contracts"), exports);
 __exportStar(require("./utils"), exports);
 __exportStar(require("./account"), exports);

@@ -1,46 +1,8 @@
 import { BigNumber as EthBigNumber } from "ethers";
-import { BigNumber } from "bignumber.js";
-
 import { Chain, Op, accountInterface } from "../../common";
-import {
-    isNativeCoin,
-    isWrappedCoin,
-    isStableCoin,
-    erc20Interface,
-    toEthBigNumber,
-} from "../../common";
+import { isNativeCoin, erc20Interface } from "../../common";
 import type {RedPacket, RedPacketInput} from "./types";
 import { redPacketInterface, redPacketAddress } from "./redpacket";
-import {PriceInfo} from "./types";
-
-export function calcGasSponsorship(
-    chain: Chain,
-    gasToken: {
-        address: string,
-        decimals: number,
-    },
-    split: number,
-    priceInfo: PriceInfo,
-) : EthBigNumber {
-    const sponsorshipGasAmount = EthBigNumber.from(200000).mul(split || 0);
-    if (isNativeCoin(gasToken.address, chain) || isWrappedCoin(gasToken.address, chain)) {
-        return sponsorshipGasAmount.mul(priceInfo.gasPrice);
-    } else if (isStableCoin(gasToken.address, chain)) {
-        // calculate usd value of tokens
-        const normalizedUsd = new BigNumber(10).pow(
-            gasToken.decimals
-        ).times(priceInfo.nativeCurrencyInUsd);
-        const nativeCoinBase = EthBigNumber.from(
-            10
-        ).pow(chain.nativeCurrency.decimals);
-        return toEthBigNumber(normalizedUsd).mul(
-            sponsorshipGasAmount
-        ).mul(
-            priceInfo.gasPrice
-        ).div(nativeCoinBase);
-    }
-    throw new Error("Unsupported gas token");
-}
 
 export function buildGasSponsorshipOp(
     hexlAccount: string,

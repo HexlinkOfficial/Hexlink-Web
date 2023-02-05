@@ -16,7 +16,7 @@ export declare function encodeExec(op: OpInput): string;
 export declare function encodeExecBatch(ops: OpInput[]): string;
 export declare function encodeValidateAndCall(params: {
     account: Contract;
-    ops: OpInput[];
+    txData: string;
     sign: (msg: string) => Promise<string>;
     gas?: GasObject;
 }): Promise<{

@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.PriceConfigs = exports.getChain = exports.getChainFromProvider = exports.SUPPORTED_CHAINS = exports.MUMBAI = exports.POLYGON = exports.GOERLI = void 0;
+exports.getChain = exports.getChainFromProvider = exports.SUPPORTED_CHAINS = exports.MUMBAI = exports.POLYGON = exports.GOERLI = void 0;
 exports.GOERLI = {
     chainId: "5",
     name: "goerli",
@@ -71,17 +71,3 @@ function getChain(chain) {
     throw new Error("Unsupported chain");
 }
 exports.getChain = getChain;
-exports.PriceConfigs = {
-    "goerli": {
-        nativeCurrencyInUsd: "1500.0",
-        gasPrice: "10000000000", // 10 gwei
-    },
-    "polygon": {
-        nativeCurrencyInUsd: "1.0",
-        gasPrice: "100000000000", // 100 gwei
-    },
-    "mumbai": {
-        nativeCurrencyInUsd: "1.0",
-        gasPrice: "2000000000", // 2 gwei
-    },
-};

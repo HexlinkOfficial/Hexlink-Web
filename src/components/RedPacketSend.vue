@@ -162,6 +162,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, watch, computed } from "vue";
+import { BigNumber as EthBigNumber } from "ethers";
 import { useWalletStore } from '@/stores/wallet';
 import { useAccountStore } from '@/stores/account';
 import { useChainStore } from "@/stores/chain";
@@ -183,7 +184,8 @@ import { getPriceInfo } from "@/web3/network";
 import type { Token } from "../../functions/common";
 import { hash, tokenAmount } from "../../functions/common";
 import type { RedPacketInput } from "../../functions/redpacket";
-import { calcGasSponsorship as calcGasSponsorshipFunc } from "../../functions/redpacket";
+import { calcGas } from "../../functions/common";
+import { redpacketId } from "../../functions/redpacket";
 
 const chooseTotalDrop = ref<boolean>(false);
 const openDropdown = ref<boolean>(false);
@@ -219,6 +221,7 @@ const redpacket = ref<RawRedPacketInput>({
   balanceInput: "1",
   token: tokenStore.nativeCoin.address,
   gasToken: tokenStore.nativeCoin.address,
+  gasTokenAmount: "0",
   validator: validator(),
 });
 
@@ -274,10 +277,12 @@ const setDefaultToken = function (getBalance: (t: string) => string) {
 const calcGasSponsorship = async () => {
   const chain = useChainStore().chain;
   const priceInfo = await getPriceInfo(chain);
-  redpacket.value.gasTokenAmount = calcGasSponsorshipFunc(
+  redpacket.value.priceInfo = priceInfo;
+  const amount = EthBigNumber.from(200000).mul(redpacket.value.split || 0);
+  redpacket.value.gasTokenAmount = calcGas(
     chain,
     tokenStore.token(redpacket.value.gasToken),
-    redpacket.value.split,
+    amount,
     priceInfo,
   ).toString();
 };
@@ -349,6 +354,9 @@ const confirmRedPacket = async function () {
       redpacket.value.balanceInput,
       tokenStore.token(redpacket.value.token).decimals
     ).toString();
+    const chain = useChainStore().chain;
+    const account = useAccountStore().account!.address;
+    redpacket.value.id = redpacketId(chain, account, redpacket.value);
     await calcGasSponsorship();
     useRedPacketStore().beforeCreate(redpacket.value);
   }

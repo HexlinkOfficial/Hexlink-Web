@@ -1,12 +1,13 @@
 import type { RedPacketDB, RedPacketOnchainState } from "@/types";
 import { ethers, BigNumber as EthBigNumber } from "ethers";
 import { useAuthStore } from "@/stores/auth";
+import { useTokenStore } from "@/stores/token";
 
 import { genDeployAuthProof } from "@/web3/oracle";
 import { tokenEqual } from "@/web3/utils";
 import { estimateGas, sendTransaction, signMessage } from "@/web3/wallet";
 
-import type { Token, Op, OpInput, Chain } from "../../functions/common";
+import type { Op, OpInput, Chain } from "../../functions/common";
 import {
     hash,
     isNativeCoin,
@@ -17,6 +18,8 @@ import {
     hexlInterface,
     accountContract,
     encodeValidateAndCall,
+    gasTokenPricePerGwei,
+    encodeExecBatch
 } from "../../functions/common";
 import type { RedPacketInput } from "../../functions/redpacket";
 import {
@@ -31,6 +34,7 @@ import { useWalletStore } from "@/stores/wallet";
 import { useAccountStore } from "@/stores/account";
 
 import { getFunctions, httpsCallable } from 'firebase/functions'
+import { string } from "vue-types";
 const functions = getFunctions();
 
 export interface Transaction {
@@ -181,7 +185,7 @@ async function buildCreateRedPacketTxForMetamask(input: RedPacketInput) {
     userOps = userOps.concat(buildRedPacketOps(chain, input));
     const {data: callData, signature, nonce} = await encodeValidateAndCall({
         account: accountContract(useChainStore().provider, hexlAccount),
-        ops: userOps.map(op => op.input),
+        txData: encodeExecBatch(userOps.map(op => op.input)),
         sign: async (msg: string) => await signMessage(walletAccount, msg)
     });
     hexlOps.push({
@@ -271,7 +275,6 @@ async function processTxAndSave(
     dryrun: boolean
 ) : Promise<{id: string, opId?: number}> {
     const chain = useChainStore().chain;
-    const id = redpacketId(chain, useAccountStore().account!.address, redpacket);
     if (dryrun) {
         for (let i = 0; i < txes.length; i++) {
             const gasUsed = await estimateGas(txes[i].tx);
@@ -280,17 +283,17 @@ async function processTxAndSave(
                 gasUsed: EthBigNumber.from(gasUsed).toString()
             })
         }
-        return {id};
+        return {id: redpacket.id!};
     }
 
     for (let i = 0; i < txes.length; i++) {
         const txHash = await sendTransaction(txes[i].input);
         if (txes[i].name == "createRedPacket") {
             const opId = await callCreateRedPacket(chain, redpacket, txHash);
-            return {id, opId};
+            return {id: redpacket.id!, opId};
         }
     }
-    return {id};
+    return {id: redpacket.id!};
 }
 
 export async function deployAndCreateNewRedPacket(
@@ -305,16 +308,62 @@ export async function deployAndCreateNewRedPacket(
     return await processTxAndSave(redpacket, txes, dryrun);
 }
 
+export async function buildCreateRedPacketRequest(input: RedPacketInput) {
+    const walletAccount = useWalletStore().account!.address;
+    const hexlAccount = useAccountStore().account!.address;
+    const chain = useChainStore().chain;
+
+    let userOps : Op[] = [];
+    userOps.push(buildGasSponsorshipOp(hexlAccount, refunder, input));
+    userOps = userOps.concat(buildRedPacketOps(chain, input));
+    const gas = {
+        receiver: refunder,
+        token: input.gasToken,
+        price: gasTokenPricePerGwei(
+            chain,
+            input.gasToken,
+            useTokenStore().token(input.gasToken).decimals,
+            input.priceInfo!
+        )
+    };
+    const txData = encodeExecBatch(userOps.map(op => op.input));
+    const {data, signature, nonce} = await encodeValidateAndCall({
+        account: accountContract(useChainStore().provider, hexlAccount),
+        txData,
+        sign: async (msg: string) => await signMessage(walletAccount, msg),
+        gas,
+    });
+    return {
+        params: {txData, signature, nonce, gas},
+        op: {to: useAccountStore().account!.address, data},
+    };
+}
+
+async function createRedPacketForHexlink(input: RedPacketInput, dryrun: boolean) {
+    const chain = useChainStore().chain;
+    const request = await buildCreateRedPacketRequest(input);
+    if (dryrun) {
+        console.log(request);
+        return {id: input.id!};
+    } else {
+        const opId = await callCreateRedPacket(
+            chain, input, undefined, request
+        );
+        return {id: input.id!, opId};
+    }
+}
+
 export async function createNewRedPacket(
     redpacket: RedPacketInput,
     useHexlinkAccount: boolean,
     dryrun: boolean = false
 ) : Promise<{id: string, opId?: number}> {
     if (useHexlinkAccount) {
-        throw new Error("not supported yet")
+        return await createRedPacketForHexlink(redpacket, dryrun);
+    } else {
+        const txes = await buildCreateRedPacketTxForMetamask(redpacket);
+        return await processTxAndSave(redpacket, txes, dryrun);
     }
-    const txes = await buildCreateRedPacketTxForMetamask(redpacket);
-    return await processTxAndSave(redpacket, txes, dryrun);
 }
 
 export async function callClaimRedPacket(redPacket: RedPacketDB) : Promise<void> {
@@ -330,7 +379,15 @@ export async function callClaimRedPacket(redPacket: RedPacketDB) : Promise<void>
 export async function callCreateRedPacket(
     chain: Chain,
     redPacket: RedPacketInput,
-    txHash: string
+    txHash?: string,
+    request?: {
+        params: any,
+        op: {
+            to: string,
+            data: string,
+            value?: string,
+        },
+    }
 ) : Promise<number> {
     const createRedPacket = httpsCallable(functions, 'createRedPacket');
     const result = await createRedPacket({
@@ -338,6 +395,7 @@ export async function callCreateRedPacket(
         redPacket: redPacket,
         creator: useAuthStore().userInfo,
         txHash,
+        request
     });
     return (result.data as any).id;
 }

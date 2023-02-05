@@ -65,7 +65,7 @@ export function encodeExecBatch(ops: OpInput[]) {
 
 export async function encodeValidateAndCall(params: {
   account: Contract,
-  ops: OpInput[],
+  txData: string
   sign: (msg: string) => Promise<string>,
   gas?: GasObject
 }) : Promise<{
@@ -74,27 +74,42 @@ export async function encodeValidateAndCall(params: {
   nonce: EthBigNumber
 }> {
   const nonce = await params.account.nonce();
-  const txData = encodeExecBatch(params.ops);
-  const message = ethers.utils.keccak256(
-    ethers.utils.defaultAbiCoder.encode(
-        ["bytes", "uint256"],
-        [txData, nonce]
-    )
-  );
-  const signature = await params.sign(message);
   let data: string;
   if (params.gas) {
+    const message = ethers.utils.keccak256(
+      ethers.utils.defaultAbiCoder.encode(
+          ["bytes", "uint256", "tuple(address, address, uint256)"],
+          [params.txData, nonce, [
+            params.gas.receiver,
+            params.gas.token,
+            params.gas.price
+          ]]
+      )
+    );
+    const signature = await params.sign(message);
     data = params.account.interface.encodeFunctionData(
       "validateAndCallWithGasRefund",
-      [txData, nonce, signature, params.gas]
+      [
+        params.txData,
+        nonce, signature,
+        params.gas
+      ]
     );
+    return { data, nonce, signature}
   } else {
+    const message = ethers.utils.keccak256(
+      ethers.utils.defaultAbiCoder.encode(
+          ["bytes", "uint256"],
+          [params.txData, nonce]
+      )
+    );
+    const signature = await params.sign(message);
     data = params.account.interface.encodeFunctionData(
       "validateAndCall",
-      [txData, nonce, signature]
+      [params.txData, nonce, signature]
     );
+    return { data, nonce, signature}
   }
-  return { data, signature, nonce}
 }
 
 function equal(one: string | undefined, two: string | undefined) : boolean {

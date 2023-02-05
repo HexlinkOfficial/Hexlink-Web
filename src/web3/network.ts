@@ -93,8 +93,7 @@ export async function getPriceInfo(chain: Chain) : Promise<PriceInfo> {
             gasPrice: string
         } = (result.data as any).priceInfo;
         useChainStore().refreshPriceInfo(chain, {
-            nativeCurrencyInUsd: new BigNumber(info.nativeCurrencyInUsd),
-            gasPrice: EthBigNumber.from(info.gasPrice),
+            ...info,
             updatedAt: new Date().getTime()
         });
     }

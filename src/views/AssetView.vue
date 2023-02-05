@@ -378,7 +378,7 @@
 img,
 svg {
   vertical-align: middle; }
-.nft-gridDetail {
+.transaction-detail {
   border-radius: 0.75rem;
   margin-top: 1.75rem; }
 .invite-content .input-group-text {
@@ -471,8 +471,8 @@ svg {
                   </div>
                 </div>
               </div>
-              <div v-if="tokenTransaction" class="nft-gridDetail">
-                <!-- <WalletNFTGrid></WalletNFTGrid> -->
+              <div v-if="tokenTransaction" class="transaction-detail">
+                <AssetTransaction></AssetTransaction>
               </div>
             </div>
           </div>
@@ -486,7 +486,7 @@ svg {
 import { ref, computed } from "vue";
 import Layout from "../components/Layout.vue";
 import WalletTokenList from "@/components/WalletTokenList.vue";
-import WalletNFTGrid from "@/components/WalletNFTGrid.vue";
+import AssetTransaction from "@/components/AssetTransaction.vue";
 import { useChainStore } from '@/stores/chain';
 import { useAccountStore } from "@/stores/account";
 import { BigNumber } from "bignumber.js";

@@ -72,7 +72,7 @@ async function parseClaims(op: any) {
     return {
       claim: {
         createdAt: new Date(claim.created_at),
-        claimed: claim.claimed ? EthBigNumber.from(claim.claimed) : undefined,
+        claimed: claim.claimed,
       },
       redpacket: {
         id: claim.redpacket.id,
@@ -82,14 +82,14 @@ async function parseClaims(op: any) {
       } as RedPacketDB,
     }
   } else if (op.request?.args) {
-    const {redpacketId} = JSON.parse(op.request.args);
-    const redpacket = await getRedPacket(redpacketId);
+    const {redPacketId} = JSON.parse(op.request.args);
+    const redpacket = await getRedPacket(redPacketId);
     return {
       claim: {
         createdAt: new Date(op.created_at),
       },
       redpacket: {
-        id: redpacketId,
+        id: redPacketId,
         metadata: redpacket?.metadata,
         creator: redpacket?.creator,
         createdAt: new Date(op.created_at),

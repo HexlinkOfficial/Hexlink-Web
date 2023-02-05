@@ -51,7 +51,7 @@ export interface HexlinkUserInfo {
 export interface RedPacketClaim {
     createdAt: Date,
     claimer: HexlinkUserInfo,
-    claimed?: EthersBigNumber,
+    claimed?: string,
 }
 
 export interface RedPacketOnchainState {

@@ -82,9 +82,7 @@
                   <div class="claimed-data">
                     <p class="claimed-number">
                       Claimed:&nbsp;
-                      <strong>{{
-                        op.redpacket.metadata.split - (op.redpacket.state?.split || op.redpacket.metadata.split)
-                      }}/{{ op.redpacket.metadata.split }}</strong>
+                      <strong>{{ split(op.redpacket) }}/{{ op.redpacket.metadata.split }}</strong>
                       &nbsp;Share
                     </p>
                     <p class="claim-mode">
@@ -354,10 +352,13 @@ watch(() => route.query?.claim, async() => {
   loading.value = false;
 });
 
+const split = (redPacket: RedPacketDB) => {
+  return redPacket.state?.split === undefined
+    ? 0 : redPacket.metadata.split - redPacket.state?.split ;
+}
+
 const progress = (redpacket: RedPacketDB) => {
-  return (
-    redpacket.metadata.split - (redpacket.state?.split || redpacket.metadata.split)
-  ) / redpacket.metadata.split*100
+  return split(redpacket) / redpacket.metadata.split*100
 }
 
 const showStatus = (op: any) => {
@@ -384,22 +385,19 @@ const copyShareLink = (redPacket: RedPacketDB | undefined) => {
 };
 
 const normalize = (balance: string | undefined, token: Token) : string => {
-  const normalized = normalizeBalance(balance || "0", token.decimals);
-  return normalized.normalized;
+  return normalizeBalance(balance || "0", token.decimals).normalized;
 }
 
 const normalizedDbBalance = (op: CreateRedPacketOp) : string => {
-  console.log(op.redpacket?.metadata.balance);
   return op.redpacket?.metadata.balance
     ? normalize(op.redpacket.metadata.balance, op.redpacket.token!)
     : "0";
 }
 
 const normalizeClaimAmount = (op: ClaimRedPacketOp) => {
-  return op.claim ? normalizeBalance(
-    op.claim.claimed?.toString() || '0',
-    op.redpacket!.token!.decimals
-  ).normalized : 0;
+  return op.claim?.claimed &&op.redpacket?.token ? normalize(
+    op.claim.claimed, op.redpacket.token
+  ) : 0;
 }
 
 const tokenStore = useTokenStore();

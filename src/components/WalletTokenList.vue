@@ -55,7 +55,7 @@
     </tbody>
   </table>
   <!-- loading -->
-  <Loading v-if="loading"/>
+  <Loading v-if="loading" class="loading-state"/>
 </template>
 
 <script lang="ts" setup>
@@ -114,6 +114,14 @@ const getPortfolioRatio = (token: Token) => {
 </script>
 
 <style lang="less" scoped>
+.loading-state {
+  display: flex;
+  padding: 0.5rem;
+  align-items: center;
+  justify-content: center;
+  height: 450px;
+  @media (max-width: 990px) {
+    height: 150px; } }
 img {
   height: auto;
   max-width: 100%;

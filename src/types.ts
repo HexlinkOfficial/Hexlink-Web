@@ -1,7 +1,7 @@
 import type { BigNumber as EthersBigNumber } from "ethers";
 
 import type { Token, Deposit } from "../functions/common";
-import type { RedPacketDBMetadata } from "../functions/redpacket";
+import type { RedPacket } from "../functions/redpacket";
 
 // if uid exists, use uid as key to
 // generate address otherwise use handle
@@ -62,7 +62,7 @@ export interface RedPacketOnchainState {
 
 export interface RedPacketDB {
     id: string,
-    metadata: RedPacketDBMetadata,
+    metadata: RedPacket,
     creator?: HexlinkUserInfo,
     deposit?: Deposit,
     createdAt: Date,

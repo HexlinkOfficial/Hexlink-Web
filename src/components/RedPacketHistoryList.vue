@@ -87,7 +87,7 @@
                     </p>
                     <p class="claim-mode">
                       Mode:&nbsp;
-                      <strong>{{ op.redpacket.metadata.mode }}</strong>
+                      <strong>{{ op.redpacket.metadata.mode == 2 ? 'Random' : 'Equal' }}</strong>
                     </p>
                     <p class="claimed-number">
                       Left:&nbsp;
@@ -242,6 +242,7 @@ const loadData = async function() {
   }
   loading.value = false;
   extractDate();
+  console.log(luckHistoryByDate.value);
 };
 
 const extractDate = () => {
@@ -650,70 +651,17 @@ i {
   line-height: 1.25rem;
   font-weight: 500;
   margin-left: 0.875rem; }
-tr:hover td {background:rgb(230, 227, 227)}
 .token-listDetail {
   border-radius: 0.75rem;
   margin-top: 1rem;
   padding: 0.5rem;
   overflow: visible; }
-  .token-listDetail .token-table {
-    display: flex;
-    margin-left: -1rem;
-    margin-right: -1rem;
-    flex-direction: column;
-  
-    @media (min-width: 640px) {
-      margin-left: 0;
-      margin-right: 0; } }
-    .token-listDetail .token-table table {
-      min-width: 100%;
-      table-layout: auto;
-      border-color: inherit;
-      text-indent: 0; }
-      .token-listDetail .token-table .table-thread {
-        display: none;
-        border-bottom: 1px solid #e5e7eb;
-        @media (min-width: 640px) {
-          display: table-header-group; } }
-        .token-listDetail .token-table .table-thread .toke-header {
-          font-weight: 400;
-          cursor: pointer; }
-          .token-listDetail .token-table .table-thread .toke-header .token-header-data {
-            display: flex;
-            align-items: center; }
-        .token-listDetail .token-table .table-thread .portfolio-percentage-header {
-          display: none;
-          font-weight: 400;
-          cursor: pointer;
-
-          @media (min-width: 1024px) {
-            display: table-cell; } }
-          .token-listDetail .token-table .table-thread .portfolio-percentage-header .portfolio-percentage-header-data {
-            display: flex;
-            align-items: center; }
-          .token-listDetail .token-table .table-thread .portfolio-percentage-header .portfolio-percentage-header-sign {
-            display: flex;
-            margin-left: 0.5rem;
-            flex-direction: column;
-            align-items: center; }
-        .token-listDetail .token-table .table-thread .price-header {
-          display: none;
-          font-weight: 400;
-          cursor: pointer;
-        
-          @media (min-width: 768px) {
-            display: table-cell; } }
-          .token-listDetail .token-table .table-thread .price-header .price-header-data {
-            display: flex;
-            align-items: center; }
-        .token-listDetail .token-table .table-thread .balance-header {
-          font-weight: 400;
-          text-align: right;
-          cursor: pointer;
-        
-          @media (min-width: 768px) {
-            text-align: left; } }
-          .token-listDetail .token-table .table-thread .balance-header .balance-header-data {
-            display: flex;
-            align-items: center; }
+.token-listDetail .token-table {
+  display: flex;
+  margin-left: -1rem;
+  margin-right: -1rem;
+  flex-direction: column;
+  @media (min-width: 640px) {
+    margin-left: 0;
+    margin-right: 0; } }
 </style>

@@ -87,7 +87,7 @@
                     </p>
                     <p class="claim-mode">
                       Mode:&nbsp;
-                      <strong>{{ op.redpacket.metadata.mode }}</strong>
+                      <strong>{{ op.redpacket.metadata.mode == 2 ? 'Random' : 'Equal' }}</strong>
                     </p>
                     <p class="claimed-number">
                       Left:&nbsp;
@@ -242,6 +242,7 @@ const loadData = async function() {
   }
   loading.value = false;
   extractDate();
+  console.log(luckHistoryByDate.value);
 };
 
 const extractDate = () => {

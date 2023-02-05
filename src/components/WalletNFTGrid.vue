@@ -87,7 +87,6 @@ const getBackcgroundColor = async (url: string) => {
       // container.style.backgroundColor = color.rgba;
       // container.style.color = color.isDark ? '#fff' : '#000';
       output = color.hex.toString();
-      console.log(color);
     })
     .catch(e => {
       console.log(e);

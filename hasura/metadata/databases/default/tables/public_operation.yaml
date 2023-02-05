@@ -2,20 +2,38 @@ table:
   name: operation
   schema: public
 object_relationships:
+  - name: request
+    using:
+      foreign_key_constraint_on: request_id
   - name: transaction
     using:
       foreign_key_constraint_on: tx_id
+array_relationships:
+  - name: redpacket_claims
+    using:
+      foreign_key_constraint_on:
+        column: op_id
+        table:
+          name: redpacket_claim
+          schema: public
+  - name: redpackets
+    using:
+      foreign_key_constraint_on:
+        column: op_id
+        table:
+          name: redpacket
+          schema: public
 select_permissions:
   - role: user
     permission:
       columns:
-        - callData
-        - callGasLimit
         - chain
         - created_at
         - id
-        - to
+        - request_id
+        - tx_error
         - tx_id
+        - type
         - updated_at
-        - value
+        - user_id
       filter: {}

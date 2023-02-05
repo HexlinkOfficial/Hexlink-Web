@@ -1,8 +1,23 @@
 table:
   name: transaction
   schema: public
+array_relationships:
+  - name: operations
+    using:
+      foreign_key_constraint_on:
+        column: tx_id
+        table:
+          name: operation
+          schema: public
 select_permissions:
   - role: user
     permission:
-      columns: []
+      columns:
+        - chain
+        - tx
+        - status
+        - created_at
+        - updated_at
+        - id
+        - error
       filter: {}

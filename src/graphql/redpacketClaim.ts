@@ -50,7 +50,7 @@ export const GET_REDPACKET_CLAIMS_BY_CLAIMER = gql`
           id,
           created_at,
           claimed,
-          redpacket {
+          redpacket_public {
             id,
             creator,
             metadata,
@@ -75,10 +75,10 @@ async function parseClaims(op: any) {
         claimed: claim.claimed,
       },
       redpacket: {
-        id: claim.redpacket.id,
-        metadata: JSON.parse(claim.redpacket.metadata),
-        creator: JSON.parse(claim.redpacket.creator),
-        createdAt: claim.redpacket.created_at
+        id: claim.redpacket_public.id,
+        metadata: JSON.parse(claim.redpacket_public.metadata),
+        creator: JSON.parse(claim.redpacket_public.creator),
+        createdAt: claim.redpacket_public.created_at
       } as RedPacketDB,
     }
   } else if (op.request?.args) {

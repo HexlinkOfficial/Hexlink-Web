@@ -8,17 +8,35 @@ object_relationships:
   - name: redpacket
     using:
       foreign_key_constraint_on: redpacket_id
-update_permissions:
+  - name: redpacket_public
+    using:
+      manual_configuration:
+        column_mapping:
+          redpacket_id: id
+        insertion_order: null
+        remote_table:
+          name: redpacket_public
+          schema: public
+  - name: request
+    using:
+      foreign_key_constraint_on: req_id
+select_permissions:
   - role: user
     permission:
       columns:
         - claimed
         - claimer
-        - tx_status
+        - claimer_id
+        - created_at
+        - creator_id
+        - id
+        - op_id
+        - redpacket_id
+        - req_id
+        - updated_at
       filter:
         _or:
           - claimer_id:
               _eq: X-Hasura-User-Id
           - creator_id:
               _eq: X-Hasura-User-Id
-      check: {}

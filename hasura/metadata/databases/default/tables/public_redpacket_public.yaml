@@ -1,26 +1,15 @@
 table:
-  name: redpacket
+  name: redpacket_public
   schema: public
 object_relationships:
-  - name: operation
-    using:
-      foreign_key_constraint_on: op_id
   - name: operation_public
     using:
       manual_configuration:
         column_mapping:
-          id: id
+          op_id: id
         insertion_order: null
         remote_table:
           name: operation_public
-          schema: public
-array_relationships:
-  - name: redpacket_claims
-    using:
-      foreign_key_constraint_on:
-        column: redpacket_id
-        table:
-          name: redpacket_claim
           schema: public
 select_permissions:
   - role: user
@@ -28,9 +17,7 @@ select_permissions:
       columns:
         - created_at
         - creator
-        - deposit
         - id
         - metadata
         - op_id
-        - user_id
       filter: {}

@@ -5,12 +5,18 @@ import { useChainStore } from '@/stores/chain';
 import type { RedPacketDB, CreateRedPacketOp } from "@/types";
 
 export const GET_REDPACKET = gql`
-  query GetRedPacket($id: String!) {
-    redpacket_by_pk(id: $id) {
+  query GetRedPacket(
+    $id: String!,
+  ) {
+    redpacket_public(
+      where: {
+        id: { _eq: $id }
+      },
+    ) {
         creator,
         metadata,
         created_at,
-        operation {
+        operation_public {
           chain
         }
     }
@@ -118,14 +124,14 @@ export async function getRedPacket(
     {id: redPacketId}
   ).toPromise();
   if (await handleUrqlResponse(result)) {
-    const rp = result.data.redpacket_by_pk;
-    if (rp) {
+    if ((result.data.redpacket_public?.length || 0) > 0) {
+      const rp = result.data.redpacket_public[0];
       return {
         id: redPacketId,
         metadata: JSON.parse(rp.metadata),
         createdAt: new Date(rp.created_at),
         creator: JSON.parse(rp.creator),
-        chain: rp.operation.chain
+        chain: rp.operation_public.chain
       }
     } else {
       throw new Error("Redpacket not found");

@@ -325,7 +325,7 @@ const extractDate = () => {
     luckHistoryByDate.value[v].forEach((op: any) => {
       time.push(new Date(op.createdAt).getTime());
     })
-    const sortedArray: any[] = []
+    const sortedArray: any[] = [];
     time.sort((a: number, b: number) => b - a).forEach((t: number) => {
       luckHistoryByDate.value[v].forEach((op: any) => {
           new Date(op.createdAt).getTime() == t && sortedArray.push(op);

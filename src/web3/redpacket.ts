@@ -136,13 +136,13 @@ async function buildCreateRedPacketTxForMetamask(input: RedPacketInput) {
 
     if (tokenEqual(input.token, input.gasToken)) {
         if (isNativeCoin(input.token, chain)) {
-            value = value.add(input.balance!).add(input.gasTokenAmount!)
+            value = value.add(input.balance!).add(input.gasSponsorship!)
         } else {
             const {tx, op} = await buildDepositErc20TokenOp(
                 input.token,
                 walletAccount,
                 hexlAccount,
-                EthBigNumber.from(input.gasTokenAmount).add(input.balance),
+                EthBigNumber.from(input.gasSponsorship).add(input.balance),
             );
             txes = txes.concat(tx);
             userOps = userOps.concat(op);
@@ -161,13 +161,13 @@ async function buildCreateRedPacketTxForMetamask(input: RedPacketInput) {
             userOps = userOps.concat(op);
         }
         if (isNativeCoin(input.gasToken, chain)) {
-            value = value.add(input.gasTokenAmount!);
+            value = value.add(input.gasSponsorship!);
         } else {
             const {tx, op} = await buildDepositErc20TokenOp(
                 input.gasToken,
                 walletAccount,
                 hexlAccount,
-                input.gasTokenAmount!
+                input.gasSponsorship!
             );
             txes = txes.concat(tx);
             userOps = userOps.concat(op);

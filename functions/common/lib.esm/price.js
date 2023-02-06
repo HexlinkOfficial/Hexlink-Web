@@ -1,17 +1,18 @@
 import { BigNumber } from "bignumber.js";
 import { isNativeCoin, isStableCoin, isWrappedCoin } from "./tokens";
 import { BigNumber as EthBigNumber } from "ethers";
+import { toEthBigNumber } from "./utils";
 const GOERLI = {
     nativeCurrencyInUsd: "1500.0",
-    gasPrice: "10000000000", // 10 gwei
+    defaultGasPrice: "10000000000", // 10 gwei
 };
 const POLYGON = {
     nativeCurrencyInUsd: "1.0",
-    gasPrice: "100000000000", // 100 gwei
+    defaultGasPrice: "100000000000", // 100 gwei
 };
 const MUMBAI = {
     nativeCurrencyInUsd: "1.0",
-    gasPrice: "2000000000", // 2 gwei
+    defaultGasPrice: "2000000000", // 2 gwei
 };
 export const PriceConfigs = {
     "goerli": GOERLI,
@@ -30,3 +31,25 @@ export function gasTokenPricePerGwei(chain, token, decimals, price) {
     throw new Error("Not supported gas token");
 }
 ;
+function getGasPrice(price) {
+    let gasPrice = EthBigNumber.from(price.lastBaseFeePerGas).add(price.maxPriorityFeePerGas);
+    gasPrice = gasPrice.gt(price.maxFeePerGas)
+        ? EthBigNumber.from(price.maxFeePerGas)
+        : gasPrice;
+    return gasPrice.gt(price.defaultGasPrice)
+        ? gasPrice
+        : price.defaultGasPrice;
+}
+export function calcGas(chain, gasToken, amount, priceInfo) {
+    const gasPrice = getGasPrice(priceInfo);
+    if (isNativeCoin(gasToken.address, chain) || isWrappedCoin(gasToken.address, chain)) {
+        return amount.mul(gasPrice);
+    }
+    else if (isStableCoin(gasToken.address, chain)) {
+        // calculate usd value of tokens
+        const normalizedUsd = new BigNumber(10).pow(gasToken.decimals).times(priceInfo.nativeCurrencyInUsd);
+        const nativeCoinBase = EthBigNumber.from(10).pow(chain.nativeCurrency.decimals);
+        return toEthBigNumber(normalizedUsd).mul(amount).mul(gasPrice).div(nativeCoinBase);
+    }
+    throw new Error("Unsupported gas token");
+}

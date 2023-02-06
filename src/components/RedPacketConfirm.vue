@@ -39,11 +39,9 @@ import { useChainStore } from "@/stores/chain";
 import { useAccountStore } from '@/stores/account';
 import { isContract } from "../../functions/common";
 import { deployAndCreateNewRedPacket, createNewRedPacket } from "@/web3/redpacket";
-import { buildCreateRedPacketRequest } from "@/web3/redpacket";
 import { BigNumber as EthBigNumber } from "ethers";
 import { useTokenStore } from "@/stores/token";
 
-const estimatedGas = ref<string>("0");
 const message = ref<string>("Let's go!");
 const store = useRedPacketStore();
 const createRedPacket = async () => {
@@ -65,14 +63,6 @@ const createRedPacket = async () => {
     message.value = "Something went wrong...";
   }
 }
-
-const serviceFee = computed(() => {
-  return EthBigNumber.from(
-    store.redpacket!.gasTokenAmount
-  ).add(estimatedGas.value).div(EthBigNumber.from(10).pow(
-    useTokenStore().token(store.redpacket!.gasToken).decimals
-  )).toString();
-})
 
 const router = useRouter();
 const closeModal = () => {

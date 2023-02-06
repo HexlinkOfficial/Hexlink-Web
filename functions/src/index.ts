@@ -22,11 +22,11 @@ exports.genTwitterOAuthProof = genTwitterOAuthProof;
 exports.calcEthAddress = calcEthAddress;
 
 import {
-  priceInfo,
+  priceConfig,
   refunder,
 } from "./config";
 
-exports.priceInfo = priceInfo;
+exports.priceConfig = priceConfig;
 exports.refunder = refunder;
 
 import {

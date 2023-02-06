@@ -13,7 +13,7 @@ function buildGasSponsorshipOp(hexlAccount, refunder, input) {
             ref: input.id,
             receipt: refunder,
             token: input.gasToken,
-            amount: input.gasTokenAmount
+            amount: input.gasSponsorship
         },
         input: {
             to: hexlAccount,
@@ -22,7 +22,7 @@ function buildGasSponsorshipOp(hexlAccount, refunder, input) {
                 input.id,
                 refunder,
                 input.gasToken,
-                input.gasTokenAmount
+                input.gasSponsorship
             ]),
             callGasLimit: ethers_1.BigNumber.from(0) // no limit
         }

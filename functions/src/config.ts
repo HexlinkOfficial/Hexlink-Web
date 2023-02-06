@@ -40,13 +40,13 @@ export const kmsConfig = () => new Map<string, KMS_CONFIG_TYPE>([
   [KMS_KEY_TYPE[KMS_KEY_TYPE.validator], identityVerifierValidatorConfig()],
 ]);
 
-export const priceInfo = functions.https.onCall(
+export const priceConfig = functions.https.onCall(
     (data, context) => {
       const uid = context.auth?.uid;
       if (!uid) {
         return {code: 401, message: "Unauthorized Call"};
       }
-      return {priceInfo: PriceConfigs[data.chain]};
+      return {priceConfig: PriceConfigs[data.chain]};
     }
 );
 

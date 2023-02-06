@@ -86,12 +86,12 @@
       <div class="gas-estimation">
           <p>
             <img style="width: 20px; height: 20px;" src="https://i.postimg.cc/RhXfgJR1/gas-pump.png"/>
-            Service Fee: 
+            Estimated Service Fee: 
             <a-tooltip placement="top">
               <template #title>
-                <span>Service Fee: <b>{{ gasSponsorship }}</b></span>
+                <span>The real service fee may differ per network conditions</span>
               </template>
-              <b>{{ gasSponsorship.substring(0,6) }}</b>
+              <b>{{ totalServiceFee.substring(0,6) }}</b>
             </a-tooltip>
           </p>
           <div class="total-choose-token">
@@ -187,6 +187,7 @@ import type { RedPacketInput } from "../../functions/redpacket";
 import { calcGas } from "../../functions/common";
 import { redpacketId } from "../../functions/redpacket";
 
+const estimatedGasAmount = "250000"; // hardcoded, can optimize later
 const chooseTotalDrop = ref<boolean>(false);
 const openDropdown = ref<boolean>(false);
 const chooseGasDrop = ref<boolean>(false);
@@ -221,7 +222,8 @@ const redpacket = ref<RawRedPacketInput>({
   balanceInput: "1",
   token: tokenStore.nativeCoin.address,
   gasToken: tokenStore.nativeCoin.address,
-  gasTokenAmount: "0",
+  gasSponsorship: "0",
+  estimatedGas: "0",
   validator: validator(),
 });
 
@@ -274,25 +276,40 @@ const setDefaultToken = function (getBalance: (t: string) => string) {
     }
 }
 
-const calcGasSponsorship = async () => {
+async function delay(ms: number) {
+    return new Promise( ( resolve, _reject ) => {
+        window.setTimeout( () => resolve(null), ms );
+    } );
+}
+
+const refreshGas = async () => {
   const chain = useChainStore().chain;
   const priceInfo = await getPriceInfo(chain);
   redpacket.value.priceInfo = priceInfo;
-  const amount = EthBigNumber.from(200000).mul(redpacket.value.split || 0);
-  redpacket.value.gasTokenAmount = calcGas(
+  const sponsorshipAmount = EthBigNumber.from(200000).mul(redpacket.value.split || 0);
+  redpacket.value.gasSponsorship = calcGas(
     chain,
     tokenStore.token(redpacket.value.gasToken),
-    amount,
+    sponsorshipAmount,
     priceInfo,
   ).toString();
+  redpacket.value.estimatedGas = calcGas(
+    chain,
+    tokenStore.token(redpacket.value.gasToken),
+    EthBigNumber.from(estimatedGasAmount),
+    priceInfo,
+  ).toString();
+  await delay(5000);
+  await refreshGas();
 };
 
-const gasSponsorship = computed(() => {
- const gasToken = tokenStore.token(redpacket.value.gasToken);
-  return new BigNumber(
-    redpacket.value.gasTokenAmount?.toString() || 0
-  ).div(tokenBase(gasToken)).toString(10);
-});
+const totalServiceFee = computed(() => {
+  return BigNumber(
+    redpacket.value.gasSponsorship
+  ).plus(redpacket.value.estimatedGas).div(
+    tokenBase(gasToken.value)
+  ).dp(4).toString();
+})
 
 const tokenChoose =
   async (mode: "token" | "gas", token: Token) => {
@@ -300,19 +317,19 @@ const tokenChoose =
       redpacket.value.token = token.address;
     } else {
       redpacket.value.gasToken = token.address;
-      calcGasSponsorship();
+      refreshGas();
     }
   };
 
 onMounted(genTokenList);
-onMounted(calcGasSponsorship);
+onMounted(refreshGas);
 
 watch(() => useChainStore().current, genTokenList);
 watch(() => useWalletStore().connected, genTokenList);
 watch([
   () => redpacket.value.gasToken,
   () => redpacket.value.split
-], calcGasSponsorship);
+], refreshGas);
 watch(
   [() => redpacket.value.balanceInput, redPacketTokenBalance],
   ([newBalanceInput, newTokenBalance], _old) => {
@@ -357,7 +374,7 @@ const confirmRedPacket = async function () {
     const chain = useChainStore().chain;
     const account = useAccountStore().account!.address;
     redpacket.value.id = redpacketId(chain, account, redpacket.value);
-    await calcGasSponsorship();
+    await refreshGas();
     useRedPacketStore().beforeCreate(redpacket.value);
   }
 };

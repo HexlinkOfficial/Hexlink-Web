@@ -1,7 +1,6 @@
 import type { Chain } from "./chain";
 import { BigNumber as EthBigNumber } from "ethers";
 import { BigNumber } from "bignumber.js";
-import type { PriceConfig } from "./price";
 export interface Token {
     chain?: string;
     chainId: string | number;
@@ -38,7 +37,3 @@ export declare function isWrappedCoin(token: string, chain: Chain): boolean;
 export declare function isStableCoin(token: string, chain: Chain): boolean;
 export declare function tokenBase(token: Token): BigNumber;
 export declare function tokenAmount(balance: string | number, decimals: number): EthBigNumber;
-export declare function calcGas(chain: Chain, gasToken: {
-    address: string;
-    decimals: number;
-}, amount: EthBigNumber, priceInfo: PriceConfig): EthBigNumber;

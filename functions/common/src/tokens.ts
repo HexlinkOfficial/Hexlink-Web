@@ -9,7 +9,6 @@ import ADDRESSES from "./addresses.json";
 import {BigNumber as EthBigNumber} from "ethers";
 import {BigNumber} from "bignumber.js";
 import {toEthBigNumber} from "./utils";
-import type {PriceConfig} from "./price";
 
 export interface Token {
     chain?: string,
@@ -113,29 +112,4 @@ export function tokenAmount(
   return toEthBigNumber(
     new BigNumber(10).pow(decimals).times(balance)
   );
-}
-
-export function calcGas(
-  chain: Chain,
-  gasToken: {
-      address: string,
-      decimals: number,
-  },
-  amount: EthBigNumber,
-  priceInfo: PriceConfig,
-) : EthBigNumber {
-  if (isNativeCoin(gasToken.address, chain) || isWrappedCoin(gasToken.address, chain)) {
-      return amount.mul(priceInfo.gasPrice);
-  } else if (isStableCoin(gasToken.address, chain)) {
-      // calculate usd value of tokens
-      const normalizedUsd = new BigNumber(10).pow(
-          gasToken.decimals
-      ).times(priceInfo.nativeCurrencyInUsd);
-      const nativeCoinBase = EthBigNumber.from(
-          10
-      ).pow(chain.nativeCurrency.decimals);
-      return toEthBigNumber(normalizedUsd).mul(
-          amount).mul(priceInfo.gasPrice).div(nativeCoinBase);
-  }
-  throw new Error("Unsupported gas token");
 }

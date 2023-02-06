@@ -1,3 +1,4 @@
+import type { PriceInfo } from "../../common";
 export interface HexlinkUserInfo {
     provider: string;
     handle: string;
@@ -17,11 +18,7 @@ export interface RedPacket {
 }
 export interface RedPacketInput extends RedPacket {
     gasToken: string;
-    gasTokenAmount: string;
+    gasSponsorship: string;
+    estimatedGas: string;
     priceInfo?: PriceInfo;
-}
-export interface PriceInfo {
-    nativeCurrencyInUsd: string;
-    gasPrice: string;
-    updatedAt: number;
 }

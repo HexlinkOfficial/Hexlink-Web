@@ -16,7 +16,7 @@ export function buildGasSponsorshipOp(
             ref: input.id,
             receipt: refunder,
             token: input.gasToken,
-            amount: input.gasTokenAmount
+            amount: input.gasSponsorship
         },
         input: {
             to: hexlAccount,
@@ -26,7 +26,7 @@ export function buildGasSponsorshipOp(
                     input.id,
                     refunder,
                     input.gasToken,
-                    input.gasTokenAmount
+                    input.gasSponsorship
                 ]
             ),
             callGasLimit: EthBigNumber.from(0) // no limit

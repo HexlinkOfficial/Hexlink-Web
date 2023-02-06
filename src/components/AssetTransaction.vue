@@ -12,13 +12,18 @@
           <div style="font-size: 0.875rem; line-height: 1.25rem;">{{ name }}</div>
         </div>
         <div v-for="(r, i) in value" :key="i" class="history-record">
-          <div v-if="r.action.type == 'receive'" class="record-box">
+          <div class="record-box">
             <div style="display: block; position: relative;">
-              <div class="icon" style="background-color: #4BAE4F;">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+              <div class="icon" :style="r.action.type == 'receive' && 'background-color: #4BAE4F;'">
+                <svg v-if="r.action.type == 'receive'" width="24" height="24" viewBox="0 0 24 24" fill="none"
                   xmlns="http://www.w3.org/2000/svg">
                   <path d="M7 7L17 17" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                   <path d="M17 7V17H7" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+                <svg v-if="r.action.type == 'send'" style="color:white;" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 text-subdued">
+                  <line x1="7" y1="17" x2="17" y2="7"></line>
+                  <polyline points="7 7 17 7 17 17"></polyline>
                 </svg>
               </div>
             </div>
@@ -28,12 +33,12 @@
                   <div style="display: flex;">
                     <div class="sent-info">
                       <div class="info-1">
-                        Received
+                        {{ r.action.type == 'receive' ? 'Receive' : 'Send' }}
                       </div>
                     </div>
                   </div>
-                  <div style="color: #6a6d7c; white-space: nowrap; margin-left: 0; font-size: 11px;">
-                    <div style="display: flex;">{{ new Date(r.tx.timestamp).toLocaleString().split(',')[1]}}</div>
+                  <div class="transaction-time">
+                    <div style="display: flex;">{{ new Date(r.tx.timestamp).toLocaleString().split(',')[1] }}</div>
                   </div>
                 </div>
               </div>
@@ -45,7 +50,7 @@
                         Amount: {{ r.amount.normalized }}
                       </span>
                     </template>
-                    <div style="overflow: auto; white-space: nowrap; margin-left: 0.25rem; width: 45px;display: flex;justify-content: flex-end;">
+                    <div class="transaction-amount">
                       + {{ r.amount.normalized.toString().substring(0, 5) }}
                     </div>
                   </a-tooltip>
@@ -58,95 +63,50 @@
               <div class="claim-status">
                 <div style="display: flex; align-items: center;">
                   <div class="arrow">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <svg v-if="r.action.type == 'receive'" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path d="M15 6L9 12L15 18" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    <svg v-if="r.action.type == 'send'" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M9 18L15 12L9 6" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
                   </div>
                   <div style="display: flex; align-items: center;">
                     <span class="thumb">
-                      <img src="https://i.postimg.cc/15QJZwkN/profile.png" :size="64" referrerpolicy="no-referrer" />
+                      <img :src="profilePic[Math.floor(Math.random() * profilePic.length)]" :size="64" referrerpolicy="no-referrer" />
                     </span>
                     <div style="display: flex; flex-direction: column; margin-left: 0.5rem;">
-                      <span class="from-text">From</span>
-                      <span style="font-size: 12px; color: rgb(100,116,139)">@dreambig_peter</span>
+                      <span class="from-text">{{ r.action.type == 'receive' ? 'From' : 'To' }}</span>
+                      <a-tooltip v-if="r.action.type == 'receive'" placement="top">
+                        <template #title>
+                          <span>
+                            Address: {{ r.action.from }}
+                          </span>
+                        </template>
+                        <span style="font-size: 12px; color: rgb(100,116,139)">{{ prettyPrintAddress(r.action.from, 5, 6) }}</span>
+                      </a-tooltip>
+                      <a-tooltip v-if="r.action.type == 'send'" placement="top">
+                        <template #title>
+                          <span>
+                            Address: {{ r.action.to }}
+                          </span>
+                        </template>
+                        <span style="font-size: 12px; color: rgb(100,116,139)">{{ prettyPrintAddress(r.action.to, 5, 6) }}</span>
+                      </a-tooltip>
                     </div>
                   </div>
                 </div>
               </div>
               <div class="share">
-                <i class="fa fa-paper-plane share-button" aria-hidden="true" @click="copy('haha')"></i>
-              </div>
-              <div class="cta">
-                <i className="fa fa-twitter"></i>
-              </div>
-            </div>
-          </div>
-          <div v-if="r.action.type == 'send'" class="record-box">
-            <div style="display: block; position: relative;">
-              <div class="icon" style="background-color: #4BAE4F;">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M7 7L17 17" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                  <path d="M17 7V17H7" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                </svg>
-              </div>
-            </div>
-            <div class="record-detail">
-              <div class="action-and-time">
-                <div style="display: block; margin-bottom: 0;">
-                  <div style="display: flex;">
-                    <div class="sent-info">
-                      <div class="info-1">
-                        Received
-                      </div>
-                    </div>
-                  </div>
-                  <div style="color: #6a6d7c; white-space: nowrap; margin-left: 0; font-size: 11px;">
-                    <div style="display: flex;">1:59:32 AM</div>
-                  </div>
-                </div>
-              </div>
-              <div class="token-amount">
-                <div class="sent-info">
-                  <a-tooltip placement="top">
-                    <template #title>
-                      <span>
-                        Amount: 0.3145
-                      </span>
-                    </template>
-                    <div
-                      style="overflow: auto; white-space: nowrap; margin-left: 0.25rem; width: 45px;display: flex;justify-content: flex-end;">
-                      + 0.3145
-                    </div>
-                  </a-tooltip>
-                  <div class="token-icon" style="margin-right: 0.25rem; margin-left: 0.25rem;">
-                    <img src="https://token.metaswap.codefi.network/assets/networkLogos/ethereum.svg">
-                  </div>
-                  gETH
-                </div>
-              </div>
-              <div class="claim-status">
-                <div style="display: flex; align-items: center;">
-                  <div class="arrow">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M15 6L9 12L15 18" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                  </div>
-                  <div style="display: flex; align-items: center;">
-                    <span class="thumb">
-                      <img src="https://i.postimg.cc/15QJZwkN/profile.png" :size="64" referrerpolicy="no-referrer" />
+                <a-tooltip placement="top">
+                  <template #title>
+                    <span>
+                      Check on blockchain explorer
                     </span>
-                    <div style="display: flex; flex-direction: column; margin-left: 0.5rem;">
-                      <span class="from-text">From</span>
-                      <span style="font-size: 12px; color: rgb(100,116,139)">@dreambig_peter</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class="share">
-                <i class="fa fa-paper-plane share-button" aria-hidden="true" @click="copy('haha')"></i>
-              </div>
-              <div class="cta">
-                <i className="fa fa-twitter"></i>
+                  </template>
+                  <a :href="useChainStore().chain.blockExplorerUrls[0]+'/tx/'+r.tx.hash" target="_blank">
+                    <i class="fa-solid fa-arrow-up-from-bracket"></i>
+                  </a>
+                </a-tooltip>
               </div>
             </div>
           </div>
@@ -161,17 +121,31 @@ import { ref, watch, computed, onMounted } from 'vue';
 import Loading from "@/components/Loading.vue";
 import { copy } from "@/web3/utils";
 import { getAssetTransfers, loadTokenLogo } from '@/web3/tokens';
+import { useTokenStore } from '@/stores/token';
+import { useChainStore } from '@/stores/chain';
+import { prettyPrintAddress } from "../../functions/common";
 
 const loading = ref<boolean>(false);
 const transfer = ref<any>();
 const transactionByDate = ref<any>([]);
+const profilePic = [
+  "https://i.postimg.cc/brC8hFMZ/blur1.png",
+  "https://i.postimg.cc/HsvsDVD6/blur2.png",
+  "https://i.postimg.cc/XNQndpJn/blur3.png",
+  "https://i.postimg.cc/wjSqMZBJ/blur4.png",
+  "https://i.postimg.cc/5Nr1KTLG/blur5.png",
+  "https://i.postimg.cc/gkjmDmX8/blur6.png",
+  "https://i.postimg.cc/XYZNV4n4/blur7.png",
+  "https://i.postimg.cc/g26pCsK0/blur8.png"
+];
 
-const loadTransactions = async () => {
+const loadTransactions = async (tokenAddress: string[]) => {
   const orderGroup: any = {};
 
   transfer.value = await getAssetTransfers({
     wallet: '0x4dD92D3b036a10733E85C2C3775935AAb515A653',
     category: ["external", "internal", "erc20", "erc721", "erc1155"],
+    contractAddresses: tokenAddress
   })
   // divide all transactions into group by dates
   transfer.value.forEach((t: any) => {
@@ -211,12 +185,34 @@ const loadTransactions = async () => {
 };
 
 onMounted(async () => {
-  await loadTransactions();
+  var tokens: string[] = [];
+  useTokenStore().visiableTokens.forEach(t => {
+    tokens.push(t.address);
+  })
+  await loadTransactions(tokens);
   console.log(transactionByDate.value);
+  console.log(useChainStore().chain);
 });
 </script>
 
 <style lang="less" scoped>
+i {
+  color: rgba(0, 0, 0, 0.3);
+  font-size: 15px; }
+i:hover {
+  color: #076AE0; }
+.transaction-amount {
+  overflow: auto;
+  white-space: nowrap;
+  margin-left: 0.25rem;
+  width: 45px;
+  display: flex;
+  justify-content: flex-end; }
+.transaction-time {
+  color: #6a6d7c;
+  white-space: nowrap;
+  margin-left: 0;
+  font-size: 11px; }
 .loading-state {
   display: flex;
   padding: 0.5rem;
@@ -288,15 +284,14 @@ onMounted(async () => {
   text-overflow: ellipsis;
   overflow-y: visible;
   align-items: center;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   flex: 1 1;
   width: 100%;
   @media (min-width: 1280px) {
     gap: 1.5rem; }
   @media (min-width: 1024px) {
     gap: 1.25rem; }
-  @media (max-width: 990px) {
-    grid-template-columns: repeat(7, minmax(0, 1fr)); } }
+  @media (max-width: 990px) { } }
 .action-and-time {
   display: flex;
   align-items: center;
@@ -304,7 +299,6 @@ onMounted(async () => {
   margin-bottom: 0; }
 .token-amount {
   display: flex;
-  justify-content: center;
   align-items: center;
   grid-column: span 1/span 1;
   margin-bottom: 0;
@@ -359,10 +353,4 @@ onMounted(async () => {
   grid-column: span 1/span 1; }
 .share img {
   max-width: 20px; }
-.cta {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  grid-column: span 1/span 1; }
 </style>

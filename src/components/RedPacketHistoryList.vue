@@ -459,8 +459,8 @@ const aggregatedClaimed = async function(
 i {
   color: rgba(0,0,0,0.3);
   font-size: 18px; }
-// i:hover {
-//   color: #076AE0; }
+i:hover {
+  color: #076AE0; }
 .arrow {
   font-size: .875rem;
   line-height: 1.25rem;

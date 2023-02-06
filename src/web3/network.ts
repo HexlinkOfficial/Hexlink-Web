@@ -1,7 +1,7 @@
 import { ethers } from "ethers";
 
-import type { Chain } from "../../functions/common";
-import type { PriceInfo, PriceConfig } from "../../functions/common";
+import type { Chain, PriceInfo, PriceConfig } from "../../functions/common";
+import { genPriceInfo } from "../../functions/common";
 import { useWalletStore } from "@/stores/wallet";
 import { useRedPacketStore } from "@/stores/redpacket";
 import { useChainStore } from '@/stores/chain';
@@ -99,16 +99,11 @@ async function getPriceConfig(chain: Chain) : Promise<PriceConfig> {
 export async function getPriceInfo(chain: Chain) : Promise<PriceInfo> {
     const priceInfo = useChainStore().priceInfos[chain.name];
     // refresh every 5s
-    if (!priceInfo || priceInfo.updatedAt < new Date().getTime() - 5000) {
+    if (!priceInfo?.updatedAt || priceInfo.updatedAt < new Date().getTime() - 5000) {
+        const provider = getInfuraProvider(chain);
         const priceConfig = await getPriceConfig(chain);
-        const feeData = await getInfuraProvider(chain).getFeeData();
-        useChainStore().refreshPriceInfo(chain, {
-            ...priceConfig,
-            lastBaseFeePerGas: feeData.lastBaseFeePerGas?.toString() || "0",
-            maxFeePerGas: feeData.maxFeePerGas?.toString() || "0",
-            maxPriorityFeePerGas: feeData.maxPriorityFeePerGas?.toString() || "0",
-            updatedAt: new Date().getTime()
-        });
+        const priceInfo = await genPriceInfo(provider, priceConfig);
+        useChainStore().refreshPriceInfo(chain, priceInfo);
     }
     return useChainStore().priceInfos[chain.name];
 }

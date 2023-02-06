@@ -365,7 +365,7 @@ const validateInput = () => {
   return true;
 };
 
-const confirmRedPacket = async function () {
+const confirmRedPacket = function () {
   if (validateInput()) {
     redpacket.value.balance = tokenAmount(
       redpacket.value.balanceInput,
@@ -374,7 +374,6 @@ const confirmRedPacket = async function () {
     const chain = useChainStore().chain;
     const account = useAccountStore().account!.address;
     redpacket.value.id = redpacketId(chain, account, redpacket.value);
-    await refreshGas();
     useRedPacketStore().beforeCreate(redpacket.value);
   }
 };

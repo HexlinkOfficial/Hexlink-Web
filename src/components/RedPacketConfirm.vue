@@ -9,8 +9,7 @@
       </svg>
     </router-link>
     <h2 class="transition">
-      <span style="font-size: 20px; margin-top: 4rem;"> ServiceFee: {{ serviceFee }}</span><br>
-      <span style="font-size: 20px;">{{ message }}</span><br>
+      <span style="font-size: 20px; margin-top: 4rem;">{{ message }}</span><br>
     </h2>
     <div class="cta-container transition" style="margin-top: 340px;">
       <button class="cta" @click="createRedPacket">Confirm</button>
@@ -32,15 +31,13 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onMounted } from "vue";
+import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { useRedPacketStore } from '@/stores/redpacket';
 import { useChainStore } from "@/stores/chain";
 import { useAccountStore } from '@/stores/account';
 import { isContract } from "../../functions/common";
 import { deployAndCreateNewRedPacket, createNewRedPacket } from "@/web3/redpacket";
-import { BigNumber as EthBigNumber } from "ethers";
-import { useTokenStore } from "@/stores/token";
 
 const message = ref<string>("Let's go!");
 const store = useRedPacketStore();
@@ -50,7 +47,7 @@ const createRedPacket = async () => {
   try {
     const account = useAccountStore().account!.address;
     if (await isContract(useChainStore().provider, account)) {
-      await createNewRedPacket(store.redpacket!, store.account == "hexlink", true);
+      await createNewRedPacket(store.redpacket!, store.account == "hexlink");
     } else {
       await deployAndCreateNewRedPacket(store.redpacket!, store.account == "hexlink");
     }

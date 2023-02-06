@@ -4,6 +4,7 @@ import type {Chain} from "../../functions/common";
 import {PriceConfigs, parseDeposit} from "../../functions/common";
 import {parseClaimed, parseCreated, redPacketAddress} from "../../functions/redpacket";
 import type {Action, Operation} from "./types";
+import {updateOp} from "./graphql/operation";
 
 export async function buildTx(
   provider: ethers.providers.Provider,
@@ -44,24 +45,25 @@ async function processAction(
         claimed,
         opId: op.id,
       }]);
+    } else {
+      console.log("redpacket claim not found: " + params.redPacketId);
+      await updateOp(op.id, undefined, "claim event not found");
     }
   }
 
   if (action.type === "insert_redpacket") {
-    const deposit = parseDeposit(
-      receipt,
-      params.redPacketId,
-      op.account,
-      params.refunder,
-    );
-
     const created = parseCreated(
       chain,
       receipt,
       params.redPacketId,
     );
-
     if (created !== undefined) {
+      const deposit = parseDeposit(
+        receipt,
+        params.redPacketId,
+        op.account,
+        params.refunder,
+      );  
       await insertRedPacket(
         params.userId,
         [{
@@ -87,6 +89,9 @@ async function processAction(
           }
         }]
       );
+    } else {
+      console.log("redpacket not found: " + params.redPacketId);
+      await updateOp(op.id, undefined, "redpacket event not found");
     }
   }
 }

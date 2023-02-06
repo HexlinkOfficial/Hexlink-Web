@@ -34,18 +34,33 @@ export interface TokenPreference {
     display: boolean;
 }
 
+interface IToken {
+  address: string;
+  decimals: number;
+}
+
+export function nativeCoin(chain: Chain) : IToken {
+  return (ADDRESSES as any)[chain.name].nativeCoin;
+}
+
+export function wrappedCoin(chain: Chain) : IToken {
+  return (ADDRESSES as any)[chain.name].wrappedCoin;
+}
+
+export function stableCoins(chain: Chain) : IToken[] {
+  return (ADDRESSES as any)[chain.name].stableCoins
+}
+
 export function nativeCoinAddress(chain: Chain) : string {
-  return ((ADDRESSES as any)[chain.name].nativeCoin as string).toLowerCase();
+  return nativeCoin(chain).address.toLowerCase();
 }
 
 export function wrappedCoinAddress(chain: Chain) : string {
-  return ((ADDRESSES as any)[chain.name].wrappedCoin as string).toLowerCase();
+  return wrappedCoin(chain).address.toLowerCase();
 }
 
 export function stableCoinAddresses(chain: Chain) : string[] {
-  return (
-    (ADDRESSES as any)[chain.name].stableCoins as string[]
-  ).map((a) => a.toLowerCase());
+  return stableCoins(chain).map(a => a.address.toLowerCase());
 }
 
 export function allowedGasToken(chain: Chain) : string[] {
@@ -99,6 +114,26 @@ export function isWrappedCoin(token: string, chain: Chain) {
 
 export function isStableCoin(token: string, chain: Chain) {
   return stableCoinAddresses(chain).includes(token.toLowerCase());
+}
+
+export function isAllowedGasToken(token: string, chain: Chain) : boolean {
+  return isNativeCoin(token, chain) ||
+    isWrappedCoin(token, chain) ||
+    isStableCoin(token, chain);
+}
+
+export function gasTokenDecimals(token: string, chain: Chain) : number | undefined {
+  if (isNativeCoin(token, chain)) {
+    return nativeCoin(chain).decimals;
+  }
+  if (isWrappedCoin(token, chain)) {
+    return wrappedCoin(chain).decimals;
+  }
+  if (isStableCoin(token, chain)) {
+    return stableCoins(chain).find(
+      c => c.address.toLowerCase() === token.toLowerCase()
+    )?.decimals;
+  }
 }
 
 export function tokenBase(token: Token) : BigNumber {

@@ -49,19 +49,3 @@ export const priceConfig = functions.https.onCall(
       return {priceConfig: PriceConfigs[data.chain]};
     }
 );
-
-export const Refunders : {[key: string]: string} = {
-  "goerli": "0x1A811678eEEDF16a1D0dF4b12e290F78a61A28F9",
-  "polygon": "0x1A811678eEEDF16a1D0dF4b12e290F78a61A28F9",
-  "mumbai": "0x1A811678eEEDF16a1D0dF4b12e290F78a61A28F9",
-};
-
-export const refunder = functions.https.onCall(
-    (data, context) => {
-      const uid = context.auth?.uid;
-      if (!uid) {
-        return {code: 401, message: "Unauthorized Call"};
-      }
-      return {refunder: Refunders[data.chain]};
-    }
-);

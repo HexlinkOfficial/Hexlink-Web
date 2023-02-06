@@ -1,5 +1,5 @@
 import { Chain } from "./chain";
-import { BigNumber as EthBigNumber } from "ethers";
+import { ethers, BigNumber as EthBigNumber } from "ethers";
 export interface PriceConfig {
     nativeCurrencyInUsd: string;
     defaultGasPrice: string;
@@ -17,3 +17,11 @@ export declare function calcGas(chain: Chain, gasToken: {
     address: string;
     decimals: number;
 }, amount: EthBigNumber, priceInfo: PriceInfo): EthBigNumber;
+export declare function genPriceInfo(provider: ethers.providers.Provider, priceConfig: PriceConfig): Promise<{
+    lastBaseFeePerGas: string;
+    maxFeePerGas: string;
+    maxPriorityFeePerGas: string;
+    updatedAt: number;
+    nativeCurrencyInUsd: string;
+    defaultGasPrice: string;
+}>;

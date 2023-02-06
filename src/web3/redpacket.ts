@@ -7,7 +7,7 @@ import { genDeployAuthProof } from "@/web3/oracle";
 import { tokenEqual } from "@/web3/utils";
 import { estimateGas, sendTransaction, signMessage } from "@/web3/wallet";
 
-import type { Op, OpInput, Chain } from "../../functions/common";
+import type { Op, OpInput, Chain, UserOpRequest } from "../../functions/common";
 import {
     hash,
     isNativeCoin,
@@ -19,12 +19,12 @@ import {
     accountContract,
     encodeValidateAndCall,
     gasTokenPricePerGwei,
-    encodeExecBatch
+    encodeExecBatch,
+    refunder,
 } from "../../functions/common";
 import type { RedPacketInput } from "../../functions/redpacket";
 import {
     redPacketContract,
-    redpacketId,
     buildGasSponsorshipOp,
     buildRedPacketOps,
 } from "../../functions/redpacket";
@@ -34,7 +34,6 @@ import { useWalletStore } from "@/stores/wallet";
 import { useAccountStore } from "@/stores/account";
 
 import { getFunctions, httpsCallable } from 'firebase/functions'
-import { string } from "vue-types";
 const functions = getFunctions();
 
 export interface Transaction {
@@ -57,8 +56,6 @@ export function validator() : string {
     }
     return "0x030ffbc193c3f9f4c6378beb506eecb0933fd457";
 }
-
-const refunder = "0x1A811678eEEDF16a1D0dF4b12e290F78a61A28F9";
 
 function buildOpInput(params: {
     to: string,
@@ -181,7 +178,7 @@ async function buildCreateRedPacketTxForMetamask(input: RedPacketInput) {
             input: buildOpInput({to: hexlAccount, value}),
         });
     }
-    userOps.push(buildGasSponsorshipOp(hexlAccount, refunder, input));
+    userOps.push(buildGasSponsorshipOp(hexlAccount, refunder(chain), input));
     userOps = userOps.concat(buildRedPacketOps(chain, input));
     const {data: callData, signature, nonce} = await encodeValidateAndCall({
         account: accountContract(useChainStore().provider, hexlAccount),
@@ -308,16 +305,16 @@ export async function deployAndCreateNewRedPacket(
     return await processTxAndSave(redpacket, txes, dryrun);
 }
 
-export async function buildCreateRedPacketRequest(input: RedPacketInput) {
+export async function buildCreateRedPacketRequest(input: RedPacketInput): Promise<UserOpRequest> {
     const walletAccount = useWalletStore().account!.address;
     const hexlAccount = useAccountStore().account!.address;
     const chain = useChainStore().chain;
 
     let userOps : Op[] = [];
-    userOps.push(buildGasSponsorshipOp(hexlAccount, refunder, input));
+    userOps.push(buildGasSponsorshipOp(hexlAccount, refunder(chain), input));
     userOps = userOps.concat(buildRedPacketOps(chain, input));
     const gas = {
-        receiver: refunder,
+        receiver: refunder(chain),
         token: input.gasToken,
         price: gasTokenPricePerGwei(
             chain,
@@ -333,15 +330,22 @@ export async function buildCreateRedPacketRequest(input: RedPacketInput) {
         sign: async (msg: string) => await signMessage(walletAccount, msg),
         gas,
     });
-    return {
-        params: {txData, signature, nonce, gas},
-        op: {to: useAccountStore().account!.address, data},
-    };
+    return {data, params: {txData, signature, nonce: nonce.toString(), gas}};
 }
 
 async function createRedPacketForHexlink(input: RedPacketInput, dryrun: boolean) {
     const chain = useChainStore().chain;
     const request = await buildCreateRedPacketRequest(input);
+    try {
+        await useChainStore().provider.estimateGas({
+            to: useAccountStore().account!.address,
+            data: request.data
+        })
+    } catch(err) {
+        console.log("tx is likely to be reverted");
+        console.log(err);
+        throw err;
+    }
     if (dryrun) {
         console.log(request);
         return {id: input.id!};
@@ -380,14 +384,7 @@ export async function callCreateRedPacket(
     chain: Chain,
     redPacket: RedPacketInput,
     txHash?: string,
-    request?: {
-        params: any,
-        op: {
-            to: string,
-            data: string,
-            value?: string,
-        },
-    }
+    request?: UserOpRequest
 ) : Promise<number> {
     const createRedPacket = httpsCallable(functions, 'createRedPacket');
     const result = await createRedPacket({

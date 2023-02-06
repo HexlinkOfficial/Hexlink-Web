@@ -53,3 +53,13 @@ export function calcGas(chain, gasToken, amount, priceInfo) {
     }
     throw new Error("Unsupported gas token");
 }
+export async function genPriceInfo(provider, priceConfig) {
+    const feeData = await provider.getFeeData();
+    return {
+        ...priceConfig,
+        lastBaseFeePerGas: feeData.lastBaseFeePerGas?.toString() || "0",
+        maxFeePerGas: feeData.maxFeePerGas?.toString() || "0",
+        maxPriorityFeePerGas: feeData.maxPriorityFeePerGas?.toString() || "0",
+        updatedAt: new Date().getTime()
+    };
+}

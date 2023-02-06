@@ -91,7 +91,8 @@ export async function encodeValidateAndCall(params: {
       "validateAndCallWithGasRefund",
       [
         params.txData,
-        nonce, signature,
+        nonce,
+        signature,
         params.gas
       ]
     );

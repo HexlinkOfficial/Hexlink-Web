@@ -3,14 +3,13 @@ import * as functions from "firebase-functions";
 
 import {getRedPacket} from "./graphql/redpacket";
 import type {RedPacket} from "./graphql/redpacket";
-import type {RedPacket as RedPacketInput} from "../redpacket";
 import {signWithKmsKey} from "./kms";
-import {ethers} from "ethers";
+import {ethers, BigNumber as EthBigNumber} from "ethers";
 import {
   accountAddress,
   toEthSignedMessageHash,
 } from "./account";
-import {KMS_KEY_TYPE, Refunders, kmsConfig} from "./config";
+import {KMS_KEY_TYPE, kmsConfig} from "./config";
 
 import {
   redPacketAddress,
@@ -18,8 +17,16 @@ import {
   redpacketId,
 } from "../redpacket";
 import {Firebase} from "./firebase";
-import {getChain} from "../common";
-import type {Chain} from "../common";
+import {
+  UserOpRequest,
+  accountInterface,
+  getChain,
+  PriceConfigs,
+  gasTokenDecimals,
+  gasTokenPricePerGwei,
+  refunder,
+} from "../common";
+import type {Chain, GasObject, OpInput} from "../common";
 import {submit} from "./services/operation";
 import {insertRequest} from "./graphql/request";
 
@@ -47,7 +54,7 @@ async function buildClaimOp(
     chain: Chain,
     redPacket: RedPacket,
     claimer: string,
-) {
+) : Promise<OpInput> {
   const message = ethers.utils.keccak256(
       ethers.utils.defaultAbiCoder.encode(
           ["bytes32", "address"],
@@ -68,11 +75,10 @@ async function buildClaimOp(
     claimer,
     signature,
   };
-  const callData = redPacketInterface.encodeFunctionData("claim", [args]);
   return {
     to: redPacketAddress(chain),
     value: "0x0",
-    callData,
+    callData: redPacketInterface.encodeFunctionData("claim", [args]),
     callGasLimit: "0x0",
   };
 }
@@ -127,21 +133,37 @@ export const claimRedPacket = functions.https.onCall(
     }
 );
 
-async function buildCreateOp(chain: Chain, redPacket: RedPacketInput) {
-  const args = {
-    token: redPacket.token,
-    salt: redPacket.salt,
-    balance: redPacket.balance,
-    validator: redPacket.validator,
-    split: redPacket.split,
-    mode: redPacket.mode,
-  };
-  const callData = redPacketInterface.encodeFunctionData("create", [args]);
+function validateGas(chain: Chain, gas: GasObject) {
+  if (gas.receiver !== refunder(chain)) {
+    throw new Error("invalid gas refunder");
+  }
+  const decimals = gasTokenDecimals(gas.token, chain);
+  if (decimals === undefined) {
+    throw new Error("invalid gas token");
+  }
+  const price = gasTokenPricePerGwei(
+      chain, gas.token, decimals, PriceConfigs[chain.name]
+  );
+  if (EthBigNumber.from(gas.price).lt(price)) {
+    throw new Error("invalid gas price");
+  }
+}
+
+async function validateAndbuildUserOp(
+    chain: Chain,
+    account: string,
+    {params}: UserOpRequest,
+) : Promise<OpInput> {
+  const data = accountInterface.encodeFunctionData(
+      "validateAndCallWithGasRefund",
+      [params.txData, params.nonce, params.signature, params.gas]
+  );
+  validateGas(chain, params.gas);
   return {
-    to: redPacketAddress(chain),
-    value: "0",
-    callData,
-    callGasLimit: "0",
+    to: account,
+    value: "0x0",
+    callData: data,
+    callGasLimit: "0x0",
   };
 }
 
@@ -157,6 +179,7 @@ export const createRedPacket = functions.https.onCall(
       if (!account.address) {
         return {code: 400, message: "invalid account"};
       }
+
       const rpId = redpacketId(chain, account.address, data.redPacket);
       const action = {
         type: "insert_redpacket",
@@ -164,7 +187,7 @@ export const createRedPacket = functions.https.onCall(
           userId: uid,
           redPacketId: rpId,
           creator: data.creator,
-          refunder: Refunders[chain.name],
+          refunder: refunder(chain),
           priceInfo: data.redPacket.priceInfo,
         },
       };
@@ -188,9 +211,10 @@ export const createRedPacket = functions.https.onCall(
       if (data.txHash) {
         postData.tx = data.txHash;
       } else {
-        postData.input = await buildCreateOp(chain, data.redPacket);
+        postData.input = await validateAndbuildUserOp(
+            chain, account.address, data.request
+        );
       }
-
       const result = await submit(chain, postData);
       return {code: 200, id: result.id};
     }

@@ -4,9 +4,9 @@ import {BigNumber as EthBigNumber} from "ethers";
 
 export interface OpInput {
     to: string,
-    value: EthBigNumber,
+    value: EthBigNumber | string,
     callData: string | [],
-    callGasLimit: EthBigNumber,
+    callGasLimit: EthBigNumber | string,
 }
 
 export interface Op {
@@ -27,4 +27,14 @@ export interface Deposit {
   receipt: string,
   token: string,
   amount: string,
+}
+
+export interface UserOpRequest {
+  params: {
+    txData: string,
+    nonce: string,
+    signature: string,
+    gas: GasObject,
+  },
+  data: string,
 }

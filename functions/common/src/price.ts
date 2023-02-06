@@ -1,7 +1,7 @@
 import { BigNumber } from "bignumber.js";
 import { Chain } from "./chain";
 import { isNativeCoin, isStableCoin, isWrappedCoin } from "./tokens";
-import { BigNumber as EthBigNumber } from "ethers";
+import { ethers, BigNumber as EthBigNumber } from "ethers";
 import {toEthBigNumber} from "./utils";
 
 export interface PriceConfig {
@@ -90,3 +90,17 @@ export function calcGas(
     }
     throw new Error("Unsupported gas token");
   }
+
+  export async function genPriceInfo(
+    provider: ethers.providers.Provider,
+    priceConfig: PriceConfig
+) {
+    const feeData = await provider.getFeeData();
+    return {
+        ...priceConfig,
+        lastBaseFeePerGas: feeData.lastBaseFeePerGas?.toString() || "0",
+        maxFeePerGas: feeData.maxFeePerGas?.toString() || "0",
+        maxPriorityFeePerGas: feeData.maxPriorityFeePerGas?.toString() || "0",
+        updatedAt: new Date().getTime()
+    };
+}

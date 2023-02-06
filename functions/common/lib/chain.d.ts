@@ -18,3 +18,4 @@ export declare const MUMBAI: Chain;
 export declare const SUPPORTED_CHAINS: Chain[];
 export declare function getChainFromProvider(provider: ethers.providers.Provider): Promise<Chain>;
 export declare function getChain(chain: string | number): Chain;
+export declare function refunder(_chain: Chain): string;

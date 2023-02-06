@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getChain = exports.getChainFromProvider = exports.SUPPORTED_CHAINS = exports.MUMBAI = exports.POLYGON = exports.GOERLI = void 0;
+exports.refunder = exports.getChain = exports.getChainFromProvider = exports.SUPPORTED_CHAINS = exports.MUMBAI = exports.POLYGON = exports.GOERLI = void 0;
 exports.GOERLI = {
     chainId: "5",
     name: "goerli",
@@ -71,3 +71,7 @@ function getChain(chain) {
     throw new Error("Unsupported chain");
 }
 exports.getChain = getChain;
+function refunder(_chain) {
+    return "0x1A811678eEEDF16a1D0dF4b12e290F78a61A28F9";
+}
+exports.refunder = refunder;

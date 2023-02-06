@@ -65,7 +65,8 @@ function encodeValidateAndCall(params) {
             const signature = yield params.sign(message);
             data = params.account.interface.encodeFunctionData("validateAndCallWithGasRefund", [
                 params.txData,
-                nonce, signature,
+                nonce,
+                signature,
                 params.gas
             ]);
             return { data, nonce, signature };

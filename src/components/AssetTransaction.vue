@@ -2,14 +2,14 @@
   <div v-if="loading" class="loading-state">
     <Loading />
   </div>
-  <!-- <div v-if="!loading" class="no-history">
+  <div v-if="!loading && transactionByDate.length == 0" class="no-history">
     <div style="text-align: center;">You have no transaction history yet!</div>
-  </div> -->
+  </div>
   <div v-if="!loading" class="transaction-detail">
     <div style="overflow: visible; border-radius: 0.75rem;">
       <div v-for="(value, name, index) in transactionByDate" :key="index" style="position: relative;">
         <div class="history-date">
-          <div style="font-size: 0.875rem; line-height: 1.25rem;">{{ name }}</div>
+          <div style="font-size: 0.875rem; line-height: 1.25rem;">{{ new Date(name).toLocaleString("en-US", options) }}</div>
         </div>
         <div v-for="(r, i) in value" :key="i" class="history-record">
           <div class="record-box">
@@ -139,7 +139,15 @@ const profilePic = [
   "https://i.postimg.cc/g26pCsK0/blur8.png"
 ];
 
+const options = {
+  weekday: "long",
+  year: "numeric",
+  month: "long",
+  day: "numeric",
+};
+
 const loadTransactions = async (tokenAddress: string[]) => {
+  loading.value = true;
   const orderGroup: any = {};
 
   transfer.value = await getAssetTransfers({
@@ -182,6 +190,7 @@ const loadTransactions = async (tokenAddress: string[]) => {
     sortedTransaction[v] = sortedArray;
   })
   transactionByDate.value = JSON.parse(JSON.stringify(sortedTransaction));
+  loading.value = false;
 };
 
 onMounted(async () => {
@@ -248,7 +257,8 @@ i:hover {
   font-size: 0.875rem;
   line-height: 1.25rem;
   font-weight: 500;
-  margin-left: 0.875rem; }
+  margin-left: 0.875rem;
+  color: #6a6d7c; }
 .history-record {
   position: relative;
   padding-left: 1.5rem;

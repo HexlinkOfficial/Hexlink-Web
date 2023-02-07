@@ -31,30 +31,29 @@ exports.PriceConfigs = {
     "polygon": POLYGON,
     "mumbai": MUMBAI,
 };
-function gasTokenPricePerGwei(chain, token, decimals, price) {
+function gasTokenPricePerGwei(chain, token, price) {
     if ((0, tokens_1.isNativeCoin)(token, chain) || (0, tokens_1.isWrappedCoin)(token, chain)) {
         return "1000000000"; // 1Gwei = 10^9 wei
     }
     if ((0, tokens_1.isStableCoin)(token, chain)) {
-        const oneEth = (0, bignumber_js_1.BigNumber)(10).pow(decimals).times(price.nativeCurrencyInUsd);
-        const oneGwei = ethers_1.BigNumber.from(oneEth.div(1000000000).toString(10));
-        return oneGwei.toString();
+        const oneEth = (0, bignumber_js_1.BigNumber)(10).pow(18).times(price.nativeCurrencyInUsd);
+        return oneEth.div("1000000000").toString(10);
     }
     throw new Error("Not supported gas token");
 }
 exports.gasTokenPricePerGwei = gasTokenPricePerGwei;
 ;
-function getGasPrice(price) {
+function getGasPrice(price, prepay) {
     let gasPrice = ethers_1.BigNumber.from(price.lastBaseFeePerGas).add(price.maxPriorityFeePerGas);
     gasPrice = gasPrice.gt(price.maxFeePerGas)
         ? ethers_1.BigNumber.from(price.maxFeePerGas)
         : gasPrice;
-    return gasPrice.gt(price.defaultGasPrice)
-        ? gasPrice
-        : price.defaultGasPrice;
+    return prepay && gasPrice.lt(price.defaultGasPrice)
+        ? price.defaultGasPrice
+        : gasPrice;
 }
-function calcGas(chain, gasToken, amount, priceInfo) {
-    const gasPrice = getGasPrice(priceInfo);
+function calcGas(chain, gasToken, amount, priceInfo, prepay) {
+    const gasPrice = getGasPrice(priceInfo, prepay);
     if ((0, tokens_1.isNativeCoin)(gasToken.address, chain) || (0, tokens_1.isWrappedCoin)(gasToken.address, chain)) {
         return amount.mul(gasPrice);
     }

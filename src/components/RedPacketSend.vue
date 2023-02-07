@@ -219,7 +219,7 @@ const redpacket = ref<RawRedPacketInput>({
   salt: hash(new Date().toISOString()),
   split: 1,
   balance: "0",
-  balanceInput: "1",
+  balanceInput: "0.0001",
   token: tokenStore.nativeCoin.address,
   gasToken: tokenStore.nativeCoin.address,
   gasSponsorship: "0",
@@ -292,12 +292,14 @@ const refreshGas = async () => {
     tokenStore.token(redpacket.value.gasToken),
     sponsorshipAmount,
     priceInfo,
+    true, // prepay
   ).toString();
   redpacket.value.estimatedGas = calcGas(
     chain,
     tokenStore.token(redpacket.value.gasToken),
     EthBigNumber.from(estimatedGasAmount),
     priceInfo,
+    false, // prepay
   ).toString();
   await delay(5000);
   await refreshGas();

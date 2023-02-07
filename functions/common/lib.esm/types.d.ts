@@ -25,11 +25,8 @@ export interface Deposit {
     amount: string;
 }
 export interface UserOpRequest {
-    params: {
-        txData: string;
-        nonce: string;
-        signature: string;
-        gas: GasObject;
-    };
-    data: string;
+    txData: string;
+    nonce: string;
+    signature: string;
+    gas: GasObject;
 }

@@ -14,7 +14,7 @@ import {KMS_KEY_TYPE, kmsConfig} from "./config";
 import {
   redPacketAddress,
   redPacketInterface,
-  redpacketId,
+  redpacketId
 } from "../redpacket";
 import {Firebase} from "./firebase";
 import {
@@ -137,12 +137,8 @@ function validateGas(chain: Chain, gas: GasObject) {
   if (gas.receiver !== refunder(chain)) {
     throw new Error("invalid gas refunder");
   }
-  const decimals = gasTokenDecimals(gas.token, chain);
-  if (decimals === undefined) {
-    throw new Error("invalid gas token");
-  }
   const price = gasTokenPricePerGwei(
-      chain, gas.token, decimals, PriceConfigs[chain.name]
+      chain, gas.token, PriceConfigs[chain.name]
   );
   if (EthBigNumber.from(gas.price).lt(price)) {
     throw new Error("invalid gas price");
@@ -152,13 +148,13 @@ function validateGas(chain: Chain, gas: GasObject) {
 async function validateAndbuildUserOp(
     chain: Chain,
     account: string,
-    {params}: UserOpRequest,
+    request: UserOpRequest,
 ) : Promise<OpInput> {
   const data = accountInterface.encodeFunctionData(
       "validateAndCallWithGasRefund",
-      [params.txData, params.nonce, params.signature, params.gas]
+      [request.txData, request.nonce, request.signature, request.gas]
   );
-  validateGas(chain, params.gas);
+  validateGas(chain, request.gas);
   return {
     to: account,
     value: "0x0",
@@ -179,7 +175,6 @@ export const createRedPacket = functions.https.onCall(
       if (!account.address) {
         return {code: 400, message: "invalid account"};
       }
-
       const rpId = redpacketId(chain, account.address, data.redPacket);
       const action = {
         type: "insert_redpacket",

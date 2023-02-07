@@ -1,7 +1,6 @@
 import type { RedPacketDB, RedPacketOnchainState } from "@/types";
 import { ethers, BigNumber as EthBigNumber } from "ethers";
 import { useAuthStore } from "@/stores/auth";
-import { useTokenStore } from "@/stores/token";
 
 import { genDeployAuthProof } from "@/web3/oracle";
 import { tokenEqual } from "@/web3/utils";
@@ -186,11 +185,9 @@ async function buildCreateRedPacketTxForMetamask(input: RedPacketInput) {
     return txes;
 }
 
-export async function buildDeployAndCreateRedPacketTx(input: RedPacketInput) : Promise<any> {
-    const txes = await buildCreateRedPacketTxForMetamask(input);
-    const tx = txes.pop();
-
-    const { initData, proof } = await genDeployAuthProof(tx.input.data);
+export async function buildDeployTxForMetaMask() : Promise<any> {
+    const { initData, proof } = await genDeployAuthProof([]);
+    console.log(proof);
     const name = useAuthStore().user!.nameHash;
     const authProof = {
         authType: hash(proof.authType),
@@ -202,26 +199,25 @@ export async function buildDeployAndCreateRedPacketTx(input: RedPacketInput) : P
         "deploy", [name, initData, authProof]
     );
     const hexlAddr = hexlAddress(useChainStore().chain);
-    txes.push({
+    await simulate(hexlAddr, data);
+    return {
         name: "createRedPacket",
-        function: "execBatch",
-        deploy: true,
+        function: "deploy",
         args: {
             name: useAuthStore().user!.nameHash,
             initData: {
                 owner: useWalletStore().account!.address,
-                data: tx.args.ops
+                data: []
             },
             authProof,
         },
         input: {
             to: hexlAddr,
             from: useWalletStore().account!.address,
-            value: tx.input.value,
+            value: "0x0",
             data,
         }
-    });
-    return txes;
+    };
 }
 
 async function processTxAndSave(
@@ -259,11 +255,25 @@ export async function deployAndCreateNewRedPacket(
     if (useHexlinkAccount) {
         throw new Error("Not supported");
     }
-    const txes = await buildDeployAndCreateRedPacketTx(redpacket);
+    const txes = [await buildDeployTxForMetaMask()].concat(
+        await buildCreateRedPacketTxForMetamask(redpacket)
+    );
     return await processTxAndSave(redpacket, txes, dryrun);
 }
 
-export async function buildCreateRedPacketRequest(input: RedPacketInput): Promise<UserOpRequest> {
+async function simulate(to: string, data: string) {
+    try {
+        const estimated = await useChainStore().provider.estimateGas({to, data});
+    } catch(err) {
+        console.log("tx is likely to be reverted");
+        console.log(err);
+        throw err;
+    }
+}
+
+export async function buildCreateRedPacketRequest(
+    input: RedPacketInput
+): Promise<UserOpRequest> {
     const walletAccount = useWalletStore().account!.address;
     const hexlAccount = useAccountStore().account!.address;
     const chain = useChainStore().chain;
@@ -277,7 +287,6 @@ export async function buildCreateRedPacketRequest(input: RedPacketInput): Promis
         price: gasTokenPricePerGwei(
             chain,
             input.gasToken,
-            useTokenStore().token(input.gasToken).decimals,
             input.priceInfo!
         )
     };
@@ -288,22 +297,13 @@ export async function buildCreateRedPacketRequest(input: RedPacketInput): Promis
         sign: async (msg: string) => await signMessage(walletAccount, msg),
         gas,
     });
-    return {data, params: {txData, signature, nonce: nonce.toString(), gas}};
+    await simulate(useAccountStore().account!.address, data);
+    return {txData, signature, nonce: nonce.toString(), gas};
 }
 
 async function createRedPacketForHexlink(input: RedPacketInput, dryrun: boolean) {
     const chain = useChainStore().chain;
     const request = await buildCreateRedPacketRequest(input);
-    try {
-        await useChainStore().provider.estimateGas({
-            to: useAccountStore().account!.address,
-            data: request.data
-        })
-    } catch(err) {
-        console.log("tx is likely to be reverted");
-        console.log(err);
-        throw err;
-    }
     if (dryrun) {
         console.log(request);
         return {id: input.id!};

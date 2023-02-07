@@ -1,4 +1,4 @@
-const profilePic = [
+export const profilePic = [
   "https://i.postimg.cc/sxJGBVKK/hex1.png",
   "https://i.postimg.cc/fys0T37J/hex2.png",
   "https://i.postimg.cc/yYVSMZYG/hex3.png",
@@ -8,4 +8,9 @@ const profilePic = [
   "https://i.postimg.cc/Pr28T5C5/hex7.png"
 ];
 
-export default profilePic;
+export const options = {
+  weekday: "long",
+  year: "numeric",
+  month: "long",
+  day: "numeric",
+};

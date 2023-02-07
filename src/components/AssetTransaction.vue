@@ -124,18 +124,11 @@ import { getAssetTransfers, loadTokenLogo } from '@/web3/tokens';
 import { useTokenStore } from '@/stores/token';
 import { useChainStore } from '@/stores/chain';
 import { prettyPrintAddress } from "../../functions/common";
-import profilePic from "@/assets/profilePic";
+import { profilePic, options } from "@/assets/imageAssets";
 
 const loading = ref<boolean>(false);
 const transfer = ref<any>();
 const transactionByDate = ref<any>([]);
-
-const options = {
-  weekday: "long",
-  year: "numeric",
-  month: "long",
-  day: "numeric",
-};
 
 const loadTransactions = async (tokenAddress: string[], profilePics: string[]) => {
   loading.value = true;

@@ -228,9 +228,9 @@ import { useAccountStore } from '@/stores/account';
 import { useTokenStore } from '@/stores/token';
 import { copy } from "@/web3/utils";
 import { queryRedPacketInfo } from "@/web3/redpacket";
-
 import { normalizeBalance } from "../../functions/common";
 import type { Token } from "../../functions/common";
+import { options } from "@/assets/imageAssets";
 
 const createdRpOps = ref<CreateRedPacketOp[]>([]);
 const claimedRpOps = ref<ClaimRedPacketOp[]>([]);
@@ -242,13 +242,6 @@ const loadClaimInfo = async () => {
 const redPacketByDate = ref<any>([]);
 const claimedByDate = ref<any>([]);
 const luckHistoryByDate = ref<any>([]);
-
-const options = {
-  weekday: "long",
-  year: "numeric",
-  month: "long",
-  day: "numeric",
-};
 
 const loadData = async function() {
   loading.value = true;

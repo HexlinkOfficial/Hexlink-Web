@@ -148,6 +148,7 @@ const options = {
 const loadTransactions = async (tokenAddress: string[], profilePics: string[]) => {
   loading.value = true;
   await preload(profilePics);
+  setTimeout(async () => await preload(profilePics), 2500);
   const orderGroup: any = {};
 
   transfer.value = await getAssetTransfers({

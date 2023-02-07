@@ -1,7 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import SignInView from '@/views/SignInView.vue'
 import Error404 from '@/views/Error404.vue'
-import Transaction from '@/views/TransactionView.vue'
 import { useAuthStore } from '@/stores/auth';
 
 const router = createRouter({
@@ -16,11 +15,6 @@ const router = createRouter({
       path: '/signin',
       name: 'signIn',
       component: SignInView
-    },
-    {
-      path: '/transactions',
-      name: 'transaction page',
-      component: Transaction
     },
     {
       path: '/adminView',

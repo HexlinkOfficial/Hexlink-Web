@@ -72,7 +72,7 @@
                   </div>
                   <div style="display: flex; align-items: center;">
                     <span class="thumb">
-                      <img :src="profilePic[Math.floor(Math.random() * profilePic.length)]" :size="64" referrerpolicy="no-referrer" />
+                      <img :src="profilePic[Math.floor(Math.random() * profilePic.length)]" :size="64" referrerpolicy="no-referrer" rel="preload" />
                     </span>
                     <div style="display: flex; flex-direction: column; margin-left: 0.5rem;">
                       <span class="from-text">{{ r.action.type == 'receive' ? 'From' : 'To' }}</span>
@@ -129,14 +129,13 @@ const loading = ref<boolean>(false);
 const transfer = ref<any>();
 const transactionByDate = ref<any>([]);
 const profilePic = [
-  "https://i.postimg.cc/brC8hFMZ/blur1.png",
-  "https://i.postimg.cc/HsvsDVD6/blur2.png",
-  "https://i.postimg.cc/XNQndpJn/blur3.png",
-  "https://i.postimg.cc/wjSqMZBJ/blur4.png",
-  "https://i.postimg.cc/5Nr1KTLG/blur5.png",
-  "https://i.postimg.cc/gkjmDmX8/blur6.png",
-  "https://i.postimg.cc/XYZNV4n4/blur7.png",
-  "https://i.postimg.cc/g26pCsK0/blur8.png"
+  "https://i.postimg.cc/sxJGBVKK/hex1.png",
+  "https://i.postimg.cc/fys0T37J/hex2.png",
+  "https://i.postimg.cc/yYVSMZYG/hex3.png",
+  "https://i.postimg.cc/ryGrZJcW/hex4.png",
+  "https://i.postimg.cc/NjF2MvX7/hex5.png",
+  "https://i.postimg.cc/fRPtSqj4/hex6.png",
+  "https://i.postimg.cc/Pr28T5C5/hex7.png"
 ];
 
 const options = {
@@ -146,8 +145,9 @@ const options = {
   day: "numeric",
 };
 
-const loadTransactions = async (tokenAddress: string[]) => {
+const loadTransactions = async (tokenAddress: string[], profilePics: string[]) => {
   loading.value = true;
+  await preload(profilePics);
   const orderGroup: any = {};
 
   transfer.value = await getAssetTransfers({
@@ -193,12 +193,20 @@ const loadTransactions = async (tokenAddress: string[]) => {
   loading.value = false;
 };
 
+const preload = async (image: string[]) => {
+  var images = new Array()
+  for (var i = 0; i < image.length; i++) {
+    images[i] = new Image()
+    images[i].src = image[i]
+  }
+};
+
 onMounted(async () => {
   var tokens: string[] = [];
   useTokenStore().visiableTokens.forEach(t => {
     tokens.push(t.address);
   })
-  await loadTransactions(tokens);
+  await loadTransactions(tokens, profilePic);
   console.log(transactionByDate.value);
   console.log(useChainStore().chain);
 });
@@ -227,7 +235,7 @@ i:hover {
   padding: 0.5rem;
   align-items: center;
   justify-content: center;
-  height: 450px;
+  height: 485px;
   @media (max-width: 990px) {
     height: 150px; } }
 .no-history {

@@ -82,7 +82,7 @@ class PrivateQueues {
                 const args = ops.map(op => op.input);
                 const estimatedGas = await hexlink.estimateGas.process(args);
                 const unsignedTx = await hexlink.populateTransaction.process(
-                    args, {gasLimit: estimatedGas},
+                    args, {gasLimit: estimatedGas.mul(2)},
                 );
                 const tx = await buildTx(provider, chain, unsignedTx, signer.address);
                 const signedTx = await signer.signTransaction(tx);

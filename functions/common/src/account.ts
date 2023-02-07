@@ -53,7 +53,7 @@ export function encodeInit(owner: string, data: string) {
 
 export function encodeExec(op: OpInput) {
   return accountInterface.encodeFunctionData(
-    "execBatch", [op]
+    "exec", [op]
   );
 }
 

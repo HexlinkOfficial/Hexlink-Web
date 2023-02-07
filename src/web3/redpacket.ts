@@ -127,7 +127,6 @@ async function buildCreateRedPacketTxForMetamask(input: RedPacketInput) {
     const chain = useChainStore().chain;
 
     let userOps : Op[] = [];
-    let hexlOps: Op[] = [];
     let txes : any[] = [];
     let value : EthBigNumber = EthBigNumber.from(0);
 
@@ -170,49 +169,18 @@ async function buildCreateRedPacketTxForMetamask(input: RedPacketInput) {
             userOps = userOps.concat(op);
         }
     }
-    if (value.gt(0)) {
-        hexlOps.push({
-            name: "depositAll",
-            function: "",
-            args: {},
-            input: buildOpInput({to: hexlAccount, value}),
-        });
-    }
+ 
     userOps.push(buildGasSponsorshipOp(hexlAccount, refunder(chain), input));
     userOps = userOps.concat(buildRedPacketOps(chain, input));
-    const {data: callData, signature, nonce} = await encodeValidateAndCall({
-        account: accountContract(useChainStore().provider, hexlAccount),
-        txData: encodeExecBatch(userOps.map(op => op.input)),
-        sign: async (msg: string) => await signMessage(walletAccount, msg)
-    });
-    hexlOps.push({
-        name: "createRedPacket",
-        function: "validateAndCall",
-        args: {
-            txData: userOps,
-            nonce,
-            signature,
-        },
-        input: buildOpInput({to: hexlAccount, callData}),
-    });
-
-    const hexlAddr = hexlAddress(useChainStore().chain);
-    const data = hexlInterface.encodeFunctionData(
-        "process", [hexlOps.map(hexlOp => hexlOp.input)]
-    );
-    const totalValue = hexlOps.reduce(
-        (sum, hexlOp) => sum.add(hexlOp.input.value),
-        EthBigNumber.from(0)
-    );
     txes.push({
         name: "createRedPacket",
-        function: "process",
-        args: {ops: hexlOps},
+        function: "execBatch",
+        args: {ops: userOps},
         input: {
-            to: hexlAddr,
+            to: useAccountStore().account!.address,
             from: useWalletStore().account!.address,
-            value: ethers.utils.hexValue(totalValue),
-            data,
+            value: ethers.utils.hexValue(value),
+            data: encodeExecBatch(userOps.map(op => op.input))
         }
     });
     return txes;
@@ -220,13 +188,9 @@ async function buildCreateRedPacketTxForMetamask(input: RedPacketInput) {
 
 export async function buildDeployAndCreateRedPacketTx(input: RedPacketInput) : Promise<any> {
     const txes = await buildCreateRedPacketTxForMetamask(input);
+    const tx = txes.pop();
 
-    // pop execBatch op and encode it to init
-    const tx = txes.pop(); 
-    const ops: Op[] = tx.args.ops;
-    const op = ops.pop();
-
-    const { initData, proof } = await genDeployAuthProof(op!.input.callData);
+    const { initData, proof } = await genDeployAuthProof(tx.input.data);
     const name = useAuthStore().user!.nameHash;
     const authProof = {
         authType: hash(proof.authType),
@@ -234,32 +198,26 @@ export async function buildDeployAndCreateRedPacketTx(input: RedPacketInput) : P
         issuedAt: EthBigNumber.from(proof.issuedAt),
         signature: proof.signature
     };
-    const callData = hexlInterface.encodeFunctionData(
+    const data = hexlInterface.encodeFunctionData(
         "deploy", [name, initData, authProof]
     );
     const hexlAddr = hexlAddress(useChainStore().chain);
-    ops.push({
-        name: "createRedPacket",
-        function: "deploy",
-        args: {
-            name: useAuthStore().user!.nameHash,
-            initData: op,
-            authProof
-        },
-        input: buildOpInput({to: hexlAddr, callData}),
-    });
-    const data = hexlInterface.encodeFunctionData(
-        "process", [ops.map(op => op.input)]
-    );
-    const value = ops.reduce((sum, op) => sum.add(op.input.value), EthBigNumber.from(0));
     txes.push({
         name: "createRedPacket",
-        function: "process",
-        args: ops,
+        function: "execBatch",
+        deploy: true,
+        args: {
+            name: useAuthStore().user!.nameHash,
+            initData: {
+                owner: useWalletStore().account!.address,
+                data: tx.args.ops
+            },
+            authProof,
+        },
         input: {
             to: hexlAddr,
             from: useWalletStore().account!.address,
-            value: ethers.utils.hexValue(value),
+            value: tx.input.value,
             data,
         }
     });

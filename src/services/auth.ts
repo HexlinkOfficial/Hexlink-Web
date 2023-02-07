@@ -12,8 +12,8 @@ import { app } from '@/services/firebase';
 import { useAuthStore } from "@/stores/auth";
 import { useWalletStore } from "@/stores/wallet";
 import { switchNetwork } from "@/web3/network";
-import { nameHash, GOERLI, SUPPORTED_CHAINS} from "../../functions/common";
-import { initHexlAccount } from "@/web3/account";
+import { GOERLI, SUPPORTED_CHAINS} from "../../functions/common";
+import { initHexlAccount, nameHashWithVersion } from "@/web3/account";
 import { useChainStore } from '@/stores/chain';
 import { initTokenList } from "@/web3/tokens";
 import { useAccountStore } from '@/stores/account';
@@ -61,7 +61,7 @@ export async function googleSocialLogin() {
             handle: result.user.email!,
             displayName: result.user.displayName || undefined,
             photoURL: result.user.photoURL || undefined,
-            nameHash: nameHash("mailto", result.user.email!),
+            nameHash: nameHashWithVersion("mailto", result.user.email!),
             idToken
         };
         useAuthStore().signIn(user);
@@ -89,7 +89,7 @@ export async function twitterSocialLogin() {
             handle: result.user.reloadUserInfo.screenName,
             displayName: result.user.displayName || undefined,
             photoURL: result.user.photoURL || undefined,
-            nameHash: nameHash("twitter.com", providerUid),
+            nameHash: nameHashWithVersion("twitter.com", providerUid),
             idToken,
         };
         useAuthStore().signIn(user);
@@ -117,4 +117,5 @@ export async function init() {
         SUPPORTED_CHAINS.map(chain => initTokenList(chain))
     );
     await switchNetwork(GOERLI);
+    console.log(useAccountStore().account);
 }

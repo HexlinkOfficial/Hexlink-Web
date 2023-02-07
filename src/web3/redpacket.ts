@@ -187,7 +187,6 @@ async function buildCreateRedPacketTxForMetamask(input: RedPacketInput) {
 
 export async function buildDeployTxForMetaMask() : Promise<any> {
     const { initData, proof } = await genDeployAuthProof([]);
-    console.log(proof);
     const name = useAuthStore().user!.nameHash;
     const authProof = {
         authType: hash(proof.authType),
@@ -258,6 +257,7 @@ export async function deployAndCreateNewRedPacket(
     const txes = [await buildDeployTxForMetaMask()].concat(
         await buildCreateRedPacketTxForMetamask(redpacket)
     );
+    console.log(txes);
     return await processTxAndSave(redpacket, txes, dryrun);
 }
 

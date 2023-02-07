@@ -25,7 +25,7 @@ export function encodeInit(owner, data) {
     return accountInterface.encodeFunctionData("init", [owner, data]);
 }
 export function encodeExec(op) {
-    return accountInterface.encodeFunctionData("execBatch", [op]);
+    return accountInterface.encodeFunctionData("exec", [op]);
 }
 export function encodeExecBatch(ops) {
     return accountInterface.encodeFunctionData("execBatch", [ops]);

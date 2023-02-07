@@ -2,7 +2,6 @@ import * as functions from "firebase-functions";
 import * as ethers from "ethers";
 import {signWithKmsKey, getEthAddressFromPublicKey} from "./kms";
 import {kmsConfig, KMS_KEY_TYPE} from "./config";
-import {env} from "process";
 import {genNameHash, toEthSignedMessageHash} from "./account";
 import {Firebase} from "./firebase";
 
@@ -32,7 +31,12 @@ export const genTwitterOAuthProof = functions.https.onCall(
       if (result.nameHash == undefined) {
         return result;
       }
-      const {nameHash} = result;
+      let {nameHash} = result;
+      if (process.env.FUNCTIONS_EMULATOR && data.version) {
+        nameHash = ethers.utils.keccak256(
+            ethers.utils.toUtf8Bytes(nameHash + "@" + data.version)
+        );
+      }
 
       const identityType = hash(TWITTER_PROVIDER_ID);
       const authType = hash(OAUTH_AUTH_TYPE);
@@ -51,7 +55,7 @@ export const genTwitterOAuthProof = functions.https.onCall(
       );
 
       let encodedSig;
-      if (env.FUNCTIONS_EMULATOR === "true") {
+      if (process.env.FUNCTIONS_EMULATOR) {
         const validator = new ethers.Wallet(secrets.HARDHAT_VALIDATOR);
         const signature = await validator.signMessage(
             ethers.utils.arrayify(message)

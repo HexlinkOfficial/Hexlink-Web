@@ -14,7 +14,7 @@ import {KMS_KEY_TYPE, kmsConfig} from "./config";
 import {
   redPacketAddress,
   redPacketInterface,
-  redpacketId
+  redpacketId,
 } from "../redpacket";
 import {Firebase} from "./firebase";
 import {
@@ -22,7 +22,6 @@ import {
   accountInterface,
   getChain,
   PriceConfigs,
-  gasTokenDecimals,
   gasTokenPricePerGwei,
   refunder,
 } from "../common";

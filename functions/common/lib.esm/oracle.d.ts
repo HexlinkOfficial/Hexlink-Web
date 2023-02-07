@@ -9,7 +9,8 @@ export interface AuthProof {
 }
 export declare function genDeployAuthProof(provider: Provider, nameHash: string, owner: string, data: string | [], genAuthProof: (request: {
     requestId: string;
-}) => Promise<AuthProof>): Promise<{
+    version?: number;
+}) => Promise<AuthProof>, version?: number): Promise<{
     initData: string;
     proof: AuthProof;
 }>;

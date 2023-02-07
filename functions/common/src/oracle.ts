@@ -41,7 +41,10 @@ export async function genDeployAuthProof(
     nameHash: string,
     owner: string,
     data: string | [],
-    genAuthProof: (request: {requestId: string}) => Promise<AuthProof>,
+    genAuthProof: (
+      request: {requestId: string, version?: number}
+    ) => Promise<AuthProof>,
+    version?: number,
 ) : Promise<{ initData: string, proof: AuthProof }> {
   const initData = accountInterface.encodeFunctionData(
       "init", [owner, data]
@@ -54,6 +57,6 @@ export async function genDeployAuthProof(
   );
   return {
     initData,
-    proof: await genAuthProof({requestId}),
+    proof: await genAuthProof({requestId, version}),
   };
 }

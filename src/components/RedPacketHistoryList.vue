@@ -10,7 +10,7 @@
       <div style="overflow: visible; border-radius: 0.75rem;">
         <div v-for="(value, name, index) in luckHistoryByDate" :key="index" style="position: relative; ">
           <div class="history-date">
-            <div style="font-size: 0.875rem; line-height: 1.25rem;">{{ name }}</div>
+            <div style="font-size: 0.875rem; line-height: 1.25rem;">{{ new Date(name).toLocaleString("en-US", options) }}</div>
           </div>
           <div v-for="(op, i) in value" :key="i" class="history-record">
             <div v-if="op.type == 'create_redpacket'" class="record-box">
@@ -100,13 +100,23 @@
                   <i v-if="showStatus(op) == 'Sent'" class="fa fa-paper-plane share-button" aria-hidden="true" @click="copyShareLink(op.redpacket)"></i>
                   <span v-if="showStatus(op) != 'Sent'" class="pending-text">{{ showDetailStatus(op) }}</span>
                 </div>
-                <div v-if="showStatus(op) == 'Sent'" class="cta">
+                <div class="cta">
                   <!-- <button class="connect-wallet-button" :href="href">
                     Withdraw
                   </button> -->
-                  <router-link :to="{ query: { details: op.redpacket.id } }">
+                  <router-link :to="{ query: { details: op.redpacket.id } }" v-if="showStatus(op) == 'Sent'">
                     <i class="fa fa-get-pocket" aria-hidden="true"></i>
                   </router-link>
+                  <a-tooltip v-if="showStatus(op) != 'Sent'" placement="top">
+                    <template #title>
+                      <span>
+                        Check on blockchain explorer
+                      </span>
+                    </template>
+                    <a :href="useChainStore().chain.blockExplorerUrls[0]+'/tx/'+op.tx" target="_blank">
+                      <i class="fa-solid fa-arrow-up-from-bracket"></i>
+                    </a>
+                  </a-tooltip>
                 </div>
               </div>
             </div>
@@ -192,8 +202,9 @@
                   <span v-if="showClaimStatus(op) != 'Claimed' && showClaimStatus(op) != 'Error'" class="pending-text">{{ showClaimStatus(op) }}</span>
                   <span v-if="showClaimStatus(op) == 'Error'" class="pending-text" style="color:#FD4755;">{{ showClaimStatus(op) }}</span>
                 </div>
-                <div class="cta" v-if="showClaimStatus(op) == 'Claimed'">
-                  <i className="fa fa-twitter"></i>
+                <div class="cta">
+                  <i v-if="showClaimStatus(op) == 'Claimed'" className="fa fa-twitter"></i>
+                  <i v-if="showClaimStatus(op) == 'Error'" className="fa-solid fa-arrow-up-from-bracket"></i>
                 </div>
               </div>
             </div>
@@ -232,6 +243,13 @@ const redPacketByDate = ref<any>([]);
 const claimedByDate = ref<any>([]);
 const luckHistoryByDate = ref<any>([]);
 
+const options = {
+  weekday: "long",
+  year: "numeric",
+  month: "long",
+  day: "numeric",
+};
+
 const loadData = async function() {
   loading.value = true;
   if (useAccountStore().account) {
@@ -242,6 +260,7 @@ const loadData = async function() {
   }
   loading.value = false;
   extractDate();
+  console.log(luckHistoryByDate.value);
 };
 
 const extractDate = () => {
@@ -325,7 +344,7 @@ const extractDate = () => {
     luckHistoryByDate.value[v].forEach((op: any) => {
       time.push(new Date(op.createdAt).getTime());
     })
-    const sortedArray: any[] = []
+    const sortedArray: any[] = [];
     time.sort((a: number, b: number) => b - a).forEach((t: number) => {
       luckHistoryByDate.value[v].forEach((op: any) => {
           new Date(op.createdAt).getTime() == t && sortedArray.push(op);
@@ -446,7 +465,7 @@ const aggregatedClaimed = async function(
 .pending-text {
   font-size: 12px;
   font-weight: 800;
-  margin-left: 5.5rem;
+  // margin-left: 5.5rem;
   text-align: center;
   color: #076AE0; }
 .claim-mode {
@@ -459,8 +478,8 @@ const aggregatedClaimed = async function(
 i {
   color: rgba(0,0,0,0.3);
   font-size: 18px; }
-// i:hover {
-//   color: #076AE0; }
+i:hover {
+  color: #076AE0; }
 .arrow {
   font-size: .875rem;
   line-height: 1.25rem;
@@ -649,7 +668,8 @@ i {
   font-size: 0.875rem;
   line-height: 1.25rem;
   font-weight: 500;
-  margin-left: 0.875rem; }
+  margin-left: 0.875rem;
+  color: #6a6d7c; }
 .token-listDetail {
   border-radius: 0.75rem;
   margin-top: 1rem;

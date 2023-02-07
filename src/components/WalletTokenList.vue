@@ -119,7 +119,7 @@ const getPortfolioRatio = (token: Token) => {
   padding: 0.5rem;
   align-items: center;
   justify-content: center;
-  height: 450px;
+  height: 425px;
   @media (max-width: 990px) {
     height: 150px; } }
 img {

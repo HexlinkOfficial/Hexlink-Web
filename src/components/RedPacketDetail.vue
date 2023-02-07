@@ -26,8 +26,8 @@
       <div v-if="!loading && claimers?.length == 0" class="claimers-list">
         <div style="text-align: center;margin-top: 25%;">You have no luck history yet! Go send some luck~</div>
       </div>
-      <div v-if="!loading" class="claimers-list" v-for="(v, i) in claimers" :key="i">
-        <div class="claimer-card">
+      <div v-if="!loading" class="claimers-list">
+        <div class="claimer-card" v-for="(v, i) in claimers" :key="i">
           <div class="profile-pic">
             <div class="thumb">
               <img

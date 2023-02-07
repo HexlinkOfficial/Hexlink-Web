@@ -16,6 +16,9 @@ import type { Token, Chain,  NormalizedTokenBalance } from "../../functions/comm
 import { normalizeBalance, getPopularTokens } from "../../functions/common";
 import { Alchemy, Network } from "alchemy-sdk";
 import { alchemyKey } from "@/web3/network";
+import GOERLI_TOKENS from "../../functions/common/lib.esm/tokens/GOERLI_TOKENS.json";
+import MUMBAI_TOKENS from "../../functions/common/lib.esm/tokens/MUMBAI_TOKENS.json";
+import POLYGON_TOEKNS from "../../functions/common/lib.esm/tokens/POLYGON_TOKENS.json";
  
 function alchemyNetwork(chain: Chain) : Network {
     if (chain.chainId == "5") {
@@ -148,12 +151,12 @@ export interface AssetTransfer {
 }
 
 const transferAction = (wallet: string, transfer: AssetTransfersWithMetadataResult) => {
-    if (transfer.from.toLowerCase() == wallet) {
+    if (transfer.from.toLowerCase() == wallet.toLowerCase()) {
         return {
             type: "send",
             to: transfer.to,
         } as Action;
-    } else if (transfer.to?.toLowerCase() == wallet) {
+    } else if (transfer.to?.toLowerCase() == wallet.toLowerCase()) {
         return {
             type: "receive",
             from: transfer.from,
@@ -208,4 +211,37 @@ export async function getAssetTransfers(input: {
     );
     transfers.sort((a, b) => a.tx.blockNumber - b.tx.blockNumber).slice(0, 1000);
     return transfers;
+}
+
+export function loadTokenLogo(address: string): string {
+    const chain = useChainStore().chain;
+    var logoURI = "";
+    if (chain.chainId == "5") {
+        if (address == "") {
+            return "https://token.metaswap.codefi.network/assets/networkLogos/ethereum.svg";
+        } else {
+            GOERLI_TOKENS.forEach(token => {
+                if (address.toLowerCase() == token.address.toLowerCase()) { logoURI = token.logoURI; }
+            })
+        }
+    }
+    if (chain.chainId == "137") {
+        if (address == "") {
+            return "https://token.metaswap.codefi.network/assets/networkLogos/polygon.svg";
+        } else {
+            POLYGON_TOEKNS.forEach(token => {
+                if (address.toLowerCase() == token.address.toLowerCase()) { logoURI = token.logoURI; }
+            })
+        }
+    }
+    if (chain.chainId == "80001") {
+        if (address == "") {
+            return "https://token.metaswap.codefi.network/assets/networkLogos/polygon.svg";
+        } else {
+            MUMBAI_TOKENS.forEach(token => {
+                if (address.toLowerCase() == token.address.toLowerCase()) { logoURI = token.logoURI; }
+            })
+        }
+    }
+    return logoURI;
 }

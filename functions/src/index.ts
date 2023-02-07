@@ -23,11 +23,10 @@ exports.calcEthAddress = calcEthAddress;
 
 import {
   priceConfig,
-  refunder,
 } from "./config";
 
 exports.priceConfig = priceConfig;
-exports.refunder = refunder;
+// exports.refunder = refunder;
 
 import {
   claimRedPacket,

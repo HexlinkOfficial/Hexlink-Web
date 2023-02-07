@@ -63,7 +63,7 @@ async function processAction(
         params.redPacketId,
         op.account,
         params.refunder,
-      );  
+      );
       await insertRedPacket(
         params.userId,
         [{

@@ -124,19 +124,11 @@ import { getAssetTransfers, loadTokenLogo } from '@/web3/tokens';
 import { useTokenStore } from '@/stores/token';
 import { useChainStore } from '@/stores/chain';
 import { prettyPrintAddress } from "../../functions/common";
+import profilePic from "@/assets/profilePic";
 
 const loading = ref<boolean>(false);
 const transfer = ref<any>();
 const transactionByDate = ref<any>([]);
-const profilePic = [
-  "https://i.postimg.cc/sxJGBVKK/hex1.png",
-  "https://i.postimg.cc/fys0T37J/hex2.png",
-  "https://i.postimg.cc/yYVSMZYG/hex3.png",
-  "https://i.postimg.cc/ryGrZJcW/hex4.png",
-  "https://i.postimg.cc/NjF2MvX7/hex5.png",
-  "https://i.postimg.cc/fRPtSqj4/hex6.png",
-  "https://i.postimg.cc/Pr28T5C5/hex7.png"
-];
 
 const options = {
   weekday: "long",

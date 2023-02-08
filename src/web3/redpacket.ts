@@ -20,6 +20,7 @@ import {
     gasTokenPricePerGwei,
     encodeExecBatch,
     refunder,
+    isContract,
 } from "../../functions/common";
 import type { RedPacketInput } from "../../functions/redpacket";
 import {
@@ -133,9 +134,8 @@ async function buildDepositErc20TokenOp(
 }
 
 async function buildCreateRedPacketTxForMetamask(
-    input: RedPacketInput,
-    deploy?: boolean
-) {
+    input: RedPacketInput
+) : Promise<Transaction[]> {
     const walletAccount = useWalletStore().account!.address;
     const hexlAccount = useAccountStore().account!.address;
     const chain = useChainStore().chain;
@@ -145,14 +145,16 @@ async function buildCreateRedPacketTxForMetamask(
     let value : EthBigNumber = EthBigNumber.from(0);
 
     if (tokenEqual(input.token, input.gasToken)) {
+        const toTransfer = EthBigNumber.from(
+            input.gasSponsorship).add(input.balance);
         if (isNativeCoin(input.token, chain)) {
-            value = value.add(input.balance!).add(input.gasSponsorship!)
+            value = value.add(toTransfer);
         } else {
             const {tx, op} = await buildDepositErc20TokenOp(
                 input.token,
                 walletAccount,
                 hexlAccount,
-                EthBigNumber.from(input.gasSponsorship).add(input.balance),
+                toTransfer,
             );
             txes = txes.concat(tx);
             userOps = userOps.concat(op);
@@ -171,13 +173,13 @@ async function buildCreateRedPacketTxForMetamask(
             userOps = userOps.concat(op);
         }
         if (isNativeCoin(input.gasToken, chain)) {
-            value = value.add(input.gasSponsorship!);
+            value = value.add(input.gasSponsorship);
         } else {
             const {tx, op} = await buildDepositErc20TokenOp(
                 input.gasToken,
                 walletAccount,
                 hexlAccount,
-                input.gasSponsorship!
+                input.gasSponsorship
             );
             txes = txes.concat(tx);
             userOps = userOps.concat(op);
@@ -186,7 +188,9 @@ async function buildCreateRedPacketTxForMetamask(
  
     userOps.push(buildGasSponsorshipOp(hexlAccount, refunder(chain), input));
     userOps = userOps.concat(buildRedPacketOps(chain, input));
-    if (!deploy) {
+    const execData = encodeExecBatch(userOps.map(op => op.input));
+    const deployed = await isContract(useChainStore().provider, hexlAccount);
+    if (deployed) {
         txes.push({
             name: "createRedPacket",
             function: "execBatch",
@@ -195,23 +199,12 @@ async function buildCreateRedPacketTxForMetamask(
                 to: useAccountStore().account!.address,
                 from: useWalletStore().account!.address,
                 value: ethers.utils.hexValue(value),
-                data: encodeExecBatch(userOps.map(op => op.input)),
+                data: execData,
             }
         });
-    } else {
-        txes.push(await buildDeployTxForMetaMask(userOps, value));
+        return txes;
     }
-    return txes;
-}
 
-export async function buildDeployTxForMetaMask(
-    userOps: Op[],
-    value: EthBigNumber
-) : Promise<any> {
-    const hexlAccount = useAccountStore().account!.address;
-    const walletAccount = useWalletStore().account!.address;
-
-    const execData = encodeExecBatch(userOps.map(op => op.input));
     const { initData, proof } = await genDeployAuthProof(execData);
     const name = useAuthStore().user!.nameHash;
     const authProof = {
@@ -226,21 +219,11 @@ export async function buildDeployTxForMetaMask(
     const hexlAddr = hexlAddress(useChainStore().chain);
     const data = hexlInterface.encodeFunctionData("process", [[
         // deposit
-        {
-            to: hexlAccount,
-            value,
-            callData: [],
-            callGasLimit: "0"
-        },
+        {to: hexlAccount, value, callData: [], callGasLimit: "0"},
         // deploy and create redpacket
-        {
-            to: hexlAddr,
-            value: "0",
-            callData: deployData,
-            callGasLimit: "0"
-        },
+        {to: hexlAddr, value: "0", callData: deployData, callGasLimit: "0"},
     ]]);
-    return {
+    txes.push({
         name: "createRedPacket",
         function: "process",
         args: {
@@ -263,7 +246,8 @@ export async function buildDeployTxForMetaMask(
             value: ethers.utils.hexValue(value),
             data,
         }
-    };
+    });
+    return txes;
 }
 
 async function processTxAndSave(
@@ -293,23 +277,16 @@ async function processTxAndSave(
     return {id: redpacket.id!};
 }
 
-export async function deployAndCreateNewRedPacket(
-    redpacket: RedPacketInput,
-    useHexlinkAccount: boolean,
-    dryrun: boolean = false
-) {
-    if (useHexlinkAccount) {
-        throw new Error("Not supported");
-    }
-    const txes = await buildCreateRedPacketTxForMetamask(redpacket, true);
-    return await processTxAndSave(redpacket, txes, dryrun);
-}
-
-export async function buildCreateRedPacketRequest(
+async function buildCreateRedPacketRequest(
     input: RedPacketInput
 ): Promise<UserOpRequest> {
-    const walletAccount = useWalletStore().account!.address;
     const hexlAccount = useAccountStore().account!.address;
+    const needDeploy = await isContract(useChainStore().provider, hexlAccount);
+    if (needDeploy) {
+        throw "not supported yet";
+    }
+
+    const walletAccount = useWalletStore().account!.address;
     const chain = useChainStore().chain;
 
     let userOps : Op[] = [];

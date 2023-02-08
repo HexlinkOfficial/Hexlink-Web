@@ -34,10 +34,8 @@
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { useRedPacketStore } from '@/stores/redpacket';
-import { useChainStore } from "@/stores/chain";
 import { useAccountStore } from '@/stores/account';
-import { isContract } from "../../functions/common";
-import { deployAndCreateNewRedPacket, createNewRedPacket } from "@/web3/redpacket";
+import { createNewRedPacket } from "@/web3/redpacket";
 
 const message = ref<string>("Let's go!");
 const store = useRedPacketStore();
@@ -45,20 +43,11 @@ const createRedPacket = async () => {
   store.setStatus("processing");
   message.value = "Processing";
   try {
-    const account = useAccountStore().account!.address;
-    if (await isContract(useChainStore().provider, account)) {
-      await createNewRedPacket(
-        store.redpacket!,
-        store.account == "hexlink",
-        false // dryrun
-      );
-    } else {
-      await deployAndCreateNewRedPacket(
-        store.redpacket!,
-        store.account == "hexlink", 
-        false // dryrun
-      );
-    }
+    await createNewRedPacket(
+      store.redpacket!,
+      store.account == "hexlink",
+      false // dryrun
+    );
     message.value = "Done!";
     store.setStatus("success");
   } catch (e) {

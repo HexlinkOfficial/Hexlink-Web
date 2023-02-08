@@ -201,7 +201,7 @@
                 </div>
                 <div class="cta">
                   <i v-if="showClaimStatus(op) == 'Claimed'" className="fa fa-twitter"></i>
-                  <i v-if="showClaimStatus(op) == 'Error'" className="fa-solid fa-arrow-up-from-bracket"></i>
+                  <i v-if="showClaimStatus(op) != 'Claimed'" className="fa-solid fa-arrow-up-from-bracket"></i>
                 </div>
               </div>
             </div>

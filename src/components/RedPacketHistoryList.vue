@@ -98,16 +98,13 @@
                 </div>
                 <div class="share" v-if="op.redpacket">
                   <i v-if="showStatus(op) == 'Sent'" class="fa fa-paper-plane share-button" aria-hidden="true" @click="copyShareLink(op.redpacket)"></i>
-                  <span v-if="showStatus(op) != 'Sent'" class="pending-text">{{ showDetailStatus(op) }}</span>
+                  <span v-if="showStatus(op) != 'Sent'" class="pending-text" :style="showStatus(op) == 'Pending' && 'margin-left: 5.5rem;'">{{ showDetailStatus(op) }}</span>
                 </div>
                 <div class="cta">
-                  <!-- <button class="connect-wallet-button" :href="href">
-                    Withdraw
-                  </button> -->
                   <router-link :to="{ query: { details: op.redpacket.id } }" v-if="showStatus(op) == 'Sent'">
                     <i class="fa fa-get-pocket" aria-hidden="true"></i>
                   </router-link>
-                  <a-tooltip v-if="showStatus(op) != 'Sent'" placement="top">
+                  <a-tooltip v-if="showStatus(op) != 'Sent' && showStatus(op) != 'Pending'" placement="top">
                     <template #title>
                       <span>
                         Check on blockchain explorer

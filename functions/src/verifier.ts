@@ -27,16 +27,11 @@ export const genTwitterOAuthProof = functions.https.onCall(
         return {code: 401, message: "Unauthorized Call"};
       }
 
-      const result = await genNameHash(uid);
+      const result = await genNameHash(uid, data.version);
       if (result.nameHash == undefined) {
         return result;
       }
-      let {nameHash} = result;
-      if (process.env.FUNCTIONS_EMULATOR && data.version) {
-        nameHash = ethers.utils.keccak256(
-            ethers.utils.toUtf8Bytes(nameHash + "@" + data.version)
-        );
-      }
+      const {nameHash} = result;
 
       const identityType = hash(TWITTER_PROVIDER_ID);
       const authType = hash(OAUTH_AUTH_TYPE);
@@ -46,11 +41,13 @@ export const genTwitterOAuthProof = functions.https.onCall(
       const message = ethers.utils.keccak256(
           ethers.utils.defaultAbiCoder.encode(
               ["bytes32", "bytes32", "uint256", "bytes32", "bytes32"],
-              [nameHash,
+              [
+                nameHash,
                 data.requestId,
                 issuedAt,
                 identityType,
-                authType]
+                authType,
+              ]
           )
       );
 

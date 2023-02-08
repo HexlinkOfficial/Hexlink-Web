@@ -12,6 +12,7 @@ import { app } from '@/services/firebase';
 import { useAuthStore } from "@/stores/auth";
 import { useWalletStore } from "@/stores/wallet";
 import { switchNetwork } from "@/web3/network";
+import type { Chain } from "../../functions/common";
 import { GOERLI, SUPPORTED_CHAINS} from "../../functions/common";
 import { initHexlAccount, nameHashWithVersion } from "@/web3/account";
 import { useChainStore } from '@/stores/chain';
@@ -111,11 +112,10 @@ export function signOutFirebase() {
 export async function init() {
     const user = useAuthStore().user!;
     await Promise.all(
-        SUPPORTED_CHAINS.map(chain => initHexlAccount(chain, user.nameHash))
+        SUPPORTED_CHAINS.map((chain: Chain) => initHexlAccount(chain, user.nameHash))
     );
     await Promise.all(
-        SUPPORTED_CHAINS.map(chain => initTokenList(chain))
+        SUPPORTED_CHAINS.map((chain: Chain) => initTokenList(chain))
     );
     await switchNetwork(GOERLI);
-    console.log(useAccountStore().account);
 }

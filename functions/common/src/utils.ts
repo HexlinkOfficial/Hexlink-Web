@@ -72,13 +72,13 @@ export function normalizeBalance(
   if (normalized.gt(1)) {
     return {
       value: balance,
-      normalized: normalized.dp(3).toString(10),
+      normalized: normalized.dp(4).toString(10),
       updatedAt: new Date(),
     };
   } else {
     return {
       value: balance,
-      normalized: normalized.dp(4).toString(10),
+      normalized: normalized.dp(5).toString(10),
       updatedAt: new Date(),
     };
   }

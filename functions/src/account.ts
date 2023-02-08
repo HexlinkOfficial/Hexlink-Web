@@ -14,7 +14,7 @@ const secrets = functions.config().doppler || {};
 
 const TWITTER_PROVIDER_ID = "twitter.com";
 
-export async function genNameHash(uid: string) : Promise<
+export async function genNameHash(uid: string, version?: number) : Promise<
     {code: number, message?: string, nameHash?: string}
 > {
   const user = await getAuth().getUser(uid);
@@ -25,10 +25,13 @@ export async function genNameHash(uid: string) : Promise<
   const userInfoList = user.providerData;
   for (const userInfo of userInfoList) {
     if (userInfo.providerId.toLowerCase() === TWITTER_PROVIDER_ID) {
-      return {
-        code: 200,
-        nameHash: nameHash(TWITTER_PROVIDER_ID, userInfo.uid),
-      };
+      let name = nameHash(TWITTER_PROVIDER_ID, userInfo.uid);
+      if (process.env.FUNCTIONS_EMULATOR && version) {
+        name = ethers.utils.keccak256(
+            ethers.utils.toUtf8Bytes(name + "@" + version)
+        );
+      }
+      return {code: 200, nameHash: name};
     }
   }
 
@@ -54,18 +57,20 @@ export const getInfuraProvider = (
 
 export const accountAddress = async function(
     chain: Chain,
-    uid: string
+    uid: string,
+    version?: number,
 ) : Promise<{code: number, message?: string, address?: string}> {
-  const result = await genNameHash(uid);
+  const result = await genNameHash(uid, version);
   if (result.nameHash == undefined) {
     return result;
   }
+  const {nameHash} = result;
   const hexlink = await hexlContract(getInfuraProvider(chain));
   try {
-    const address = await hexlink.addressOfName(result.nameHash);
+    const address = await hexlink.addressOfName(nameHash);
     return {code: 200, address};
   } catch (e : unknown) {
-    const data = {uid, nameHash: result.nameHash, chain: chain.name};
+    const data = {uid, nameHash, chain: chain.name};
     console.log("Failed to get address of name for " + JSON.stringify(data));
     console.log("Error is " + JSON.stringify(e));
     return {code: 500, message: "Internal Error"};

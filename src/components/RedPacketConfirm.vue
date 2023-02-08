@@ -47,9 +47,17 @@ const createRedPacket = async () => {
   try {
     const account = useAccountStore().account!.address;
     if (await isContract(useChainStore().provider, account)) {
-      await createNewRedPacket(store.redpacket!, store.account == "hexlink");
+      await createNewRedPacket(
+        store.redpacket!,
+        store.account == "hexlink",
+        false // dryrun
+      );
     } else {
-      await deployAndCreateNewRedPacket(store.redpacket!, store.account == "hexlink");
+      await deployAndCreateNewRedPacket(
+        store.redpacket!,
+        store.account == "hexlink", 
+        false // dryrun
+      );
     }
     message.value = "Done!";
     store.setStatus("success");

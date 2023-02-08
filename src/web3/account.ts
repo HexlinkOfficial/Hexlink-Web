@@ -4,12 +4,12 @@ import { useAccountStore } from "@/stores/account";
 import { getInfuraProvider } from "./network";
 import { ethers } from "ethers";
 
-const ACCOUNT_VERSION = 1;
+const ACCOUNT_VERSION = 2;
 
 export function nameHashWithVersion(provider: string, uid: string) {
     let name = nameHash(provider, uid);
-    if (ACCOUNT_VERSION) {
-        return ethers.utils.keccak256(
+    if (ACCOUNT_VERSION && import.meta.env.VITE_USE_FUNCTIONS_EMULATOR === 'true') {
+        name = ethers.utils.keccak256(
             ethers.utils.toUtf8Bytes(name + "@" + ACCOUNT_VERSION)
         );
     }

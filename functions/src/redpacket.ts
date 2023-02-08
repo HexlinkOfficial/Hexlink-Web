@@ -91,7 +91,7 @@ export const claimRedPacket = functions.https.onCall(
       }
 
       const chain = getChain(data.chain);
-      const account = await accountAddress(chain, uid);
+      const account = await accountAddress(chain, uid, data.version);
       if (!account.address) {
         return {code: 400, message: "invalid account"};
       }
@@ -144,7 +144,7 @@ function validateGas(chain: Chain, gas: GasObject) {
   }
 }
 
-async function validateAndbuildUserOp(
+async function validateAndBuildUserOp(
     chain: Chain,
     account: string,
     request: UserOpRequest,
@@ -170,7 +170,7 @@ export const createRedPacket = functions.https.onCall(
         return {code: 401, message: "Unauthorized"};
       }
       const chain = getChain(data.chain);
-      const account = await accountAddress(chain, uid);
+      const account = await accountAddress(chain, uid, data.version);
       if (!account.address) {
         return {code: 400, message: "invalid account"};
       }
@@ -205,7 +205,7 @@ export const createRedPacket = functions.https.onCall(
       if (data.txHash) {
         postData.tx = data.txHash;
       } else {
-        postData.input = await validateAndbuildUserOp(
+        postData.input = await validateAndBuildUserOp(
             chain, account.address, data.request
         );
       }

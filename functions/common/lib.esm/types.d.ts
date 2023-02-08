@@ -31,3 +31,21 @@ export interface UserOpRequest {
     signature: string;
     gas: GasObject;
 }
+export interface AuthProof {
+    name: string;
+    requestId: string;
+    authType: string;
+    identityType: string;
+    issuedAt: number;
+    signature: string;
+}
+export interface AuthProofInput {
+    authType: string;
+    identityType: string;
+    issuedAt: EthBigNumber | string | number;
+    signature: string;
+}
+export interface DeployRequest {
+    authProof: AuthProofInput;
+    owner: string;
+}

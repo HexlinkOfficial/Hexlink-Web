@@ -2,7 +2,11 @@ import * as functions from "firebase-functions";
 import * as ethers from "ethers";
 import {signWithKmsKey, getEthAddressFromPublicKey} from "./kms";
 import {kmsConfig, KMS_KEY_TYPE} from "./config";
-import {genNameHash, toEthSignedMessageHash} from "./account";
+import {
+  GenNameHashSuccess,
+  genNameHash,
+  toEthSignedMessageHash,
+} from "./account";
 import {Firebase} from "./firebase";
 
 const TWITTER_PROVIDER_ID = "twitter.com";
@@ -28,10 +32,10 @@ export const genTwitterOAuthProof = functions.https.onCall(
       }
 
       const result = await genNameHash(uid, data.version);
-      if (result.nameHash == undefined) {
+      if (result.code !== 200) {
         return result;
       }
-      const {nameHash} = result;
+      const {nameHash} = result as GenNameHashSuccess;
 
       const identityType = hash(TWITTER_PROVIDER_ID);
       const authType = hash(OAUTH_AUTH_TYPE);

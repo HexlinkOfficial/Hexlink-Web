@@ -36,3 +36,24 @@ export interface UserOpRequest {
   signature: string,
   gas: GasObject,
 }
+
+export interface AuthProof {
+  name: string,
+  requestId: string,
+  authType: string, // non-hashed
+  identityType: string, // non-hashed
+  issuedAt: number, // timestamp
+  signature: string // encoded with validator address
+}
+
+export interface AuthProofInput {
+  authType: string, // hashed
+  identityType: string, // hashed
+  issuedAt: EthBigNumber | string | number,
+  signature: string,
+}
+
+export interface DeployRequest {
+  authProof: AuthProofInput,
+  owner: string,
+}

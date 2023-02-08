@@ -6,7 +6,14 @@ import { genDeployAuthProof } from "@/web3/oracle";
 import { tokenEqual } from "@/web3/utils";
 import { estimateGas, sendTransaction, signMessage } from "@/web3/wallet";
 
-import type { Op, OpInput, Chain, UserOpRequest } from "../../functions/common";
+import type {
+    Op,
+    OpInput,
+    Chain,
+    UserOpRequest,
+    DeployRequest,
+    AuthProofInput,
+} from "../../functions/common";
 import {
     hash,
     isNativeCoin,
@@ -279,13 +286,11 @@ async function processTxAndSave(
 
 async function buildCreateRedPacketRequest(
     input: RedPacketInput
-): Promise<UserOpRequest> {
+): Promise<{
+    redpacket: UserOpRequest,
+    deploy?: DeployRequest,
+}> {
     const hexlAccount = useAccountStore().account!.address;
-    const deployed = await isContract(useChainStore().provider, hexlAccount);
-    if (!deployed) {
-        throw new Error("not supported yet");
-    }
-
     const walletAccount = useWalletStore().account!.address;
     const chain = useChainStore().chain;
 
@@ -310,7 +315,22 @@ async function buildCreateRedPacketRequest(
         gas,
     });
     await simulate(useAccountStore().account!.address, data, "0");
-    return {txData, signature, nonce: nonce.toString(), gas};
+    const result = {
+        redpacket: {txData, signature, nonce: nonce.toString(), gas},
+    } as { redpacket: UserOpRequest, deploy?: DeployRequest };
+
+    const deployed = await isContract(useChainStore().provider, hexlAccount);
+    if (!deployed) {
+        const { proof } = await genDeployAuthProof(data);
+        const authProof = {
+            authType: hash(proof.authType),
+            identityType: hash(proof.identityType),
+            issuedAt: EthBigNumber.from(proof.issuedAt),
+            signature: proof.signature,
+        } as AuthProofInput;
+        result.deploy = {authProof, owner: walletAccount};;
+    }
+    return result;
 }
 
 export async function createNewRedPacket(
@@ -350,7 +370,10 @@ export async function callCreateRedPacket(
     chain: Chain,
     redPacket: RedPacketInput,
     txHash?: string,
-    request?: UserOpRequest
+    request?: {
+        redpacket: UserOpRequest,
+        deploy?: DeployRequest
+    }
 ) : Promise<number> {
     const createRedPacket = httpsCallable(functions, 'createRedPacket');
     const result = await createRedPacket({

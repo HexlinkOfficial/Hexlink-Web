@@ -7,8 +7,10 @@ import {signWithKmsKey} from "./kms";
 import {ethers, BigNumber as EthBigNumber} from "ethers";
 import {
   accountAddress,
+  getInfuraProvider,
   toEthSignedMessageHash,
 } from "./account";
+import type {Error, GenAddressSuccess} from "./account";
 import {KMS_KEY_TYPE, kmsConfig} from "./config";
 
 import {
@@ -24,8 +26,11 @@ import {
   PriceConfigs,
   gasTokenPricePerGwei,
   refunder,
+  isContract,
+  hexlInterface,
+  hexlAddress,
 } from "../common";
-import type {Chain, GasObject, OpInput} from "../common";
+import type {Chain, GasObject, OpInput, DeployRequest} from "../common";
 import {submit} from "./services/operation";
 import {insertRequest} from "./graphql/request";
 
@@ -91,10 +96,12 @@ export const claimRedPacket = functions.https.onCall(
       }
 
       const chain = getChain(data.chain);
-      const account = await accountAddress(chain, uid, data.version);
-      if (!account.address) {
+      let account =
+        await accountAddress(chain, uid, data.version);
+      if (account.code !== 200) {
         return {code: 400, message: "invalid account"};
       }
+      account = account as GenAddressSuccess;
 
       const redPacket = await getRedPacket(data.redPacketId);
       if (!redPacket) {
@@ -132,13 +139,17 @@ export const claimRedPacket = functions.https.onCall(
     }
 );
 
-function validateGas(chain: Chain, gas: GasObject) {
+const DEPLOYMENT_GASCOST = 350000;
+function validateGas(chain: Chain, gas: GasObject, deployed: boolean) {
   if (gas.receiver !== refunder(chain)) {
     throw new Error("invalid gas refunder");
   }
   const price = gasTokenPricePerGwei(
       chain, gas.token, PriceConfigs[chain.name]
   );
+  if (!deployed && EthBigNumber.from(gas.baseGas).lt(DEPLOYMENT_GASCOST)) {
+    throw new Error("insufficient base gas for deployment");
+  }
   if (EthBigNumber.from(gas.price).lt(price)) {
     throw new Error("invalid gas price");
   }
@@ -146,20 +157,52 @@ function validateGas(chain: Chain, gas: GasObject) {
 
 async function validateAndBuildUserOp(
     chain: Chain,
-    account: string,
-    request: UserOpRequest,
+    account: GenAddressSuccess,
+    request: {
+      redpacket: UserOpRequest,
+      deploy?: DeployRequest,
+    },
 ) : Promise<OpInput> {
+  const redpacket = request.redpacket;
   const data = accountInterface.encodeFunctionData(
       "validateAndCallWithGasRefund",
-      [request.txData, request.nonce, request.signature, request.gas]
+      [
+        redpacket.txData,
+        redpacket.nonce,
+        redpacket.signature,
+        redpacket.gas,
+      ]
   );
-  validateGas(chain, request.gas);
-  return {
-    to: account,
-    value: "0x0",
-    callData: data,
-    callGasLimit: "0x0",
-  };
+  const provider = getInfuraProvider(chain);
+  const deployed = await isContract(provider, account.address);
+  validateGas(chain, redpacket.gas, deployed);
+  if (deployed) {
+    return {
+      to: account.address,
+      value: "0x0",
+      callData: data,
+      callGasLimit: "0x0",
+    };
+  } else {
+    if (!request.deploy) {
+      throw new Error("invalid param, missing deploy request params");
+    }
+    const deployData = hexlInterface.encodeFunctionData(
+        "deploy", [
+          account.nameHash,
+          accountInterface.encodeFunctionData(
+              "init", [request.deploy.owner, data]
+          ),
+          request.deploy.authProof,
+        ]
+    );
+    return {
+      to: hexlAddress(chain),
+      value: "0x0",
+      callData: deployData,
+      callGasLimit: "0x0",
+    };
+  }
 }
 
 export const createRedPacket = functions.https.onCall(
@@ -170,10 +213,12 @@ export const createRedPacket = functions.https.onCall(
         return {code: 401, message: "Unauthorized"};
       }
       const chain = getChain(data.chain);
-      const account = await accountAddress(chain, uid, data.version);
-      if (!account.address) {
-        return {code: 400, message: "invalid account"};
+      let account = await accountAddress(chain, uid, data.version);
+      if (account.code !== 200) {
+        return {code: 400, message: (account as Error).message};
       }
+      account = account as GenAddressSuccess;
+
       const rpId = redpacketId(chain, account.address, data.redPacket);
       const action = {
         type: "insert_redpacket",
@@ -206,7 +251,7 @@ export const createRedPacket = functions.https.onCall(
         postData.tx = data.txHash;
       } else {
         postData.input = await validateAndBuildUserOp(
-            chain, account.address, data.request
+            chain, account, data.request
         );
       }
       const result = await submit(chain, postData);

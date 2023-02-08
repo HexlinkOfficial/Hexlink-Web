@@ -4,15 +4,7 @@ import type {Provider} from "@ethersproject/providers";
 import {ethers} from "ethers";
 import {accountInterface} from "./account";
 import {hexlContract, hexlInterface} from "./hexlink";
-
-export interface AuthProof {
-    name: string,
-    requestId: string,
-    authType: string, // non-hashed
-    identityType: string, // non-hashed
-    issuedAt: number, // timestamp
-    signature: string // encoded with validator address
-}
+import type {AuthProof} from "./types";
 
 const genRequestId = async function(
     provider: Provider,

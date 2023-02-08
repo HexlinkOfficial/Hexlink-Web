@@ -14,9 +14,24 @@ const secrets = functions.config().doppler || {};
 
 const TWITTER_PROVIDER_ID = "twitter.com";
 
-export async function genNameHash(uid: string, version?: number) : Promise<
-    {code: number, message?: string, nameHash?: string}
-> {
+export interface GenNameHashSuccess {
+  code: 200;
+  nameHash: string;
+}
+
+export interface GenAddressSuccess extends GenNameHashSuccess {
+  address: string;
+}
+
+export interface Error {
+  code: number;
+  message: string;
+}
+
+export async function genNameHash(
+    uid: string,
+    version?: number
+) : Promise<GenNameHashSuccess | Error> {
   const user = await getAuth().getUser(uid);
   if (!user) {
     return {code: 400, message: "Invalid uid: failed to get the user."};
@@ -59,16 +74,16 @@ export const accountAddress = async function(
     chain: Chain,
     uid: string,
     version?: number,
-) : Promise<{code: number, message?: string, address?: string}> {
+) : Promise<GenAddressSuccess | Error> {
   const result = await genNameHash(uid, version);
-  if (result.nameHash == undefined) {
-    return result;
+  if ((result as GenAddressSuccess).nameHash == undefined) {
+    return result as Error;
   }
-  const {nameHash} = result;
+  const {nameHash} = result as GenAddressSuccess;
   const hexlink = await hexlContract(getInfuraProvider(chain));
   try {
     const address = await hexlink.addressOfName(nameHash);
-    return {code: 200, address};
+    return {code: 200, address, nameHash};
   } catch (e : unknown) {
     const data = {uid, nameHash, chain: chain.name};
     console.log("Failed to get address of name for " + JSON.stringify(data));

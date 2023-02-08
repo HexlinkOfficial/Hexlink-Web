@@ -6,7 +6,7 @@ import { genDeployAuthProof } from "@/web3/oracle";
 import { tokenEqual } from "@/web3/utils";
 import { estimateGas, sendTransaction, signMessage } from "@/web3/wallet";
 
-import { type Op, type OpInput, type Chain, type UserOpRequest, hexlAccount } from "../../functions/common";
+import type { Op, OpInput, Chain, UserOpRequest } from "../../functions/common";
 import {
     hash,
     isNativeCoin,
@@ -54,6 +54,18 @@ export function validator() : string {
         return "0xEF2e3F91209F88A3143e36Be10D52502162426B3";
     }
     return "0x030ffbc193c3f9f4c6378beb506eecb0933fd457";
+}
+
+async function simulate(to: string, data: string, value: string) {
+    try {
+        await useChainStore().provider.estimateGas(
+            {to, data, value}
+        );
+    } catch(err) {
+        console.log("tx is likely to be reverted");
+        console.log(err);
+        throw err;
+    }
 }
 
 function buildOpInput(params: {
@@ -293,18 +305,6 @@ export async function deployAndCreateNewRedPacket(
     return await processTxAndSave(redpacket, txes, dryrun);
 }
 
-async function simulate(to: string, data: string, value: string) {
-    try {
-        await useChainStore().provider.estimateGas(
-            {to, data, value}
-        );
-    } catch(err) {
-        console.log("tx is likely to be reverted");
-        console.log(err);
-        throw err;
-    }
-}
-
 export async function buildCreateRedPacketRequest(
     input: RedPacketInput
 ): Promise<UserOpRequest> {
@@ -318,6 +318,7 @@ export async function buildCreateRedPacketRequest(
     const gas = {
         receiver: refunder(chain),
         token: input.gasToken,
+        baseGas: "0",
         price: gasTokenPricePerGwei(
             chain,
             input.gasToken,

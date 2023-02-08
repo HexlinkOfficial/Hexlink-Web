@@ -34,9 +34,10 @@ export async function encodeValidateAndCall(params) {
     const nonce = await params.account.nonce();
     let data;
     if (params.gas) {
-        const message = ethers.utils.keccak256(ethers.utils.defaultAbiCoder.encode(["bytes", "uint256", "tuple(address, address, uint256)"], [params.txData, nonce, [
+        const message = ethers.utils.keccak256(ethers.utils.defaultAbiCoder.encode(["bytes", "uint256", "tuple(address, address, uint256, uint256)"], [params.txData, nonce, [
                 params.gas.receiver,
                 params.gas.token,
+                params.gas.baseGas || 0,
                 params.gas.price
             ]]));
         const signature = await params.sign(message);

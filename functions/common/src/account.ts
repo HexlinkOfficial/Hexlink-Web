@@ -78,10 +78,11 @@ export async function encodeValidateAndCall(params: {
   if (params.gas) {
     const message = ethers.utils.keccak256(
       ethers.utils.defaultAbiCoder.encode(
-          ["bytes", "uint256", "tuple(address, address, uint256)"],
+          ["bytes", "uint256", "tuple(address, address, uint256, uint256)"],
           [params.txData, nonce, [
             params.gas.receiver,
             params.gas.token,
+            params.gas.baseGas || 0,
             params.gas.price
           ]]
       )

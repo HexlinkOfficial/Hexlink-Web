@@ -16,6 +16,7 @@ export interface Op {
 export interface GasObject {
     receiver: string;
     token: string;
+    baseGas?: EthBigNumber | string;
     price: EthBigNumber | string;
 }
 export interface Deposit {

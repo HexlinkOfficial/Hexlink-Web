@@ -57,9 +57,10 @@ function encodeValidateAndCall(params) {
         const nonce = yield params.account.nonce();
         let data;
         if (params.gas) {
-            const message = ethers_1.ethers.utils.keccak256(ethers_1.ethers.utils.defaultAbiCoder.encode(["bytes", "uint256", "tuple(address, address, uint256)"], [params.txData, nonce, [
+            const message = ethers_1.ethers.utils.keccak256(ethers_1.ethers.utils.defaultAbiCoder.encode(["bytes", "uint256", "tuple(address, address, uint256, uint256)"], [params.txData, nonce, [
                     params.gas.receiver,
                     params.gas.token,
+                    params.gas.baseGas || 0,
                     params.gas.price
                 ]]));
             const signature = yield params.sign(message);

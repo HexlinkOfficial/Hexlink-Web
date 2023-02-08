@@ -11,6 +11,7 @@ import type {
 import { useAuthStore } from "@/stores/auth";
 import { useChainStore } from "@/stores/chain";
 import { useTokenStore } from "@/stores/token";
+import { useNftStore } from '@/stores/nft';
 
 import type { Token, Chain,  NormalizedTokenBalance } from "../../functions/common";
 import { normalizeBalance, getPopularTokens } from "../../functions/common";
@@ -127,11 +128,73 @@ export async function updatePreferences(balances: BalanceMap) {
     });
 }
 
+export interface openSea {
+    collectionName: string | undefined,
+    description: string | undefined,
+    discordUrl: string | undefined,
+    externalUrl: string | undefined,
+    floorPrice: number | undefined,
+    imageUrl: string | undefined,
+    lastIngestedAt: string | undefined,
+    twitterUsername: string | undefined
+}
+
+export interface nftImage {
+    contract: string,
+    name: string,
+    symbol: string,
+    id: string,
+    tokenType: string,
+    openSea: openSea,
+    totalSupply: string,
+    url: string,
+    rawUrl: string,
+    thumbnail: string,
+    attributes: Array<any>,
+}
+
+export interface bindedNFT {
+  nft: nftImage,
+  color: string,
+  hasOpensea: boolean
+}
+
+export async function loadErc721Token(account: string) {
+    const nfts = await alchemy().nft.getNftsForOwner(account);
+    const nftArray: nftImage[] = [];
+    nfts.ownedNfts.map(nft => {
+        nftArray.push({
+            contract: nft.contract.address,
+            name: nft.contract.name || "",
+            symbol: nft.contract.symbol || "",
+            id: nft.rawMetadata?.token || "",
+            tokenType: nft.contract.tokenType || "",
+            openSea: {
+                collectionName: nft.contract.openSea?.collectionName,
+                description: nft.contract.openSea?.description,
+                discordUrl: nft.contract.openSea?.discordUrl,
+                externalUrl: nft.contract.openSea?.externalUrl,
+                floorPrice: nft.contract.openSea?.floorPrice,
+                imageUrl: nft.contract.openSea?.imageUrl,
+                lastIngestedAt: nft.contract.openSea?.lastIngestedAt,
+                twitterUsername: nft.contract.openSea?.twitterUsername
+            },
+            totalSupply: nft.contract.totalSupply || "",
+            url: nft.media[0].gateway || "",
+            rawUrl: nft.media[0].raw || "",
+            thumbnail: nft.media[0].thumbnail || "",
+            attributes: nft.rawMetadata?.attributes || []
+        })
+    })
+    return [nftArray, nfts.totalCount];
+}
+
 export interface Transaction {
     hash: string;
     blockNumber: number;
     timestamp?: string;
     position?: number;
+    tokenID?: string
 }
 
 export interface Action {
@@ -175,6 +238,7 @@ const toAssetTransfer = (
             hash: transfer.hash,
             blockNumber: Number(transfer.blockNum),
             timestamp: transfer.metadata.blockTimestamp,
+            tokenID: parseInt(transfer.erc721TokenId || "", 16).toString() || "",
         },
         asset: {
             address: transfer.rawContract.address || "",

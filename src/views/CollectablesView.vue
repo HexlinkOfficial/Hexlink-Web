@@ -354,7 +354,7 @@ svg {
               <div class="title">
                 <span>NFT Holding</span>
               </div>
-              <div class="price">0</div>
+              <div class="price">{{ useNftStore().contracts.length }}</div>
             </div>
           </div>
         </div>
@@ -392,7 +392,7 @@ svg {
               <div v-if="transactionView" class="token-listDetail">
                 <div class="token-table">
                   <div style="overflow: visible; border-radius: 0.75rem;">
-                    <WalletTokenList></WalletTokenList>
+                    <CollectableTransaction></CollectableTransaction>
                   </div>
                 </div>
               </div>
@@ -408,14 +408,13 @@ svg {
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref } from "vue";
 import Layout from "../components/Layout.vue";
-import WalletTokenList from "@/components/WalletTokenList.vue";
 import WalletNFTGrid from "@/components/WalletNFTGrid.vue";
-import { useChainStore } from '@/stores/chain';
-import { useAccountStore } from "@/stores/account";
-import { BigNumber } from "bignumber.js";
+import CollectableTransaction from "@/components/CollectableTransaction.vue";
+import { useNftStore } from '@/stores/nft';
 
 const nftView = ref<boolean>(true);
 const transactionView = ref<boolean>(false);
+const totalNfts = ref<number>(0);
 </script>

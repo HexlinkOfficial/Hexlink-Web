@@ -98,16 +98,13 @@
                 </div>
                 <div class="share" v-if="op.redpacket">
                   <i v-if="showStatus(op) == 'Sent'" class="fa fa-paper-plane share-button" aria-hidden="true" @click="copyShareLink(op.redpacket)"></i>
-                  <span v-if="showStatus(op) != 'Sent'" class="pending-text">{{ showDetailStatus(op) }}</span>
+                  <span v-if="showStatus(op) != 'Sent'" class="pending-text" :style="showStatus(op) == 'Pending' && 'margin-left: 5.5rem;'">{{ showDetailStatus(op) }}</span>
                 </div>
                 <div class="cta">
-                  <!-- <button class="connect-wallet-button" :href="href">
-                    Withdraw
-                  </button> -->
                   <router-link :to="{ query: { details: op.redpacket.id } }" v-if="showStatus(op) == 'Sent'">
                     <i class="fa fa-get-pocket" aria-hidden="true"></i>
                   </router-link>
-                  <a-tooltip v-if="showStatus(op) != 'Sent'" placement="top">
+                  <a-tooltip v-if="showStatus(op) != 'Sent' && showStatus(op) != 'Pending'" placement="top">
                     <template #title>
                       <span>
                         Check on blockchain explorer
@@ -204,7 +201,7 @@
                 </div>
                 <div class="cta">
                   <i v-if="showClaimStatus(op) == 'Claimed'" className="fa fa-twitter"></i>
-                  <i v-if="showClaimStatus(op) == 'Error'" className="fa-solid fa-arrow-up-from-bracket"></i>
+                  <i v-if="showClaimStatus(op) != 'Claimed'" className="fa-solid fa-arrow-up-from-bracket"></i>
                 </div>
               </div>
             </div>
@@ -228,9 +225,9 @@ import { useAccountStore } from '@/stores/account';
 import { useTokenStore } from '@/stores/token';
 import { copy } from "@/web3/utils";
 import { queryRedPacketInfo } from "@/web3/redpacket";
-
 import { normalizeBalance } from "../../functions/common";
 import type { Token } from "../../functions/common";
+import { options } from "@/assets/imageAssets";
 
 const createdRpOps = ref<CreateRedPacketOp[]>([]);
 const claimedRpOps = ref<ClaimRedPacketOp[]>([]);
@@ -242,13 +239,6 @@ const loadClaimInfo = async () => {
 const redPacketByDate = ref<any>([]);
 const claimedByDate = ref<any>([]);
 const luckHistoryByDate = ref<any>([]);
-
-const options = {
-  weekday: "long",
-  year: "numeric",
-  month: "long",
-  day: "numeric",
-};
 
 const loadData = async function() {
   loading.value = true;

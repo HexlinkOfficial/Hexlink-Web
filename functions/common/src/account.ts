@@ -13,6 +13,8 @@ export interface Account {
     owner?: string,
 }
 
+export const DEPLOYMENT_GASCOST = 350000;
+
 export const accountInterface = new ethers.utils.Interface(ACCOUNT_SIMPLE_ABI);
 
 export function nameHash(schema: string, name: string) {
@@ -64,53 +66,48 @@ export function encodeExecBatch(ops: OpInput[]) {
 }
 
 export async function encodeValidateAndCall(params: {
-  account: Contract,
+  nonce: EthBigNumber | string | number,
   txData: string
   sign: (msg: string) => Promise<string>,
   gas?: GasObject
-}) : Promise<{
-  data: string,
-  signature: string,
-  nonce: EthBigNumber
-}> {
-  const nonce = await params.account.nonce();
+}) : Promise<{data: string, signature: string}> {
   let data: string;
   if (params.gas) {
     const message = ethers.utils.keccak256(
       ethers.utils.defaultAbiCoder.encode(
           ["bytes", "uint256", "tuple(address, address, uint256, uint256)"],
-          [params.txData, nonce, [
+          [params.txData, params.nonce, [
             params.gas.receiver,
             params.gas.token,
-            params.gas.baseGas || 0,
+            params.gas.baseGas,
             params.gas.price
           ]]
       )
     );
     const signature = await params.sign(message);
-    data = params.account.interface.encodeFunctionData(
+    data = accountInterface.encodeFunctionData(
       "validateAndCallWithGasRefund",
       [
         params.txData,
-        nonce,
+        params.nonce,
         signature,
         params.gas
       ]
     );
-    return { data, nonce, signature}
+    return { data, signature}
   } else {
     const message = ethers.utils.keccak256(
       ethers.utils.defaultAbiCoder.encode(
           ["bytes", "uint256"],
-          [params.txData, nonce]
+          [params.txData, params.nonce]
       )
     );
     const signature = await params.sign(message);
-    data = params.account.interface.encodeFunctionData(
+    data = accountInterface.encodeFunctionData(
       "validateAndCall",
-      [params.txData, nonce, signature]
+      [params.txData, params.nonce, signature]
     );
-    return { data, nonce, signature}
+    return { data, signature}
   }
 }
 

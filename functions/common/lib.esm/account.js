@@ -2,6 +2,7 @@
 import { ethers } from "ethers";
 import ACCOUNT_SIMPLE_ABI from "./abi/ACCOUNT_SIMPLE_ABI.json";
 import { hash, isContract } from "./utils";
+export const DEPLOYMENT_GASCOST = 350000;
 export const accountInterface = new ethers.utils.Interface(ACCOUNT_SIMPLE_ABI);
 export function nameHash(schema, name) {
     return hash(`${schema}:${name}`);
@@ -31,29 +32,28 @@ export function encodeExecBatch(ops) {
     return accountInterface.encodeFunctionData("execBatch", [ops]);
 }
 export async function encodeValidateAndCall(params) {
-    const nonce = await params.account.nonce();
     let data;
     if (params.gas) {
-        const message = ethers.utils.keccak256(ethers.utils.defaultAbiCoder.encode(["bytes", "uint256", "tuple(address, address, uint256, uint256)"], [params.txData, nonce, [
+        const message = ethers.utils.keccak256(ethers.utils.defaultAbiCoder.encode(["bytes", "uint256", "tuple(address, address, uint256, uint256)"], [params.txData, params.nonce, [
                 params.gas.receiver,
                 params.gas.token,
-                params.gas.baseGas || 0,
+                params.gas.baseGas,
                 params.gas.price
             ]]));
         const signature = await params.sign(message);
-        data = params.account.interface.encodeFunctionData("validateAndCallWithGasRefund", [
+        data = accountInterface.encodeFunctionData("validateAndCallWithGasRefund", [
             params.txData,
-            nonce,
+            params.nonce,
             signature,
             params.gas
         ]);
-        return { data, nonce, signature };
+        return { data, signature };
     }
     else {
-        const message = ethers.utils.keccak256(ethers.utils.defaultAbiCoder.encode(["bytes", "uint256"], [params.txData, nonce]));
+        const message = ethers.utils.keccak256(ethers.utils.defaultAbiCoder.encode(["bytes", "uint256"], [params.txData, params.nonce]));
         const signature = await params.sign(message);
-        data = params.account.interface.encodeFunctionData("validateAndCall", [params.txData, nonce, signature]);
-        return { data, nonce, signature };
+        data = accountInterface.encodeFunctionData("validateAndCall", [params.txData, params.nonce, signature]);
+        return { data, signature };
     }
 }
 function equal(one, two) {

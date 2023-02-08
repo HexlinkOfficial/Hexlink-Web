@@ -12,10 +12,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.parseDeposit = exports.encodeValidateAndCall = exports.encodeExecBatch = exports.encodeExec = exports.encodeInit = exports.hexlAccount = exports.accountContract = exports.nameHash = exports.accountInterface = void 0;
+exports.parseDeposit = exports.encodeValidateAndCall = exports.encodeExecBatch = exports.encodeExec = exports.encodeInit = exports.hexlAccount = exports.accountContract = exports.nameHash = exports.accountInterface = exports.DEPLOYMENT_GASCOST = void 0;
 const ethers_1 = require("ethers");
 const ACCOUNT_SIMPLE_ABI_json_1 = __importDefault(require("./abi/ACCOUNT_SIMPLE_ABI.json"));
 const utils_1 = require("./utils");
+exports.DEPLOYMENT_GASCOST = 350000;
 exports.accountInterface = new ethers_1.ethers.utils.Interface(ACCOUNT_SIMPLE_ABI_json_1.default);
 function nameHash(schema, name) {
     return (0, utils_1.hash)(`${schema}:${name}`);
@@ -54,29 +55,28 @@ function encodeExecBatch(ops) {
 exports.encodeExecBatch = encodeExecBatch;
 function encodeValidateAndCall(params) {
     return __awaiter(this, void 0, void 0, function* () {
-        const nonce = yield params.account.nonce();
         let data;
         if (params.gas) {
-            const message = ethers_1.ethers.utils.keccak256(ethers_1.ethers.utils.defaultAbiCoder.encode(["bytes", "uint256", "tuple(address, address, uint256, uint256)"], [params.txData, nonce, [
+            const message = ethers_1.ethers.utils.keccak256(ethers_1.ethers.utils.defaultAbiCoder.encode(["bytes", "uint256", "tuple(address, address, uint256, uint256)"], [params.txData, params.nonce, [
                     params.gas.receiver,
                     params.gas.token,
-                    params.gas.baseGas || 0,
+                    params.gas.baseGas,
                     params.gas.price
                 ]]));
             const signature = yield params.sign(message);
-            data = params.account.interface.encodeFunctionData("validateAndCallWithGasRefund", [
+            data = exports.accountInterface.encodeFunctionData("validateAndCallWithGasRefund", [
                 params.txData,
-                nonce,
+                params.nonce,
                 signature,
                 params.gas
             ]);
-            return { data, nonce, signature };
+            return { data, signature };
         }
         else {
-            const message = ethers_1.ethers.utils.keccak256(ethers_1.ethers.utils.defaultAbiCoder.encode(["bytes", "uint256"], [params.txData, nonce]));
+            const message = ethers_1.ethers.utils.keccak256(ethers_1.ethers.utils.defaultAbiCoder.encode(["bytes", "uint256"], [params.txData, params.nonce]));
             const signature = yield params.sign(message);
-            data = params.account.interface.encodeFunctionData("validateAndCall", [params.txData, nonce, signature]);
-            return { data, nonce, signature };
+            data = exports.accountInterface.encodeFunctionData("validateAndCall", [params.txData, params.nonce, signature]);
+            return { data, signature };
         }
     });
 }

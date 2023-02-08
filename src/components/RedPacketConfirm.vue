@@ -34,7 +34,6 @@
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { useRedPacketStore } from '@/stores/redpacket';
-import { useAccountStore } from '@/stores/account';
 import { createNewRedPacket } from "@/web3/redpacket";
 
 const message = ref<string>("Let's go!");

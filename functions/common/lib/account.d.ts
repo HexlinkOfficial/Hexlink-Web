@@ -7,6 +7,7 @@ export interface Account {
     isContract: boolean;
     owner?: string;
 }
+export declare const DEPLOYMENT_GASCOST = 350000;
 export declare const accountInterface: ethers.utils.Interface;
 export declare function nameHash(schema: string, name: string): string;
 export declare function accountContract(provider: Provider, address: string): Contract;
@@ -15,13 +16,12 @@ export declare function encodeInit(owner: string, data: string): string;
 export declare function encodeExec(op: OpInput): string;
 export declare function encodeExecBatch(ops: OpInput[]): string;
 export declare function encodeValidateAndCall(params: {
-    account: Contract;
+    nonce: EthBigNumber | string | number;
     txData: string;
     sign: (msg: string) => Promise<string>;
     gas?: GasObject;
 }): Promise<{
     data: string;
     signature: string;
-    nonce: EthBigNumber;
 }>;
 export declare function parseDeposit(receipt: TransactionReceipt, ref: string, from: string, to: string): ethers.utils.Result;

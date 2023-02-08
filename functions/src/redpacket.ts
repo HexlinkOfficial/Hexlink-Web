@@ -29,6 +29,7 @@ import {
   isContract,
   hexlInterface,
   hexlAddress,
+  DEPLOYMENT_GASCOST,
 } from "../common";
 import type {Chain, GasObject, OpInput, DeployRequest} from "../common";
 import {submit} from "./services/operation";
@@ -139,7 +140,6 @@ export const claimRedPacket = functions.https.onCall(
     }
 );
 
-const DEPLOYMENT_GASCOST = 350000;
 function validateGas(chain: Chain, gas: GasObject, deployed: boolean) {
   if (gas.receiver !== refunder(chain)) {
     throw new Error("invalid gas refunder");
@@ -163,19 +163,14 @@ async function validateAndBuildUserOp(
       deploy?: DeployRequest,
     },
 ) : Promise<OpInput> {
-  const redpacket = request.redpacket;
+  const req = request.redpacket;
   const data = accountInterface.encodeFunctionData(
       "validateAndCallWithGasRefund",
-      [
-        redpacket.txData,
-        redpacket.nonce,
-        redpacket.signature,
-        redpacket.gas,
-      ]
+      [req.txData, req.nonce, req.signature, req.gas]
   );
   const provider = getInfuraProvider(chain);
   const deployed = await isContract(provider, account.address);
-  validateGas(chain, redpacket.gas, deployed);
+  validateGas(chain, req.gas, deployed);
   if (deployed) {
     return {
       to: account.address,

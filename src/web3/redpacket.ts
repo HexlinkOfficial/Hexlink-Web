@@ -28,6 +28,7 @@ import {
     encodeExecBatch,
     refunder,
     isContract,
+    DEPLOYMENT_GASCOST,
 } from "../../functions/common";
 import type { RedPacketInput } from "../../functions/redpacket";
 import {
@@ -297,29 +298,31 @@ async function buildCreateRedPacketRequest(
     let userOps : Op[] = [];
     userOps.push(buildGasSponsorshipOp(hexlAccount, refunder(chain), input));
     userOps = userOps.concat(buildRedPacketOps(chain, input));
+    const txData = encodeExecBatch(userOps.map(op => op.input));
+    const account = accountContract(useChainStore().provider, hexlAccount);
+
+    const deployed = await isContract(useChainStore().provider, hexlAccount);
     const gas = {
         receiver: refunder(chain),
         token: input.gasToken,
-        baseGas: "0",
+        baseGas: deployed ? "0" : DEPLOYMENT_GASCOST,
         price: gasTokenPricePerGwei(
             chain,
             input.gasToken,
             input.priceInfo!
         )
     };
-    const txData = encodeExecBatch(userOps.map(op => op.input));
-    const {data, signature, nonce} = await encodeValidateAndCall({
-        account: accountContract(useChainStore().provider, hexlAccount),
+    const nonce = deployed ? await account.nonce() : 0;
+    const {data, signature} = await encodeValidateAndCall({
+        nonce,
         txData,
         sign: async (msg: string) => await signMessage(walletAccount, msg),
         gas,
     });
-    await simulate(useAccountStore().account!.address, data, "0");
     const result = {
-        redpacket: {txData, signature, nonce: nonce.toString(), gas},
+        redpacket: {txData, signature, nonce, gas},
     } as { redpacket: UserOpRequest, deploy?: DeployRequest };
 
-    const deployed = await isContract(useChainStore().provider, hexlAccount);
     if (!deployed) {
         const { proof } = await genDeployAuthProof(data);
         const authProof = {
@@ -328,7 +331,7 @@ async function buildCreateRedPacketRequest(
             issuedAt: EthBigNumber.from(proof.issuedAt),
             signature: proof.signature,
         } as AuthProofInput;
-        result.deploy = {authProof, owner: walletAccount};;
+        result.deploy = {authProof, owner: walletAccount};
     }
     return result;
 }

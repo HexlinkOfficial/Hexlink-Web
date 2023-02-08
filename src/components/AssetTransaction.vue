@@ -14,7 +14,7 @@
         <div v-for="(r, i) in value" :key="i" class="history-record">
           <div class="record-box">
             <div style="display: block; position: relative;">
-              <div class="icon" :style="r.action.type == 'receive' && 'background-color: #4BAE4F;'">
+              <div class="icon" :style="r.action.type == 'receive' ? ('background-color: #4BAE4F;') : ''">
                 <svg v-if="r.action.type == 'receive'" width="24" height="24" viewBox="0 0 24 24" fill="none"
                   xmlns="http://www.w3.org/2000/svg">
                   <path d="M7 7L17 17" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
@@ -123,6 +123,7 @@ import { copy } from "@/web3/utils";
 import { getAssetTransfers, loadTokenLogo } from '@/web3/tokens';
 import { useTokenStore } from '@/stores/token';
 import { useChainStore } from '@/stores/chain';
+import { useAccountStore } from '@/stores/account';
 import { prettyPrintAddress } from "../../functions/common";
 import { profilePic, options } from "@/assets/imageAssets";
 
@@ -135,8 +136,8 @@ const loadTransactions = async (tokenAddress: string[], profilePics: string[]) =
   const orderGroup: any = {};
 
   transfer.value = await getAssetTransfers({
-    wallet: '0x4dD92D3b036a10733E85C2C3775935AAb515A653',
-    category: ["external", "internal", "erc20", "erc721", "erc1155"],
+    wallet: useAccountStore().account!.address,
+    category: ["external", "internal", "erc20"],
     contractAddresses: tokenAddress
   })
   // divide all transactions into group by dates
@@ -168,7 +169,9 @@ const loadTransactions = async (tokenAddress: string[], profilePics: string[]) =
     const sortedArray: any[] = [];
     time.sort((a: number, b: number) => b - a).forEach((t: number) => {
       transactionByDate.value[v].forEach((time: any) => {
-        new Date(time.tx.timestamp).getTime() == t && sortedArray.push(time);
+        if(new Date(time.tx.timestamp).getTime() == t) {
+          !sortedArray.includes(time) && sortedArray.push(time);
+        }
       })
     })
     sortedTransaction[v] = sortedArray;

@@ -15,7 +15,7 @@
         <div v-for="(r, i) in value" :key="i" class="history-record">
           <div class="record-box">
             <div style="display: block; position: relative;">
-              <div class="icon" :style="r.action.type == 'receive' && 'background-color: #4BAE4F;'">
+              <div class="icon" :style="r.action.type == 'receive' ? 'background-color: #4BAE4F;' : ''">
                 <svg v-if="r.action.type == 'receive'" width="24" height="24" viewBox="0 0 24 24" fill="none"
                   xmlns="http://www.w3.org/2000/svg">
                   <path d="M7 7L17 17" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
@@ -45,21 +45,31 @@
                 </div>
               </div>
               <div class="token-amount">
-                <div class="sent-info">
+                <div style="display: flex; align-items: center;">
                   <a-tooltip placement="top">
                     <template #title>
-                      <span>
-                        Amount: {{ r.amount.normalized }}
-                      </span>
+                      <img :src="getNFTdata(r.tx.tokenID).image" :size="64" referrerpolicy="no-referrer" rel="preload" />
                     </template>
-                    <div class="transaction-amount">
-                      + {{ r.amount.normalized.toString().substring(0, 5) }}
-                    </div>
+                    <span class="thumb">
+                      <img :src="getNFTdata(r.tx.tokenID).image" :size="64" referrerpolicy="no-referrer" rel="preload" />
+                    </span>
                   </a-tooltip>
-                  <div class="token-icon" style="margin-right: 0.25rem; margin-left: 0.25rem;">
-                    <img :src="loadTokenLogo(r.asset.address)">
+                  <div style="display: flex; flex-direction: column; margin-left: 0.5rem;">
+                    <span class="from-text">{{ getNFTdata(r.tx.tokenID).symbol }}</span>
+                    <span style="font-size: 12px; color: rgb(100,116,139)">
+                      {{ getNFTdata(r.tx.tokenID).name }} #{{ getNFTdata(r.tx.tokenID).nftId }}
+                    </span>
+                    <a-tooltip v-if="r.action.type == 'send'" placement="top">
+                      <template #title>
+                        <span>
+                          Address: {{ r.action.to }}
+                        </span>
+                      </template>
+                      <span style="font-size: 12px; color: rgb(100,116,139)">{{
+                      prettyPrintAddress(r.action.to, 5, 6)
+                      }}</span>
+                    </a-tooltip>
                   </div>
-                  {{ r.asset.symbol }}
                 </div>
               </div>
               <div class="claim-status">
@@ -135,24 +145,27 @@ import { copy } from "@/web3/utils";
 import { getAssetTransfers, loadTokenLogo } from '@/web3/tokens';
 import { useTokenStore } from '@/stores/token';
 import { useChainStore } from '@/stores/chain';
+import { useAccountStore } from '@/stores/account';
 import { prettyPrintAddress } from "../../functions/common";
 import { profilePic, options } from "@/assets/imageAssets";
+import { useNftStore } from '@/stores/nft';
 
 const loading = ref<boolean>(false);
-const transfer = ref<any>();
+const transfer = ref<any[]>([]);
 const transactionByDate = ref<any>([]);
 
-const loadTransactions = async (tokenAddress: string[], profilePics: string[]) => {
+const loadTransactions = async (erc721Address: string[]) => {
   loading.value = true;
   const orderGroup: any = {};
+  const tempList: any = []
 
-  transfer.value = await getAssetTransfers({
-    wallet: '0x4dD92D3b036a10733E85C2C3775935AAb515A653',
-    category: ["external", "internal", "erc20", "erc721", "erc1155"],
-    contractAddresses: tokenAddress
+  const historyList = await getAssetTransfers({
+    wallet: useAccountStore().account!.address,
+    category: ["erc721", "erc1155"],
+    contractAddresses: erc721Address
   })
   // divide all transactions into group by dates
-  transfer.value.forEach((t: any) => {
+  historyList.forEach((t: any) => {
     const date = new Date(t.tx.timestamp).toLocaleString().split(',')[0];
     if (date in orderGroup) {
       orderGroup[date].push(t);
@@ -170,6 +183,9 @@ const loadTransactions = async (tokenAddress: string[], profilePics: string[]) =
     sortedGroup[v] = orderGroup[v];
   });
   transactionByDate.value = JSON.parse(JSON.stringify(sortedGroup));
+
+  console.log("test: ", transactionByDate.value)
+
   // reorder group
   const sortedTransaction: any = {};
   Object.keys(transactionByDate.value).forEach(v => {
@@ -180,7 +196,9 @@ const loadTransactions = async (tokenAddress: string[], profilePics: string[]) =
     const sortedArray: any[] = [];
     time.sort((a: number, b: number) => b - a).forEach((t: number) => {
       transactionByDate.value[v].forEach((time: any) => {
-        new Date(time.tx.timestamp).getTime() == t && sortedArray.push(time);
+        if (new Date(time.tx.timestamp).getTime() == t) {
+          !sortedArray.includes(time) && sortedArray.push(time);
+        }
       })
     })
     sortedTransaction[v] = sortedArray;
@@ -189,14 +207,25 @@ const loadTransactions = async (tokenAddress: string[], profilePics: string[]) =
   loading.value = false;
 };
 
+const getNFTdata = (id: string) => {
+
+  const index = useNftStore().nftId.indexOf(id);
+  return {
+    contracts: useNftStore().contracts[index],
+    symbol: useNftStore().symbol[index],
+    name: useNftStore().name[index],
+    nftId: useNftStore().nftId[index],
+    image: useNftStore().image[index]
+  }
+}
+
 onMounted(async () => {
-  var tokens: string[] = [];
-  useTokenStore().visiableTokens.forEach(t => {
-    tokens.push(t.address);
-  })
-  await loadTransactions(tokens, profilePic);
+  // var tokens: string[] = [];
+  // useTokenStore().visiableTokens.forEach(t => {
+  //   tokens.push(t.address);
+  // })
+  await loadTransactions(useNftStore().contracts);
   console.log(transactionByDate.value);
-  console.log(useChainStore().chain);
 });
 </script>
 

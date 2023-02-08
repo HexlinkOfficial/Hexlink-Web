@@ -11,6 +11,7 @@ import type {
 import { useAuthStore } from "@/stores/auth";
 import { useChainStore } from "@/stores/chain";
 import { useTokenStore } from "@/stores/token";
+import { useNftStore } from '@/stores/nft';
 
 import type { Token, Chain,  NormalizedTokenBalance } from "../../functions/common";
 import { normalizeBalance, getPopularTokens } from "../../functions/common";
@@ -152,6 +153,12 @@ export interface nftImage {
     attributes: Array<any>,
 }
 
+export interface bindedNFT {
+  nft: nftImage,
+  color: string,
+  hasOpensea: boolean
+}
+
 export async function loadErc721Token(account: string) {
     const nfts = await alchemy().nft.getNftsForOwner(account);
     const nftArray: nftImage[] = [];
@@ -187,6 +194,7 @@ export interface Transaction {
     blockNumber: number;
     timestamp?: string;
     position?: number;
+    tokenID?: string
 }
 
 export interface Action {
@@ -230,6 +238,7 @@ const toAssetTransfer = (
             hash: transfer.hash,
             blockNumber: Number(transfer.blockNum),
             timestamp: transfer.metadata.blockTimestamp,
+            tokenID: parseInt(transfer.erc721TokenId || "", 16).toString() || "",
         },
         asset: {
             address: transfer.rawContract.address || "",

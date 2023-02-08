@@ -16,13 +16,13 @@
             <div class="card_details">
               <div class="card_details_box">
                 <div>
-                  <div style="font-size: 0.75rem; line-height: 1rem; color: #6a6d7c; display: flex; align-items: center; justify-content: space-between;">
-                    <div class="collection_name_text">Invisible Mfers</div>
+                  <div class="box-content">
+                    <div class="collection_name_text">{{ value.nft.symbol }}</div>
                     <a :href="getOpenseaUrl(value.nft)" target="_blank">
                       <img src="https://storage.googleapis.com/opensea-static/Logomark/Logomark-Blue.svg" style="width: 20px;" />
                     </a>
                   </div>
-                  <p class="nft_title">invisible mfers #2725</p>
+                  <p class="nft_title">{{ value.nft.name }} #{{ value.nft.id }}</p>
                 </div>
               </div>
             </div>
@@ -38,14 +38,9 @@ import { onMounted, ref } from 'vue';
 import { FastAverageColor } from 'fast-average-color';
 import { loadErc721Token } from '@/web3/tokens';
 import { useAccountStore } from "@/stores/account";
+import { useNftStore } from '@/stores/nft';
 import Loading from "@/components/Loading.vue";
-import type { openSea, nftImage } from '@/web3/tokens';
-
-interface bindedNFT {
-  nft: nftImage,
-  color: string,
-  hasOpensea: boolean
-}
+import type { openSea, nftImage, bindedNFT } from '@/web3/tokens';
 
 // const nfts = [
 //   'https://i.seadn.io/gcs/files/e98dad5dbac144288475ab0d152cb45a.gif?auto=format&w=1000',
@@ -83,6 +78,7 @@ const getBackcgroundColor = async (nft: nftImage) => {
     opensea = true;
   } else {
     url = nft.rawUrl;
+    opensea = false;
   }
   const fac = new FastAverageColor();
   await fac.getColorAsync(url, { algorithm: 'dominant' })
@@ -95,14 +91,11 @@ const getBackcgroundColor = async (nft: nftImage) => {
       console.log(e);
       return e;
     });
-  if (!imageColor.value.includes(output)) {
-    imageColor.value.push(output);
-    nftImages.value.push({
-      nft: nft,
-      color: output,
-      hasOpensea: opensea
-    })
-  }
+  nftImages.value.push({
+    nft: nft,
+    color: output,
+    hasOpensea: opensea
+  })
 }
 
 const getOpenseaUrl = (nft: nftImage) => {
@@ -110,10 +103,21 @@ const getOpenseaUrl = (nft: nftImage) => {
 }
 
 const preloadColors = () => {
-  nftPics.value.map((nft: any) => {
-    getBackcgroundColor(nft);
+  var contracts: string[] = [];
+  var symbols: string[] = [];
+  var names: string[] = [];
+  var nftIds: string[] = [];
+  var images: string[] = [];
+  nftPics.value.map(async (nft: any) => {
+    contracts.push(nft.contract);
+    symbols.push(nft.symbol);
+    names.push(nft.name);
+    nftIds.push(nft.id);
+    images.push(nft.rawUrl);
+    await getBackcgroundColor(nft);
   })
-  console.log(nftImages.value);
+  console.log("xxx", nftImages.value);
+  useNftStore().set(contracts, symbols, names, nftIds, images);
 };
 
 onMounted(async () => {
@@ -123,6 +127,13 @@ onMounted(async () => {
 </script>
 
 <style lang="less" scoped>
+.box-content {
+  font-size: 0.75rem;
+  line-height: 1rem;
+  color: #6a6d7c;
+  display: flex;
+  align-items: center;
+  justify-content: space-between; }
 .no-history {
   display: flex;
   justify-content: center;
@@ -140,7 +151,7 @@ onMounted(async () => {
     height: 150px; } }
 .card_details_box {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   padding: 16px 20px;
   transition: opacity .3s ease-out; }

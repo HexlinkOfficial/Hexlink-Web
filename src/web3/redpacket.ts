@@ -281,9 +281,9 @@ async function buildCreateRedPacketRequest(
     input: RedPacketInput
 ): Promise<UserOpRequest> {
     const hexlAccount = useAccountStore().account!.address;
-    const needDeploy = await isContract(useChainStore().provider, hexlAccount);
-    if (needDeploy) {
-        throw "not supported yet";
+    const deployed = await isContract(useChainStore().provider, hexlAccount);
+    if (!deployed) {
+        throw new Error("not supported yet");
     }
 
     const walletAccount = useWalletStore().account!.address;

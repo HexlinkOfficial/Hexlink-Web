@@ -431,6 +431,9 @@ onClickOutside(
   opacity: 1;
   background-color: rgb(7, 106, 224);
   color: white; }
+.connect-wallet-button:hover {
+  background-color: rgba(7, 106, 224,0.9);
+}
 .red-packet {
   visibility: visible;
   height: auto;

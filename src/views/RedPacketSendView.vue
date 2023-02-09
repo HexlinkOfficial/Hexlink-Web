@@ -1,6 +1,5 @@
 <template>
   <Layout :hidden="status !== ''" :active="1">
-    <h1 style="margin-bottom: 1rem;">Red Packet</h1>
     <RedPacketBase>
       <RedPacketSend></RedPacketSend>
     </RedPacketBase>

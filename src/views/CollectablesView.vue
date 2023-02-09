@@ -344,7 +344,6 @@ svg {
 </style>
 <template>
   <layout :active="2">
-    <h1 style="margin-bottom: 1rem;">Collectables</h1>
     <div class="row">
       <div className="row invoice-card-row">
         <!-- account balance and title -->

@@ -183,10 +183,12 @@ tbody tr {
 }
 .token-detail {
   border: 0px solid transparent;
-  border-radius: 1.75rem;
+  border-radius: 1rem;
   cursor: pointer; }
   .token-detail:hover {
-    background: #e5e7eb; }
+    box-shadow: rgb(39 44 49 / 7%) 8px 28px 50px, rgb(39 44 49 / 4%) 1px 6px 12px;
+    transform: translate3d(0px, -1px, 0px) scale(1.01);
+    transition: all 0.2s ease 0s; }
   .token-detail .token-description {
     display: flex;
     position: relative;

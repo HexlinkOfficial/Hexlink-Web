@@ -37,6 +37,13 @@
             <span class="icon-grey"><i class="fa-solid fa-image" style="font-size: 20px;"></i></span>
           </router-link>
         </li>
+        <!-- Activities -->
+        <li>
+          <router-link to="/activities" data-toggle="tooltip" data-placement="right" title="Home"
+            :class="active === 3 && 'active'">
+            <span class="icon-grey"><i class="fa-solid fa-receipt" style="font-size: 20px;"></i></span>
+          </router-link>
+        </li>
         <!-- signout -->
         <li class="logout">
           <router-link 

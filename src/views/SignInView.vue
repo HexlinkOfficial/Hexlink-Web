@@ -1,425 +1,214 @@
 <template>
-    <div className="login-main-page" :style="{ backgroundImage: `url(${loginbg})` }">
-        <div className="login-wrapper">
-            <div className="login-aside-left">
-                <router-link to="/dashboard" className="login-logo">
-                    <img :src="logo" alt="" />
-                </router-link>
-                <div className="login-description">
-                    <h2 className="main-title mb-2">Welcome To HexLink</h2>
-                    <p className="main-description">Hexlink transforms your email or any social account to wallet address. Now you can
-                        simply share your email to receive tokens without downloading or signing up anything. It's as easy
-                        as using Zelle!</p>
-                    <ul className="social-icons mt-4" style="list-style-type:none; padding: 0;">
-                        <!-- <li>
-                            <router-link to="#"><i className="fa fa-facebook"></i></router-link>
-                        </li> -->
-                        <li>
-                            <router-link to="#"><i className="fa fa-twitter"></i></router-link>
-                        </li>
-                        <li>
-                            <router-link to="#"><i class="fa fa-discord"></i></router-link>
-                        </li>
-                    </ul>
-                    <div className="bottom-privacy">
-                        <router-link to="#" className="mr-4">Privacy Policy</router-link>
-                        <router-link to="#" className="mr-4">Contact</router-link>
-                        <router-link to="#" className="">© 2022 Hexlink</router-link>
-                    </div>
-                </div>
-            </div>
-            <div className="login-aside-right">
-                <div className="row m-0 justify-content-center h-100 align-items-center">
-                    <div className="login-right-wrapper">
-                        <div className="authincation-content">
-                            <div className="row no-gutters">
-                                <div className="col-xl-12">
-                                    <div className="auth-form-1">
-                                        <div className="mb-4" style="padding-left: 20px;">
-                                            <!-- <h3 className="dz-title mb-1">Hexlink: start your web3 journey</h3> -->
-                                            <h3 className="">Sign in with options below</h3>
-                                        </div>
-                                        <!-- Sign in with Google -->
-                                        <!-- <a-row justify="center" style="margin-top: 30px;">
-                                            <button size="large" @click="google_login" className="google__btn">
-                                                <i class="fa fa-google"></i>&nbsp;&nbsp;
-                                                Sign in with Google
-                                            </button>
-                                        </a-row> -->
-                                        <!-- Sign in with Twitter -->
-                                        <a-row justify="center" style="margin-top: 5px;">
-                                            <button size="large" @click="twitter_login" className="twitter__btn">
-                                                <i class="fa fa-twitter"></i>&nbsp;&nbsp;
-                                                Sign in with Twitter
-                                            </button>
-                                        </a-row>
-                                        <!-- Sign in with facebook -->
-                                        <!-- <a-row justify="center" style="margin-top: 5px;">
-                                            <button size="large" @click="github_login" className="facebook__btn">
-                                                <i class="fa fa-facebook"></i>&nbsp;&nbsp;
-                                                Sign in with Facebook
-                                            </button>
-                                        </a-row> -->
-                                        <!-- Sign in with Github -->
-                                        <!-- <a-row justify="center" style="margin-top: 5px;">
-                                            <button size="large" @click="github_login" className="github__btn">
-                                                <i class="fa fa-github"></i>&nbsp;&nbsp;
-                                                Sign in with GitHub
-                                            </button>
-                                        </a-row> -->
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+  <div class="login-card" :style="{ backgroundImage: `url(${background})` }">
+    <div class="card">
+      <form @submit="onSubmit">
+        <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem;">
+            <img :src="hexlink" style="width:2.5rem; height: 2.5rem;" />
         </div>
+        <h2 class="title">Welcome To HexLink</h2>
+        <p class="subtitle">Address-less experience with Hexlink Auth Protocal</p>
+        <transition name="fade">
+            <div v-if="show" class="step1">
+                <div class="social-login">
+                    <button size="large" @click="twitter_login" className="twitter-btn">
+                        <i class="fa fa-twitter"></i>
+                        &nbsp;&nbsp;Sign in with Twitter
+                    </button>
+                </div>
+                <p class="or"><span>or</span></p>
+                <div class="email-login">
+                    <input type="text" placeholder="Enter Email" name="uname" class="email-input" required>
+                </div>
+                <button class="cta-btn" v-on:click="show = !show">Log In</button>
+            </div>
+        </transition>
+        <transition name="fade">
+            <div v-if="!show" class="step2">
+                <div class="social-login" style="flex-direction: column;">
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <input v-for="(arr, index) in code" :key="index" type="number" pattern="\d*" :id="'input_' + index"
+                            maxlength="1" v-model="code[index]" @input="handleInput" @keypress="isNumber"
+                            @keydown.delete="handleDelete" @paste="onPaste" />
+                    </div>
+                    <button class="cta-btn" v-on:click="show = !show">Send</button>
+                </div>
+            </div>
+        </transition>
+      </form>
     </div>
+  </div>
 </template>
 
 <script setup lang="ts">
-import { useRouter } from 'vue-router'; 
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 import { twitterSocialLogin, signOutFirebase } from '@/services/auth'
 import { useAuthStore } from '@/stores/auth'
-import logo from "@/assets/hori-white-logo.svg"
-import loginbg from "@/assets/bg-login.jpg"
+import hexlink from "@/assets/logo/blue-logo.svg";
+import background from "@/assets/background.png";
 
 const store = useAuthStore();
 const router = useRouter();
+let code: string[] = Array(6);
+let dataFromPaste: string[] | undefined;
+const keysAllowed: string[] = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9",];
+const show = ref<boolean>(true);
+
+const onSubmit = (e: Event) => {
+    e.preventDefault();
+}
 
 const twitter_login = async () => {
     await twitterSocialLogin();
     router.push(store.returnUrl || "/");
 }
+
+const isNumber = (event: Event) => {
+    (event.currentTarget as HTMLInputElement).value = "";
+    const keyPressed: string = (event as KeyboardEvent).key;
+    if (!keysAllowed.includes(keyPressed)) {
+        event.preventDefault();
+    }
+}
+
+const handleInput = (event: Event) => {
+    const inputType = (event as InputEvent).inputType;
+    let currentActiveElement = event.target as HTMLInputElement;
+    if (inputType === "insertText")
+        (currentActiveElement.nextElementSibling as HTMLElement)?.focus();
+    if (inputType === "insertFromPaste" && dataFromPaste) {
+        for (const num of dataFromPaste) {
+            let id: number = parseInt(currentActiveElement.id.split("_")[1]);
+            currentActiveElement.value = num;
+            code[id] = num;
+            if (currentActiveElement.nextElementSibling) {
+                currentActiveElement =
+                    currentActiveElement.nextElementSibling as HTMLInputElement;
+                (currentActiveElement.nextElementSibling as HTMLElement)?.focus();
+            }
+        }
+    }
+    console.log(code);
+}
+
+const handleDelete = (event: Event) => {
+    //keydown event = move to previous element then only delete number
+    let value = (event.target as HTMLInputElement).value;
+    let currentActiveElement = event.target as HTMLInputElement;
+    if (!value)
+        (currentActiveElement.previousElementSibling as HTMLElement)?.focus();
+}
+
+const onPaste = (event: Event) => {
+    dataFromPaste = (event as ClipboardEvent).clipboardData
+        ?.getData("text")
+        .trim()
+        .split("");
+    if (dataFromPaste) {
+        for (const num of dataFromPaste) {
+            if (!keysAllowed.includes(num)) event.preventDefault();
+        }
+    }
+}
 </script>
 
 <style lang="less" scoped>
+.fade-enter-active, .fade-leave-active {
+  transition: display 10s; }
+.fade-enter-from, .fade-leave-to  {
+  display: none;}
+input[type="number"] {
+  width: 50px;
+  height: 50px;
+  font-size: 2rem;
+  text-align: center;
+  border-radius: 0.5rem;
+  box-shadow: none;
+  border: 1px solid #999;
+  margin-top: 8px;
+  margin-bottom: 25px;
+  caret-color: transparent !important; }
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0; }
+input[type="number"] {
+  -moz-appearance: textfield; }
+.login-card {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 1rem;
+    margin-right: 1rem;
+    background-color: rgb(228, 229, 247);
+    height: 100vh; }
+.social-login img {
+    width: 24px; }
+a {
+    text-decoration: none; }
+.card {
+    width: 450px;
+    border-radius: 15px;
+    background-color: #ffff;
+    padding: 1.8rem;
+    box-shadow: 2px 5px 20px rgba(0, 0, 0, 0.1); }
+.subtitle {
+  text-align: center;
+  font-weight: bold;
+  margin-bottom: 30px; }
+.btn-text {
+    margin: 0; }
+.social-login {
+    display: flex;
+    justify-content: center;
+    gap: 5px; }
+.or {
+    text-align: center;
+    font-weight: bold;
+    border-bottom: 2px solid rgb(245 239 239);
+    line-height: 0.1em;
+    margin: 25px 0; }
+.or span {
+    background: #fff;
+    padding: 0 10px; }
+.email-login {
+    display: flex;
+    flex-direction: column;
+    padding-top: 20px; }
+.email-input {
+    padding: 15px 20px;
+    margin-top: 8px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-sizing: border-box; }
+.cta-btn {
+    background-color: rgb(7, 106, 224);
+    color: white;
+    padding: 18px 20px;
+    margin-top: 10px;
+    margin-bottom: 20px;
+    width: 100%;
+    border-radius: 10px;
+    border: none; }
+.cta-btn:hover {
+    background-color: rgba(7, 106, 224, 0.8); }
+.twitter-btn {
+    background-color: #1DA1F2;
+    color: white;
+    padding: 18px 20px;
+    margin-top: 10px;
+    margin-bottom: 20px;
+    width: 100%;
+    border-radius: 10px;
+    border: none; }
+.twitter-btn:hover {
+    background-color: rgba(29, 161, 242, 0.8); }
 .title {
-        margin: 10px 0px 40px 0px;
-        font-family: system-ui;
-        font-size: 1.5em;
-        font-weight: bold;
-    }
-    .login-main-page {
-        padding: 10vh;
-        background-size: cover;
-        background-position: center;
-        position: relative;
-        height: 100vh;
-        z-index: 1;
-    }
-    @media only screen and (max-height: 780px) {
-        .login-main-page {
-            height: 100%; } }
-    .login-main-page .login-wrapper {
-        background: #fff;
-        max-width: 65vw;
-        margin-left: auto;
-        margin-right: auto;
-    }
-    .login-main-page .main-title {
-        color: #fff;
-        font-size: 50px;
-        line-height: 1.3;
-        font-weight: 700;
-    }
-    .login-main-page:after {
-        content: "";
-        position: absolute;
-        height: 100%;
-        width: 100%;
-        left: 0;
-        top: 0;
-        background: rgba(0, 0, 0, 0.2);
-        z-index: -1;
-    }
-    @media only screen and (max-width: 1600px) {
-            .login-wrapper {
-                max-width: 80vw; } } 
-    @media only screen and (max-width: 1245px) {
-        .login-main-page {
-            padding: 7vh 0px 7vh 0px; }
-        .login-wrapper {
-            max-width: 80vw; }
-        .login-main-page .main-title {
-            font-size: 2.3rem; } } 
-    @media only screen and (max-width: 991px) {
-        .login-main-page {
-            padding: 5vh 0px 5vh 0px; }
-        .login-main-page .main-title {
-            font-size: 2rem; } }
-    @media only screen and (max-width: 767px) {
-        .login-main-page {
-        padding: 2.5vh 0px 2.5vh 0px; } }
-    @media only screen and (max-width: 575px) {
-        // .login-main-page {
-        //     padding: 0px; }
-        .login-main-page .main-title {
-            font-size: 30px; }
-        .login-main-page {
-        padding: 2.5vh 0px 2.5vh 0px; }
-        .login-main-page .login-wrapper{
-            max-width: 90vw; } }
-    .login-wrapper {
-        display: flex;
-        min-height: 600px;
-        height: 80vh;
-        box-shadow: 0 0 60px 10px rgba(85, 44, 44, 0.2); }
-        // @media only screen and (max-width: 1600px) {
-        //     .login-wrapper {
-        //         height: calc(100vh - 600px); } }
-        @media only screen and (max-width: 1245px) {
-            .login-wrapper {
-                height: 86vh; } }
-        @media only screen and (max-width: 991px) {
-            .login-wrapper {
-                height: 90vh; } }
-        @media only screen and (max-width: 767px) {
-            .login-wrapper {
-                height: 95vh; } }
-        @media only screen and (max-width: 575px) {
-            .login-wrapper {
-                height: calc(95vh); }
-            .login-main-page {
-                height: auto; } }
-        .login-wrapper .bottom-privacy {
-            color: #fff;
-            font-size: 16px;
-            font-weight: 600;
-            margin-top: 3rem !important;
-            line-height: 1.5; }
-            @media only screen and (max-width: 991px) {
-            .login-wrapper .bottom-privacy {
-                margin-top: 0rem !important; } }
-            .login-wrapper .bottom-privacy a {
-                color: inherit; }
-        .login-wrapper .login-aside-left {
-            max-width: 60%;
-            flex: 0 0 60%;
-            position: relative;
-            display: table;
-            padding: 50px;
-            z-index: 1;
-            background-size: 100%;
-            background-repeat: no-repeat;
-            background-position: bottom;
-            background: linear-gradient(to right, #5bcfc5 25%, #3197b7 100%);
-            overflow: hidden; }
-            .login-wrapper .login-aside-left:before, .login-wrapper .login-aside-left:after {
-                position: absolute;
-                z-index: -1;
-                content: "";
-                box-shadow: 0 0 0 60px rgba(255, 255, 255, 0.1); }
-            .login-wrapper .login-aside-left:before {
-                background: #759dd9;
-                width: 150px;
-                height: 150px;
-                border-radius: 35px;
-                left: -35px;
-                top: 30%;
-                transform: rotate(45deg);
-                animation: dzMove1 5s linear infinite; }
-            .login-wrapper .login-aside-left:after {
-                background: #ffa755;
-                width: 150px;
-                height: 150px;
-                border-radius: 35px;
-                right: -30px;
-                top: -30px;
-                transform: rotate(45deg);
-                animation: dzMove1 8s linear infinite; }
-            .login-wrapper .login-aside-left .login-description {
-                display: table-cell;
-                vertical-align: bottom; }
-                .login-wrapper .login-aside-left .login-description p {
-                    font-size: 18px;
-                    font-weight: 600;
-                    color: rgba(255, 255, 255, 0.8);
-                    line-height: 1.5; }
-                @media only screen and (max-width: 575px) {
-                    .login-wrapper .login-aside-left .login-description p {
-                        font-size: 16px; } }
-    .login-wrapper .dz-title {
-        color: #000;
-        font-weight: 700;
-        font-size: 35px; }
-    .login-wrapper p {
-        font-size: 16px;
-        color: #666; }
-    .login-wrapper .login-aside-right {
-        max-width: 40%;
-        flex: 0 0 40%;
-        display: flex;
-        align-items: center;
-        justify-content: center; }
-    .login-right-wrapper {
-        padding: 3rem !important;
-    }
-    @media only screen and (max-width: 1245px) {
-        .login-wrapper .dz-title {
-            font-weight: 700;
-            font-size: 30px; }
-        .login-right-wrapper {
-            padding: 1.5rem !important; } }
-    .login-wrapper .social-icons {
-        display: flex; }
-        .login-wrapper .social-icons li {
-            margin-right: 10px; }
-            .login-wrapper .social-icons li a {
-                height: 45px;
-                width: 45px;
-                color: #fff;
-                border-radius: 12px;
-                line-height: 45px;
-                font-size: 18px;
-                display: inline-block;
-                text-align: center;
-                border: 0;
-                background: rgba(255, 255, 255, 0.2);
-                -webkit-transition: all 0.5s;
-                -ms-transition: all 0.5s;
-                transition: all 0.5s; }
-                .login-wrapper .social-icons li a:hover {
-                    background: #fff;
-                    color: #000; }
-    .login-wrapper .login-logo {
-        position: absolute; }
-    .login-wrapper .authincation-content {
-        background-color: transparent;
-        box-shadow: none; }
-    .login-wrapper .form-group {
-        margin-bottom: 15px; }
-    .login-wrapper .form-group label {
-        font-size: 14px;
-        color: #666; }
-    .login-wrapper .custom-checkbox .custom-control-input {
-        margin-right: 10px;
-        top: 2px;
-        position: relative; }
-    .login-wrapper .form-control {
-        background: transparent;
-        border: 0;
-        border-bottom: 2px solid #000;
-        border-radius: 0 !important;
-        padding: 0;
-        color: #000; }
-    .login-wrapper .form-control::placeholder {
-        color: #999;
-        opacity: 0.7; }
-    .login-wrapper .form-control:-ms-input-placeholder {
-        color: #999;
-        opacity: 0.7; }
-    .login-wrapper .form-control::-ms-input-placeholder {
-        color: #999;
-        opacity: 0.7; }
-    .login-wrapper .form-control,
-    .login-wrapper .btn {
-        border-radius: 8px; }
-    @media only screen and (max-width: 1199px) {
-        .login-wrapper .login-aside-left {
-            width: 470px; } }
-    // @media only screen and (max-width: 991px) {
-    //     .login-wrapper {
-    //         height: calc(100vh - 100px); } }
-    @media only screen and (max-width: 767px) {
-        .login-wrapper {
-            display: block;
-            height: auto; }
-            .login-wrapper .login-aside-left,
-            .login-wrapper .login-aside-right {
-                max-width: 100%;
-                flex: 0 0 100%; }
-            .login-wrapper .login-logo {
-                position: relative;
-                margin-bottom: 20px;
-                display: block; }
-            .login-wrapper .social-icons {
-                justify-content: center; }
-                .login-wrapper .social-icons li {
-                    margin-left: 5px;
-                    margin-right: 5px; }
-            .login-wrapper .login-aside-left {
-                text-align: center;
-                width: 100%;
-                display: block; }
-            .login-wrapper .authincation-content {
-                padding: 30px 10px; } }
-        @media only screen and (max-width: 575px) {
-            .login-wrapper .login-aside-left {
-                padding: 50px 30px; }
-                .login-wrapper .login-aside-left .login-description {
-                    padding-bottom: 0; }
-            .login-wrapper h2, .login-wrapper .h2, .login-wrapper .h2 {
-                font-size: 1.5rem; }
-            .login-wrapper h4, .login-wrapper .h4, .login-wrapper .h4 {
-                font-size: 0.8rem; } }
-    .facebook__btn,
-    .twitter__btn,
-    .google__btn,
-    .github__btn {
-        display: block;
-        width: 90%;
-        max-width: 680px;
-        margin: 5px auto;
-        height: 50px;
-        cursor: pointer;
-        font-size: 14px;
-        font-family: 'Montserrat', sans-serif;
-        border-radius: 8px;
-        border: none;
-        line-height: 20px;
-        &.google__btn {
-            background: #DB4437;
-            color: white;
-            box-shadow: 0 15px 30px rgba(#DB4437, .36);
-            transition: .2s linear;
-            .fa {
-                font-size: 20px;
-                // padding: 0 5px 0 0;
-            }
-            &:hover {
-                box-shadow: 0 0 0 rgba(#DB4437, .0);
-            }
-        }
-        &.github__btn {
-            background: #25282d;
-            color: white;
-            box-shadow: 0 15px 30px rgba(#25282d, .36);
-            transition: .2s linear;
-            .fa {
-                font-size: 20px;
-                // padding: 0 5px 0 0;
-            }
-            &:hover {
-                box-shadow: 0 0 0 rgba(#25282d, .0);
-            }
-        }
-        &.twitter__btn {
-            background: #1DA1F2;
-            color: white;
-            box-shadow: 0 15px 30px rgba(#1DA1F2, .36);
-            transition: .2s linear;
-            .fa {
-                font-size: 20px;
-                // padding: 0 5px 0 0;
-            }
-            &:hover {
-                box-shadow: 0 0 0 rgba(#1DA1F2, .0);
-            }
-        }
-        &.facebook__btn {
-            background: #4267B2;
-            color: white;
-            box-shadow: 0 15px 30px rgba(#4267B2, .36);
-            transition: .2s linear;
-            .fa {
-                font-size: 20px;
-                // padding: 0 5px 0 0;
-            }
-            &:hover {
-                box-shadow: 0 0 0 rgba(#4267B2, .0);
-            }
-        }
-    }
+    margin: 10px 0px 10px 0px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 1.5em;
+    font-weight: bold; }
 </style>

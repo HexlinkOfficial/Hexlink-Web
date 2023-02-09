@@ -37,6 +37,11 @@ const router = createRouter({
       component: () => import('@/views/CollectablesView.vue')
     },
     {
+      path: '/activities',
+      name: 'activity view',
+      component: () => import('@/views/ActivityView.vue')
+    },
+    {
       path: '/:pathMatch(.*)*',
       name: 'error404',
       component: Error404

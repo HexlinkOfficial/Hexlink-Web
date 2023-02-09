@@ -2,13 +2,13 @@
   <div class="login-card" :style="{ backgroundImage: `url(${background})` }">
     <div class="card">
       <form @submit="onSubmit">
-        <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem;">
-            <img :src="hexlink" style="width:2.5rem; height: 2.5rem;" />
-        </div>
-        <h2 class="title">Welcome To HexLink</h2>
-        <p class="subtitle">Address-less experience with Hexlink Auth Protocal</p>
         <transition name="fade">
             <div v-if="show" class="step1">
+                <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem;">
+                    <img :src="hexlink" style="width:2.5rem; height: 2.5rem;" />
+                </div>
+                <h2 class="title">Welcome To HexLink</h2>
+                <p class="subtitle">Address-less experience with Hexlink Auth Protocal</p>
                 <div class="social-login">
                     <button size="large" @click="twitter_login" className="twitter-btn">
                         <i class="fa fa-twitter"></i>
@@ -24,13 +24,18 @@
         </transition>
         <transition name="fade">
             <div v-if="!show" class="step2">
+                <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem;">
+                    <img :src="secure" style="width:2.5rem; height: 2.5rem;" />
+                </div>
+                <h2 class="title">Enter Verification Code</h2>
+                <p class="subtitle">Enter code that we have sent to your email <b>elonmusk@tesla.com</b></p>
                 <div class="social-login" style="flex-direction: column;">
                     <div style="display: flex; align-items: center; justify-content: space-between;">
                         <input v-for="(arr, index) in code" :key="index" type="number" pattern="\d*" :id="'input_' + index"
                             maxlength="1" v-model="code[index]" @input="handleInput" @keypress="isNumber"
                             @keydown.delete="handleDelete" @paste="onPaste" />
                     </div>
-                    <button class="cta-btn" v-on:click="show = !show">Send</button>
+                    <button class="cta-btn" v-on:click="show = !show">Verify</button>
                 </div>
             </div>
         </transition>
@@ -46,6 +51,7 @@ import { twitterSocialLogin, signOutFirebase } from '@/services/auth'
 import { useAuthStore } from '@/stores/auth'
 import hexlink from "@/assets/logo/blue-logo.svg";
 import background from "@/assets/background.png";
+import secure from "@/assets/secure.svg";
 
 const store = useAuthStore();
 const router = useRouter();

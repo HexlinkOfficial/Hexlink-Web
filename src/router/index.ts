@@ -9,7 +9,7 @@ const router = createRouter({
     {
       path: '/',
       name: 'home',
-      component: () => import('@/views/AssetView.vue')
+      component: () => import('@/views/TokenView.vue')
     },
     {
       path: '/signin',

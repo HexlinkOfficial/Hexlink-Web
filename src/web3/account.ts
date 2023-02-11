@@ -1,10 +1,11 @@
-import { hexlAccount, hexlContract, nameHash } from "../../functions/common";
+import { hexlAccount, hexlContract, nameHash, getChain } from "../../functions/common";
 import type { Chain } from "../../functions/common";
 import { useAccountStore } from "@/stores/account";
 import { getInfuraProvider } from "./network";
 import { ethers } from "ethers";
 
-const ACCOUNT_VERSION = undefined;
+
+const ACCOUNT_VERSION = undefined; // for test only
 
 export function nameHashWithVersion(provider: string, uid: string) {
     let name = nameHash(provider, uid);

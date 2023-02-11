@@ -166,7 +166,6 @@
 import { ref, onMounted, computed, watch } from "vue";
 import { getRedPacket } from '@/graphql/redpacket';
 import { useRoute } from "vue-router";
-import { callClaimRedPacket } from "@/web3/redpacket";
 import { loadAndSetErc20Token } from '@/web3/tokens';
 import type { BalanceMap } from "@/web3/tokens";
 import { switchNetwork } from "@/web3/network";
@@ -181,7 +180,6 @@ import { useWalletStore } from '@/stores/wallet';
 import { useChainStore } from "@/stores/chain";
 import { hash } from "../../functions/common";
 import type { OnClickOutsideHandler } from '@vueuse/core';
-import { onClickOutside } from '@vueuse/core'
 import { vOnClickOutside } from '@/services/directive';
 import { getBalances } from "@/web3/tokens";
 import { getPriceInfo } from "@/web3/network";
@@ -190,6 +188,7 @@ import { calcGas } from "../../functions/common";
 import { BigNumber } from "bignumber.js";
 import { profilePic } from "@/assets/imageAssets";
 import { ethers } from "ethers";
+import { sendToken } from "@/web3/operation";
 
 const estimatedGasAmount = "250000"; // hardcoded, can optimize later
 const chooseTotalDrop = ref<boolean>(false);
@@ -375,8 +374,22 @@ watch(
 const verifySendTo = () => {
   isInputAddress.value = false;
   if (transaction.value.to.length > 0) {
-    if (validateEmail(transaction.value.to.toString()) || ethers.utils.isAddress(transaction.value.to.toString())) {
-      if (ethers.utils.isAddress(transaction.value.to.toString())) isInputAddress.value = true;
+    if (ethers.utils.isAddress(transaction.value.to.toString())) {
+      isInputAddress.value = true;
+      // sendToken(
+      //   transaction.value.token,
+      //   transaction.value.to,
+      //   transaction.value.balance,
+      //   transaction.value.gasToken,
+      // );
+      return true;
+    } else if (validateEmail(transaction.value.to.toString())) {
+      // sendToken(
+      //   transaction.value.token,
+      //   transaction.value.to,
+      //   transaction.value.balance,
+      //   transaction.value.gasToken,
+      // );
       return true;
     } else {
       console.log("Invalid input. Please input an email.")

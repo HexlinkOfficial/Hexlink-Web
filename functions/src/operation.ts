@@ -21,7 +21,6 @@ import {
 import {accountAddress, getInfuraProvider} from "./account";
 import type {Error, GenAddressSuccess} from "./account";
 import {submit} from "./services/operation";
-import {redPacketAddress} from "../redpacket/src";
 import {insertRequest} from "./graphql/request";
 
 export interface RequestData {
@@ -105,7 +104,7 @@ export async function validateAndBuildUserOp(
   }
 }
 
-export const sendErc20Token = functions.https.onCall(
+export const sendToken = functions.https.onCall(
     async (data, context) => {
       const result = await preprocess(data, context);
       if (result.code !== 200) {

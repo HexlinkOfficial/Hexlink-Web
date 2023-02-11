@@ -37,7 +37,7 @@ exports.claimRedPacket = claimRedPacket;
 exports.createRedPacket = createRedPacket;
 
 import {
-  sendErc20Token,
+  sendToken,
 } from "./operation";
 
-exports.sendErc20Token = sendErc20Token;
+exports.sendToken = sendToken;

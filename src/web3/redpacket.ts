@@ -4,15 +4,13 @@ import { useAuthStore } from "@/stores/auth";
 
 import { genDeployAuthProof } from "@/web3/oracle";
 import { tokenEqual } from "@/web3/utils";
-import { estimateGas, sendTransaction, signMessage } from "@/web3/wallet";
+import { estimateGas, sendTransaction } from "@/web3/wallet";
 
 import type {
     Op,
-    OpInput,
     Chain,
     UserOpRequest,
     DeployRequest,
-    AuthProofInput,
 } from "../../functions/common";
 import {
     hash,
@@ -22,13 +20,9 @@ import {
     getChain,
     hexlAddress,
     hexlInterface,
-    accountContract,
-    encodeValidateAndCall,
-    gasTokenPricePerGwei,
     encodeExecBatch,
     refunder,
     isContract,
-    DEPLOYMENT_GASCOST,
 } from "../../functions/common";
 import type { RedPacketInput } from "../../functions/redpacket";
 import {
@@ -40,6 +34,7 @@ import {
 import { useChainStore } from "@/stores/chain";
 import { useWalletStore } from "@/stores/wallet";
 import { useAccountStore } from "@/stores/account";
+import { buildOpInput, buildUserOpRequest } from "@/web3/operation";
 
 import { getFunctions, httpsCallable } from 'firebase/functions'
 const functions = getFunctions();
@@ -74,23 +69,6 @@ async function simulate(to: string, data: string, value: string) {
         console.log("tx is likely to be reverted");
         console.log(err);
         throw err;
-    }
-}
-
-function buildOpInput(params: {
-    to: string,
-    value?: EthBigNumber,
-    callData?: string | [],
-    callGasLimit?: EthBigNumber,
-}) : OpInput {
-    if (!params.value && !params.callData) {
-        throw new Error("Neither value or data is set");
-    }
-    return {
-        to: params.to,
-        value: params.value || EthBigNumber.from(0),
-        callData: params.callData || [],
-        callGasLimit: params.callGasLimit || EthBigNumber.from(0),
     }
 }
 
@@ -292,48 +270,15 @@ async function buildCreateRedPacketRequest(
     deploy?: DeployRequest,
 }> {
     const hexlAccount = useAccountStore().account!.address;
-    const walletAccount = useWalletStore().account!.address;
     const chain = useChainStore().chain;
 
     let userOps : Op[] = [];
     userOps.push(buildGasSponsorshipOp(hexlAccount, refunder(chain), input));
     userOps = userOps.concat(buildRedPacketOps(chain, input));
-    const txData = encodeExecBatch(userOps.map(op => op.input));
-    const account = accountContract(useChainStore().provider, hexlAccount);
-
-    const deployed = await isContract(useChainStore().provider, hexlAccount);
-    const gas = {
-        receiver: refunder(chain),
-        token: input.gasToken,
-        baseGas: deployed ? "0" : DEPLOYMENT_GASCOST,
-        price: gasTokenPricePerGwei(
-            chain,
-            input.gasToken,
-            input.priceInfo!
-        )
-    };
-    const nonce = deployed ? await account.nonce() : 0;
-    const {data, signature} = await encodeValidateAndCall({
-        nonce,
-        txData,
-        sign: async (msg: string) => await signMessage(walletAccount, msg),
-        gas,
-    });
-    const result = {
-        params: {txData, signature, nonce, gas},
-    } as { params: UserOpRequest, deploy?: DeployRequest };
-
-    if (!deployed) {
-        const { proof } = await genDeployAuthProof(data);
-        const authProof = {
-            authType: hash(proof.authType),
-            identityType: hash(proof.identityType),
-            issuedAt: EthBigNumber.from(proof.issuedAt),
-            signature: proof.signature,
-        } as AuthProofInput;
-        result.deploy = {authProof, owner: walletAccount};
-    }
-    return result;
+    return await buildUserOpRequest(
+        userOps.map(op => op.input),
+        input.gasToken
+    );
 }
 
 export async function createNewRedPacket(

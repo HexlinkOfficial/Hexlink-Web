@@ -7,98 +7,6 @@
           fill="#076AE0" />
       </svg>
     </router-link>
-    <!-- <div style="margin: 16px; margin-top: 5rem;">
-      <div class="send-token">
-        <p v-if="hasBalanceWarning" class="balance-warning-mobile"><i class="icofont-warning-alt"
-            style="margin-right: 0.25rem;"></i>Insufficient balance</p>
-        <div class="total-amount">
-          <div class="box">
-            <p class="total-amount-text">Total Amount</p>
-            <div style="display: flex; width: 100%;">
-              <input v-model="transaction.balanceInput" :style="hasBalanceWarning ? 'color: #FE646F;' : ''"
-                id="red-packet-amount" class="amount-input" autocomplete="off" placeholder="0.0" required="true" type="number"
-                autocorrect="off" title="Token Amount" inputmode="decimal" min="0" minlength="1" maxlength="79"
-                pattern="^[0-9]*[.,]?[0-9]*$" spellcheck="false">
-            </div>
-            <div class="input-info-show">
-              <p class="token-available-balance">
-                Available Balance:
-                <span class="balance-amount">{{ redPacketTokenBalance.substring(0,6) }}</span>
-              </p>
-              <div class="total-choose-token">
-                <div class="token-select">
-                  <div class="max-amount-button">
-                    <span class="button-text" @click="transaction.balanceInput = redPacketTokenBalance">MAX</span>
-                    <span class="button-outline"></span>
-                  </div>
-                </div>
-                <div class="token-select">
-                  <div class="mode-dropdown" :class="chooseTotalDrop && 'active'"
-                    @click.stop="chooseTotalDrop = !chooseTotalDrop;" v-on-click-outside.bubble="chooseTotalHandle">
-                    <div class="token-icon">
-                      <img :src="token.logoURI" />
-                    </div>
-                    <div class="mode-text2">{{ token.symbol }}</div>
-                    <input class="mode-input" type="text" placeholder="select" readonly>
-                    <div class="mode-options">
-                      <div class="mode-option" v-for="(token, index) of tokens" :key="index"
-                        @click="tokenChoose('token', token)">
-                        <div class="token-icon">
-                          <img :src="token.logoURI" />
-                        </div>
-                        <div style="display: flex; flex-direction: column; align-items: flex-start;">
-                          <b>{{ token.symbol }}</b>
-                          <div style="margin-right:0.5rem;">balance {{ tokenBalance(token.address) }}</div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="gas-station">
-        <div class="gas-estimation">
-          <p>
-            <img style="width: 20px; height: 20px;" src="https://i.postimg.cc/RhXfgJR1/gas-pump.png" />
-            Estimated Service Fee:
-            <a-tooltip placement="top">
-              <template #title>
-                <span>The real service fee may differ per network conditions</span>
-              </template>
-              <b>{{ totalServiceFee.substring(0,6) }}</b>
-            </a-tooltip>
-          </p>
-          <div class="total-choose-token">
-            <div class="token-select">
-              <div class="mode-dropdown" :class="chooseGasDrop && 'active'" @click.stop="chooseGasDrop = !chooseGasDrop;"
-                v-on-click-outside.bubble="chooseGasHandle">
-                <div class="token-icon">
-                  <img :src="gasToken.logoURI" />
-                </div>
-                <div class="mode-text2">{{ gasToken.symbol }}</div>
-                <input class="mode-input" type="text" placeholder="select" readonly>
-                <div class="mode-options">
-                  <div class="mode-option" v-for="(token, index) of tokens" :key="index" @click="tokenChoose('gas', token)">
-                    <div class="token-icon">
-                      <img :src="token.logoURI" />
-                    </div>
-                    <div style="display: flex; flex-direction: column; align-items: flex-start;">
-                      <b>{{ token.symbol }}</b>
-                      <div style="margin-right:0.5rem;">
-                        Balance {{ tokenBalance(token.address) }}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div> -->
     <form
       style="background-color: white; position: static; border-radius: 15px; overflow: visible; width: 100%; height: 100%; display: flex; flex-direction: column; padding: 1rem 0 1rem 0; justify-content: space-between;"
       @submit.prevent="onSubmit"
@@ -162,6 +70,8 @@
               inputmode="decimal" min="0" minlength="1" step="any" maxlength="79" pattern="^[0-9]*[.,]?[0-9]*$" spellcheck="false" required
             >
           </div>
+          <p v-if="hasBalanceWarning" class="balance-warning-mobile"><i class="icofont-warning-alt"
+              style="margin-right: 0.25rem;"></i>Insufficient balance</p>
           <div style="display: flex; align-items: center; justify-content: center; margin-top: 10px;">
             <div class="token-select">
               <div class="mode-dropdown" :class="chooseTotalDrop && 'active'" @click.stop="chooseTotalDrop = !chooseTotalDrop;"
@@ -224,25 +134,6 @@
               </div>
             </div>
           </div>
-          <!-- <div style="display: flex; margin: 0px; justify-content: center; margin-top: 20px;">
-                  <p style="background-color: #f2f6fa; padding: 10px 20px; border-radius: 15px; margin-bottom: 0rem;">
-                    <span>Total Send:</span>
-                    <span style="margin-left: 0.5rem;">
-                      <div>
-                        <b>{{ totalServiceFee.substring(0,6) }}</b>
-                        <div class="token-icon">
-                          <img :src="token.logoURI" />
-                        </div>
-                      </div>
-                      <div>
-                        <b>{{ totalServiceFee.substring(0,6) }}</b>
-                        <div class="token-icon">
-                          <img :src="token.logoURI" />
-                        </div>
-                      </div>
-                    </span>
-                  </p>
-                </div> -->
         </div>
       </div>
       <div style="display: flex; justify-content: center;">
@@ -361,7 +252,7 @@ const tokenBalance = (token: string) => {
   return walletAccountBalance(token);
 };
 
-const redPacketTokenBalance = computed(
+const transactionTokenBalance = computed(
   () => tokenBalance(transaction.value.token)
 );
 
@@ -455,7 +346,7 @@ watch([
   () => transaction.value.gasToken
 ], refreshGas);
 watch(
-  [() => transaction.value.balanceInput, redPacketTokenBalance],
+  [() => transaction.value.balanceInput, transactionTokenBalance],
   ([newBalanceInput, newTokenBalance], _old) => {
     if (Number(newBalanceInput) > Number(newTokenBalance)) {
       hasBalanceWarning.value = true;
@@ -552,10 +443,6 @@ input::-webkit-inner-spin-button {
     margin-bottom: 0rem;
     margin-right: 1rem;
     font-weight: 500; } }
-.gas-station {
-  display: flex;
-  margin: 0px;
-  justify-content: flex-end; }
 .mode-options {
   display: flex;
   align-items: center;
@@ -641,58 +528,6 @@ input::-webkit-inner-spin-button {
 .mode-dropdown.active .mode-options {
   display: block;
   z-index: 60; }
-.max-amount-button {
-  position: relative;
-  margin: 0px;
-  appearance: none;
-  max-width: 100%;
-  background-color: rgba(28, 104, 243, 0.1);
-  color: rgb(28, 104, 243);
-  border-radius: 4px;
-  font-size: 14px;
-  line-height: 18px;
-  padding: 3px 12px;
-  cursor: pointer;
-  display: inline-flex;
-  -webkit-box-align: center;
-  align-items: center;
-  -webkit-box-pack: center;
-  justify-content: center;
-  height: 24px;
-  white-space: nowrap;
-  transition: background-color 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms, box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
-  outline: 0px;
-  text-decoration: none;
-  border: 0px;
-  vertical-align: middle;
-  box-sizing: border-box;
-  user-select: none;
-  -webkit-tap-highlight-color: transparent;
-  .button-text {
-    padding: 0px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    color: rgb(28, 104, 243);
-    font-size: 14px;
-    line-height: 18px;
-    cursor: pointer;
-    user-select: none;
-    -webkit-tap-highlight-color: transparent;
-    font-weight: 400; }
-  .button-outline {
-    overflow: hidden;
-    pointer-events: none;
-    position: absolute;
-    z-index: 0;
-    inset: 0px;
-    color: rgb(28, 104, 243);
-    font-size: 14px;
-    line-height: 18px;
-    cursor: pointer;
-    white-space: nowrap;
-    user-select: none;
-    -webkit-tap-highlight-color: transparent; } }
 .token-select {
   position: relative;
   appearance: none;
@@ -761,94 +596,14 @@ input::-webkit-inner-spin-button {
   margin-left: 4px;
   margin-left: 0.5rem;
   margin-right: 0.5rem; }
-.token-available-balance {
-  display: flex;
-  justify-content: flex-end;
-  width: 175px;
-  font-size: 13px;
-  line-height: 18px;
-  color: rgb(118, 127, 141);
-  white-space: nowrap;
-  font-weight: 400;
-  margin: 0px;
-  display: flex;
-  align-items: center; }
-.input-info-show {
-  display: flex;
-  height: 100%;
-  flex-direction: column;
-  align-items: flex-end;
-  row-gap: 4px;
-  font-weight: 400;
-  font-size: 14px;
-  line-height: 1.4375em;
-  color: rgb(7, 16, 27);
-  cursor: text; }
 .balance-warning-mobile {
   display: flex;
   align-items: center;
+  justify-content: center;
   font-weight: 700;
-  padding-top: 11px;
   height: 18px;
-  margin-bottom: -0.5rem;
   color: #FE646F;
   width: auto; }
-.amount-input {
-  flex: 2 1 0%;
-  font-size: 18px;
-  font-weight: 700;
-  padding-top: 22px !important;
-  padding-bottom: 0px !important;
-  padding-left: 0px !important;
-  padding: 11px 12px;
-  height: 18px;
-  border: 0px;
-  box-sizing: content-box;
-  background: none;
-  margin: 0px;
-  -webkit-tap-highlight-color: transparent;
-  display: block;
-  min-width: 0px;
-  width: 100%; }
-.total-amount-text {
-  font-size: 13px;
-  font-weight: 400;
-  line-height: 18px;
-  color: rgb(118, 127, 141);
-  white-space: nowrap;
-  margin-bottom: 0rem;
-  position: absolute;
-  top: 10px;
-  left: 12px; }
-.box {
-  position: relative;
-  padding: 10px 12px;
-  padding-right: 12px;
-  padding-left: 12px;
-  font-weight: 400;
-  line-height: 1.4375em;
-  color: rgb(7, 16, 27);
-  box-sizing: border-box;
-  cursor: text;
-  display: inline-flex;
-  -webkit-box-align: center;
-  align-items: center;
-  width: 100%;
-  border-radius: 8px;
-  background-color: rgb(242, 246, 250);
-  font-size: 14px;
-  overflow: unset !important; }
-.total-amount {
-  display: flex;
-  gap: 16px;
-  margin: 16px;
-  margin-left: 0rem;
-  margin-right: 0rem; }
-.send-token {
-  visibility: visible;
-  height: auto;
-  display: block;
-  padding: 0px; }
 .claim-card {
   background-color: #fff;
   height: 400px;

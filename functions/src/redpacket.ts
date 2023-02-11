@@ -4,13 +4,8 @@ import * as functions from "firebase-functions";
 import {getRedPacket} from "./graphql/redpacket";
 import type {RedPacket} from "./graphql/redpacket";
 import {signWithKmsKey} from "./kms";
-import {ethers, BigNumber as EthBigNumber} from "ethers";
-import {
-  accountAddress,
-  getInfuraProvider,
-  toEthSignedMessageHash,
-} from "./account";
-import type {Error, GenAddressSuccess} from "./account";
+import {ethers} from "ethers";
+import {toEthSignedMessageHash} from "./account";
 import {KMS_KEY_TYPE, kmsConfig} from "./config";
 
 import {
@@ -18,22 +13,11 @@ import {
   redPacketInterface,
   redpacketId,
 } from "../redpacket";
-import {Firebase} from "./firebase";
-import {
-  UserOpRequest,
-  accountInterface,
-  getChain,
-  PriceConfigs,
-  gasTokenPricePerGwei,
-  refunder,
-  isContract,
-  hexlInterface,
-  hexlAddress,
-  DEPLOYMENT_GASCOST,
-} from "../common";
-import type {Chain, GasObject, OpInput, DeployRequest} from "../common";
+import {refunder} from "../common";
+import type {Chain, OpInput} from "../common";
 import {submit} from "./services/operation";
 import {insertRequest} from "./graphql/request";
+import {RequestData, preprocess, validateAndBuildUserOp} from "./operation";
 
 const secrets = functions.config().doppler || {};
 
@@ -90,19 +74,11 @@ async function buildClaimOp(
 
 export const claimRedPacket = functions.https.onCall(
     async (data, context) => {
-      Firebase.getInstance();
-      const uid = context.auth?.uid;
-      if (!uid) {
-        return {code: 401, message: "Unauthorized"};
+      const result = await preprocess(data, context);
+      if (result.code !== 200) {
+        return result;
       }
-
-      const chain = getChain(data.chain);
-      let account =
-        await accountAddress(chain, uid, data.version);
-      if (account.code !== 200) {
-        return {code: 400, message: "invalid account"};
-      }
-      account = account as GenAddressSuccess;
+      const {uid, account, chain} = result as RequestData;
 
       const redPacket = await getRedPacket(data.redPacketId);
       if (!redPacket) {
@@ -128,7 +104,7 @@ export const claimRedPacket = functions.https.onCall(
             },
           }]
       );
-      const result = await submit(chain, {
+      const resp = await submit(chain, {
         type: "claim_redpacket",
         input,
         account: account.address,
@@ -136,83 +112,17 @@ export const claimRedPacket = functions.https.onCall(
         actions: [action],
         requestId: reqId,
       });
-      return {code: 200, id: result.id};
+      return {code: 200, id: resp.id};
     }
 );
 
-function validateGas(chain: Chain, gas: GasObject, deployed: boolean) {
-  if (gas.receiver !== refunder(chain)) {
-    throw new Error("invalid gas refunder");
-  }
-  const price = gasTokenPricePerGwei(
-      chain, gas.token, PriceConfigs[chain.name]
-  );
-  if (!deployed && EthBigNumber.from(gas.baseGas).lt(DEPLOYMENT_GASCOST)) {
-    throw new Error("insufficient base gas for deployment");
-  }
-  if (EthBigNumber.from(gas.price).lt(price)) {
-    throw new Error("invalid gas price");
-  }
-}
-
-async function validateAndBuildUserOp(
-    chain: Chain,
-    account: GenAddressSuccess,
-    request: {
-      redpacket: UserOpRequest,
-      deploy?: DeployRequest,
-    },
-) : Promise<OpInput> {
-  const req = request.redpacket;
-  const data = accountInterface.encodeFunctionData(
-      "validateAndCallWithGasRefund",
-      [req.txData, req.nonce, req.signature, req.gas]
-  );
-  const provider = getInfuraProvider(chain);
-  const deployed = await isContract(provider, account.address);
-  validateGas(chain, req.gas, deployed);
-  if (deployed) {
-    return {
-      to: account.address,
-      value: "0x0",
-      callData: data,
-      callGasLimit: "0x0",
-    };
-  } else {
-    if (!request.deploy) {
-      throw new Error("invalid param, missing deploy request params");
-    }
-    const deployData = hexlInterface.encodeFunctionData(
-        "deploy", [
-          account.nameHash,
-          accountInterface.encodeFunctionData(
-              "init", [request.deploy.owner, data]
-          ),
-          request.deploy.authProof,
-        ]
-    );
-    return {
-      to: hexlAddress(chain),
-      value: "0x0",
-      callData: deployData,
-      callGasLimit: "0x0",
-    };
-  }
-}
-
 export const createRedPacket = functions.https.onCall(
     async (data, context) => {
-      Firebase.getInstance();
-      const uid = context.auth?.uid;
-      if (!uid) {
-        return {code: 401, message: "Unauthorized"};
+      const result = await preprocess(data, context);
+      if (result.code !== 200) {
+        return result;
       }
-      const chain = getChain(data.chain);
-      let account = await accountAddress(chain, uid, data.version);
-      if (account.code !== 200) {
-        return {code: 400, message: (account as Error).message};
-      }
-      account = account as GenAddressSuccess;
+      const {uid, account, chain} = result as RequestData;
 
       const rpId = redpacketId(chain, account.address, data.redPacket);
       const action = {
@@ -249,7 +159,7 @@ export const createRedPacket = functions.https.onCall(
             chain, account, data.request
         );
       }
-      const result = await submit(chain, postData);
-      return {code: 200, id: result.id};
+      const resp = await submit(chain, postData);
+      return {code: 200, id: resp.id};
     }
 );

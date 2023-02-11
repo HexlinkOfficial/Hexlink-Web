@@ -288,7 +288,7 @@ async function processTxAndSave(
 async function buildCreateRedPacketRequest(
     input: RedPacketInput
 ): Promise<{
-    redpacket: UserOpRequest,
+    params: UserOpRequest,
     deploy?: DeployRequest,
 }> {
     const hexlAccount = useAccountStore().account!.address;
@@ -320,8 +320,8 @@ async function buildCreateRedPacketRequest(
         gas,
     });
     const result = {
-        redpacket: {txData, signature, nonce, gas},
-    } as { redpacket: UserOpRequest, deploy?: DeployRequest };
+        params: {txData, signature, nonce, gas},
+    } as { params: UserOpRequest, deploy?: DeployRequest };
 
     if (!deployed) {
         const { proof } = await genDeployAuthProof(data);
@@ -374,7 +374,7 @@ export async function callCreateRedPacket(
     redPacket: RedPacketInput,
     txHash?: string,
     request?: {
-        redpacket: UserOpRequest,
+        params: UserOpRequest,
         deploy?: DeployRequest
     }
 ) : Promise<number> {

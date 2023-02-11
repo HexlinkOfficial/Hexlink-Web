@@ -228,21 +228,6 @@ const transaction = ref<tokenTransaction>({
   estimatedGas: "0",
 })
 
-onMounted(async () => {
-  redPacket.value = await getRedPacket(useRoute().query.claim!.toString());
-  if (redPacket.value) {
-    const network = getChain(redPacket.value.chain!);
-    await switchNetwork(network);
-    const metadata = await loadAndSetErc20Token(
-      redPacket.value!.metadata.token
-    );
-    redPacketToken.value = metadata.symbol;
-    redPacketTokenIcon.value = metadata.logoURI || "";
-  } else {
-    claimStatus.value = "error";
-  }
-});
-
 const token = computed(() => tokenStore.token(transaction.value.token));
 const gasToken = computed(() => tokenStore.token(transaction.value.gasToken));
 

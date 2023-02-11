@@ -82,52 +82,52 @@
         </div>
       </div>
     </div>
-    <div class="token-list gas-station">
+    <div class="gas-station">
       <div class="gas-estimation">
-          <p>
-            <img style="width: 20px; height: 20px;" src="https://i.postimg.cc/RhXfgJR1/gas-pump.png"/>
-            Estimated Service Fee: 
-            <a-tooltip placement="top">
-              <template #title>
-                <span>The real service fee may differ per network conditions</span>
-              </template>
-              <b>{{ totalServiceFee.substring(0,6) }}</b>
-            </a-tooltip>
-          </p>
-          <div class="total-choose-token">
-            <div class="token-select">
-              <div class="mode-dropdown" :class="chooseGasDrop && 'active'" @click.stop="chooseGasDrop = !chooseGasDrop;" v-on-click-outside.bubble="chooseGasHandle">
-                <div class="token-icon">
-                  <img :src="gasToken.logoURI" />
-                </div>
-                <div class="mode-text2">{{ gasToken.symbol }}</div>
-                <input class="mode-input" type="text" placeholder="select" readonly>
-                <div class="mode-options">
-                  <div class="mode-option" v-for="(token, index) of tokens" :key="index"
-                    @click="tokenChoose('gas', token)">
-                    <div class="token-icon">
-                      <img :src="token.logoURI" />
-                    </div>
-                    <div style="display: flex; flex-direction: column; align-items: flex-start;">
-                      <b>{{ token.symbol }}</b>
-                      <div style="margin-right:0.5rem;">
-                        Balance {{ tokenBalance(token.address) }}
-                      </div>
+        <p>
+          <img style="width: 20px; height: 20px;" src="https://i.postimg.cc/RhXfgJR1/gas-pump.png"/>
+          Estimated Service Fee: 
+          <a-tooltip placement="top">
+            <template #title>
+              <span>The real service fee may differ per network conditions</span>
+            </template>
+            <b>{{ totalServiceFee.substring(0,6) }}</b>
+          </a-tooltip>
+        </p>
+        <div class="total-choose-token">
+          <div class="token-select">
+            <div class="mode-dropdown" :class="chooseGasDrop && 'active'" @click.stop="chooseGasDrop = !chooseGasDrop;" v-on-click-outside.bubble="chooseGasHandle">
+              <div class="token-icon">
+                <img :src="gasToken.logoURI" />
+              </div>
+              <div class="mode-text2">{{ gasToken.symbol }}</div>
+              <input class="mode-input" type="text" placeholder="select" readonly>
+              <div class="mode-options">
+                <div class="mode-option" v-for="(token, index) of tokens" :key="index"
+                  @click="tokenChoose('gas', token)">
+                  <div class="token-icon">
+                    <img :src="token.logoURI" />
+                  </div>
+                  <div style="display: flex; flex-direction: column; align-items: flex-start;">
+                    <b>{{ token.symbol }}</b>
+                    <div style="margin-right:0.5rem;">
+                      Balance {{ tokenBalance(token.address) }}
                     </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-          <div class="tooltip fade" data-title="Service gas fee is determined by the market, not Hexlink">
-            <svg style="margin-left: 1rem; width: 16px;" width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path
-                d="M11 21C16.5228 21 21 16.5228 21 11C21 5.47715 16.5228 1 11 1C5.47715 1 1 5.47715 1 11C1 16.5228 5.47715 21 11 21Z"
-                stroke="#898989" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-              <path d="M11 15V11" stroke="#898989" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-              <path d="M11 8V7" stroke="#898989" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-            </svg>
-          </div>
+        </div>
+        <div class="tooltip fade" data-title="Service gas fee is determined by the market, not Hexlink">
+          <svg style="margin-left: 1rem; width: 16px;" width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path
+              d="M11 21C16.5228 21 21 16.5228 21 11C21 5.47715 16.5228 1 11 1C5.47715 1 1 5.47715 1 11C1 16.5228 5.47715 21 11 21Z"
+              stroke="#898989" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M11 15V11" stroke="#898989" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M11 8V7" stroke="#898989" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </div>
       </div>
     </div>
     <div class="choose-account">
@@ -180,7 +180,6 @@ import { message } from 'ant-design-vue';
 import { useTokenStore } from "@/stores/token";
 import RedPacketAccount from "@/components/RedPacketAccount.vue";
 import { getPriceInfo } from "@/web3/network";
-
 import type { Token } from "../../functions/common";
 import { hash, tokenAmount } from "../../functions/common";
 import type { RedPacketInput } from "../../functions/redpacket";

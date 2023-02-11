@@ -190,6 +190,7 @@ onMounted(async () => {
   width: 100%;
   height: 100%;
   border-radius: 14px;
+  overflow: hidden;
   transition: transform .2s cubic-bezier(.5, 1, .89, 1);
   box-shadow: 0 0 15px 1px rgb(0 0 0 / 10%); }
 .box {

@@ -7,7 +7,6 @@ import {
     type AuthProofInput,
     type OpInput,
     type Op,
-    type Token,
     type Chain,
     erc20Interface,
     encodeExecBatch,
@@ -20,7 +19,7 @@ import {
     hash,
     isNativeCoin,
     nameHash,
-} from "functions/common/";
+} from "../../functions/common/";
 import { genDeployAuthProof } from "./oracle";
 import { signMessage } from "./wallet";
 import { useWalletStore } from "@/stores/wallet";

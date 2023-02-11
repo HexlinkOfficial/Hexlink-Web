@@ -376,20 +376,8 @@ const verifySendTo = () => {
   if (transaction.value.to.length > 0) {
     if (ethers.utils.isAddress(transaction.value.to.toString())) {
       isInputAddress.value = true;
-      // sendToken(
-      //   transaction.value.token,
-      //   transaction.value.to,
-      //   transaction.value.balance,
-      //   transaction.value.gasToken,
-      // );
       return true;
     } else if (validateEmail(transaction.value.to.toString())) {
-      // sendToken(
-      //   transaction.value.token,
-      //   transaction.value.to,
-      //   transaction.value.balance,
-      //   transaction.value.gasToken,
-      // );
       return true;
     } else {
       console.log("Invalid input. Please input an email.")
@@ -402,6 +390,12 @@ const verifySendTo = () => {
 };
 
 const onSubmit = (e: Event) => {
+  // sendToken(
+  //   transaction.value.token,
+  //   transaction.value.to,
+  //   transaction.value.balance,
+  //   transaction.value.gasToken,
+  // );
   console.log(e);
 }
 

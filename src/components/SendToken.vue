@@ -100,11 +100,13 @@
       </div>
     </div> -->
     <form
-      style="background-color: white; position: static; border-radius: 15px; overflow: visible; width: 100%; height: 100%; display: flex; flex-direction: column; padding: 1rem 0 1rem 0;">
-      <!-- <div style="display: block; background-color: white; padding: 25px 0px calc(5%);">
+      style="background-color: white; position: static; border-radius: 15px; overflow: visible; width: 100%; height: 100%; display: flex; flex-direction: column; padding: 1rem 0 1rem 0; justify-content: space-between;"
+      @submit.prevent="onSubmit"
+    >
+      <div v-if="show" style="display: block; background-color: white; padding: 25px 0px calc(5%);">
         <div style="margin: 0px auto; display: block;">
           <h2
-            style="color: #0c0c0d; font-size: 1.75rem; line-height: 2.25rem; font-weight: normal; margin-top: 0px; margin-left: 20px;">
+            style="color: #0c0c0d; font-size: 1.75rem; line-height: 2.25rem; font-weight: 500; margin-top: 0px; margin-left: 20px;">
             Send Money</h2>
           <div style="margin-top: 30px;">
             <div style="position: relative;">
@@ -119,108 +121,101 @@
                   </svg>
                 </span>
                 <input
-                  style="border-color: #909191; box-shadow: none; border-radius: 4rem; padding-left: 3.6875rem; padding-right: 3.6875rem; padding: 10px 1rem 10px 2.5rem; font-size: 1.125rem; line-height: 1.5rem; font-weight: normal; text-overflow: ellipsis; display: block; box-sizing: border-box; width: 100%; border: #909697 solid 0.0625rem; background-color: #ffffff; margin: 0; outline: none; position: relative; -webkit-appearance: none;"
-                  name="autocomplete-input" id="fn-sendRecipient" aria-invalid="false"
-                  placeholder="Name, @username, email, or mobile" role="combobox" aria-autocomplete="both"
-                  aria-expanded="false" autocomplete="off" autocapitalize="none" autocorrect="off" type="text"
-                  data-nemo="recipient" value="">
-                <button
-                  style="top: 2px; right: 15px; width: 3rem; height: 3rem; display: flex; justify-content: center; align-items: center; left: auto; position: absolute; color: #515354; background: rgba(0, 0, 0, 0); cursor: pointer; border-radius: 50%; padding: 0.75rem 0.75rem 0.75rem 0.75rem; border: none;"
-                  type="button">
-                  <span aria-hidden="true">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" width="1em"
-                      height="1em">
-                      <path fill-rule="evenodd"
-                        d="M6.709 6.707a1 1 0 0 1 1.414 0l9.9 9.9a1 1 0 0 1-1.415 1.414l-9.9-9.9a1 1 0 0 1 0-1.414z"
-                        clip-rule="evenodd"></path>
-                      <path fill-rule="evenodd"
-                        d="M18.021 6.707a1 1 0 0 1 0 1.414l-9.9 9.9a1 1 0 0 1-1.413-1.415l9.9-9.899a1 1 0 0 1 1.413 0z"
-                        clip-rule="evenodd"></path>
-                    </svg>
-                  </span>
-                </button>
+                  class="send-people"
+                  type="text"
+                  v-model="transaction.to"
+                  placeholder="email or wallet address"
+                  aria-expanded="false" autocomplete="off" autocorrect="off"
+                  oninvalid="try{setCustomValidity(verifySendTo() ? '' : 'your custom message')}" 
+                  required
+                >
               </div>
             </div>
           </div>
         </div>
       </div>
-      <div style="display: flex; justify-content: center;">
-        <button
-          style="background-color: rgb(7, 106, 224); color: white; padding: 10px; margin-top: 10px; margin-bottom: 30px; width: 80%; border-radius: 50px; border: none;">Continue</button>
-      </div> -->
-      <div style="text-align: center; background: white; padding: 35px 20px 5px;">
-        <div style="display: flex; text-align: left; -webkit-box-align: center; align-items: center; -webkit-box-pack: center; justify-content: center;">
-          <div class="profile-wrapper"
-            style="margin-right: 1rem; line-height: 4rem; position: relative; display: flex; justify-content: center; align-items: center;">
-            <img style="border-radius: 50px; max-width: 40px;" :src="profilePic[Math.floor(Math.random() * profilePic.length)]"
-              :size="64" referrerpolicy="no-referrer" rel="preload" />
-          </div>
-          <div class="name" style="display: flex; position: relative; word-break: break-word; -webkit-box-orient: vertical; -webkit-box-direction: normal; flex-direction: column;">
-            <div style="color: #0c0c0d; font-size: 1.2rem; font-weight: 500;">peterchen.eth@gmail.com</div>
-          </div>
-        </div>
-      </div>
-      <div style="display: block;">
-        <div class="input-wrapper" style="display: flex; justify-content: center;">
-          <input v-model="transaction.balanceInput" :style="hasBalanceWarning ? 'color: #FE646F;' : ''" id="red-packet-amount" autocomplete="off" placeholder="0.00" required="true" type="number" autocorrect="off"
-            title="Token Amount" inputmode="decimal" min="0" minlength="1" maxlength="79" pattern="^[0-9]*[.,]?[0-9]*$"
-            spellcheck="false"
-            style="width: auto; font-size: 40px; font-weight: 700; border: 0px; box-sizing: content-box; background: none; -webkit-tap-highlight-color: transparent; display: block; min-width: 0px;"
-          >
-        </div>
-        <div style="display: flex; align-items: center; justify-content: center; margin-top: 10px;">
-          <div class="token-select">
-            <div class="mode-dropdown" :class="chooseTotalDrop && 'active'" @click.stop="chooseTotalDrop = !chooseTotalDrop;"
-              v-on-click-outside.bubble="chooseTotalHandle">
-              <div class="token-icon">
-                <img :src="token.logoURI" />
+      <div v-if="!show">
+        <div style="text-align: center; background: white; padding: 35px 20px 5px;">
+          <div
+            style="display: flex; text-align: left; -webkit-box-align: center; align-items: center; -webkit-box-pack: center; justify-content: center;">
+            <div class="profile-wrapper"
+              style="margin-right: 1rem; line-height: 4rem; position: relative; display: flex; justify-content: center; align-items: center;">
+              <img style="border-radius: 50px; max-width: 40px;"
+                :src="profilePic[Math.floor(Math.random() * profilePic.length)]" :size="64" referrerpolicy="no-referrer"
+                rel="preload" />
+            </div>
+            <div class="name"
+              style="display: flex; position: relative; word-break: break-word; -webkit-box-orient: vertical; -webkit-box-direction: normal; flex-direction: column;">
+              <div style="color: #0c0c0d; font-size: 1.1rem; font-weight: 500;">
+                <span v-if="!isInputAddress">{{ transaction.to }}</span>
+                <span v-if="isInputAddress">{{ transaction.to.toString().substring(0,21).toLowerCase() }}<br>{{ transaction.to.toString().substring(21,).toLowerCase() }}</span>
               </div>
-              <div class="mode-text2">{{ token.symbol }}</div>
-              <input class="mode-input" type="text" placeholder="select" readonly>
-              <div class="mode-options" style="right: -48px;">
-                <div class="mode-option" v-for="(token, index) of tokens" :key="index" @click="tokenChoose('token', token)">
-                  <div class="token-icon">
-                    <img :src="token.logoURI" />
-                  </div>
-                  <div style="display: flex; flex-direction: column; align-items: flex-start;">
-                    <b>{{ token.symbol }}</b>
-                    <div style="margin-right:0.5rem;">balance {{ tokenBalance(token.address) }}</div>
+            </div>
+          </div>
+        </div>
+        <div style="display: block;">
+          <div class="input-wrapper" style="display: flex; justify-content: center;">
+            <input 
+              class="send-amount"
+              v-model="transaction.balanceInput" :style="hasBalanceWarning ? 'color: #FE646F;' : ''" id="red-packet-amount"
+              autocomplete="off" placeholder="0.00" type="number" autocorrect="off" title="Token Amount"
+              inputmode="decimal" min="0" minlength="1" step="any" maxlength="79" pattern="^[0-9]*[.,]?[0-9]*$" spellcheck="false" required
+            >
+          </div>
+          <div style="display: flex; align-items: center; justify-content: center; margin-top: 10px;">
+            <div class="token-select">
+              <div class="mode-dropdown" :class="chooseTotalDrop && 'active'" @click.stop="chooseTotalDrop = !chooseTotalDrop;"
+                v-on-click-outside.bubble="chooseTotalHandle">
+                <div class="token-icon">
+                  <img :src="token.logoURI" />
+                </div>
+                <div class="mode-text2">{{ token.symbol }}</div>
+                <input class="mode-input" type="text" placeholder="select" readonly>
+                <div class="mode-options" style="right: -48px;">
+                  <div class="mode-option" v-for="(token, index) of tokens" :key="index" @click="tokenChoose('token', token)">
+                    <div class="token-icon">
+                      <img :src="token.logoURI" />
+                    </div>
+                    <div style="display: flex; flex-direction: column; align-items: flex-start;">
+                      <b>{{ token.symbol }}</b>
+                      <div style="margin-right:0.5rem;">balance {{ tokenBalance(token.address) }}</div>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-        <div style="display: flex; margin: 0px; justify-content: center; margin-top: 20px;">
-          <div class="gas-estimation" style="padding: 0 0.5rem 0 0.5rem;">
-            <p>
-              <img style="width: 20px; height: 20px;" src="https://i.postimg.cc/RhXfgJR1/gas-pump.png" />
-              Estimated Fee:
-              <a-tooltip placement="top">
-                <template #title>
-                  <span>The real service fee may differ per network conditions</span>
-                </template>
-                <b>{{ totalServiceFee.substring(0,6) }}</b>
-              </a-tooltip>
-            </p>
-            <div class="total-choose-token">
-              <div class="token-select">
-                <div class="mode-dropdown" :class="chooseGasDrop && 'active'" @click.stop="chooseGasDrop = !chooseGasDrop;"
-                  v-on-click-outside.bubble="chooseGasHandle">
-                  <div class="token-icon">
-                    <img :src="gasToken.logoURI" />
-                  </div>
-                  <div class="mode-text2">{{ gasToken.symbol }}</div>
-                  <input class="mode-input" type="text" placeholder="select" readonly>
-                  <div class="mode-options">
-                    <div class="mode-option" v-for="(token, index) of tokens" :key="index" @click="tokenChoose('gas', token)">
-                      <div class="token-icon">
-                        <img :src="token.logoURI" />
-                      </div>
-                      <div style="display: flex; flex-direction: column; align-items: flex-start;">
-                        <b>{{ token.symbol }}</b>
-                        <div style="margin-right:0.5rem;">
-                          Balance {{ tokenBalance(token.address) }}
+          <div style="display: flex; margin: 0px; justify-content: center; margin-top: 20px;">
+            <div class="gas-estimation" style="padding: 0 0.5rem 0 0.5rem;">
+              <p>
+                <img style="width: 20px; height: 20px;" src="https://i.postimg.cc/RhXfgJR1/gas-pump.png" />
+                Estimated Fee:
+                <a-tooltip placement="top">
+                  <template #title>
+                    <span>The real service fee may differ per network conditions</span>
+                  </template>
+                  <b>{{ totalServiceFee.substring(0,6) }}</b>
+                </a-tooltip>
+              </p>
+              <div class="total-choose-token">
+                <div class="token-select">
+                  <div class="mode-dropdown" :class="chooseGasDrop && 'active'" @click.stop="chooseGasDrop = !chooseGasDrop;"
+                    v-on-click-outside.bubble="chooseGasHandle">
+                    <div class="token-icon">
+                      <img :src="gasToken.logoURI" />
+                    </div>
+                    <div class="mode-text2">{{ gasToken.symbol }}</div>
+                    <input class="mode-input" type="text" placeholder="select" readonly>
+                    <div class="mode-options">
+                      <div class="mode-option" v-for="(token, index) of tokens" :key="index" @click="tokenChoose('gas', token)">
+                        <div class="token-icon">
+                          <img :src="token.logoURI" />
+                        </div>
+                        <div style="display: flex; flex-direction: column; align-items: flex-start;">
+                          <b>{{ token.symbol }}</b>
+                          <div style="margin-right:0.5rem;">
+                            Balance {{ tokenBalance(token.address) }}
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -229,7 +224,32 @@
               </div>
             </div>
           </div>
+          <!-- <div style="display: flex; margin: 0px; justify-content: center; margin-top: 20px;">
+                  <p style="background-color: #f2f6fa; padding: 10px 20px; border-radius: 15px; margin-bottom: 0rem;">
+                    <span>Total Send:</span>
+                    <span style="margin-left: 0.5rem;">
+                      <div>
+                        <b>{{ totalServiceFee.substring(0,6) }}</b>
+                        <div class="token-icon">
+                          <img :src="token.logoURI" />
+                        </div>
+                      </div>
+                      <div>
+                        <b>{{ totalServiceFee.substring(0,6) }}</b>
+                        <div class="token-icon">
+                          <img :src="token.logoURI" />
+                        </div>
+                      </div>
+                    </span>
+                  </p>
+                </div> -->
         </div>
+      </div>
+      <div style="display: flex; justify-content: center;">
+        <button @click="() => {
+          if (verifySendTo()) show = !show;
+        }"
+          style="background-color: rgb(7, 106, 224); color: white; padding: 10px; margin-top: 10px; margin-bottom: 30px; width: 80%; border-radius: 50px; border: none;">Continue</button>
       </div>
     </form>
   </div>
@@ -262,6 +282,7 @@ import { BigNumber as EthBigNumber } from "ethers";
 import { calcGas } from "../../functions/common";
 import { BigNumber } from "bignumber.js";
 import { profilePic } from "@/assets/imageAssets";
+import { ethers } from "ethers";
 
 const estimatedGasAmount = "250000"; // hardcoded, can optimize later
 const chooseTotalDrop = ref<boolean>(false);
@@ -277,6 +298,8 @@ const hexlAccountBalances = ref<BalanceMap>({});
 const walletAccountBalances = ref<BalanceMap>({});
 const tokens = ref<Token[]>([]);
 const walletStore = useWalletStore();
+const show = ref<boolean>(true)
+const isInputAddress = ref<boolean>(false);
 
 interface tokenTransaction {
   to: string[],
@@ -441,13 +464,78 @@ watch(
     }
   }
 );
+
+const verifySendTo = () => {
+  isInputAddress.value = false;
+  if (transaction.value.to.length > 0) {
+    if (validateEmail(transaction.value.to.toString()) || ethers.utils.isAddress(transaction.value.to.toString())) {
+      if (ethers.utils.isAddress(transaction.value.to.toString())) isInputAddress.value = true;
+      return true;
+    } else {
+      console.log("Invalid input. Please input an email.")
+      return false;
+    }
+  } else {
+    console.log("Empty input.")
+    return false;
+  }
+};
+
+const onSubmit = (e: Event) => {
+  console.log(e);
+}
+
+const formatEmail = (email: string) => {
+  return email.match(/^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/);
+};
+
+const validateEmail = (input: string) => {
+  if (formatEmail(input)) {
+    return true;
+  } else {
+    return false;
+  }
+};
 </script>
 
 <style lang="less" scoped>
-input {
-  text-align: center; }
-::-webkit-input-placeholder {
-  text-align: center; }
+.send-people {
+  border-color: #909191;
+  box-shadow: none;
+  border-radius: 4rem;
+  padding-left: 3.6875rem;
+  padding-right: 3.6875rem;
+  padding: 10px 1rem 10px 2.5rem;
+  font-size: 1.125rem;
+  line-height: 1.5rem;
+  font-weight: normal;
+  text-overflow: ellipsis;
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  border: #909697 solid 0.0625rem;
+  background-color: #ffffff;
+  margin: 0;
+  outline: none;
+  position: relative;
+  -webkit-appearance: none;
+}
+.send-amount {
+  width: auto;
+  font-size: 40px;
+  font-weight: 700;
+  border: 0px;
+  box-sizing: content-box;
+  background: none;
+  -webkit-tap-highlight-color: transparent;
+  display: block;
+  min-width: 0px;
+  text-align: center;
+  ::-webkit-input-placeholder {
+    text-align: center; }
+  input[type=number] {
+  -moz-appearance: textfield; }
+}
 :-moz-placeholder {
   text-align: center; }
 input:focus {
@@ -458,9 +546,6 @@ input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0; }
-/* Firefox */
-input[type=number] {
-  -moz-appearance: textfield; }
 .gas-estimation {
   display: flex;
   p {

@@ -446,8 +446,9 @@ svg {
             </div>
             <div class="price">${{ price }}</div>
             <div style="display: flex; margin-top: 1rem; margin-bottom: 1rem;">
-              <router-link to="/?action=send">
-                <button class="cta-button">
+              <router-link 
+                :to="sendTo">
+                <button class="cta-button" @click="openSend">
                   <svg style="margin-right: 5px;" width="19" height="19" viewBox="0 0 19 19" fill="none"
                     xmlns="http://www.w3.org/2000/svg">
                     <path fill-rule="evenodd" clip-rule="evenodd"
@@ -523,11 +524,13 @@ import WalletTokenList from "@/components/WalletTokenList.vue";
 import AssetTransaction from "@/components/AssetTransaction.vue";
 import { useChainStore } from '@/stores/chain';
 import { useAccountStore } from "@/stores/account";
+import { useWalletStore } from "@/stores/wallet";
 import { BigNumber } from "bignumber.js";
+import { connectWallet } from "@/web3/wallet";
 
 const tokenTransaction = ref<boolean>(false);
 const tokenView = ref<boolean>(true);
-const showInfo = ref<boolean>(true);
+const sendTo = ref<string>("");
 
 const blockExplorer = computed(() => {
   const account = useAccountStore().account?.address;
@@ -537,4 +540,21 @@ const blockExplorer = computed(() => {
 const price = computed(() => {
   return BigNumber(0);
 });
+
+const openSend = async () => {
+  // check if wallet is connected
+  const walletStore = useWalletStore();
+  // if connected, open send modal
+  if (walletStore.connected) {
+    sendTo.value = "/?action=send";
+  } else {
+    // if not connected, connect wallet then open send modal
+    sendTo.value = "";
+    if (typeof window.ethereum == 'undefined') {
+      console.log('MetaMask is not installed!');
+    }
+    await connectWallet();
+    await openSend();
+  }
+}
 </script>

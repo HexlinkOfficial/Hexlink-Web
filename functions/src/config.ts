@@ -3,6 +3,8 @@ import {PriceConfigs} from "../common";
 
 const secrets = functions.config().doppler;
 
+export const sendgridApiKey = secrets.SENDGRID_API_KEY;
+
 export enum KMS_KEY_TYPE {
   operator,
   validator

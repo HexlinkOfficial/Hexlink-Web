@@ -31,5 +31,16 @@ module.exports = {
     "import/no-unresolved": 0,
     "require-jsdoc": 0,
     "@typescript-eslint/no-non-null-assertion": "off",
+    "max-len": [
+      "error",
+      {
+        "code": 80,
+        "tabWidth": 2,
+        "ignoreComments": true,
+        "ignoreUrls": true,
+        "ignoreStrings": true,
+        "ignoreTemplateLiterals": true,
+      },
+    ],
   },
 };

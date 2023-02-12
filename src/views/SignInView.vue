@@ -125,7 +125,8 @@ const sendOTP = async () => {
 
 const verifyOTP = async () => {
     const result = await validateOTP(email.value, code.join(""));
-    if (result.data?.code === 400) {
+    console.log(result.data);
+    if (result.data?.code === 200) {
         router.push(store.returnUrl || "/");
     }
     // should show an error message in UI

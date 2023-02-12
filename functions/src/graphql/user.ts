@@ -25,6 +25,7 @@ export const GET_USER = gql`
         email
         otp
         updated_at
+        is_active
     }
   }
 `;
@@ -33,13 +34,16 @@ export const UPDATE_OTP = gql`
     mutation (
         $id: uuid!
         $otp: String!
+        $isActive: Boolean
     ) {
         update_user_by_pk (
             pk_columns: {id: $id},
-            _set: { otp: $otp }
+            _set: {
+              otp: $otp
+              is_active: $isActive
+            }
         ) {
             id
-            otp
         }
     }
 `;
@@ -48,7 +52,8 @@ export interface User {
   email: string,
   otp: string,
   id?: string,
-  updated_at?: string
+  updatedAt?: string,
+  isActive?: boolean
 }
 
 export async function insertUser(
@@ -59,6 +64,7 @@ export async function insertUser(
       {objects: inputs.map((i) => ({
         email: i.email,
         otp: i.otp,
+        is_active: i.isActive,
       }))}
   ).toPromise();
   return result.data.insert_user.returning;
@@ -86,7 +92,8 @@ export async function getUser(
     id: user[0].id,
     email: user[0].email,
     otp: user[0].otp,
-    updated_at: user[0].updated_at,
+    updatedAt: user[0].updated_at,
+    isActive: user[0].is_active,
   };
 }
 
@@ -94,6 +101,7 @@ export async function updateOTP(
     data: {
       id: string,
       otp: string,
+      isActive: boolean,
     },
 ) : Promise<void> {
   const result = await client().mutation(

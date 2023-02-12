@@ -17,9 +17,9 @@
                 </div>
                 <p class="or"><span>or</span></p>
                 <div class="email-login">
-                    <input type="text" placeholder="Enter Email" name="uname" class="email-input" required>
+                    <input type="text" v-model="email" placeholder="Enter Email" name="uname" class="email-input" required>
                 </div>
-                <button class="cta-btn" v-on:click="show = !show">Log In</button>
+                <button class="cta-btn" @click="sendOTP()">Log In</button>
             </div>
         </transition>
         <transition name="fade">
@@ -35,7 +35,7 @@
                             maxlength="1" v-model="code[index]" @input="handleInput" @keypress="isNumber"
                             @keydown.delete="handleDelete" @paste="onPaste" />
                     </div>
-                    <button class="cta-btn" v-on:click="show = !show">Verify</button>
+                    <button class="cta-btn" @click="verifyOTP()">Verify</button>
                 </div>
             </div>
         </transition>
@@ -47,7 +47,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { twitterSocialLogin, signOutFirebase } from '@/services/auth'
+import { twitterSocialLogin, signOutFirebase, genOTP, validateOTP } from '@/services/auth'
 import { useAuthStore } from '@/stores/auth'
 import hexlink from "@/assets/logo/blue-logo.svg";
 import background from "@/assets/background.png";
@@ -59,6 +59,7 @@ let code: string[] = Array(6);
 let dataFromPaste: string[] | undefined;
 const keysAllowed: string[] = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9",];
 const show = ref<boolean>(true);
+const email = ref<string>("");
 
 const onSubmit = (e: Event) => {
     e.preventDefault();
@@ -115,6 +116,17 @@ const onPaste = (event: Event) => {
             if (!keysAllowed.includes(num)) event.preventDefault();
         }
     }
+}
+
+const sendOTP = async () => {
+    await genOTP(email.value);
+    show.value = !show.value;
+}
+
+const verifyOTP = async () => {
+    const result = await validateOTP(email.value, code.join(""));
+    console.log(result);
+    router.push(store.returnUrl || "/");
 }
 </script>
 

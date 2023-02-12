@@ -8,18 +8,11 @@ class PrivateFirebase {
 
   constructor() {
     const secrets = functions.config().doppler || {};
-    const credential = secrets.GOOGLE_CREDENTIAL_JSON;
-    let params;
-    if (credential) {
-      const serviceAccount = JSON.parse(credential);
-      params = {
-        credential: admin.credential.cert(serviceAccount),
-      };
-    } else {
-      params = functions.config().firebase;
-    }
 
-    this.app = admin.initializeApp(params);
+    this.app = admin.initializeApp({
+      projectId: secrets.VITE_FIREBASE_PROJECT_ID,
+      serviceAccountId: secrets.VITE_FIREBASE_SERVICE_ACCOUNT_ID,
+    });
     this.db = admin.firestore();
     this.db.settings({ignoreUndefinedProperties: true});
     this.storage = admin.storage();

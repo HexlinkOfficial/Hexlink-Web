@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.refunder = exports.getChain = exports.getChainFromProvider = exports.SUPPORTED_CHAINS = exports.MUMBAI = exports.POLYGON = exports.GOERLI = void 0;
+exports.refunder = exports.getChain = exports.getChainFromProvider = exports.SUPPORTED_CHAINS = exports.GALILEO = exports.MUMBAI = exports.POLYGON = exports.GOERLI = void 0;
 exports.GOERLI = {
     chainId: "5",
     name: "goerli",
@@ -49,6 +49,19 @@ exports.MUMBAI = {
     blockExplorerUrls: ["https://mumbai.polygonscan.com/"],
     logoUrl: "https://token.metaswap.codefi.network/assets/networkLogos/polygon.svg",
 };
+exports.GALILEO = {
+    chainId: "3334",
+    rpcUrls: ["https://galileo.web3q.io:8545"],
+    name: "galileo",
+    fullName: "Web3Q Galileo Test Network",
+    nativeCurrency: {
+        name: "W3Q",
+        symbol: "W3Q",
+        decimals: 18,
+    },
+    blockExplorerUrls: ["https://explorer.galileo.web3q.io/"],
+    logoUrl: "",
+};
 exports.SUPPORTED_CHAINS = [exports.GOERLI, exports.MUMBAI];
 function getChainFromProvider(provider) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -59,14 +72,20 @@ function getChainFromProvider(provider) {
 exports.getChainFromProvider = getChainFromProvider;
 function getChain(chain) {
     chain = chain.toString();
-    if (chain == "goerli" || chain == "5") {
+    if (chain === "goerli" || chain === "5") {
         return exports.GOERLI;
     }
-    else if (chain == "polygon" || chain == "137") {
+    else if (chain === "polygon" || chain === "137") {
         return exports.POLYGON;
     }
-    else if (chain == "mumbai" || chain == "80001") {
+    else if (chain === "mumbai" || chain == "80001") {
         return exports.MUMBAI;
+    }
+    else if (chain === "mumbai" || chain == "80001") {
+        return exports.MUMBAI;
+    }
+    else if (chain === "galileo" || chain == "3334") {
+        return exports.GALILEO;
     }
     throw new Error("Unsupported chain");
 }

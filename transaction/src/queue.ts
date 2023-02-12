@@ -28,6 +28,7 @@ class PrivateQueues {
     opQueues : Map<string, Queue.Queue> = new Map<string, Queue.Queue>();
     txQueues : Map<string, Queue.Queue> = new Map<string, Queue.Queue>();
     coordinatorQueues : Map<string, Queue.Queue> = new Map<string, Queue.Queue>();
+    storageQueue : Queue.Queue = new Queue("storage");
 
     constructor() {
         SUPPORTED_CHAINS.forEach(chain => {
@@ -54,7 +55,7 @@ class PrivateQueues {
         const queue = new Queue(this.queueName(chain, "coordinator"));
         console.log("Initiating coordinator queue " + queue.name);
         queue.process("poll", 1, async (job) => {
-            const signer = senderPool.getSenderInIdle(chain);
+            const signer = senderPool.getSenderInIdle(chain.name);
             if (signer === undefined) {
                 console.log("No signer available...");
                 return;
@@ -67,7 +68,7 @@ class PrivateQueues {
                 jobs.push(j);
             }
             if (jobs.length === 0) {
-                senderPool.removeSenderCompletedJob(chain, signer.address);
+                senderPool.removeSenderCompletedJob(chain.name, signer.address);
                 return;
             }
             const ops = jobs.map((j: any) => j.data as Operation);
@@ -93,7 +94,7 @@ class PrivateQueues {
             } catch(err) {
                 console.log(err);
                 await Promise.all(jobs.map(j => postPorgress(j, undefined, "failed to insert tx")));
-                senderPool.removeSenderCompletedJob(chain, signer.address);
+                senderPool.removeSenderCompletedJob(chain.name, signer.address);
             }
         });
         queue.add("poll", {}, { repeat: { every: 1000, } });
@@ -126,7 +127,7 @@ class PrivateQueues {
                 console.log(err);
                 await updateTx(job.data.id, "error", err.message);
             }
-            senderPool.removeSenderCompletedJob(chain, job.data.signer);
+            senderPool.removeSenderCompletedJob(chain.name, job.data.signer);
         });
         return queue;
     }

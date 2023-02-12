@@ -1,4 +1,10 @@
 {
-    "goerli": "0xad7346eBfCd605A9528fCdFfe868e5d4772A3362",
-    "mumbai": "0x71adadC8059160472e93A7DfEedDBf3c5752A6B4"
+    "goerli": {
+        "redpacket": "0xad7346eBfCd605A9528fCdFfe868e5d4772A3362",
+        "tokenFactory": "0x9605de4dfCF73b97585d68d403392240263Aa995"
+    },
+    "mumbai": {
+        "redpacket": "0x71adadC8059160472e93A7DfEedDBf3c5752A6B4",
+        "tokenFactory": "0x22fEA56f746aEB5AFab7c7375692b5d9E2800E86"
+    }
 }

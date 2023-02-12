@@ -7,7 +7,7 @@ import { redPacketInterface, redPacketAddress } from "./redpacket";
 export function buildGasSponsorshipOp(
     hexlAccount: string,
     refunder: string,
-    input: RedPacketInput,
+    input: {id: string, gasToken: string, gasSponsorship: string},
 ) : Op {
     return {
         name: "depositGasSponsorship",

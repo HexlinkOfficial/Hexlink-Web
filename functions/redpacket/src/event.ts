@@ -1,10 +1,15 @@
 "use strict";
 
 import {ethers, BigNumber as EthBigNumber} from "ethers";
-import {redPacketAddress, redPacketInterface} from "./redpacket";
+import {
+    redPacketAddress,
+    redPacketInterface,
+    tokenFactoryAddress,
+    tokenFactoryInterface
+} from "./redpacket";
 import type {Chain} from "../../common";
 import type {TransactionReceipt} from "@ethersproject/providers";
-import type {RedPacket} from "./types";
+import type {RedPacket, RedPacketErc721} from "./types";
 
 const iface = new ethers.utils.Interface([
     "event Claimed(bytes32 indexed PacketId, address claimer, uint256 amount)",
@@ -76,4 +81,35 @@ export function redpacketId(chain: Chain, account: string, input: RedPacket) {
             ]
         )
     );
+}
+
+export function redpacketErc721Id(chain: Chain, account: string, input: RedPacketErc721) {
+    const redPacketType = "tuple(address,bytes32,uint256,address,uint32,uint8)";
+    return ethers.utils.keccak256(
+        ethers.utils.defaultAbiCoder.encode(
+            ["uint256", "address", "address", "bytes32"],
+            [
+                Number(chain.chainId),
+                tokenFactoryAddress(chain),
+                account,
+                input.salt,
+            ]
+        )
+    );
+}
+
+export function parseDeployed(
+    chain: Chain,
+    receipt: TransactionReceipt,
+    creator: string,
+    salt: string,
+) {
+    const factoryAddress = tokenFactoryAddress(chain).toLowerCase();
+    const events = receipt.logs.filter(
+        (log: any) => log.address.toLowerCase() === factoryAddress
+    ).map((log: any) => tokenFactoryInterface.parseLog(log));
+    const event = events.find(
+        (e: any) => e.name === "Deployed" && equal(e.args.salt, salt) && equal(e.args.creator, creator)
+    );
+    return event?.args;
 }

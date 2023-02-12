@@ -36,7 +36,7 @@ export async function preprocess(data: any, context: any) {
     return {code: 401, message: "Unauthorized"};
   }
   const chain = getChain(data.chain);
-  let account = await accountAddress(chain, uid, data.version);
+  let account = await accountAddress(chain, uid, data.accountVersion);
   if (account.code !== 200) {
     return {code: 400, message: (account as Error).message};
   }

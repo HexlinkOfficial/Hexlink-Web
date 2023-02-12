@@ -57,9 +57,10 @@ export async function insertRedPacket(
       id: string,
       userId: string,
       creator: HexlinkUserInfo,
-      metadata: RedPacket,
+      metadata: any,
       opId: number,
-      deposit: any
+      deposit: any,
+      type: "erc20" | "erc721",
     }[],
 ) : Promise<{id: string}[]> {
   const result = await client.mutation(
@@ -72,6 +73,7 @@ export async function insertRedPacket(
           creator: JSON.stringify(d.creator),
           op_id: d.opId,
           deposit: JSON.stringify(d.deposit),
+          type: d.type,
         })),
       }
   ).toPromise();

@@ -57,6 +57,20 @@ export const MUMBAI : Chain = {
   logoUrl: "https://token.metaswap.codefi.network/assets/networkLogos/polygon.svg",
 };
 
+export const GALILEO : Chain = {
+  chainId: "3334",
+  rpcUrls: ["https://galileo.web3q.io:8545"],
+  name: "galileo",
+  fullName: "Web3Q Galileo Test Network",
+  nativeCurrency: {
+    name: "W3Q",
+    symbol: "W3Q",
+    decimals: 18,
+  },
+  blockExplorerUrls: ["https://explorer.galileo.web3q.io/"],
+  logoUrl: "",
+};
+
 export const SUPPORTED_CHAINS = [GOERLI, MUMBAI];
 
 export async function getChainFromProvider(
@@ -68,12 +82,16 @@ export async function getChainFromProvider(
 
 export function getChain(chain: string | number) : Chain {
   chain = chain.toString();
-  if (chain == "goerli" || chain == "5") {
+  if (chain === "goerli" || chain === "5") {
     return GOERLI;
-  } else if (chain == "polygon" || chain == "137") {
+  } else if (chain === "polygon" || chain === "137") {
     return POLYGON;
-  } else if (chain == "mumbai" || chain == "80001") {
+  } else if (chain === "mumbai" || chain == "80001") {
     return MUMBAI;
+  } else if (chain === "mumbai" || chain == "80001") {
+    return MUMBAI;
+  } else if (chain === "galileo" || chain == "3334") {
+    return GALILEO;
   }
   throw new Error("Unsupported chain");
 }

@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.redpacketId = exports.parseCreated = exports.parseClaimed = void 0;
+exports.parseDeployed = exports.redpacketErc721Id = exports.redpacketId = exports.parseCreated = exports.parseClaimed = void 0;
 const ethers_1 = require("ethers");
 const redpacket_1 = require("./redpacket");
 const iface = new ethers_1.ethers.utils.Interface([
@@ -51,3 +51,20 @@ function redpacketId(chain, account, input) {
     ]));
 }
 exports.redpacketId = redpacketId;
+function redpacketErc721Id(chain, account, input) {
+    const redPacketType = "tuple(address,bytes32,uint256,address,uint32,uint8)";
+    return ethers_1.ethers.utils.keccak256(ethers_1.ethers.utils.defaultAbiCoder.encode(["uint256", "address", "address", "bytes32"], [
+        Number(chain.chainId),
+        (0, redpacket_1.tokenFactoryAddress)(chain),
+        account,
+        input.salt,
+    ]));
+}
+exports.redpacketErc721Id = redpacketErc721Id;
+function parseDeployed(chain, receipt, creator, salt) {
+    const factoryAddress = (0, redpacket_1.tokenFactoryAddress)(chain).toLowerCase();
+    const events = receipt.logs.filter((log) => log.address.toLowerCase() === factoryAddress).map((log) => redpacket_1.tokenFactoryInterface.parseLog(log));
+    const event = events.find((e) => e.name === "Deployed" && equal(e.args.salt, salt) && equal(e.args.creator, creator));
+    return event === null || event === void 0 ? void 0 : event.args;
+}
+exports.parseDeployed = parseDeployed;

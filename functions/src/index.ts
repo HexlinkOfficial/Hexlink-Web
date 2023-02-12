@@ -31,10 +31,12 @@ exports.priceConfig = priceConfig;
 import {
   claimRedPacket,
   createRedPacket,
+  createRedPacketErc721,
 } from "./redpacket";
 
 exports.claimRedPacket = claimRedPacket;
 exports.createRedPacket = createRedPacket;
+exports.createRedPacketErc721 = createRedPacketErc721;
 
 import {
   sendToken,

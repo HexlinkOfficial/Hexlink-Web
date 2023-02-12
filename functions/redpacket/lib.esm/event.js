@@ -1,6 +1,6 @@
 "use strict";
 import { ethers } from "ethers";
-import { redPacketAddress, redPacketInterface } from "./redpacket";
+import { redPacketAddress, redPacketInterface, tokenFactoryAddress, tokenFactoryInterface } from "./redpacket";
 const iface = new ethers.utils.Interface([
     "event Claimed(bytes32 indexed PacketId, address claimer, uint256 amount)",
 ]);
@@ -45,4 +45,19 @@ export function redpacketId(chain, account, input) {
             input.mode
         ]
     ]));
+}
+export function redpacketErc721Id(chain, account, input) {
+    const redPacketType = "tuple(address,bytes32,uint256,address,uint32,uint8)";
+    return ethers.utils.keccak256(ethers.utils.defaultAbiCoder.encode(["uint256", "address", "address", "bytes32"], [
+        Number(chain.chainId),
+        tokenFactoryAddress(chain),
+        account,
+        input.salt,
+    ]));
+}
+export function parseDeployed(chain, receipt, creator, salt) {
+    const factoryAddress = tokenFactoryAddress(chain).toLowerCase();
+    const events = receipt.logs.filter((log) => log.address.toLowerCase() === factoryAddress).map((log) => tokenFactoryInterface.parseLog(log));
+    const event = events.find((e) => e.name === "Deployed" && equal(e.args.salt, salt) && equal(e.args.creator, creator));
+    return event?.args;
 }

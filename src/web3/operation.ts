@@ -57,7 +57,6 @@ export async function buildUserOpRequest(
     const chain = useChainStore().chain;
 
     const provider = useChainStore().provider;
-
     const txData = encodeExecBatch(opInputs);
     const account = accountContract(provider, hexlAccount);
 
@@ -190,7 +189,7 @@ export async function sendToken(
             to,
         },
         request,
-        version: useAccountStore().version,
+        accountVersion: useAccountStore().version,
     });
     return {opId: (result.data as any).id};
 }

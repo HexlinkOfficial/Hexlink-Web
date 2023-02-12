@@ -1,12 +1,9 @@
-import * as admin from "firebase-admin";
-import type {Request, Response, NextFunction, RequestHandler} from "express";
 
-const serviceAccount = JSON.parse(process.env.GOOGLE_CREDENTIAL_JSON!);
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-});
+import type {Request, Response, NextFunction, RequestHandler} from "express";
+import {Firebase} from "../firebase";
 
 export const auth : RequestHandler = (req: Request, res: Response, next: NextFunction) => {
+  const firebase = Firebase.getInstance();
   const authHeader = req.headers.authorization;
   if (authHeader) {
     /* Bearer xxx */
@@ -14,14 +11,10 @@ export const auth : RequestHandler = (req: Request, res: Response, next: NextFun
     if (idToken === process.env.TRANSACTION_SERVICE_SECRET) {
       next();
     } else {
-      admin
-      .auth()
-      .verifyIdToken(idToken)
-      .then((decodedToken) => {
+      firebase.auth.verifyIdToken(idToken).then((decodedToken) => {
         req.body.uid = decodedToken.uid;
         next();
-      })
-      .catch((error) => {
+      }).catch((error) => {
         console.log(error);
         res.sendStatus(403);
       });

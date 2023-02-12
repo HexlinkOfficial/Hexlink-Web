@@ -1,6 +1,5 @@
 import {ethers} from "ethers";
 import cache from "node-cache";
-import type {Chain} from "../../functions/common";
 
 class PrivateSenderPool {
     senders : Map<string, string>;
@@ -25,27 +24,27 @@ class PrivateSenderPool {
         return this.senderPoolAddr.length;
     }
 
-    getSenderInProcess(chain: Chain) : string[] {
-        return this.senderCache.has(chain.name) ? this.senderCache.get(chain.name)! : [];
+    getSenderInProcess(chain: string) : string[] {
+        return this.senderCache.has(chain) ? this.senderCache.get(chain)! : [];
     }
 
-    getSenderInIdle(chain: Chain) : ethers.Wallet | undefined {
+    getSenderInIdle(chain: string) : ethers.Wallet | undefined {
         const sendersInProcess: string[] = this.getSenderInProcess(chain);
         const sendersInIdle = this.senderPoolAddr.filter(k => !sendersInProcess.includes(k));
         if (sendersInIdle.length > 0) {
             const sender = sendersInIdle[0];
             sendersInProcess.push(sender);
-            this.senderCache.set(chain.name, sendersInProcess);
+            this.senderCache.set(chain, sendersInProcess);
             return new ethers.Wallet(this.senders.get(sender)!);
         }
         return undefined;
     };
 
-    removeSenderCompletedJob(chain: Chain, sender: string) {
+    removeSenderCompletedJob(chain: string, sender: string) {
         const sendersInProcess: string[] = this.getSenderInProcess(chain);
         const index = sendersInProcess.indexOf(sender.toLowerCase(), 0);
         if (index > -1) {
-            this.senderCache.set(chain.name, sendersInProcess.splice(index, 1));
+            this.senderCache.set(chain, sendersInProcess.splice(index, 1));
         }
     }
 }

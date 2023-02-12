@@ -184,7 +184,7 @@ import { vOnClickOutside } from '@/services/directive';
 import { getBalances } from "@/web3/tokens";
 import { getPriceInfo } from "@/web3/network";
 import { BigNumber as EthBigNumber } from "ethers";
-import { calcGas } from "../../functions/common";
+import { calcGas, type PriceInfo } from "../../functions/common";
 import { BigNumber } from "bignumber.js";
 import { profilePic } from "@/assets/imageAssets";
 import { ethers } from "ethers";
@@ -215,13 +215,7 @@ interface tokenTransaction {
   token: string,
   gasToken: string,
   estimatedGas: string,
-  priceInfo?: {
-    maxFeePerGas: string;
-    maxPriorityFeePerGas: string;
-    lastBaseFeePerGas: string;
-    nativeCurrencyInUsd: string;
-    defaultGasPrice: string;
-  } | undefined;
+  priceInfo?: PriceInfo | undefined;
 }
 
 const transaction = ref<tokenTransaction>({

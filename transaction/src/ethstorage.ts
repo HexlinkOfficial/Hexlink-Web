@@ -1,6 +1,7 @@
 /* eslint-disable max-len */
 import {ethers} from "ethers";
 import type {Signer} from "ethers";
+import {Firebase} from "./firebase";
 
 const flatDirectoryAbi = [
   "function write(bytes memory name, bytes memory data) external payable",
@@ -28,18 +29,26 @@ const NftRootStorage = (signer: Signer) => {
   );
 };
 
-const readFile = async(url: string) : Promise<Buffer> => {
-  return Buffer.from("");
+const readFile = async(filename: string) : Promise<{
+  content: Buffer,
+  fileSize: number,
+}> => {
+  const bucket = Firebase.getInstance().storage.bucket();
+  const file = bucket.file(filename);
+  const resp = await file.download();
+  return {
+    content: Buffer.from(resp.toString()),
+    fileSize: file.metadata.fileSize,
+  };
 };
 
-export async function writeFile(file: File, signer: Signer) {
+export async function writeFile(filename: string, signer: Signer) {
   const contract = NftRootStorage(signer);
-  const hexName = "0x" + Buffer.from("hello.txt", "utf8").toString("hex");
-  const content = await readFile(file.name);
+  const hexName = "0x" + Buffer.from(filename, "utf8").toString("hex");
+  let {content, fileSize} = await readFile(filename);
 
   // Data need to be sliced if file > 475K
   let chunks = [];
-  let fileSize = file.size;
   if (fileSize > 475 * 1024) {
     const chunkSize = Math.ceil(fileSize / (475 * 1024));
     chunks = bufferChunk(content, chunkSize);
@@ -50,31 +59,28 @@ export async function writeFile(file: File, signer: Signer) {
 
   // Files larger than 24k need stak tokens
   let cost = 0;
-  if (file.size > 24 * 1024 - 326) {
-    cost = Math.floor((file.size + 326) / 1024 / 24);
+  if (fileSize > 24 * 1024 - 326) {
+    cost = Math.floor((fileSize + 326) / 1024 / 24);
   }
 
+  const result = [];
   for (const index of chunks.keys()) {
     const chunk = chunks[index];
     const hexData = "0x" + chunk.toString("hex");
 
-    const estimatedGas = await contract.estimateGas.writeChunk(hexName, index, hexData, {
-      value: ethers.utils.parseEther(cost.toString()),
-    });
-
-    // upload file
+    const estimatedGas = await contract.estimateGas.writeChunk(
+      hexName, index, hexData, {
+        value: ethers.utils.parseEther(cost.toString()),
+      }
+    );
     const option = {
       gasLimit: estimatedGas.mul(6).div(5).toString(),
       value: ethers.utils.parseEther(cost.toString()),
     };
     const tx = await contract.writeChunk(hexName, index, hexData, option);
-    console.log(`Transaction Id: ${tx.hash}`);
-
-    // get result
-    const receipt = await tx.wait();
-    if (receipt.status) {
-      console.log(`File ${file.name} chunkId: ${index} uploaded!`);
-    }
+    await tx.wait()
+    result.push(tx.hash);
   }
-  console.log(content);
+  return result;
 }
+

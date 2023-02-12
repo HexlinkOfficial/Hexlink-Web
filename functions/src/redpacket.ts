@@ -12,6 +12,8 @@ import {
   redPacketAddress,
   redPacketInterface,
   redpacketId,
+  redpacketErc721Id,
+  tokenFactoryAddress,
 } from "../redpacket";
 import {refunder} from "../common";
 import type {Chain, OpInput} from "../common";
@@ -147,6 +149,52 @@ export const createRedPacket = functions.https.onCall(
       );
       const postData: any = {
         type: "create_redpacket",
+        userId: uid,
+        actions: [action],
+        account: account.address,
+        requestId: reqId,
+      };
+      if (data.txHash) {
+        postData.tx = data.txHash;
+      } else {
+        postData.input = await validateAndBuildUserOp(
+            chain, account, data.request
+        );
+      }
+      const resp = await submit(chain, postData);
+      return {code: 200, id: resp.id};
+    }
+);
+
+export const createRedPacketErc721 = functions.https.onCall(
+    async (data, context) => {
+      const result = await preprocess(data, context);
+      if (result.code !== 200) {
+        return result;
+      }
+      const {uid, account, chain} = result as RequestData;
+
+      const rpId = redpacketErc721Id(chain, account.address, data.erc721);
+      const action = {
+        type: "insert_redpacket_erc721",
+        params: {
+          userId: uid,
+          redPacketId: rpId,
+          salt: data.erc721.salt,
+          creator: data.creator,
+          refunder: refunder(chain),
+          priceInfo: data.redPacket.priceInfo,
+        },
+      };
+      const [{id: reqId}] = await insertRequest(
+          uid,
+          [{
+            to: tokenFactoryAddress(chain),
+            args: data.erc721,
+          }]
+      );
+      const postData: any = {
+        type: "create_redpacket_erc721",
         userId: uid,
         actions: [action],
         account: account.address,

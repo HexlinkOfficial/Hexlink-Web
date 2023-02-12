@@ -28,7 +28,7 @@
                     <img :src="secure" style="width:2.5rem; height: 2.5rem;" />
                 </div>
                 <h2 class="title">Enter Verification Code</h2>
-                <p class="subtitle">Enter code that we have sent to your email <b>elonmusk@tesla.com</b></p>
+                <p class="subtitle">Enter code that we have sent to your email <b>{{ email }}</b></p>
                 <div class="social-login" style="flex-direction: column;">
                     <div style="display: flex; align-items: center; justify-content: space-between;">
                         <input v-for="(arr, index) in code" :key="index" type="number" pattern="\d*" :id="'input_' + index"
@@ -125,8 +125,10 @@ const sendOTP = async () => {
 
 const verifyOTP = async () => {
     const result = await validateOTP(email.value, code.join(""));
-    console.log(result);
-    router.push(store.returnUrl || "/");
+    if (result.data?.code === 400) {
+        router.push(store.returnUrl || "/");
+    }
+    // should show an error message in UI
 }
 </script>
 

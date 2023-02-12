@@ -23,6 +23,16 @@ import { useTokenStore } from '@/stores/token';
 const auth = getAuth(app)
 const functions = getFunctions()
 
+export async function genOTP(email: string) {
+    const genOTPCall = httpsCallable(functions, 'genOTP');
+    return await genOTPCall({email: email});
+}
+
+export async function validateOTP(email: string, otp: string) {
+    const validateOTPCall = httpsCallable(functions, 'validateOTP');
+    return await validateOTPCall({email: email, otp: otp});
+}
+
 export async function getIdTokenAndSetClaimsIfNecessary(user: User, refresh: boolean = false) {
     let idToken = await user.getIdToken(refresh)
     const idTokenResult = await user.getIdTokenResult()

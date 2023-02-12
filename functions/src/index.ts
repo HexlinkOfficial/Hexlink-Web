@@ -43,3 +43,13 @@ import {
 } from "./operation";
 
 exports.sendToken = sendToken;
+
+import {
+  genOTP,
+  validateOTP,
+  refreshCustomToken,
+} from "./signin";
+
+exports.genOTP = genOTP;
+exports.validateOTP = validateOTP;
+exports.refreshCustomToken = refreshCustomToken;

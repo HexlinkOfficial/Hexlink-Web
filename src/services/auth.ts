@@ -2,6 +2,7 @@ import {
     getAuth,
     GoogleAuthProvider,
     TwitterAuthProvider,
+    signInWithCustomToken,
     signInWithPopup,
     signOut,
 } from 'firebase/auth';
@@ -30,7 +31,37 @@ export async function genOTP(email: string) {
 
 export async function validateOTP(email: string, otp: string) {
     const validateOTPCall = httpsCallable(functions, 'validateOTP');
-    return await validateOTPCall({email: email, otp: otp});
+    const result = await validateOTPCall({email: email, otp: otp});
+    const resultData = result.data as any;
+    if (resultData.code !== 200) {
+        console.log(resultData.message);
+        return {code: resultData.code, message: resultData.message}
+    }
+    console.log(resultData);
+
+    try {
+        const userCredential = await signInWithCustomToken(auth, resultData.token);
+        const cred = userCredential.user;
+        const idToken = await getIdTokenAndSetClaimsIfNecessary(cred);
+        console.log(idToken);
+        const user : IUser = {
+            provider: "mailto",
+            identityType: "mailto",
+            authType: "otp",
+            uid: cred.uid,
+            providerUid: email,
+            handle: email,
+            displayName: email,
+            nameHash: nameHashWithVersion("mailto", email),
+            idToken,
+        };
+        useAuthStore().signIn(user);
+        await init();
+        return {code: 200};
+    } catch (error) {
+        console.log(error);
+    }
+
 }
 
 export async function getIdTokenAndSetClaimsIfNecessary(user: User, refresh: boolean = false) {

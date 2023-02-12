@@ -19,7 +19,7 @@
                 <div class="email-login">
                     <input type="text" v-model="email" placeholder="Enter Email" name="uname" class="email-input" required>
                 </div>
-                <button class="cta-btn" @click="sendOTP()">Log In</button>
+                <button class="cta-btn" @click="sendOTP">Log In</button>
             </div>
         </transition>
         <transition name="fade">
@@ -35,7 +35,7 @@
                             maxlength="1" v-model="code[index]" @input="handleInput" @keypress="isNumber"
                             @keydown.delete="handleDelete" @paste="onPaste" />
                     </div>
-                    <button class="cta-btn" @click="verifyOTP()">Verify</button>
+                    <button class="cta-btn" @click="verifyOTP">Verify</button>
                 </div>
             </div>
         </transition>
@@ -125,8 +125,7 @@ const sendOTP = async () => {
 
 const verifyOTP = async () => {
     const result = await validateOTP(email.value, code.join(""));
-    console.log(result.data);
-    if (result.data?.code === 200) {
+    if (result?.code === 200) {
         router.push(store.returnUrl || "/");
     }
     // should show an error message in UI

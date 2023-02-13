@@ -119,7 +119,6 @@
 <script lang="ts" setup>
 import { ref, watch, computed, onMounted } from 'vue';
 import Loading from "@/components/Loading.vue";
-import { copy } from "@/web3/utils";
 import { getAssetTransfers, loadTokenLogo } from '@/web3/tokens';
 import { useTokenStore } from '@/stores/token';
 import { useChainStore } from '@/stores/chain';

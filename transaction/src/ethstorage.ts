@@ -45,8 +45,13 @@ const readFile = async(filename: string) : Promise<{
 export async function writeFile(filename: string, signer: Signer) {
   const contract = NftRootStorage(signer);
   const hexName = "0x" + Buffer.from(filename, "utf8").toString("hex");
+<<<<<<< HEAD
   /* tslint:disable-next-line */
   let {content, fileSize} = await readFile(filename);
+=======
+  let {fileSize} = await readFile(filename);
+  const { content } = await readFile(filename);
+>>>>>>> d967c25 (update)
 
   // Data need to be sliced if file > 475K
   let chunks = [];

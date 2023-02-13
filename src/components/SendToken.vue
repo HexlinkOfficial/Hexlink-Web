@@ -1,5 +1,5 @@
 <template>
-  <div v-if="sendStatus === ''" class="claim-card transition">
+  <div class="claim-card transition">
     <router-link to="/">
       <svg 
         class="redpacket_close transition" 
@@ -14,10 +14,10 @@
         />
       </svg>
     </router-link>
-    <form class="form-send" @submit.prevent="onSubmit">
-        <div style="margin: 0px auto; display: block;">
+    <form v-if="sendStatus === ''" class="form-send" @submit.prevent="onSubmit">
+        <div style="display: block;">
           <h2 class="people-title">Send Token</h2>
-          <div style="margin-top: 30px; position: relative;">
+          <div style="margin-top: 20px; position: relative;">
             <div class="people-input-box">
               <span class="input-search-icon">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" width="1em" height="1em">
@@ -32,13 +32,11 @@
                 v-model="transaction.to"
                 placeholder="email or wallet address"
                 aria-expanded="false" autocomplete="off" autocorrect="off"
-                oninvalid="try{setCustomValidity(verifySendTo() ? '' : 'invalid receipt')}" 
-                required
               >
             </div>
           </div>
         </div>
-        <div style="display: block;">
+        <div v-if="verifySendTo()" style="display: block;">
           <div class="input-wrapper">
             <input 
               class="send-amount"
@@ -94,8 +92,8 @@
                 <a-tooltip placement="top">
                   <template #title>
                     <span>The real service fee may differ per network conditions</span>
-                  </template>
-                  <b>{{ totalServiceFee.substring(0,6) }}</b>
+                    </template>
+                    <b>{{ totalServiceFee.substring(0,6) }}</b>
                 </a-tooltip>
               </p>
               <div class="total-choose-token">
@@ -130,13 +128,14 @@
           </div>
         </div>
       <div style="display: flex; justify-content: center;">
-        <button
-          class="cta-button"
-        >
-          Continue
-        </button>
+        <button class="cta-button">Send</button>
       </div>
     </form>
+    <div v-if="sendStatus != ''" class="form-send">
+      <div style="display: block;">
+        <h2 class="people-title">Sending!</h2>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -184,7 +183,7 @@ const transaction = ref<TokenTransaction>({
   to: "",
   salt: hash(new Date().toISOString()),
   amount: "0",
-  amountInput: "0",
+  amountInput: "0.1",
   token: tokenStore.nativeCoin.address,
   gasToken: tokenStore.nativeCoin.address,
   estimatedGas: "0",
@@ -298,11 +297,11 @@ const verifySendTo = () => {
       isInputAddress.value = false;
       return true;
     } else {
-      console.log("Invalid input. Please input an email.")
+      // createNotification("Invalid Input", "error");
       return false;
     }
   } else {
-    console.log("Empty input.")
+    // createNotification("Empty Input", "error");
     return false;
   }
 };
@@ -451,8 +450,7 @@ const validateEmail = (input: string) => {
   margin: 0;
   outline: none;
   position: relative;
-  -webkit-appearance: none;
-}
+  -webkit-appearance: none; }
 .send-amount {
   width: auto;
   font-size: 40px;
@@ -464,6 +462,7 @@ const validateEmail = (input: string) => {
   display: block;
   min-width: 0px;
   text-align: center;
+  margin-top: -10px;
   ::-webkit-input-placeholder {
     text-align: center; }
   input[type=number] {

@@ -197,5 +197,7 @@ export async function sendToken(
         request,
         accountVersion: useAccountStore().version,
     });
-    return {opId: (result.data as any).id};
+    return {
+        opId: (result.data as any).id
+    };
 }

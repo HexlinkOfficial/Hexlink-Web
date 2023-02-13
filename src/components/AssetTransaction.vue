@@ -137,7 +137,7 @@ const loadTransactions = async (tokenAddress: string[], profilePics: string[]) =
   transfer.value = await getAssetTransfers({
     wallet: useAccountStore().account!.address,
     category: ["external", "internal", "erc20"],
-    contractAddresses: tokenAddress
+    contractAddresses: tokenAddress,
   })
   // divide all transactions into group by dates
   transfer.value.forEach((t: any) => {

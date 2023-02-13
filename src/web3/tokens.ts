@@ -179,9 +179,9 @@ export async function loadErc721Token(account: string) {
                 twitterUsername: nft.contract.openSea?.twitterUsername
             },
             totalSupply: nft.contract.totalSupply || "",
-            url: nft.media[0].gateway || "",
-            rawUrl: nft.media[0].raw || "",
-            thumbnail: nft.media[0].thumbnail || "",
+            url: nft.media[0]?.gateway || "",
+            rawUrl: nft.media[0]?.raw || "",
+            thumbnail: nft.media[0]?.thumbnail || "",
             attributes: nft.rawMetadata?.attributes || []
         })
     })
@@ -261,7 +261,7 @@ export async function getAssetTransfers(input: {
 }) : Promise<AssetTransfer[]> {
     const order = input.order || 'desc';
     const category = input.category || ['erc20', 'erc721'];
-    let params = { category, order, withMetadata: true} as AssetTransfersWithMetadataParams;
+    let params = { category, order, withMetadata: true, maxCount: 50,} as AssetTransfersWithMetadataParams;
     if (input.contractAddresses && input.contractAddresses.length > 0) {
         params.contractAddresses = input.contractAddresses;
     }
@@ -272,7 +272,7 @@ export async function getAssetTransfers(input: {
     const transfers = send.transfers.concat(receive.transfers).map(
         t => toAssetTransfer(input.wallet, t)
     );
-    transfers.sort((a, b) => a.tx.blockNumber - b.tx.blockNumber).slice(0, 1000);
+    transfers.sort((a, b) => a.tx.blockNumber - b.tx.blockNumber).slice(0, 50);
     return transfers;
 }
 

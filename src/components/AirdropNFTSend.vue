@@ -38,13 +38,7 @@
     <div style="width: 100%; padding: 0 0.87rem;">
       <div class="input-box-wrap">
         <div class="input-box">
-          <input
-            class="text-input"
-            placeholder="e. g. &quot;Redeemable T-Shirt with logo&quot;"
-            type="text"
-            data-marker="Name"
-            v-model="nftAirdrop.name"
-          >
+          <input v-model="nftAirdrop.name" class="text-input" placeholder="e. g. &quot;Redeemable T-Shirt with logo&quot;" type="text" data-marker="Name">
         </div>
     </div>
     </div>
@@ -54,13 +48,7 @@
     <div style="width: 100%; padding: 0 0.87rem;">
       <div class="input-box-wrap">
         <div class="input-box">
-          <input
-            class="text-input"
-            placeholder="e. g. &quot;Redeemable T-Shirt with logo&quot;"
-            type="text"
-            data-marker="Name"
-            v-model="nftAirdrop.symbol"
-          >
+          <input v-model="nftAirdrop.symbol" class="text-input" placeholder="e. g. &quot;Redeemable T-Shirt with logo&quot;" type="text" data-marker="Name">
         </div>
       </div>
     </div>
@@ -70,13 +58,7 @@
     <div style="width: 100%; padding: 0 0.87rem;">
       <div class="input-box-wrap">
         <div class="input-box">
-          <input
-            class="text-input"
-            placeholder="e. g. &quot;100,200,300&quot;"
-            type="number"
-            data-marker="Name"
-            v-model="nftAirdrop.maxSupply" 
-          >
+          <input v-model="nftAirdrop.maxSupply" class="text-input" placeholder="e. g. &quot;100,200,300&quot;" type="text" data-marker="Name">
         </div>
       </div>
     </div>

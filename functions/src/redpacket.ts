@@ -144,6 +144,7 @@ export const createRedPacket = functions.https.onCall(
             args: {
               redPacketId: rpId,
               metadata: data.redPacket,
+              type: "erc20",
             },
           }]
       );
@@ -195,7 +196,11 @@ export const createRedPacketErc721 = functions.https.onCall(
           uid,
           [{
             to: tokenFactoryAddress(chain),
-            args: data.erc721,
+            args: {
+              redPacketId: rpId,
+              metadata: data.erc721,
+              type: "erc721",
+            },
           }]
       );
       const postData: any = {

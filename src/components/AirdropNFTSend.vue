@@ -75,7 +75,7 @@
             placeholder="e. g. &quot;100,200,300&quot;"
             type="number"
             data-marker="Name"
-            v-model="nftAirdrop.maxSupply" 
+            v-model="nftAirdrop.split" 
           >
         </div>
       </div>
@@ -216,7 +216,7 @@ const nftAirdrop = ref<NftAirdrop>({
   id: "",
   name: "",
   symbol: "",
-  maxSupply: "",
+  split: "",
   tokenURI: "",
   salt: "",
   gasToken: tokenStore.nativeCoin.address,
@@ -298,7 +298,7 @@ const setGas = async () => {
   const priceInfo = await getPriceInfo(chain);
   nftAirdrop.value.priceInfo = priceInfo;
   const sponsorshipAmount =
-    EthBigNumber.from(200000).mul(nftAirdrop.value.maxSupply || 0);
+    EthBigNumber.from(200000).mul(nftAirdrop.value.split || 0);
   nftAirdrop.value.gasSponsorship = calcGas(
     chain,
     tokenStore.token(nftAirdrop.value.gasToken),
@@ -332,7 +332,7 @@ watch(() => useChainStore().current, genTokenList);
 watch(() => useWalletStore().connected, genTokenList);
 watch([
   () => nftAirdrop.value.gasToken,
-  () => nftAirdrop.value.maxSupply
+  () => nftAirdrop.value.split
 ], setGas);
 
 const showFileSelection = () => {
@@ -363,7 +363,7 @@ const validateInput = () => {
   if (nftAirdrop.value.symbol.length === 0) {
     throw new Error("symbol cannot be empty");
   }
-  if (EhtBigNumber.from(nftAirdrop.value.maxSupply).eq(0)) {
+  if (EhtBigNumber.from(nftAirdrop.value.split).eq(0)) {
     throw new Error("max supply cannot be 0");
   }
 }

@@ -16,6 +16,7 @@ export const GET_REDPACKET = gql`
         creator,
         metadata,
         created_at,
+        type,
         operation_public {
           chain
         }
@@ -27,12 +28,13 @@ export const GET_CREATED_REDPACKETS = gql`
     query GetRedPacketByUser (
         $userId: String!,
         $chain: String!,
+        $type: String!,
     ) {
         operation (
             where: {
               user_id: { _eq: $userId },
               chain: { _eq: $chain },
-              type: { _eq: "create_redpacket" },
+              type: { _eq: $type },
             },
             limit: 100
         ) {
@@ -49,7 +51,8 @@ export const GET_CREATED_REDPACKETS = gql`
               id,
               metadata,
               deposit,
-              created_at
+              created_at,
+              type
             }
             request {
               args
@@ -75,13 +78,15 @@ function parseRedPacket(op: any) : RedPacketDB | undefined {
       metadata: JSON.parse(r.metadata),
       deposit: JSON.parse(r.deposit),
       createdAt: new Date(r.created_at),
+      type: r.type,
     };
   } else if (op.request?.args) {
-    const {redpacketId, metadata} = JSON.parse(op.request.args);
+    const {redpacketId, metadata, type} = JSON.parse(op.request.args);
     return {
       id: redpacketId,
       metadata,
       createdAt: new Date(op.created_at),
+      type,
     }
   }
 }
@@ -95,6 +100,7 @@ export async function getCreatedRedPackets() : Promise<CreateRedPacketOp[]> {
     {
       userId: useAuthStore().user!.uid,
       chain: useChainStore().chain.name,
+      type: "create_redpacket",
     }
   ).toPromise();
   if (await handleUrqlResponse(result)) {
@@ -132,7 +138,8 @@ export async function getRedPacket(
         metadata: JSON.parse(rp.metadata),
         createdAt: new Date(rp.created_at),
         creator: JSON.parse(rp.creator),
-        chain: rp.operation_public.chain
+        chain: rp.operation_public.chain,
+        type: rp.type,
       }
     } else {
       throw new Error("Redpacket not found");

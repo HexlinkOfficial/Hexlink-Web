@@ -54,6 +54,7 @@ import { loadAndSetErc20Token } from '@/web3/tokens';
 import { switchNetwork } from "@/web3/network";
 import { getChain } from "../../functions/common";
 import type { RedPacketDB } from "@/types";
+import type { RedPacket } from "functions/redpacket/lib";
 
 const redPacket = ref<RedPacketDB | undefined>();
 const redPacketTokenIcon = ref<string>("");
@@ -65,11 +66,14 @@ onMounted(async () => {
   if (redPacket.value) {
     const network = getChain(redPacket.value.chain!);
     await switchNetwork(network);
-    const metadata = await loadAndSetErc20Token(
-      redPacket.value!.metadata.token
-    );
-    redPacketToken.value = metadata.symbol;
-    redPacketTokenIcon.value = metadata.logoURI || "";
+    if (redPacket.value.type === 'erc20') {
+      const metadata = redPacket.value!.metadata as RedPacket;
+      const tokenMetadata = await loadAndSetErc20Token(
+        metadata.token
+      );
+      redPacketToken.value = tokenMetadata.symbol;
+      redPacketTokenIcon.value = tokenMetadata.logoURI || "";
+    }
   } else {
     claimStatus.value = "error";
   }

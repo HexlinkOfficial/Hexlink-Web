@@ -370,7 +370,7 @@ export function buildDeployErc721Op(
 ): Op {
     const initData = hexlinkErc721Interface.encodeFunctionData(
         "init",
-        [input.name, input.symbol, input.tokenURI, input.maxSupply, validator()]
+        [input.name, input.symbol, input.tokenURI, input.split, validator()]
     );
     const callData = tokenFactoryInterface.encodeFunctionData(
         "deployErc721",

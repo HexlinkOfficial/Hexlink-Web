@@ -54,7 +54,7 @@
                     </div>
                   </div>
                 </div>
-                <div class="token-amount" v-if="op.redpacket">
+                <div class="token-amount" v-if="op.redpacket && op.redpacket.type === 'erc20'">
                   <div class="sent-info">
                     <a-tooltip placement="top">
                       <template #title>
@@ -73,7 +73,7 @@
                     {{ op.redpacket.token.symbol }}
                   </div>
                 </div>
-                <div class="claim-status" v-if="op.redpacket">
+                <div class="claim-status" v-if="op.redpacket && op.redpacket.type === 'erc20'">
                   <div class="progress-bar">
                     <span class="box-progress" :style="{
                       width: progress(op.redpacket) + '%'
@@ -96,7 +96,7 @@
                     </p>
                   </div>
                 </div>
-                <div class="share" v-if="op.redpacket">
+                <div class="share" v-if="op.redpacket && op.redpacket.type === 'erc20'">
                   <i v-if="showStatus(op) == 'Sent'" class="fa fa-paper-plane share-button" aria-hidden="true" @click="copyShareLink(op.redpacket)"></i>
                   <span v-if="showStatus(op) != 'Sent'" class="pending-text" :style="showStatus(op) == 'Pending' && 'margin-left: 5.5rem;'">{{ showDetailStatus(op) }}</span>
                 </div>
@@ -227,6 +227,7 @@ import { copy } from "@/web3/utils";
 import { queryRedPacketInfo } from "@/web3/redpacket";
 import { normalizeBalance } from "../../functions/common";
 import type { Token } from "../../functions/common";
+import type { RedPacket } from "../../functions/redpacket";
 import { options } from "@/assets/imageAssets";
 
 const createdRpOps = ref<CreateRedPacketOp[]>([]);
@@ -395,9 +396,13 @@ const normalize = (balance: string | undefined, token: Token) : string => {
 }
 
 const normalizedDbBalance = (op: CreateRedPacketOp) : string => {
-  return op.redpacket?.metadata.balance
-    ? normalize(op.redpacket.metadata.balance, op.redpacket.token!)
-    : "0";
+  if (op.redpacket && op.redpacket.type === "erc20") {
+    const metadata = op.redpacket.metadata as RedPacket | undefined;
+    if (metadata?.balance) {
+      return normalize(metadata.balance, op.redpacket.token!);
+    }
+  }
+  return "0";
 }
 
 const normalizeClaimAmount = (op: ClaimRedPacketOp) => {
@@ -417,8 +422,9 @@ const loadAndSaveERC20Token = async (tokenAddr: string) : Promise<Token> => {
 const aggregateCreated = async function(
   op: CreateRedPacketOp
 ) : Promise<CreateRedPacketOp> {
-  if (op.redpacket) {
-    const tokenAddr = op.redpacket.metadata.token.toLowerCase();
+  if (op.redpacket && op.redpacket.type === 'erc20') {
+    const metadata = op.redpacket!.metadata as RedPacket;
+    const tokenAddr = metadata.token.toLowerCase();
     op.redpacket.token = await loadAndSaveERC20Token(tokenAddr);
     if (op.tx && op.txStatus === 'success') {
       op.redpacket.state = await queryRedPacketInfo(op.redpacket);
@@ -430,8 +436,9 @@ const aggregateCreated = async function(
 const aggregatedClaimed = async function(
   op: ClaimRedPacketOp
 ) : Promise<ClaimRedPacketOp> {
-  if (op.redpacket) {
-    const tokenAddr = op.redpacket!.metadata.token.toLowerCase();
+  if (op.redpacket && op.redpacket.type === "erc20") {
+    const metadata = op.redpacket!.metadata as RedPacket;
+    const tokenAddr = metadata.token.toLowerCase();
     const token = await loadAndSaveERC20Token(tokenAddr);
     op.redpacket.token = token;
   }

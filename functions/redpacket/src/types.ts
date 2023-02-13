@@ -34,7 +34,7 @@ export interface RedPacketErc721 {
     name: string,
     symbol: string,
     tokenURI: string,
-    maxSupply: string,
+    split: number,
     validator: string;
     contract?: string;
     creator?: string;

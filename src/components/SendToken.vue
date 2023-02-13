@@ -1,5 +1,5 @@
 <template>
-  <div v-if="claimStatus == ''" class="claim-card transition">
+  <div v-if="sendStatus === ''" class="claim-card transition">
     <router-link to="/">
       <svg 
         class="redpacket_close transition" 
@@ -15,9 +15,9 @@
       </svg>
     </router-link>
     <form class="form-send" @submit.prevent="onSubmit">
-      <div v-if="show" class="people-section">
+      <div v-if="sendStatus == 'input_receipt'" class="people-section">
         <div style="margin: 0px auto; display: block;">
-          <h2 class="people-title">Send Money</h2>
+          <h2 class="people-title">Send Token</h2>
           <div style="margin-top: 30px; position: relative;">
             <div class="people-input-box">
               <span class="input-search-icon">
@@ -40,7 +40,7 @@
           </div>
         </div>
       </div>
-      <div v-if="!show" class="transaction-section">
+      <div v-if="sendStatus === 'input_token'" class="transaction-section">
         <div class="send-to-wrapper">
           <div class="profile-wrapper">
             <img 
@@ -61,7 +61,7 @@
             <input 
               class="send-amount"
               type="number"
-              v-model="transaction.balanceInput" :style="hasBalanceWarning ? 'color: #FE646F;' : ''"
+              v-model="transaction.amountInput" :style="hasBalanceWarning ? 'color: #FE646F;' : ''"
               autocomplete="off" 
               placeholder="0.00"
               autocorrect="off" 
@@ -149,10 +149,7 @@
         </div>
       </div>
       <div style="display: flex; justify-content: center;">
-        <button 
-          @click="() => {
-            if (verifySendTo()) show = !show;
-          }"
+        <button
           class="cta-button"
         >
           Continue
@@ -164,19 +161,11 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed, watch } from "vue";
-import { getRedPacket } from '@/graphql/redpacket';
-import { useRoute } from "vue-router";
-import { loadAndSetErc20Token } from '@/web3/tokens';
 import type { BalanceMap } from "@/web3/tokens";
-import { switchNetwork } from "@/web3/network";
 import { tokenBase } from "@/web3/utils";
-import { getChain } from "../../functions/common";
 import type { Token } from "../../functions/common";
-import type { RedPacketDB } from "@/types";
 import { useTokenStore } from "@/stores/token";
-import { useRedPacketStore } from '@/stores/redpacket';
 import { useAccountStore } from '@/stores/account';
-import { useWalletStore } from '@/stores/wallet';
 import { useChainStore } from "@/stores/chain";
 import { hash } from "../../functions/common";
 import type { OnClickOutsideHandler } from '@vueuse/core';
@@ -184,82 +173,49 @@ import { vOnClickOutside } from '@/services/directive';
 import { getBalances } from "@/web3/tokens";
 import { getPriceInfo } from "@/web3/network";
 import { BigNumber as EthBigNumber } from "ethers";
-import { calcGas, type PriceInfo } from "../../functions/common";
+import { calcGas, tokenAmount, type PriceInfo } from "../../functions/common";
 import { BigNumber } from "bignumber.js";
 import { profilePic } from "@/assets/imageAssets";
 import { ethers } from "ethers";
 import { sendToken } from "@/web3/operation";
 
-const estimatedGasAmount = "250000"; // hardcoded, can optimize later
+const estimatedGasAmount = "100000"; // hardcoded, can optimize later
 const chooseTotalDrop = ref<boolean>(false);
 const chooseGasDrop = ref<boolean>(false);
-const redPacket = ref<RedPacketDB | undefined>();
-const redPacketTokenIcon = ref<string>("");
-const redPacketToken = ref<string>("");
-const claimStatus = ref<string>("");
+const sendStatus = ref<string>("");
 const hasBalanceWarning = ref<boolean>(false);
 const tokenStore = useTokenStore();
-const redPacketStore = useRedPacketStore();
 const hexlAccountBalances = ref<BalanceMap>({});
-const walletAccountBalances = ref<BalanceMap>({});
 const tokens = ref<Token[]>([]);
-const walletStore = useWalletStore();
-const show = ref<boolean>(true)
 const isInputAddress = ref<boolean>(false);
 
-interface tokenTransaction {
-  to: string[],
+interface TokenTransaction {
+  to: string,
   salt: string,
-  balance: string,
-  balanceInput: string,
+  amount: string,
+  amountInput: string,
   token: string,
   gasToken: string,
   estimatedGas: string,
   priceInfo?: PriceInfo | undefined;
 }
 
-const transaction = ref<tokenTransaction>({
-  to: [],
+const transaction = ref<TokenTransaction>({
+  to: "",
   salt: hash(new Date().toISOString()),
-  balance: "0",
-  balanceInput: "0.0001",
+  amount: "0",
+  amountInput: "0.0001",
   token: tokenStore.nativeCoin.address,
   gasToken: tokenStore.nativeCoin.address,
   estimatedGas: "0",
 })
 
-onMounted(async () => {
-  redPacket.value = await getRedPacket(useRoute().query.claim!.toString());
-  if (redPacket.value) {
-    const network = getChain(redPacket.value.chain!);
-    await switchNetwork(network);
-    const metadata = await loadAndSetErc20Token(
-      redPacket.value!.metadata.token
-    );
-    redPacketToken.value = metadata.symbol;
-    redPacketTokenIcon.value = metadata.logoURI || "";
-  } else {
-    claimStatus.value = "error";
-  }
-});
-
 const token = computed(() => tokenStore.token(transaction.value.token));
 const gasToken = computed(() => tokenStore.token(transaction.value.gasToken));
 
-const hexlAccountBalance = (token: string): string => {
+const tokenBalance = (token: string): string => {
   return hexlAccountBalances.value[token]?.normalized || "0";
 }
-
-const walletAccountBalance = (token: string): string => {
-  return walletAccountBalances.value[token]?.normalized || "0";
-}
-
-const tokenBalance = (token: string) => {
-  if (redPacketStore.account == "hexlink") {
-    return hexlAccountBalance(token);
-  }
-  return walletAccountBalance(token);
-};
 
 const transactionTokenBalance = computed(
   () => tokenBalance(transaction.value.token)
@@ -270,23 +226,10 @@ const genTokenList = async function () {
     useAccountStore().account!.address,
     hexlAccountBalances.value,
   );
-  if (walletStore.connected) {
-    walletAccountBalances.value = await getBalances(
-      walletStore.account!.address,
-      walletAccountBalances.value,
-    );
-  }
-  if (redPacketStore.account == "hexlink") {
-    tokens.value = tokenStore.tokens.filter(
-      t => Number(hexlAccountBalance(t.address)) > 0
-    );
-    setDefaultToken(walletAccountBalance);
-  } else {
-    tokens.value = tokenStore.tokens.filter(
-      t => Number(walletAccountBalance(t.address)) > 0
-    );
-    setDefaultToken(hexlAccountBalance);
-  }
+  tokens.value = tokenStore.tokens.filter(
+    t => Number(tokenBalance(t.address)) > 0
+  );
+  setDefaultToken(tokenBalance);
 }
 
 const setDefaultToken = function (getBalance: (t: string) => string) {
@@ -350,14 +293,11 @@ const tokenChoose =
 onMounted(genTokenList);
 onMounted(refreshGas);
 watch(() => useChainStore().current, genTokenList);
-watch(() => useWalletStore().connected, genTokenList);
-watch([
-  () => transaction.value.gasToken
-], refreshGas);
+watch([() => transaction.value.gasToken], refreshGas);
 watch(
-  [() => transaction.value.balanceInput, transactionTokenBalance],
-  ([newBalanceInput, newTokenBalance], _old) => {
-    if (Number(newBalanceInput) > Number(newTokenBalance)) {
+  [() => transaction.value.amountInput, transactionTokenBalance],
+  ([newAmountInput, newTokenBalance], _old) => {
+    if (Number(newAmountInput) > Number(newTokenBalance)) {
       hasBalanceWarning.value = true;
     } else {
       hasBalanceWarning.value = false;
@@ -383,14 +323,32 @@ const verifySendTo = () => {
   }
 };
 
-const onSubmit = (e: Event) => {
-  // sendToken(
-  //   transaction.value.token,
-  //   transaction.value.to,
-  //   transaction.value.balance,
-  //   transaction.value.gasToken,
-  // );
-  console.log(e);
+const onSubmit = async (e: Event) => {
+  if (sendStatus.value === 'input_receipt') {
+    if (verifySendTo()) {
+      sendStatus.value = "input_token";
+    }
+  } else if (sendStatus.value === 'input_token') {
+    transaction.value.amount = tokenAmount(
+      transaction.value.amountInput,
+      tokenStore.token(transaction.value.token).decimals
+    ).toString();
+    try {
+      await sendToken(
+        transaction.value.token,
+        [{
+          schema: isInputAddress ? undefined : "mailto",
+          name: transaction.value.to,
+        }],
+        transaction.value.amount,
+        transaction.value.gasToken,
+      );
+      sendStatus.value = "success";
+    } catch(error) {
+      console.log(error);
+      sendStatus.value = "error";
+    }
+  }
 }
 
 const formatEmail = (email: string) => {

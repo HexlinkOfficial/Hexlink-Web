@@ -214,6 +214,7 @@ interface RawRedPacketInput extends RedPacketInput {
 }
 
 const redpacket = ref<RawRedPacketInput>({
+  id: "",
   mode: 2,
   salt: hash(new Date().toISOString()),
   split: 1,

@@ -6,13 +6,7 @@ import { genDeployAuthProof } from "@/web3/oracle";
 import { tokenEqual } from "@/web3/utils";
 import { estimateGas, sendTransaction } from "@/web3/wallet";
 
-import {
-    type Op,
-    type Chain,
-    type UserOpRequest,
-    type DeployRequest,
-    hexlAccount,
-} from "../../functions/common";
+import type { Op, Chain, UserOpRequest, DeployRequest} from "../../functions/common";
 import {
     hash,
     isNativeCoin,
@@ -133,7 +127,7 @@ async function buildTransactionsForMetamask(
     const deployed = await isContract(useChainStore().provider, hexlAccount);
     if (deployed) {
         txes.push({
-            name: "createRedPacketErc721",
+            name: "createRedPacket",
             function: "execBatch",
             args: {ops: userOps},
             input: {
@@ -165,7 +159,7 @@ async function buildTransactionsForMetamask(
         {to: hexlAddr, value: "0", callData: deployData, callGasLimit: "0"},
     ]]);
     txes.push({
-        name: "createRedPacketErc721",
+        name: "createRedPacket",
         function: "process",
         args: {
             "deposit": {
@@ -258,6 +252,7 @@ async function createRedPacketTxForMetamask(
 async function processTxAndSave(
     redpacket: RedPacketInput | RedPacketErc721Input,
     txes: any[],
+    postProcess: any,
     dryrun: boolean
 ) : Promise<{id: string, opId?: number}> {
     const chain = useChainStore().chain;
@@ -275,10 +270,7 @@ async function processTxAndSave(
     for (let i = 0; i < txes.length; i++) {
         const txHash = await sendTransaction(txes[i].input);
         if (txes[i].name == "createRedPacket") {
-            const opId = await callCreateRedPacket(chain, redpacket as RedPacketInput, txHash);
-            return {id: redpacket.id!, opId};
-        } else if (txes[i].name == "createRedPacketErc721") {
-            const opId = await callCreateRedPacketErc721(chain, redpacket as RedPacketErc721Input, txHash);
+            const opId = await postProcess(chain, redpacket as RedPacketInput, txHash);
             return {id: redpacket.id!, opId};
         }
     }
@@ -321,7 +313,7 @@ export async function createNewRedPacket(
         return {id: redpacket.id!, opId};
     } else {
         const txes = await createRedPacketTxForMetamask(redpacket);
-        return await processTxAndSave(redpacket, txes, dryrun);
+        return await processTxAndSave(redpacket, txes, callCreateRedPacket, dryrun);
     }
 }
 
@@ -488,6 +480,6 @@ export async function createRedPacketErc721(
         return {id: input.id!, opId};
     } else {
         const txes = await createRedPacketErc721ForMetamask(input);
-        return await processTxAndSave(input, txes, dryrun);
+        return await processTxAndSave(input, txes, callCreateRedPacketErc721, dryrun);
     }
 }

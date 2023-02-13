@@ -163,7 +163,7 @@ export async function sendToken(
     to: Name[],
     amount: string,
     gasToken: string,
-    dryrun?: boolean
+    dryrun?: boolean,
 ) : Promise<{opId: number}> {
     const chain = useChainStore().chain;
     const ops = buildSendTokenRequestOps(

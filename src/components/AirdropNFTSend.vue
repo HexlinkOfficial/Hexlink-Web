@@ -128,7 +128,7 @@
       :tokenBalance="hexlAccountBalance(nftAirdrop.gasToken)"
       :gasTokenBalance="hexlAccountBalance(nftAirdrop.gasToken)"
       @selected="setAccount"
-      :isChosen="account === 'hexlink'"
+      :isChosen="useRedPacketStore().account === 'hexlink'"
     >
     </RedPacketAccount>
     <RedPacketAccount
@@ -138,12 +138,12 @@
       :tokenBalance="walletAccountBalance(nftAirdrop.gasToken)"
       :gasTokenBalance="walletAccountBalance(nftAirdrop.gasToken)"
       @selected="setAccount"
-      :isChosen="account === 'wallet'"
+      :isChosen="useRedPacketStore().account === 'wallet'"
     >
     </RedPacketAccount>
   </div>
   <div class="create">
-    <button class="connect-wallet-button" @click="createNft">
+    <button class="connect-wallet-button" @click="confirmNFT">
       Create
     </button>
   </div>
@@ -162,7 +162,7 @@ import { useChainStore } from "@/stores/chain";
 import { getPriceInfo } from "@/web3/network";
 import { hash, calcGas } from "../../functions/common";
 import { redpacketErc721Id } from "../../functions/redpacket";
-import type { RedPacketErc721Input } from "../../functions/redpacket";
+import type { NftAirdrop } from "../../functions/redpacket";
 import type { BalanceMap } from "@/web3/tokens";
 import { getBalances } from "@/web3/tokens";
 import { useAccountStore } from '@/stores/account';
@@ -171,6 +171,9 @@ import RedPacketAccount from "@/components/RedPacketAccount.vue";
 import {createRedPacketErc721, validator} from "@/web3/redpacket";
 import { uploadToIPFS } from "@/web3/storage";
 import {BigNumber as EhtBigNumber} from "ethers";
+import { createNotification } from "@/web3/utils";
+import { useRedPacketStore } from '@/stores/redpacket';
+import type { AccountType } from "@/stores/redpacket";
 
 const FILE_SIZE_LIMIT = 1024 * 1024 * 5;
 const estimatedGasAmount = "550000"; // hardcoded, can optimize later
@@ -178,6 +181,8 @@ const tokenStore = useTokenStore();
 const walletStore = useWalletStore();
 const chooseGasDrop = ref<boolean>(false);
 const tokens = ref<Token[]>([]);
+const sendStatus = ref<string>("");
+const message = ref<string>("Let's go!");
 
 const hexlAccountBalances = ref<BalanceMap>({});
 const hexlAccountBalance = (token: string): string => {
@@ -195,11 +200,6 @@ function createObjectURL(file: File) {
       : window.webkitURL.createObjectURL(file);
 }
 
-interface NftAirdrop extends RedPacketErc721Input {
-  file?: File;
-  splitInput: string,
-}
-
 const nftAirdrop = ref<NftAirdrop>({
   id: "",
   name: "",
@@ -215,8 +215,9 @@ const nftAirdrop = ref<NftAirdrop>({
 });
 
 const account = ref<string>("hexlink");
-const setAccount = (acc: string) => {
-  account.value = acc;
+
+const setAccount = (account: AccountType) => {
+  useRedPacketStore().setAccount(account);
 }
 
 const gasToken = computed(
@@ -224,7 +225,7 @@ const gasToken = computed(
 );
 
 const tokenBalance = (token: string) => {
-  if (account.value === "hexlink") {
+  if (useRedPacketStore().account === "hexlink") {
     return hexlAccountBalance(token);
   }
   return walletAccountBalance(token);
@@ -254,7 +255,7 @@ const genTokenList = async function () {
       walletAccountBalances.value,
     );
   }
-  if (account.value === "hexlink") {
+  if (useRedPacketStore().account === "hexlink") {
     tokens.value = tokenStore.tokens.filter(
       t => Number(hexlAccountBalance(t.address)) > 0
     );
@@ -341,20 +342,31 @@ const chooseFile = async (e: any) => {
 
 const validateInput = () => {
   if (nftAirdrop.value.file == undefined) {
+    createNotification("Please select a file first", "error");
+    return false;
     throw new Error("please select a file first");
   }
   if (nftAirdrop.value.file.size > FILE_SIZE_LIMIT) {
+    createNotification("File too large, maximum 5MB accepted", "error");
+    return false;
     throw new Error("file too large, maximum 5MB accepted");
   }
   if (nftAirdrop.value.name.length === 0) {
+    createNotification("Name cannot be empty", "error");
+    return false;
     throw new Error("name cannot be empty");
   }
   if (nftAirdrop.value.symbol.length === 0) {
+    createNotification("Symbol cannot be empty", "error");
+    return false;
     throw new Error("symbol cannot be empty");
   }
   if (EhtBigNumber.from(nftAirdrop.value.splitInput).eq(0)) {
+    createNotification("Supply cannot be 0", "error");
+    return false;
     throw new Error("supply cannot be 0");
   }
+  return true;
 }
 
 const createNft = async () => {
@@ -371,15 +383,36 @@ const createNft = async () => {
       nftAirdrop.value.tokenURI = await uploadToIPFS(
         nftAirdrop.value.file!
       );
+      createNotification("Waiting to upload your NFT picture", "error");
     }
-    await createRedPacketErc721(
+    const status = await createRedPacketErc721(
       nftAirdrop.value,
-      account.value === "hexlink",
+      useRedPacketStore().account === "hexlink",
       false // dryrun
     );
+    console.log(status);
   } catch (e) {
     console.log("Failed to create redpacket with");
     console.log(e);
+  }
+}
+
+const confirmNFT = async () => {
+  if (validateInput()) {
+    nftAirdrop.value.salt = hash(new Date().toISOString());
+    nftAirdrop.value.split = Number(nftAirdrop.value.splitInput);
+    nftAirdrop.value.id = redpacketErc721Id(
+      useChainStore().chain,
+      useAccountStore().account!.address,
+      nftAirdrop.value
+    );
+    if (!nftAirdrop.value.tokenURI) {
+      nftAirdrop.value.tokenURI = await uploadToIPFS(
+        nftAirdrop.value.file!
+      );
+      createNotification("Waiting to upload your NFT picture", "error");
+    }
+    useRedPacketStore().beforeCreate(nftAirdrop.value);
   }
 }
 </script>

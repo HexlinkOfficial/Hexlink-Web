@@ -37,3 +37,8 @@ export interface RedPacketInput extends RedPacket, GasInput {
 }
 export interface RedPacketErc721Input extends RedPacketErc721, GasInput {
 }
+
+interface NftAirdrop extends RedPacketErc721Input {
+    file?: File;
+    splitInput: string,
+}

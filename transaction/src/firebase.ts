@@ -1,3 +1,4 @@
+/* tslint:disable:max-classes-per-file */
 import * as admin from "firebase-admin";
 
 const serviceAccount = JSON.parse(process.env.GOOGLE_CREDENTIAL_JSON!);

@@ -19,8 +19,8 @@
   <div v-if="store.status !== 'confirming'" class="claim-success-card transition">
     <h2 class="transition">
       <div class="spinner-lg" :class="store.status">
-          <div class="check"></div>
-        </div>
+        <div class="check"></div>
+      </div>
       <span style="font-size: 20px; margin-top: 1rem;">{{ message }}</span><br>
     </h2>
     <div class="cta-container transition" style="margin-top: 340px;">

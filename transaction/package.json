@@ -6,8 +6,7 @@
   "scripts": {
     "prebuild": "tslint -c tslint.json -p tsconfig.json --fix",
     "build": "npm run prebuild && tsc",
-    "prestart": "npm run build",
-    "start": "npm run prestart && nodemon .",
+    "start": "npm run build && nodemon .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",

@@ -652,6 +652,8 @@ const createNft = async () => {
   color: white;
   background: #076ae0;
   appearance: button; }
+.file-upload-button:hover {
+  background-color: rgba(7, 106, 224, 0.9); }
 .input-title {
   margin-bottom: 16px;
   color: rgba(22, 22, 26, 0.6);

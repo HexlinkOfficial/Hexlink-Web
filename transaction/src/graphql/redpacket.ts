@@ -1,13 +1,7 @@
 import {gql} from "@urql/core";
 import {client} from "./client";
 import type {RedPacketClaimInput} from "../types";
-<<<<<<< HEAD
-import type {
-  HexlinkUserInfo
-} from "../../../functions/redpacket";
-=======
 import type { HexlinkUserInfo } from "../../../functions/redpacket";
->>>>>>> d967c25 (update)
 
 const INSERT_REDPACKET_CLAIM = gql`
 mutation ($objects: [redpacket_claim_insert_input!]!) {

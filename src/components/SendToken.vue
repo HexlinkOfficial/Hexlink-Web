@@ -15,7 +15,6 @@
       </svg>
     </router-link>
     <form class="form-send" @submit.prevent="onSubmit">
-      <div v-if="sendStatus == 'input_receipt'" class="people-section">
         <div style="margin: 0px auto; display: block;">
           <h2 class="people-title">Send Token</h2>
           <div style="margin-top: 30px; position: relative;">
@@ -33,26 +32,9 @@
                 v-model="transaction.to"
                 placeholder="email or wallet address"
                 aria-expanded="false" autocomplete="off" autocorrect="off"
-                oninvalid="try{setCustomValidity(verifySendTo() ? '' : 'your custom message')}" 
+                oninvalid="try{setCustomValidity(verifySendTo() ? '' : 'invalid receipt')}" 
                 required
               >
-            </div>
-          </div>
-        </div>
-      </div>
-      <div v-if="sendStatus === 'input_token'" class="transaction-section">
-        <div class="send-to-wrapper">
-          <div class="profile-wrapper">
-            <img 
-              style="border-radius: 50px; max-width: 40px;"
-              :src="profilePic[Math.floor(Math.random() * profilePic.length)]" :size="64" referrerpolicy="no-referrer"
-              rel="preload" 
-            />
-          </div>
-          <div class="send-to-name">
-            <div style="color: #0c0c0d; font-size: 1.1rem; font-weight: 500;">
-              <span v-if="!isInputAddress">{{ transaction.to }}</span>
-              <span v-if="isInputAddress">{{ transaction.to.toString().substring(0,21).toLowerCase() }}<br>{{ transaction.to.toString().substring(21,).toLowerCase() }}</span>
             </div>
           </div>
         </div>
@@ -147,7 +129,6 @@
             </div>
           </div>
         </div>
-      </div>
       <div style="display: flex; justify-content: center;">
         <button
           class="cta-button"
@@ -175,11 +156,10 @@ import { getPriceInfo } from "@/web3/network";
 import { BigNumber as EthBigNumber } from "ethers";
 import { calcGas, tokenAmount, type PriceInfo } from "../../functions/common";
 import { BigNumber } from "bignumber.js";
-import { profilePic } from "@/assets/imageAssets";
 import { ethers } from "ethers";
 import { sendToken } from "@/web3/operation";
 
-const estimatedGasAmount = "100000"; // hardcoded, can optimize later
+const estimatedGasAmount = "150000"; // hardcoded, can optimize later
 const chooseTotalDrop = ref<boolean>(false);
 const chooseGasDrop = ref<boolean>(false);
 const sendStatus = ref<string>("");
@@ -204,7 +184,7 @@ const transaction = ref<TokenTransaction>({
   to: "",
   salt: hash(new Date().toISOString()),
   amount: "0",
-  amountInput: "0.0001",
+  amountInput: "1",
   token: tokenStore.nativeCoin.address,
   gasToken: tokenStore.nativeCoin.address,
   estimatedGas: "0",
@@ -306,12 +286,12 @@ watch(
 );
 
 const verifySendTo = () => {
-  isInputAddress.value = false;
   if (transaction.value.to.length > 0) {
-    if (ethers.utils.isAddress(transaction.value.to.toString())) {
+    if (ethers.utils.isAddress(transaction.value.to)) {
       isInputAddress.value = true;
       return true;
-    } else if (validateEmail(transaction.value.to.toString())) {
+    } else if (validateEmail(transaction.value.to)) {
+      isInputAddress.value = false;
       return true;
     } else {
       console.log("Invalid input. Please input an email.")
@@ -323,12 +303,8 @@ const verifySendTo = () => {
   }
 };
 
-const onSubmit = async (e: Event) => {
-  if (sendStatus.value === 'input_receipt') {
-    if (verifySendTo()) {
-      sendStatus.value = "input_token";
-    }
-  } else if (sendStatus.value === 'input_token') {
+const onSubmit = async (_e: Event) => {
+  if (verifySendTo()) {
     transaction.value.amount = tokenAmount(
       transaction.value.amountInput,
       tokenStore.token(transaction.value.token).decimals
@@ -337,17 +313,17 @@ const onSubmit = async (e: Event) => {
       await sendToken(
         transaction.value.token,
         [{
-          schema: isInputAddress ? undefined : "mailto",
+          schema: isInputAddress.value ? undefined : "mailto",
           name: transaction.value.to,
         }],
         transaction.value.amount,
         transaction.value.gasToken,
+        false // dryrun
       );
-      sendStatus.value = "success";
     } catch(error) {
       console.log(error);
-      sendStatus.value = "error";
     }
+    sendStatus.value = "";
   }
 }
 

@@ -18,14 +18,15 @@ import {
     encodeValidateAndCall,
     hash,
     isNativeCoin,
-    nameHash,
+    hexlContract,
 } from "../../functions/common/";
 import { genDeployAuthProof } from "./oracle";
 import { signMessage } from "./wallet";
 import { useWalletStore } from "@/stores/wallet";
+import { nameHashWithVersion } from "@/web3/account";
 
 import { getFunctions, httpsCallable } from 'firebase/functions'
-import { getPriceInfo } from "./network";
+import { getInfuraProvider, getPriceInfo } from "./network";
 const functions = getFunctions();
 
 export function buildOpInput(params: {
@@ -151,9 +152,11 @@ export interface Name {
     name: string;
 }
 
-function addressOf(receipt: Name) {
+async function addressOf(chain: Chain, receipt: Name) {
     if (receipt.schema) {
-        return nameHash(receipt.schema, receipt.name);
+        const nameHash = nameHashWithVersion(receipt.schema, receipt.name);
+        const hexl = await hexlContract(getInfuraProvider(chain));
+        return await hexl.addressOfName(nameHash);
     }
     return receipt.name;
 }
@@ -166,10 +169,13 @@ export async function sendToken(
     dryrun?: boolean,
 ) : Promise<{opId: number}> {
     const chain = useChainStore().chain;
+    const parsedAddresses = await Promise.all(
+        to.map(t => addressOf(chain, t))
+    );
     const ops = buildSendTokenRequestOps(
         chain,
         token,
-        to.map(n => addressOf(n)),
+        parsedAddresses,
         amount
     );
     const request = await buildUserOpRequest(

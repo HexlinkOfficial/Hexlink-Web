@@ -163,14 +163,19 @@
                           Amount: {{ normalizeClaimAmount(op) }}
                         </span>
                       </template>
-                      <div
+                      <div v-if="op.redpacket.type === 'erc721'"
                         style="overflow: auto; white-space: nowrap; margin-left: 0.25rem; width: 45px;display: flex;justify-content: flex-end;">
-                        + {{ normalizeClaimAmount(op).toString().substring(0,5)}}</div>
+                        #{{ op.claim?.claimed }}
+                      </div>
+                      <div v-if="op.redpacket.type === 'erc20'"
+                        style="overflow: auto; white-space: nowrap; margin-left: 0.25rem; width: 45px;display: flex;justify-content: flex-end;">
+                        + {{ normalizeClaimAmount(op).toString().substring(0,5)}}
+                      </div>
                     </a-tooltip>
                     <div class="token-icon" style="margin-right: 0.25rem; margin-left: 0.25rem;">
-                      <img :src="op.redpacket.token.logoURI">
+                      <img :src="op.redpacket.token?.logoURI || ipfsUrl(op.redpacket.metadata.tokenURI)">
                     </div>
-                    {{ op.redpacket.token.symbol }}
+                    {{ op.redpacket.token?.symbol || op.redpacket.metadata.symbol}}
                   </div>
                 </div>
                 <div class="claim-status" v-if="op.claim">
@@ -229,6 +234,7 @@ import { normalizeBalance } from "../../functions/common";
 import type { Token } from "../../functions/common";
 import type { RedPacket } from "../../functions/redpacket";
 import { options } from "@/assets/imageAssets";
+import { ipfsUrl } from "@/web3/storage";
 
 const createdRpOps = ref<CreateRedPacketOp[]>([]);
 const claimedRpOps = ref<ClaimRedPacketOp[]>([]);

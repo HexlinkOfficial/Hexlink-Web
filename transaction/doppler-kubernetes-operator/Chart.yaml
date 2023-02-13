@@ -1,0 +1,12 @@
+apiVersion: v2
+description: Automatically sync secrets from Doppler to Kubernetes and auto-reload
+  deployments when secrets change.
+home: https://doppler.com
+icon: https://doppler.com/imgs/logo_color.png
+keywords:
+- Doppler
+- Secrets Manager
+name: doppler-kubernetes-operator
+sources:
+- https://github.com/DopplerHQ/kubernetes-operator
+version: 1.2.0

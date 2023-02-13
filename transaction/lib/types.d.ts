@@ -11,7 +11,7 @@ export interface RedPacketClaimInput {
     opId: number;
 }
 export type QueueType = "operation" | "transaction" | "coordinator";
-export type ActionType = "insert_redpacket_claim" | "insert_redpacket";
+export type ActionType = "insert_redpacket_claim" | "insert_redpacket" | "insert_redpacket_erc721";
 export interface Action {
     type: ActionType;
     params: any;

@@ -2,7 +2,6 @@ import {gql} from "@urql/core";
 import {client} from "./client";
 import type {RedPacketClaimInput} from "../types";
 import type {
-  RedPacket,
   HexlinkUserInfo
 } from "../../../functions/redpacket";
 

@@ -26,6 +26,7 @@ import {
     buildRedPacketOps,
     tokenFactoryInterface,
     tokenFactoryAddress,
+    hexlinkErc721Interface,
 } from "../../functions/redpacket";
 
 import { useChainStore } from "@/stores/chain";
@@ -367,7 +368,7 @@ export function buildDeployErc721Op(
     chain: Chain,
     input: RedPacketErc721Input,
 ): Op {
-    const initData = tokenFactoryInterface.encodeFunctionData(
+    const initData = hexlinkErc721Interface.encodeFunctionData(
         "init",
         [input.name, input.symbol, input.tokenURI, input.maxSupply, validator()]
     );

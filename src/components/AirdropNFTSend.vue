@@ -5,7 +5,6 @@
       <div class="upload-box-wrap" v-if="!nftAirdrop.file">
         <input 
           hidden
-          ref="file"
           id="nftUpload"
           accept="image/png,image/jpeg,image/gif,image/webp,video/mp4,video/webm,audio/mp3,audio/webm,audio/mpeg"
           name="primary-attachment" 
@@ -135,15 +134,29 @@
     </div>
   </div>
   <div class="choose-account">
-    <RedPacketAccount account="hexlink" :token="nftAirdrop.gasToken" :gasToken="nftAirdrop.gasToken"
-      :tokenBalance="hexlAccountBalance(nftAirdrop.gasToken)" :gasTokenBalance="hexlAccountBalance(nftAirdrop.gasToken)">
+    <RedPacketAccount
+      account="hexlink"
+      :token="nftAirdrop.gasToken"
+      :gasToken="nftAirdrop.gasToken"
+      :tokenBalance="hexlAccountBalance(nftAirdrop.gasToken)"
+      :gasTokenBalance="hexlAccountBalance(nftAirdrop.gasToken)"
+      @selected="setAccount"
+      :isChosen="account === 'hexlink'"
+    >
     </RedPacketAccount>
-    <RedPacketAccount account="wallet" :token="nftAirdrop.gasToken" :gasToken="nftAirdrop.gasToken"
-      :tokenBalance="walletAccountBalance(nftAirdrop.gasToken)" :gasTokenBalance="walletAccountBalance(nftAirdrop.gasToken)">
+    <RedPacketAccount
+      account="wallet"
+      :token="nftAirdrop.gasToken"
+      :gasToken="nftAirdrop.gasToken"
+      :tokenBalance="walletAccountBalance(nftAirdrop.gasToken)"
+      :gasTokenBalance="walletAccountBalance(nftAirdrop.gasToken)"
+      @selected="setAccount"
+      :isChosen="account === 'wallet'"
+    >
     </RedPacketAccount>
   </div>
   <div class="create">
-    <button class="connect-wallet-button">
+    <button class="connect-wallet-button" @click="createNft">
       Create
     </button>
   </div>
@@ -160,18 +173,22 @@ import { vOnClickOutside } from '@/services/directive';
 import type { Token } from "../../functions/common";
 import { useChainStore } from "@/stores/chain";
 import { getPriceInfo } from "@/web3/network";
-import { calcGas, type PriceInfo } from "../../functions/common";
+import { hash, calcGas } from "../../functions/common";
+import { redpacketErc721Id } from "../../functions/redpacket";
+import type { RedPacketErc721Input } from "../../functions/redpacket";
 import type { BalanceMap } from "@/web3/tokens";
 import { getBalances } from "@/web3/tokens";
 import { useAccountStore } from '@/stores/account';
 import { useWalletStore } from '@/stores/wallet';
-import { useRedPacketStore } from '@/stores/redpacket';
 import RedPacketAccount from "@/components/RedPacketAccount.vue";
+import {createRedPacketErc721, validator} from "@/web3/redpacket";
+import { uploadToIPFS } from "@/web3/storage";
+import {BigNumber as EhtBigNumber} from "ethers";
 
+const FILE_SIZE_LIMIT = 1024 * 1024 * 5;
 const estimatedGasAmount = "250000"; // hardcoded, can optimize later
 const tokenStore = useTokenStore();
 const walletStore = useWalletStore();
-const redPacketStore = useRedPacketStore();
 const chooseGasDrop = ref<boolean>(false);
 const tokens = ref<Token[]>([]);
 
@@ -191,32 +208,34 @@ function createObjectURL(file: File) {
       : window.webkitURL.createObjectURL(file);
 }
 
-interface NFTAirdrop {
-  file?: File,
-  name: string,
-  symbol: string,
-  maxSupply: string,
-  gasToken: string,
-  gasSponsorship: string,
-  estimatedGas: string,
-  priceInfo?: PriceInfo | undefined;
+interface NftAirdrop extends RedPacketErc721Input {
+  file?: File;
 }
 
-const nftAirdrop = ref<NFTAirdrop>({
+const nftAirdrop = ref<NftAirdrop>({
+  id: "",
   name: "",
   symbol: "",
   maxSupply: "",
+  tokenURI: "",
+  salt: hash(new Date().toISOString()),
   gasToken: tokenStore.nativeCoin.address,
   gasSponsorship: "0",
   estimatedGas: "0",
-})
+  validator: validator(),
+});
+
+const account = ref<string>("hexlink");
+const setAccount = (acc: string) => {
+  account.value = acc;
+}
 
 const gasToken = computed(
   () => tokenStore.token(nftAirdrop.value.gasToken)
 );
 
 const tokenBalance = (token: string) => {
-  if (redPacketStore.account == "hexlink") {
+  if (account.value === "hexlink") {
     return hexlAccountBalance(token);
   }
   return walletAccountBalance(token);
@@ -246,7 +265,7 @@ const genTokenList = async function () {
       walletAccountBalances.value,
     );
   }
-  if (redPacketStore.account == "hexlink") {
+  if (account.value === "hexlink") {
     tokens.value = tokenStore.tokens.filter(
       t => Number(hexlAccountBalance(t.address)) > 0
     );
@@ -324,8 +343,53 @@ const removeFile = () => {
   nftAirdrop.value.file = undefined;
 }
 
-const chooseFile = (e: any) => {
+const chooseFile = async (e: any) => {
   nftAirdrop.value.file = e.target.files[0];
+  if (nftAirdrop.value.file!.size <= FILE_SIZE_LIMIT) {
+    nftAirdrop.value.tokenURI = await uploadToIPFS(nftAirdrop.value.file!);
+  }
+}
+
+const validateInput = () => {
+  if (nftAirdrop.value.file == undefined) {
+    throw new Error("please select a file first");
+  }
+  if (nftAirdrop.value.file.size > FILE_SIZE_LIMIT) {
+    throw new Error("file too large, maximum 5MB accepted");
+  }
+  if (nftAirdrop.value.name.length === 0) {
+    throw new Error("name cannot be empty");
+  }
+  if (nftAirdrop.value.symbol.length === 0) {
+    throw new Error("symbol cannot be empty");
+  }
+  if (EhtBigNumber.from(nftAirdrop.value.maxSupply).eq(0)) {
+    throw new Error("max supply cannot be 0");
+  }
+}
+
+const createNft = async () => {
+  try {
+    validateInput();
+    nftAirdrop.value.id = redpacketErc721Id(
+      useChainStore().chain,
+      useAccountStore().account!.address,
+      nftAirdrop.value
+    );
+    if (!nftAirdrop.value.tokenURI) {
+      nftAirdrop.value.tokenURI = await uploadToIPFS(
+        nftAirdrop.value.file!
+      );
+    }
+    await createRedPacketErc721(
+      nftAirdrop.value,
+      account.value === "hexlink",
+      false // dryrun
+    );
+  } catch (e) {
+    console.log("Failed to create redpacket with");
+    console.log(e);
+  }
 }
 </script>
 

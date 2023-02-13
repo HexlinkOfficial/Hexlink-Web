@@ -175,15 +175,21 @@ export const createRedPacketErc721 = functions.https.onCall(
       const {uid, account, chain} = result as RequestData;
 
       const rpId = redpacketErc721Id(chain, account.address, data.erc721);
+      const salt = ethers.utils.keccak256(
+          ethers.utils.defaultAbiCoder.encode(
+              ["address", "bytes32"],
+              [account.address, data.erc721.salt]
+          )
+      );
       const action = {
         type: "insert_redpacket_erc721",
         params: {
           userId: uid,
           redPacketId: rpId,
-          salt: data.erc721.salt,
+          salt,
           creator: data.creator,
           refunder: refunder(chain),
-          priceInfo: data.redPacket.priceInfo,
+          priceInfo: data.erc721.priceInfo,
         },
       };
       const [{id: reqId}] = await insertRequest(

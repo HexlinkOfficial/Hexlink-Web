@@ -1,32 +1,23 @@
 import {validate} from "deep-email-validator";
 import sendgridMail from "@sendgrid/mail";
-import {sendgridApiKey} from "./config";
 import {Firebase} from "./firebase";
 import * as functions from "firebase-functions";
 import {getUser, insertUser, updateOTP} from "./graphql/user";
 import {getAuth} from "firebase-admin/auth";
 
-sendgridMail.setApiKey(sendgridApiKey);
+const secrets = functions.config().doppler || {};
 const CHARS = "0123456789";
 const OTP_LEN = 6;
 const expiredAfter = 10 * 60000;
 
-export const genOTP = functions.https.onCall(async (data, context) => {
+export const genOTP = functions.https.onCall(async (data, _context) => {
   Firebase.getInstance();
-  /*
-  const uid = context.auth?.uid;
-  if (!uid) {
-    return {code: 401, message: "Unauthorized"};
-  }
-  */
-
   const isValidEmail = await validateEmail(data.email);
   if (!isValidEmail) {
     return {code: 400, message: "Invalid email"};
   }
 
   const otp = randomCode(OTP_LEN);
-
   const user = await getUser(data.email);
   if (!user || !user.id) {
     await insertUser([{email: data.email, otp: otp, isActive: true}]);
@@ -34,6 +25,7 @@ export const genOTP = functions.https.onCall(async (data, context) => {
     await updateOTP({id: user.id!, otp: otp, isActive: true});
   }
 
+  sendgridMail.setApiKey(secrets.SENDGRID_API_KEY);
   await sendgridMail.send({
     to: data.email,
     from: "info@hexlink.io",
@@ -68,15 +60,8 @@ const randomCode = (length: number) => {
   return code;
 };
 
-export const validateOTP = functions.https.onCall(async (data, context) => {
+export const validateOTP = functions.https.onCall(async (data, _context) => {
   Firebase.getInstance();
-  /*
-  const uid = context.auth?.uid;
-  if (!uid) {
-    return {code: 401, message: "Unauthorized"};
-  }
-  */
-
   if (!data.email || !data.otp) {
     return {code: 400, message: "Email or OTP is missing."};
   }

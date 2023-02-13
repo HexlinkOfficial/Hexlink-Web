@@ -137,6 +137,8 @@
         :gasToken="redpacket.gasToken"
         :tokenBalance="hexlAccountBalance(redpacket.token)"
         :gasTokenBalance="hexlAccountBalance(redpacket.gasToken)"
+        @selected="setAccount"
+        :isChosen="redPacketStore.account === 'hexlink'"
       ></RedPacketAccount>
       <RedPacketAccount
         account="wallet"
@@ -144,6 +146,8 @@
         :gasToken="redpacket.gasToken"
         :tokenBalance="walletAccountBalance(redpacket.token)"
         :gasTokenBalance="walletAccountBalance(redpacket.gasToken)"
+        @selected="setAccount"
+        :isChosen="redPacketStore.account === 'wallet'"
       ></RedPacketAccount>
     </div>
     <div class="create">
@@ -167,6 +171,7 @@ import { useWalletStore } from '@/stores/wallet';
 import { useAccountStore } from '@/stores/account';
 import { useChainStore } from "@/stores/chain";
 import { useRedPacketStore } from '@/stores/redpacket';
+import type { AccountType } from "@/stores/redpacket";
 import { connectWallet } from "@/web3/wallet";
 import { tokenBase } from "@/web3/utils";
 import type { OnClickOutsideHandler } from '@vueuse/core';
@@ -207,6 +212,10 @@ const hexlAccountBalance = (token: string) : string => {
 const walletAccountBalances = ref<BalanceMap>({});
 const walletAccountBalance = (token: string) : string => {
   return walletAccountBalances.value[token]?.normalized || "0";
+}
+
+const setAccount = (account: AccountType) => {
+  useRedPacketStore().setAccount(account);
 }
 
 interface RawRedPacketInput extends RedPacketInput {

@@ -29,6 +29,9 @@ export interface RedPacketErc721 {
     symbol: string;
     tokenURI: string;
     maxSupply: string;
+    validator: string;
+    contract?: string;
+    creator?: string;
 }
 export interface RedPacketInput extends RedPacket, GasInput {
 }

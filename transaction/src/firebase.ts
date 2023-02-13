@@ -16,6 +16,8 @@ class PrivateFirebase {
   }
 }
 
+/* tslint:disable:max-classes-per-file */
+
 export class Firebase {
   private static instance : PrivateFirebase;
 

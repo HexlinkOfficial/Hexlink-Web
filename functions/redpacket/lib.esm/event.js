@@ -1,6 +1,6 @@
 "use strict";
 import { ethers } from "ethers";
-import { redPacketAddress, redPacketInterface, tokenFactoryAddress, tokenFactoryInterface } from "./redpacket";
+import { hexlinkErc721Interface, redPacketAddress, redPacketInterface, tokenFactoryAddress, tokenFactoryInterface } from "./redpacket";
 const iface = new ethers.utils.Interface([
     "event Claimed(bytes32 indexed PacketId, address claimer, uint256 amount)",
 ]);
@@ -60,4 +60,9 @@ export function parseDeployed(chain, receipt, creator, salt) {
     const events = receipt.logs.filter((log) => log.address.toLowerCase() === factoryAddress).map((log) => tokenFactoryInterface.parseLog(log));
     const event = events.find((e) => e.name === "Deployed" && equal(e.args.salt, salt) && equal(e.args.creator, creator));
     return event?.args;
+}
+export function parseMinted(receipt, token, claimer) {
+    const events = receipt.logs.filter((log) => log.address.toLowerCase() === token).map((log) => hexlinkErc721Interface.parseLog(log));
+    const event = events.find((e) => e.name === "Transfer" && equal(e.args.from, ethers.constants.AddressZero) && equal(e.args.creator, claimer));
+    return event?.args.tokenId;
 }

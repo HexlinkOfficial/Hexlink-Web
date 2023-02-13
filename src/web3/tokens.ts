@@ -11,7 +11,6 @@ import type {
 import { useAuthStore } from "@/stores/auth";
 import { useChainStore } from "@/stores/chain";
 import { useTokenStore } from "@/stores/token";
-import { useNftStore } from '@/stores/nft';
 
 import type { Token, Chain,  NormalizedTokenBalance } from "../../functions/common";
 import { normalizeBalance, getPopularTokens } from "../../functions/common";

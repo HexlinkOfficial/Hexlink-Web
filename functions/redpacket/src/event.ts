@@ -2,6 +2,7 @@
 
 import {ethers, BigNumber as EthBigNumber} from "ethers";
 import {
+    hexlinkErc721Interface,
     redPacketAddress,
     redPacketInterface,
     tokenFactoryAddress,
@@ -112,4 +113,20 @@ export function parseDeployed(
         (e: any) => e.name === "Deployed" && equal(e.args.salt, salt) && equal(e.args.creator, creator)
     );
     return event?.args;
+}
+
+export function parseMinted(
+    receipt: TransactionReceipt,
+    token: string,
+    claimer: string,
+) {
+    const events = receipt.logs.filter(
+        (log: any) => log.address.toLowerCase() === token
+    ).map((log: any) => hexlinkErc721Interface.parseLog(log));
+    const event = events.find(
+        (e: any) => e.name === "Transfer" && equal(
+            e.args.from, ethers.constants.AddressZero
+        ) && equal(e.args.creator, claimer)
+    );
+    return event?.args.tokenId;
 }

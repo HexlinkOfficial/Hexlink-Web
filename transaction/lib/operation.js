@@ -24,7 +24,13 @@ exports.buildTx = buildTx;
 async function processAction(op, chain, action, receipt) {
     const params = action.params;
     if (action.type === "insert_redpacket_claim") {
-        const claimed = (0, redpacket_2.parseClaimed)(chain, receipt, params.redPacketId, op.account);
+        let claimed;
+        if (params.type === "erc20") {
+            claimed = (0, redpacket_2.parseClaimed)(chain, receipt, params.redPacketId, op.account);
+        }
+        else {
+            claimed = (0, redpacket_2.parseMinted)(receipt, params.token, op.account);
+        }
         if (claimed !== undefined) {
             await (0, redpacket_1.insertRedPacketClaim)([{
                     ...params,

@@ -52,9 +52,10 @@ import { useRoute } from "vue-router";
 import { callClaimRedPacket } from "@/web3/redpacket";
 import { loadAndSetErc20Token } from '@/web3/tokens';
 import { switchNetwork } from "@/web3/network";
+import { ipfsUrl } from "@/web3/storage";
 import { getChain } from "../../functions/common";
 import type { RedPacketDB } from "@/types";
-import type { RedPacket } from "functions/redpacket/lib";
+import type { RedPacket, RedPacketErc721 } from "functions/redpacket/lib";
 
 const redPacket = ref<RedPacketDB | undefined>();
 const redPacketTokenIcon = ref<string>("");
@@ -73,6 +74,10 @@ onMounted(async () => {
       );
       redPacketToken.value = tokenMetadata.symbol;
       redPacketTokenIcon.value = tokenMetadata.logoURI || "";
+    } else if (redPacket.value.type === 'erc721') {
+      const metadata = redPacket.value!.metadata as RedPacketErc721;
+      redPacketToken.value = metadata.symbol;
+      redPacketTokenIcon.value = ipfsUrl(metadata.tokenURI) || "";
     }
   } else {
     claimStatus.value = "error";

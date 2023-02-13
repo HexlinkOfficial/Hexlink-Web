@@ -7,3 +7,4 @@ export declare function parseCreated(chain: Chain, receipt: TransactionReceipt, 
 export declare function redpacketId(chain: Chain, account: string, input: RedPacket): string;
 export declare function redpacketErc721Id(chain: Chain, account: string, input: RedPacketErc721): string;
 export declare function parseDeployed(chain: Chain, receipt: TransactionReceipt, creator: string, salt: string): ethers.utils.Result;
+export declare function parseMinted(receipt: TransactionReceipt, token: string, claimer: string): any;

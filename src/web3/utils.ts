@@ -28,3 +28,17 @@ export async function copy(text: string, message?: string) {
         toaster.error(`Can not copy`);
     }
 }
+
+export function createNotification(message: string, mode: string) {
+    try {
+        const toaster = createToaster({ position: "top", duration: 3000 });
+        if (mode == "success") {
+            toaster.success(message);
+        } else if (mode == "error") {
+            toaster.error(message);
+        }
+    } catch (error) {
+        const toaster = createToaster({ position: "top", duration: 3000 });
+        toaster.error(`Error: ${error}`);
+    }
+}

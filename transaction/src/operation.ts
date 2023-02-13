@@ -6,6 +6,7 @@ import {
   parseDeployed,
   parseClaimed,
   parseCreated,
+  parseMinted,
   redPacketAddress,
   hexlinkErc721Contract,
   hexlinkErc721Metadata,
@@ -41,12 +42,22 @@ async function processAction(
 ) {
   const params = action.params;
   if (action.type === "insert_redpacket_claim") {
-    const claimed = parseClaimed(
-      chain,
-      receipt,
-      params.redPacketId,
-      op.account,
-    );
+    let claimed;
+    if (params.type === "erc20") {
+      claimed = parseClaimed(
+        chain,
+        receipt,
+        params.redPacketId,
+        op.account,
+      );
+    } else {
+      claimed = parseMinted(
+        receipt,
+        params.token,
+        op.account,
+      );
+    }
+
     if (claimed !== undefined) {
       await insertRedPacketClaim([{
         ...params,

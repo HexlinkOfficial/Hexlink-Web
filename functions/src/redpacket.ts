@@ -1,7 +1,7 @@
 /* eslint-disable require-jsdoc */
 import * as functions from "firebase-functions";
 
-import {getRedPacket} from "./graphql/redpacket";
+import {RedPacketMetadata, getRedPacket} from "./graphql/redpacket";
 import type {RedPacket} from "./graphql/redpacket";
 import {signWithKmsKey} from "./kms";
 import {ethers} from "ethers";
@@ -41,7 +41,7 @@ async function sign(signer: string, message: string) : Promise<string> {
   }
 }
 
-async function buildClaimOp(
+async function buildClaimErc20Op(
     chain: Chain,
     redPacket: RedPacket,
     claimer: string,
@@ -53,15 +53,16 @@ async function buildClaimOp(
       )
   );
   const signature = await sign(redPacket.metadata.validator, message);
+  const metadata = redPacket.metadata as RedPacketMetadata;
   const args = {
-    creator: redPacket.metadata.creator,
+    creator: metadata.creator,
     packet: {
-      token: redPacket.metadata.token,
-      salt: redPacket.metadata.salt,
-      balance: redPacket.metadata.balance,
-      validator: redPacket.metadata.validator,
-      split: redPacket.metadata.split,
-      mode: redPacket.metadata.mode,
+      token: metadata.token,
+      salt: metadata.salt,
+      balance: metadata.balance,
+      validator: metadata.validator,
+      split: metadata.split,
+      mode: metadata.mode,
     },
     claimer,
     signature,
@@ -70,6 +71,26 @@ async function buildClaimOp(
     to: redPacketAddress(chain),
     value: "0x0",
     callData: redPacketInterface.encodeFunctionData("claim", [args]),
+    callGasLimit: "0x0",
+  };
+}
+
+async function buildMintErc721Op(
+    chain: Chain,
+    redPacket: RedPacket,
+    claimer: string,
+) : Promise<OpInput> {
+  const message = ethers.utils.keccak256(
+      ethers.utils.defaultAbiCoder.encode(
+          ["uint256", "address", "address"],
+          [chain.chainId, redPacket.metadata.token, claimer]
+      )
+  );
+  const signature = await sign(redPacket.metadata.validator, message);
+  return {
+    to: redPacketAddress(chain),
+    value: "0x0",
+    callData: redPacketInterface.encodeFunctionData("mint", [claimer, signature]),
     callGasLimit: "0x0",
   };
 }
@@ -87,14 +108,22 @@ export const claimRedPacket = functions.https.onCall(
         return {code: 400, message: "Failed to load redpacket"};
       }
 
-      const input = await buildClaimOp(chain, redPacket, account.address);
+      let input;
+      if (redPacket.type === "erc20") {
+        input = await buildClaimErc20Op(chain, redPacket, account.address);
+      } else {
+        input = await buildMintErc721Op(chain, redPacket, account.address);
+      }
+
       const action = {
         type: "insert_redpacket_claim",
         params: {
           redPacketId: redPacket.id,
+          token: redPacket.metadata.token,
           creatorId: redPacket.user_id,
           claimerId: uid,
           claimer: data.claimer,
+          type: redPacket.type,
         },
       };
       const [{id: reqId}] = await insertRequest(
@@ -103,6 +132,7 @@ export const claimRedPacket = functions.https.onCall(
             to: redPacketAddress(chain),
             args: {
               redPacketId: redPacket.id,
+              token: redPacket.metadata.token,
             },
           }]
       );

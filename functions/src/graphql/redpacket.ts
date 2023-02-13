@@ -8,6 +8,7 @@ export const GET_REDPACKET = gql`
         user_id
         metadata
         creator
+        type
     }
   }
 `;
@@ -22,11 +23,23 @@ export interface RedPacketMetadata {
   mode: string
 }
 
+export interface RedPacketErc721Metadata {
+  token: string,
+  salt: string,
+  name: string,
+  symbol: string,
+  tokenURI: string,
+  maxSupply: number,
+  validator: string,
+  creator: string,
+}
+
 export interface RedPacket {
   id: string,
   user_id: string,
-  metadata: RedPacketMetadata,
+  metadata: RedPacketMetadata | RedPacketErc721Metadata,
   creator: string,
+  type: "erc20" | "erc721",
 }
 
 export async function getRedPacket(
@@ -46,5 +59,6 @@ export async function getRedPacket(
     user_id: rp.user_id,
     metadata: JSON.parse(rp.metadata),
     creator: JSON.parse(rp.creator),
+    type: rp.type,
   };
 }

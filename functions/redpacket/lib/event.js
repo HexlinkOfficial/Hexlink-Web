@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.parseDeployed = exports.redpacketErc721Id = exports.redpacketId = exports.parseCreated = exports.parseClaimed = void 0;
+exports.parseMinted = exports.parseDeployed = exports.redpacketErc721Id = exports.redpacketId = exports.parseCreated = exports.parseClaimed = void 0;
 const ethers_1 = require("ethers");
 const redpacket_1 = require("./redpacket");
 const iface = new ethers_1.ethers.utils.Interface([
@@ -68,3 +68,9 @@ function parseDeployed(chain, receipt, creator, salt) {
     return event === null || event === void 0 ? void 0 : event.args;
 }
 exports.parseDeployed = parseDeployed;
+function parseMinted(receipt, token, claimer) {
+    const events = receipt.logs.filter((log) => log.address.toLowerCase() === token).map((log) => redpacket_1.hexlinkErc721Interface.parseLog(log));
+    const event = events.find((e) => e.name === "Transfer" && equal(e.args.from, ethers_1.ethers.constants.AddressZero) && equal(e.args.creator, claimer));
+    return event === null || event === void 0 ? void 0 : event.args.tokenId;
+}
+exports.parseMinted = parseMinted;

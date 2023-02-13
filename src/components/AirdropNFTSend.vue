@@ -38,13 +38,7 @@
     <div style="width: 100%; padding: 0 0.87rem;">
       <div class="input-box-wrap">
         <div class="input-box">
-          <input
-            class="text-input"
-            placeholder="e. g. &quot;Redeemable T-Shirt with logo&quot;"
-            type="text"
-            data-marker="Name"
-            v-model="nftAirdrop.name"
-          >
+          <input v-model="nftAirdrop.name" class="text-input" placeholder="e. g. &quot;Redeemable T-Shirt with logo&quot;" type="text" data-marker="Name">
         </div>
     </div>
     </div>
@@ -54,13 +48,7 @@
     <div style="width: 100%; padding: 0 0.87rem;">
       <div class="input-box-wrap">
         <div class="input-box">
-          <input
-            class="text-input"
-            placeholder="e. g. &quot;Redeemable T-Shirt with logo&quot;"
-            type="text"
-            data-marker="Name"
-            v-model="nftAirdrop.symbol"
-          >
+          <input v-model="nftAirdrop.symbol" class="text-input" placeholder="e. g. &quot;Redeemable T-Shirt with logo&quot;" type="text" data-marker="Name">
         </div>
       </div>
     </div>
@@ -71,12 +59,11 @@
       <div class="input-box-wrap">
         <div class="input-box">
           <input
+            v-model="nftAirdrop.splitInput"
             class="text-input"
             placeholder="e. g. &quot;100,200,300&quot;"
             type="number"
-            data-marker="Name"
-            v-model="nftAirdrop.split" 
-          >
+            data-marker="Name">
         </div>
       </div>
     </div>
@@ -210,13 +197,15 @@ function createObjectURL(file: File) {
 
 interface NftAirdrop extends RedPacketErc721Input {
   file?: File;
+  splitInput: string,
 }
 
 const nftAirdrop = ref<NftAirdrop>({
   id: "",
   name: "",
   symbol: "",
-  split: "",
+  splitInput: "",
+  split: 0,
   tokenURI: "",
   salt: "",
   gasToken: tokenStore.nativeCoin.address,
@@ -298,7 +287,7 @@ const setGas = async () => {
   const priceInfo = await getPriceInfo(chain);
   nftAirdrop.value.priceInfo = priceInfo;
   const sponsorshipAmount =
-    EthBigNumber.from(200000).mul(nftAirdrop.value.split || 0);
+    EthBigNumber.from(200000).mul(nftAirdrop.value.splitInput || 0);
   nftAirdrop.value.gasSponsorship = calcGas(
     chain,
     tokenStore.token(nftAirdrop.value.gasToken),
@@ -332,7 +321,7 @@ watch(() => useChainStore().current, genTokenList);
 watch(() => useWalletStore().connected, genTokenList);
 watch([
   () => nftAirdrop.value.gasToken,
-  () => nftAirdrop.value.split
+  () => nftAirdrop.value.splitInput
 ], setGas);
 
 const showFileSelection = () => {
@@ -363,8 +352,8 @@ const validateInput = () => {
   if (nftAirdrop.value.symbol.length === 0) {
     throw new Error("symbol cannot be empty");
   }
-  if (EhtBigNumber.from(nftAirdrop.value.split).eq(0)) {
-    throw new Error("max supply cannot be 0");
+  if (EhtBigNumber.from(nftAirdrop.value.splitInput).eq(0)) {
+    throw new Error("supply cannot be 0");
   }
 }
 
@@ -372,6 +361,7 @@ const createNft = async () => {
   try {
     validateInput();
     nftAirdrop.value.salt = hash(new Date().toISOString());
+    nftAirdrop.value.split = Number(nftAirdrop.value.splitInput);
     nftAirdrop.value.id = redpacketErc721Id(
       useChainStore().chain,
       useAccountStore().account!.address,

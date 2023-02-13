@@ -26,14 +26,19 @@
                     <div class="views">
                     <div class="detail-view">
                         <router-link to="/redpackets">
-                        <button class="listView-button" :class="selected == 'history' ? 'show' : ''">
-                            Luck History
-                        </button>
+                            <button class="listView-button" :class="selected == 'history' ? 'show' : ''">
+                                Luck History
+                            </button>
                         </router-link>
                         <router-link to="/redpacket/send">
-                        <button class="listView-button" :class="selected == 'send' ? 'show' : ''">
-                            Send Luck
-                        </button>
+                            <button class="listView-button" :class="selected == 'send' ? 'show' : ''">
+                                Send Luck
+                            </button>
+                        </router-link>
+                        <router-link to="/redpacket/airdropCollectable">
+                            <button class="listView-button" :class="selected == 'airdropNFTs' ? 'show' : ''">
+                                Send NFTs
+                            </button>
                         </router-link>
                     </div>
                     </div>
@@ -47,11 +52,18 @@
 </template>
   
 <script setup lang="ts">
+import { send } from "process";
 import { computed } from "vue";
 import { useRoute } from "vue-router";
 
 const selected  = computed(() => {
-    return useRoute().path == '/redpacket/send' ? 'send' : 'history';
+    if (useRoute().path == '/redpacket/send') {
+        return 'send';
+    } else if (useRoute().path == '/redpackets') {
+        return 'history';
+    } else {
+        return 'airdropNFTs'
+    }
 });
 </script>
   
@@ -150,7 +162,7 @@ const selected  = computed(() => {
     @media (min-width: 640px) {
       margin-left: 0.75rem;
       margin-left: 0.875rem;
-      max-width: 28rem; } }
+      max-width: 30rem; } }
 .token-list .views .detail-view button {
     padding-top: 0.5rem;
     padding-bottom: 0.5rem;

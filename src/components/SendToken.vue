@@ -487,7 +487,7 @@ const validateEmail = (input: string) => {
   ::-webkit-input-placeholder {
     text-align: center; }
   input[type=number] {
-  -moz-appearance: textfield; }
+    -moz-appearance: textfield; }
 }
 :-moz-placeholder {
   text-align: center; }

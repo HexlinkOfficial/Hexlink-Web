@@ -1,0 +1,642 @@
+<template>
+  <div class="collection-file">
+    <span class="title">Upload file</span>
+    <div class="upload-box">
+      <div class="upload-box-wrap">
+        <input 
+          hidden
+          ref="file"
+          accept="image/png,image/jpeg,image/gif,image/webp,video/mp4,video/webm,audio/mp3,audio/webm,audio/mpeg"
+          name="primary-attachment" 
+          type="file" 
+          data-marker="Upload file" 
+          multiple
+          onchange="showFile()"
+          class="upload-input"
+        >
+        <div class="input-content">
+          <span class="input-title">PNG, GIF, WEBP, MP4 or MP3. Max 100mb.</span>
+          <button type="button" class="file-upload-button">
+            <span class="button-text">Choose File</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="name" class="collection-details">
+    <span class="title">Collection Name</span>
+    <div style="width: 100%; padding: 0 0.87rem;">
+      <div class="input-box-wrap">
+        <div class="input-box">
+          <input class="text-input" placeholder="e. g. &quot;Redeemable T-Shirt with logo&quot;" type="text" data-marker="Name" value="">
+        </div>
+    </div>
+    </div>
+  </div>
+  <div id="symbol" class="collection-details">
+    <span class="title">Collection Symbol</span>
+    <div style="width: 100%; padding: 0 0.87rem;">
+      <div class="input-box-wrap">
+        <div class="input-box">
+          <input class="text-input" placeholder="e. g. &quot;Redeemable T-Shirt with logo&quot;" type="text" data-marker="Name" value="">
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="amount" class="collection-details">
+    <span class="title">Max Supply</span>
+    <div style="width: 100%; padding: 0 0.87rem;">
+      <div class="input-box-wrap">
+        <div class="input-box">
+          <input class="text-input" placeholder="e. g. &quot;100,200,300&quot;" type="text" data-marker="Name" value="">
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="gas-station">
+    <div class="gas-estimation">
+      <p>
+        <img style="width: 20px; height: 20px;" src="https://i.postimg.cc/RhXfgJR1/gas-pump.png" />
+        Estimated Service Fee:
+        <a-tooltip placement="top">
+          <template #title>
+            <span>The real service fee may differ per network conditions</span>
+          </template>
+          <b>{{ totalServiceFee.substring(0, 6) }}</b>
+        </a-tooltip>
+      </p>
+      <div class="total-choose-token">
+        <div class="token-select">
+          <div 
+            class="mode-dropdown" 
+            :class="chooseGasDrop && 'active'" 
+            @click.stop="chooseGasDrop = !chooseGasDrop;"
+            v-on-click-outside.bubble="chooseGasHandle">
+            <div class="token-icon">
+              <img :src="gasToken.logoURI" />
+            </div>
+            <div class="mode-text2">{{ gasToken.symbol }}</div>
+            <input class="mode-input" type="text" placeholder="select" readonly>
+            <div class="mode-options">
+              <div class="mode-option" v-for="(token, index) of tokens" :key="index" @click="tokenGasChoose(token)">
+                <div class="token-icon">
+                  <img :src="token.logoURI" />
+                </div>
+                <div style="display: flex; flex-direction: column; align-items: flex-start;">
+                  <b>{{ token.symbol }}</b>
+                  <div style="margin-right:0.5rem;">
+                    Balance {{ tokenBalance(token.address) }}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="tooltip fade" data-title="Service gas fee is determined by the market, not Hexlink">
+        <svg style="margin-left: 1rem; width: 16px;" width="22" height="22" viewBox="0 0 22 22" fill="none"
+          xmlns="http://www.w3.org/2000/svg">
+          <path
+            d="M11 21C16.5228 21 21 16.5228 21 11C21 5.47715 16.5228 1 11 1C5.47715 1 1 5.47715 1 11C1 16.5228 5.47715 21 11 21Z"
+            stroke="#898989" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M11 15V11" stroke="#898989" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M11 8V7" stroke="#898989" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </div>
+    </div>
+  </div>
+  <div class="choose-account">
+    <RedPacketAccount account="hexlink" :token="nftAirdrop.gasToken" :gasToken="nftAirdrop.gasToken"
+      :tokenBalance="hexlAccountBalance(nftAirdrop.gasToken)" :gasTokenBalance="hexlAccountBalance(nftAirdrop.gasToken)">
+    </RedPacketAccount>
+    <RedPacketAccount account="wallet" :token="nftAirdrop.gasToken" :gasToken="nftAirdrop.gasToken"
+      :tokenBalance="walletAccountBalance(nftAirdrop.gasToken)" :gasTokenBalance="walletAccountBalance(nftAirdrop.gasToken)">
+    </RedPacketAccount>
+  </div>
+  <div class="create">
+    <button class="connect-wallet-button">
+      Create
+    </button>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref, computed, onMounted, watch } from "vue";
+import { useTokenStore } from "@/stores/token";
+import { BigNumber } from "bignumber.js";
+import { BigNumber as EthBigNumber } from "ethers";
+import { tokenBase } from "@/web3/utils";
+import type { OnClickOutsideHandler } from '@vueuse/core';
+import { onClickOutside } from '@vueuse/core'
+import { vOnClickOutside } from '@/services/directive';
+import type { Token } from "../../functions/common";
+import { useChainStore } from "@/stores/chain";
+import { getPriceInfo } from "@/web3/network";
+import { calcGas, type PriceInfo } from "../../functions/common";
+import type { BalanceMap } from "@/web3/tokens";
+import { getBalances } from "@/web3/tokens";
+import { useAccountStore } from '@/stores/account';
+import { useWalletStore } from '@/stores/wallet';
+import { useRedPacketStore } from '@/stores/redpacket';
+import RedPacketAccount from "@/components/RedPacketAccount.vue";
+
+const estimatedGasAmount = "250000"; // hardcoded, can optimize later
+const tokenStore = useTokenStore();
+const walletStore = useWalletStore();
+const redPacketStore = useRedPacketStore();
+const chooseGasDrop = ref<boolean>(false);
+const tokens = ref<Token[]>([]);
+
+const hexlAccountBalances = ref<BalanceMap>({});
+const hexlAccountBalance = (token: string): string => {
+  return hexlAccountBalances.value[token]?.normalized || "0";
+}
+
+const walletAccountBalances = ref<BalanceMap>({});
+const walletAccountBalance = (token: string): string => {
+  return walletAccountBalances.value[token]?.normalized || "0";
+}
+
+interface NFTAirdrop {
+  file: string,
+  name: string,
+  symbol: string,
+  maxSupply: string,
+  gasToken: string,
+  gasSponsorship: string,
+  estimatedGas: string,
+  priceInfo?: PriceInfo | undefined;
+}
+
+const nftAirdrop = ref<NFTAirdrop>({
+  file: "",
+  name: "",
+  symbol: "",
+  maxSupply: "0",
+  gasToken: tokenStore.nativeCoin.address,
+  gasSponsorship: "0",
+  estimatedGas: "0",
+})
+
+const gasToken = computed(() => tokenStore.token(nftAirdrop.value.gasToken));
+
+const tokenBalance = (token: string) => {
+  if (redPacketStore.account == "hexlink") {
+    return hexlAccountBalance(token);
+  }
+  return walletAccountBalance(token);
+};
+
+const totalServiceFee = computed(() => {
+  return BigNumber(
+    nftAirdrop.value.gasSponsorship
+  ).plus(nftAirdrop.value.estimatedGas).div(
+    tokenBase(gasToken.value)
+  ).dp(4).toString();
+})
+
+const tokenGasChoose = async (token: Token) => {
+  nftAirdrop.value.gasToken = token.address;
+  refreshGas();
+};
+
+const genTokenList = async function () {
+  hexlAccountBalances.value = await getBalances(
+    useAccountStore().account!.address,
+    hexlAccountBalances.value,
+  );
+  if (walletStore.connected) {
+    walletAccountBalances.value = await getBalances(
+      walletStore.account!.address,
+      walletAccountBalances.value,
+    );
+  }
+  if (redPacketStore.account == "hexlink") {
+    tokens.value = tokenStore.tokens.filter(
+      t => Number(hexlAccountBalance(t.address)) > 0
+    );
+    setDefaultToken(walletAccountBalance);
+  } else {
+    tokens.value = tokenStore.tokens.filter(
+      t => Number(walletAccountBalance(t.address)) > 0
+    );
+    setDefaultToken(hexlAccountBalance);
+  }
+}
+
+const setDefaultToken = function (getBalance: (t: string) => string) {
+  const nativeCoin = tokenStore.nativeCoin;
+  if (Number(getBalance(nativeCoin.address)) > 0 || tokens.value.length == 0) {
+    nftAirdrop.value.gasToken = nativeCoin.address;
+  } else {
+    nftAirdrop.value.gasToken = tokens.value[0].address
+  }
+}
+
+async function delay(ms: number) {
+  return new Promise((resolve, _reject) => {
+    window.setTimeout(() => resolve(null), ms);
+  });
+}
+
+const refreshGas = async () => {
+  const chain = useChainStore().chain;
+  const priceInfo = await getPriceInfo(chain);
+  nftAirdrop.value.priceInfo = priceInfo;
+  const sponsorshipAmount = EthBigNumber.from(200000).mul(nftAirdrop.value.maxSupply || 0);
+  nftAirdrop.value.gasSponsorship = calcGas(
+    chain,
+    tokenStore.token(nftAirdrop.value.gasToken),
+    sponsorshipAmount,
+    priceInfo,
+    true, // prepay
+  ).toString();
+  nftAirdrop.value.estimatedGas = calcGas(
+    chain,
+    tokenStore.token(nftAirdrop.value.gasToken),
+    EthBigNumber.from(estimatedGasAmount),
+    priceInfo,
+    false, // prepay
+  ).toString();
+  await delay(5000);
+  await refreshGas();
+};
+
+const chooseGasHandle: OnClickOutsideHandler = (event) => {
+  chooseGasDrop.value = false;
+}
+
+onMounted(genTokenList);
+onMounted(refreshGas);
+
+watch(() => useChainStore().current, genTokenList);
+watch(() => useWalletStore().connected, genTokenList);
+watch([
+  () => nftAirdrop.value.gasToken,
+  () => nftAirdrop.value.maxSupply
+], refreshGas);
+
+const showFile = () => {
+  let fileInputElement = file;
+  console.log((e.target as HTMLInputElement).files);
+}
+</script>
+
+<style lang="less" scoped>
+.choose-account {
+  display: flex;
+  margin: 16px;
+  justify-content: center;
+  align-items: center;
+  svg {
+    display: inline-flex;
+    transition-property: background-color, border-color, color, fill, stroke;
+    justify-content: center;
+    align-items: center;
+    width: 1rem;
+    height: 1rem;
+    margin-left: 0.75rem; }
+  @media (max-width: 768px) {
+    flex-direction: column; } }
+.mode-options {
+  display: flex;
+  align-items: center;
+  position: absolute;
+  top: 50px;
+  width: auto;
+  background: #fff;
+  box-shadow: 0px 10px 20px rgb(0 0 0 / 10%);
+  border-radius: 10px;
+  overflow: hidden;
+  display: none; }
+.tooltip {
+  position: relative; }
+.tooltip:before,
+.tooltip:after {
+  display: block;
+  opacity: 0;
+  pointer-events: none;
+  position: absolute; }
+.tooltip:after {
+  border-right: 6px solid transparent;
+  border-bottom: 6px solid rgba(0, 0, 0, .75);
+  border-left: 6px solid transparent;
+  content: '';
+  height: 0;
+  top: 20px;
+  left: 20px;
+  width: 0; }
+.tooltip:before {
+  background: rgba(0, 0, 0, .75);
+  border-radius: 15px;
+  color: #fff;
+  content: attr(data-title);
+  font-size: 12px;
+  padding: 6px 10px;
+  top: 26px;
+  right: -15px;
+  white-space: nowrap; }
+.tooltip.fade:after,
+.tooltip.fade:before {
+  transform: translate3d(0,-10px,0);
+  transition: all .15s ease-in-out; }
+.tooltip.fade:hover:after,
+.tooltip.fade:hover:before {
+  opacity: 1;
+  transform: translate3d(0,3px,0); }
+.mode-option {
+  display: flex;
+  align-items: center;
+  padding: 12px 20px;
+  cursor: pointer; }
+.mode-option:hover {
+  background: rgb(242, 246, 250);
+  color: #999; }
+.mode-input {
+  bottom: 0px;
+  left: 0px;
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  width: 100%;
+  box-sizing: border-box; }
+.mode-text2 {
+  padding-right: 32px;
+  padding: 11px 0px 11px 0px;
+  height: 18px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  border-radius: 15px;
+  cursor: pointer;
+  border: 0px;
+  box-sizing: content-box;
+  background: none;
+  -webkit-tap-highlight-color: transparent;
+  display: block;
+  font-size: 14px;
+  line-height: 18px;
+  font-weight: 700;
+  color: #07101b;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  margin-right: 1.5rem; }
+.mode-dropdown {
+  flex: 1 1 0%;
+  font-weight: 400;
+  line-height: 1.4375em;
+  color: rgb(7, 16, 27);
+  box-sizing: border-box;
+  position: relative;
+  cursor: text;
+  display: inline-flex;
+  -webkit-box-align: center;
+  align-items: center;
+  justify-content: flex-end;
+  width: auto;
+  border-radius: 8px;
+  background-color: rgb(242, 246, 250);
+  font-size: 14px;
+  overflow: unset !important; }
+.mode-dropdown::before {
+  content: '';
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border: 2px solid #333;
+  border-top: 2px solid rgb(242, 246, 250);
+  border-right: 2px solid rgb(242, 246, 250);
+  transform: rotate(-45deg);
+  right: 10px;
+  top: 14px;
+  z-index: 0;
+  transition: 0.5s;
+  pointer-events: none; }
+.mode-dropdown.active::before {
+  top: 19px;
+  transform: rotate(-225deg); }
+.mode-dropdown.active .mode-options {
+  display: block;
+  z-index: 60; }
+.token-select {
+  position: relative;
+  appearance: none;
+  max-width: 100%;
+  font-family: -apple-system, system-ui, sans-serif;
+  display: inline-flex;
+  -webkit-box-align: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  justify-content: center;
+  height: 24px;
+  border-radius: 16px;
+  white-space: nowrap;
+  transition: background-color 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms, box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+  outline: 0px;
+  text-decoration: none;
+  vertical-align: middle;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+  margin-bottom: 0.2rem;
+.token-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-left: 8px;
+  padding-right: 8px;
+  white-space: nowrap;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 18px;
+  font-weight: 700;
+  color: rgb(7, 16, 27);
+  user-select: none;
+  -webkit-tap-highlight-color: transparent; }
+.token-dropdown {
+  -webkit-tap-highlight-color: transparent;
+  font-size: 16px;
+  cursor: pointer;
+  margin: 0px 4px 0px -4px;
+  color: rgb(118, 127, 141) !important;
+  display: inline-block;
+  background-repeat: no-repeat;
+  background-position: center center;
+  flex-shrink: 0;
+  aspect-ratio: 1 / 1;
+  height: 24px;
+  width: 24px;
+  line-height: 18px;
+  font-weight: 700;
+  user-select: none; } }
+.total-choose-token {
+  display: flex;
+  -webkit-box-align: center;
+  align-items: center;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.4375em;
+  color: rgb(7, 16, 27);
+  cursor: text; }
+.gas-station {
+  display: flex;
+  margin: 16px;
+  justify-content: flex-end;
+  @media (max-width: 768px) {
+    margin: 0px; } }
+.gas-estimation {
+  display: flex;
+  p {
+    margin-bottom: 0rem;
+    margin-right: 1rem;
+    font-weight: 500; } }
+.text-input {
+  overflow: hidden;
+  padding: 0px;
+  opacity: 1;
+  color: rgba(22, 22, 26, 0.8);
+  outline: none;
+  -webkit-appearance: none;
+  background: transparent;
+  border: #909697 solid 0; }
+.input-box {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  flex-shrink: 1;
+  padding: 0px 8px;
+  align-items: stretch; }
+.input-box-wrap {
+  display: flex;
+  justify-content: center;
+  background: #f2f6fa;
+  border: 1px solid transparent;
+  transition: all 0.15s ease-in-out 0s;
+  overflow: hidden;
+  min-height: 48px;
+  padding: 8px 14px;
+  border-radius: 16px;
+  font-size: 14px;
+  align-items: center;
+  padding: 0 0.87rem;
+  margin-top: 8px; }
+.collection-details {
+  align-items: flex-start;
+  flex-direction: column;
+  max-width: 100%;
+  min-height: 0px;
+  min-width: 0px;
+  flex-shrink: 0;
+  flex-basis: auto;
+  display: flex;
+  margin-top: 25px; }
+.button-text {
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  max-width: 100%; }
+.file-upload-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  border: 1px solid transparent;
+  font-size: 0.875rem;
+  border-radius: 50px;
+  padding: 6px 16px;
+  font-weight: 900;
+  transition: all 0.15s ease-in-out 0s;
+  transform-origin: center center;
+  user-select: none;
+  border-color: transparent;
+  color: white;
+  background: #076ae0;
+  appearance: button; }
+.input-title {
+  margin-bottom: 16px;
+  color: rgba(22, 22, 26, 0.6);
+  font-size: 14px;
+  line-height: 20px;
+  text-align: center; }
+.input-content {
+  display: flex;
+  flex-direction: column;
+  -webkit-box-align: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  justify-content: center; }
+.upload-input {
+  display: none;
+  position: fixed;
+  left: -100vw;
+  overflow: visible; }
+.upload-box-wrap {
+  border: 2px dashed rgba(22, 22, 26, 0.1);
+  min-height: 150px;
+  padding: 32px 60px;
+  position: relative;
+  border-radius: 16px;
+  -webkit-box-align: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  justify-content: center;
+  flex-direction: column; }
+.upload-box {
+  margin-top: 8px;
+  padding: 0 0.87rem;
+  width: 100%; }
+.title {
+  margin-left: 0.875rem;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 700; }
+.collection-file {
+  align-items: flex-start;
+  flex-direction: column;
+  max-width: 100%;
+  min-height: 0px;
+  min-width: 0px;
+  flex-shrink: 0;
+  flex-basis: auto;
+  display: flex;
+  margin-top: 25px; }
+.connect-wallet-button {
+  display: flex;
+  justify-content: center;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  color: #000;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 800;
+  line-height: 1.25rem;
+  width: 50%;
+  border-radius: 50px;
+  @media (min-width: 640px) {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+    width: 200px; }
+  @media (min-width: 768px) {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+    width: 200px; }
+  @media (max-width: 640px) {
+    width: 70%; }
+  opacity: 1;
+  background-color: rgb(7, 106, 224);
+  color: white; }
+.connect-wallet-button:hover {
+  background-color: rgba(7, 106, 224,0.9); }
+.create {
+  display: flex;
+  margin: 16px;
+  margin-top: 32px;
+  flex-direction: row-reverse;
+  @media (max-width: 640px) {
+    justify-content: center; } }
+input:focus {
+  outline: none;
+  box-shadow: none; }
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0; }
+</style>

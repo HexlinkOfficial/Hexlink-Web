@@ -2,24 +2,35 @@
   <div class="collection-file">
     <span class="title">Upload file</span>
     <div class="upload-box">
-      <div class="upload-box-wrap">
+      <div class="upload-box-wrap" v-if="!nftAirdrop.file">
         <input 
           hidden
           ref="file"
+          id="nftUpload"
           accept="image/png,image/jpeg,image/gif,image/webp,video/mp4,video/webm,audio/mp3,audio/webm,audio/mpeg"
           name="primary-attachment" 
           type="file" 
           data-marker="Upload file" 
-          multiple
-          onchange="showFile()"
+          @change="chooseFile"
           class="upload-input"
         >
         <div class="input-content">
           <span class="input-title">PNG, GIF, WEBP, MP4 or MP3. Max 100mb.</span>
-          <button type="button" class="file-upload-button">
+          <button type="button" class="file-upload-button" @click="showFileSelection">
             <span class="button-text">Choose File</span>
           </button>
         </div>
+      </div>
+      <div class="upload-box-wrap" v-if="nftAirdrop.file">
+        <button
+          type="button"
+          @click="removeFile"
+          style="display: block; margin-left: auto; margin-right: auto;">
+          <img
+            :src="createObjectURL(nftAirdrop.file)"
+            style="max-height: 100px;"
+          />
+        </button>
       </div>
     </div>
   </div>
@@ -28,7 +39,13 @@
     <div style="width: 100%; padding: 0 0.87rem;">
       <div class="input-box-wrap">
         <div class="input-box">
-          <input class="text-input" placeholder="e. g. &quot;Redeemable T-Shirt with logo&quot;" type="text" data-marker="Name" value="">
+          <input
+            class="text-input"
+            placeholder="e. g. &quot;Redeemable T-Shirt with logo&quot;"
+            type="text"
+            data-marker="Name"
+            v-model="nftAirdrop.name"
+          >
         </div>
     </div>
     </div>
@@ -38,7 +55,13 @@
     <div style="width: 100%; padding: 0 0.87rem;">
       <div class="input-box-wrap">
         <div class="input-box">
-          <input class="text-input" placeholder="e. g. &quot;Redeemable T-Shirt with logo&quot;" type="text" data-marker="Name" value="">
+          <input
+            class="text-input"
+            placeholder="e. g. &quot;Redeemable T-Shirt with logo&quot;"
+            type="text"
+            data-marker="Name"
+            v-model="nftAirdrop.symbol"
+          >
         </div>
       </div>
     </div>
@@ -48,7 +71,13 @@
     <div style="width: 100%; padding: 0 0.87rem;">
       <div class="input-box-wrap">
         <div class="input-box">
-          <input class="text-input" placeholder="e. g. &quot;100,200,300&quot;" type="text" data-marker="Name" value="">
+          <input
+            class="text-input"
+            placeholder="e. g. &quot;100,200,300&quot;"
+            type="number"
+            data-marker="Name"
+            v-model="nftAirdrop.maxSupply" 
+          >
         </div>
       </div>
     </div>
@@ -127,7 +156,6 @@ import { BigNumber } from "bignumber.js";
 import { BigNumber as EthBigNumber } from "ethers";
 import { tokenBase } from "@/web3/utils";
 import type { OnClickOutsideHandler } from '@vueuse/core';
-import { onClickOutside } from '@vueuse/core'
 import { vOnClickOutside } from '@/services/directive';
 import type { Token } from "../../functions/common";
 import { useChainStore } from "@/stores/chain";
@@ -157,8 +185,14 @@ const walletAccountBalance = (token: string): string => {
   return walletAccountBalances.value[token]?.normalized || "0";
 }
 
+function createObjectURL(file: File) {
+    return window.URL
+      ? window.URL.createObjectURL(file)
+      : window.webkitURL.createObjectURL(file);
+}
+
 interface NFTAirdrop {
-  file: string,
+  file?: File,
   name: string,
   symbol: string,
   maxSupply: string,
@@ -169,16 +203,17 @@ interface NFTAirdrop {
 }
 
 const nftAirdrop = ref<NFTAirdrop>({
-  file: "",
   name: "",
   symbol: "",
-  maxSupply: "0",
+  maxSupply: "",
   gasToken: tokenStore.nativeCoin.address,
   gasSponsorship: "0",
   estimatedGas: "0",
 })
 
-const gasToken = computed(() => tokenStore.token(nftAirdrop.value.gasToken));
+const gasToken = computed(
+  () => tokenStore.token(nftAirdrop.value.gasToken)
+);
 
 const tokenBalance = (token: string) => {
   if (redPacketStore.account == "hexlink") {
@@ -197,7 +232,7 @@ const totalServiceFee = computed(() => {
 
 const tokenGasChoose = async (token: Token) => {
   nftAirdrop.value.gasToken = token.address;
-  refreshGas();
+  setGas();
 };
 
 const genTokenList = async function () {
@@ -215,12 +250,12 @@ const genTokenList = async function () {
     tokens.value = tokenStore.tokens.filter(
       t => Number(hexlAccountBalance(t.address)) > 0
     );
-    setDefaultToken(walletAccountBalance);
+    setDefaultToken(hexlAccountBalance);
   } else {
     tokens.value = tokenStore.tokens.filter(
       t => Number(walletAccountBalance(t.address)) > 0
     );
-    setDefaultToken(hexlAccountBalance);
+    setDefaultToken(walletAccountBalance);
   }
 }
 
@@ -239,11 +274,12 @@ async function delay(ms: number) {
   });
 }
 
-const refreshGas = async () => {
+const setGas = async () => {
   const chain = useChainStore().chain;
   const priceInfo = await getPriceInfo(chain);
   nftAirdrop.value.priceInfo = priceInfo;
-  const sponsorshipAmount = EthBigNumber.from(200000).mul(nftAirdrop.value.maxSupply || 0);
+  const sponsorshipAmount =
+    EthBigNumber.from(200000).mul(nftAirdrop.value.maxSupply || 0);
   nftAirdrop.value.gasSponsorship = calcGas(
     chain,
     tokenStore.token(nftAirdrop.value.gasToken),
@@ -258,6 +294,10 @@ const refreshGas = async () => {
     priceInfo,
     false, // prepay
   ).toString();
+}
+
+const refreshGas = async () => {
+  await setGas();
   await delay(5000);
   await refreshGas();
 };
@@ -274,11 +314,18 @@ watch(() => useWalletStore().connected, genTokenList);
 watch([
   () => nftAirdrop.value.gasToken,
   () => nftAirdrop.value.maxSupply
-], refreshGas);
+], setGas);
 
-const showFile = () => {
-  let fileInputElement = file;
-  console.log((e.target as HTMLInputElement).files);
+const showFileSelection = () => {
+  document.getElementById("nftUpload")?.click()
+}
+
+const removeFile = () => {
+  nftAirdrop.value.file = undefined;
+}
+
+const chooseFile = (e: any) => {
+  nftAirdrop.value.file = e.target.files[0];
 }
 </script>
 

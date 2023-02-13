@@ -184,7 +184,7 @@ const transaction = ref<TokenTransaction>({
   to: "",
   salt: hash(new Date().toISOString()),
   amount: "0",
-  amountInput: "1",
+  amountInput: "0",
   token: tokenStore.nativeCoin.address,
   gasToken: tokenStore.nativeCoin.address,
   estimatedGas: "0",
@@ -229,7 +229,7 @@ async function delay(ms: number) {
   });
 }
 
-const refreshGas = async () => {
+const setGas = async () => {
   const chain = useChainStore().chain;
   const priceInfo = await getPriceInfo(chain);
   transaction.value.priceInfo = priceInfo;
@@ -240,6 +240,10 @@ const refreshGas = async () => {
     priceInfo,
     false, // prepay
   ).toString();
+}
+
+const refreshGas = async () => {
+  await setGas();
   await delay(5000);
   await refreshGas();
 };
@@ -273,7 +277,7 @@ const tokenChoose =
 onMounted(genTokenList);
 onMounted(refreshGas);
 watch(() => useChainStore().current, genTokenList);
-watch([() => transaction.value.gasToken], refreshGas);
+watch([() => transaction.value.gasToken], setGas);
 watch(
   [() => transaction.value.amountInput, transactionTokenBalance],
   ([newAmountInput, newTokenBalance], _old) => {

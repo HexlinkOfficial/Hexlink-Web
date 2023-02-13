@@ -282,7 +282,7 @@ async function delay(ms: number) {
     } );
 }
 
-const refreshGas = async () => {
+const setGas = async() => {
   const chain = useChainStore().chain;
   const priceInfo = await getPriceInfo(chain);
   redpacket.value.priceInfo = priceInfo;
@@ -301,6 +301,10 @@ const refreshGas = async () => {
     priceInfo,
     false, // prepay
   ).toString();
+}
+
+const refreshGas = async () => {
+  await setGas();
   await delay(5000);
   await refreshGas();
 };
@@ -319,7 +323,7 @@ const tokenChoose =
       redpacket.value.token = token.address;
     } else {
       redpacket.value.gasToken = token.address;
-      refreshGas();
+      setGas();
     }
   };
 
@@ -331,7 +335,7 @@ watch(() => useWalletStore().connected, genTokenList);
 watch([
   () => redpacket.value.gasToken,
   () => redpacket.value.split
-], refreshGas);
+], setGas);
 watch(
   [() => redpacket.value.balanceInput, redPacketTokenBalance],
   ([newBalanceInput, newTokenBalance], _old) => {

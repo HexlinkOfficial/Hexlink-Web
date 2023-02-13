@@ -50,7 +50,7 @@ async function processAction(
         params.redPacketId,
         op.account,
       );
-    } else {
+    } else if (params.type === "erc721") {
       claimed = parseMinted(
         receipt,
         params.token,

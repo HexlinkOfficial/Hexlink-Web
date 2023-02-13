@@ -57,12 +57,12 @@ export function redpacketErc721Id(chain, account, input) {
 }
 export function parseDeployed(chain, receipt, creator, salt) {
     const factoryAddress = tokenFactoryAddress(chain).toLowerCase();
-    const events = receipt.logs.filter((log) => log.address.toLowerCase() === factoryAddress).map((log) => tokenFactoryInterface.parseLog(log));
+    const events = receipt.logs.filter((log) => log.address.toLowerCase() === factoryAddress.toLowerCase()).map((log) => tokenFactoryInterface.parseLog(log));
     const event = events.find((e) => e.name === "Deployed" && equal(e.args.salt, salt) && equal(e.args.creator, creator));
     return event?.args;
 }
 export function parseMinted(receipt, token, claimer) {
-    const events = receipt.logs.filter((log) => log.address.toLowerCase() === token).map((log) => hexlinkErc721Interface.parseLog(log));
-    const event = events.find((e) => e.name === "Transfer" && equal(e.args.from, ethers.constants.AddressZero) && equal(e.args.creator, claimer));
+    const events = receipt.logs.filter((log) => log.address.toLowerCase() === token.toLowerCase()).map((log) => hexlinkErc721Interface.parseLog(log));
+    const event = events.find((e) => e.name === "Transfer" && equal(e.args.from, ethers.constants.AddressZero) && equal(e.args.to, claimer));
     return event?.args.tokenId;
 }

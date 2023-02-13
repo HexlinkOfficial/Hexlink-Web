@@ -173,7 +173,7 @@ import { uploadToIPFS } from "@/web3/storage";
 import {BigNumber as EhtBigNumber} from "ethers";
 
 const FILE_SIZE_LIMIT = 1024 * 1024 * 5;
-const estimatedGasAmount = "250000"; // hardcoded, can optimize later
+const estimatedGasAmount = "550000"; // hardcoded, can optimize later
 const tokenStore = useTokenStore();
 const walletStore = useWalletStore();
 const chooseGasDrop = ref<boolean>(false);

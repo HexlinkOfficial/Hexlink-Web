@@ -14,6 +14,7 @@ import {
   redpacketId,
   redpacketErc721Id,
   tokenFactoryAddress,
+  hexlinkErc721Interface,
 } from "../redpacket";
 import {refunder} from "../common";
 import type {Chain, OpInput} from "../common";
@@ -88,9 +89,9 @@ async function buildMintErc721Op(
   );
   const signature = await sign(redPacket.metadata.validator, message);
   return {
-    to: redPacketAddress(chain),
+    to: redPacket.metadata.token,
     value: "0x0",
-    callData: redPacketInterface.encodeFunctionData("mint", [claimer, signature]),
+    callData: hexlinkErc721Interface.encodeFunctionData("mint", [claimer, signature]),
     callGasLimit: "0x0",
   };
 }

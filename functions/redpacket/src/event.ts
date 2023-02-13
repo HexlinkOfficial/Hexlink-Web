@@ -107,7 +107,7 @@ export function parseDeployed(
 ) {
     const factoryAddress = tokenFactoryAddress(chain).toLowerCase();
     const events = receipt.logs.filter(
-        (log: any) => log.address.toLowerCase() === factoryAddress
+        (log: any) => log.address.toLowerCase() === factoryAddress.toLowerCase()
     ).map((log: any) => tokenFactoryInterface.parseLog(log));
     const event = events.find(
         (e: any) => e.name === "Deployed" && equal(e.args.salt, salt) && equal(e.args.creator, creator)
@@ -121,12 +121,12 @@ export function parseMinted(
     claimer: string,
 ) {
     const events = receipt.logs.filter(
-        (log: any) => log.address.toLowerCase() === token
+        (log: any) => log.address.toLowerCase() === token.toLowerCase()
     ).map((log: any) => hexlinkErc721Interface.parseLog(log));
     const event = events.find(
         (e: any) => e.name === "Transfer" && equal(
             e.args.from, ethers.constants.AddressZero
-        ) && equal(e.args.creator, claimer)
+        ) && equal(e.args.to, claimer)
     );
     return event?.args.tokenId;
 }

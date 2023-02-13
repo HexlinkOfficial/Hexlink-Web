@@ -173,7 +173,6 @@ export const createRedPacketErc721 = functions.https.onCall(
         return result;
       }
       const {uid, account, chain} = result as RequestData;
-
       const rpId = redpacketErc721Id(chain, account.address, data.erc721);
       const salt = ethers.utils.keccak256(
           ethers.utils.defaultAbiCoder.encode(

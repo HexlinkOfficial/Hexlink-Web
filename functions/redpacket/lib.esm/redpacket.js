@@ -25,8 +25,8 @@ export async function hexlinkErc721Metadata(erc721) {
         name: await erc721.name(),
         symbol: await erc721.symbol(),
         validator: await erc721.validator(),
-        tokenURI: await erc721.tokenURI(),
-        maxSupply: await erc721.maxSupply(),
+        tokenURI: await erc721.tokenURI(0),
+        maxSupply: (await erc721.maxSupply()).toString(),
     };
 }
 export async function tokenFactory(provider) {

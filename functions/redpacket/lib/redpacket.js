@@ -48,8 +48,8 @@ function hexlinkErc721Metadata(erc721) {
             name: yield erc721.name(),
             symbol: yield erc721.symbol(),
             validator: yield erc721.validator(),
-            tokenURI: yield erc721.tokenURI(),
-            maxSupply: yield erc721.maxSupply(),
+            tokenURI: yield erc721.tokenURI(0),
+            maxSupply: (yield erc721.maxSupply()).toString(),
         };
     });
 }

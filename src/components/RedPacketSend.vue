@@ -225,7 +225,7 @@ interface RawRedPacketInput extends RedPacketInput {
 const redpacket = ref<RawRedPacketInput>({
   id: "",
   mode: 2,
-  salt: hash(new Date().toISOString()),
+  salt: "",
   split: 1,
   balance: "0",
   balanceInput: "0.0001",
@@ -382,6 +382,7 @@ const validateInput = () => {
 
 const confirmRedPacket = function () {
   if (validateInput()) {
+    redpacket.value.salt = hash(new Date().toISOString());
     redpacket.value.balance = tokenAmount(
       redpacket.value.balanceInput,
       tokenStore.token(redpacket.value.token).decimals

@@ -218,7 +218,7 @@ const nftAirdrop = ref<NftAirdrop>({
   symbol: "",
   maxSupply: "",
   tokenURI: "",
-  salt: hash(new Date().toISOString()),
+  salt: "",
   gasToken: tokenStore.nativeCoin.address,
   gasSponsorship: "0",
   estimatedGas: "0",
@@ -371,6 +371,7 @@ const validateInput = () => {
 const createNft = async () => {
   try {
     validateInput();
+    nftAirdrop.value.salt = hash(new Date().toISOString());
     nftAirdrop.value.id = redpacketErc721Id(
       useChainStore().chain,
       useAccountStore().account!.address,

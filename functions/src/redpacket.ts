@@ -24,7 +24,7 @@ import type {Chain, OpInput} from "../common";
 import {submit} from "./services/operation";
 import {insertRequest} from "./graphql/request";
 import {RequestData, preprocess, validateAndBuildUserOp} from "./operation";
-import * as totp from "totp-generator";
+import totp from "totp-generator";
 
 const secrets = functions.config().doppler || {};
 

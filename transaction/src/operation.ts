@@ -2,7 +2,6 @@ import {ethers, BigNumber as EthBigNumber, PopulatedTransaction } from "ethers";
 import {
   insertRedPacketClaim,
   insertRedPacket,
-  insertRedPacketValidation
 } from "./graphql/redpacket";
 import type {Chain} from "../../functions/common";
 import {PriceConfigs, parseDeposit} from "../../functions/common";

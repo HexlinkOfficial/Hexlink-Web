@@ -6,3 +6,5 @@ declare module "*.svg" {
 }
 
 declare module '@meforma/vue-toaster';
+declare module 'totp-generator';
+declare module 'qrcode';

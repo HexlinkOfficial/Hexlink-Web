@@ -284,16 +284,12 @@ const loadData = async function() {
   if (useAccountStore().account) {
     const rps : CreateRedPacketOp[] = await getCreatedRedPackets();
     createdRpOps.value = await Promise.all(rps.map(r => aggregateCreated(r)));
-    console.log("------");
     await loadClaimInfo();
-    console.log("------");
     // await loadClaimsForOnePacket(provider, redPackets.value[0]?.redPacket.id);
   }
   loading.value = false;
   extractDate();
-  console.log(luckHistoryByDate.value);
   extractTokenId();
-  console.log(tokenIdtable.value);
 };
 
 const extractTokenId = () => {

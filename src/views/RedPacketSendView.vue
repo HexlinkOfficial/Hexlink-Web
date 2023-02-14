@@ -4,7 +4,7 @@
       <RedPacketSend></RedPacketSend>
     </RedPacketBase>
   </Layout>
-  <RedpacketConfirm v-if="status !== ''"></RedpacketConfirm>
+  <RedpacketConfirm v-if="status !== ''" :mode="'token'"></RedpacketConfirm>
 </template>
 
 <script setup lang="ts">

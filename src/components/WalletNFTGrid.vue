@@ -7,28 +7,12 @@
   </div>
   <div v-if="!loading" class="box">
     <div class="nft_grid">
-      <div v-for="(value, index) in nftImages" :key="index" class="nfts" :style=" 'background:' + value.color">
-        <header class="nft_header">
-          <img :src="value.hasOpensea ? value.nft.openSea.imageUrl : value.nft.rawUrl" width="540" height="540" />
-        </header>
-        <footer class="nft_footer">
-          <div class="card_footer">
-            <div class="card_details">
-              <div class="card_details_box">
-                <div>
-                  <div class="box-content">
-                    <div class="collection_name_text">{{ value.nft.symbol }}</div>
-                    <a :href="getOpenseaUrl(value.nft)" target="_blank">
-                      <img src="https://storage.googleapis.com/opensea-static/Logomark/Logomark-Blue.svg" style="width: 20px;" />
-                    </a>
-                  </div>
-                  <p class="nft_title">{{ value.nft.name }} #{{ value.nft.id }}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </footer>
-      </div>
+      <NFTCard 
+        v-for="(value, index) in nftImages" 
+        :key="index"
+        :style=" 'background:' + value.color" 
+        :nftImage="value" >
+      </NFTCard>
     </div>
   </div>
 </template>
@@ -41,18 +25,9 @@ import { useAccountStore } from "@/stores/account";
 import { useNftStore } from '@/stores/nft';
 import Loading from "@/components/Loading.vue";
 import type { openSea, nftImage, bindedNFT } from '@/web3/tokens';
+import NFTCard from './NFTCard.vue';
+import { getBackcgroundColor } from '@/web3/utils';
 
-// const nfts = [
-//   'https://i.seadn.io/gcs/files/e98dad5dbac144288475ab0d152cb45a.gif?auto=format&w=1000',
-//   'https://i.seadn.io/gcs/files/4afadc510eb17a8c96d25aecd23b001a.png?auto=format&w=1000',
-//   'https://i.seadn.io/gcs/files/503e8f8bd33777a560b3335689c9151f.png?auto=format&w=1000',
-//   'https://i.seadn.io/gcs/files/17c7e2250fb40d56525b23bcc7b53cbe.png?auto=format&w=1000',
-//   'https://i.seadn.io/gcs/files/649cd263c9518915328df38b2db1a6f3.png?auto=format&w=1000',
-//   'https://i.seadn.io/gae/QujNj-aJYUhkvETUDl0nGE95RI6uZtk023bCQwlInY62JVrZjMm7rbfFKCat0e0AybncAGElLlhsvarHIUf__G23IpFTbkLwVHm-kQ?auto=format&w=1000',
-//   'https://i.seadn.io/gcs/files/ea43d5579c02a90a77041fb6a36c1762.png?auto=format&w=1000',
-//   'https://i.seadn.io/gae/YVyDrv2lF27IX8G7spx3rHXs89G_DYhupoRlcBqRWo5-peJckMhQ-9W831ROMWLQPkqjRptHzF9pUaPB9kMaZEZEMy_s8vQhXgoYrg?auto=format&w=1000',
-//   'https://i.seadn.io/gae/Hjsjmua_NJtdJ5TXkYm7YsJqPqUX4hwBG5FpQi6g9oekbYuQMB6U894sHbB6bhgc9tyjNTqO8zG5uDfEv8Fj5df7M7dlpg_ng4yJ?auto=format&w=1000'
-// ]
 const imageColor = ref<string[]>([]);
 const nftImages = ref<bindedNFT[]>([]);
 const loading = ref<boolean>(false);
@@ -69,39 +44,6 @@ const loadNfts = async () => {
   loading.value = false;
 }
 
-const getBackcgroundColor = async (nft: nftImage) => {
-  var output: string = "";
-  var url: string = "";
-  var opensea: boolean = false;
-  if (nft.openSea.imageUrl != undefined) {
-    url = nft.openSea.imageUrl;
-    opensea = true;
-  } else {
-    url = nft.rawUrl;
-    opensea = false;
-  }
-  const fac = new FastAverageColor();
-  await fac.getColorAsync(url, { algorithm: 'dominant' })
-    .then(color => {
-      // container.style.backgroundColor = color.rgba;
-      // container.style.color = color.isDark ? '#fff' : '#000';
-      output = color.hex.toString();
-    })
-    .catch(e => {
-      console.log(e);
-      return e;
-    });
-  nftImages.value.push({
-    nft: nft,
-    color: output,
-    hasOpensea: opensea
-  })
-}
-
-const getOpenseaUrl = (nft: nftImage) => {
-  return 'https://opensea.io/assets/ethereum/' + nft.contract + '/' + nft.id;
-}
-
 const preloadColors = () => {
   var contracts: string[] = [];
   var symbols: string[] = [];
@@ -114,7 +56,7 @@ const preloadColors = () => {
     names.push(nft.name);
     nftIds.push(nft.id);
     images.push(nft.rawUrl);
-    await getBackcgroundColor(nft);
+    nftImages.value.push(await getBackcgroundColor(nft));
   })
   console.log("xxx", nftImages.value);
   useNftStore().set(contracts, symbols, names, nftIds, images);

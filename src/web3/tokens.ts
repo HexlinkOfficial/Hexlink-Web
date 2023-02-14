@@ -139,17 +139,17 @@ export interface openSea {
 }
 
 export interface nftImage {
-    contract: string,
+    contract?: string,
     name: string,
     symbol: string,
     id: string,
-    tokenType: string,
-    openSea: openSea,
-    totalSupply: string,
-    url: string,
+    tokenType?: string,
+    openSea?: openSea,
+    totalSupply?: string,
+    url?: string,
     rawUrl: string,
-    thumbnail: string,
-    attributes: Array<any>,
+    thumbnail?: string,
+    attributes?: Array<any>,
 }
 
 export interface bindedNFT {

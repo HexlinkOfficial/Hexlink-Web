@@ -3,6 +3,8 @@ import { BigNumber } from "bignumber.js";
 import type { Token } from "../../functions/common";
 import useClipboard from 'vue-clipboard3';
 import { createToaster } from "@meforma/vue-toaster";
+import type { nftImage } from '@/web3/tokens';
+import { FastAverageColor } from 'fast-average-color';
 
 export function toEthBigNumber(value: BigNumber) : EthBigNumber {
     return EthBigNumber.from(value.toString(10));
@@ -42,3 +44,32 @@ export function createNotification(message: string, mode: string) {
         toaster.error(`Error: ${error}`);
     }
 }
+
+export async function getBackcgroundColor(nft: nftImage) {
+    var output: string = "";
+    var url: string = "";
+    var opensea: boolean = false;
+    if (nft.openSea?.imageUrl != undefined) {
+        url = nft.openSea!.imageUrl;
+        opensea = true;
+    } else {
+        url = nft.rawUrl!;
+        opensea = false;
+    }
+    const fac = new FastAverageColor();
+    await fac.getColorAsync(url, { algorithm: 'dominant' })
+        .then(color => {
+            // container.style.backgroundColor = color.rgba;
+            // container.style.color = color.isDark ? '#fff' : '#000';
+            output = color.hex.toString();
+        })
+        .catch(e => {
+            console.log(e);
+            return e;
+        });
+    return {
+        nft: nft,
+        color: output,
+        hasOpensea: opensea
+    };
+};

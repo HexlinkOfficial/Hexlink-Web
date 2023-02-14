@@ -20,8 +20,8 @@
           </button>
         </div>
       </div>
-      <div class="upload-box-wrap" v-if="nftAirdrop.file">
-        <button
+      <div class="upload-box-wrap" style="flex-direction: row; justify-content: space-evenly; border: 0px; padding: 16px 16px;" v-if="nftAirdrop.file">
+        <!-- <button
           type="button"
           @click="removeFile"
           style="display: block; margin-left: auto; margin-right: auto;">
@@ -29,7 +29,46 @@
             :src="createObjectURL(nftAirdrop.file)"
             style="max-height: 100px;"
           />
-        </button>
+        </button> -->
+        <div>
+          <span class="title">NFT</span>
+          <div class="nft-pic" style="width: 300px; height: 300px; border: 2px dashed rgba(22, 22, 26, 0.1); border-radius: 16px; padding: 16px;">
+            <img :src="createObjectURL(nftAirdrop.file)" style="height: 100%; width: 100%; border-radius: 16px;" />
+          </div>
+        </div>
+        <div class="changePic">
+          <button 
+            type="button"
+            @click="removeFile" 
+            style="background: rgb(255, 255, 255); height: 40px; width: 40px; padding: 0px; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(22, 22, 26, 0.1); border-radius: 12px; transition: all 0.15s ease-in-out 0s; transform-origin: center center; "
+          >
+            <svg style="color: rgb(22, 22, 26);" viewBox="0 0 24 24" fill="none" width="24" height="24" xlmns="http://www.w3.org/2000/svg">
+              <path fill-rule="evenodd" clip-rule="evenodd"
+                d="M17.5303 7.53033C17.8232 7.23744 17.8232 6.76256 17.5303 6.46967C17.2374 6.17678 16.7626 6.17678 16.4697 6.46967L12 10.9393L7.53033 6.46967C7.23744 6.17678 6.76256 6.17678 6.46967 6.46967C6.17678 6.76256 6.17678 7.23744 6.46967 7.53033L10.9393 12L6.46967 16.4697C6.17678 16.7626 6.17678 17.2374 6.46967 17.5303C6.76256 17.8232 7.23744 17.8232 7.53033 17.5303L12 13.0607L16.4697 17.5303C16.7626 17.8232 17.2374 17.8232 17.5303 17.5303C17.8232 17.2374 17.8232 16.7626 17.5303 16.4697L13.0607 12L17.5303 7.53033Z"
+                fill="currentColor"></path>
+            </svg>
+          </button>
+        </div>
+        <div>
+          <span class="title">Preview</span>
+          <div class="nft_preview" style="border: 2px dashed rgba(22, 22, 26, 0.1); border-radius: 16px; padding: 16px;">
+            <Loading v-if="getColorStatus === ''" style="padding-bottom: 45px;" />
+            <NFTCard 
+              v-if="getColorStatus === 'Done'"
+              :nftImage="{
+                nft: {
+                  name: 'Preview Name',
+                  symbol: 'PV',
+                  id: '666',
+                  rawUrl: createObjectURL(nftAirdrop.file)
+                },
+                color: imageColor,
+                hasOpensea: false
+              }"
+              :style="'background:' + imageColor" 
+            ></NFTCard>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -128,7 +167,7 @@
       :tokenBalance="hexlAccountBalance(nftAirdrop.gasToken)"
       :gasTokenBalance="hexlAccountBalance(nftAirdrop.gasToken)"
       @selected="setAccount"
-      :isChosen="account === 'hexlink'"
+      :isChosen="useRedPacketStore().account === 'hexlink'"
     >
     </RedPacketAccount>
     <RedPacketAccount
@@ -138,12 +177,12 @@
       :tokenBalance="walletAccountBalance(nftAirdrop.gasToken)"
       :gasTokenBalance="walletAccountBalance(nftAirdrop.gasToken)"
       @selected="setAccount"
-      :isChosen="account === 'wallet'"
+      :isChosen="useRedPacketStore().account === 'wallet'"
     >
     </RedPacketAccount>
   </div>
   <div class="create">
-    <button class="connect-wallet-button" @click="createNft">
+    <button class="connect-wallet-button" @click="confirmNFT">
       Create
     </button>
   </div>
@@ -162,7 +201,7 @@ import { useChainStore } from "@/stores/chain";
 import { getPriceInfo } from "@/web3/network";
 import { hash, calcGas } from "../../functions/common";
 import { redpacketErc721Id } from "../../functions/redpacket";
-import type { RedPacketErc721Input } from "../../functions/redpacket";
+import type { NftAirdrop } from "../../functions/redpacket";
 import type { BalanceMap } from "@/web3/tokens";
 import { getBalances } from "@/web3/tokens";
 import { useAccountStore } from '@/stores/account';
@@ -171,6 +210,13 @@ import RedPacketAccount from "@/components/RedPacketAccount.vue";
 import {createRedPacketErc721, validator} from "@/web3/redpacket";
 import { uploadToIPFS } from "@/web3/storage";
 import {BigNumber as EhtBigNumber} from "ethers";
+import { createNotification } from "@/web3/utils";
+import { useRedPacketStore } from '@/stores/redpacket';
+import type { AccountType } from "@/stores/redpacket";
+import NFTCard from "./NFTCard.vue";
+import { getBackcgroundColor } from '@/web3/utils';
+import type { nftImage } from '@/web3/tokens';
+import Loading from "@/components/Loading.vue";
 
 const FILE_SIZE_LIMIT = 1024 * 1024 * 5;
 const estimatedGasAmount = "550000"; // hardcoded, can optimize later
@@ -178,6 +224,10 @@ const tokenStore = useTokenStore();
 const walletStore = useWalletStore();
 const chooseGasDrop = ref<boolean>(false);
 const tokens = ref<Token[]>([]);
+const sendStatus = ref<string>("");
+const message = ref<string>("Let's go!");
+const imageColor = ref<string>("");
+const getColorStatus = ref<string>("");
 
 const hexlAccountBalances = ref<BalanceMap>({});
 const hexlAccountBalance = (token: string): string => {
@@ -195,11 +245,6 @@ function createObjectURL(file: File) {
       : window.webkitURL.createObjectURL(file);
 }
 
-interface NftAirdrop extends RedPacketErc721Input {
-  file?: File;
-  splitInput: string,
-}
-
 const nftAirdrop = ref<NftAirdrop>({
   id: "",
   name: "",
@@ -215,9 +260,8 @@ const nftAirdrop = ref<NftAirdrop>({
   validationRules: [],
 });
 
-const account = ref<string>("hexlink");
-const setAccount = (acc: string) => {
-  account.value = acc;
+const setAccount = (account: AccountType) => {
+  useRedPacketStore().setAccount(account);
 }
 
 const gasToken = computed(
@@ -225,7 +269,7 @@ const gasToken = computed(
 );
 
 const tokenBalance = (token: string) => {
-  if (account.value === "hexlink") {
+  if (useRedPacketStore().account === "hexlink") {
     return hexlAccountBalance(token);
   }
   return walletAccountBalance(token);
@@ -255,7 +299,7 @@ const genTokenList = async function () {
       walletAccountBalances.value,
     );
   }
-  if (account.value === "hexlink") {
+  if (useRedPacketStore().account === "hexlink") {
     tokens.value = tokenStore.tokens.filter(
       t => Number(hexlAccountBalance(t.address)) > 0
     );
@@ -331,6 +375,7 @@ const showFileSelection = () => {
 
 const removeFile = () => {
   nftAirdrop.value.file = undefined;
+  getColorStatus.value = "";
 }
 
 const chooseFile = async (e: any) => {
@@ -338,24 +383,42 @@ const chooseFile = async (e: any) => {
   if (nftAirdrop.value.file!.size <= FILE_SIZE_LIMIT) {
     nftAirdrop.value.tokenURI = await uploadToIPFS(nftAirdrop.value.file!);
   }
+  imageColor.value = (await getColor({
+    name: 'Preview Name',
+    symbol: 'PV',
+    id: '666',
+    rawUrl: createObjectURL(e.target.files[0])
+  })).color;
+  console.log("Color: ", imageColor.value);
 }
 
 const validateInput = () => {
   if (nftAirdrop.value.file == undefined) {
+    createNotification("Please select a file first", "error");
+    return false;
     throw new Error("please select a file first");
   }
   if (nftAirdrop.value.file.size > FILE_SIZE_LIMIT) {
+    createNotification("File too large, maximum 5MB accepted", "error");
+    return false;
     throw new Error("file too large, maximum 5MB accepted");
   }
   if (nftAirdrop.value.name.length === 0) {
+    createNotification("Name cannot be empty", "error");
+    return false;
     throw new Error("name cannot be empty");
   }
   if (nftAirdrop.value.symbol.length === 0) {
+    createNotification("Symbol cannot be empty", "error");
+    return false;
     throw new Error("symbol cannot be empty");
   }
   if (EhtBigNumber.from(nftAirdrop.value.splitInput).eq(0)) {
+    createNotification("Supply cannot be 0", "error");
+    return false;
     throw new Error("supply cannot be 0");
   }
+  return true;
 }
 
 const createNft = async () => {
@@ -372,18 +435,46 @@ const createNft = async () => {
       nftAirdrop.value.tokenURI = await uploadToIPFS(
         nftAirdrop.value.file!
       );
+      createNotification("Waiting to upload your NFT picture", "error");
     }
     // TODO: make this configurable
     nftAirdrop.value.validationRules.push({type: "dynamic_secrets"});
-    await createRedPacketErc721(
+    const status = await createRedPacketErc721(
       nftAirdrop.value,
-      account.value === "hexlink",
+      useRedPacketStore().account === "hexlink",
       false // dryrun
     );
+    console.log(status);
   } catch (e) {
     console.log("Failed to create redpacket with");
     console.log(e);
   }
+}
+
+const confirmNFT = async () => {
+  if (validateInput()) {
+    nftAirdrop.value.salt = hash(new Date().toISOString());
+    nftAirdrop.value.split = Number(nftAirdrop.value.splitInput);
+    nftAirdrop.value.id = redpacketErc721Id(
+      useChainStore().chain,
+      useAccountStore().account!.address,
+      nftAirdrop.value
+    );
+    if (!nftAirdrop.value.tokenURI) {
+      nftAirdrop.value.tokenURI = await uploadToIPFS(
+        nftAirdrop.value.file!
+      );
+      createNotification("Waiting to upload your NFT picture", "error");
+    }
+    useRedPacketStore().beforeCreate(nftAirdrop.value);
+  }
+}
+
+const getColor = async (nft: nftImage) => {
+  getColorStatus.value = "";
+  const result = await getBackcgroundColor(nft);
+  getColorStatus.value = "Done";
+  return result;
 }
 </script>
 
@@ -655,6 +746,8 @@ const createNft = async () => {
   color: white;
   background: #076ae0;
   appearance: button; }
+.file-upload-button:hover {
+  background-color: rgba(7, 106, 224, 0.9); }
 .input-title {
   margin-bottom: 16px;
   color: rgba(22, 22, 26, 0.6);
@@ -680,6 +773,7 @@ const createNft = async () => {
   position: relative;
   border-radius: 16px;
   -webkit-box-align: center;
+  display: flex;
   align-items: center;
   -webkit-box-pack: center;
   justify-content: center;

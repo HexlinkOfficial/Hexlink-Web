@@ -4,7 +4,7 @@
       <AirdropNFTSend></AirdropNFTSend>
     </RedPacketBase>
   </Layout>
-  <RedpacketConfirm v-if="status !== ''"></RedpacketConfirm>
+  <RedpacketConfirm v-if="status !== ''" :mode="'nft'"></RedpacketConfirm>
 </template>
 
 <script setup lang="ts">

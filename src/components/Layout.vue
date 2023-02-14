@@ -1,5 +1,5 @@
 <template>
-  <div v-if="props.hidden" class="hidden-layer"></div>
+  <div v-if="props.hidden" class="hidden-layer" @wheel.prevent @touchmove.prevent @scroll.prevent></div>
   <div id="main-wrapper" class="show" :class="props.hidden ? 'mobile-modal' : ''">
     <Header />
     <SideBar :active="props.active" />

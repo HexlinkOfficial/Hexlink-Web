@@ -34,7 +34,7 @@
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { useRedPacketStore } from '@/stores/redpacket';
-import { createNewRedPacket, createRedPacketErc721, validator } from "@/web3/redpacket";
+import { createNewRedPacket, createRedPacketErc721 } from "@/web3/redpacket";
 import type { RedPacketInput, NftAirdrop } from "../../functions/redpacket";
 
 const props = defineProps({

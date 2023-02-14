@@ -63,6 +63,6 @@ export async function getRedPacket(
     metadata: JSON.parse(rp.metadata),
     creator: JSON.parse(rp.creator),
     type: rp.type,
-    validationData: JSON.parse(rp.validationData),
+    validationData: JSON.parse(rp.validation_data),
   };
 }

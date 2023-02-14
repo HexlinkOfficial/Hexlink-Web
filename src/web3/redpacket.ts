@@ -325,13 +325,16 @@ export async function callClaimRedPacket(
 ) : Promise<void> {
     const claimRedPacket = httpsCallable(functions, 'claimRedPacket');
     const chain = getChain(redPacket.chain!);
-    await claimRedPacket({
+    const result = await claimRedPacket({
         chain: chain.name,
         redPacketId: redPacket.id,
         claimer: useAuthStore().userInfo,
         accountVersion: useAccountStore().version,
         secret
     });
+    if ((result.data as any)?.code == 422) {
+        throw new Error("validation failed");
+    }
 }
 
 export async function callCreateRedPacket(

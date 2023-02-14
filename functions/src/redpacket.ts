@@ -100,10 +100,10 @@ async function buildMintErc721Op(
   };
 }
 
-async function validateRedPacket(
+function validateRedPacket(
     redPacket: RedPacket,
     secret: string
-) : Promise<boolean> {
+) : boolean {
   const validationRules = redPacket.metadata.validationRules || [];
   const validationData = redPacket.validationData || [];
   // eslint-disable-next-line guard-for-in
@@ -111,7 +111,7 @@ async function validateRedPacket(
     const rule = validationRules[index];
     const data = validationData[index];
     if (rule.type === "dynamic_secrets") {
-      return totp(secret) === data.secret;
+      return totp(data.secret) === secret;
     }
   }
   return true;

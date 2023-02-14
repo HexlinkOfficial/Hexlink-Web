@@ -27,6 +27,7 @@ import {
     tokenFactoryInterface,
     tokenFactoryAddress,
     hexlinkErc721Interface,
+    hexlinkErc721Contract
 } from "../../functions/redpacket";
 
 import { useChainStore } from "@/stores/chain";
@@ -366,6 +367,12 @@ export async function queryRedPacketInfo(
         balance: info.balance.toString(),
         split: info.split
     } as RedPacketOnchainState;
+}
+
+export async function  queryErc721TokenId(address: string) : Promise<number> {
+    const redPacketErc721 = await hexlinkErc721Contract(address, useChainStore().provider);
+    const info = await redPacketErc721.tokenId();
+    return info.toNumber();
 }
 
 export function buildDeployErc721Op(

@@ -21,26 +21,17 @@
         </div>
       </div>
       <div class="upload-box-wrap" style="flex-direction: row; justify-content: space-evenly; border: 0px; padding: 16px 16px;" v-if="nftAirdrop.file">
-        <!-- <button
-          type="button"
-          @click="removeFile"
-          style="display: block; margin-left: auto; margin-right: auto;">
-          <img
-            :src="createObjectURL(nftAirdrop.file)"
-            style="max-height: 100px;"
-          />
-        </button> -->
         <div>
           <span class="title">NFT</span>
-          <div class="nft-pic" style="width: 300px; height: 300px; border: 2px dashed rgba(22, 22, 26, 0.1); border-radius: 16px; padding: 16px;">
-            <img :src="createObjectURL(nftAirdrop.file)" style="height: 100%; width: 100%; border-radius: 16px;" />
+          <div class="nft-pic">
+            <img :src="createObjectURL(nftAirdrop.file)" />
           </div>
         </div>
-        <div class="changePic">
+        <div>
           <button 
             type="button"
             @click="removeFile" 
-            style="background: rgb(255, 255, 255); height: 40px; width: 40px; padding: 0px; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(22, 22, 26, 0.1); border-radius: 12px; transition: all 0.15s ease-in-out 0s; transform-origin: center center; "
+            class="changePicButton"
           >
             <svg style="color: rgb(22, 22, 26);" viewBox="0 0 24 24" fill="none" width="24" height="24" xlmns="http://www.w3.org/2000/svg">
               <path fill-rule="evenodd" clip-rule="evenodd"
@@ -51,7 +42,7 @@
         </div>
         <div>
           <span class="title">Preview</span>
-          <div class="nft_preview" style="border: 2px dashed rgba(22, 22, 26, 0.1); border-radius: 16px; padding: 16px;">
+          <div class="nft-preview">
             <Loading v-if="getColorStatus === ''" style="padding-bottom: 45px;" />
             <NFTCard 
               v-if="getColorStatus === 'Done'"
@@ -389,7 +380,6 @@ const chooseFile = async (e: any) => {
     id: '666',
     rawUrl: createObjectURL(e.target.files[0])
   })).color;
-  console.log("Color: ", imageColor.value);
 }
 
 const validateInput = () => {
@@ -479,6 +469,32 @@ const getColor = async (nft: nftImage) => {
 </script>
 
 <style lang="less" scoped>
+.nft-preview {
+  border: 2px dashed rgba(22, 22, 26, 0.1);
+  border-radius: 16px;
+  padding: 16px; }
+.changePicButton {
+  background: rgb(255, 255, 255);
+  height: 40px;
+  width: 40px;
+  padding: 0px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(22, 22, 26, 0.1);
+  border-radius: 12px;
+  transition: all 0.15s ease-in-out 0s;
+  transform-origin: center center; }
+.nft-pic {
+  width: 300px;
+  height: 300px;
+  border: 2px dashed rgba(22, 22, 26, 0.1);
+  border-radius: 16px;
+  padding: 16px; }
+.nft-pic img {
+  height: 100%;
+  width: 100%;
+  border-radius: 16px; }
 .choose-account {
   display: flex;
   margin: 16px;

@@ -1,6 +1,6 @@
 <template>
-  <div v-if="store.status === 'confirming'" class="claim-success-card transition">
-    <router-link to="/redpacket/send">
+  <div v-if="store.status === 'confirming'" class="claim-success-card transition" @wheel.prevent @touchmove.prevent @scroll.prevent >
+    <router-link :to="props.mode == 'token' ? '/redpacket/send' : '/redpacket/airdropCollectable'">
       <svg @click="closeModal" class="redpacket_close transition" width="30" height="30" viewBox="0 0 30 30" fill="none"
         xmlns="http://www.w3.org/2000/svg">
         <path
@@ -34,26 +34,48 @@
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { useRedPacketStore } from '@/stores/redpacket';
-import { createNewRedPacket } from "@/web3/redpacket";
+import { createNewRedPacket, createRedPacketErc721, validator } from "@/web3/redpacket";
+import type { RedPacketInput, NftAirdrop } from "../../functions/redpacket";
+
+const props = defineProps({
+  mode: String
+});
 
 const message = ref<string>("Let's go!");
 const store = useRedPacketStore();
 const createRedPacket = async () => {
   store.setStatus("processing");
   message.value = "Processing";
-  try {
-    await createNewRedPacket(
-      store.redpacket!,
-      store.account == "hexlink",
-      false // dryrun
-    );
-    message.value = "Done!";
-    store.setStatus("success");
-  } catch (e) {
-    console.log("Failed to create redpacket with");
-    console.log(e);
-    store.setStatus("error");
-    message.value = "Something went wrong...";
+  if(props.mode == 'token') {
+    try {
+      await createNewRedPacket(
+        store.redpacket! as RedPacketInput,
+        store.account == "hexlink",
+        false // dryrun
+      );
+      message.value = "Done!";
+      store.setStatus("success");
+    } catch (e) {
+      console.log("Failed to create redpacket with");
+      console.log(e);
+      store.setStatus("error");
+      message.value = "Something went wrong...";
+    }
+  } else {
+    try {
+      await createRedPacketErc721(
+        store.redpacket! as NftAirdrop,
+        store.account == "hexlink",
+        false // dryrun
+      );
+      message.value = "Done!";
+      store.setStatus("success");
+    } catch (e) {
+      console.log("Failed to create redpacket with");
+      console.log(e);
+      store.setStatus("error");
+      message.value = "Something went wrong...";
+    }
   }
 }
 
@@ -187,7 +209,7 @@ const closeModal = () => {
   right: 0.5rem; }
 .claim-success-card {
   background-color: #fff;
-  position: absolute;
+  position: fixed;
   margin: auto;
   left: 50%;
   top: 45%;
@@ -206,7 +228,6 @@ const closeModal = () => {
   height: 400px;
   width: 450px;
   background-color: #FD4755;
-  position: absolute;
   border-radius: 0;
   margin-left: -80px;
   margin-top: -130px; }

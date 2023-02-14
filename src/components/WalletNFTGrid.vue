@@ -19,7 +19,6 @@
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
-import { FastAverageColor } from 'fast-average-color';
 import { loadErc721Token } from '@/web3/tokens';
 import { useAccountStore } from "@/stores/account";
 import { useNftStore } from '@/stores/nft';
@@ -172,9 +171,9 @@ onMounted(async () => {
     column-gap: 1.5rem; }
   @media (min-width: 1024px) {
     grid-template-columns: repeat(4, minmax(0, 1fr)); }
-  @media (min-width: 1280px) {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    column-gap: 2rem; }
+  // @media (min-width: 1280px) {
+  //   grid-template-columns: repeat(5, minmax(0, 1fr));
+  //   column-gap: 2rem; }
   @media (min-width: 1536px) {} }
 .nft_card {
   position: relative;

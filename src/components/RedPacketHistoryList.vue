@@ -14,7 +14,7 @@
           </div>
           <div v-for="(op, i) in value" :key="i" class="history-record">
             <div v-if="op.type == 'create_redpacket'" class="record-box">
-              <div style="display: block; position: relative;">
+              <div class="sending-status" style="display: block; position: relative;">
                 <svg v-if="showStatus(op) == 'Pending'" version="1.1" id="loader-1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px"
                   y="0px" width="40px" height="40px" viewBox="0 0 50 50" style="enable-background:new 0 0 50 50;"
                   xml:space="preserve">
@@ -54,8 +54,8 @@
                     </div>
                   </div>
                 </div>
-                <div class="token-amount" v-if="op.redpacket && op.redpacket.type === 'erc20'">
-                  <div class="sent-info">
+                <div class="token-amount" v-if="op.redpacket">
+                  <div v-if="op.redpacket.type === 'erc20'" class="sent-info">
                     <a-tooltip placement="top">
                       <template #title>
                         <span>
@@ -72,31 +72,57 @@
                     </div>
                     {{ op.redpacket.token.symbol }}
                   </div>
+                  <div v-if="op.redpacket.type === 'erc721'" style="display: flex; align-items: center;" >
+                    <a-tooltip placement="top">
+                      <template #title>
+                          <img :src="ipfsUrl(op.redpacket.metadata.tokenURI)" style="max-width: 100px;" :size="64"
+                            referrerpolicy="no-referrer" rel="preload" />
+                      </template>
+                      <span class="thumb">
+                        <img :src="ipfsUrl(op.redpacket.metadata.tokenURI)" style="border: 2px solid #D9D9D9;" :size="64" referrerpolicy="no-referrer" rel="preload" />
+                      </span>
+                    </a-tooltip>
+                    <div style="display: flex; flex-direction: column; margin-left: 0.5rem;">
+                      <span class="from-text">{{ op.redpacket.metadata.symbol }}</span>
+                      <span style="font-size: 12px; color: rgb(100,116,139)">
+                        {{ op.redpacket.metadata.symbol }}
+                      </span>
+                    </div>
+                  </div>
                 </div>
-                <div class="claim-status" v-if="op.redpacket && op.redpacket.type === 'erc20'">
+                <div class="claim-status" v-if="op.redpacket && op.txStatus != 'error'">
                   <div class="progress-bar">
-                    <span class="box-progress" :style="{
-                      width: progress(op.redpacket) + '%'
-                    }"></span>
+                    <span v-if="op.redpacket.type === 'erc20'" class="box-progress" :style="{width: progress(op.redpacket) + '%' }"></span>
+                    <span v-if="op.redpacket.type === 'erc721'" class="box-progress" :style="{ width: progressErc721(op.redpacket.metadata.token, op.redpacket.metadata.maxSupply) + '%' }"></span>
                   </div>
                   <div class="claimed-data">
-                    <p class="claimed-number">
+                    <p class="claimed-number" v-if="op.redpacket.type === 'erc20'">
                       Claimed:&nbsp;
                       <strong>{{ split(op.redpacket) }}/{{ op.redpacket.metadata.split }}</strong>
                       &nbsp;Share
                     </p>
-                    <p class="claim-mode">
+                    <p class="claimed-number" v-if="op.redpacket.type === 'erc721'">
+                      Claimed:&nbsp;
+                      <strong>{{ findTokenId(op.redpacket.metadata.token) }}/{{ op.redpacket.metadata.maxSupply }}</strong>
+                      &nbsp;Share
+                    </p>
+                    <p class="claim-mode" v-if="op.redpacket.type === 'erc20'">
                       Mode:&nbsp;
                       <strong>{{ op.redpacket.metadata.mode == 2 ? 'Random' : 'Equal' }}</strong>
                     </p>
-                    <p class="claimed-number">
+                    <p class="claimed-number-left" v-if="op.redpacket.type === 'erc20'">
                       Left:&nbsp;
                       <strong>{{ normalize(op.redpacket.state?.balance || op.redpacket.metadata.balance, op.redpacket.token) }}</strong>
                       &nbsp;{{ op.redpacket.token.symbol }}
                     </p>
+                    <p class="claimed-number-left" v-if="op.redpacket.type === 'erc721'">
+                      Left:&nbsp;
+                      <strong>{{ parseInt(op.redpacket.metadata.maxSupply) - findTokenId(op.redpacket.metadata.token) }}</strong>
+                      &nbsp;
+                    </p>
                   </div>
                 </div>
-                <div class="share" v-if="op.redpacket && op.redpacket.type === 'erc20'">
+                <div class="share" v-if="op.redpacket">
                   <i v-if="showStatus(op) == 'Sent'" class="fa fa-paper-plane share-button" aria-hidden="true" @click="copyShareLink(op.redpacket)"></i>
                   <span v-if="showStatus(op) != 'Sent'" class="pending-text" :style="showStatus(op) == 'Pending' && 'margin-left: 5.5rem;'">{{ showDetailStatus(op) }}</span>
                 </div>
@@ -218,8 +244,8 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, watch, onMounted } from 'vue';
-import { useRoute } from 'vue-router';
+import { ref, watch, onMounted, computed } from 'vue';
+import { RouterLink, useRoute } from 'vue-router';
 import { loadErc20Token } from '@/web3/tokens';
 import { useChainStore } from "@/stores/chain";
 import { getCreatedRedPackets } from '@/graphql/redpacket';
@@ -229,7 +255,7 @@ import Loading from "@/components/Loading.vue";
 import { useAccountStore } from '@/stores/account';
 import { useTokenStore } from '@/stores/token';
 import { copy } from "@/web3/utils";
-import { queryRedPacketInfo } from "@/web3/redpacket";
+import { queryRedPacketInfo, queryErc721TokenId } from "@/web3/redpacket";
 import { normalizeBalance } from "../../functions/common";
 import type { Token } from "../../functions/common";
 import type { RedPacket } from "../../functions/redpacket";
@@ -242,10 +268,16 @@ const loadClaimInfo = async () => {
   const claims : ClaimRedPacketOp[] = await getClaimedRedPackets();
   claimedRpOps.value = await Promise.all(claims.map(c => aggregatedClaimed(c)));
 }
-
 const redPacketByDate = ref<any>([]);
 const claimedByDate = ref<any>([]);
 const luckHistoryByDate = ref<any>([]);
+const tokenIdAddress = ref<string[]>([]);
+
+interface tokenIDMap {
+  address: string,
+  tokenId: number
+}
+const tokenIdtable = ref<tokenIDMap[]>([]);
 
 const loadData = async function() {
   loading.value = true;
@@ -257,7 +289,19 @@ const loadData = async function() {
   }
   loading.value = false;
   extractDate();
+  console.log(luckHistoryByDate.value);
+  extractTokenId();
+  console.log(tokenIdtable.value);
 };
+
+const extractTokenId = () => {
+  tokenIdAddress.value.forEach(async address => {
+    tokenIdtable.value.push({
+      address: address,
+      tokenId: await queryErc721TokenId(address)
+    });
+  })
+}
 
 const extractDate = () => {
   const sentGroup: any = {};
@@ -284,6 +328,9 @@ const extractDate = () => {
   });
 
   createdRpOps.value.forEach((op) => {
+    if(op.redpacket?.type == 'erc721' && op.txStatus != 'error') {
+      tokenIdAddress.value.push(op.redpacket.metadata.token);
+    }
     const date = new Date(op.createdAt).toLocaleString().split(',')[0];
     if (date in sentGroup) {
       sentGroup[date].push(op);
@@ -369,6 +416,21 @@ const split = (redPacket: RedPacketDB) => {
 
 const progress = (redpacket: RedPacketDB) => {
   return split(redpacket) / redpacket.metadata.split*100
+}
+
+const progressErc721 = (address: string, maxSupply: string) => {
+  const id: number = findTokenId(address);
+  return id / parseInt(maxSupply) * 100;
+}
+
+const findTokenId = (address : string) => {
+  var id = 0;
+  tokenIdtable.value.forEach(t => {
+    if (t.address == address) {
+      id =  t.tokenId;
+    }
+  })
+  return id;
 }
 
 const showStatus = (op: any) => {
@@ -588,12 +650,24 @@ i:hover {
   grid-column: span 1/span 1; }
 .claimed-number {
   display: flex;
+  justify-content: flex-start;
   margin: 0px;
   font-weight: 400;
   line-height: 1.5;
   font-size: 12px;
   width: 100px;
   color: rgb(91, 112, 131); }
+.claimed-number-left {
+  display: flex;
+  justify-content: flex-end;
+  margin: 0px;
+  font-weight: 400;
+  line-height: 1.5;
+  font-size: 12px;
+  width: 100px;
+  color: rgb(91, 112, 131); }
+.claimed-number-left strong {
+  font-weight: bold; }
 .claimed-number strong {
   font-weight: bold; }
 .claimed-data {

@@ -380,7 +380,6 @@ const chooseFile = async (e: any) => {
     id: '666',
     rawUrl: createObjectURL(e.target.files[0])
   })).color;
-  console.log("Color: ", imageColor.value);
 }
 
 const validateInput = () => {

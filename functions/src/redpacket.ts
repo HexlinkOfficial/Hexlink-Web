@@ -264,7 +264,7 @@ export const createRedPacketErc721 = functions.https.onCall(
           }]
       );
       const postData: any = {
-        type: "create_redpacket_erc721",
+        type: "create_redpacket",
         userId: uid,
         actions: [action],
         account: account.address,

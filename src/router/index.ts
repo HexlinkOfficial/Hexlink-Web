@@ -27,6 +27,11 @@ const router = createRouter({
       component: () => import('@/views/RedPacketsView.vue')
     },
     {
+      path: '/airdrop/share/:id',
+      name: 'airdrop claim QR code',
+      component: () => import('@/views/AirdropShare.vue')
+    },
+    {
       path: '/redpacket/send',
       name: 'red pocket send view',
       component: () => import('@/views/RedPacketSendView.vue')

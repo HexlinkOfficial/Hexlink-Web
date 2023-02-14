@@ -234,6 +234,7 @@ const redpacket = ref<RawRedPacketInput>({
   gasSponsorship: "0",
   estimatedGas: "0",
   validator: validator(),
+  validationRules: [],
 });
 
 const token = computed(() => tokenStore.token(redpacket.value.token));
@@ -387,6 +388,8 @@ const confirmRedPacket = function () {
       redpacket.value.balanceInput,
       tokenStore.token(redpacket.value.token).decimals
     ).toString();
+    // TODO: make this configurable
+    redpacket.value.validationRules.push({type: "dynamic_secrets"});
     const chain = useChainStore().chain;
     const account = useAccountStore().account!.address;
     redpacket.value.id = redpacketId(chain, account, redpacket.value);

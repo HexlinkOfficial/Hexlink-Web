@@ -1,7 +1,11 @@
 /* eslint-disable require-jsdoc */
 import * as functions from "firebase-functions";
 
-import {RedPacketMetadata, getRedPacket} from "./graphql/redpacket";
+import {
+  RedPacketMetadata,
+  getRedPacket,
+  getRedPacketValidation,
+} from "./graphql/redpacket";
 import type {RedPacket} from "./graphql/redpacket";
 import {signWithKmsKey} from "./kms";
 import {ethers} from "ethers";
@@ -21,6 +25,7 @@ import type {Chain, OpInput} from "../common";
 import {submit} from "./services/operation";
 import {insertRequest} from "./graphql/request";
 import {RequestData, preprocess, validateAndBuildUserOp} from "./operation";
+import {totp} from "otplib";
 
 const secrets = functions.config().doppler || {};
 
@@ -96,6 +101,25 @@ async function buildMintErc721Op(
   };
 }
 
+async function validateRedPacket(
+    redPacket: RedPacket,
+    secret: string
+) : Promise<boolean> {
+  const validationRules = redPacket.metadata.validationRules;
+  if (redPacket.metadata.validationRules) {
+    for (const rule of validationRules) {
+      if (rule.type === "dynamic_secrets") {
+        const secretDB = await getRedPacketValidation(
+            redPacket.id,
+            rule.type,
+        );
+        return !secretDB || totp.check(secret, secretDB);
+      }
+    }
+  }
+  return true;
+}
+
 export const claimRedPacket = functions.https.onCall(
     async (data, context) => {
       const result = await preprocess(data, context);
@@ -107,6 +131,9 @@ export const claimRedPacket = functions.https.onCall(
       const redPacket = await getRedPacket(data.redPacketId);
       if (!redPacket) {
         return {code: 400, message: "Failed to load redpacket"};
+      }
+      if (!validateRedPacket(redPacket, data.secret)) {
+        return {code: 422, message: "validation failed"};
       }
 
       let input;
@@ -166,6 +193,7 @@ export const createRedPacket = functions.https.onCall(
           creator: data.creator,
           refunder: refunder(chain),
           priceInfo: data.redPacket.priceInfo,
+          validationRules: data.redPacket.validationRules,
         },
       };
       const [{id: reqId}] = await insertRequest(
@@ -221,6 +249,7 @@ export const createRedPacketErc721 = functions.https.onCall(
           creator: data.creator,
           refunder: refunder(chain),
           priceInfo: data.erc721.priceInfo,
+          validationRules: data.erc721.validationRules,
         },
       };
       const [{id: reqId}] = await insertRequest(

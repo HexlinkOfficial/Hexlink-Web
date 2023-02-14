@@ -1,5 +1,6 @@
 import {gql} from "@urql/core";
 import {client} from "./client";
+import type {ValidationRule} from "../../redpacket";
 
 export const GET_REDPACKET = gql`
   query GetRedPacket($id: String!) {
@@ -13,25 +14,25 @@ export const GET_REDPACKET = gql`
   }
 `;
 
-export interface RedPacketMetadata {
+export interface RedPacketMetadataBase {
   token: string,
   salt: string,
-  balance: string,
-  validator: string,
   creator: string,
+  validator: string,
+  validationRules: ValidationRule[],
+}
+
+export interface RedPacketMetadata extends RedPacketMetadataBase {
+  balance: string,
   split: number,
   mode: string
 }
 
-export interface RedPacketErc721Metadata {
-  token: string,
-  salt: string,
+export interface RedPacketErc721Metadata extends RedPacketMetadataBase {
   name: string,
   symbol: string,
   tokenURI: string,
   maxSupply: number,
-  validator: string,
-  creator: string,
 }
 
 export interface RedPacket {
@@ -61,4 +62,40 @@ export async function getRedPacket(
     creator: JSON.parse(rp.creator),
     type: rp.type,
   };
+}
+
+export const GET_REDPACKET_VALIDATION = gql`
+  query GetRedPacketValidation(
+    $redpacketId: String!,
+    $type: String!,
+  ) {
+    redpacket_validation (
+      where: {
+        redpacket_id: { _eq: $redpacketId }
+        type: { _eq: $type }
+      }
+    ) {
+      secret
+    }
+  }
+`;
+
+export async function getRedPacketValidation(
+    redPacketId: string,
+    type: string,
+) : Promise<string | undefined> {
+  const result = await client().query(
+      GET_REDPACKET_VALIDATION,
+      {redPacketId, type}
+  ).toPromise();
+  if (result.error) {
+    console.log("Failed to get validation", result.error);
+    return undefined;
+  }
+  const validation = result.data?.redpacket_validation;
+  if (!validation || validation.length == 0) {
+    console.log("No validaton found");
+    return undefined;
+  }
+  return validation[0].secret;
 }

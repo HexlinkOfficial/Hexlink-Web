@@ -36,6 +36,7 @@
     "node-html-parser": "^6.1.4",
     "nodemailer": "^6.7.8",
     "oauth": "^0.10.0",
+    "otplib": "^12.0.1",
     "save": "^2.9.0",
     "twitter-api-v2": "^1.14.0"
   },

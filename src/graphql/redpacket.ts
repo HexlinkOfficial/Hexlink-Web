@@ -148,3 +148,39 @@ export async function getRedPacket(
     return await getRedPacket(redPacketId);
   }
 }
+
+
+export const GET_REDPACKET_VALIDATION = gql`
+  query GetRedPacketValidation(
+    $redpacketId: String!,
+    $type: String!,
+  ) {
+    redpacket_validation (
+      where: {
+        redpacket_id: { _eq: $redpacketId }
+        type: { _eq: $type }
+      }
+    ) {
+      secret
+    }
+  }
+`;
+
+export async function getRedPacketValidation(
+    redPacketId: string,
+    type: string,
+) : Promise<string | undefined> {
+  const client = setUrqlClientIfNecessary(
+    useAuthStore().user!.idToken!
+  );
+  const result = await client.query(
+      GET_REDPACKET_VALIDATION,
+      {redPacketId, type}
+  ).toPromise();
+  if (await handleUrqlResponse(result)) {
+    const validation = result.data?.redpacket_validation;
+    return validation && validation.length > 0 ? validation[0].secret : undefined;
+  } else {
+    return await getRedPacketValidation(redPacketId, type);
+  }
+}

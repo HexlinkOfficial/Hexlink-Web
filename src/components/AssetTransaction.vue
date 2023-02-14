@@ -117,7 +117,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, watch, computed, onMounted } from 'vue';
+import { ref, onMounted } from 'vue';
 import Loading from "@/components/Loading.vue";
 import { getAssetTransfers, loadTokenLogo } from '@/web3/tokens';
 import { useTokenStore } from '@/stores/token';

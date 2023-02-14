@@ -212,6 +212,7 @@ const nftAirdrop = ref<NftAirdrop>({
   gasSponsorship: "0",
   estimatedGas: "0",
   validator: validator(),
+  validationRules: [],
 });
 
 const account = ref<string>("hexlink");
@@ -372,6 +373,8 @@ const createNft = async () => {
         nftAirdrop.value.file!
       );
     }
+    // TODO: make this configurable
+    nftAirdrop.value.validationRules.push({type: "dynamic_secrets"});
     await createRedPacketErc721(
       nftAirdrop.value,
       account.value === "hexlink",

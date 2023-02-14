@@ -318,7 +318,10 @@ export async function createNewRedPacket(
     }
 }
 
-export async function callClaimRedPacket(redPacket: RedPacketDB) : Promise<void> {
+export async function callClaimRedPacket(
+    redPacket: RedPacketDB,
+    secret: string | undefined,
+) : Promise<void> {
     const claimRedPacket = httpsCallable(functions, 'claimRedPacket');
     const chain = getChain(redPacket.chain!);
     await claimRedPacket({
@@ -326,6 +329,7 @@ export async function callClaimRedPacket(redPacket: RedPacketDB) : Promise<void>
         redPacketId: redPacket.id,
         claimer: useAuthStore().userInfo,
         accountVersion: useAccountStore().version,
+        secret
     });
 }
 

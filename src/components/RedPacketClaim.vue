@@ -58,12 +58,14 @@ import type { RedPacketDB } from "@/types";
 import type { RedPacket, RedPacketErc721 } from "functions/redpacket/lib";
 
 const redPacket = ref<RedPacketDB | undefined>();
+const otp = ref<string | undefined>();
 const redPacketTokenIcon = ref<string>("");
 const redPacketToken = ref<string>("");
 const claimStatus = ref<string>("");
 
 onMounted(async () => {
   redPacket.value = await getRedPacket(useRoute().query.claim!.toString());
+  otp.value = useRoute().query.otp?.toString();
   if (redPacket.value) {
     const network = getChain(redPacket.value.chain!);
     await switchNetwork(network);
@@ -87,7 +89,7 @@ onMounted(async () => {
 const claim = async () => {
   claimStatus.value = 'loading';
   try {
-    await callClaimRedPacket(redPacket.value!);
+    await callClaimRedPacket(redPacket.value!, otp.value);
     claimStatus.value = 'success';
   } catch (e) {
     console.log("Failed to claim redpacket with error " + JSON.stringify(e));

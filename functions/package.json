@@ -38,6 +38,7 @@
     "oauth": "^0.10.0",
     "otplib": "^12.0.1",
     "save": "^2.9.0",
+    "totp-generator": "^0.0.14",
     "twitter-api-v2": "^1.14.0"
   },
   "devDependencies": {

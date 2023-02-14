@@ -24,7 +24,7 @@ async function buildTx(provider, chain, unsignedTx, from) {
 exports.buildTx = buildTx;
 function buildValidationData(params) {
     const result = [];
-    for (const rule of (params.valiationRules || [])) {
+    for (const rule of (params.validationRules || [])) {
         const data = { redPacketId: params.redPacketId, type: rule.type };
         if (rule.type === "dynamic_secrets") {
             data.secret = otplib_1.authenticator.generateSecret();

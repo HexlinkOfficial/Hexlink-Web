@@ -10,6 +10,7 @@ export const GET_REDPACKET = gql`
         metadata
         creator
         type
+        validation_data
     }
   }
 `;

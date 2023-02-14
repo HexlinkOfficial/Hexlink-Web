@@ -3,9 +3,9 @@
 </template>
   
 <script setup lang="ts">
-import { getRedPacketValidation, getRedPacket } from "@/graphql/redpacket";
+import { getRedPacketPrivate } from "@/graphql/redpacket";
 import type { RedPacketDB } from "@/types";
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted } from "vue";
 import { useRoute } from 'vue-router';
 import {totp} from "otplib";
 import QRCode from "qrcode";
@@ -15,13 +15,13 @@ const redPacket = ref<RedPacketDB | undefined>();
 onMounted(async () => {
     const route = useRoute();
     const redPacketId = route.params.id;
-    redPacket.value = await getRedPacket(redPacketId as string);
+    redPacket.value = await getRedPacketPrivate(redPacketId as string);
     const validationRules = redPacket.value?.metadata.validationRules || [];
     const validationData = redPacket.value?.validationData || [];
     for (const index in validationRules) {
         const rule = validationRules[index];
         const data = validationData[index];
-        if (rule.type == "dynamic_secrets") {
+        if (rule.type === "dynamic_secrets") {
             secret.value = data.secret;
         }
     }
@@ -38,7 +38,6 @@ const genQrCode = async() => {
     if (secret.value) {
         url += `&otp=${totpCode(secret.value)}`;
     }
-    console.log(url);
     var canvas = document.getElementById('canvas')
     await QRCode.toCanvas(canvas, url);
 }

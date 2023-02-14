@@ -24,6 +24,22 @@ export const GET_REDPACKET = gql`
   }
 `
 
+export const GET_REDPACKET_PRIVATE = gql`
+  query GetRedPacket($id: String!) {
+    redpacket_by_pk(id: $id) {
+        id
+        user_id
+        metadata
+        creator
+        type
+        validation_data
+        operation {
+          chain
+        }
+    }
+  }
+`;
+
 export const GET_CREATED_REDPACKETS = gql`
     query GetRedPacketByUser (
         $userId: String!,
@@ -52,6 +68,7 @@ export const GET_CREATED_REDPACKETS = gql`
               metadata,
               deposit,
               created_at,
+              validation_data,
               type
             }
             request {
@@ -139,6 +156,37 @@ export async function getRedPacket(
         createdAt: new Date(rp.created_at),
         creator: JSON.parse(rp.creator),
         chain: rp.operation_public.chain,
+        type: rp.type,
+      }
+    } else {
+      throw new Error("Redpacket not found");
+    }
+  } else {
+    return await getRedPacket(redPacketId);
+  }
+}
+
+
+export async function getRedPacketPrivate(
+  redPacketId: string
+) : Promise<RedPacketDB | undefined> {
+  const client = setUrqlClientIfNecessary(
+    useAuthStore().user!.idToken!
+  );
+  const result = await client.query(
+    GET_REDPACKET_PRIVATE,
+    {id: redPacketId}
+  ).toPromise();
+  if (await handleUrqlResponse(result)) {
+    const rp = result.data?.redpacket_by_pk;
+    if (rp) {
+      return {
+        id: redPacketId,
+        metadata: JSON.parse(rp.metadata),
+        createdAt: new Date(rp.created_at),
+        creator: JSON.parse(rp.creator),
+        chain: rp.operation.chain,
+        validationData: JSON.parse(rp.validation_data || "[]"),
         type: rp.type,
       }
     } else {

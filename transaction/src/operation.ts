@@ -15,7 +15,6 @@ import {
   hexlinkErc721Contract,
   hexlinkErc721Metadata,
 } from "../../functions/redpacket";
-import type {ValidationRule} from "../../functions/redpacket";
 import type {Action, Operation} from "./types";
 import {updateOp} from "./graphql/operation";
 import { getInfuraProvider } from "./utils";
@@ -42,7 +41,7 @@ export async function buildTx(
 
 function buildValidationData(params: any) {
     const result = [];
-    for (const rule of (params.valiationRules || [])) {
+    for (const rule of (params.validationRules || [])) {
       const data : any = {redPacketId: params.redPacketId, type: rule.type};
       if (rule.type === "dynamic_secrets") {
         data.secret = authenticator.generateSecret();;

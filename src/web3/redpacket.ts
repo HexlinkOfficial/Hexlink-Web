@@ -372,7 +372,7 @@ export async function queryRedPacketInfo(
     } as RedPacketOnchainState;
 }
 
-export async function  queryErc721TokenId(address: string) : Promise<number> {
+export async function queryErc721TokenId(address: string) : Promise<number> {
     const redPacketErc721 = await hexlinkErc721Contract(address, useChainStore().provider);
     const info = await redPacketErc721.tokenId();
     return info.toNumber();

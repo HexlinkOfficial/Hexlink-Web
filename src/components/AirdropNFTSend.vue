@@ -386,59 +386,24 @@ const validateInput = () => {
   if (nftAirdrop.value.file == undefined) {
     createNotification("Please select a file first", "error");
     return false;
-    throw new Error("please select a file first");
   }
   if (nftAirdrop.value.file.size > FILE_SIZE_LIMIT) {
     createNotification("File too large, maximum 5MB accepted", "error");
     return false;
-    throw new Error("file too large, maximum 5MB accepted");
   }
   if (nftAirdrop.value.name.length === 0) {
     createNotification("Name cannot be empty", "error");
     return false;
-    throw new Error("name cannot be empty");
   }
   if (nftAirdrop.value.symbol.length === 0) {
     createNotification("Symbol cannot be empty", "error");
     return false;
-    throw new Error("symbol cannot be empty");
   }
   if (EhtBigNumber.from(nftAirdrop.value.splitInput).eq(0)) {
     createNotification("Supply cannot be 0", "error");
     return false;
-    throw new Error("supply cannot be 0");
   }
   return true;
-}
-
-const createNft = async () => {
-  try {
-    validateInput();
-    nftAirdrop.value.salt = hash(new Date().toISOString());
-    nftAirdrop.value.split = Number(nftAirdrop.value.splitInput);
-    nftAirdrop.value.id = redpacketErc721Id(
-      useChainStore().chain,
-      useAccountStore().account!.address,
-      nftAirdrop.value
-    );
-    if (!nftAirdrop.value.tokenURI) {
-      nftAirdrop.value.tokenURI = await uploadToIPFS(
-        nftAirdrop.value.file!
-      );
-      createNotification("Waiting to upload your NFT picture", "error");
-    }
-    // TODO: make this configurable
-    nftAirdrop.value.validationRules.push({type: "dynamic_secrets"});
-    const status = await createRedPacketErc721(
-      nftAirdrop.value,
-      useRedPacketStore().account === "hexlink",
-      false // dryrun
-    );
-    console.log(status);
-  } catch (e) {
-    console.log("Failed to create redpacket with");
-    console.log(e);
-  }
 }
 
 const confirmNFT = async () => {
@@ -456,6 +421,8 @@ const confirmNFT = async () => {
       );
       createNotification("Waiting to upload your NFT picture", "error");
     }
+    // TODO: make this configurable
+    nftAirdrop.value.validationRules.push({type: "dynamic_secrets"});
     useRedPacketStore().beforeCreate(nftAirdrop.value);
   }
 }

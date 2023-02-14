@@ -16,12 +16,13 @@ onMounted(async () => {
     const route = useRoute();
     const redPacketId = route.params.id;
     redPacket.value = await getRedPacket(redPacketId as string);
-    const validationRules = redPacket.value?.metadata.validationRules
-    for (const rule of (validationRules || [])) {
+    const validationRules = redPacket.value?.metadata.validationRules || [];
+    const validationData = redPacket.value?.validationData || [];
+    for (const index in validationRules) {
+        const rule = validationRules[index];
+        const data = validationData[index];
         if (rule.type == "dynamic_secrets") {
-            secret.value = await getRedPacketValidation(
-                redPacket.value!.id, rule.type
-            );
+            secret.value = data.secret;
         }
     }
 });

@@ -53,6 +53,7 @@ async function insertRedPacket(uid, data) {
             creator: JSON.stringify(d.creator),
             op_id: d.opId,
             deposit: JSON.stringify(d.deposit),
+            validation_data: JSON.stringify(d.validationData),
             type: d.type,
         })),
     }).toPromise();

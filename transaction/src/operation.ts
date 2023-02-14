@@ -1,5 +1,9 @@
 import {ethers, BigNumber as EthBigNumber, PopulatedTransaction } from "ethers";
-import {insertRedPacketClaim, insertRedPacket} from "./graphql/redpacket";
+import {
+  insertRedPacketClaim,
+  insertRedPacket,
+  insertRedPacketValidation
+} from "./graphql/redpacket";
 import type {Chain} from "../../functions/common";
 import {PriceConfigs, parseDeposit} from "../../functions/common";
 import {
@@ -11,9 +15,11 @@ import {
   hexlinkErc721Contract,
   hexlinkErc721Metadata,
 } from "../../functions/redpacket";
+import type {ValidationRule} from "../../functions/redpacket";
 import type {Action, Operation} from "./types";
 import {updateOp} from "./graphql/operation";
 import { getInfuraProvider } from "./utils";
+import { authenticator } from 'otplib';
 
 export async function buildTx(
   provider: ethers.providers.Provider,
@@ -32,6 +38,18 @@ export async function buildTx(
   unsignedTx.maxFeePerGas = feeData.maxFeePerGas ||
     EthBigNumber.from(PriceConfigs[chain.name]);
   return unsignedTx;
+}
+
+function buildValidationData(params: any) {
+    const result = [];
+    for (const rule of (params.valiationRules || [])) {
+      const data : any = {redPacketId: params.redPacketId, type: rule.type};
+      if (rule.type === "dynamic_secrets") {
+        data.secret = authenticator.generateSecret();;
+      }
+      result.push(data);
+    }
+    return result;
 }
 
 async function processAction(
@@ -108,6 +126,7 @@ async function processAction(
             amount: deposit?.amount.toString(),
             priceInfo: params.priceInfo,
           },
+          validationData: buildValidationData(params),
         }]
       );
     } else {
@@ -124,17 +143,17 @@ async function processAction(
       params.salt,
     );
     if (deployed !== undefined) {
-      const deposit = parseDeposit(
-        receipt,
-        params.redPacketId,
-        op.account,
-        params.refunder,
-      );
       const metadata = await hexlinkErc721Metadata(
         await hexlinkErc721Contract(
           deployed.deployed,
           getInfuraProvider(chain)
         )
+      );
+      const deposit = parseDeposit(
+        receipt,
+        params.redPacketId,
+        op.account,
+        params.refunder,
       );
       await insertRedPacket(
         params.userId,
@@ -157,8 +176,9 @@ async function processAction(
             amount: deposit?.amount.toString(),
             priceInfo: params.priceInfo,
           },
+          validationData: buildValidationData(params),
         }]
-      )
+      );
     }
   }
 }

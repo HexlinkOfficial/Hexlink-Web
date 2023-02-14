@@ -69,6 +69,7 @@ export interface RedPacketDB {
     state?: RedPacketOnchainState,
     token?: Token,
     chain?: string,
+    validationData?: any[],
     type: "erc20" | "erc721",
 }
 

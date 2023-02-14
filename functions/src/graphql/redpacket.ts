@@ -40,6 +40,7 @@ export interface RedPacket {
   user_id: string,
   metadata: RedPacketMetadata | RedPacketErc721Metadata,
   creator: string,
+  validationData: any[],
   type: "erc20" | "erc721",
 }
 
@@ -61,41 +62,6 @@ export async function getRedPacket(
     metadata: JSON.parse(rp.metadata),
     creator: JSON.parse(rp.creator),
     type: rp.type,
+    validationData: JSON.parse(rp.validationData),
   };
-}
-
-export const GET_REDPACKET_VALIDATION = gql`
-  query GetRedPacketValidation(
-    $redpacketId: String!,
-    $type: String!,
-  ) {
-    redpacket_validation (
-      where: {
-        redpacket_id: { _eq: $redpacketId }
-        type: { _eq: $type }
-      }
-    ) {
-      secret
-    }
-  }
-`;
-
-export async function getRedPacketValidation(
-    redPacketId: string,
-    type: string,
-) : Promise<string | undefined> {
-  const result = await client().query(
-      GET_REDPACKET_VALIDATION,
-      {redPacketId, type}
-  ).toPromise();
-  if (result.error) {
-    console.log("Failed to get validation", result.error);
-    return undefined;
-  }
-  const validation = result.data?.redpacket_validation;
-  if (!validation || validation.length == 0) {
-    console.log("No validaton found");
-    return undefined;
-  }
-  return validation[0].secret;
 }

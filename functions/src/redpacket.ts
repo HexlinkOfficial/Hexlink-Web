@@ -105,16 +105,14 @@ async function validateRedPacket(
     redPacket: RedPacket,
     secret: string
 ) : Promise<boolean> {
-  const validationRules = redPacket.metadata.validationRules;
-  if (redPacket.metadata.validationRules) {
-    for (const rule of validationRules) {
-      if (rule.type === "dynamic_secrets") {
-        const secretDB = await getRedPacketValidation(
-            redPacket.id,
-            rule.type,
-        );
-        return !secretDB || totp.check(secret, secretDB);
-      }
+  const validationRules = redPacket.metadata.validationRules || [];
+  const validationData = redPacket.validationData || [];
+  // eslint-disable-next-line guard-for-in
+  for (const index in validationRules) {
+    const rule = validationRules[index];
+    const data = validationData[index];
+    if (rule.type === "dynamic_secrets") {
+      return !secret || totp.check(secret, data.secret);
     }
   }
   return true;

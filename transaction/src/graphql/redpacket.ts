@@ -57,6 +57,7 @@ export async function insertRedPacket(
       metadata: any,
       opId: number,
       deposit: any,
+      validationData: any,
       type: "erc20" | "erc721",
     }[],
 ) : Promise<{id: string}[]> {
@@ -70,6 +71,7 @@ export async function insertRedPacket(
           creator: JSON.stringify(d.creator),
           op_id: d.opId,
           deposit: JSON.stringify(d.deposit),
+          validation_data: JSON.stringify(d.validationData),
           type: d.type,
         })),
       }

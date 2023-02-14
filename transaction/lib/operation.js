@@ -7,6 +7,7 @@ const common_1 = require("../../functions/common");
 const redpacket_2 = require("../../functions/redpacket");
 const operation_1 = require("./graphql/operation");
 const utils_1 = require("./utils");
+const otplib_1 = require("otplib");
 async function buildTx(provider, chain, unsignedTx, from) {
     const { chainId } = await provider.getNetwork();
     unsignedTx.chainId = chainId;
@@ -21,6 +22,18 @@ async function buildTx(provider, chain, unsignedTx, from) {
     return unsignedTx;
 }
 exports.buildTx = buildTx;
+function buildValidationData(params) {
+    const result = [];
+    for (const rule of (params.valiationRules || [])) {
+        const data = { redPacketId: params.redPacketId, type: rule.type };
+        if (rule.type === "dynamic_secrets") {
+            data.secret = otplib_1.authenticator.generateSecret();
+            ;
+        }
+        result.push(data);
+    }
+    return result;
+}
 async function processAction(op, chain, action, receipt) {
     const params = action.params;
     if (action.type === "insert_redpacket_claim") {
@@ -70,6 +83,7 @@ async function processAction(op, chain, action, receipt) {
                         amount: deposit === null || deposit === void 0 ? void 0 : deposit.amount.toString(),
                         priceInfo: params.priceInfo,
                     },
+                    validationData: buildValidationData(params),
                 }]);
         }
         else {
@@ -80,8 +94,8 @@ async function processAction(op, chain, action, receipt) {
     if (action.type === "insert_redpacket_erc721") {
         const deployed = (0, redpacket_2.parseDeployed)(chain, receipt, op.account, params.salt);
         if (deployed !== undefined) {
-            const deposit = (0, common_1.parseDeposit)(receipt, params.redPacketId, op.account, params.refunder);
             const metadata = await (0, redpacket_2.hexlinkErc721Metadata)(await (0, redpacket_2.hexlinkErc721Contract)(deployed.deployed, (0, utils_1.getInfuraProvider)(chain)));
+            const deposit = (0, common_1.parseDeposit)(receipt, params.redPacketId, op.account, params.refunder);
             await (0, redpacket_1.insertRedPacket)(params.userId, [{
                     id: params.redPacketId,
                     creator: params.creator,
@@ -101,6 +115,7 @@ async function processAction(op, chain, action, receipt) {
                         amount: deposit === null || deposit === void 0 ? void 0 : deposit.amount.toString(),
                         priceInfo: params.priceInfo,
                     },
+                    validationData: buildValidationData(params),
                 }]);
         }
     }

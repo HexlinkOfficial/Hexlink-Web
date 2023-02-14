@@ -36,9 +36,38 @@
             <img :src="createObjectURL(nftAirdrop.file)" style="height: 100%; width: 100%; border-radius: 16px;" />
           </div>
         </div>
+        <div class="changePic">
+          <button 
+            type="button"
+            @click="removeFile" 
+            style="background: rgb(255, 255, 255); height: 40px; width: 40px; padding: 0px; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(22, 22, 26, 0.1); border-radius: 12px; transition: all 0.15s ease-in-out 0s; transform-origin: center center; "
+          >
+            <svg style="color: rgb(22, 22, 26);" viewBox="0 0 24 24" fill="none" width="24" height="24" xlmns="http://www.w3.org/2000/svg">
+              <path fill-rule="evenodd" clip-rule="evenodd"
+                d="M17.5303 7.53033C17.8232 7.23744 17.8232 6.76256 17.5303 6.46967C17.2374 6.17678 16.7626 6.17678 16.4697 6.46967L12 10.9393L7.53033 6.46967C7.23744 6.17678 6.76256 6.17678 6.46967 6.46967C6.17678 6.76256 6.17678 7.23744 6.46967 7.53033L10.9393 12L6.46967 16.4697C6.17678 16.7626 6.17678 17.2374 6.46967 17.5303C6.76256 17.8232 7.23744 17.8232 7.53033 17.5303L12 13.0607L16.4697 17.5303C16.7626 17.8232 17.2374 17.8232 17.5303 17.5303C17.8232 17.2374 17.8232 16.7626 17.5303 16.4697L13.0607 12L17.5303 7.53033Z"
+                fill="currentColor"></path>
+            </svg>
+          </button>
+        </div>
         <div>
           <span class="title">Preview</span>
-          <div class="nft_preview" style="width: 300px; height: 300px; border: 2px dashed rgba(22, 22, 26, 0.1); border-radius: 16px;"></div>
+          <div class="nft_preview" style="border: 2px dashed rgba(22, 22, 26, 0.1); border-radius: 16px; padding: 16px;">
+            <Loading v-if="getColorStatus === ''" style="padding-bottom: 45px;" />
+            <NFTCard 
+              v-if="getColorStatus === 'Done'"
+              :nftImage="{
+                nft: {
+                  name: 'Preview Name',
+                  symbol: 'PV',
+                  id: '666',
+                  rawUrl: createObjectURL(nftAirdrop.file)
+                },
+                color: imageColor,
+                hasOpensea: false
+              }"
+              :style="'background:' + imageColor" 
+            ></NFTCard>
+          </div>
         </div>
       </div>
     </div>
@@ -184,6 +213,10 @@ import {BigNumber as EhtBigNumber} from "ethers";
 import { createNotification } from "@/web3/utils";
 import { useRedPacketStore } from '@/stores/redpacket';
 import type { AccountType } from "@/stores/redpacket";
+import NFTCard from "./NFTCard.vue";
+import { getBackcgroundColor } from '@/web3/utils';
+import type { nftImage } from '@/web3/tokens';
+import Loading from "@/components/Loading.vue";
 
 const FILE_SIZE_LIMIT = 1024 * 1024 * 5;
 const estimatedGasAmount = "550000"; // hardcoded, can optimize later
@@ -193,6 +226,8 @@ const chooseGasDrop = ref<boolean>(false);
 const tokens = ref<Token[]>([]);
 const sendStatus = ref<string>("");
 const message = ref<string>("Let's go!");
+const imageColor = ref<string>("");
+const getColorStatus = ref<string>("");
 
 const hexlAccountBalances = ref<BalanceMap>({});
 const hexlAccountBalance = (token: string): string => {
@@ -223,8 +258,6 @@ const nftAirdrop = ref<NftAirdrop>({
   estimatedGas: "0",
   validator: validator(),
 });
-
-const account = ref<string>("hexlink");
 
 const setAccount = (account: AccountType) => {
   useRedPacketStore().setAccount(account);
@@ -341,6 +374,7 @@ const showFileSelection = () => {
 
 const removeFile = () => {
   nftAirdrop.value.file = undefined;
+  getColorStatus.value = "";
 }
 
 const chooseFile = async (e: any) => {
@@ -348,6 +382,13 @@ const chooseFile = async (e: any) => {
   if (nftAirdrop.value.file!.size <= FILE_SIZE_LIMIT) {
     nftAirdrop.value.tokenURI = await uploadToIPFS(nftAirdrop.value.file!);
   }
+  imageColor.value = (await getColor({
+    name: 'Preview Name',
+    symbol: 'PV',
+    id: '666',
+    rawUrl: createObjectURL(e.target.files[0])
+  })).color;
+  console.log("Color: ", imageColor.value);
 }
 
 const validateInput = () => {
@@ -424,6 +465,13 @@ const confirmNFT = async () => {
     }
     useRedPacketStore().beforeCreate(nftAirdrop.value);
   }
+}
+
+const getColor = async (nft: nftImage) => {
+  getColorStatus.value = "";
+  const result = await getBackcgroundColor(nft);
+  getColorStatus.value = "Done";
+  return result;
 }
 </script>
 

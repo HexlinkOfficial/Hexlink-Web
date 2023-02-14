@@ -7,7 +7,11 @@
   </div>
   <div v-if="!loading" class="box">
     <div class="nft_grid">
-      <NFTCard v-for="(value, index) in nftImages" :key="index" class="nfts" :style=" 'background:' + value.color" :nftImage="value" >
+      <NFTCard 
+        v-for="(value, index) in nftImages" 
+        :key="index"
+        :style=" 'background:' + value.color" 
+        :nftImage="value" >
       </NFTCard>
     </div>
   </div>
@@ -22,6 +26,7 @@ import { useNftStore } from '@/stores/nft';
 import Loading from "@/components/Loading.vue";
 import type { openSea, nftImage, bindedNFT } from '@/web3/tokens';
 import NFTCard from './NFTCard.vue';
+import { getBackcgroundColor } from '@/web3/utils';
 
 const imageColor = ref<string[]>([]);
 const nftImages = ref<bindedNFT[]>([]);
@@ -39,39 +44,6 @@ const loadNfts = async () => {
   loading.value = false;
 }
 
-const getBackcgroundColor = async (nft: nftImage) => {
-  var output: string = "";
-  var url: string = "";
-  var opensea: boolean = false;
-  if (nft.openSea.imageUrl != undefined) {
-    url = nft.openSea.imageUrl;
-    opensea = true;
-  } else {
-    url = nft.rawUrl;
-    opensea = false;
-  }
-  const fac = new FastAverageColor();
-  await fac.getColorAsync(url, { algorithm: 'dominant' })
-    .then(color => {
-      // container.style.backgroundColor = color.rgba;
-      // container.style.color = color.isDark ? '#fff' : '#000';
-      output = color.hex.toString();
-    })
-    .catch(e => {
-      console.log(e);
-      return e;
-    });
-  nftImages.value.push({
-    nft: nft,
-    color: output,
-    hasOpensea: opensea
-  })
-}
-
-const getOpenseaUrl = (nft: nftImage) => {
-  return 'https://opensea.io/assets/ethereum/' + nft.contract + '/' + nft.id;
-}
-
 const preloadColors = () => {
   var contracts: string[] = [];
   var symbols: string[] = [];
@@ -84,7 +56,7 @@ const preloadColors = () => {
     names.push(nft.name);
     nftIds.push(nft.id);
     images.push(nft.rawUrl);
-    await getBackcgroundColor(nft);
+    nftImages.value.push(await getBackcgroundColor(nft));
   })
   console.log("xxx", nftImages.value);
   useNftStore().set(contracts, symbols, names, nftIds, images);

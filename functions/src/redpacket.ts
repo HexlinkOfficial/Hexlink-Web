@@ -4,7 +4,6 @@ import * as functions from "firebase-functions";
 import {
   RedPacketMetadata,
   getRedPacket,
-  getRedPacketValidation,
 } from "./graphql/redpacket";
 import type {RedPacket} from "./graphql/redpacket";
 import {signWithKmsKey} from "./kms";
@@ -25,7 +24,7 @@ import type {Chain, OpInput} from "../common";
 import {submit} from "./services/operation";
 import {insertRequest} from "./graphql/request";
 import {RequestData, preprocess, validateAndBuildUserOp} from "./operation";
-import {totp} from "otplib";
+import * as totp from "totp-generator";
 
 const secrets = functions.config().doppler || {};
 
@@ -112,7 +111,7 @@ async function validateRedPacket(
     const rule = validationRules[index];
     const data = validationData[index];
     if (rule.type === "dynamic_secrets") {
-      return !secret || totp.check(secret, data.secret);
+      return totp(secret) === data.secret;
     }
   }
   return true;

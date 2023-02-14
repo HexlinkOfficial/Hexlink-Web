@@ -7,7 +7,7 @@ import { getRedPacketPrivate } from "@/graphql/redpacket";
 import type { RedPacketDB } from "@/types";
 import { ref, onMounted } from "vue";
 import { useRoute } from 'vue-router';
-import {totp} from "otplib";
+import * as totp from "totp-generator";
 import QRCode from "qrcode";
 
 const secret = ref<string | undefined>();
@@ -51,6 +51,6 @@ const refreshQrCode = async () => {
 onMounted(refreshQrCode);
 
 const totpCode = (secret: string) => {
-    return totp.generate(secret);
+    return totp(secret);
 };
 </script>

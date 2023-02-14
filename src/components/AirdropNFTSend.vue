@@ -20,8 +20,8 @@
           </button>
         </div>
       </div>
-      <div class="upload-box-wrap" v-if="nftAirdrop.file">
-        <button
+      <div class="upload-box-wrap" style="flex-direction: row; justify-content: space-evenly; border: 0px; padding: 16px 16px;" v-if="nftAirdrop.file">
+        <!-- <button
           type="button"
           @click="removeFile"
           style="display: block; margin-left: auto; margin-right: auto;">
@@ -29,7 +29,17 @@
             :src="createObjectURL(nftAirdrop.file)"
             style="max-height: 100px;"
           />
-        </button>
+        </button> -->
+        <div>
+          <span class="title">NFT</span>
+          <div class="nft-pic" style="width: 300px; height: 300px; border: 2px dashed rgba(22, 22, 26, 0.1); border-radius: 16px; padding: 16px;">
+            <img :src="createObjectURL(nftAirdrop.file)" style="height: 100%; width: 100%; border-radius: 16px;" />
+          </div>
+        </div>
+        <div>
+          <span class="title">Preview</span>
+          <div class="nft_preview" style="width: 300px; height: 300px; border: 2px dashed rgba(22, 22, 26, 0.1); border-radius: 16px;"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -712,6 +722,7 @@ const confirmNFT = async () => {
   position: relative;
   border-radius: 16px;
   -webkit-box-align: center;
+  display: flex;
   align-items: center;
   -webkit-box-pack: center;
   justify-content: center;

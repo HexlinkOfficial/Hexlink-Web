@@ -83,14 +83,14 @@
                       </span>
                     </a-tooltip>
                     <div style="display: flex; flex-direction: column; margin-left: 0.5rem;">
-                      <span class="from-text">{{ op.redpacket.metadata.symbol }}</span>
+                      <span class="from-text">{{ op.redpacket.metadata.name }}</span>
                       <span style="font-size: 12px; color: rgb(100,116,139)">
                         {{ op.redpacket.metadata.symbol }}
                       </span>
                     </div>
                   </div>
                 </div>
-                <div class="claim-status" v-if="op.redpacket && op.txStatus != 'error'">
+                <div class="claim-status" v-if="op.redpacket && op.txStatus == 'success'">
                   <div class="progress-bar">
                     <span v-if="op.redpacket.type === 'erc20'" class="box-progress" :style="{width: progress(op.redpacket) + '%' }"></span>
                     <span v-if="op.redpacket.type === 'erc721'" class="box-progress" :style="{ width: progressErc721(op.redpacket.metadata.token, op.redpacket.metadata.maxSupply) + '%' }"></span>
@@ -122,6 +122,7 @@
                     </p>
                   </div>
                 </div>
+                <div class="claim-status" v-if="op.redpacket && op.txStatus != 'success'"></div>
                 <div class="share" v-if="op.redpacket">
                   <i v-if="showStatus(op) == 'Sent'" class="fa fa-paper-plane share-button" aria-hidden="true" @click="copyShareLink(op.redpacket)"></i>
                   <span v-if="showStatus(op) != 'Sent'" class="pending-text" :style="showStatus(op) == 'Pending' && 'margin-left: 5.5rem;'">{{ showDetailStatus(op) }}</span>
@@ -182,18 +183,18 @@
                   </div>
                 </div>
                 <div class="token-amount" v-if="op.claim">
-                  <div class="sent-info" v-if="showClaimStatus(op) == 'Claimed'">
+                  <div class="sent-info" v-if="op.redpacket.type === 'erc20' && showClaimStatus(op) == 'Claimed'">
                     <a-tooltip placement="top">
                       <template #title>
                         <span>
                           Amount: {{ normalizeClaimAmount(op) }}
                         </span>
                       </template>
-                      <div v-if="op.redpacket.type === 'erc721'"
+                      <!-- <div v-if="op.redpacket.type === 'erc721'"
                         style="overflow: auto; white-space: nowrap; margin-left: 0.25rem; width: 45px;display: flex;justify-content: flex-end;">
                         #{{ op.claim?.claimed }}
-                      </div>
-                      <div v-if="op.redpacket.type === 'erc20'"
+                      </div> -->
+                      <div
                         style="overflow: auto; white-space: nowrap; margin-left: 0.25rem; width: 45px;display: flex;justify-content: flex-end;">
                         + {{ normalizeClaimAmount(op).toString().substring(0,5)}}
                       </div>
@@ -202,6 +203,24 @@
                       <img :src="op.redpacket.token?.logoURI || ipfsUrl(op.redpacket.metadata.tokenURI)">
                     </div>
                     {{ op.redpacket.token?.symbol || op.redpacket.metadata.symbol}}
+                  </div>
+                  <div v-if="op.redpacket.type === 'erc721' && showClaimStatus(op) == 'Claimed'" style="display: flex; align-items: center;">
+                    <a-tooltip placement="top">
+                      <template #title>
+                        <img :src="ipfsUrl(op.redpacket.metadata.tokenURI)" style="max-width: 100px;" :size="64"
+                          referrerpolicy="no-referrer" rel="preload" />
+                      </template>
+                      <span class="thumb">
+                        <img :src="ipfsUrl(op.redpacket.metadata.tokenURI)" style="border: 2px solid #D9D9D9;" :size="64"
+                          referrerpolicy="no-referrer" rel="preload" />
+                      </span>
+                    </a-tooltip>
+                    <div style="display: flex; flex-direction: column; margin-left: 0.5rem;">
+                      <span class="from-text">{{ op.redpacket.metadata.name }}</span>
+                      <span style="font-size: 12px; color: rgb(100,116,139)">
+                        {{ op.redpacket.metadata.symbol }}#{{ op.claim?.claimed }}
+                      </span>
+                    </div>
                   </div>
                 </div>
                 <div class="claim-status" v-if="op.claim">
@@ -418,7 +437,11 @@ const progress = (redpacket: RedPacketDB) => {
 
 const progressErc721 = (address: string, maxSupply: string) => {
   const id: number = findTokenId(address);
-  return id / parseInt(maxSupply) * 100;
+  if (id > 0) {
+    return id / parseInt(maxSupply) * 100;
+  } else {
+    return 0;
+  }
 }
 
 const findTokenId = (address : string) => {
@@ -566,7 +589,8 @@ i:hover {
     transform: translateY(-0.125rem); } }
 .thumb img {
   border-radius: 50px;
-  max-width: 30px; }
+  width: 30px;
+  height: 30px; }
 .record-box {
   display: flex;
   align-items: center;
@@ -701,11 +725,11 @@ i:hover {
   margin-bottom: 0; }
 .token-amount {
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
-  grid-column: span 1/span 1;
+  grid-column: span 2/span 2;
   margin-bottom: 0;
-  margin-left: -1.5rem; }
+  margin-left: 1.5rem; }
 .record-detail {
   display: grid;
   padding-left: 1rem;
@@ -715,7 +739,7 @@ i:hover {
   text-overflow: ellipsis;
   overflow-y: visible;
   align-items: center;
-  grid-template-columns: repeat(8, minmax(0, 1fr));
+  grid-template-columns: repeat(9, minmax(0, 1fr));
   flex: 1 1;
   width: 100%;
   @media (min-width: 1280px) {

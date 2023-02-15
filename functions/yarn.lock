@@ -552,47 +552,6 @@
     "@nodelib/fs.scandir" "2.1.5"
     "fastq" "^1.6.0"
 
-<<<<<<< HEAD
-=======
-"@otplib/core@^12.0.1":
-  "integrity" "sha512-4sGntwbA/AC+SbPhbsziRiD+jNDdIzsZ3JUyfZwjtKyc/wufl1pnSIaG4Uqx8ymPagujub0o92kgBnB89cuAMA=="
-  "resolved" "https://registry.npmjs.org/@otplib/core/-/core-12.0.1.tgz"
-  "version" "12.0.1"
-
-"@otplib/plugin-crypto@^12.0.1":
-  "integrity" "sha512-qPuhN3QrT7ZZLcLCyKOSNhuijUi9G5guMRVrxq63r9YNOxxQjPm59gVxLM+7xGnHnM6cimY57tuKsjK7y9LM1g=="
-  "resolved" "https://registry.npmjs.org/@otplib/plugin-crypto/-/plugin-crypto-12.0.1.tgz"
-  "version" "12.0.1"
-  dependencies:
-    "@otplib/core" "^12.0.1"
-
-"@otplib/plugin-thirty-two@^12.0.1":
-  "integrity" "sha512-MtT+uqRso909UkbrrYpJ6XFjj9D+x2Py7KjTO9JDPhL0bJUYVu5kFP4TFZW4NFAywrAtFRxOVY261u0qwb93gA=="
-  "resolved" "https://registry.npmjs.org/@otplib/plugin-thirty-two/-/plugin-thirty-two-12.0.1.tgz"
-  "version" "12.0.1"
-  dependencies:
-    "@otplib/core" "^12.0.1"
-    "thirty-two" "^1.0.2"
-
-"@otplib/preset-default@^12.0.1":
-  "integrity" "sha512-xf1v9oOJRyXfluBhMdpOkr+bsE+Irt+0D5uHtvg6x1eosfmHCsCC6ej/m7FXiWqdo0+ZUI6xSKDhJwc8yfiOPQ=="
-  "resolved" "https://registry.npmjs.org/@otplib/preset-default/-/preset-default-12.0.1.tgz"
-  "version" "12.0.1"
-  dependencies:
-    "@otplib/core" "^12.0.1"
-    "@otplib/plugin-crypto" "^12.0.1"
-    "@otplib/plugin-thirty-two" "^12.0.1"
-
-"@otplib/preset-v11@^12.0.1":
-  "integrity" "sha512-9hSetMI7ECqbFiKICrNa4w70deTUfArtwXykPUvSHWOdzOlfa9ajglu7mNCntlvxycTiOAXkQGwjQCzzDEMRMg=="
-  "resolved" "https://registry.npmjs.org/@otplib/preset-v11/-/preset-v11-12.0.1.tgz"
-  "version" "12.0.1"
-  dependencies:
-    "@otplib/core" "^12.0.1"
-    "@otplib/plugin-crypto" "^12.0.1"
-    "@otplib/plugin-thirty-two" "^12.0.1"
-
->>>>>>> 9a1785c (update)
 "@protobufjs/aspromise@^1.1.1", "@protobufjs/aspromise@^1.1.2":
   "integrity" "sha512-j+gKExEuLmKwvz3OgROXtrJ2UG2x8Ch2YZUxahh+s1F2HZ+wAceUNLkvy6zKCPVRkU++ZWQrdxsUeQXmcg4uoQ=="
   "resolved" "https://registry.npmjs.org/@protobufjs/aspromise/-/aspromise-1.1.2.tgz"
@@ -841,9 +800,9 @@
     "@types/node" "*"
 
 "@types/totp-generator@^0.0.5":
-  version "0.0.5"
-  resolved "https://registry.npmjs.org/@types/totp-generator/-/totp-generator-0.0.5.tgz"
-  integrity sha512-ryo6U5lfQg2/7pNQnpEXG49EPX7/cmRi/FX7sPBYO7QVJf0z6turM3km3w+98mpqlM4E+vkoOrN+gcjqCBmX0g==
+  "integrity" "sha512-ryo6U5lfQg2/7pNQnpEXG49EPX7/cmRi/FX7sPBYO7QVJf0z6turM3km3w+98mpqlM4E+vkoOrN+gcjqCBmX0g=="
+  "resolved" "https://registry.npmjs.org/@types/totp-generator/-/totp-generator-0.0.5.tgz"
+  "version" "0.0.5"
 
 "@typescript-eslint/parser@^5.12.0":
   "integrity" "sha512-veDlZN9mUhGqU31Qiv2qEp+XrJj5fgZpJ8PW30sHU+j/8/e5ruAhLaVDAeznS7A7i4ucb/s8IozpDtt9NqCkZg=="
@@ -2727,6 +2686,11 @@
     "ms" "^2.1.1"
     "semver" "^7.3.8"
 
+"jssha@^3.1.2":
+  "integrity" "sha512-w9OtT4ALL+fbbwG3gw7erAO0jvS5nfvrukGPMWIAoea359B26ALXGpzy4YJSp9yGnpUvuvOw1nSjSoHDfWSr1w=="
+  "resolved" "https://registry.npmjs.org/jssha/-/jssha-3.3.0.tgz"
+  "version" "3.3.0"
+
 "jwa@^1.4.1":
   "integrity" "sha512-qiLX/xhEEFKUAJ6FiBMbes3w9ATzyk5W7Hvzpa/SLYdxNtng+gcurvrI7TbACjIXlsJyr05/S1oUhZrc63evQA=="
   "resolved" "https://registry.npmjs.org/jwa/-/jwa-1.4.1.tgz"
@@ -3169,15 +3133,6 @@
     "prelude-ls" "^1.2.1"
     "type-check" "^0.4.0"
     "word-wrap" "^1.2.3"
-
-"otplib@^12.0.1":
-  "integrity" "sha512-xDGvUOQjop7RDgxTQ+o4pOol0/3xSZzawTiPKRrHnQWAy0WjhNs/5HdIDJCrqC4MBynmjXgULc6YfioaxZeFgg=="
-  "resolved" "https://registry.npmjs.org/otplib/-/otplib-12.0.1.tgz"
-  "version" "12.0.1"
-  dependencies:
-    "@otplib/core" "^12.0.1"
-    "@otplib/preset-default" "^12.0.1"
-    "@otplib/preset-v11" "^12.0.1"
 
 "p-limit@^3.0.1", "p-limit@^3.0.2":
   "integrity" "sha512-TYOanM3wGwNGsZN2cVTYPArw454xnXj5qmWF1bEoAc4+cU/ol7GVh7odevjp1FNHduHc3KZMcFduxU5Xc6uJRQ=="
@@ -3742,11 +3697,6 @@
   "resolved" "https://registry.npmjs.org/text-table/-/text-table-0.2.0.tgz"
   "version" "0.2.0"
 
-"thirty-two@^1.0.2":
-  "integrity" "sha512-OEI0IWCe+Dw46019YLl6V10Us5bi574EvlJEOcAkB29IzQ/mYD1A6RyNHLjZPiHCmuodxvgF6U+vZO1L15lxVA=="
-  "resolved" "https://registry.npmjs.org/thirty-two/-/thirty-two-1.0.2.tgz"
-  "version" "1.0.2"
-
 "through@^2.3.8", "through@~2.3", "through@~2.3.4", "through@2":
   "integrity" "sha512-w89qg7PI8wAdvX60bMDP+bFoD5Dvhm9oLheFp5O4a2QF0cSBGsBX4qZmadPMvVqlLJBBci+WqGGOAPvcDeNSVg=="
   "resolved" "https://registry.npmjs.org/through/-/through-2.3.8.tgz"
@@ -3770,6 +3720,13 @@
   "integrity" "sha512-o5sSPKEkg/DIQNmH43V0/uerLrpzVedkUh8tGNvaeXpfpuwjKenlSox/2O/BTlZUtEe+JG7s5YhEz608PlAHRA=="
   "resolved" "https://registry.npmjs.org/toidentifier/-/toidentifier-1.0.1.tgz"
   "version" "1.0.1"
+
+"totp-generator@^0.0.14":
+  "integrity" "sha512-vFZ8N2TdF4mCj8bUW460jI73LqS+JKccsZ8cttQSuXa3dkTmZo8q81Pq2yAuiPxCI5fPfUrfaKuU+7adjx5s4w=="
+  "resolved" "https://registry.npmjs.org/totp-generator/-/totp-generator-0.0.14.tgz"
+  "version" "0.0.14"
+  dependencies:
+    "jssha" "^3.1.2"
 
 "tr46@~0.0.3":
   "integrity" "sha512-N3WMsuqV66lT30CrXNbEjx4GEwlow3v6rr4mCcv6prnfwhS01rkgyFdjPNBYd9br7LpXV1+Emh01fHnq2Gdgrw=="

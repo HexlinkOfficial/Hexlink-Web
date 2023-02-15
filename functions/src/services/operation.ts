@@ -3,7 +3,7 @@
 import axios from "axios";
 import type {Chain} from "../../common/lib";
 
-const LOCAL_URL = "http://localhost:9000/submit/";
+const LOCAL_URL = "http://localhost:8080/submit/";
 const PROD_URL = "https://api.hexlink.io/submit/";
 
 function txServiceUrl() {

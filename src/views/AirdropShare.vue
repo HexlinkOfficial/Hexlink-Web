@@ -1,12 +1,12 @@
 <template>
-    <div style="width: 100vw; height: 100vh; background-color: white;" @wheel.prevent @touchmove.prevent @scroll.prevent>
-        <div class="header" style="width: 100%; height: 70px;">
+    <div class="share-card" @wheel.prevent @touchmove.prevent @scroll.prevent>
+        <div class="header">
             <router-link to="/">
                 <img src="../assets/logo/blue2-logo.svg" alt="" style="height: 40px; margin: 40px; overflow: visible;" />
             </router-link>
         </div>
-        <div class="body" style="width: 100%; height: calc(100% - 70px); display: flex; align-items: center; justify-content: center; flex-direction: column;">
-            <div style="width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem; border: 1px solid rgba(0,0,0,0.1); border-radius: 8px;">
+        <div class="body">
+            <div class="scan-icon">
                 <svg style="width: 12px;" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M2 12H22" stroke="black" stroke-width="1.5" stroke-linecap="round" />
                     <path d="M2 8V5C2 3.34315 3.34315 2 5 2H8" stroke="black" stroke-width="1.5" stroke-linecap="round" />
@@ -15,9 +15,9 @@
                     <path d="M8 22L5 22C3.34315 22 2 20.6569 2 19L2 16" stroke="black" stroke-width="1.5" stroke-linecap="round" />
                 </svg>
             </div>
-            <h2 style="font-size: 24px; font-weight: 600;">Scan QR Code</h2>
-            <p style="color: rgba(0,0,0,0.6); font-weight: 500;">Scan this QR code to claim your airdrop</p>
-            <div style="width: 170px; height: 170px; display: flex; align-items: center; justify-content: center; border: 2px solid rgba(0,0,0,0.1); border-radius: 15px; overflow: hidden; margin: 20px; margin-bottom: calc(1rem + 20px);">
+            <h2>Scan QR Code</h2>
+            <p class="subtitle">Scan this QR code to claim your airdrop</p>
+            <div class="qrcode">
                 <canvas id="canvas"></canvas>
             </div>
             <p class="or"><span>or copy the claim link</span></p>
@@ -86,6 +86,46 @@ const totpCode = (secret: string) => {
 </script>
 
 <style lang="less" scoped>
+.qrcode {
+    width: 170px;
+    height: 170px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid rgba(0, 0, 0, 0.1);
+    border-radius: 15px;
+    overflow: hidden;
+    margin: 20px;
+    margin-bottom: calc(1rem + 20px); }
+.subtitle {
+    color: rgba(0, 0, 0, 0.6);
+    font-weight: 500; }
+.body h2 {
+    font-size: 24px;
+    font-weight: 600; }
+.scan-icon {
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 8px; }
+.body {
+    width: 100%;
+    height: calc(100% - 70px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column; }
+.header {
+    width: 100%;
+    height: 70px; }
+.share-card {
+    width: 100vw;
+    height: 100vh;
+    background-color: white; }
 .or {
     text-align: center;
     font-weight: bold;

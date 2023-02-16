@@ -389,7 +389,7 @@ const confirmRedPacket = function () {
       tokenStore.token(redpacket.value.token).decimals
     ).toString();
     // TODO: make this configurable
-    redpacket.value.validationRules.push({type: "dynamic_secrets"});
+    // redpacket.value.validationRules.push({type: "dynamic_secrets"});
     const chain = useChainStore().chain;
     const account = useAccountStore().account!.address;
     redpacket.value.id = redpacketId(chain, account, redpacket.value);

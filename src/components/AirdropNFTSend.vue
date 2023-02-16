@@ -422,7 +422,7 @@ const confirmNFT = async () => {
       createNotification("Waiting to upload your NFT picture", "error");
     }
     // TODO: make this configurable
-    nftAirdrop.value.validationRules.push({type: "dynamic_secrets"});
+    // nftAirdrop.value.validationRules.push({type: "dynamic_secrets"});
     useRedPacketStore().beforeCreate(nftAirdrop.value);
   }
 }

@@ -52,7 +52,6 @@
     "rollup-plugin-polyfill-node": "^0.11.0",
     "stylus": "^0.59.0",
     "stylus-loader": "3",
-    "totp-generator": "^0.0.14",
     "ts-node": "^10.9.1",
     "twitter-api-sdk": "^1.2.0",
     "twitter-api-v2": "^1.12.8",

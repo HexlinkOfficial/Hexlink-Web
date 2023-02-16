@@ -7,7 +7,7 @@ import { getRedPacketPrivate } from "@/graphql/redpacket";
 import type { RedPacketDB } from "@/types";
 import { ref, onMounted } from "vue";
 import { useRoute } from 'vue-router';
-import totp from "totp-generator";
+import { genTotpCode } from "../../functions/common";
 import QRCode from "qrcode";
 
 const secret = ref<string | undefined>();
@@ -37,10 +37,10 @@ async function delay(ms: number) {
 const genQrCode = async() => {
     let url = window.location.origin + `/redpackets?claim=${redPacket.value?.id}`;
     if (secret.value) {
-        url += `&otp=${totpCode(secret.value)}`;
+        url += `&otp=${genTotpCode(secret.value)}`;
     }
     console.log(url);
-    var canvas = document.getElementById('canvas')
+    let canvas = document.getElementById('canvas')
     await QRCode.toCanvas(canvas, url);
 }
 
@@ -51,8 +51,4 @@ const refreshQrCode = async () => {
 }
 
 onMounted(refreshQrCode);
-
-const totpCode = (secret: string) => {
-    return totp(secret);
-};
 </script>

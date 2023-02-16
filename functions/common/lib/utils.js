@@ -8,10 +8,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.toEthBigNumber = exports.isContract = exports.normalizeBalance = exports.toHex = exports.truncateAddress = exports.prettyPrintTimestamp = exports.prettyPrintTxHash = exports.prettyPrintAddress = exports.hash = void 0;
+exports.matchTotpCode = exports.genTotpCode = exports.toEthBigNumber = exports.isContract = exports.normalizeBalance = exports.toHex = exports.truncateAddress = exports.prettyPrintTimestamp = exports.prettyPrintTxHash = exports.prettyPrintAddress = exports.hash = void 0;
 const ethers_1 = require("ethers");
 const bignumber_js_1 = require("bignumber.js");
+const totp_generator_1 = __importDefault(require("totp-generator"));
 function hash(value) {
     return ethers_1.ethers.utils.keccak256(ethers_1.ethers.utils.toUtf8Bytes(value));
 }
@@ -98,3 +102,12 @@ function toEthBigNumber(value) {
     return ethers_1.BigNumber.from(value);
 }
 exports.toEthBigNumber = toEthBigNumber;
+function genTotpCode(secret) {
+    return (0, totp_generator_1.default)(secret, { period: 60 });
+}
+exports.genTotpCode = genTotpCode;
+function matchTotpCode(secret, code) {
+    return code === (0, totp_generator_1.default)(secret, { period: 60 }) ||
+        code === (0, totp_generator_1.default)(secret, { period: 60, timestamp: new Date().getTime() });
+}
+exports.matchTotpCode = matchTotpCode;

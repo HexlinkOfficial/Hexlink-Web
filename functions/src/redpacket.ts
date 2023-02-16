@@ -19,12 +19,12 @@ import {
   tokenFactoryAddress,
   hexlinkErc721Interface,
 } from "../redpacket";
-import {refunder} from "../common";
+import {refunder, matchTotpCode} from "../common";
 import type {Chain, OpInput} from "../common";
 import {submit} from "./services/operation";
 import {insertRequest} from "./graphql/request";
 import {RequestData, preprocess, validateAndBuildUserOp} from "./operation";
-import totp from "totp-generator";
+
 
 const secrets = functions.config().doppler || {};
 
@@ -111,7 +111,7 @@ function validateRedPacket(
     const rule = validationRules[index];
     const data = validationData[index];
     if (rule.type === "dynamic_secrets") {
-      return totp(data.secret) === secret;
+      return matchTotpCode(data.secret, secret);
     }
   }
   return true;

@@ -16,7 +16,8 @@
   "dependencies": {
     "@types/node": "^18.11.18",
     "bignumber.js": "^9.1.1",
-    "ethers": "^5.7.2"
+    "ethers": "^5.7.2",
+    "totp-generator": "^0.0.14"
   },
   "files": [
     "/lib"

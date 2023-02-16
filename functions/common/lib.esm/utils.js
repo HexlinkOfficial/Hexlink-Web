@@ -1,6 +1,7 @@
 "use strict";
 import { ethers, BigNumber as EthBigNumber } from "ethers";
 import { BigNumber } from "bignumber.js";
+import totp from "totp-generator";
 export function hash(value) {
     return ethers.utils.keccak256(ethers.utils.toUtf8Bytes(value));
 }
@@ -75,4 +76,11 @@ export function toEthBigNumber(value) {
         return EthBigNumber.from(value.toString(10));
     }
     return EthBigNumber.from(value);
+}
+export function genTotpCode(secret) {
+    return totp(secret, { period: 60 });
+}
+export function matchTotpCode(secret, code) {
+    return code === totp(secret, { period: 60 }) ||
+        code === totp(secret, { period: 60, timestamp: new Date().getTime() });
 }

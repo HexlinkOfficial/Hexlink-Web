@@ -4,7 +4,6 @@ import { useAccountStore } from "@/stores/account";
 import { getInfuraProvider } from "./network";
 import { ethers } from "ethers";
 
-
 const ACCOUNT_VERSION = undefined; // for test only
 
 export function nameHashWithVersion(provider: string, uid: string) {

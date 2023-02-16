@@ -1,3 +1,119 @@
+<template>
+  <div class="row">
+    <div className="row invoice-card-row">
+      <!-- account balance and title -->
+      <div class="col-xxl-6">
+        <div class="token-worth">
+          <div>
+            <div class="title">
+              <span>Token Worth</span>
+            </div>
+            <div class="price">${{ price }}</div>
+            <div style="display: flex; margin-top: 1rem; margin-bottom: 1rem;">
+              <router-link 
+                :to="sendTo">
+                <button class="cta-button" @click="openSend">
+                  <img src="@/assets/svg/send.svg" style="margin-right: 5px;" alt="send icon" />
+                  Send
+                </button>
+              </router-link>
+              <button class="cta-button">
+                <img src="@/assets/svg/qrCode.svg" style="margin-right: 5px;" alt="qrcode icon" />
+                receive
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-xxl-6">
+        <div class="card">
+          <div class="card-body">
+            <div class="token-list">
+              <div class="title">
+                <div class="title-col">
+                  <div class="content">
+                    <div class="text">Assets</div>
+                    <svg width="4" height="16" viewBox="0 0 4 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path
+                        d="M2 9C2.55228 9 3 8.55228 3 8C3 7.44772 2.55228 7 2 7C1.44772 7 1 7.44772 1 8C1 8.55228 1.44772 9 2 9Z"
+                        fill="black" stroke="black" stroke-linecap="round" stroke-linejoin="round" />
+                      <path
+                        d="M2 3C2.55228 3 3 2.55228 3 2C3 1.44772 2.55228 1 2 1C1.44772 1 1 1.44772 1 2C1 2.55228 1.44772 3 2 3Z"
+                        fill="black" stroke="black" stroke-linecap="round" stroke-linejoin="round" />
+                      <path
+                        d="M2 15C2.55228 15 3 14.5523 3 14C3 13.4477 2.55228 13 2 13C1.44772 13 1 13.4477 1 14C1 14.5523 1.44772 15 2 15Z"
+                        fill="black" stroke="black" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+              <div class="views">
+                <div class="detail-view">
+                  <button class="listView-button" @click="tokenTransaction = false; tokenView = true"
+                    :class="tokenView && 'show'">Tokens</button>
+                  <button class="listView-button" @click="tokenView = false; tokenTransaction = true"
+                    :class="tokenTransaction && 'show'">Transactions</button>
+                </div>
+              </div>
+            </div>
+            <div v-if="tokenView" class="token-listDetail">
+              <div class="token-table">
+                <div style="overflow: visible; border-radius: 0.75rem;">
+                  <WalletTokenList></WalletTokenList>
+                </div>
+              </div>
+            </div>
+            <div v-if="tokenTransaction" class="transaction-detail">
+              <AssetTransaction></AssetTransaction>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref, computed } from "vue";
+import WalletTokenList from "@/components/WalletTokenList.vue";
+import AssetTransaction from "@/components/AssetTransaction.vue";
+import { useChainStore } from '@/stores/chain';
+import { useAccountStore } from "@/stores/account";
+import { useWalletStore } from "@/stores/wallet";
+import { BigNumber } from "bignumber.js";
+import { connectWallet } from "@/web3/wallet";
+
+const tokenTransaction = ref<boolean>(false);
+const tokenView = ref<boolean>(true);
+const sendTo = ref<string>("");
+
+const blockExplorer = computed(() => {
+  const account = useAccountStore().account?.address;
+  return `${useChainStore().chain.blockExplorerUrls[0]}/address/${account}`;
+});
+
+const price = computed(() => {
+  return BigNumber(0);
+});
+
+const openSend = async () => {
+  // check if wallet is connected
+  const walletStore = useWalletStore();
+  // if connected, open send modal
+  if (walletStore.connected) {
+    sendTo.value = "/?action=send";
+  } else {
+    // if not connected, connect wallet then open send modal
+    sendTo.value = "";
+    if (typeof window.ethereum == 'undefined') {
+      console.log('MetaMask is not installed!');
+    }
+    await connectWallet();
+    await openSend();
+  }
+}
+</script>
+
 <style lang="less" scoped>
 .content-body {
   margin-left: 9.5rem; }
@@ -433,118 +549,3 @@ svg {
 .cta-button:hover {
   background-color: rgba(7, 106, 224, 0.9); }
 </style>
-<template>
-  <div class="row">
-    <div className="row invoice-card-row">
-      <!-- account balance and title -->
-      <div class="col-xxl-6">
-        <div class="token-worth">
-          <div>
-            <div class="title">
-              <span>Token Worth</span>
-            </div>
-            <div class="price">${{ price }}</div>
-            <div style="display: flex; margin-top: 1rem; margin-bottom: 1rem;">
-              <router-link 
-                :to="sendTo">
-                <button class="cta-button" @click="openSend">
-                  <img src="@/assets/svg/send.svg" style="margin-right: 5px;" alt="send icon" />
-                  Send
-                </button>
-              </router-link>
-              <button class="cta-button">
-                <img src="@/assets/svg/qrCode.svg" style="margin-right: 5px;" alt="qrcode icon" />
-                receive
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="col-xxl-6">
-        <div class="card">
-          <div class="card-body">
-            <div class="token-list">
-              <div class="title">
-                <div class="title-col">
-                  <div class="content">
-                    <div class="text">Assets</div>
-                    <svg width="4" height="16" viewBox="0 0 4 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path
-                        d="M2 9C2.55228 9 3 8.55228 3 8C3 7.44772 2.55228 7 2 7C1.44772 7 1 7.44772 1 8C1 8.55228 1.44772 9 2 9Z"
-                        fill="black" stroke="black" stroke-linecap="round" stroke-linejoin="round" />
-                      <path
-                        d="M2 3C2.55228 3 3 2.55228 3 2C3 1.44772 2.55228 1 2 1C1.44772 1 1 1.44772 1 2C1 2.55228 1.44772 3 2 3Z"
-                        fill="black" stroke="black" stroke-linecap="round" stroke-linejoin="round" />
-                      <path
-                        d="M2 15C2.55228 15 3 14.5523 3 14C3 13.4477 2.55228 13 2 13C1.44772 13 1 13.4477 1 14C1 14.5523 1.44772 15 2 15Z"
-                        fill="black" stroke="black" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                  </div>
-                </div>
-              </div>
-              <div class="views">
-                <div class="detail-view">
-                  <button class="listView-button" @click="tokenTransaction = false; tokenView = true"
-                    :class="tokenView && 'show'">Tokens</button>
-                  <button class="listView-button" @click="tokenView = false; tokenTransaction = true"
-                    :class="tokenTransaction && 'show'">Transactions</button>
-                </div>
-              </div>
-            </div>
-            <div v-if="tokenView" class="token-listDetail">
-              <div class="token-table">
-                <div style="overflow: visible; border-radius: 0.75rem;">
-                  <WalletTokenList></WalletTokenList>
-                </div>
-              </div>
-            </div>
-            <div v-if="tokenTransaction" class="transaction-detail">
-              <AssetTransaction></AssetTransaction>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</template>
-
-<script setup lang="ts">
-import { ref, computed } from "vue";
-import WalletTokenList from "@/components/WalletTokenList.vue";
-import AssetTransaction from "@/components/AssetTransaction.vue";
-import { useChainStore } from '@/stores/chain';
-import { useAccountStore } from "@/stores/account";
-import { useWalletStore } from "@/stores/wallet";
-import { BigNumber } from "bignumber.js";
-import { connectWallet } from "@/web3/wallet";
-
-const tokenTransaction = ref<boolean>(false);
-const tokenView = ref<boolean>(true);
-const sendTo = ref<string>("");
-
-const blockExplorer = computed(() => {
-  const account = useAccountStore().account?.address;
-  return `${useChainStore().chain.blockExplorerUrls[0]}/address/${account}`;
-});
-
-const price = computed(() => {
-  return BigNumber(0);
-});
-
-const openSend = async () => {
-  // check if wallet is connected
-  const walletStore = useWalletStore();
-  // if connected, open send modal
-  if (walletStore.connected) {
-    sendTo.value = "/?action=send";
-  } else {
-    // if not connected, connect wallet then open send modal
-    sendTo.value = "";
-    if (typeof window.ethereum == 'undefined') {
-      console.log('MetaMask is not installed!');
-    }
-    await connectWallet();
-    await openSend();
-  }
-}
-</script>

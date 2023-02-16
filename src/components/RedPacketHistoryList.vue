@@ -309,6 +309,7 @@ const loadData = async function() {
   loading.value = false;
   extractDate();
   extractTokenId();
+  console.log(luckHistoryByDate.value);
 };
 
 const extractTokenId = () => {

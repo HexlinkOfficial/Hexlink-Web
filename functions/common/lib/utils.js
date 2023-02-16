@@ -102,12 +102,12 @@ function toEthBigNumber(value) {
     return ethers_1.BigNumber.from(value);
 }
 exports.toEthBigNumber = toEthBigNumber;
-function genTotpCode(secret) {
-    return (0, totp_generator_1.default)(secret, { period: 60 });
+function genTotpCode(secret, timestamp) {
+    return (0, totp_generator_1.default)(secret, { period: 60, timestamp });
 }
 exports.genTotpCode = genTotpCode;
 function matchTotpCode(secret, code) {
-    return code === (0, totp_generator_1.default)(secret, { period: 60 }) ||
-        code === (0, totp_generator_1.default)(secret, { period: 60, timestamp: new Date().getTime() });
+    return code === genTotpCode(secret) ||
+        code === genTotpCode(secret, new Date().getTime() - 60000);
 }
 exports.matchTotpCode = matchTotpCode;

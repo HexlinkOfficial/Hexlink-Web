@@ -77,10 +77,10 @@ export function toEthBigNumber(value) {
     }
     return EthBigNumber.from(value);
 }
-export function genTotpCode(secret) {
-    return totp(secret, { period: 60 });
+export function genTotpCode(secret, timestamp) {
+    return totp(secret, { period: 60, timestamp });
 }
 export function matchTotpCode(secret, code) {
-    return code === totp(secret, { period: 60 }) ||
-        code === totp(secret, { period: 60, timestamp: new Date().getTime() });
+    return code === genTotpCode(secret) ||
+        code === genTotpCode(secret, new Date().getTime() - 60000);
 }

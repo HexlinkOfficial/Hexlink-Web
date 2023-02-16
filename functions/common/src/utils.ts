@@ -104,11 +104,11 @@ export function toEthBigNumber(value: BigNumber | string | number) : EthBigNumbe
   return EthBigNumber.from(value);
 }
 
-export function genTotpCode(secret: string) : string {
-    return totp(secret, {period: 60});
+export function genTotpCode(secret: string, timestamp?: number) : string {
+    return totp(secret, {period: 60, timestamp});
 }
 
 export function matchTotpCode(secret: string, code: string) : boolean {
-  return code === totp(secret, {period: 60}) ||
-    code === totp(secret, {period: 60, timestamp: new Date().getTime()});
+  return code === genTotpCode(secret) ||
+    code === genTotpCode(secret, new Date().getTime() - 60000);
 }

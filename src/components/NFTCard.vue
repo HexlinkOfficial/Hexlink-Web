@@ -1,14 +1,14 @@
 <template>
   <div class="nfts">
     <header class="nft_header">
-      <img :src="props.nftImage!.hasOpensea ? props.nftImage!.nft.openSea.imageUrl : props.nftImage!.nft.rawUrl" width="540"
+      <img :src="getImageSource()" width="540"
         height="540" />
     </header>
     <footer class="nft_footer">
       <div class="card_footer">
         <div class="card_details">
           <div class="card_details_box">
-            <div>
+            <div style="width: 130px;">
               <div class="box-content">
                 <div class="collection_name_text">{{ props.nftImage!.nft.symbol }}</div>
                 <a :href="getOpenseaUrl(props.nftImage!.nft)" target="_blank">
@@ -26,12 +26,32 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import type { nftImage } from '@/web3/tokens';
 
 const props = defineProps({
   nftImage: Object
 });
+
+onMounted(() => {
+  if (props.nftImage!.hasOpensea) {
+    console.log(props.nftImage!.nft.openSea.imageUrl);
+  } else {
+    console.log("raw: ", props.nftImage)
+  }
+})
+
+const getImageSource = () => {
+  if (props.nftImage!.hasOpensea) {
+    return props.nftImage!.nft.openSea.imageUrl;
+  } else {
+    if (props.nftImage!.nft.rawUrl != "") {
+      return props.nftImage!.nft.rawUrl;
+    } else {
+      return props.nftImage!.nft.url;
+    }
+  }
+}
 
 const getOpenseaUrl = (nft: nftImage) => {
   return 'https://opensea.io/assets/ethereum/' + nft.contract + '/' + nft.id;
@@ -88,7 +108,7 @@ const getOpenseaUrl = (nft: nftImage) => {
   white-space: nowrap; }
 .nft_title {
   display: block;
-  font-size: 0.875rem;
+  font-size: 0.85rem;
   line-height: 1.25rem;
   color: #262833;
   font-weight: 500;

@@ -19,6 +19,7 @@ import { alchemyKey } from "@/web3/network";
 import GOERLI_TOKENS from "../../functions/common/lib.esm/tokens/GOERLI_TOKENS.json";
 import MUMBAI_TOKENS from "../../functions/common/lib.esm/tokens/MUMBAI_TOKENS.json";
 import POLYGON_TOEKNS from "../../functions/common/lib.esm/tokens/POLYGON_TOKENS.json";
+import { ipfsUrl } from "@/web3/storage";
  
 function alchemyNetwork(chain: Chain) : Network {
     if (chain.chainId == "5") {
@@ -179,7 +180,7 @@ export async function loadErc721Token(account: string) {
                 twitterUsername: nft.contract.openSea?.twitterUsername
             },
             totalSupply: nft.contract.totalSupply || "",
-            url: nft.media[0]?.gateway || "",
+            url: nft.tokenUri?.gateway == "" ? (nft.media[0]?.gateway) : (ipfsUrl(nft.tokenUri?.raw!)) || "",
             rawUrl: nft.media[0]?.raw || "",
             thumbnail: nft.media[0]?.thumbnail || "",
             attributes: nft.rawMetadata?.attributes || []

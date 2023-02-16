@@ -7,7 +7,7 @@ import { insertTx } from "./graphql/transaction";
 import bodyParser from "body-parser";
 
 const app = express();
-const port = 9000;
+const port = 8080;
 const queues = Queues.getInstance();
 
 // parse application/x-www-form-urlencoded

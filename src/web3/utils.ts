@@ -53,7 +53,11 @@ export async function getBackcgroundColor(nft: nftImage) {
         url = nft.openSea!.imageUrl;
         opensea = true;
     } else {
-        url = nft.rawUrl!;
+        if (nft.rawUrl != "") {
+            url = nft.rawUrl!;
+        } else {
+            url = nft.url!;
+        }
         opensea = false;
     }
     const fac = new FastAverageColor();

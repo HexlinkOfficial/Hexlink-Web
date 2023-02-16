@@ -609,7 +609,7 @@ cursor: pointer; }
   background-color: #fff;
   background-clip: padding-box;
   border: 0px solid rgba(0, 0, 0, 0.15);
-  width: 20rem;
+  width: 18rem;
   z-index: 1;
   transition: height 0.3s ease-in-out;
   border-radius: 0.5rem; }

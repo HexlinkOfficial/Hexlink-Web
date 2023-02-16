@@ -184,8 +184,6 @@ const loadTransactions = async (erc721Address: string[]) => {
   });
   transactionByDate.value = JSON.parse(JSON.stringify(sortedGroup));
 
-  console.log("test: ", transactionByDate.value)
-
   // reorder group
   const sortedTransaction: any = {};
   Object.keys(transactionByDate.value).forEach(v => {
@@ -208,7 +206,6 @@ const loadTransactions = async (erc721Address: string[]) => {
 };
 
 const getNFTdata = (id: string) => {
-
   const index = useNftStore().nftId.indexOf(id);
   return {
     contracts: useNftStore().contracts[index],

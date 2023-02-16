@@ -124,7 +124,7 @@
                 </div>
                 <div class="claim-status" v-if="op.redpacket && op.txStatus != 'success'"></div>
                 <div class="share" v-if="op.redpacket">
-                  <i v-if="showStatus(op) == 'Sent'" class="fa fa-paper-plane share-button" aria-hidden="true" @click="copyShareLink(op.redpacket)"></i>
+                  <i v-if="showStatus(op) == 'Sent'" class="fa fa-paper-plane share-button" aria-hidden="true" @click="share(op.redpacket)"></i>
                   <span v-if="showStatus(op) != 'Sent'" class="pending-text" :style="showStatus(op) == 'Pending' && 'margin-left: 5.5rem;'">{{ showDetailStatus(op) }}</span>
                 </div>
                 <div class="cta">
@@ -245,7 +245,7 @@
                   </div>
                 </div>
                 <div class="share" v-if="op.claim">
-                  <i v-if="showClaimStatus(op) == 'Claimed'" class="fa fa-paper-plane share-button" aria-hidden="true" @click="copyShareLink(op.redpacket)"></i>
+                  <i v-if="showClaimStatus(op) == 'Claimed'" class="fa fa-paper-plane share-button" aria-hidden="true" @click="share(op.redpacket)"></i>
                   <span v-if="showClaimStatus(op) != 'Claimed' && showClaimStatus(op) != 'Error'" class="pending-text">{{ showClaimStatus(op) }}</span>
                   <span v-if="showClaimStatus(op) == 'Error'" class="pending-text" style="color:#FD4755;">{{ showClaimStatus(op) }}</span>
                 </div>
@@ -473,11 +473,8 @@ const showClaimStatus = (op: any) => {
   return op.txStatus == "success" ? "Claimed" : "Error";
 }
 
-const copyShareLink = (redPacket: RedPacketDB | undefined) => {
-  return copy(
-    window.location.origin + route.path + "?claim=" + redPacket?.id,
-    'Successfully copied your red packet share link!'
-  );
+const share = (redPacket: RedPacketDB | undefined) => {
+  window.open(location.origin + "/airdrop/share/" + redPacket?.id);
 };
 
 const normalize = (balance: string | undefined, token: Token) : string => {

@@ -2,6 +2,28 @@
     <div class="row">
         <div className="row invoice-card-row">
             <div class="col-xxl-6">
+                <div class="airdrop-status">
+                    <div>
+                        <div class="title">
+                            <span>Airdrop Status</span>
+                        </div>
+                        <div class="price">XXXX</div>
+                        <div style="display: flex; margin-top: 1rem; margin-bottom: 1rem;">
+                            <router-link to="/">
+                                <button class="cta-button">
+                                    <img src="@/assets/svg/coin.svg" style="margin-right: 5px; width: 19px; height: 19px;" alt="token icon"/>
+                                    Airdrop Token
+                                </button>
+                            </router-link>
+                            <button class="cta-button">
+                                <img src="@/assets/svg/picture.svg" style="margin-right: 5px; width: 19px; height: 19px;" alt="picture icon" />
+                                Airdrop NFT
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xxl-6">
             <div class="card">
                 <div class="card-body">
                 <div class="token-list">
@@ -68,6 +90,65 @@ const selected  = computed(() => {
 </script>
   
 <style lang="less" scoped>
+.cta-button {
+  display: flex;
+  justify-content: center;
+  width: 175px;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+  margin-right: 5px;
+  margin-left: 5px;
+  align-items: center;
+  color: #000;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 800;
+  line-height: 1.25rem;
+  border-radius: 50px;
+  @media (min-width: 640px) {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem; }
+  @media (min-width: 768px) {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem; }
+  opacity: 1;
+  background-color: rgb(7, 106, 224);
+  color: white; }
+.cta-button:hover {
+  background-color: rgba(7, 106, 224, 0.9); }
+.airdrop-status {
+    display: flex;
+  flex-direction: row;
+  padding: 16px 16px 16px 6px;
+  border-radius: 5px;
+  width: 100%;
+  min-height: 70px;
+  justify-content: center;
+  align-items: center;
+  @media (min-width: 640px) {
+    padding: 16px 16px 16px 25px; } }
+.airdrop-status .title {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    align-content: center;
+    flex-direction: row;
+    font-size: 1rem;
+    line-height: 1.33;
+    color: rgb(138, 147, 165);
+    margin-bottom: 4px; }
+.airdrop-status .price {
+    font-family: "sfpro-heavy";
+    display: flex;
+    justify-content: center;
+    font-size: 2rem;
+    font-weight: 800;
+    line-height: 1.33;
+    color: black;
+    margin-right: auto;
+    word-break: keep-all; }
 .card {
     position: relative;
     display: flex;

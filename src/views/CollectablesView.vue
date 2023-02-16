@@ -1,3 +1,91 @@
+<template>
+  <layout :active="2">
+    <div class="row">
+      <div className="row invoice-card-row">
+        <!-- account balance and title -->
+        <div class="col-xxl-6">
+          <div class="token-worth">
+            <div>
+              <div class="title">
+                <span>NFT Holding</span>
+              </div>
+              <div class="price">{{ useNftStore().contracts.length }}</div>
+              <div style="display: flex; margin-top: 1rem; margin-bottom: 1rem;">
+                <router-link to="/">
+                  <button class="cta-button">
+                    <img src="@/assets/svg/send.svg" style="margin-right: 5px;" alt="send icon" />
+                    Send
+                  </button>
+                </router-link>
+                <button class="cta-button">
+                  <img src="@/assets/svg/qrCode.svg" style="margin-right: 5px;" alt="qrcode icon" />
+                  receive
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-xxl-6">
+          <div class="card">
+            <div class="card-body">
+              <div class="token-list">
+                <div class="title">
+                  <div class="title-col">
+                    <div class="content">
+                      <div class="text">Collectables</div>
+                      <svg width="4" height="16" viewBox="0 0 4 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                          d="M2 9C2.55228 9 3 8.55228 3 8C3 7.44772 2.55228 7 2 7C1.44772 7 1 7.44772 1 8C1 8.55228 1.44772 9 2 9Z"
+                          fill="black" stroke="black" stroke-linecap="round" stroke-linejoin="round" />
+                        <path
+                          d="M2 3C2.55228 3 3 2.55228 3 2C3 1.44772 2.55228 1 2 1C1.44772 1 1 1.44772 1 2C1 2.55228 1.44772 3 2 3Z"
+                          fill="black" stroke="black" stroke-linecap="round" stroke-linejoin="round" />
+                        <path
+                          d="M2 15C2.55228 15 3 14.5523 3 14C3 13.4477 2.55228 13 2 13C1.44772 13 1 13.4477 1 14C1 14.5523 1.44772 15 2 15Z"
+                          fill="black" stroke="black" stroke-linecap="round" stroke-linejoin="round" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+                <div class="views">
+                  <div class="detail-view">
+                    <button class="listView-button" @click="transactionView = false; nftView = true"
+                      :class="nftView && 'show'">Collections</button>
+                    <button class="listView-button" @click="nftView = false; transactionView = true"
+                      :class="transactionView && 'show'">Transactions</button>
+                  </div>
+                </div>
+              </div>
+              <div v-if="transactionView" class="token-listDetail">
+                <div class="token-table">
+                  <div style="overflow: visible; border-radius: 0.75rem;">
+                    <CollectableTransaction></CollectableTransaction>
+                  </div>
+                </div>
+              </div>
+              <div v-if="nftView" class="nft-gridDetail">
+                <WalletNFTGrid></WalletNFTGrid>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </layout>
+</template>
+
+<script setup lang="ts">
+import { ref } from "vue";
+import Layout from "../components/Layout.vue";
+import WalletNFTGrid from "@/components/WalletNFTGrid.vue";
+import CollectableTransaction from "@/components/CollectableTransaction.vue";
+import { useNftStore } from '@/stores/nft';
+
+const nftView = ref<boolean>(true);
+const transactionView = ref<boolean>(false);
+const totalNfts = ref<number>(0);
+</script>
+
 <style lang="less" scoped>
 .content-body {
   margin-left: 9.5rem; }
@@ -139,13 +227,13 @@
   border-radius: 5px;
   width: 100%;
   min-height: 70px;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   @media (min-width: 640px) {
     padding: 16px 16px 16px 25px; } }
   .token-worth .title {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
     align-content: center;
     flex-direction: row;
@@ -154,8 +242,11 @@
     color: rgb(138, 147, 165);
     margin-bottom: 4px; }
   .token-worth .price {
+    font-family: "sfpro-heavy";
+    display: flex;
+    justify-content: center;
     font-size: 2rem;
-    font-weight: bold;
+    font-weight: 800;
     line-height: 1.33;
     color: black;
     margin-right: auto;
@@ -339,81 +430,33 @@ svg {
       .invite-content .social-share-link a i.icofont-telegram {
         color: #0088cc; }
 .info {
-  display: none;
-}
+  display: none; }
+.cta-button {
+  display: flex;
+  justify-content: center;
+  width: 125px;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+  margin-right: 5px;
+  margin-left: 5px;
+  align-items: center;
+  color: #000;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 800;
+  line-height: 1.25rem;
+  border-radius: 50px;
+  @media (min-width: 640px) {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem; }
+  @media (min-width: 768px) {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem; }
+  opacity: 1;
+  background-color: rgb(7, 106, 224);
+  color: white; }
+.cta-button:hover {
+  background-color: rgba(7, 106, 224, 0.9); }
 </style>
-<template>
-  <layout :active="2">
-    <div class="row">
-      <div className="row invoice-card-row">
-        <!-- account balance and title -->
-        <div class="col-xxl-6">
-          <div class="token-worth">
-            <div>
-              <div class="title">
-                <span>NFT Holding</span>
-              </div>
-              <div class="price">{{ useNftStore().contracts.length }}</div>
-            </div>
-          </div>
-        </div>
-        <div class="col-xxl-6">
-          <div class="card">
-            <div class="card-body">
-              <div class="token-list">
-                <div class="title">
-                  <div class="title-col">
-                    <div class="content">
-                      <div class="text">Collectables</div>
-                      <svg width="4" height="16" viewBox="0 0 4 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path
-                          d="M2 9C2.55228 9 3 8.55228 3 8C3 7.44772 2.55228 7 2 7C1.44772 7 1 7.44772 1 8C1 8.55228 1.44772 9 2 9Z"
-                          fill="black" stroke="black" stroke-linecap="round" stroke-linejoin="round" />
-                        <path
-                          d="M2 3C2.55228 3 3 2.55228 3 2C3 1.44772 2.55228 1 2 1C1.44772 1 1 1.44772 1 2C1 2.55228 1.44772 3 2 3Z"
-                          fill="black" stroke="black" stroke-linecap="round" stroke-linejoin="round" />
-                        <path
-                          d="M2 15C2.55228 15 3 14.5523 3 14C3 13.4477 2.55228 13 2 13C1.44772 13 1 13.4477 1 14C1 14.5523 1.44772 15 2 15Z"
-                          fill="black" stroke="black" stroke-linecap="round" stroke-linejoin="round" />
-                      </svg>
-                    </div>
-                  </div>
-                </div>
-                <div class="views">
-                  <div class="detail-view">
-                    <button class="listView-button" @click="transactionView = false; nftView = true"
-                      :class="nftView && 'show'">Collections</button>
-                    <button class="listView-button" @click="nftView = false; transactionView = true"
-                      :class="transactionView && 'show'">Transactions</button>
-                  </div>
-                </div>
-              </div>
-              <div v-if="transactionView" class="token-listDetail">
-                <div class="token-table">
-                  <div style="overflow: visible; border-radius: 0.75rem;">
-                    <CollectableTransaction></CollectableTransaction>
-                  </div>
-                </div>
-              </div>
-              <div v-if="nftView" class="nft-gridDetail">
-                <WalletNFTGrid></WalletNFTGrid>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </layout>
-</template>
-
-<script setup lang="ts">
-import { ref } from "vue";
-import Layout from "../components/Layout.vue";
-import WalletNFTGrid from "@/components/WalletNFTGrid.vue";
-import CollectableTransaction from "@/components/CollectableTransaction.vue";
-import { useNftStore } from '@/stores/nft';
-
-const nftView = ref<boolean>(true);
-const transactionView = ref<boolean>(false);
-const totalNfts = ref<number>(0);
-</script>

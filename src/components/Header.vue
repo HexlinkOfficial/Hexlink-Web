@@ -5,9 +5,12 @@
         <div class="col-xxl-12">
           <div class="header-content">
             <div class="header-left">
-              <div class="brand-logo header-logo">
+              <div class="brand-logo">
                 <router-link to="/">
-                  <img src="../assets/logo/blue2-logo.svg" alt="" />
+                  <div class="header-title">
+                    <h2 style="margin-bottom: 0rem; font-size: 1.4rem; font-weight: 600;">{{ componentTitle }}</h2>
+                  </div>
+                  <img class="header-logo" src="../assets/logo/blue2-logo.svg" alt="" />
                 </router-link>
               </div>
             </div>
@@ -220,6 +223,7 @@ import { useAccountStore } from "@/stores/account";
 import { signOutFirebase } from "@/services/auth";
 import type { Account } from "../../functions/common";
 import useClipboard from 'vue-clipboard3';
+import { useRoute } from "vue-router";
 
 const newLocal = "wallet-presence";
 const authStore = useAuthStore();
@@ -228,6 +232,18 @@ const walletStore = useWalletStore();
 const active = ref<string>("");
 const { toClipboard } = useClipboard();
 const ownerAccountAddress = useAccountStore().account?.owner;
+const componentTitle = ref<string>("");
+
+const getComponentName = () => {
+  const router = useRoute();
+  if (router.path == "/redpackets") {
+    componentTitle.value = "Hexlink Drop";
+  } else if (router.path == "/") {
+    componentTitle.value = "Assets";
+  } else if (router.path == "/activities") {
+    componentTitle.value = "Transactions";
+  }
+}
 
 const addressTextLong = function (address: string | undefined) {
   if (address) {
@@ -265,6 +281,7 @@ const doCopy = (address: string | undefined) => {
 
 onMounted(() => {
   document.addEventListener('click', closeDropDown);
+  getComponentName();
 });
 
 onBeforeUnmount(() => {
@@ -273,14 +290,27 @@ onBeforeUnmount(() => {
 </script>
 
 <style lang="scss" scoped>
+.header-logo {
+  @media only screen and (min-width: 991px) {
+    display: none; } }
+.header-title {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  @media only screen and (max-width: 990px) {
+    display: none; } }
+.header-title h2 {
+  margin-bottom: 0rem;
+  font-size: 1.4rem;
+  font-weight: 600; }
 .header {
   background: #f0f0f0;
   padding: 30px 0px 20px 0px;
   position: fixed;
   top: 0;
-  left: 9.5rem;
+  left: 9rem;
   z-index: 60;
-  right: 3rem;
+  right: 1rem;
   z-index: 100; }
   @media only screen and (max-width: 990px) {
     .header {
@@ -334,7 +364,10 @@ onBeforeUnmount(() => {
 .header-right {
   display: flex;
   justify-content: space-between;
-  align-items: center; }
+  align-items: center;
+  @media only screen and (max-width: 576px) {
+    margin-left: 5px;
+  } }
 .dark-light-toggle {
 margin-right: 20px;
 cursor: pointer; }

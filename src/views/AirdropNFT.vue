@@ -12,7 +12,6 @@ import RedPacketBase from "@/components/RedPacketBase.vue";
 import AirdropNFTSend from "@/components/AirdropNFTSend.vue";
 import RedpacketConfirm from "@/components/RedPacketConfirm.vue";
 import Layout from "@/components/Layout.vue";
-
 import { useRedPacketStore } from '@/stores/redpacket';
 import { storeToRefs } from 'pinia';
 

@@ -54,7 +54,7 @@ const preloadColors = () => {
     symbols.push(nft.symbol);
     names.push(nft.name);
     nftIds.push(nft.id);
-    images.push(nft.rawUrl);
+    images.push(nft.rawUrl == "" ? nft.url : nft.rawUrl);
     nftImages.value.push(await getBackcgroundColor(nft));
   })
   console.log("xxx", nftImages.value);

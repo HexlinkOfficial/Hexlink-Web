@@ -82,8 +82,6 @@ onMounted(refreshQrCode);
 
 <style lang="less" scoped>
 .qrcode {
-    width: 170px;
-    height: 170px;
     display: flex;
     align-items: center;
     justify-content: center;

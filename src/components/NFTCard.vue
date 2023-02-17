@@ -80,7 +80,10 @@ const getOpenseaUrl = (nft: nftImage) => {
   display: block;
   position: relative;
   box-sizing: border-box;
-  margin-top: 1rem; }
+  margin-top: 1rem;
+  @media (max-width: 640px) {
+    padding: 0 8px 8px;
+    margin-top: 0.5rem; } }
 .card_details {
   position: relative;
   z-index: 1;
@@ -117,7 +120,10 @@ const getOpenseaUrl = (nft: nftImage) => {
   white-space: nowrap;
   white-space: pre;
   margin-bottom: 0rem;
-  margin-top: 0.5rem; }
+  margin-top: 0.5rem;
+  @media (max-width: 640px) {
+    font-size: 0.75rem;
+    line-height: 1rem; } }
 .nfts {
   display: block;
   width: 100%;

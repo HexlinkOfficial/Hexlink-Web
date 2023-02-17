@@ -135,7 +135,7 @@ onMounted(async () => {
   transition: transform .2s cubic-bezier(.5, 1, .89, 1);
   box-shadow: 0 0 15px 1px rgb(0 0 0 / 10%); }
 .box {
-  padding: 1rem;
+  // padding: 1rem;
   @media (min-width: 640px) {
     padding: 1.5rem; } }
 .amountOwned {

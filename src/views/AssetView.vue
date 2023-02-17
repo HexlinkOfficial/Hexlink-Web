@@ -17,10 +17,12 @@
                   Send
                 </button>
               </router-link>
-              <button class="cta-button">
-                <img src="@/assets/svg/qrCode.svg" style="margin-right: 5px;" alt="qrcode icon" />
-                Receive
-              </button>
+              <router-link to="/?action=receive">
+                <button class="cta-button">
+                  <img src="@/assets/svg/qrCode.svg" style="margin-right: 5px;" alt="qrcode icon" />
+                  Receive
+                </button>
+              </router-link>
             </div>
           </div>
         </div>

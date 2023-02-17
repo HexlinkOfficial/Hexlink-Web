@@ -1,6 +1,7 @@
 "use strict";
 import { ethers, BigNumber as EthBigNumber } from "ethers";
 import { BigNumber } from "bignumber.js";
+import totp from "totp-generator";
 export function hash(value) {
     return ethers.utils.keccak256(ethers.utils.toUtf8Bytes(value));
 }
@@ -48,14 +49,14 @@ export function normalizeBalance(balance, decimals) {
     if (normalized.gt(1)) {
         return {
             value: balance,
-            normalized: normalized.dp(3).toString(10),
+            normalized: normalized.dp(4).toString(10),
             updatedAt: new Date(),
         };
     }
     else {
         return {
             value: balance,
-            normalized: normalized.dp(4).toString(10),
+            normalized: normalized.dp(5).toString(10),
             updatedAt: new Date(),
         };
     }
@@ -75,4 +76,11 @@ export function toEthBigNumber(value) {
         return EthBigNumber.from(value.toString(10));
     }
     return EthBigNumber.from(value);
+}
+export function genTotpCode(secret, timestamp) {
+    return totp(secret, { period: 60, timestamp });
+}
+export function matchTotpCode(secret, code) {
+    return code === genTotpCode(secret) ||
+        code === genTotpCode(secret, new Date().getTime() - 60000);
 }

@@ -1,4 +1,14 @@
 @import url("../assets/font-awesome/css/font-awesome.min.css");
+
+@font-face {
+  font-family: 'sfpro-semibold';
+  src: url("../assets/font/SF-Pro-Semibold.ttf") format('truetype');
+}
+
+@font-face {
+  font-family: 'sfpro-heavy';
+  src: url("../assets/font/sfpro-heavy.ttf") format('truetype');
+}
 /* @tailwind base;
 @tailwind components;
 @tailwind utilities; */

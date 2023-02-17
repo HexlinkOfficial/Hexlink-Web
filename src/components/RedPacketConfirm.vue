@@ -1,6 +1,6 @@
 <template>
-  <div v-if="store.status == 'confirming'" class="claim-success-card transition">
-    <router-link to="/redpacket/send">
+  <div v-if="store.status === 'confirming'" class="claim-success-card transition" @wheel.prevent @touchmove.prevent @scroll.prevent >
+    <router-link :to="props.mode == 'token' ? '/redpacket/send' : '/redpacket/airdropCollectable'">
       <svg @click="closeModal" class="redpacket_close transition" width="30" height="30" viewBox="0 0 30 30" fill="none"
         xmlns="http://www.w3.org/2000/svg">
         <path
@@ -19,69 +19,73 @@
   <div v-if="store.status !== 'confirming'" class="claim-success-card transition">
     <h2 class="transition">
       <div class="spinner-lg" :class="store.status">
-          <div class="check"></div>
-        </div>
+        <div class="check"></div>
+      </div>
       <span style="font-size: 20px; margin-top: 1rem;">{{ message }}</span><br>
     </h2>
     <div class="cta-container transition" style="margin-top: 340px;">
-      <router-link to="/redpackets">
-        <button @click="closeModal" class="cta">Close</button>
-      </router-link>
+      <button @click="closeModal" class="cta">Close</button>
     </div>
     <div class="card_circle transition" style="margin-top: -100px;"></div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
+import { ref } from "vue";
+import { useRouter } from "vue-router";
 import { useRedPacketStore } from '@/stores/redpacket';
-import { useChainStore } from "@/stores/chain";
-import { useAccountStore } from '@/stores/account';
-import { isContract } from "../../functions/common";
-import { deployAndCreateNewRedPacket, createNewRedPacket } from "@/web3/redpacket";
+import { createNewRedPacket, createRedPacketErc721 } from "@/web3/redpacket";
+import type { RedPacketInput, NftAirdrop } from "../../functions/redpacket";
 
+const props = defineProps({
+  mode: String
+});
+
+const message = ref<string>("Let's go!");
 const store = useRedPacketStore();
 const createRedPacket = async () => {
   store.setStatus("processing");
-  try {
-    if (await isContract(
-      useChainStore().provider,
-      useAccountStore().account!.address
-    )) {
+  message.value = "Processing";
+  if(props.mode == 'token') {
+    try {
       await createNewRedPacket(
-        store.redpacket!,
-        store.account == "hexlink"
+        store.redpacket! as RedPacketInput,
+        store.account == "hexlink",
+        false // dryrun
       );
-    } else {
-      await deployAndCreateNewRedPacket(
-        store.redpacket!,
-        store.account == "hexlink"
-      );
+      message.value = "Done!";
+      store.setStatus("success");
+    } catch (e) {
+      console.log("Failed to create redpacket with");
+      console.log(e);
+      store.setStatus("error");
+      message.value = "Something went wrong...";
     }
-    store.setStatus("success");
-  } catch (e) {
-    console.log("Failed to claim redpacket with error " + e);
-    store.setStatus("error");
+  } else {
+    try {
+      await createRedPacketErc721(
+        store.redpacket! as NftAirdrop,
+        store.account == "hexlink",
+        false // dryrun
+      );
+      message.value = "Done!";
+      store.setStatus("success");
+    } catch (e) {
+      console.log("Failed to create redpacket with");
+      console.log(e);
+      store.setStatus("error");
+      message.value = "Something went wrong...";
+    }
   }
 }
 
-const closeModal = () => store.setStatus("");
-
-const message = computed(() => {
-  if (store.status == 'error') {
-    return "Something went wrong";
-  }
+const router = useRouter();
+const closeModal = () => {
   if (store.status == 'success') {
-    return "RedPacket sent succesfully!";
+    router.push("/redpackets");
   }
-  if (store.status == "processing") {
-    return "Processing";
-  }
-  if (store.status == "confirming") {
-    return "Let's go!";
-  }
-  return "";
-});
+  store.setStatus("");
+}
 </script>
 
 <style lang="less" scoped>
@@ -205,7 +209,7 @@ const message = computed(() => {
   right: 0.5rem; }
 .claim-success-card {
   background-color: #fff;
-  position: absolute;
+  position: fixed;
   margin: auto;
   left: 50%;
   top: 45%;
@@ -224,7 +228,6 @@ const message = computed(() => {
   height: 400px;
   width: 450px;
   background-color: #FD4755;
-  position: absolute;
   border-radius: 0;
   margin-left: -80px;
   margin-top: -130px; }

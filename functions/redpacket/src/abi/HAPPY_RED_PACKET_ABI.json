@@ -105,7 +105,7 @@
           }
         ],
         "indexed": false,
-        "internalType": "struct HappyRedPacket.RedPacketData",
+        "internalType": "struct HappyRedPacketImpl.RedPacketData",
         "name": "packet",
         "type": "tuple"
       }
@@ -187,7 +187,7 @@
                 "type": "uint8"
               }
             ],
-            "internalType": "struct HappyRedPacket.RedPacketData",
+            "internalType": "struct HappyRedPacketImpl.RedPacketData",
             "name": "packet",
             "type": "tuple"
           },
@@ -202,74 +202,7 @@
             "type": "bytes"
           }
         ],
-        "internalType": "struct HappyRedPacket.RedPacketClaim[]",
-        "name": "claims",
-        "type": "tuple[]"
-      }
-    ],
-    "name": "batchClaim",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "components": [
-          {
-            "internalType": "address",
-            "name": "creator",
-            "type": "address"
-          },
-          {
-            "components": [
-              {
-                "internalType": "address",
-                "name": "token",
-                "type": "address"
-              },
-              {
-                "internalType": "bytes32",
-                "name": "salt",
-                "type": "bytes32"
-              },
-              {
-                "internalType": "uint256",
-                "name": "balance",
-                "type": "uint256"
-              },
-              {
-                "internalType": "address",
-                "name": "validator",
-                "type": "address"
-              },
-              {
-                "internalType": "uint32",
-                "name": "split",
-                "type": "uint32"
-              },
-              {
-                "internalType": "uint8",
-                "name": "mode",
-                "type": "uint8"
-              }
-            ],
-            "internalType": "struct HappyRedPacket.RedPacketData",
-            "name": "packet",
-            "type": "tuple"
-          },
-          {
-            "internalType": "address",
-            "name": "claimer",
-            "type": "address"
-          },
-          {
-            "internalType": "bytes",
-            "name": "signature",
-            "type": "bytes"
-          }
-        ],
-        "internalType": "struct HappyRedPacket.RedPacketClaim",
+        "internalType": "struct HappyRedPacketImpl.RedPacketClaim",
         "name": "c",
         "type": "tuple"
       }
@@ -314,7 +247,7 @@
             "type": "uint8"
           }
         ],
-        "internalType": "struct HappyRedPacket.RedPacketData",
+        "internalType": "struct HappyRedPacketImpl.RedPacketData",
         "name": "pd",
         "type": "tuple"
       }
@@ -352,7 +285,7 @@
             "type": "uint32"
           }
         ],
-        "internalType": "struct HappyRedPacket.RedPacket",
+        "internalType": "struct HappyRedPacketImpl.RedPacket",
         "name": "",
         "type": "tuple"
       }
@@ -447,7 +380,7 @@
             "type": "uint8"
           }
         ],
-        "internalType": "struct HappyRedPacket.RedPacketData",
+        "internalType": "struct HappyRedPacketImpl.RedPacketData",
         "name": "pd",
         "type": "tuple"
       }

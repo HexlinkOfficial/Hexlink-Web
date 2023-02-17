@@ -27,14 +27,21 @@
         <li>
           <router-link to="/" data-toggle="tooltip" data-placement="right" title="Wallet"
             :class="active === 1 && 'active'">
-            <span class="icon-grey"><i class="icofont-wallet"></i></span>
+            <span class="icon-grey"><i class="fa-solid fa-wallet" style="font-size: 20px;"></i></span>
           </router-link>
         </li>
-        <!-- transactions -->
+        <!-- collectables -->
         <li>
-          <router-link to="/transactions" data-toggle="tooltip" data-placement="right" title="Home"
+          <router-link to="/collectables" data-toggle="tooltip" data-placement="right" title="Home"
             :class="active === 2 && 'active'">
-            <span class="icon-grey"><i class="icofont-page"></i></span>
+            <span class="icon-grey"><i class="fa-solid fa-image" style="font-size: 20px;"></i></span>
+          </router-link>
+        </li>
+        <!-- Activities -->
+        <li>
+          <router-link to="/activities" data-toggle="tooltip" data-placement="right" title="Home"
+            :class="active === 3 && 'active'">
+            <span class="icon-grey"><i class="fa-solid fa-receipt" style="font-size: 20px;"></i></span>
           </router-link>
         </li>
         <!-- signout -->
@@ -46,7 +53,7 @@
             data-placement="right"
             title="Signout"
           >
-            <span class="icon-grey"><i class="icofont-logout"></i></span>
+            <span class="icon-grey"><i class="fa-solid fa-arrow-right-from-bracket" style="font-size: 20px;"></i></span>
           </router-link>
         </li>
       </ul>
@@ -114,7 +121,7 @@ const props = defineProps({
     list-style-type: none;
     text-align: center; }
     .menu ul li a {
-      padding: 10px 15px;
+      padding: 12.5px 15px;
       display: inline-block;
       margin-bottom: 20px;
       border-radius: 15px; }

@@ -1,6 +1,5 @@
 <template>
   <Layout :hidden="showClaim || showDetails" :active="1">
-    <h1 style="margin-bottom: 1rem;">Red Packet</h1>
     <lockScreen v-if="isLocked" @lock="lock"></lockScreen>
     <RedPacketBase v-if="!isLocked">
       <RedPacektHistoryList></RedPacektHistoryList>

@@ -12,23 +12,35 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.tokenAmount = exports.tokenBase = exports.isStableCoin = exports.isWrappedCoin = exports.isNativeCoin = exports.getPopularTokens = exports.allowedGasToken = exports.stableCoinAddresses = exports.wrappedCoinAddress = exports.nativeCoinAddress = void 0;
+exports.tokenAmount = exports.tokenBase = exports.gasTokenDecimals = exports.isAllowedGasToken = exports.isStableCoin = exports.isWrappedCoin = exports.isNativeCoin = exports.getPopularTokens = exports.allowedGasToken = exports.stableCoinAddresses = exports.wrappedCoinAddress = exports.nativeCoinAddress = exports.stableCoins = exports.wrappedCoin = exports.nativeCoin = void 0;
 const GOERLI_TOKENS_json_1 = __importDefault(require("./tokens/GOERLI_TOKENS.json"));
 const MUMBAI_TOKENS_json_1 = __importDefault(require("./tokens/MUMBAI_TOKENS.json"));
 const POLYGON_TOKENS_json_1 = __importDefault(require("./tokens/POLYGON_TOKENS.json"));
 const addresses_json_1 = __importDefault(require("./addresses.json"));
 const bignumber_js_1 = require("bignumber.js");
 const utils_1 = require("./utils");
+function nativeCoin(chain) {
+    return addresses_json_1.default[chain.name].nativeCoin;
+}
+exports.nativeCoin = nativeCoin;
+function wrappedCoin(chain) {
+    return addresses_json_1.default[chain.name].wrappedCoin;
+}
+exports.wrappedCoin = wrappedCoin;
+function stableCoins(chain) {
+    return addresses_json_1.default[chain.name].stableCoins;
+}
+exports.stableCoins = stableCoins;
 function nativeCoinAddress(chain) {
-    return addresses_json_1.default[chain.name].nativeCoin.toLowerCase();
+    return nativeCoin(chain).address.toLowerCase();
 }
 exports.nativeCoinAddress = nativeCoinAddress;
 function wrappedCoinAddress(chain) {
-    return addresses_json_1.default[chain.name].wrappedCoin.toLowerCase();
+    return wrappedCoin(chain).address.toLowerCase();
 }
 exports.wrappedCoinAddress = wrappedCoinAddress;
 function stableCoinAddresses(chain) {
-    return addresses_json_1.default[chain.name].stableCoins.map((a) => a.toLowerCase());
+    return stableCoins(chain).map(a => a.address.toLowerCase());
 }
 exports.stableCoinAddresses = stableCoinAddresses;
 function allowedGasToken(chain) {
@@ -70,23 +82,45 @@ function getPopularTokens(chain) {
     });
 }
 exports.getPopularTokens = getPopularTokens;
+function equal(a, b) {
+    return a.toLowerCase() == b.toLowerCase();
+}
 function isNativeCoin(token, chain) {
-    return token.address == nativeCoinAddress(chain);
+    return equal(token, nativeCoinAddress(chain));
 }
 exports.isNativeCoin = isNativeCoin;
 function isWrappedCoin(token, chain) {
-    return token.address == wrappedCoinAddress(chain);
+    return equal(token, wrappedCoinAddress(chain));
 }
 exports.isWrappedCoin = isWrappedCoin;
 function isStableCoin(token, chain) {
-    return stableCoinAddresses(chain).includes(token.address);
+    return stableCoinAddresses(chain).includes(token.toLowerCase());
 }
 exports.isStableCoin = isStableCoin;
+function isAllowedGasToken(token, chain) {
+    return isNativeCoin(token, chain) ||
+        isWrappedCoin(token, chain) ||
+        isStableCoin(token, chain);
+}
+exports.isAllowedGasToken = isAllowedGasToken;
+function gasTokenDecimals(token, chain) {
+    var _a;
+    if (isNativeCoin(token, chain)) {
+        return nativeCoin(chain).decimals;
+    }
+    if (isWrappedCoin(token, chain)) {
+        return wrappedCoin(chain).decimals;
+    }
+    if (isStableCoin(token, chain)) {
+        return (_a = stableCoins(chain).find(c => c.address.toLowerCase() === token.toLowerCase())) === null || _a === void 0 ? void 0 : _a.decimals;
+    }
+}
+exports.gasTokenDecimals = gasTokenDecimals;
 function tokenBase(token) {
     return new bignumber_js_1.BigNumber(10).pow(token.decimals);
 }
 exports.tokenBase = tokenBase;
-function tokenAmount(balance, token) {
-    return (0, utils_1.toEthBigNumber)(tokenBase(token).times(balance));
+function tokenAmount(balance, decimals) {
+    return (0, utils_1.toEthBigNumber)(new bignumber_js_1.BigNumber(10).pow(decimals).times(balance));
 }
 exports.tokenAmount = tokenAmount;

@@ -1,8 +1,7 @@
-import { ethers, BigNumber as EthBigNumber } from "ethers";
-import { BigNumber } from "bignumber.js";
+import { ethers } from "ethers";
 
-import type { Chain } from "../../functions/common";
-import type { PriceInfo } from "../../functions/redpacket";
+import type { Chain, PriceInfo, PriceConfig } from "../../functions/common";
+import { genPriceInfo } from "../../functions/common";
 import { useWalletStore } from "@/stores/wallet";
 import { useRedPacketStore } from "@/stores/redpacket";
 import { useChainStore } from '@/stores/chain';
@@ -82,21 +81,35 @@ export function getInfuraProvider(chain: Chain) {
 }
 
 const functions = getFunctions();
+const priceConfig : {
+    value?: PriceConfig,
+    updatedAt: number,
+} = {updatedAt: new Date().getTime()};
+async function getPriceConfig(chain: Chain) : Promise<PriceConfig> {
+    //refresh every 15mins
+    if (!priceConfig.value || priceConfig.updatedAt < new Date().getTime() - 900000) {
+        const getPriceConfig = httpsCallable(functions, 'priceConfig');
+        const result = await getPriceConfig({chain: chain.name});
+        priceConfig.value = (result.data as any).priceConfig;
+        priceConfig.updatedAt = new Date().getTime();
+    }
+    return priceConfig.value as PriceConfig;
+}
+
 export async function getPriceInfo(chain: Chain) : Promise<PriceInfo> {
     const priceInfo = useChainStore().priceInfos[chain.name];
-    // refresh every 15 mins
-    if (!priceInfo || priceInfo.updatedAt < new Date().getTime() - 900000) {
-        const getPriceInfo = httpsCallable(functions, 'priceInfo');
-        const result = await getPriceInfo({chainId: chain.chainId});
-        const info : {
-            nativeCurrencyInUsd: string,
-            gasPrice: string
-        } = (result.data as any).priceInfo;
-        useChainStore().refreshPriceInfo(chain, {
-            nativeCurrencyInUsd: new BigNumber(info.nativeCurrencyInUsd),
-            gasPrice: EthBigNumber.from(info.gasPrice),
-            updatedAt: new Date().getTime()
-        });
+    // refresh every 5s
+    if (!priceInfo?.updatedAt || priceInfo.updatedAt < new Date().getTime() - 5000) {
+        const provider = getInfuraProvider(chain);
+        const priceConfig = await getPriceConfig(chain);
+        const priceInfo = await genPriceInfo(provider, priceConfig);
+        useChainStore().refreshPriceInfo(chain, priceInfo);
     }
     return useChainStore().priceInfos[chain.name];
+}
+
+export async function getRefunder(chain: Chain) : Promise<string> {
+    const getRefunder = httpsCallable(functions, 'priceInfo');
+    const result = await getRefunder({chain: chain.name});
+    return (result.data as any).refunder as string;
 }

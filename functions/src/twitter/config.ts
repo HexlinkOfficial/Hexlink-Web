@@ -7,9 +7,9 @@ export const GET_TWEET_V2_URL = "https://api.twitter.com/2/tweets/";
 export const TWITTER_URL = "https://twitter.com/";
 
 const secrets = functions.config().doppler;
-export const TWITTER_CONFIG_1 = {
+export const twitterConfig1 = () => ({
   twitterApiKey: secrets.TWITTER_API_KEY_1,
   twitterApiSecret: secrets.TWITTER_API_SECRET_1,
   twitterAccessKey: secrets.TWITTER_ACCESS_KEY_1,
   twitterAccessSecret: secrets.TWITTER_ACCESS_SECRET_1,
-};
+});

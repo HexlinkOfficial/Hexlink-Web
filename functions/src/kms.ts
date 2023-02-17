@@ -6,7 +6,7 @@ import * as ethers from "ethers";
 import * as crc32c from "fast-crc32c";
 import * as BN from "bn.js";
 import {Signature} from "ethers";
-import {KMS_KEY_TYPE, KMS_CONFIG, KMS_CONFIG_TYPE} from "./config";
+import {KMS_KEY_TYPE, kmsConfig, KMS_CONFIG_TYPE} from "./config";
 
 const client = new kms.KeyManagementServiceClient();
 
@@ -33,7 +33,7 @@ const getVersionName = async function(keyType: string) {
         ", while getting version name.");
   }
 
-  const config: KMS_CONFIG_TYPE = KMS_CONFIG.get(keyType)!;
+  const config: KMS_CONFIG_TYPE = kmsConfig().get(keyType)!;
   return client.cryptoKeyVersionPath(
       config.projectId,
       config.locationId,
@@ -43,8 +43,18 @@ const getVersionName = async function(keyType: string) {
   );
 };
 
-export const getEthAddressFromPublicKey = async function(keyType: string) {
-  const versionName = await getVersionName(keyType);
+export const getEthAddressFromPublicKey = async function(
+    keyId: string,
+    keyType: string
+) {
+  const config: KMS_CONFIG_TYPE = kmsConfig().get(keyType)!;
+  const versionName = client.cryptoKeyVersionPath(
+      config.projectId,
+      config.locationId,
+      config.keyRingId,
+      keyId,
+      config.versionId
+  );
   const publicKey = await getPublicKey(versionName);
   const publicKeyPem = publicKey.pem || "";
   const publicKeyDer = crypto.createPublicKey(publicKeyPem)
@@ -67,7 +77,7 @@ export const signWithKmsKey = async function(
 ) : Promise<Signature | string> {
   const digestBuffer = Buffer.from(ethers.utils.arrayify(message));
   const signature = await getKmsSignature(digestBuffer, keyType);
-  const address = KMS_CONFIG.get(keyType)!.publicAddress;
+  const address = kmsConfig().get(keyType)!.publicAddress;
   const [r, s] = await calculateRS(signature as Buffer);
   const v = calculateRecoveryParam(
       digestBuffer,

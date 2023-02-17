@@ -5,14 +5,23 @@ import POLYGON_TOEKNS from "./tokens/POLYGON_TOKENS.json";
 import ADDRESSES from "./addresses.json";
 import { BigNumber } from "bignumber.js";
 import { toEthBigNumber } from "./utils";
+export function nativeCoin(chain) {
+    return ADDRESSES[chain.name].nativeCoin;
+}
+export function wrappedCoin(chain) {
+    return ADDRESSES[chain.name].wrappedCoin;
+}
+export function stableCoins(chain) {
+    return ADDRESSES[chain.name].stableCoins;
+}
 export function nativeCoinAddress(chain) {
-    return ADDRESSES[chain.name].nativeCoin.toLowerCase();
+    return nativeCoin(chain).address.toLowerCase();
 }
 export function wrappedCoinAddress(chain) {
-    return ADDRESSES[chain.name].wrappedCoin.toLowerCase();
+    return wrappedCoin(chain).address.toLowerCase();
 }
 export function stableCoinAddresses(chain) {
-    return ADDRESSES[chain.name].stableCoins.map((a) => a.toLowerCase());
+    return stableCoins(chain).map(a => a.address.toLowerCase());
 }
 export function allowedGasToken(chain) {
     return [
@@ -49,18 +58,37 @@ export async function getPopularTokens(chain) {
         error: "Unsupported network " + chain.chainId,
     };
 }
+function equal(a, b) {
+    return a.toLowerCase() == b.toLowerCase();
+}
 export function isNativeCoin(token, chain) {
-    return token.address == nativeCoinAddress(chain);
+    return equal(token, nativeCoinAddress(chain));
 }
 export function isWrappedCoin(token, chain) {
-    return token.address == wrappedCoinAddress(chain);
+    return equal(token, wrappedCoinAddress(chain));
 }
 export function isStableCoin(token, chain) {
-    return stableCoinAddresses(chain).includes(token.address);
+    return stableCoinAddresses(chain).includes(token.toLowerCase());
+}
+export function isAllowedGasToken(token, chain) {
+    return isNativeCoin(token, chain) ||
+        isWrappedCoin(token, chain) ||
+        isStableCoin(token, chain);
+}
+export function gasTokenDecimals(token, chain) {
+    if (isNativeCoin(token, chain)) {
+        return nativeCoin(chain).decimals;
+    }
+    if (isWrappedCoin(token, chain)) {
+        return wrappedCoin(chain).decimals;
+    }
+    if (isStableCoin(token, chain)) {
+        return stableCoins(chain).find(c => c.address.toLowerCase() === token.toLowerCase())?.decimals;
+    }
 }
 export function tokenBase(token) {
     return new BigNumber(10).pow(token.decimals);
 }
-export function tokenAmount(balance, token) {
-    return toEthBigNumber(tokenBase(token).times(balance));
+export function tokenAmount(balance, decimals) {
+    return toEthBigNumber(new BigNumber(10).pow(decimals).times(balance));
 }

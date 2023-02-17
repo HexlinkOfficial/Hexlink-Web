@@ -1,7 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import SignInView from '@/views/SignInView.vue'
 import Error404 from '@/views/Error404.vue'
-import Transaction from '@/views/TransactionView.vue'
 import { useAuthStore } from '@/stores/auth';
 
 const router = createRouter({
@@ -10,17 +9,12 @@ const router = createRouter({
     {
       path: '/',
       name: 'home',
-      component: () => import('@/views/AssetView.vue')
+      component: () => import('@/views/TokenView.vue')
     },
     {
       path: '/signin',
       name: 'signIn',
       component: SignInView
-    },
-    {
-      path: '/transactions',
-      name: 'transaction page',
-      component: Transaction
     },
     {
       path: '/adminView',
@@ -33,9 +27,29 @@ const router = createRouter({
       component: () => import('@/views/RedPacketsView.vue')
     },
     {
+      path: '/airdrop/share/:id',
+      name: 'airdrop claim QR code',
+      component: () => import('@/views/AirdropShare.vue')
+    },
+    {
       path: '/redpacket/send',
       name: 'red pocket send view',
       component: () => import('@/views/RedPacketSendView.vue')
+    },
+    {
+      path: '/redpacket/airdropCollectable',
+      name: 'red pocket send NFTs',
+      component: () => import('@/views/AirdropNFT.vue')
+    },
+    {
+      path: '/collectables',
+      name: 'collectable view',
+      component: () => import('@/views/CollectablesView.vue')
+    },
+    {
+      path: '/activities',
+      name: 'activity view',
+      component: () => import('@/views/ActivityView.vue')
     },
     {
       path: '/:pathMatch(.*)*',

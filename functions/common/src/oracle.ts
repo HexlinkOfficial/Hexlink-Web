@@ -4,15 +4,7 @@ import type {Provider} from "@ethersproject/providers";
 import {ethers} from "ethers";
 import {accountInterface} from "./account";
 import {hexlContract, hexlInterface} from "./hexlink";
-
-export interface AuthProof {
-    name: string,
-    requestId: string,
-    authType: string, // non-hashed
-    identityType: string, // non-hashed
-    issuedAt: number, // timestamp
-    signature: string // encoded with validator address
-}
+import type {AuthProof} from "./types";
 
 const genRequestId = async function(
     provider: Provider,
@@ -40,8 +32,11 @@ export async function genDeployAuthProof(
     provider: Provider,
     nameHash: string,
     owner: string,
-    data: string,
-    genAuthProof: (request: {requestId: string}) => Promise<AuthProof>,
+    data: string | [],
+    genAuthProof: (
+      request: {requestId: string, version?: number}
+    ) => Promise<AuthProof>,
+    version?: number,
 ) : Promise<{ initData: string, proof: AuthProof }> {
   const initData = accountInterface.encodeFunctionData(
       "init", [owner, data]
@@ -54,6 +49,6 @@ export async function genDeployAuthProof(
   );
   return {
     initData,
-    proof: await genAuthProof({requestId}),
+    proof: await genAuthProof({requestId, version}),
   };
 }

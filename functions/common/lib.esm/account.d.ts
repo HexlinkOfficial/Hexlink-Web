@@ -1,21 +1,27 @@
 import { ethers, Contract, BigNumber as EthBigNumber } from "ethers";
 import type { Provider } from "@ethersproject/providers";
-import { GasObject, UserOpInput } from "./types";
+import type { GasObject, OpInput } from "./types";
+import type { TransactionReceipt } from "@ethersproject/providers";
 export interface Account {
     address: string;
     isContract: boolean;
     owner?: string;
 }
+export declare const DEPLOYMENT_GASCOST = 350000;
 export declare const accountInterface: ethers.utils.Interface;
 export declare function nameHash(schema: string, name: string): string;
 export declare function accountContract(provider: Provider, address: string): Contract;
 export declare function hexlAccount(provider: Provider, hexlink: Contract, nameHash: string): Promise<Account>;
 export declare function encodeInit(owner: string, data: string): string;
-export declare function encodeExec(op: UserOpInput): string;
-export declare function encodeExecBatch(ops: UserOpInput[]): string;
+export declare function encodeExec(op: OpInput): string;
+export declare function encodeExecBatch(ops: OpInput[]): string;
 export declare function encodeValidateAndCall(params: {
-    ops: UserOpInput[];
-    signature: string;
-    nonce: EthBigNumber;
+    nonce: EthBigNumber | string | number;
+    txData: string;
+    sign: (msg: string) => Promise<string>;
     gas?: GasObject;
-}): string;
+}): Promise<{
+    data: string;
+    signature: string;
+}>;
+export declare function parseDeposit(receipt: TransactionReceipt, ref: string, from: string, to: string): ethers.utils.Result;

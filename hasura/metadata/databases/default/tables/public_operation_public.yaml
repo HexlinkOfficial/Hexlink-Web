@@ -1,0 +1,21 @@
+table:
+  name: operation_public
+  schema: public
+object_relationships:
+  - name: redpacket
+    using:
+      manual_configuration:
+        column_mapping:
+          id: op_id
+        insertion_order: null
+        remote_table:
+          name: redpacket
+          schema: public
+select_permissions:
+  - role: user
+    permission:
+      columns:
+        - id
+        - chain
+        - user_id
+      filter: {}

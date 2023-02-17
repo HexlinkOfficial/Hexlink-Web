@@ -2,37 +2,60 @@
 
 import {BigNumber as EthBigNumber} from "ethers";
 
-export interface UserOpInput {
+export type BigNumberish =  string | number | EthBigNumber;
+
+export interface OpInput {
     to: string,
-    value: EthBigNumber,
-    callData: string | any[],
-    callGasLimit: EthBigNumber,
+    value: BigNumberish,
+    callData: string | [],
+    callGasLimit: BigNumberish,
 }
 
-export interface UserOp {
+export interface Op {
   name: string;
   function: string;
-  args: any[];
-  input: UserOpInput;
+  args: {[key: string]: any};
+  input: OpInput;
 }
 
 export interface GasObject {
   receiver: string;
   token: string;
-  base: EthBigNumber;
-  price: EthBigNumber;
+  baseGas?: BigNumberish;
+  price: BigNumberish;
 }
 
-export interface TransactionInput {
-    to: string,
-    from: string,
-    value: string,
-    data: string | any[],
+export interface Deposit {
+  ref: string,
+  receipt: string,
+  token: string,
+  amount: BigNumberish,
 }
 
-export interface Transaction {
-    name: string,
-    function: string,
-    args: any[],
-    input: TransactionInput
+export interface UserOpRequest {
+  txData: string,
+  nonce: BigNumberish,
+  signature: string,
+  gas: GasObject,
+}
+
+export interface AuthProof {
+  name: string,
+  requestId: string,
+  authType: string, // non-hashed
+  identityType: string, // non-hashed
+  issuedAt: number, // timestamp
+  signature: string // encoded with validator address
+}
+
+export interface AuthProofInput {
+  authType: string, // hashed
+  identityType: string, // hashed
+  issuedAt: EthBigNumber | string | number,
+  signature: string,
+}
+
+export interface DeployRequest {
+  authProof: AuthProofInput,
+  owner: string,
 }

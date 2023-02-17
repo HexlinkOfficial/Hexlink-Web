@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app'
-import { getStorage } from 'firebase/storage'
+import { getStorage, connectStorageEmulator } from 'firebase/storage'
 import { getFunctions, connectFunctionsEmulator } from 'firebase/functions'
 import { getAnalytics } from 'firebase/analytics'
 
@@ -15,6 +15,7 @@ const firebaseConfig = {
 
 export const app = initializeApp(firebaseConfig)
 export const googleAnalytics = getAnalytics(app)
+export const storage = getStorage(app);
 
 if (import.meta.env.VITE_ENVIRONMENT !== 'production') {
     console.log('Using firebase: ' + import.meta.env.VITE_FIREBASE_AUTH_DOMAIN)
@@ -22,8 +23,6 @@ if (import.meta.env.VITE_ENVIRONMENT !== 'production') {
 }
 
 if (import.meta.env.VITE_USE_FUNCTIONS_EMULATOR === 'true') {
-    connectFunctionsEmulator(getFunctions(app), 'localhost', 5001)
+    connectFunctionsEmulator(getFunctions(app), 'localhost', 5001);
+    connectStorageEmulator(storage, "localhost", 9199);
 }
-
-const storage = getStorage(app)
-export default storage

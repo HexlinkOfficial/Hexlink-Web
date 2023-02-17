@@ -5,9 +5,12 @@
         <div class="col-xxl-12">
           <div class="header-content">
             <div class="header-left">
-              <div class="brand-logo header-logo">
+              <div class="brand-logo">
                 <router-link to="/">
-                  <img src="../assets/logo/blue2-logo.svg" alt="" />
+                  <div class="header-title">
+                    <h2 style="margin-bottom: 0rem; font-size: 1.4rem; font-weight: 600;">{{ componentTitle }}</h2>
+                  </div>
+                  <img class="header-logo" src="../assets/logo/blue2-logo.svg" alt="" />
                 </router-link>
               </div>
             </div>
@@ -17,9 +20,7 @@
                 <div class="network" data-toggle="dropdown">
                   <img :src="useChainStore().chain.logoUrl" height=25 style="margin-left: 0.5rem;">
                   <span>{{ useChainStore().chain.fullName }}</span>
-                  <svg width="14" height="8" viewBox="0 0 14 8" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 0.5rem; width: 1rem">
-                    <path d="M1 1L7 7L13 1" stroke="#475569" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                  </svg>
+                  <img src="@/assets/svg/arrowDown.svg" alt="arrow down icon" style="margin-right: 0.5rem; width: 1rem" />
                 </div>
                 <div class="dropdown-menu dropdown-menu-right network-list mt-3" onclick="event.stopPropagation()" :class="active === 'selectnetwork' && 'show'">
                   <div class="box">
@@ -75,9 +76,7 @@
                 <div class="user" data-toggle="dropdown">
                   <img class="profile" :src="user?.photoURL" :size="64" referrerpolicy="no-referrer"/>
                   <span>@{{ user?.provider?.includes("twitter") && user.handle }}</span>
-                  <svg width="14" height="8" viewBox="0 0 14 8" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 0.5rem; width: 1rem">
-                    <path d="M1 1L7 7L13 1" stroke="#475569" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                  </svg>
+                  <img src="@/assets/svg/arrowDown.svg" alt="arrow down icon" style="margin-right: 0.5rem; width: 1rem"/>
                 </div>
                 <!-- dropdown menu -->
                 <div style="opacity: 1; transform: translateY(0);">
@@ -96,12 +95,7 @@
                         <h5>Hexlink Account Address</h5>
                         <div class="user-wallet">
                           <div class="user2">
-                            <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <circle cx="15" cy="15" r="15" fill="#076AE0" />
-                              <path
-                                d="M12.9544 8.0197C11.966 8.15381 11.1676 8.81988 10.9158 9.72287C10.8778 9.85698 10.8445 10.1207 10.8445 10.313C10.8445 10.9701 11.0964 11.5155 11.6048 11.9714C12.3984 12.6733 13.4343 12.8163 14.4084 12.3559C14.5653 12.2843 14.7031 12.2218 14.7173 12.2218C14.7363 12.2218 17.3451 15.2705 17.4164 15.3778C17.4307 15.4046 17.3594 15.5342 17.2501 15.6683C16.7939 16.2316 16.5563 16.9826 16.6133 17.68C16.6418 18.0287 16.6371 18.0778 16.5611 18.1136C16.5135 18.1359 15.6059 18.4533 14.5415 18.8154L12.6075 19.477L12.2748 19.1418C11.7521 18.6143 11.2104 18.3907 10.4644 18.3907C9.59951 18.3907 8.87721 18.7528 8.40202 19.4279C7.4754 20.7421 8.2262 22.5258 9.87987 22.9281C11.3862 23.2991 12.9021 22.186 12.9116 20.7064V20.3174L14.9074 19.6335C16.0051 19.258 16.9175 18.9495 16.9412 18.9495C16.9602 18.9495 17.098 19.1015 17.2501 19.2848C17.8963 20.0716 18.785 20.4918 19.8066 20.4918C20.3436 20.4918 20.7475 20.4024 21.2369 20.1744C22.2634 19.6961 22.9381 18.7215 22.9952 17.6308C23.0237 17.0675 22.9286 16.6518 22.6483 16.1109C22.3584 15.5611 21.8832 15.1051 21.3177 14.8279C20.7523 14.5508 20.4624 14.4837 19.8256 14.4837C19.2411 14.4793 18.9418 14.5418 18.4571 14.7564C18.2432 14.8503 18.191 14.8592 18.1434 14.8101C17.8868 14.5463 15.4063 11.587 15.4063 11.5423C15.4063 11.5155 15.4491 11.4037 15.5061 11.2964C16.0241 10.2951 15.6487 9.0121 14.665 8.39967C14.1708 8.09122 13.5151 7.9437 12.9544 8.0197ZM11.1106 19.401C11.4005 19.5307 11.7141 19.8346 11.8567 20.1252C11.9327 20.2817 11.9612 20.4247 11.9612 20.6706C11.9612 20.9612 11.9422 21.0461 11.8044 21.3098C11.5193 21.8552 11.0013 22.1324 10.3503 22.0921C9.79433 22.0564 9.34765 21.7747 9.10055 21.3054C8.98651 21.0863 8.9675 20.9969 8.9675 20.6706C8.9675 20.3443 8.98651 20.2593 9.10055 20.0582C9.49972 19.3384 10.3503 19.0613 11.1106 19.401Z"
-                                fill="white" />
-                            </svg>
+                            <img src="@/assets/svg/hexlinkCircle.svg" alt="hexlink logo" style="margin-right: 1rem;"/>
                             <div class="user-info">
                               <span style="margin-bottom: 0;" class="smart-contract-address">
                                 <h5 @click="doCopy(useAccountStore().account?.address)">
@@ -118,7 +112,19 @@
                       <div class="user_wallet" style="border: 0 solid #e5e7eb; padding: 10px 0px 0px 0px;">
                         <div class="user2">
                           <div class="wallet-image-wrapper">
-                            <img class="wallet-image" :src="useWalletStore().walletIcon">
+                            <img v-if="walletStore.connected" class="wallet-image" :src="walletStore.connected && useWalletStore().walletIcon">
+                            <svg v-if="!walletStore.connected" class="wallet-image" style="margin-right: 0rem;" width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <circle cx="15" cy="15" r="15" fill="#076AE0" />
+                              <path
+                                d="M10.7978 11.0468H20.1728C20.2823 11.0468 20.3917 11.0537 20.5004 11.0676C20.4635 10.8092 20.3748 10.5608 20.2394 10.3376C20.104 10.1144 19.9248 9.92088 19.7126 9.76878C19.5004 9.61668 19.2596 9.50913 19.0047 9.4526C18.7499 9.39608 18.4862 9.39175 18.2296 9.43989L10.5195 10.7562H10.5107C10.0268 10.8487 9.59638 11.1226 9.3075 11.5217C9.74273 11.2122 10.2637 11.0461 10.7978 11.0468V11.0468Z"
+                                fill="white" />
+                              <path
+                                d="M20.1729 11.75H10.7979C10.3007 11.7505 9.82414 11.9483 9.47263 12.2998C9.12111 12.6513 8.92339 13.1279 8.92285 13.625V19.25C8.92339 19.7471 9.12111 20.2237 9.47263 20.5752C9.82414 20.9267 10.3007 21.1245 10.7979 21.125H20.1729C20.67 21.1245 21.1466 20.9267 21.4981 20.5752C21.8496 20.2237 22.0473 19.7471 22.0479 19.25V13.625C22.0473 13.1279 21.8496 12.6513 21.4981 12.2998C21.1466 11.9483 20.67 11.7505 20.1729 11.75V11.75ZM18.7812 17.375C18.5958 17.375 18.4146 17.32 18.2604 17.217C18.1062 17.114 17.9861 16.9676 17.9151 16.7963C17.8442 16.625 17.8256 16.4365 17.8618 16.2546C17.8979 16.0727 17.9872 15.9057 18.1183 15.7746C18.2494 15.6435 18.4165 15.5542 18.5984 15.518C18.7802 15.4818 18.9687 15.5004 19.14 15.5714C19.3113 15.6423 19.4577 15.7625 19.5608 15.9167C19.6638 16.0708 19.7188 16.2521 19.7188 16.4375C19.7188 16.6861 19.62 16.9246 19.4442 17.1004C19.2683 17.2762 19.0299 17.375 18.7812 17.375Z"
+                                fill="white" />
+                              <path
+                                d="M8.9375 15.6025V12.6875C8.9375 12.0526 9.28906 10.9883 10.5093 10.7577C11.5449 10.5635 12.5703 10.5635 12.5703 10.5635C12.5703 10.5635 13.2441 11.0322 12.6875 11.0322C12.1309 11.0322 12.1455 11.75 12.6875 11.75C13.2295 11.75 12.6875 12.4385 12.6875 12.4385L10.5049 14.9141L8.9375 15.6025Z"
+                                fill="white" />
+                            </svg>
                             <div v-if="ownerAccountAddress == null" class="wallet-presence-wrapper">
                               <a-tooltip placement="right">
                                 <template #title>
@@ -146,8 +152,11 @@
                           </div>
                           <div class="user-info">
                             <span style="margin-bottom: 0;" class="smart-contract-address">
-                              <h5 @click="doCopy(walletStore.account?.address)">
+                              <h5 v-if="ownerAccountAddress == null" @click="doCopy(walletStore.account?.address)">
                                 {{ addressTextLong(walletStore.account?.address) }}
+                              </h5>
+                              <h5 v-if="ownerAccountAddress != null" @click="doCopy(ownerAccountAddress)">
+                                {{ addressTextLong(ownerAccountAddress) }}
                               </h5>
                             </span>
                           </div>
@@ -205,6 +214,7 @@ import { useAccountStore } from "@/stores/account";
 import { signOutFirebase } from "@/services/auth";
 import type { Account } from "../../functions/common";
 import useClipboard from 'vue-clipboard3';
+import { useRoute } from "vue-router";
 
 const newLocal = "wallet-presence";
 const authStore = useAuthStore();
@@ -213,7 +223,18 @@ const walletStore = useWalletStore();
 const active = ref<string>("");
 const { toClipboard } = useClipboard();
 const ownerAccountAddress = useAccountStore().account?.owner;
-console.log(ownerAccountAddress)
+const componentTitle = ref<string>("");
+
+const getComponentName = () => {
+  const router = useRoute();
+  if (router.path == "/redpackets") {
+    componentTitle.value = "Hexlink Drop";
+  } else if (router.path == "/") {
+    componentTitle.value = "Assets";
+  } else if (router.path == "/activities") {
+    componentTitle.value = "Transactions";
+  }
+}
 
 const addressTextLong = function (address: string | undefined) {
   if (address) {
@@ -251,6 +272,7 @@ const doCopy = (address: string | undefined) => {
 
 onMounted(() => {
   document.addEventListener('click', closeDropDown);
+  getComponentName();
 });
 
 onBeforeUnmount(() => {
@@ -259,14 +281,27 @@ onBeforeUnmount(() => {
 </script>
 
 <style lang="scss" scoped>
+.header-logo {
+  @media only screen and (min-width: 991px) {
+    display: none; } }
+.header-title {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  @media only screen and (max-width: 990px) {
+    display: none; } }
+.header-title h2 {
+  margin-bottom: 0rem;
+  font-size: 1.4rem;
+  font-weight: 600; }
 .header {
   background: #f0f0f0;
   padding: 30px 0px 20px 0px;
   position: fixed;
   top: 0;
-  left: 9.5rem;
+  left: 9rem;
   z-index: 60;
-  right: 3rem;
+  right: 1rem;
   z-index: 100; }
   @media only screen and (max-width: 990px) {
     .header {
@@ -320,7 +355,10 @@ onBeforeUnmount(() => {
 .header-right {
   display: flex;
   justify-content: space-between;
-  align-items: center; }
+  align-items: center;
+  @media only screen and (max-width: 576px) {
+    margin-left: 5px;
+  } }
 .dark-light-toggle {
 margin-right: 20px;
 cursor: pointer; }
@@ -420,9 +458,10 @@ cursor: pointer; }
     line-height: 1.25rem;
     margin-right: 0.5rem;
     color: rgb(71, 85, 105); }
-  @media only screen and (max-width: 768px) {
-    .profile_log .user2 span {
-      display: none; } }
+  // @media only screen and (max-width: 768px) {
+  //   .profile_log .user2 span {
+  //     display: none; } 
+  // }
   .profile_log .user2 .profile {
     height: 25px;
     margin-left: 0.5rem;
@@ -470,9 +509,7 @@ cursor: pointer; }
   .profile_log .dropdown-menu .user2 {
     display: flex;
     align-items: center;
-    justify-content: flex-start;
-    svg {
-      margin-right: 1rem; } }
+    justify-content: flex-start; }
   .profile_log .dropdown-menu .user-email {
     border: 0 solid #e5e7eb;
     padding: 30px 20px 20px 20px; }
@@ -572,7 +609,7 @@ cursor: pointer; }
   background-color: #fff;
   background-clip: padding-box;
   border: 0px solid rgba(0, 0, 0, 0.15);
-  width: 20rem;
+  width: 18rem;
   z-index: 1;
   transition: height 0.3s ease-in-out;
   border-radius: 0.5rem; }
@@ -585,9 +622,9 @@ cursor: pointer; }
   display: block; }
 .user-info {
   margin: 15px 0px; }
-  .user-info span {
-    margin-bottom: 5px;
-    display: inline-block; }
+.user-info span {
+  margin-bottom: 5px;
+  display: inline-block; }
 .dropdown-item {
   display: block;
   width: 100%;

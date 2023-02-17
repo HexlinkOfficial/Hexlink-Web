@@ -2,108 +2,113 @@ import { gql } from '@urql/core';
 import { useAuthStore } from '@/stores/auth';
 import { handleUrqlResponse, setUrqlClientIfNecessary } from './urql';
 import { useChainStore } from '@/stores/chain';
-import type {
-  HexlinkUserInfo,
-  RedPacketDB,
-  RedPacketDBMetadata,
-  RedPacketOnchainState
-} from "@/types";
+import type { RedPacketDB, CreateRedPacketOp } from "@/types";
 
 export const GET_REDPACKET = gql`
+  query GetRedPacket(
+    $id: String!,
+  ) {
+    redpacket_public(
+      where: {
+        id: { _eq: $id }
+      },
+    ) {
+        creator,
+        metadata,
+        created_at,
+        type,
+        operation_public {
+          chain
+        }
+    }
+  }
+`
+
+export const GET_REDPACKET_PRIVATE = gql`
   query GetRedPacket($id: String!) {
     redpacket_by_pk(id: $id) {
         id
         user_id
-        chain
-        tx
-        creator
         metadata
-        created_at
+        creator
+        type
+        validation_data
+        operation {
+          chain
+        }
     }
   }
-`
+`;
 
 export const GET_CREATED_REDPACKETS = gql`
     query GetRedPacketByUser (
         $userId: String!,
         $chain: String!,
+        $type: String!,
     ) {
-        redpacket (
+        operation (
             where: {
               user_id: { _eq: $userId },
               chain: { _eq: $chain },
+              type: { _eq: $type },
             },
             limit: 100
         ) {
             id
-            user_id
-            chain
-            tx
-            creator
-            metadata
+            type
             created_at
-            status
-            state
-        }
-    }
-`
-
-export const INSERT_REDPACKET = gql`
-    mutation ($objects: [redpacket_insert_input!]!) {
-        insert_redpacket (
-            objects: $objects
-        ) {
-            affected_rows
-            returning {
-                id
+            tx_error
+            transaction {
+              tx
+              status
+              error
+            }
+            redpackets {
+              id,
+              metadata,
+              deposit,
+              created_at,
+              validation_data,
+              type
+            }
+            request {
+              args
             }
         }
     }
 `
 
-export const UPDATE_REDPACKET_STATUS = gql`
-    mutation (
-        $id: String!
-        $status: String!
-        $state: jsonb
-    ) {
-        update_redpacket_by_pk (
-            pk_columns: {id: $id},
-            _set: { status: $status, state: $state }
-        ) {
-            id
-        }
-    }
-`
+export interface RedPacketDBRaw {
+  id: string,
+  metadata: string,
+  deposit: string,
+  created_at: string
+}
 
-export async function getRedPacket(
-  redPacketId: string
-) : Promise<RedPacketDB | undefined> {
-  const client = setUrqlClientIfNecessary(useAuthStore().user!.idToken!);
-  const result = await client.query(
-    GET_REDPACKET,
-    {id: redPacketId}
-  ).toPromise();
-  if (await handleUrqlResponse(result)) {
-    const rp = result.data.redpacket_by_pk;
-    if(rp) {
-      return {
-        id: rp.id,
-        userId: rp.user_id,
-        chain: rp.chain,
-        metadata: JSON.parse(rp.metadata),
-        creator: JSON.parse(rp.creator),
-        createdAt: rp.created_at
-      } as RedPacketDB;
-    } else {
-      return undefined;
+function parseRedPacket(op: any) : RedPacketDB | undefined {
+  const r = (op.redpackets || []).length > 0
+    ? op.redpackets[0]
+    : undefined;
+  if (r) {
+    return {
+      id: r.id,
+      metadata: JSON.parse(r.metadata),
+      deposit: JSON.parse(r.deposit),
+      createdAt: new Date(r.created_at),
+      type: r.type,
+    };
+  } else if (op.request?.args) {
+    const {redpacketId, metadata, type} = JSON.parse(op.request.args);
+    return {
+      id: redpacketId,
+      metadata,
+      createdAt: new Date(op.created_at),
+      type,
     }
-  } else {
-    return await getRedPacket(redPacketId);
   }
 }
 
-export async function getCreatedRedPackets() : Promise<RedPacketDB[]> {
+export async function getCreatedRedPackets() : Promise<CreateRedPacketOp[]> {
   const client = setUrqlClientIfNecessary(
     useAuthStore().user!.idToken!
   );
@@ -112,70 +117,82 @@ export async function getCreatedRedPackets() : Promise<RedPacketDB[]> {
     {
       userId: useAuthStore().user!.uid,
       chain: useChainStore().chain.name,
+      type: "create_redpacket",
     }
   ).toPromise();
   if (await handleUrqlResponse(result)) {
-    return result.data.redpacket.map((r : any) => {
+    return result.data.operation.map((op : any) => {
       return {
-        id: r.id,
-        chain: r.chain,
-        userId: r.user_id,
-        metadata: JSON.parse(r.metadata),
-        creator: JSON.parse(r.creator),
-        createdAt: r.created_at,
-        tx: r.tx,
-        status: r.status,
-        state: r.state ? JSON.parse(r.state) : r.state,
-      } as RedPacketDB;
+        id: op.id,
+        type: op.type,
+        createdAt: new Date(op.created_at),
+        redpacket: parseRedPacket(op),
+        tx: op.transaction?.tx,
+        txStatus: op.transaction?.status,
+        error: op.tx_error || op.transaction?.error,
+      };
     });
   } else {
     return await getCreatedRedPackets();
   }
 }
 
-export async function insertRedPacket(
-  data: {
-    id: string,
-    creator: HexlinkUserInfo,
-    metadata: RedPacketDBMetadata,
-    chain: string,
-    tx: string
-  }[],
-) : Promise<{id: string}[]> {
-  const client = setUrqlClientIfNecessary(useAuthStore().user!.idToken!)
-  const result = await client.mutation(
-      INSERT_REDPACKET,
-      {
-          objects: data.map(d => ({
-              user_id: useAuthStore().user!.uid,
-              id: d.id,
-              metadata: JSON.stringify(d.metadata),
-              chain: d.chain,
-              creator: JSON.stringify(d.creator),
-              tx: d.tx
-          }))
-      }
+export async function getRedPacket(
+  redPacketId: string
+) : Promise<RedPacketDB | undefined> {
+  const client = setUrqlClientIfNecessary(
+    useAuthStore().user!.idToken!
+  );
+  const result = await client.query(
+    GET_REDPACKET,
+    {id: redPacketId}
   ).toPromise();
   if (await handleUrqlResponse(result)) {
-      return result.data.insert_redpacket.returning;
+    if ((result.data.redpacket_public?.length || 0) > 0) {
+      const rp = result.data.redpacket_public[0];
+      return {
+        id: redPacketId,
+        metadata: JSON.parse(rp.metadata),
+        createdAt: new Date(rp.created_at),
+        creator: JSON.parse(rp.creator),
+        chain: rp.operation_public.chain,
+        type: rp.type,
+      }
+    } else {
+      throw new Error("Redpacket not found");
+    }
   } else {
-      return await insertRedPacket(data);
+    return await getRedPacket(redPacketId);
   }
 }
 
-export async function updateRedPacketStatus(
-  data: {id: string, status: string, state?: RedPacketOnchainState},
-) : Promise<void> {
-  const client = setUrqlClientIfNecessary(useAuthStore().user!.idToken!)
-  const result = await client.mutation(
-      UPDATE_REDPACKET_STATUS,
-      {
-        id: data.id,
-        status: data.status,
-        state: data.state ? JSON.stringify(data.state) : undefined
-      }
+
+export async function getRedPacketPrivate(
+  redPacketId: string
+) : Promise<RedPacketDB | undefined> {
+  const client = setUrqlClientIfNecessary(
+    useAuthStore().user!.idToken!
+  );
+  const result = await client.query(
+    GET_REDPACKET_PRIVATE,
+    {id: redPacketId}
   ).toPromise();
-  if (!await handleUrqlResponse(result)) {
-      await updateRedPacketStatus(data);
+  if (await handleUrqlResponse(result)) {
+    const rp = result.data?.redpacket_by_pk;
+    if (rp) {
+      return {
+        id: redPacketId,
+        metadata: JSON.parse(rp.metadata),
+        createdAt: new Date(rp.created_at),
+        creator: JSON.parse(rp.creator),
+        chain: rp.operation.chain,
+        validationData: JSON.parse(rp.validation_data || "[]"),
+        type: rp.type,
+      }
+    } else {
+      throw new Error("Redpacket not found");
+    }
+  } else {
+    return await getRedPacket(redPacketId);
   }
 }

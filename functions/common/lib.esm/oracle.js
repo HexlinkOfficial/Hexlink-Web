@@ -13,11 +13,11 @@ const genRequestId = async function (provider, nameHash, func, data) {
     ]));
     return result;
 };
-export async function genDeployAuthProof(provider, nameHash, owner, data, genAuthProof) {
+export async function genDeployAuthProof(provider, nameHash, owner, data, genAuthProof, version) {
     const initData = accountInterface.encodeFunctionData("init", [owner, data]);
     const requestId = await genRequestId(provider, nameHash, hexlInterface.getSighash("deploy"), initData);
     return {
         initData,
-        proof: await genAuthProof({ requestId }),
+        proof: await genAuthProof({ requestId, version }),
     };
 }

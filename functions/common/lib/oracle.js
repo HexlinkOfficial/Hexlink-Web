@@ -26,13 +26,13 @@ const genRequestId = function (provider, nameHash, func, data) {
         return result;
     });
 };
-function genDeployAuthProof(provider, nameHash, owner, data, genAuthProof) {
+function genDeployAuthProof(provider, nameHash, owner, data, genAuthProof, version) {
     return __awaiter(this, void 0, void 0, function* () {
         const initData = account_1.accountInterface.encodeFunctionData("init", [owner, data]);
         const requestId = yield genRequestId(provider, nameHash, hexlink_1.hexlInterface.getSighash("deploy"), initData);
         return {
             initData,
-            proof: yield genAuthProof({ requestId }),
+            proof: yield genAuthProof({ requestId, version }),
         };
     });
 }

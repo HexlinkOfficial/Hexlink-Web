@@ -8,14 +8,14 @@
           fill="white" />
       </svg>
     </router-link>
-    <button class="withdraw-button">
+    <!-- <button class="withdraw-button">
       <span style="padding: 5px;">Withdraw</span>
-    </button>
+    </button> -->
     <div class="card_circle transition"></div>
     <h2 class="transition">
       <span>
-        Sent by @{{ redPacket?.creator.handle }}
-        <a class="twitter-link" :href="'https://twitter.com/' + redPacket?.creator.handle">
+        Sent by @{{ redPacket?.creator?.handle }}
+        <a class="twitter-link" :href="'https://twitter.com/' + redPacket?.creator?.handle">
           <i className="fa fa-twitter"></i>
         </a>
       </span>
@@ -26,8 +26,8 @@
       <div v-if="!loading && claimers?.length == 0" class="claimers-list">
         <div style="text-align: center;margin-top: 25%;">You have no luck history yet! Go send some luck~</div>
       </div>
-      <div v-if="!loading" class="claimers-list" v-for="(v, i) in claimers" :key="i">
-        <div class="claimer-card">
+      <div v-if="!loading" class="claimers-list">
+        <div class="claimer-card" v-for="(v, i) in claimers" :key="i">
           <div class="profile-pic">
             <div class="thumb">
               <img
@@ -39,11 +39,23 @@
             <div class="profile-username">
               <div>
                 {{ v.claimer.displayName }}
-                <a class="twitter-link" :href="'https://twitter.com/' + redPacket?.creator.handle">
+                <a class="twitter-link" :href="'https://twitter.com/' + redPacket!.creator!.handle">
                   <i className="fa fa-twitter"></i>
                 </a>
               </div>
-              <div class="claimed-amount">233.333ETH</div>
+              <div class="claimed-amount">
+                <a-tooltip placement="top">
+                  <template #title>
+                    <span>
+                      Amount: {{ normalizeBalance(v.claimed!.toString(), redPacket!.token!.decimals).normalized }}
+                    </span>
+                  </template>
+                  {{ normalizeBalance(v.claimed!.toString(), redPacket!.token!.decimals).normalized.substring(0, 5) }}
+                </a-tooltip>
+                <div class="token-icon" style="margin-right: 0.25rem; margin-left: 0.25rem;">
+                  <img src="https://token.metaswap.codefi.network/assets/networkLogos/ethereum.svg">
+                </div>
+              </div>
             </div>
             <div class="claim-date">@{{ v.claimer.handle }}</div>
           </div>
@@ -56,90 +68,35 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
-import { ethers } from "ethers";
+
+import { normalizeBalance } from "../../functions/common";
+import type { Token } from "../../functions/common";
+
 import type { RedPacketDB, RedPacketClaim } from "@/types";
 import { getRedPacket } from '@/graphql/redpacket';
-import { updateRedPacketTxStatus, getRedPacketClaims } from '@/graphql/redpacketClaim';
-import { redPacketAddress } from "../../functions/redpacket";
-import { useChainStore } from "@/stores/chain";
-import { BigNumber as EthBigNumber } from "ethers";
-import { getInfuraProvider } from "@/web3/network";
+import { getRedPacketClaims } from '@/graphql/redpacketClaim';
 import Loading from "@/components/Loading.vue";
-import { normalizeBalance } from "../../functions/common";
+import { loadAndSetErc20Token } from '@/web3/tokens';
 
 const redPacket = ref<RedPacketDB | undefined>();
 const claimers = ref<RedPacketClaim[]>();
-const provider = getInfuraProvider(useChainStore().chain);
 const loading = ref<boolean>(true);
 
 const loadData = async function() {
   loading.value = true;
   const id = useRoute().query.details!.toString();
   redPacket.value = await getRedPacket(id);
-  claimers.value = await loadClaimsForOnePacket(provider, id);
+  if (redPacket.value) {
+    redPacket.value.token = await loadAndSetErc20Token(
+      redPacket.value.metadata.token
+    );
+    claimers.value = await getRedPacketClaims(id);
+    console.log(claimers.value);
+  }
   loading.value = false;
 };
 
 onMounted(loadData);
-
-const loadClaimsForOnePacket = async (
-  provider: ethers.providers.Provider,
-  redPacketId: string
-): Promise<RedPacketClaim[]> => {
-  const claims = await getRedPacketClaims(redPacketId);
-  console.log(claims);
-  return await Promise.all(
-    claims.map(c => validateClaimStatus(provider, c))
-  );
-};
-
-const iface = new ethers.utils.Interface([
-  "event Claimed(bytes32 indexed PacketId, address claimer, uint256 amount)",
-]);
-const legacyIface = new ethers.utils.Interface([
-  "event Claimed(bytes32 indexed PacketId, address indexed claimer, uint256 amount)",
-]);
-
-const parseLog = (log: any) => {
-  try {
-    return iface.parseLog(log);
-  } catch (e) {
-    return legacyIface.parseLog(log);
-  }
-}
-
-const validateClaimStatus = async (
-  provider: ethers.providers.Provider,
-  claim: RedPacketClaim
-): Promise<RedPacketClaim> => {
-  if (claim.txStatus == "success" || claim.txStatus == "error") {
-    return claim;
-  }
-  const receipt = await provider.getTransactionReceipt(claim.tx);
-  if (!receipt) {
-    return claim;
-  } // not mined
-  if (receipt.status) { // success
-    const events = receipt.logs.filter(
-      (log: any) => log.address.toLowerCase() == (
-        redPacketAddress(useChainStore().chain)
-      ).toLowerCase()
-    ).map((log: any) => parseLog(log));
-    const event = events.find((e: any) => e.name == "Claimed");
-    const claimedAmount = event?.args.amount || EthBigNumber.from(0);
-    await updateRedPacketTxStatus(
-      claim.id,
-      "success",
-      claimedAmount.toString()
-    );
-    claim.txStatus = "success";
-    claim.claimed = claimedAmount;
-  } else { // reverted
-    await updateRedPacketTxStatus(claim.id, "error");
-    claim.txStatus = "error";
-  }
-  return claim;
-}
 </script>
 
 <style lang="less" scoped>
@@ -171,9 +128,10 @@ const validateClaimStatus = async (
   font-size: 12px;
   display: flex;
   justify-content: flex-start;
-  color: rgba(7, 16, 27, 0.5);
-  margin-top: 5px; }
+  color: rgba(7, 16, 27, 0.5); }
 .claimed-amount {
+  display: flex;
+  align-items: center;
   font-size: 13px;
   font-weight: 500; }
 .profile-username {

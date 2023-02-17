@@ -3,6 +3,7 @@
 import {ethers, BigNumber as EthBigNumber} from "ethers";
 import type {Provider} from "@ethersproject/providers";
 import {BigNumber} from "bignumber.js";
+import totp from "totp-generator";
 
 export function hash(value: string) {
   return ethers.utils.keccak256(
@@ -72,13 +73,13 @@ export function normalizeBalance(
   if (normalized.gt(1)) {
     return {
       value: balance,
-      normalized: normalized.dp(3).toString(10),
+      normalized: normalized.dp(4).toString(10),
       updatedAt: new Date(),
     };
   } else {
     return {
       value: balance,
-      normalized: normalized.dp(4).toString(10),
+      normalized: normalized.dp(5).toString(10),
       updatedAt: new Date(),
     };
   }
@@ -101,4 +102,13 @@ export function toEthBigNumber(value: BigNumber | string | number) : EthBigNumbe
     return EthBigNumber.from(value.toString(10));
   }
   return EthBigNumber.from(value);
+}
+
+export function genTotpCode(secret: string, timestamp?: number) : string {
+    return totp(secret, {period: 60, timestamp});
+}
+
+export function matchTotpCode(secret: string, code: string) : boolean {
+  return code === genTotpCode(secret) ||
+    code === genTotpCode(secret, new Date().getTime() - 60000);
 }

@@ -1,22 +1,3 @@
-import * as admin from "firebase-admin";
-import * as functions from "firebase-functions";
-
-const secrets = functions.config().doppler || {};
-
-const credential = secrets.GOOGLE_CREDENTIAL_JSON;
-let params;
-if (credential) {
-  const serviceAccount = JSON.parse(credential);
-  params = {
-    credential: admin.credential.cert(serviceAccount),
-  };
-} else {
-  params = functions.config().firebase;
-}
-
-admin.initializeApp(params);
-admin.firestore().settings({ignoreUndefinedProperties: true});
-
 import {
   processSignUp,
   refreshToken,
@@ -34,18 +15,41 @@ exports.hasRetweeted = hasRetweeted;
 
 import {
   genTwitterOAuthProof,
+  calcEthAddress,
 } from "./verifier";
 
 exports.genTwitterOAuthProof = genTwitterOAuthProof;
+exports.calcEthAddress = calcEthAddress;
 
 import {
-  priceInfo,
+  priceConfig,
 } from "./config";
 
-exports.priceInfo = priceInfo;
+exports.priceConfig = priceConfig;
+// exports.refunder = refunder;
 
 import {
   claimRedPacket,
+  createRedPacket,
+  createRedPacketErc721,
 } from "./redpacket";
 
 exports.claimRedPacket = claimRedPacket;
+exports.createRedPacket = createRedPacket;
+exports.createRedPacketErc721 = createRedPacketErc721;
+
+import {
+  sendToken,
+} from "./operation";
+
+exports.sendToken = sendToken;
+
+import {
+  genOTP,
+  validateOTP,
+  refreshCustomToken,
+} from "./signin";
+
+exports.genOTP = genOTP;
+exports.validateOTP = validateOTP;
+exports.refreshCustomToken = refreshCustomToken;

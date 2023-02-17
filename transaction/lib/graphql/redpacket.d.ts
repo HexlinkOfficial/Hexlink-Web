@@ -1,6 +1,17 @@
-import type { TxStatus, RedPacketClaimInput } from "../types";
-export declare const UPDATE_REDPACKET_CLAIM_TX: import("@urql/core").TypedDocumentNode<any, import("@urql/core").AnyVariables>;
+import type { RedPacketClaimInput } from "../types";
+import type { HexlinkUserInfo } from "../../../functions/redpacket";
 export declare function insertRedPacketClaim(data: RedPacketClaimInput[]): Promise<{
     id: string;
 }[]>;
-export declare function updateRedPacketTxStatus(id: number, txStatus: TxStatus, claimed?: string): Promise<void>;
+export declare function insertRedPacket(uid: string, data: {
+    id: string;
+    userId: string;
+    creator: HexlinkUserInfo;
+    metadata: any;
+    opId: number;
+    deposit: any;
+    validationData: any;
+    type: "erc20" | "erc721";
+}[]): Promise<{
+    id: string;
+}[]>;

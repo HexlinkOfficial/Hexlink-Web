@@ -16,6 +16,10 @@ import type { Token, Chain,  NormalizedTokenBalance } from "../../functions/comm
 import { normalizeBalance, getPopularTokens } from "../../functions/common";
 import { Alchemy, Network } from "alchemy-sdk";
 import { alchemyKey } from "@/web3/network";
+import GOERLI_TOKENS from "../../functions/common/lib.esm/tokens/GOERLI_TOKENS.json";
+import MUMBAI_TOKENS from "../../functions/common/lib.esm/tokens/MUMBAI_TOKENS.json";
+import POLYGON_TOEKNS from "../../functions/common/lib.esm/tokens/POLYGON_TOKENS.json";
+import { ipfsUrl } from "@/web3/storage";
  
 function alchemyNetwork(chain: Chain) : Network {
     if (chain.chainId == "5") {
@@ -36,6 +40,14 @@ function alchemy() {
         apiKey: alchemyKey(chain),
         network: alchemyNetwork(chain!)
     });
+}
+
+export async function loadAndSetErc20Token(token: string) : Promise<Token> {
+    const tokenStore = useTokenStore();
+    if (!tokenStore.token(token)) {
+        tokenStore.set(await loadErc20Token(token));
+    }
+    return tokenStore.token(token);
 }
 
 export async function loadErc20Token(token: string) : Promise<Token> {
@@ -116,11 +128,73 @@ export async function updatePreferences(balances: BalanceMap) {
     });
 }
 
+export interface openSea {
+    collectionName: string | undefined,
+    description: string | undefined,
+    discordUrl: string | undefined,
+    externalUrl: string | undefined,
+    floorPrice: number | undefined,
+    imageUrl: string | undefined,
+    lastIngestedAt: string | undefined,
+    twitterUsername: string | undefined
+}
+
+export interface nftImage {
+    contract?: string,
+    name: string,
+    symbol: string,
+    id: string,
+    tokenType?: string,
+    openSea?: openSea,
+    totalSupply?: string,
+    url?: string,
+    rawUrl: string,
+    thumbnail?: string,
+    attributes?: Array<any>,
+}
+
+export interface bindedNFT {
+  nft: nftImage,
+  color: string,
+  hasOpensea: boolean
+}
+
+export async function loadErc721Token(account: string) {
+    const nfts = await alchemy().nft.getNftsForOwner(account);
+    const nftArray: nftImage[] = [];
+    nfts.ownedNfts.map(nft => {
+        nftArray.push({
+            contract: nft.contract.address,
+            name: nft.contract.name || "",
+            symbol: nft.contract.symbol || "",
+            id: nft.tokenId || "",
+            tokenType: nft.contract.tokenType || "",
+            openSea: {
+                collectionName: nft.contract.openSea?.collectionName,
+                description: nft.contract.openSea?.description,
+                discordUrl: nft.contract.openSea?.discordUrl,
+                externalUrl: nft.contract.openSea?.externalUrl,
+                floorPrice: nft.contract.openSea?.floorPrice,
+                imageUrl: nft.contract.openSea?.imageUrl,
+                lastIngestedAt: nft.contract.openSea?.lastIngestedAt,
+                twitterUsername: nft.contract.openSea?.twitterUsername
+            },
+            totalSupply: nft.contract.totalSupply || "",
+            url: nft.tokenUri?.gateway == "" ? (nft.media[0]?.gateway) : (ipfsUrl(nft.tokenUri?.raw!)) || "",
+            rawUrl: nft.media[0]?.raw || "",
+            thumbnail: nft.media[0]?.thumbnail || "",
+            attributes: nft.rawMetadata?.attributes || []
+        })
+    })
+    return [nftArray, nfts.totalCount];
+}
+
 export interface Transaction {
     hash: string;
     blockNumber: number;
     timestamp?: string;
     position?: number;
+    tokenID?: string
 }
 
 export interface Action {
@@ -140,12 +214,12 @@ export interface AssetTransfer {
 }
 
 const transferAction = (wallet: string, transfer: AssetTransfersWithMetadataResult) => {
-    if (transfer.from.toLowerCase() == wallet) {
+    if (transfer.from.toLowerCase() == wallet.toLowerCase()) {
         return {
             type: "send",
             to: transfer.to,
         } as Action;
-    } else if (transfer.to?.toLowerCase() == wallet) {
+    } else if (transfer.to?.toLowerCase() == wallet.toLowerCase()) {
         return {
             type: "receive",
             from: transfer.from,
@@ -164,6 +238,7 @@ const toAssetTransfer = (
             hash: transfer.hash,
             blockNumber: Number(transfer.blockNum),
             timestamp: transfer.metadata.blockTimestamp,
+            tokenID: parseInt(transfer.erc721TokenId || "", 16).toString() || "",
         },
         asset: {
             address: transfer.rawContract.address || "",
@@ -187,7 +262,7 @@ export async function getAssetTransfers(input: {
 }) : Promise<AssetTransfer[]> {
     const order = input.order || 'desc';
     const category = input.category || ['erc20', 'erc721'];
-    let params = { category, order, withMetadata: true} as AssetTransfersWithMetadataParams;
+    let params = { category, order, withMetadata: true, maxCount: 50,} as AssetTransfersWithMetadataParams;
     if (input.contractAddresses && input.contractAddresses.length > 0) {
         params.contractAddresses = input.contractAddresses;
     }
@@ -198,6 +273,39 @@ export async function getAssetTransfers(input: {
     const transfers = send.transfers.concat(receive.transfers).map(
         t => toAssetTransfer(input.wallet, t)
     );
-    transfers.sort((a, b) => a.tx.blockNumber - b.tx.blockNumber).slice(0, 1000);
+    transfers.sort((a, b) => a.tx.blockNumber - b.tx.blockNumber).slice(0, 50);
     return transfers;
+}
+
+export function loadTokenLogo(address: string): string {
+    const chain = useChainStore().chain;
+    var logoURI = "";
+    if (chain.chainId == "5") {
+        if (address == "") {
+            return "https://token.metaswap.codefi.network/assets/networkLogos/ethereum.svg";
+        } else {
+            GOERLI_TOKENS.forEach(token => {
+                if (address.toLowerCase() == token.address.toLowerCase()) { logoURI = token.logoURI; }
+            })
+        }
+    }
+    if (chain.chainId == "137") {
+        if (address == "") {
+            return "https://token.metaswap.codefi.network/assets/networkLogos/polygon.svg";
+        } else {
+            POLYGON_TOEKNS.forEach(token => {
+                if (address.toLowerCase() == token.address.toLowerCase()) { logoURI = token.logoURI; }
+            })
+        }
+    }
+    if (chain.chainId == "80001") {
+        if (address == "") {
+            return "https://token.metaswap.codefi.network/assets/networkLogos/polygon.svg";
+        } else {
+            MUMBAI_TOKENS.forEach(token => {
+                if (address.toLowerCase() == token.address.toLowerCase()) { logoURI = token.logoURI; }
+            })
+        }
+    }
+    return logoURI;
 }

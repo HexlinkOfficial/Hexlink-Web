@@ -72,20 +72,23 @@
 import { computed } from "vue";
 import { useRedPacketStore } from "@/stores/redpacket";
 import { useChainStore } from "@/stores/chain";
-import type { AccountType } from "@/stores/redpacket";
 import { CopyOutlined } from '@ant-design/icons-vue';
-import type { Token } from "../../functions/common";
 import { useAccountStore } from "@/stores/account";
 import { useWalletStore } from "@/stores/wallet";
 import { copy } from "@/web3/utils";
+import { useTokenStore } from "@/stores/token";
 
 const props = defineProps({
     account: {
-        type: String as () => AccountType,
+        type: String,
+        required: true,
+    },
+    isChosen: {
+        type: Boolean,
         required: true,
     },
     token: {
-        type: Object as () => Token,
+        type: String,
         required: true,
     },
     tokenBalance: {
@@ -93,13 +96,21 @@ const props = defineProps({
         required: true,
     },
     gasToken: {
-        type: Object as () => Token,
+        type: String,
         required: true,
     },
     gasTokenBalance: {
         type: String,
         required: true,
     },
+});
+
+const token = computed(() => {
+    return useTokenStore().token(props.token);
+});
+
+const gasToken = computed(() => {
+    return useTokenStore().token(props.gasToken);
 });
 
 const wallet = useWalletStore();
@@ -123,16 +134,13 @@ const capitalize = (word: string) => {
     return word.charAt(0).toUpperCase() + word.slice(1)
 }
 
+const emit = defineEmits(['selected'])
 const chooseAccount = () => {
-    useRedPacketStore().setAccount(props.account)
+    emit('selected', props.account);
 };
 
-const isChosen = computed(() => {
-    return useRedPacketStore().account == props.account;
-});
-
 const showGasToken = computed(() => {
-  return props.token.address != props.gasToken.address;
+  return props.token != props.gasToken;
 });
 </script>
 

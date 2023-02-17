@@ -17,7 +17,7 @@
         <div class="box">
           <p class="total-amount-text">Total Amount</p>
           <div style="display: flex; width: 100%;">
-            <input v-model="redpacket.balance" :style="hasBalanceWarning ? 'color: #FE646F;' : ''" id="red-packet-amount" class="amount-input"
+            <input v-model="redpacket.balanceInput" :style="hasBalanceWarning ? 'color: #FE646F;' : ''" id="red-packet-amount" class="amount-input"
               autocomplete="off" placeholder="0.0" required="true" type="number" autocorrect="off" title="Token Amount"
               inputmode="decimal" min="0" minlength="1" maxlength="79" pattern="^[0-9]*[.,]?[0-9]*$" spellcheck="false">
             <p v-if="hasBalanceWarning" class="balance-warning"><i class="icofont-warning-alt" style="margin-right: 0.25rem;"></i>Insufficient balance</p>
@@ -30,7 +30,7 @@
             <div class="total-choose-token">
               <div class="token-select">
                 <div class="max-amount-button">
-                  <span class="button-text" @click="redpacket.balance = redPacketTokenBalance">MAX</span>
+                  <span class="button-text" @click="redpacket.balanceInput = redPacketTokenBalance">MAX</span>
                   <span class="button-outline"></span>
                 </div>
               </div>
@@ -38,9 +38,9 @@
                 <div class="mode-dropdown" :class="chooseTotalDrop && 'active'"
                   @click.stop="chooseTotalDrop = !chooseTotalDrop;" v-on-click-outside.bubble="chooseTotalHandle">
                   <div class="token-icon">
-                    <img :src="redpacket.token.logoURI" />
+                    <img :src="token.logoURI" />
                   </div>
-                  <div class="mode-text2">{{ redpacket.token.symbol }}</div>
+                  <div class="mode-text2">{{ token.symbol }}</div>
                   <input class="mode-input" type="text" placeholder="select" readonly>
                   <div class="mode-options">
                     <div class="mode-option" v-for="(token, index) of tokens" :key="index"
@@ -50,7 +50,7 @@
                       </div>
                       <div style="display: flex; flex-direction: column; align-items: flex-start;">
                         <b>{{ token.symbol }}</b>
-                        <div style="margin-right:0.5rem;">balance {{ tokenBalance(token) }}</div>
+                        <div style="margin-right:0.5rem;">balance {{ tokenBalance(token.address) }}</div>
                       </div>
                     </div>
                   </div>
@@ -67,8 +67,8 @@
             <div class="mode-text">{{ modeLabels[redpacket.mode] }}</div>
             <input class="mode-input" type="text" placeholder="select" readonly>
             <div class="mode-options" style="width:100%;">
-              <div class="mode-option" @click="modeChoose('random')">Randomly</div>
-              <div class="mode-option" @click="modeChoose('equal')">Equally</div>
+              <div class="mode-option" @click="modeChoose(2)">Randomly</div>
+              <div class="mode-option" @click="modeChoose(1)">Equally</div>
             </div>
           </div>
           <p>Shared among</p>
@@ -82,52 +82,56 @@
         </div>
       </div>
     </div>
-    <div class="token-list gas-station">
+    <div class="gas-station">
+      <div class="enable-switch">
+        <p>Enable dynamic share link</p>
+        <a-switch v-model:checked="enableDynamic" style="margin-left: 1rem;" />
+      </div>
       <div class="gas-estimation">
-          <p>
-            <img style="width: 20px; height: 20px;" src="https://i.postimg.cc/RhXfgJR1/gas-pump.png"/>
-            Service Fee: 
-            <a-tooltip placement="top">
-              <template #title>
-                <span>Service Fee: <b>{{ gasSponsorship }}</b></span>
-              </template>
-              <b>{{ gasSponsorship.substring(0,6) }}</b>
-            </a-tooltip>
-          </p>
-          <div class="total-choose-token">
-            <div class="token-select">
-              <div class="mode-dropdown" :class="chooseGasDrop && 'active'" @click.stop="chooseGasDrop = !chooseGasDrop;" v-on-click-outside.bubble="chooseGasHandle">
-                <div class="token-icon">
-                  <img :src="redpacket.gasToken.logoURI" />
-                </div>
-                <div class="mode-text2">{{ redpacket.gasToken.symbol }}</div>
-                <input class="mode-input" type="text" placeholder="select" readonly>
-                <div class="mode-options">
-                  <div class="mode-option" v-for="(token, index) of tokens" :key="index"
-                    @click="tokenChoose('gas', token)">
-                    <div class="token-icon">
-                      <img :src="token.logoURI" />
-                    </div>
-                    <div style="display: flex; flex-direction: column; align-items: flex-start;">
-                      <b>{{ token.symbol }}</b>
-                      <div style="margin-right:0.5rem;">
-                        Balance {{ tokenBalance(token) }}
-                      </div>
+        <p>
+          <img style="width: 20px; height: 20px;" src="https://i.postimg.cc/RhXfgJR1/gas-pump.png"/>
+          Estimated Service Fee: 
+          <a-tooltip placement="top">
+            <template #title>
+              <span>The real service fee may differ per network conditions</span>
+            </template>
+            <b>{{ totalServiceFee.substring(0,6) }}</b>
+          </a-tooltip>
+        </p>
+        <div class="total-choose-token">
+          <div class="token-select">
+            <div class="mode-dropdown" :class="chooseGasDrop && 'active'" @click.stop="chooseGasDrop = !chooseGasDrop;" v-on-click-outside.bubble="chooseGasHandle">
+              <div class="token-icon">
+                <img :src="gasToken.logoURI" />
+              </div>
+              <div class="mode-text2">{{ gasToken.symbol }}</div>
+              <input class="mode-input" type="text" placeholder="select" readonly>
+              <div class="mode-options">
+                <div class="mode-option" v-for="(token, index) of tokens" :key="index"
+                  @click="tokenChoose('gas', token)">
+                  <div class="token-icon">
+                    <img :src="token.logoURI" />
+                  </div>
+                  <div style="display: flex; flex-direction: column; align-items: flex-start;">
+                    <b>{{ token.symbol }}</b>
+                    <div style="margin-right:0.5rem;">
+                      Balance {{ tokenBalance(token.address) }}
                     </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-          <div class="tooltip fade" data-title="Service gas fee is determined by the market, not Hexlink">
-            <svg style="margin-left: 1rem; width: 16px;" width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path
-                d="M11 21C16.5228 21 21 16.5228 21 11C21 5.47715 16.5228 1 11 1C5.47715 1 1 5.47715 1 11C1 16.5228 5.47715 21 11 21Z"
-                stroke="#898989" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-              <path d="M11 15V11" stroke="#898989" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-              <path d="M11 8V7" stroke="#898989" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-            </svg>
-          </div>
+        </div>
+        <div class="tooltip fade" data-title="Service gas fee is determined by the market, not Hexlink">
+          <svg style="margin-left: 1rem; width: 16px;" width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path
+              d="M11 21C16.5228 21 21 16.5228 21 11C21 5.47715 16.5228 1 11 1C5.47715 1 1 5.47715 1 11C1 16.5228 5.47715 21 11 21Z"
+              stroke="#898989" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M11 15V11" stroke="#898989" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M11 8V7" stroke="#898989" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </div>
       </div>
     </div>
     <div class="choose-account">
@@ -137,6 +141,8 @@
         :gasToken="redpacket.gasToken"
         :tokenBalance="hexlAccountBalance(redpacket.token)"
         :gasTokenBalance="hexlAccountBalance(redpacket.gasToken)"
+        @selected="setAccount"
+        :isChosen="redPacketStore.account === 'hexlink'"
       ></RedPacketAccount>
       <RedPacketAccount
         account="wallet"
@@ -144,6 +150,8 @@
         :gasToken="redpacket.gasToken"
         :tokenBalance="walletAccountBalance(redpacket.token)"
         :gasTokenBalance="walletAccountBalance(redpacket.gasToken)"
+        @selected="setAccount"
+        :isChosen="redPacketStore.account === 'wallet'"
       ></RedPacketAccount>
     </div>
     <div class="create">
@@ -162,10 +170,12 @@
 
 <script setup lang="ts">
 import { ref, onMounted, watch, computed } from "vue";
+import { BigNumber as EthBigNumber } from "ethers";
 import { useWalletStore } from '@/stores/wallet';
 import { useAccountStore } from '@/stores/account';
 import { useChainStore } from "@/stores/chain";
 import { useRedPacketStore } from '@/stores/redpacket';
+import type { AccountType } from "@/stores/redpacket";
 import { connectWallet } from "@/web3/wallet";
 import { tokenBase } from "@/web3/utils";
 import type { OnClickOutsideHandler } from '@vueuse/core';
@@ -179,12 +189,13 @@ import { message } from 'ant-design-vue';
 import { useTokenStore } from "@/stores/token";
 import RedPacketAccount from "@/components/RedPacketAccount.vue";
 import { getPriceInfo } from "@/web3/network";
-
 import type { Token } from "../../functions/common";
-import { hash } from "../../functions/common";
-import type { RedPacket } from "../../functions/redpacket";
-import { calcGasSponsorship as calcGasSponsorshipFunc } from "../../functions/redpacket";
+import { hash, tokenAmount } from "../../functions/common";
+import type { RedPacketInput } from "../../functions/redpacket";
+import { calcGas } from "../../functions/common";
+import { redpacketId } from "../../functions/redpacket";
 
+const estimatedGasAmount = "250000"; // hardcoded, can optimize later
 const chooseTotalDrop = ref<boolean>(false);
 const openDropdown = ref<boolean>(false);
 const chooseGasDrop = ref<boolean>(false);
@@ -192,32 +203,49 @@ const tokens = ref<Token[]>([]);
 const modalRef = ref<any>(null);
 const modal = ref<boolean>(false);
 const hasBalanceWarning = ref<boolean>(false);
+const enableDynamic = ref<boolean>(false);
 
 const tokenStore = useTokenStore();
 const walletStore = useWalletStore();
 const redPacketStore = useRedPacketStore();
 
 const hexlAccountBalances = ref<BalanceMap>({});
-const hexlAccountBalance = (token: Token) : string => {
-  return hexlAccountBalances.value[token.address]?.normalized || "0";
+const hexlAccountBalance = (token: string) : string => {
+  return hexlAccountBalances.value[token]?.normalized || "0";
 }
 
 const walletAccountBalances = ref<BalanceMap>({});
-const walletAccountBalance = (token: Token) : string => {
-  return walletAccountBalances.value[token.address]?.normalized || "0";
+const walletAccountBalance = (token: string) : string => {
+  return walletAccountBalances.value[token]?.normalized || "0";
 }
 
-const redpacket = ref<RedPacket>({
-  mode: "random",
-  salt: hash(new Date().toISOString()),
+const setAccount = (account: AccountType) => {
+  useRedPacketStore().setAccount(account);
+}
+
+interface RawRedPacketInput extends RedPacketInput {
+  balanceInput: string,
+}
+
+const redpacket = ref<RawRedPacketInput>({
+  id: "",
+  mode: 2,
+  salt: "",
   split: 1,
   balance: "0",
-  token: tokenStore.nativeCoin,
-  gasToken: tokenStore.nativeCoin,
+  balanceInput: "0.0001",
+  token: tokenStore.nativeCoin.address,
+  gasToken: tokenStore.nativeCoin.address,
+  gasSponsorship: "0",
+  estimatedGas: "0",
   validator: validator(),
+  validationRules: [],
 });
 
-const tokenBalance = (token: Token) => {
+const token = computed(() => tokenStore.token(redpacket.value.token));
+const gasToken = computed(() => tokenStore.token(redpacket.value.gasToken));
+
+const tokenBalance = (token: string) => {
   if (redPacketStore.account == "hexlink") {
     return hexlAccountBalance(token);
   }
@@ -241,67 +269,92 @@ const genTokenList = async function () {
     }
     if (redPacketStore.account == "hexlink") {
       tokens.value = tokenStore.tokens.filter(
-        t => Number(hexlAccountBalance(t)) > 0
+        t => Number(hexlAccountBalance(t.address)) > 0
       );
       setDefaultToken(walletAccountBalance);
     } else {
       tokens.value = tokenStore.tokens.filter(
-        t => Number(walletAccountBalance(t)) > 0
+        t => Number(walletAccountBalance(t.address)) > 0
       );
       setDefaultToken(hexlAccountBalance);
     }
 }
 
-const setDefaultToken = function (getBalance: (t: Token) => string) {
+const setDefaultToken = function (getBalance: (t: string) => string) {
     const nativeCoin = tokenStore.nativeCoin;
-    if (Number(getBalance(nativeCoin)) > 0 || tokens.value.length == 0) {
-      redpacket.value.token = nativeCoin;
-      redpacket.value.gasToken = nativeCoin;
+    if (Number(getBalance(nativeCoin.address)) > 0 || tokens.value.length == 0) {
+      redpacket.value.token = nativeCoin.address;
+      redpacket.value.gasToken = nativeCoin.address;
     } else {
-      redpacket.value.token = tokens.value[0];
-      redpacket.value.gasToken = tokens.value[0]
+      redpacket.value.token = tokens.value[0].address;
+      redpacket.value.gasToken = tokens.value[0].address
     }
 }
 
-const calcGasSponsorship = async () => {
+async function delay(ms: number) {
+    return new Promise( ( resolve, _reject ) => {
+        window.setTimeout( () => resolve(null), ms );
+    } );
+}
+
+const setGas = async() => {
   const chain = useChainStore().chain;
   const priceInfo = await getPriceInfo(chain);
-  redpacket.value.gasTokenAmount = calcGasSponsorshipFunc(
+  redpacket.value.priceInfo = priceInfo;
+  const sponsorshipAmount = EthBigNumber.from(200000).mul(redpacket.value.split || 0);
+  redpacket.value.gasSponsorship = calcGas(
     chain,
-    redpacket.value,
+    tokenStore.token(redpacket.value.gasToken),
+    sponsorshipAmount,
     priceInfo,
-  );
+    true, // prepay
+  ).toString();
+  redpacket.value.estimatedGas = calcGas(
+    chain,
+    tokenStore.token(redpacket.value.gasToken),
+    EthBigNumber.from(estimatedGasAmount),
+    priceInfo,
+    false, // prepay
+  ).toString();
+}
+
+const refreshGas = async () => {
+  await setGas();
+  await delay(5000);
+  await refreshGas();
 };
 
-const gasSponsorship = computed(() => {
-  return new BigNumber(
-    redpacket.value.gasTokenAmount?.toString() || 0
-  ).div(tokenBase(redpacket.value.gasToken)).toString(10);
-});
+const totalServiceFee = computed(() => {
+  return BigNumber(
+    redpacket.value.gasSponsorship
+  ).plus(redpacket.value.estimatedGas).div(
+    tokenBase(gasToken.value)
+  ).dp(4).toString();
+})
 
 const tokenChoose =
   async (mode: "token" | "gas", token: Token) => {
     if (mode === "token") {
-      redpacket.value.token = token;
+      redpacket.value.token = token.address;
     } else {
-      redpacket.value.gasToken = token;
-      calcGasSponsorship();
+      redpacket.value.gasToken = token.address;
+      setGas();
     }
   };
 
 onMounted(genTokenList);
-onMounted(calcGasSponsorship);
+onMounted(refreshGas);
 
 watch(() => useChainStore().current, genTokenList);
 watch(() => useWalletStore().connected, genTokenList);
 watch([
   () => redpacket.value.gasToken,
   () => redpacket.value.split
-], calcGasSponsorship);
+], setGas);
 watch(
-  [() => redpacket.value.balance, redPacketTokenBalance],
-  ([newBalance, newTokenBalance], _old) => {
-    if (Number(newBalance) > Number(newTokenBalance)) {
+  [() => redpacket.value.balanceInput, redPacketTokenBalance],
+  ([newBalanceInput, newTokenBalance], _old) => {
+    if (Number(newBalanceInput) > Number(newTokenBalance)) {
       hasBalanceWarning.value = true;
     } else {
       hasBalanceWarning.value = false;
@@ -316,17 +369,13 @@ const tryConnectWallet = async function () {
   await connectWallet();
 };
 
-const modeLabels = {
-  "random": "Randomly",
-  "equal": "Equally",
-};
-
-const modeChoose = (gameMode: "random" | "equal") => {
+const modeLabels = ["", "Equally", "Randomly"];
+const modeChoose = (gameMode: 1 | 2) => {
   redpacket.value.mode = gameMode;
 }
 
 const validateInput = () => {
-  if (Number(redpacket.value.balance) == 0) {
+  if (Number(redpacket.value.balanceInput) == 0) {
     message.error("Number of tokens to deposit cannot be 0");
     return false;
   }
@@ -339,6 +388,16 @@ const validateInput = () => {
 
 const confirmRedPacket = function () {
   if (validateInput()) {
+    redpacket.value.salt = hash(new Date().toISOString());
+    redpacket.value.balance = tokenAmount(
+      redpacket.value.balanceInput,
+      tokenStore.token(redpacket.value.token).decimals
+    ).toString();
+    // TODO: make this configurable
+    enableDynamic && redpacket.value.validationRules.push({type: "dynamic_secrets"});
+    const chain = useChainStore().chain;
+    const account = useAccountStore().account!.address;
+    redpacket.value.id = redpacketId(chain, account, redpacket.value);
     useRedPacketStore().beforeCreate(redpacket.value);
   }
 };
@@ -363,6 +422,23 @@ onClickOutside(
 </script>
 
 <style lang="less" scoped>
+.ant-switch-handle {
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  width: 20px;
+  height: 20px;
+  transition: all 0.2s ease-in-out; }
+.ant-switch {
+  min-width: 40px; }
+.enable-switch {
+  display: flex;
+  align-items: center;
+  p {
+    margin-bottom: 0rem; }
+  @media (max-width: 768px) {
+    width: 100%;
+    justify-content: flex-end; } }
 .connectWallet {
   display: flex;
   width: 100%;
@@ -394,6 +470,9 @@ onClickOutside(
   opacity: 1;
   background-color: rgb(7, 106, 224);
   color: white; }
+.connect-wallet-button:hover {
+  background-color: rgba(7, 106, 224,0.9);
+}
 .red-packet {
   visibility: visible;
   height: auto;
@@ -868,7 +947,7 @@ input[type=number] {
 .gas-station {
   display: flex;
   margin: 16px;
-  justify-content: flex-end;
+  justify-content: space-between;
   @media (max-width: 768px) {
     margin: 0px; } }
 .gas-estimation {

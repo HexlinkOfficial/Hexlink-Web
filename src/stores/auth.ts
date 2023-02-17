@@ -33,6 +33,7 @@ export const useAuthStore = defineStore({
         signOut() {
             this.authenticated = false;
             this.user = undefined;
+            this.returnUrl = "/";
             console.log("User logged out");
         },
         setReturnUrl(returnUrl: string) {

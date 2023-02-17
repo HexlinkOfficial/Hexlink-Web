@@ -5,6 +5,8 @@ import WalletConnect from "@walletconnect/web3-provider";
 import { isContract } from "../../functions/common";
 import type { Account } from "../../functions/common";
 import { useChainStore } from "@/stores/chain";
+import { useAccountStore } from "@/stores/account";
+import { createToaster } from "@meforma/vue-toaster";
 
 async function buildAccount(account: string) : Promise<Account> {
   return {
@@ -57,23 +59,63 @@ export async function connectWallet() {
       walletIcon = "https://i.postimg.cc/j29hn62F/9035092-wallet-icon.png";
     }
   }
+
+  const ownerAccountAddress = useAccountStore().account?.owner;
   const store = useWalletStore();
-  store.connectWallet(
-    wallet,
-    walletIcon,
-    await buildAccount(accounts[0])
-  );
+  console.log("Account 0: ", accounts[0]);
+  if (ownerAccountAddress != null && accounts.map(acc => acc.toLowerCase()).includes(ownerAccountAddress.toLowerCase())) {
+    store.connectWallet(
+      wallet,
+      walletIcon,
+      await buildAccount(ownerAccountAddress)
+    );
+  } else if (ownerAccountAddress == null) {
+    store.connectWallet(
+      wallet,
+      walletIcon,
+      await buildAccount(accounts[0])
+    );
+  } else {
+    try {
+      const result = await window.ethereum.request({
+        method: 'wallet_requestPermissions',
+        params: [{ eth_accounts: {}}]
+      })
+      if (result[0].caveats[0].value.includes(ownerAccountAddress.toLowerCase())) {
+        store.connectWallet(
+          wallet,
+          walletIcon,
+          await buildAccount(ownerAccountAddress)
+        );
+      } else {
+        const toaster = createToaster({ position: "top", duration: 5000 });
+        toaster.error(`Wrong account! Please connect your owners account!`);
+      }
+    } catch (error: any) {
+      console.log(error.message);
+      const toaster = createToaster({ position: "top", duration: 5000 });
+      toaster.error(error.message);
+    }
+  }
 
   window.ethereum.on('accountsChanged', async function (accounts: string[]) {
-    store.switchAccount(await buildAccount(accounts[0]));
+    const ownerAccountAddress = useAccountStore().account?.owner;
+    if (ownerAccountAddress != null && accounts.includes(ownerAccountAddress)) {
+      // pass
+    } else if (ownerAccountAddress != null) {
+      // pop out error and disconnect
+    } else if (accounts.length > 0) {
+      store.switchAccount(await buildAccount(accounts[0]));
+    } else {
+      // pop out error and disconnect
+    }
   });
 }
 
-export async function signMessage(account: string, message: string) {
-  await window.ethereum.request({
-      method: 'eth_signTypedData_v4',
-      params: [{ account, message }],
-      from: account
+export async function signMessage(account: string, message: string) : Promise<string> {
+  return await window.ethereum.request({
+      method: 'personal_sign',
+      params: [message, account],
   });
 }
 

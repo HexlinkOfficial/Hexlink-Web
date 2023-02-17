@@ -1,0 +1,19 @@
+# compiled javascript files
+lib/**/*.js
+lib/**/*.d.ts
+lib/**/*.js.map
+lib/**/*.json
+
+# typescript v1 declaration files
+typings/
+
+# node.js dependency directory
+node_modules/
+
+node_modules
+.env
+coverage
+coverage.json
+typechain
+
+files

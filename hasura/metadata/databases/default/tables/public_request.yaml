@@ -1,0 +1,33 @@
+table:
+  name: request
+  schema: public
+array_relationships:
+  - name: operations
+    using:
+      foreign_key_constraint_on:
+        column: request_id
+        table:
+          name: operation
+          schema: public
+  - name: redpacket_claims
+    using:
+      foreign_key_constraint_on:
+        column: req_id
+        table:
+          name: redpacket_claim
+          schema: public
+select_permissions:
+  - role: user
+    permission:
+      columns:
+        - id
+        - created_at
+        - args
+        - to
+        - gaslimit
+        - datahash
+        - value
+        - user_id
+      filter:
+        user_id:
+          _eq: X-Hasura-User-Id

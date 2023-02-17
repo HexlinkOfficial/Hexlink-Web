@@ -1,16 +1,141 @@
 <template>
-  <div class="box">
-    <div>
-      <div class="nft_grid">
-        Coming Soon
-      </div>
+  <div v-if="loading" class="loading-state">
+    <Loading />
+  </div>
+  <div v-if="!loading && totalNfts == 0" class="no-history">
+    <div style="text-align: center;">You have no NFTs!</div>
+  </div>
+  <div v-if="!loading" class="box">
+    <div class="nft_grid">
+      <NFTCard 
+        v-for="(value, index) in nftImages" 
+        :key="index"
+        :style=" 'background:' + value.color" 
+        :nftImage="value" >
+      </NFTCard>
     </div>
   </div>
 </template>
 
+<script setup lang="ts">
+import { onMounted, ref } from 'vue';
+import { loadErc721Token } from '@/web3/tokens';
+import { useAccountStore } from "@/stores/account";
+import { useNftStore } from '@/stores/nft';
+import Loading from "@/components/Loading.vue";
+import type { openSea, nftImage, bindedNFT } from '@/web3/tokens';
+import NFTCard from './NFTCard.vue';
+import { getBackcgroundColor } from '@/web3/utils';
+
+const imageColor = ref<string[]>([]);
+const nftImages = ref<bindedNFT[]>([]);
+const loading = ref<boolean>(false);
+const nftView = ref<boolean>(true);
+const transactionView = ref<boolean>(false);
+const nftPics = ref<nftImage[]>([]);
+const totalNfts = ref<number>(0);
+
+const loadNfts = async () => {
+  loading.value = true;
+  const data: any = await loadErc721Token(useAccountStore().account!.address);
+  nftPics.value = data[0];
+  totalNfts.value = data[1];
+  loading.value = false;
+}
+
+const preloadColors = () => {
+  var contracts: string[] = [];
+  var symbols: string[] = [];
+  var names: string[] = [];
+  var nftIds: string[] = [];
+  var images: string[] = [];
+  nftPics.value.map(async (nft: any) => {
+    contracts.push(nft.contract);
+    symbols.push(nft.symbol);
+    names.push(nft.name);
+    nftIds.push(nft.id);
+    images.push(nft.rawUrl == "" ? nft.url : nft.rawUrl);
+    nftImages.value.push(await getBackcgroundColor(nft));
+  })
+  console.log("xxx", nftImages.value);
+  useNftStore().set(contracts, symbols, names, nftIds, images);
+};
+
+onMounted(async () => {
+  await loadNfts();
+  preloadColors();
+})
+</script>
+
 <style lang="less" scoped>
+.box-content {
+  font-size: 0.75rem;
+  line-height: 1rem;
+  color: #6a6d7c;
+  display: flex;
+  align-items: center;
+  justify-content: space-between; }
+.no-history {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 450px;
+  @media (max-width: 990px) {
+    height: 150px; } }
+.loading-state {
+  display: flex;
+  padding: 0.5rem;
+  align-items: center;
+  justify-content: center;
+  height: 485px;
+  @media (max-width: 990px) {
+    height: 150px; } }
+.card_details_box {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 16px 20px;
+  transition: opacity .3s ease-out; }
+.card_details {
+  position: relative;
+  z-index: 1;
+  border-radius: 10px;
+  background-color: #ffffff;
+  box-shadow: 0 0 500px 0px rgb(0 0 0 / 10%);
+  transform: scale(1);
+  transition: transform .3s cubic-bezier(.195, 1.085, .575, 1.555); }
+.nft_footer {
+  padding: 0 16px 16px;
+  display: block;
+  position: relative;
+  box-sizing: border-box;
+  margin-top: 1rem; }
+.nft_header {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  height: 0;
+  padding-bottom: 100%;
+  border-radius: 14px; }
+.nft_header img {
+  width: 100%;
+  opacity: 1;
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  transition: opacity .3s ease-out;
+  border-radius: 14px }
+.nfts {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 14px;
+  overflow: hidden;
+  transition: transform .2s cubic-bezier(.5, 1, .89, 1);
+  box-shadow: 0 0 15px 1px rgb(0 0 0 / 10%); }
 .box {
-  padding: 1rem;
+  // padding: 1rem;
   @media (min-width: 640px) {
     padding: 1.5rem; } }
 .amountOwned {
@@ -46,9 +171,9 @@
     column-gap: 1.5rem; }
   @media (min-width: 1024px) {
     grid-template-columns: repeat(4, minmax(0, 1fr)); }
-  @media (min-width: 1280px) {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    column-gap: 2rem; }
+  // @media (min-width: 1280px) {
+  //   grid-template-columns: repeat(5, minmax(0, 1fr));
+  //   column-gap: 2rem; }
   @media (min-width: 1536px) {} }
 .nft_card {
   position: relative;
@@ -128,7 +253,7 @@
   white-space: nowrap;
   white-space: pre;
   margin-bottom: 0rem;
-  margin-top: calc(0.75rem); }
+  margin-top: 0.5rem; }
 .items_tag {
   visibility: visible;
   margin-bottom: 6rem;
@@ -145,6 +270,3 @@
   transition: opacity 0.3s ease-out;
   z-index: 999; }
 </style>
-
-<script setup lang="ts">
-</script>

@@ -1,5 +1,5 @@
 <template>
-  <div v-if="claimStatus == ''" class="claim-card transition">
+  <div v-if="claimStatus == ''" class="claim-card transition" :style="claimItem == 'erc721' && 'height: 500px;'">
     <router-link to="/redpackets">
       <svg class="redpacket_close transition" width="30" height="30" viewBox="0 0 30 30" fill="none"
         xmlns="http://www.w3.org/2000/svg">
@@ -9,25 +9,29 @@
       </svg>
     </router-link>
     <h2 class="transition">
-      <span style="font-size: 20px;">Sent by</span><br>
-      <div style="display: flex; align-items: center; justify-content: center;">
-        @{{ redPacket?.creator.handle }}
-        <a class="twitter-link" :href="'https://twitter.com/' + redPacket?.creator.handle">
+      <span style="font-size: 15px;">Claim {{ claimItem == 'erc721' ? 'NFT' : 'Token' }} from</span><br>
+      <div style="display: flex; align-items: center; justify-content: center; font-size: 20px;">
+        @{{ redPacket?.creator?.handle }}
+        <a class="twitter-link" :href="'https://twitter.com/' + redPacket?.creator?.handle">
           <i className="fa fa-twitter"></i>
         </a>
       </div>
-      <div class="claim-tokens">
+      <div v-if="claimItem == 'erc20'" class="claim-tokens">
         <div class="token-icon">
           <img :src="redPacketTokenIcon" />
         </div>
         <b class="mode-text2">{{ redPacketToken }}</b>
       </div>
-      <small>Best Wishes!</small>
+      <div v-if="claimItem == 'erc721'" class="claim-erc721">
+        <img :src="redPacketTokenIcon" alt="nft-pic"/>
+        <b class="mode-text2" style="margin-right: 0rem; font-size: 12px;">{{ redPacketToken }}</b>
+      </div>
+      <small >Best Wishes!</small>
     </h2>
-    <div class="cta-container transition">
+    <div class="cta-container transition" :style="claimItem == 'erc721' && 'margin-top: 410px;'">
       <button class="cta" @click="claim">Claim</button>
     </div>
-    <div class="card_circle transition"></div>
+    <div :class="claimItem == 'erc721' ? 'card_circle721 transition' : 'card_circle transition'"></div>
   </div>
   <div v-if="claimStatus !== ''" class="claim-success-card transition">
     <h2 class="transition">
@@ -37,7 +41,7 @@
       <span style="font-size: 20px; margin-top: 1rem;">{{ loadText() }}</span><br>
     </h2>
     <div class="cta-container transition" style="margin-top: 340px;">
-      <router-link to="/redpackets" @click.native="$router.go(-1)">
+      <router-link to="/redpackets">
         <button class="cta">OK</button>
       </router-link>
     </div>
@@ -49,40 +53,55 @@
 import { ref, onMounted } from "vue";
 import { getRedPacket } from '@/graphql/redpacket';
 import { useRoute } from "vue-router";
-import { claimRedPacket } from "@/web3/redpacket";
-import { loadErc20Token } from "@/web3/tokens";
-import { useTokenStore } from "@/stores/token";
+import { callClaimRedPacket } from "@/web3/redpacket";
+import { loadAndSetErc20Token } from '@/web3/tokens';
 import { switchNetwork } from "@/web3/network";
-import type { Token } from "../../functions/common";
+import { ipfsUrl } from "@/web3/storage";
 import { getChain } from "../../functions/common";
 import type { RedPacketDB } from "@/types";
+import type { RedPacket, RedPacketErc721 } from "functions/redpacket/lib";
 
 const redPacket = ref<RedPacketDB | undefined>();
 const redPacketTokenIcon = ref<string>("");
 const redPacketToken = ref<string>("");
 const claimStatus = ref<string>("");
+const claimItem = ref<string>("");
 
-async function loadToken(tokenAddr: string) : Promise<Token> {
-  const token = useTokenStore().token(tokenAddr);
-  return token || await loadErc20Token(tokenAddr);
-}
-
+const route = useRoute();
 onMounted(async () => {
-  redPacket.value = await getRedPacket(useRoute().query.claim!.toString());
-  const network = getChain(redPacket.value!.chain);
-  await switchNetwork(network);
-  const metadata = await loadToken(redPacket.value!.metadata.token);
-  redPacketToken.value = metadata.symbol;
-  redPacketTokenIcon.value = metadata.logoURI || "";
+  claimItem.value = "";
+  redPacket.value = await getRedPacket(route.query.claim!.toString());
+  if (redPacket.value) {
+    const network = getChain(redPacket.value.chain!);
+    await switchNetwork(network);
+    if (redPacket.value.type === 'erc20') {
+      claimItem.value = "erc20";
+      const metadata = redPacket.value!.metadata as RedPacket;
+      const tokenMetadata = await loadAndSetErc20Token(
+        metadata.token
+      );
+      redPacketToken.value = tokenMetadata.symbol;
+      redPacketTokenIcon.value = tokenMetadata.logoURI || "";
+    } else if (redPacket.value.type === 'erc721') {
+      claimItem.value = "erc721";
+      const metadata = redPacket.value!.metadata as RedPacketErc721;
+      redPacketToken.value = metadata.symbol;
+      redPacketTokenIcon.value = ipfsUrl(metadata.tokenURI) || "";
+    }
+  } else {
+    claimStatus.value = "error";
+  }
 });
 
 const claim = async () => {
   claimStatus.value = 'loading';
   try {
-    await claimRedPacket(redPacket.value!);
+    const otp = route.query.otp?.toString();
+    await callClaimRedPacket(redPacket.value!, otp);
     claimStatus.value = 'success';
   } catch (e) {
-    console.log("Failed to claim redpacket with error " + JSON.stringify(e));
+    console.log("Failed to claim redpacket with error");
+    console.log(e);
     claimStatus.value = 'error';
   }
 }
@@ -229,14 +248,6 @@ const loadText = () => {
   @media (max-width: 990px) {
     top: 50vh;
     left: 50%; } }
-.claim-success-card .card_circle {
-  height: 400px;
-  width: 450px;
-  background-color: #FD4755;
-  position: absolute;
-  border-radius: 0;
-  margin-left: -80px;
-  margin-top: -130px; }
 .claim-success-card h2 {
   text-align: center;
   position: absolute;
@@ -291,7 +302,7 @@ const loadText = () => {
   width: 100%;}
 .claim-card h2 {
   text-align: center;
-  margin-top: 50%;
+  margin-top: 45%;
   position: absolute;
   z-index: 55;
   font-size: 26px;
@@ -304,7 +315,18 @@ const loadText = () => {
 .claim-card:hover .card_circle {
   border-radius: 0;
   margin-top: -100px; }
+.claim-card:hover .card_circle721 {
+  border-radius: 0;
+  margin-top: -20px; }
 .card_circle {
+  height: 400px;
+  width: 450px;
+  background-color: #FD4755;
+  position: absolute;
+  border-radius: 50%;
+  margin-left: -80px;
+  margin-top: -280px; }
+.card_circle721 {
   height: 400px;
   width: 450px;
   background-color: #FD4755;
@@ -367,4 +389,15 @@ const loadText = () => {
   display: flex;
   align-items: center;
   justify-content: center; }
+.claim-erc721 {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1rem; }
+.claim-erc721 img {
+  width: 110px;
+  height: 110px;
+  border: 2px solid white;
+  border-radius: 15px; }
 </style>

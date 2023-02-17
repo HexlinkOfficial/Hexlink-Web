@@ -1,13 +1,12 @@
-
 import { defineStore } from 'pinia';
-import type { RedPacket } from "../../functions/redpacket";
+import type { RedPacketInput, NftAirdrop } from "../../functions/redpacket";
 
 type Status = "" | "confirming" | "processing" | "error" | "success";
 export type AccountType = "hexlink" | "wallet";
 
 interface CreatingRedPacket {
   status: Status;
-  redpacket: RedPacket | undefined;
+  redpacket: RedPacketInput | NftAirdrop | undefined;
   account: AccountType;
 }
 
@@ -20,7 +19,7 @@ export const useRedPacketStore = defineStore({
   }),
   persist: true,
   actions: {
-    beforeCreate(redpacket: RedPacket) {
+    beforeCreate(redpacket: RedPacketInput | NftAirdrop) {
       this.status = "confirming";
       this.redpacket = redpacket;
     },

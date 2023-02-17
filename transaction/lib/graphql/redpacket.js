@@ -1,15 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateRedPacketTxStatus = exports.insertRedPacketClaim = exports.UPDATE_REDPACKET_CLAIM_TX = void 0;
+exports.insertRedPacket = exports.insertRedPacketClaim = void 0;
 const core_1 = require("@urql/core");
-const client = (0, core_1.createClient)({
-    url: process.env.VITE_HASURA_URL,
-    fetchOptions: () => {
-        return {
-            headers: { "x-hasura-admin-secret": process.env.HASURA_GRAPHQL_ADMIN_SECRET },
-        };
-    },
-});
+const client_1 = require("./client");
 const INSERT_REDPACKET_CLAIM = (0, core_1.gql) `
 mutation ($objects: [redpacket_claim_insert_input!]!) {
     insert_redpacket_claim (
@@ -22,41 +15,49 @@ mutation ($objects: [redpacket_claim_insert_input!]!) {
     }
 }
 `;
-exports.UPDATE_REDPACKET_CLAIM_TX = (0, core_1.gql) `
-    mutation (
-        $id: Int!
-        $txStatus: String!
-        $claimed: String
-    ) {
-        update_redpacket_claim_by_pk (
-            pk_columns: {id: $id},
-            _set: {
-              tx_status: $txStatus,
-              claimed: $claimed,
-            }
-        ) {
-            id
-        }
-    }
-`;
 async function insertRedPacketClaim(data) {
-    const result = await client.mutation(INSERT_REDPACKET_CLAIM, {
-        objects: data.map((d) => ({
-            redpacket_id: d.redPacketId,
-            claimer_id: d.claimerId,
-            creator_id: d.creatorId,
-            tx: d.tx,
-            tx_status: d.txStatus || "",
-            claimer: d.claimer || "",
-            claimed: d.claimed || "",
-        })),
+    const result = await client_1.client.mutation(INSERT_REDPACKET_CLAIM, {
+        objects: data.map((d) => {
+            var _a;
+            return ({
+                redpacket_id: d.redPacketId,
+                claimer_id: d.claimerId,
+                creator_id: d.creatorId,
+                claimer: JSON.stringify(d.claimer || {}),
+                claimed: ((_a = d.claimed) === null || _a === void 0 ? void 0 : _a.toString()) || "0",
+                op_id: d.opId,
+            });
+        }),
     }).toPromise();
     return result.data.insert_redpacket_claim.returning;
 }
 exports.insertRedPacketClaim = insertRedPacketClaim;
-async function updateRedPacketTxStatus(id, txStatus, claimed) {
-    const result = await client.mutation(exports.UPDATE_REDPACKET_CLAIM_TX, { id, txStatus, claimed }).toPromise();
-    return result.data.update_redpacket_claim_by_pk.returning;
+const INSERT_REDPACKET = (0, core_1.gql) `
+    mutation ($objects: [redpacket_insert_input!]!) {
+        insert_redpacket (
+            objects: $objects
+        ) {
+            affected_rows
+            returning {
+                id
+            }
+        }
+    }
+`;
+async function insertRedPacket(uid, data) {
+    const result = await client_1.client.mutation(INSERT_REDPACKET, {
+        objects: data.map((d) => ({
+            user_id: uid,
+            id: d.id,
+            metadata: JSON.stringify(d.metadata),
+            creator: JSON.stringify(d.creator),
+            op_id: d.opId,
+            deposit: JSON.stringify(d.deposit),
+            validation_data: JSON.stringify(d.validationData),
+            type: d.type,
+        })),
+    }).toPromise();
+    return result.data.insert_redpacket.returning;
 }
-exports.updateRedPacketTxStatus = updateRedPacketTxStatus;
+exports.insertRedPacket = insertRedPacket;
 //# sourceMappingURL=redpacket.js.map

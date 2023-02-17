@@ -1,3 +1,119 @@
+<template>
+  <div class="row">
+    <div className="row invoice-card-row">
+      <!-- account balance and title -->
+      <div class="col-xxl-6">
+        <div class="token-worth">
+          <div>
+            <div class="title">
+              <span>Token Worth</span>
+            </div>
+            <div class="price">${{ price }}</div>
+            <div style="display: flex; margin-top: 1rem; margin-bottom: 1rem;">
+              <router-link 
+                :to="sendTo">
+                <button class="cta-button" @click="openSend">
+                  <img src="@/assets/svg/send.svg" style="margin-right: 5px;" alt="send icon" />
+                  Send
+                </button>
+              </router-link>
+              <button class="cta-button">
+                <img src="@/assets/svg/qrCode.svg" style="margin-right: 5px;" alt="qrcode icon" />
+                Receive
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-xxl-6">
+        <div class="card">
+          <div class="card-body">
+            <div class="token-list">
+              <div class="title">
+                <div class="title-col">
+                  <div class="content">
+                    <div class="text">Assets</div>
+                    <svg width="4" height="16" viewBox="0 0 4 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path
+                        d="M2 9C2.55228 9 3 8.55228 3 8C3 7.44772 2.55228 7 2 7C1.44772 7 1 7.44772 1 8C1 8.55228 1.44772 9 2 9Z"
+                        fill="black" stroke="black" stroke-linecap="round" stroke-linejoin="round" />
+                      <path
+                        d="M2 3C2.55228 3 3 2.55228 3 2C3 1.44772 2.55228 1 2 1C1.44772 1 1 1.44772 1 2C1 2.55228 1.44772 3 2 3Z"
+                        fill="black" stroke="black" stroke-linecap="round" stroke-linejoin="round" />
+                      <path
+                        d="M2 15C2.55228 15 3 14.5523 3 14C3 13.4477 2.55228 13 2 13C1.44772 13 1 13.4477 1 14C1 14.5523 1.44772 15 2 15Z"
+                        fill="black" stroke="black" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+              <div class="views">
+                <div class="detail-view">
+                  <button class="listView-button" @click="tokenTransaction = false; tokenView = true"
+                    :class="tokenView && 'show'">Tokens</button>
+                  <button class="listView-button" @click="tokenView = false; tokenTransaction = true"
+                    :class="tokenTransaction && 'show'">Transactions</button>
+                </div>
+              </div>
+            </div>
+            <div v-if="tokenView" class="token-listDetail">
+              <div class="token-table">
+                <div style="overflow: visible; border-radius: 0.75rem;">
+                  <WalletTokenList></WalletTokenList>
+                </div>
+              </div>
+            </div>
+            <div v-if="tokenTransaction" class="transaction-detail">
+              <AssetTransaction></AssetTransaction>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref, computed } from "vue";
+import WalletTokenList from "@/components/WalletTokenList.vue";
+import AssetTransaction from "@/components/AssetTransaction.vue";
+import { useChainStore } from '@/stores/chain';
+import { useAccountStore } from "@/stores/account";
+import { useWalletStore } from "@/stores/wallet";
+import { BigNumber } from "bignumber.js";
+import { connectWallet } from "@/web3/wallet";
+
+const tokenTransaction = ref<boolean>(false);
+const tokenView = ref<boolean>(true);
+const sendTo = ref<string>("");
+
+const blockExplorer = computed(() => {
+  const account = useAccountStore().account?.address;
+  return `${useChainStore().chain.blockExplorerUrls[0]}/address/${account}`;
+});
+
+const price = computed(() => {
+  return BigNumber(0);
+});
+
+const openSend = async () => {
+  // check if wallet is connected
+  const walletStore = useWalletStore();
+  // if connected, open send modal
+  if (walletStore.connected) {
+    sendTo.value = "/?action=send";
+  } else {
+    // if not connected, connect wallet then open send modal
+    sendTo.value = "";
+    if (typeof window.ethereum == 'undefined') {
+      console.log('MetaMask is not installed!');
+    }
+    await connectWallet();
+    await openSend();
+  }
+}
+</script>
+
 <style lang="less" scoped>
 .content-body {
   margin-left: 9.5rem; }
@@ -174,13 +290,13 @@
   border-radius: 5px;
   width: 100%;
   min-height: 70px;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   @media (min-width: 640px) {
     padding: 16px 16px 16px 25px; } }
   .token-worth .title {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
     align-content: center;
     flex-direction: row;
@@ -189,8 +305,11 @@
     color: rgb(138, 147, 165);
     margin-bottom: 4px; }
   .token-worth .price {
+    font-family: "sfpro-heavy";
+    display: flex;
+    justify-content: center;
     font-size: 2rem;
-    font-weight: bold;
+    font-weight: 800;
     line-height: 1.33;
     color: black;
     margin-right: auto;
@@ -378,7 +497,7 @@
 img,
 svg {
   vertical-align: middle; }
-.nft-gridDetail {
+.transaction-detail {
   border-radius: 0.75rem;
   margin-top: 1.75rem; }
 .invite-content .input-group-text {
@@ -400,107 +519,33 @@ svg {
       .invite-content .social-share-link a i.icofont-telegram {
         color: #0088cc; }
 .info {
-  display: none;
-}
+  display: none; }
+.cta-button {
+  display: flex;
+  justify-content: center;
+  width: 125px;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+  margin-right: 5px;
+  margin-left: 5px;
+  align-items: center;
+  color: #000;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 800;
+  line-height: 1.25rem;
+  border-radius: 50px;
+  @media (min-width: 640px) {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem; }
+  @media (min-width: 768px) {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem; }
+  opacity: 1;
+  background-color: rgb(7, 106, 224);
+  color: white; }
+.cta-button:hover {
+  background-color: rgba(7, 106, 224, 0.9); }
 </style>
-<template>
-  <layout :active="1">
-    <h1 @click="showInfo = !showInfo;" style="margin-bottom: 1rem;">Tokens</h1>
-    <div class="row">
-      <div className="row invoice-card-row">
-        <!-- account balance and title -->
-        <div class="col-xxl-6">
-          <div class="token-worth">
-            <div>
-              <div class="title">
-                <span>Token Worth</span>
-                <div class="cta">
-                  <div class="cta-title">
-                    <a :href="blockExplorer" target="_blank">
-                      <svg width="50" height="50" viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path
-                          d="M10.3917 23.8059C10.3917 23.5267 10.4468 23.2502 10.5539 22.9923C10.6609 22.7344 10.8179 22.5003 11.0157 22.3033C11.2135 22.1063 11.4483 21.9503 11.7065 21.8444C11.9648 21.7384 12.2414 21.6845 12.5206 21.6858L16.05 21.6974C16.6127 21.6974 17.1524 21.921 17.5503 22.3191C17.9483 22.7172 18.1718 23.2571 18.1718 23.82V37.1707C18.5694 37.0528 19.0793 36.9272 19.6379 36.7961C20.0258 36.7048 20.3714 36.4851 20.6188 36.1727C20.8662 35.8602 21.0009 35.4734 21.001 35.0748V18.5144C21.001 18.2356 21.0559 17.9596 21.1625 17.702C21.2691 17.4444 21.4254 17.2104 21.6225 17.0132C21.8195 16.8161 22.0535 16.6597 22.3109 16.553C22.5684 16.4462 22.8444 16.3913 23.1231 16.3913H26.6594C27.2222 16.3914 27.7618 16.615 28.1597 17.0131C28.5576 17.4111 28.7812 17.951 28.7813 18.5139V33.8847C28.7813 33.8847 29.6663 33.5261 30.5291 33.1619C30.8494 33.0264 31.1228 32.7994 31.3151 32.5095C31.5074 32.2195 31.61 31.8793 31.6103 31.5314V13.2069C31.6103 12.9282 31.6652 12.6522 31.7718 12.3947C31.8784 12.1371 32.0347 11.9032 32.2317 11.706C32.4287 11.5089 32.6626 11.3526 32.92 11.2459C33.1775 11.1392 33.4534 11.0843 33.732 11.0843H37.2684C37.8312 11.0843 38.3709 11.308 38.7688 11.706C39.1668 12.1041 39.3904 12.644 39.3904 13.2069V28.2961C42.4564 26.0734 45.5637 23.3998 48.0295 20.1852C48.3873 19.7185 48.624 19.1706 48.7186 18.5902C48.8132 18.0098 48.7627 17.415 48.5716 16.8588C46.9032 11.9947 43.7736 7.7649 39.6108 4.74766C35.448 1.73042 30.4552 0.0730622 25.315 0.00220542C11.4543 -0.184057 -0.000936476 11.1346 0.000425111 25.002C-0.0131845 29.39 1.13169 33.7039 3.31929 37.5074C3.62098 38.0277 4.06481 38.451 4.59865 38.7276C5.13249 39.0043 5.73416 39.1228 6.33299 39.0692C7.00204 39.0103 7.83499 38.9271 8.82521 38.8108C9.2562 38.7617 9.65411 38.5558 9.94314 38.2322C10.2322 37.9086 10.3921 37.49 10.3926 37.0561V23.8059"
-                          fill="#21325B" />
-                        <path
-                          d="M10.3146 45.2173C14.0422 47.93 18.4474 49.5583 23.0428 49.922C27.6381 50.2858 32.2444 49.3707 36.3522 47.2781C40.4599 45.1856 43.9089 41.997 46.3176 38.0653C48.7263 34.1336 50.0008 29.6119 50 25.0006C50 24.425 49.9733 23.8558 49.9348 23.2897C40.8051 36.9104 23.948 43.278 10.3144 45.2178"
-                          fill="#979695" />
-                      </svg>
-                    </a>
-                  </div>
-                </div>
-              </div>
-              <div class="price">$ {{ price }}</div>
-            </div>
-          </div>
-        </div>
-        <div class="col-xxl-6">
-          <div class="card">
-            <div class="card-body">
-              <div class="token-list">
-                <div class="title">
-                  <div class="title-col">
-                    <div class="content">
-                      <div class="text">Assets</div>
-                      <svg width="4" height="16" viewBox="0 0 4 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path
-                          d="M2 9C2.55228 9 3 8.55228 3 8C3 7.44772 2.55228 7 2 7C1.44772 7 1 7.44772 1 8C1 8.55228 1.44772 9 2 9Z"
-                          fill="black" stroke="black" stroke-linecap="round" stroke-linejoin="round" />
-                        <path
-                          d="M2 3C2.55228 3 3 2.55228 3 2C3 1.44772 2.55228 1 2 1C1.44772 1 1 1.44772 1 2C1 2.55228 1.44772 3 2 3Z"
-                          fill="black" stroke="black" stroke-linecap="round" stroke-linejoin="round" />
-                        <path
-                          d="M2 15C2.55228 15 3 14.5523 3 14C3 13.4477 2.55228 13 2 13C1.44772 13 1 13.4477 1 14C1 14.5523 1.44772 15 2 15Z"
-                          fill="black" stroke="black" stroke-linecap="round" stroke-linejoin="round" />
-                      </svg>
-                    </div>
-                  </div>
-                </div>
-                <div class="views">
-                  <div class="detail-view">
-                    <button class="listView-button" @click="nftView = false; tokenView = true"
-                      :class="tokenView && 'show'">Tokens</button>
-                    <button class="listView-button" @click="tokenView = false; nftView = true"
-                      :class="nftView && 'show'">Collectables</button>
-                  </div>
-                </div>
-              </div>
-              <div v-if="tokenView" class="token-listDetail">
-                <div class="token-table">
-                  <div style="overflow: visible; border-radius: 0.75rem;">
-                    <WalletTokenList></WalletTokenList>
-                  </div>
-                </div>
-              </div>
-              <div v-if="nftView" class="nft-gridDetail">
-                <WalletNFTGrid></WalletNFTGrid>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </layout>
-</template>
-
-<script setup lang="ts">
-import { ref, computed } from "vue";
-import Layout from "../components/Layout.vue";
-import WalletTokenList from "@/components/WalletTokenList.vue";
-import WalletNFTGrid from "@/components/WalletNFTGrid.vue";
-import { useChainStore } from '@/stores/chain';
-import { useAccountStore } from "@/stores/account";
-import { BigNumber } from "bignumber.js";
-
-const nftView = ref<boolean>(false);
-const tokenView = ref<boolean>(true);
-const showInfo = ref<boolean>(true);
-
-const blockExplorer = computed(() => {
-  const account = useAccountStore().account?.address;
-  return `${useChainStore().chain.blockExplorerUrls[0]}/address/${account}`;
-});
-
-const price = computed(() => {
-  return BigNumber(0);
-});
-</script>

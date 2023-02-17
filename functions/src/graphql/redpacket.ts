@@ -1,69 +1,6 @@
-/* eslint-disable require-jsdoc */
-import {gql, createClient} from "@urql/core";
-import * as functions from "firebase-functions";
-
-const secrets = functions.config().doppler || {};
-const client = createClient({
-  url: secrets.VITE_HASURA_URL,
-  fetchOptions: () => {
-    return {
-      headers: {"x-hasura-admin-secret": secrets.HASURA_GRAPHQL_ADMIN_SECRET},
-    };
-  },
-});
-
-const INSERT_REDPACKET_CLAIM = gql`
-    mutation ($objects: [redpacket_claim_insert_input!]!) {
-        insert_redpacket_claim (
-            objects: $objects
-        ) {
-            affected_rows
-            returning {
-                id
-            }
-        }
-    }
-`;
-
-export interface RedPacketClaimInput {
-  redPacketId: string,
-  creatorId: string,
-  tx?: string,
-  claimerId: string,
-  claimer: HexlinkUserInfo
-}
-
-export interface HexlinkUserInfo {
-  provider: string;
-  handle: string;
-  displayName?: string;
-  logoURI?: string;
-}
-
-export interface RedPacketClaim extends RedPacketClaimInput {
-  createdAt: Date,
-  id: string,
-  claimerId: string,
-  claimer: HexlinkUserInfo,
-}
-
-export async function insertRedPacketClaim(
-    data: RedPacketClaimInput[],
-) : Promise<{id: string}[]> {
-  const result = await client.mutation(
-      INSERT_REDPACKET_CLAIM,
-      {
-        objects: data.map((d) => ({
-          redpacket_id: d.redPacketId,
-          claimer_id: d.claimerId,
-          creator_id: d.creatorId,
-          claimer: JSON.stringify(d.claimer),
-          tx: d.tx,
-        })),
-      }
-  ).toPromise();
-  return result.data.insert_redpacket_claim.returning;
-}
+import {gql} from "@urql/core";
+import {client} from "./client";
+import type {ValidationRule} from "../../redpacket";
 
 export const GET_REDPACKET = gql`
   query GetRedPacket($id: String!) {
@@ -71,34 +8,47 @@ export const GET_REDPACKET = gql`
         id
         user_id
         metadata
-        chain
         creator
+        type
+        validation_data
     }
   }
 `;
 
-export interface RedPacketMetadata {
+export interface RedPacketMetadataBase {
   token: string,
   salt: string,
-  tokenAmount: string,
-  validator: string,
   creator: string,
+  validator: string,
+  validationRules: ValidationRule[],
+}
+
+export interface RedPacketMetadata extends RedPacketMetadataBase {
+  balance: string,
   split: number,
   mode: string
+}
+
+export interface RedPacketErc721Metadata extends RedPacketMetadataBase {
+  name: string,
+  symbol: string,
+  tokenURI: string,
+  maxSupply: number,
 }
 
 export interface RedPacket {
   id: string,
   user_id: string,
-  metadata: RedPacketMetadata,
-  chain: string,
+  metadata: RedPacketMetadata | RedPacketErc721Metadata,
   creator: string,
+  validationData: any[],
+  type: "erc20" | "erc721",
 }
 
 export async function getRedPacket(
     redPacketId: string
 ) : Promise<RedPacket | undefined> {
-  const result = await client.query(
+  const result = await client().query(
       GET_REDPACKET,
       {id: redPacketId}
   ).toPromise();
@@ -111,7 +61,8 @@ export async function getRedPacket(
     id: rp.id,
     user_id: rp.user_id,
     metadata: JSON.parse(rp.metadata),
-    chain: rp.chain,
     creator: JSON.parse(rp.creator),
+    type: rp.type,
+    validationData: JSON.parse(rp.validation_data),
   };
 }

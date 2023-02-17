@@ -1,10 +1,20 @@
 {
-  "functions": {
-    "predeploy": [
-      "npm --prefix \"$RESOURCE_DIR\" run lint",
-      "npm --prefix \"$RESOURCE_DIR\" run build"
-    ]
-  },
+  "functions": [
+    {
+      "runtime": "nodejs18",
+      "predeploy": [
+        "npm --prefix \"$RESOURCE_DIR\" run build"
+      ],
+      "source": "functions",
+      "codebase": "default",
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log"
+      ]
+    }
+  ],
   "emulators": {
     "functions": {
       "port": 5001
@@ -13,19 +23,22 @@
       "enabled": true
     }
   },
-  "hosting":{
-    "public":"dist",
+  "hosting": {
+    "public": "dist",
     "ignore": [
       "firebase.json",
       "**/.*",
       "**/functions/**",
       "**/node_modules/**"
     ],
-    "rewrites":[
+    "rewrites": [
       {
-        "source":"**",
-        "destination":"/index.html"
+        "source": "**",
+        "destination": "/index.html"
       }
     ]
+  },
+  "storage": {
+    "rules": "storage.rules"
   }
 }

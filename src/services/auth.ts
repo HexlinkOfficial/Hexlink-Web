@@ -2,6 +2,7 @@ import {
     getAuth,
     GoogleAuthProvider,
     TwitterAuthProvider,
+    signInWithCustomToken,
     signInWithPopup,
     signOut,
 } from 'firebase/auth';
@@ -12,8 +13,9 @@ import { app } from '@/services/firebase';
 import { useAuthStore } from "@/stores/auth";
 import { useWalletStore } from "@/stores/wallet";
 import { switchNetwork } from "@/web3/network";
-import { nameHash, GOERLI, SUPPORTED_CHAINS} from "../../functions/common";
-import { initHexlAccount } from "@/web3/account";
+import type { Chain } from "../../functions/common";
+import { GOERLI, SUPPORTED_CHAINS} from "../../functions/common";
+import { initHexlAccount, nameHashWithVersion } from "@/web3/account";
 import { useChainStore } from '@/stores/chain';
 import { initTokenList } from "@/web3/tokens";
 import { useAccountStore } from '@/stores/account';
@@ -21,6 +23,46 @@ import { useTokenStore } from '@/stores/token';
 
 const auth = getAuth(app)
 const functions = getFunctions()
+
+export async function genOTP(email: string) {
+    const genOTPCall = httpsCallable(functions, 'genOTP');
+    return await genOTPCall({email: email});
+}
+
+export async function validateOTP(email: string, otp: string) {
+    const validateOTPCall = httpsCallable(functions, 'validateOTP');
+    const result = await validateOTPCall({email: email, otp: otp});
+    const resultData = result.data as any;
+    if (resultData.code !== 200) {
+        console.log(resultData.message);
+        return {code: resultData.code, message: resultData.message}
+    }
+    console.log(resultData);
+
+    try {
+        const userCredential = await signInWithCustomToken(auth, resultData.token);
+        const cred = userCredential.user;
+        const idToken = await getIdTokenAndSetClaimsIfNecessary(cred);
+        console.log(idToken);
+        const user : IUser = {
+            provider: "mailto",
+            identityType: "mailto",
+            authType: "otp",
+            uid: cred.uid,
+            providerUid: email,
+            handle: email,
+            displayName: email,
+            nameHash: nameHashWithVersion("mailto", email),
+            idToken,
+        };
+        useAuthStore().signIn(user);
+        await init();
+        return {code: 200};
+    } catch (error) {
+        console.log(error);
+    }
+
+}
 
 export async function getIdTokenAndSetClaimsIfNecessary(user: User, refresh: boolean = false) {
     let idToken = await user.getIdToken(refresh)
@@ -61,7 +103,7 @@ export async function googleSocialLogin() {
             handle: result.user.email!,
             displayName: result.user.displayName || undefined,
             photoURL: result.user.photoURL || undefined,
-            nameHash: nameHash("mailto", result.user.email!),
+            nameHash: nameHashWithVersion("mailto", result.user.email!),
             idToken
         };
         useAuthStore().signIn(user);
@@ -89,7 +131,7 @@ export async function twitterSocialLogin() {
             handle: result.user.reloadUserInfo.screenName,
             displayName: result.user.displayName || undefined,
             photoURL: result.user.photoURL || undefined,
-            nameHash: nameHash("twitter.com", providerUid),
+            nameHash: nameHashWithVersion("twitter.com", providerUid),
             idToken,
         };
         useAuthStore().signIn(user);
@@ -111,10 +153,10 @@ export function signOutFirebase() {
 export async function init() {
     const user = useAuthStore().user!;
     await Promise.all(
-        SUPPORTED_CHAINS.map(chain => initHexlAccount(chain, user.nameHash))
+        SUPPORTED_CHAINS.map((chain: Chain) => initHexlAccount(chain, user.nameHash))
     );
     await Promise.all(
-        SUPPORTED_CHAINS.map(chain => initTokenList(chain))
+        SUPPORTED_CHAINS.map((chain: Chain) => initTokenList(chain))
     );
     await switchNetwork(GOERLI);
 }

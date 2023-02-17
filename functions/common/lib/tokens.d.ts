@@ -27,13 +27,23 @@ export interface TokenPreference {
     tokenAlias?: string;
     display: boolean;
 }
+interface IToken {
+    address: string;
+    decimals: number;
+}
+export declare function nativeCoin(chain: Chain): IToken;
+export declare function wrappedCoin(chain: Chain): IToken;
+export declare function stableCoins(chain: Chain): IToken[];
 export declare function nativeCoinAddress(chain: Chain): string;
 export declare function wrappedCoinAddress(chain: Chain): string;
 export declare function stableCoinAddresses(chain: Chain): string[];
 export declare function allowedGasToken(chain: Chain): string[];
 export declare function getPopularTokens(chain: Chain): Promise<TokenDataList>;
-export declare function isNativeCoin(token: Token, chain: Chain): boolean;
-export declare function isWrappedCoin(token: Token, chain: Chain): boolean;
-export declare function isStableCoin(token: Token, chain: Chain): boolean;
+export declare function isNativeCoin(token: string, chain: Chain): boolean;
+export declare function isWrappedCoin(token: string, chain: Chain): boolean;
+export declare function isStableCoin(token: string, chain: Chain): boolean;
+export declare function isAllowedGasToken(token: string, chain: Chain): boolean;
+export declare function gasTokenDecimals(token: string, chain: Chain): number | undefined;
 export declare function tokenBase(token: Token): BigNumber;
-export declare function tokenAmount(balance: string | number, token: Token): EthBigNumber;
+export declare function tokenAmount(balance: string | number, decimals: number): EthBigNumber;
+export {};

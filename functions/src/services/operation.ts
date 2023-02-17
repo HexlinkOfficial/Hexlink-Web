@@ -4,7 +4,7 @@ import axios from "axios";
 import type {Chain} from "../../common/lib";
 
 const LOCAL_URL = "http://localhost:8080/submit/";
-const PROD_URL = "https://api.hexlink.io/submit/";
+const PROD_URL = process.env.TRANSACTION_SERVICE_URL;
 
 function txServiceUrl() {
   if (process.env.FUNCTIONS_EMULATOR === "true") {

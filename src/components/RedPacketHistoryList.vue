@@ -62,9 +62,8 @@
                           Amount: {{ normalizedDbBalance(op) }}
                         </span>
                       </template>
-                      <div
-                        style="overflow: auto; white-space: nowrap; margin-left: 0.25rem; width: 45px;display: flex;justify-content: flex-end;">
-                        - {{ normalizedDbBalance(op).toString().substring(0,5) }}
+                      <div style="overflow: auto; white-space: nowrap; margin-left: 0.25rem; width: 50px;display: flex;justify-content: flex-end;">
+                        - {{ prettyPrintNumber(normalizedDbBalance(op).toString()) }}
                       </div>
                     </a-tooltip>
                     <div class="token-icon" style="margin-right: 0.25rem; margin-left: 0.25rem;">
@@ -146,7 +145,7 @@
             </div>
             <div v-if="op.type == 'claim_redpacket'" class="record-box">
               <div style="display: block; position: relative;">
-                <div class="icon" :style="showClaimStatus(op) == 'Error' ? 'background-color: #FD4755;' : 'background-color: #4BAE4F;'">
+                <div class="icon" :style="showClaimStatus(op) == 'Error' && 'background-color: #FD4755;'">
                   <svg v-if="showClaimStatus(op) != 'Claimed' && showClaimStatus(op) != 'Error'" version="1.1" id="loader-1"
                     xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="40px"
                     height="40px" viewBox="0 0 50 50" style="enable-background:new 0 0 50 50; background-color: none;" xml:space="preserve">
@@ -190,13 +189,9 @@
                           Amount: {{ normalizeClaimAmount(op) }}
                         </span>
                       </template>
-                      <!-- <div v-if="op.redpacket.type === 'erc721'"
-                        style="overflow: auto; white-space: nowrap; margin-left: 0.25rem; width: 45px;display: flex;justify-content: flex-end;">
-                        #{{ op.claim?.claimed }}
-                      </div> -->
                       <div
-                        style="overflow: auto; white-space: nowrap; margin-left: 0.25rem; width: 45px;display: flex;justify-content: flex-end;">
-                        + {{ normalizeClaimAmount(op).toString().substring(0,5)}}
+                        style="overflow: auto; white-space: nowrap; margin-left: 0.25rem; width: 50px;display: flex;justify-content: flex-end;">
+                        + {{ prettyPrintNumber(normalizeClaimAmount(op).toString()) }}
                       </div>
                     </a-tooltip>
                     <div class="token-icon" style="margin-right: 0.25rem; margin-left: 0.25rem;">
@@ -280,6 +275,7 @@ import type { Token } from "../../functions/common";
 import type { RedPacket } from "../../functions/redpacket";
 import { options } from "@/assets/imageAssets";
 import { ipfsUrl } from "@/web3/storage";
+import { prettyPrintNumber } from "@/web3/utils";
 
 const createdRpOps = ref<CreateRedPacketOp[]>([]);
 const claimedRpOps = ref<ClaimRedPacketOp[]>([]);
@@ -632,7 +628,7 @@ i:hover {
   height: 2rem;
   border-radius: 55px;
   border-width: 1px;
-  background-color: #FD4755; }
+  background-color: #4BAE4F; }
 .connect-wallet-button {
   display: flex;
   justify-content: center;

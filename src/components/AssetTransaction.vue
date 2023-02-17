@@ -14,7 +14,7 @@
         <div v-for="(r, i) in value" :key="i" class="history-record">
           <div class="record-box">
             <div style="display: block; position: relative;">
-              <div class="icon" :style="r.action.type == 'receive' ? ('background-color: #4BAE4F;') : ''">
+              <div class="icon">
                 <svg v-if="r.action.type == 'receive'" width="24" height="24" viewBox="0 0 24 24" fill="none"
                   xmlns="http://www.w3.org/2000/svg">
                   <path d="M7 7L17 17" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
@@ -51,7 +51,7 @@
                       </span>
                     </template>
                     <div class="transaction-amount">
-                      + {{ r.amount.normalized.toString().substring(0, 5) }}
+                      {{ r.action.type == 'receive' ? '+' : '-' }} {{ prettyPrintNumber(r.amount.normalized.toString()) }}
                     </div>
                   </a-tooltip>
                   <div class="token-icon" style="margin-right: 0.25rem; margin-left: 0.25rem;">
@@ -125,6 +125,7 @@ import { useChainStore } from '@/stores/chain';
 import { useAccountStore } from '@/stores/account';
 import { prettyPrintAddress } from "../../functions/common";
 import { profilePic, options } from "@/assets/imageAssets";
+import { prettyPrintNumber } from "@/web3/utils";
 
 const loading = ref<boolean>(false);
 const transfer = ref<any>();
@@ -200,7 +201,7 @@ i:hover {
   overflow: auto;
   white-space: nowrap;
   margin-left: 0.25rem;
-  width: 45px;
+  width: 50px;
   display: flex;
   justify-content: flex-end; }
 .transaction-time {
@@ -270,7 +271,7 @@ i:hover {
   height: 2rem;
   border-radius: 55px;
   border-width: 1px;
-  background-color: #FD4755; }
+  background-color: #4BAE4F; }
 .record-detail {
   display: grid;
   padding-left: 1rem;

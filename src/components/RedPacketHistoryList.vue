@@ -45,7 +45,7 @@
                     <div style="display: flex;">
                       <div class="sent-info">
                         <div class="info-1">
-                          {{ showStatus(op) }}
+                          {{ showStatus(op) == 'Sent' && 'Created' }}
                         </div>
                       </div>
                     </div>

@@ -48,16 +48,16 @@
                 <div style="display: flex; align-items: center;">
                   <a-tooltip placement="top">
                     <template #title>
-                      <img :src="getNFTdata(r.tx.tokenID).image" :size="64" referrerpolicy="no-referrer" rel="preload" />
+                      <img :src="getNFTdata(r.tx.tokenID, r.asset.address)!.image" :size="64" referrerpolicy="no-referrer" rel="preload" />
                     </template>
                     <span class="thumb">
-                      <img :src="getNFTdata(r.tx.tokenID).image" :size="64" referrerpolicy="no-referrer" rel="preload" />
+                      <img :src="getNFTdata(r.tx.tokenID, r.asset.address)!.image" :size="64" referrerpolicy="no-referrer" rel="preload" />
                     </span>
                   </a-tooltip>
                   <div style="display: flex; flex-direction: column; margin-left: 0.5rem;">
-                    <span class="from-text">{{ getNFTdata(r.tx.tokenID).symbol }}</span>
+                    <span class="from-text">{{ getNFTdata(r.tx.tokenID, r.asset.address)!.symbol }}</span>
                     <span style="font-size: 12px; color: rgb(100,116,139)">
-                      {{ getNFTdata(r.tx.tokenID).name }} #{{ getNFTdata(r.tx.tokenID).nftId }}
+                      {{ getNFTdata(r.tx.tokenID, r.asset.address)!.name }} #{{ getNFTdata(r.tx.tokenID, r.asset.address)!.nftId }}
                     </span>
                     <a-tooltip v-if="r.action.type == 'send'" placement="top">
                       <template #title>
@@ -205,8 +205,28 @@ const loadTransactions = async (erc721Address: string[]) => {
   loading.value = false;
 };
 
-const getNFTdata = (id: string) => {
-  const index = useNftStore().nftId.indexOf(id);
+const getNFTdata = (id: string, contract: string) => {
+  let index = 0;
+  const itemLength = useNftStore().contracts.filter(x => x === contract.toLowerCase()).length;
+  if (itemLength > 1) {
+    const item = useNftStore().contracts.indexOf(contract);
+    for (let i=0; i<itemLength; ++i) {
+      if (useNftStore().nftId[item+i] == id) {
+        index = item + i;
+        console.log(i);
+        console.log(index);
+        return {
+          contracts: useNftStore().contracts[index],
+          symbol: useNftStore().symbol[index],
+          name: useNftStore().name[index],
+          nftId: useNftStore().nftId[index],
+          image: useNftStore().image[index]
+        }
+      }
+    }
+  } else {
+    index = useNftStore().contracts.indexOf(contract);
+  }
   return {
     contracts: useNftStore().contracts[index],
     symbol: useNftStore().symbol[index],

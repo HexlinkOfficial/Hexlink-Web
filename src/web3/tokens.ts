@@ -167,7 +167,7 @@ export async function loadErc721Token(account: string) {
             contract: nft.contract.address,
             name: nft.contract.name || "",
             symbol: nft.contract.symbol || "",
-            id: nft.rawMetadata?.token || "",
+            id: nft.tokenId || "",
             tokenType: nft.contract.tokenType || "",
             openSea: {
                 collectionName: nft.contract.openSea?.collectionName,

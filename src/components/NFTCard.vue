@@ -33,14 +33,6 @@ const props = defineProps({
   nftImage: Object
 });
 
-onMounted(() => {
-  if (props.nftImage!.hasOpensea) {
-    console.log(props.nftImage!.nft.openSea.imageUrl);
-  } else {
-    console.log("raw: ", props.nftImage)
-  }
-})
-
 const getImageSource = () => {
   if (props.nftImage!.hasOpensea) {
     return props.nftImage!.nft.openSea.imageUrl;

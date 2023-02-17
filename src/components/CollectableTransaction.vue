@@ -213,8 +213,6 @@ const getNFTdata = (id: string, contract: string) => {
     for (let i=0; i<itemLength; ++i) {
       if (useNftStore().nftId[item+i] == id) {
         index = item + i;
-        console.log(i);
-        console.log(index);
         return {
           contracts: useNftStore().contracts[index],
           symbol: useNftStore().symbol[index],
@@ -237,12 +235,7 @@ const getNFTdata = (id: string, contract: string) => {
 }
 
 onMounted(async () => {
-  // var tokens: string[] = [];
-  // useTokenStore().visiableTokens.forEach(t => {
-  //   tokens.push(t.address);
-  // })
   await loadTransactions(useNftStore().contracts);
-  console.log(transactionByDate.value);
 });
 </script>
 

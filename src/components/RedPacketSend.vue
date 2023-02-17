@@ -393,8 +393,9 @@ const confirmRedPacket = function () {
       redpacket.value.balanceInput,
       tokenStore.token(redpacket.value.token).decimals
     ).toString();
-    // TODO: make this configurable
-    enableDynamic && redpacket.value.validationRules.push({type: "dynamic_secrets"});
+    if (enableDynamic) {
+      redpacket.value.validationRules.push({type: "dynamic_secrets"});
+    }
     const chain = useChainStore().chain;
     const account = useAccountStore().account!.address;
     redpacket.value.id = redpacketId(chain, account, redpacket.value);

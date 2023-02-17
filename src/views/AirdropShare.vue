@@ -33,7 +33,6 @@ import { ref, onMounted } from "vue";
 import { useRoute } from 'vue-router';
 import { genTotpCode } from "../../functions/common";
 import QRCode from "qrcode";
-import qrcode from "@/assets/scan.png";
 import { copy } from "@/web3/utils";
 
 const secret = ref<string | undefined>();

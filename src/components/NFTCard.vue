@@ -26,7 +26,6 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
 import type { nftImage } from '@/web3/tokens';
 
 const props = defineProps({
@@ -103,7 +102,7 @@ const getOpenseaUrl = (nft: nftImage) => {
   white-space: nowrap; }
 .nft_title {
   display: block;
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   line-height: 1.25rem;
   color: #262833;
   font-weight: 500;

@@ -99,6 +99,10 @@
     </div>
   </div>
   <div class="gas-station">
+    <div class="enable-switch">
+      <p>Enable dynamic share link</p>
+      <a-switch v-model:checked="enableDynamic" style="margin-left: 1rem;" />
+    </div>
     <div class="gas-estimation">
       <p>
         <img style="width: 20px; height: 20px;" src="https://i.postimg.cc/RhXfgJR1/gas-pump.png" />
@@ -219,6 +223,7 @@ const sendStatus = ref<string>("");
 const message = ref<string>("Let's go!");
 const imageColor = ref<string>("");
 const getColorStatus = ref<string>("");
+const enableDynamic = ref<boolean>(false);
 
 const hexlAccountBalances = ref<BalanceMap>({});
 const hexlAccountBalance = (token: string): string => {
@@ -421,8 +426,7 @@ const confirmNFT = async () => {
       );
       createNotification("Waiting to upload your NFT picture", "error");
     }
-    // TODO: make this configurable
-    // nftAirdrop.value.validationRules.push({type: "dynamic_secrets"});
+    enableDynamic && nftAirdrop.value.validationRules.push({type: "dynamic_secrets"});
     useRedPacketStore().beforeCreate(nftAirdrop.value);
   }
 }
@@ -436,6 +440,23 @@ const getColor = async (nft: nftImage) => {
 </script>
 
 <style lang="less" scoped>
+.ant-switch-handle {
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  width: 20px;
+  height: 20px;
+  transition: all 0.2s ease-in-out; }
+.ant-switch {
+  min-width: 40px; }
+.enable-switch {
+  display: flex;
+  align-items: center;
+  p {
+    margin-bottom: 0rem; }
+  @media (max-width: 768px) {
+    width: 100%;
+    justify-content: flex-end; } }
 .nft-preview {
   border: 2px dashed rgba(22, 22, 26, 0.1);
   border-radius: 16px;
@@ -658,7 +679,7 @@ const getColor = async (nft: nftImage) => {
 .gas-station {
   display: flex;
   margin: 16px;
-  justify-content: flex-end;
+  justify-content: space-between;
   @media (max-width: 768px) {
     margin: 0px; } }
 .gas-estimation {

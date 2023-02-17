@@ -19,7 +19,7 @@
               </router-link>
               <button class="cta-button">
                 <img src="@/assets/svg/qrCode.svg" style="margin-right: 5px;" alt="qrcode icon" />
-                receive
+                Receive
               </button>
             </div>
           </div>

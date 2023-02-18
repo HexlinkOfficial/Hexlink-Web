@@ -315,8 +315,7 @@ i:hover {
   line-height: 1.25rem;
   font-weight: 500;
   margin-left: 0.875rem;
-  color: #6a6d7c;
-}
+  color: #6a6d7c; }
 
 .history-record {
   position: relative;
@@ -324,8 +323,8 @@ i:hover {
   padding-bottom: 0.5rem;
   margin-left: -0.5rem;
   margin-right: -0.5rem;
-  cursor: pointer;
-}
+  border-radius: 1rem;
+  cursor: pointer; }
 
 .history-record:hover {
   box-shadow: rgb(39 44 49 / 7%) 8px 28px 50px, rgb(39 44 49 / 4%) 1px 6px 12px;

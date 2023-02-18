@@ -252,6 +252,7 @@ i:hover {
   padding-bottom: 0.5rem;
   margin-left: -0.5rem;
   margin-right: -0.5rem;
+  border-radius: 1rem;
   cursor: pointer; }
 .history-record:hover {
   box-shadow: rgb(39 44 49 / 7%) 8px 28px 50px, rgb(39 44 49 / 4%) 1px 6px 12px;

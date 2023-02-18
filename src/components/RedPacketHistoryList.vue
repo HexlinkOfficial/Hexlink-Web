@@ -17,7 +17,7 @@
               <div class="sending-status" style="display: block; position: relative;">
                 <img v-if="showStatus(op) == 'Pending'" src="@/assets/svg/createRedpacketPending.svg"/>
                 <div v-if="showStatus(op) == 'Sent'" class="icon">
-                  <img src="@/assets/svg/createRedpacketSent.svg" style="color:white;"/>
+                  <img src="@/assets/svg/createRedpacketSent.svg"/>
                 </div>
                 <div v-if="showStatus(op) == 'Error'" class="icon" style="background-color: rgb(253, 71, 85);">
                   <img src="@/assets/svg/createRedpacketError.svg" />
@@ -128,7 +128,7 @@
               </div>
             </div>
             <div v-if="op.type == 'claim_redpacket'" class="record-box">
-              <div style="display: block; position: relative;">
+              <div class="status-icon" style="display: block; position: relative;">
                 <div class="icon" :style="showClaimStatus(op) == 'Error' ? 'background-color: #FD4755;' : ''">
                   <img v-if="showClaimStatus(op) != 'Claimed' && showClaimStatus(op) != 'Error'" src="@/assets/svg/claimRedpacketPending.svg"/>
                   <img v-if="showClaimStatus(op) == 'Claimed'" src="@/assets/svg/claimRedpacketClaimed.svg"/>
@@ -189,7 +189,7 @@
                   </div>
                 </div>
                 <div class="claim-status" v-if="op.claim">
-                  <div style="display: flex; align-items: center;">
+                  <div v-if="showClaimStatus(op) != 'Error'" style="display: flex; align-items: center;">
                     <div class="arrow">
                       <img src="@/assets/svg/backwardArrow.svg"/>
                     </div>
@@ -734,6 +734,7 @@ i:hover {
   padding-bottom: 0.5rem;
   margin-left: -0.5rem;
   margin-right: -0.5rem;
+  border-radius: 1rem;
   cursor: pointer; }
 .history-record:hover {
   box-shadow: rgb(39 44 49 / 7%) 8px 28px 50px, rgb(39 44 49 / 4%) 1px 6px 12px;

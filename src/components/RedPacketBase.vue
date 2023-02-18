@@ -4,10 +4,20 @@
             <div class="col-xxl-6">
                 <div class="airdrop-status">
                     <div>
-                        <div class="title">
-                            <span>Airdrop Status</span>
+                        <div style="display: flex; align-items: center; justify-content: center;">
+                            <div>
+                                <div class="title">
+                                    <span>Total Created</span>
+                                </div>
+                                <div class="price">XXXX</div>
+                            </div>
+                            <div>
+                                <div class="title">
+                                    <span>Total Claimed</span>
+                                </div>
+                                <div class="price">XXXX</div>
+                            </div>
                         </div>
-                        <div class="price">XXXX</div>
                         <div style="display: flex; margin-top: 1rem; margin-bottom: 1rem;">
                             <router-link to="/">
                                 <button class="cta-button">

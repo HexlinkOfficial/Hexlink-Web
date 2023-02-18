@@ -32,7 +32,7 @@
                     <polyline points="7 7 17 7 17 17"></polyline>
                   </svg>
                 </div>
-                <div v-if="showStatus(op) == 'Error'" class="icon">
+                <div v-if="showStatus(op) == 'Error'" class="icon" style="background-color: rgb(253, 71, 85);">
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M7 17L17 7" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                     <path d="M7 7L17 17" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
@@ -45,7 +45,7 @@
                     <div style="display: flex;">
                       <div class="sent-info">
                         <div class="info-1">
-                          {{ showStatus(op) == 'Sent' && 'Created' }}
+                          {{ showStatus(op) == 'Sent' ? 'Created' : 'Error' }}
                         </div>
                       </div>
                     </div>
@@ -287,6 +287,8 @@ const redPacketByDate = ref<any>([]);
 const claimedByDate = ref<any>([]);
 const luckHistoryByDate = ref<any>([]);
 const tokenIdAddress = ref<string[]>([]);
+const createdCount = ref<number>(0);
+const claimedCount = ref<number>(0);
 
 interface tokenIDMap {
   address: string,
@@ -323,6 +325,7 @@ const extractDate = () => {
   const sentOrderedGroup: any = {}
   const claimedOrderedGroup: any = {}
   claimedRpOps.value.forEach((op) => {
+    console.log(op);
     const date = new Date(op.createdAt).toLocaleString().split(',')[0];
     if (date in claimGroup) {
       claimGroup[date].push(op);

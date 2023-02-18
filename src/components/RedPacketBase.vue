@@ -118,7 +118,6 @@ const selected  = computed(() => {
 onMounted(async () => {
     loading.value = true;
     await delay(1000);
-    console.log(props.status);
     loading.value = false;
 })
 </script>

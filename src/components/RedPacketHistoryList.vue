@@ -15,28 +15,12 @@
           <div v-for="(op, i) in value" :key="i" class="history-record">
             <div v-if="op.type == 'create_redpacket'" class="record-box">
               <div class="sending-status" style="display: block; position: relative;">
-                <svg v-if="showStatus(op) == 'Pending'" version="1.1" id="loader-1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px"
-                  y="0px" width="40px" height="40px" viewBox="0 0 50 50" style="enable-background:new 0 0 50 50;"
-                  xml:space="preserve">
-                  <path fill="#FD4755"
-                    d="M25.251,6.461c-10.318,0-18.683,8.365-18.683,18.683h4.068c0-8.071,6.543-14.615,14.615-14.615V6.461z">
-                    <animateTransform attributeType="xml" attributeName="transform" type="rotate" from="0 25 25" to="360 25 25"
-                      dur="0.6s" repeatCount="indefinite"></animateTransform>
-                  </path>
-                </svg>
+                <img v-if="showStatus(op) == 'Pending'" src="@/assets/svg/createRedpacketPending.svg"/>
                 <div v-if="showStatus(op) == 'Sent'" class="icon">
-                  <svg style="color:white;" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                    class="w-4 h-4 text-subdued">
-                    <line x1="7" y1="17" x2="17" y2="7"></line>
-                    <polyline points="7 7 17 7 17 17"></polyline>
-                  </svg>
+                  <img src="@/assets/svg/createRedpacketSent.svg" style="color:white;"/>
                 </div>
                 <div v-if="showStatus(op) == 'Error'" class="icon" style="background-color: rgb(253, 71, 85);">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M7 17L17 7" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                    <path d="M7 7L17 17" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                  </svg>
+                  <img src="@/assets/svg/createRedpacketError.svg" />
                 </div>
               </div>
               <div class="record-detail">
@@ -124,7 +108,7 @@
                 <div class="claim-status" v-if="op.redpacket && op.txStatus != 'success'"></div>
                 <div class="share" v-if="op.redpacket">
                   <i v-if="showStatus(op) == 'Sent'" class="fa fa-paper-plane share-button" aria-hidden="true" @click="share(op.redpacket)"></i>
-                  <span v-if="showStatus(op) != 'Sent'" class="pending-text" :style="showStatus(op) == 'Pending' && 'margin-left: 5.5rem;'">{{ showDetailStatus(op) }}</span>
+                  <span v-if="showStatus(op) != 'Sent'" class="pending-text" :style="showStatus(op) == 'Pending' ? 'margin-left: 5.5rem;' : ''">{{ showDetailStatus(op) }}</span>
                 </div>
                 <div class="cta">
                   <router-link :to="{ query: { details: op.redpacket.id } }" v-if="showStatus(op) == 'Sent'">
@@ -145,24 +129,10 @@
             </div>
             <div v-if="op.type == 'claim_redpacket'" class="record-box">
               <div style="display: block; position: relative;">
-                <div class="icon" :style="showClaimStatus(op) == 'Error' && 'background-color: #FD4755;'">
-                  <svg v-if="showClaimStatus(op) != 'Claimed' && showClaimStatus(op) != 'Error'" version="1.1" id="loader-1"
-                    xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="40px"
-                    height="40px" viewBox="0 0 50 50" style="enable-background:new 0 0 50 50; background-color: none;" xml:space="preserve">
-                    <path fill="#FFFFFF"
-                      d="M25.251,6.461c-10.318,0-18.683,8.365-18.683,18.683h4.068c0-8.071,6.543-14.615,14.615-14.615V6.461z">
-                      <animateTransform attributeType="xml" attributeName="transform" type="rotate" from="0 25 25" to="360 25 25"
-                        dur="0.6s" repeatCount="indefinite"></animateTransform>
-                    </path>
-                  </svg>
-                  <svg v-if="showClaimStatus(op) == 'Claimed'" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M7 7L17 17" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                    <path d="M17 7V17H7" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                  </svg>
-                  <svg v-if="showClaimStatus(op) == 'Error'" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M7 17L17 7" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                    <path d="M7 7L17 17" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                  </svg>
+                <div class="icon" :style="showClaimStatus(op) == 'Error' ? 'background-color: #FD4755;' : ''">
+                  <img v-if="showClaimStatus(op) != 'Claimed' && showClaimStatus(op) != 'Error'" src="@/assets/svg/claimRedpacketPending.svg"/>
+                  <img v-if="showClaimStatus(op) == 'Claimed'" src="@/assets/svg/claimRedpacketClaimed.svg"/>
+                  <img v-if="showClaimStatus(op) == 'Error'" src="@/assets/svg/claimRedpacketError.svg"/>
                 </div>
               </div>
               <div class="record-detail">
@@ -221,9 +191,7 @@
                 <div class="claim-status" v-if="op.claim">
                   <div style="display: flex; align-items: center;">
                     <div class="arrow">
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M15 6L9 12L15 18" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                      </svg>
+                      <img src="@/assets/svg/backwardArrow.svg"/>
                     </div>
                     <div style="display: flex; align-items: center;">
                       <span class="thumb">

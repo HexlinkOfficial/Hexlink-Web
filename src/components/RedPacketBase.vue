@@ -4,13 +4,13 @@
             <div class="col-xxl-6">
                 <div class="airdrop-status">
                     <div>
-                        <div style="display: flex; align-items: center; justify-content: center;">
+                        <div class="status-box">
                             <div style="margin: 0 10px;">
                                 <div class="title">
                                     <span>Total Created</span>
                                 </div>
                                 <div class="price">
-                                    <Loading v-if="loading" style="margin-top: -20px; margin-bottom: 20px; padding: 0px;"/>
+                                    <Loading v-if="loading" class="loading"/>
                                     <span v-if="!loading">{{ props.status[0] }}</span>
                                 </div>
                             </div>
@@ -19,20 +19,20 @@
                                     <span>Total Claimed</span>
                                 </div>
                                 <div class="price">
-                                    <Loading v-if="loading" style="margin-top: -20px; margin-bottom: 20px; padding: 0px;" />
+                                    <Loading v-if="loading" class="loading" />
                                     <span v-if="!loading">{{ props.status[1] }}</span>
                                 </div>
                             </div>
                         </div>
-                        <div style="display: flex; margin-top: 1rem; margin-bottom: 1rem;">
+                        <div class="cta-box">
                             <router-link to="/">
                                 <button class="cta-button">
-                                    <img src="@/assets/svg/coin.svg" style="margin-right: 5px; width: 19px; height: 19px;" alt="token icon"/>
+                                    <img src="@/assets/svg/coin.svg" alt="token icon"/>
                                     Airdrop Token
                                 </button>
                             </router-link>
                             <button class="cta-button">
-                                <img src="@/assets/svg/picture.svg" style="margin-right: 5px; width: 19px; height: 19px;" alt="picture icon" />
+                                <img src="@/assets/svg/picture.svg" alt="picture icon" />
                                 Airdrop NFT
                             </button>
                         </div>
@@ -40,50 +40,50 @@
                 </div>
             </div>
             <div class="col-xxl-6">
-            <div class="card">
-                <div class="card-body">
-                <div class="token-list">
-                    <div class="title">
-                    <div class="title-col">
-                        <div class="content">
-                        <div class="text">Share your love</div>
-                        <svg width="4" height="16" viewBox="0 0 4 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path
-                            d="M2 9C2.55228 9 3 8.55228 3 8C3 7.44772 2.55228 7 2 7C1.44772 7 1 7.44772 1 8C1 8.55228 1.44772 9 2 9Z"
-                            fill="black" stroke="black" stroke-linecap="round" stroke-linejoin="round" />
-                            <path
-                            d="M2 3C2.55228 3 3 2.55228 3 2C3 1.44772 2.55228 1 2 1C1.44772 1 1 1.44772 1 2C1 2.55228 1.44772 3 2 3Z"
-                            fill="black" stroke="black" stroke-linecap="round" stroke-linejoin="round" />
-                            <path
-                            d="M2 15C2.55228 15 3 14.5523 3 14C3 13.4477 2.55228 13 2 13C1.44772 13 1 13.4477 1 14C1 14.5523 1.44772 15 2 15Z"
-                            fill="black" stroke="black" stroke-linecap="round" stroke-linejoin="round" />
-                        </svg>
+                <div class="card">
+                    <div class="card-body">
+                    <div class="token-list">
+                        <div class="title">
+                        <div class="title-col">
+                            <div class="content">
+                            <div class="text">Share your love</div>
+                            <svg width="4" height="16" viewBox="0 0 4 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                d="M2 9C2.55228 9 3 8.55228 3 8C3 7.44772 2.55228 7 2 7C1.44772 7 1 7.44772 1 8C1 8.55228 1.44772 9 2 9Z"
+                                fill="black" stroke="black" stroke-linecap="round" stroke-linejoin="round" />
+                                <path
+                                d="M2 3C2.55228 3 3 2.55228 3 2C3 1.44772 2.55228 1 2 1C1.44772 1 1 1.44772 1 2C1 2.55228 1.44772 3 2 3Z"
+                                fill="black" stroke="black" stroke-linecap="round" stroke-linejoin="round" />
+                                <path
+                                d="M2 15C2.55228 15 3 14.5523 3 14C3 13.4477 2.55228 13 2 13C1.44772 13 1 13.4477 1 14C1 14.5523 1.44772 15 2 15Z"
+                                fill="black" stroke="black" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                            </div>
+                        </div>
+                        </div>
+                        <div class="views">
+                        <div class="detail-view">
+                            <router-link to="/redpackets">
+                                <button class="listView-button" :class="selected == 'history' ? 'show' : ''">
+                                    Luck History
+                                </button>
+                            </router-link>
+                            <router-link to="/redpacket/send">
+                                <button class="listView-button" :class="selected == 'send' ? 'show' : ''">
+                                    Send Luck
+                                </button>
+                            </router-link>
+                            <router-link to="/redpacket/airdropCollectable">
+                                <button class="listView-button" :class="selected == 'airdropNFTs' ? 'show' : ''">
+                                    Send NFTs
+                                </button>
+                            </router-link>
+                        </div>
                         </div>
                     </div>
-                    </div>
-                    <div class="views">
-                    <div class="detail-view">
-                        <router-link to="/redpackets">
-                            <button class="listView-button" :class="selected == 'history' ? 'show' : ''">
-                                Luck History
-                            </button>
-                        </router-link>
-                        <router-link to="/redpacket/send">
-                            <button class="listView-button" :class="selected == 'send' ? 'show' : ''">
-                                Send Luck
-                            </button>
-                        </router-link>
-                        <router-link to="/redpacket/airdropCollectable">
-                            <button class="listView-button" :class="selected == 'airdropNFTs' ? 'show' : ''">
-                                Send NFTs
-                            </button>
-                        </router-link>
-                    </div>
+                    <slot></slot>
                     </div>
                 </div>
-                <slot></slot>
-                </div>
-            </div>
             </div>
         </div>
     </div>
@@ -124,6 +124,18 @@ onMounted(async () => {
 </script>
   
 <style lang="less" scoped>
+.status-box {
+    display: flex;
+    align-items: center;
+    justify-content: center; }
+.loading {
+    margin-top: -20px;
+    margin-bottom: 20px;
+    padding: 0px; }
+.cta-box {
+    display: flex;
+    margin-top: 1rem;
+    margin-bottom: 1rem; }
 .cta-button {
   display: flex;
   justify-content: center;
@@ -152,6 +164,10 @@ onMounted(async () => {
   color: white; }
 .cta-button:hover {
   background-color: rgba(7, 106, 224, 0.9); }
+.cta-button img {
+    margin-right: 5px;
+    width: 19px;
+    height: 19px; }
 .airdrop-status {
     display: flex;
   flex-direction: row;

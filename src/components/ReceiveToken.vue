@@ -3,19 +3,68 @@
     <router-link to="/">
       <img class="redpacket_close transition" src="@/assets/svg/closeButton.svg" alt="close button"/>
     </router-link>
-    <div style="display: flex; align-items: center; justify-content: center; padding: 1rem 0 1rem 0;">
-      <h2 style="font-size: 1.5rem; font-weight: 600;">Receive ETH</h2>
+    <div style="display: flex; align-items: center; justify-content: center; padding: 1rem 0 1rem 0; flex-direction: column; margin-top: 20px;">
+      <h2 style="font-size: 1.5rem; font-weight: 600;">Receive tokens</h2>
+      <img :src="useTokenStore().nativeCoin.logoURI" style="width: 25px; height: 25px;"/>
+      <p class="or"></p>
+      <div class="qrcode">
+        <canvas id="canvas" style="height: 200px; width: 200px;"></canvas>
+        <p style="word-wrap: break-word; width: 200px; font-size: 12px; text-align: center; margin-bottom: 10px;">{{ useAccountStore().account?.address }}</p>
+      </div>
+      <p class="or"></p>
+      <p style="padding: 0 10px; margin-bottom: 0rem; font-size: 12px; text-align:center; margin-top: 10px; color: rgba(0,0,0,0.6); font-weight: 500;">Send only token on {{ useChainStore().chain.name }} network(id: {{ useChainStore().chain.chainId }}) to this address.<br>Sending tokens from other chains may result in permanent loss.</p>
+      <div style="display: flex; justify-content: center;">
+        <button @click="copy(useAccountStore().account?.address!, 'Claim URL Copied')" class="cta-button">Copy</button>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { ref, onMounted } from "vue";
+import { useTokenStore } from "@/stores/token";
+import { useAccountStore } from "@/stores/account";
+import { useChainStore } from "@/stores/chain";
+import QRCode from "qrcode";
+import { copy } from "@/web3/utils";
+
+onMounted(() => {
+  console.log(useChainStore().chain.name);
+  genQrCode();
+})
+
+const genQrCode = async () => {
+  let walletAddress = useAccountStore().account?.address;
+  let canvas = document.getElementById('canvas')
+  await QRCode.toCanvas(canvas, walletAddress, { margin: '2', scale: '6', width: '200px' });
+}
 </script>
 
 <style lang="less" scoped>
+.cta-button {
+  background-color: rgb(7, 106, 224);
+  color: white;
+  padding: 10px;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  width: 250px;
+  border-radius: 50px;
+  border: none; }
+.qrcode {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid rgba(0, 0, 0, 0.1);
+  border-radius: 15px;
+  overflow: hidden;
+  margin: 10px;
+  margin-bottom: 10px;
+  display: flex;
+  flex-direction: column;
+  width: 210px; }
 .claim-card {
   background-color: #fff;
-  height: 400px;
+  height: auto;
   width: 90vw;
   max-width: 400px;
   position: fixed;
@@ -37,4 +86,12 @@
   z-index: 50;
   margin: 0.5rem 0;
   right: 0.5rem; }
+.or {
+    text-align: center;
+    font-weight: bold;
+    width: 90%;
+    border-bottom: 1px solid #f5efef;
+    line-height: 0.1em;
+    margin-top: 10px;
+    margin-bottom: 10px; }
 </style>

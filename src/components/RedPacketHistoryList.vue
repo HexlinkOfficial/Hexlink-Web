@@ -296,6 +296,8 @@ interface tokenIDMap {
 }
 const tokenIdtable = ref<tokenIDMap[]>([]);
 
+const emit = defineEmits(["expressStatus"])
+
 const loadData = async function() {
   loading.value = true;
   if (useAccountStore().account) {
@@ -308,6 +310,7 @@ const loadData = async function() {
   extractDate();
   extractTokenId();
   console.log(luckHistoryByDate.value);
+  emit("expressStatus", [createdCount, claimedCount]);
 };
 
 const extractTokenId = () => {
@@ -325,7 +328,9 @@ const extractDate = () => {
   const sentOrderedGroup: any = {}
   const claimedOrderedGroup: any = {}
   claimedRpOps.value.forEach((op) => {
-    console.log(op);
+    if(op.error == null) {
+      claimedCount.value += 1;
+    }
     const date = new Date(op.createdAt).toLocaleString().split(',')[0];
     if (date in claimGroup) {
       claimGroup[date].push(op);
@@ -345,6 +350,9 @@ const extractDate = () => {
   });
 
   createdRpOps.value.forEach((op) => {
+    if (op.error == null) {
+      createdCount.value += 1;
+    }
     if(op.redpacket?.type == 'erc721' && op.txStatus != 'error') {
       tokenIdAddress.value.push(op.redpacket.metadata.token);
     }

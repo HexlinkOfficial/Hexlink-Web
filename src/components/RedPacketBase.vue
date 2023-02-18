@@ -5,17 +5,23 @@
                 <div class="airdrop-status">
                     <div>
                         <div style="display: flex; align-items: center; justify-content: center;">
-                            <div>
+                            <div style="margin: 0 10px;">
                                 <div class="title">
                                     <span>Total Created</span>
                                 </div>
-                                <div class="price">XXXX</div>
+                                <div class="price">
+                                    <Loading v-if="loading" style="margin-top: -20px; margin-bottom: 20px; padding: 0px;"/>
+                                    <span v-if="!loading">{{ props.status[0] }}</span>
+                                </div>
                             </div>
-                            <div>
+                            <div style="margin: 0 10px;">
                                 <div class="title">
                                     <span>Total Claimed</span>
                                 </div>
-                                <div class="price">XXXX</div>
+                                <div class="price">
+                                    <Loading v-if="loading" style="margin-top: -20px; margin-bottom: 20px; padding: 0px;" />
+                                    <span v-if="!loading">{{ props.status[1] }}</span>
+                                </div>
                             </div>
                         </div>
                         <div style="display: flex; margin-top: 1rem; margin-bottom: 1rem;">
@@ -85,8 +91,19 @@
   
 <script setup lang="ts">
 import { send } from "process";
-import { computed } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
+import Loading from "@/components/Loading.vue";
+
+const props = defineProps({
+    status: Array(),
+});
+
+const loading = ref<boolean>(true);
+
+function delay(ms: number) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 const selected  = computed(() => {
     if (useRoute().path == '/redpacket/send') {
@@ -97,6 +114,13 @@ const selected  = computed(() => {
         return 'airdropNFTs'
     }
 });
+
+onMounted(async () => {
+    loading.value = true;
+    await delay(1000);
+    console.log(props.status);
+    loading.value = false;
+})
 </script>
   
 <style lang="less" scoped>
@@ -146,6 +170,7 @@ const selected  = computed(() => {
     align-content: center;
     flex-direction: row;
     font-size: 1rem;
+    font-weight: 500;
     line-height: 1.33;
     color: rgb(138, 147, 165);
     margin-bottom: 4px; }

@@ -1,18 +1,21 @@
 <template>
-  <div class="claim-card transition">
+  <div class="receive-card transition">
     <router-link to="/">
       <img class="redpacket_close transition" src="@/assets/svg/closeButton.svg" alt="close button"/>
     </router-link>
-    <div style="display: flex; align-items: center; justify-content: center; padding: 1rem 0 1rem 0; flex-direction: column; margin-top: 20px;">
-      <h2 style="font-size: 1.5rem; font-weight: 600;">Receive tokens</h2>
-      <img :src="useTokenStore().nativeCoin.logoURI" style="width: 25px; height: 25px;"/>
+    <div class="content-box">
+      <h2 class="title">Receive tokens</h2>
+      <div>
+        <img :src="useTokenStore().nativeCoin.logoURI" style="width: 25px; height: 25px;" />
+        <span style="margin-left: 0.5rem;">{{ useChainStore().chain.fullName }}</span>
+      </div>
       <p class="or"></p>
       <div class="qrcode">
         <canvas id="canvas" style="height: 200px; width: 200px;"></canvas>
-        <p style="word-wrap: break-word; width: 200px; font-size: 12px; text-align: center; margin-bottom: 10px;">{{ useAccountStore().account?.address }}</p>
+        <p class="qrcode-address">{{ useAccountStore().account?.address }}</p>
       </div>
       <p class="or"></p>
-      <p style="padding: 0 10px; margin-bottom: 0rem; font-size: 12px; text-align:center; margin-top: 10px; color: rgba(0,0,0,0.6); font-weight: 500;">Send only token on {{ useChainStore().chain.name }} network(id: {{ useChainStore().chain.chainId }}) to this address.<br>Sending tokens from other chains may result in permanent loss.</p>
+      <p class="sending-reminder">Send only token on {{ useChainStore().chain.name }} network(id: {{ useChainStore().chain.chainId }}) to this address.<br>Sending tokens from other chains may result in permanent loss.</p>
       <div style="display: flex; justify-content: center;">
         <button @click="copy(useAccountStore().account?.address!, 'Claim URL Copied')" class="cta-button">Copy</button>
       </div>
@@ -29,7 +32,7 @@ import QRCode from "qrcode";
 import { copy } from "@/web3/utils";
 
 onMounted(() => {
-  console.log(useChainStore().chain.name);
+  console.log(useChainStore().chain);
   genQrCode();
 })
 
@@ -41,6 +44,30 @@ const genQrCode = async () => {
 </script>
 
 <style lang="less" scoped>
+.sending-reminder {
+  padding: 0 10px;
+  margin-bottom: 0rem;
+  font-size: 12px;
+  text-align: center;
+  margin-top: 10px;
+  color: rgba(0, 0, 0, 0.6);
+  font-weight: 500; }
+.qrcode-address {
+  word-wrap: break-word;
+  width: 200px;
+  font-size: 12px;
+  text-align: center;
+  margin-bottom: 10px; }
+.title {
+  font-size: 1.5rem;
+  font-weight: 600; }
+.content-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem 0 1rem 0;
+  flex-direction: column;
+  margin-top: 20px; }
 .cta-button {
   background-color: rgb(7, 106, 224);
   color: white;
@@ -62,7 +89,7 @@ const genQrCode = async () => {
   display: flex;
   flex-direction: column;
   width: 210px; }
-.claim-card {
+.receive-card {
   background-color: #fff;
   height: auto;
   width: 90vw;

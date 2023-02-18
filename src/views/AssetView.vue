@@ -54,7 +54,7 @@
                   <button class="listView-button" @click="tokenTransaction = false; tokenView = true"
                     :class="tokenView && 'show'">Tokens</button>
                   <button class="listView-button" @click="tokenView = false; tokenTransaction = true"
-                    :class="tokenTransaction && 'show'">Transactions</button>
+                    :class="tokenTransaction && 'show'">History</button>
                 </div>
               </div>
             </div>

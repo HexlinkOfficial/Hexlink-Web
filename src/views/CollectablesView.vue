@@ -52,7 +52,7 @@
                     <button class="listView-button" @click="transactionView = false; nftView = true"
                       :class="nftView && 'show'">Collections</button>
                     <button class="listView-button" @click="nftView = false; transactionView = true"
-                      :class="transactionView && 'show'">Transactions</button>
+                      :class="transactionView && 'show'">History</button>
                   </div>
                 </div>
               </div>

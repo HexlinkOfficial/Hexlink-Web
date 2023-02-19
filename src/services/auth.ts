@@ -37,7 +37,6 @@ export async function validateOTP(email: string, otp: string) {
     if (resultData.code !== 200) {
         return {code: resultData.code, message: resultData.message}
     }
-    console.log(resultData);
 
     try {
         const userCredential = await signInWithCustomToken(auth, resultData.token);

@@ -50,11 +50,15 @@ async function getVersion(
   address: string,
   provider: Provider
 ) : Promise<number> {
-  const abi = [
-    "function version() pure returns (uint256)",
-  ];
-  const contract = new ethers.Contract(address, abi, provider);
-  return (await contract.version()).toNumber();
+  try {
+    const abi = [
+      "function version() pure returns (uint256)",
+    ];
+    const contract = new ethers.Contract(address, abi, provider);
+    return (await contract.version()).toNumber();
+  } catch(err) {
+    return HEXLINK_ERC721_VERSION_LATEST;
+  }
 }
 
 export async function hexlinkErc721Contract(

@@ -27,11 +27,16 @@ export function hexlinkErc721Interface(version) {
     return new ethers.utils.Interface(hexlinkErc721Abi(version || HEXLINK_ERC721_VERSION_LATEST));
 }
 async function getVersion(address, provider) {
-    const abi = [
-        "function version() pure returns (uint256)",
-    ];
-    const contract = new ethers.Contract(address, abi, provider);
-    return (await contract.version()).toNumber();
+    try {
+        const abi = [
+            "function version() pure returns (uint256)",
+        ];
+        const contract = new ethers.Contract(address, abi, provider);
+        return (await contract.version()).toNumber();
+    }
+    catch (err) {
+        return HEXLINK_ERC721_VERSION_LATEST;
+    }
 }
 export async function hexlinkErc721Contract(address, provider) {
     const version = await getVersion(address, provider);

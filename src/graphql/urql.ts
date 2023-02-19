@@ -1,16 +1,24 @@
 import { createClient } from '@urql/vue';
 import type { Client } from '@urql/vue';
 import { refreshToken } from '../services/auth';
+import { jwt } from "jsonwebtoken";
 
 let urqlClient: Client | null;
 let urqlClientIdToken: string;
+
+function getIdToken(token: string) {
+    if (import.meta.env.VITE_USE_FUNCTIONS_EMULATOR === 'true') {
+        return jwt.sign(jwt.decode(token), "DkMEqQV1ZtLnTCGQOdtce5TfhpHY74ob");
+    }
+    return token;
+}
 
 function createUrqlClient(idToken: string) {
     return createClient({
         url: import.meta.env.VITE_HASURA_URL,
         fetchOptions: () => {
             return {
-                headers: { authorization: `Bearer ${idToken}`},
+                headers: { authorization: `Bearer ${getIdToken(idToken)}`},
             };
         },
     });

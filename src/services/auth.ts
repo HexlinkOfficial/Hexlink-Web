@@ -1,5 +1,6 @@
 import {
     getAuth,
+    connectAuthEmulator,
     GoogleAuthProvider,
     TwitterAuthProvider,
     signInWithCustomToken,
@@ -22,11 +23,14 @@ import { useAccountStore } from '@/stores/account';
 import { useTokenStore } from '@/stores/token';
 
 const auth = getAuth(app)
+if (process.env.FUNCTIONS_EMULATOR === "true") {
+    connectAuthEmulator(auth, "http://localhost:9099");
+}
 const functions = getFunctions()
 
 export async function genOTP(email: string) {
     const genOTPCall = httpsCallable(functions, 'genOTP');
-    return await genOTPCall({email: email});
+    await genOTPCall({email: email});
 }
 
 export async function validateOTP(email: string, otp: string) {
@@ -34,7 +38,6 @@ export async function validateOTP(email: string, otp: string) {
     const result = await validateOTPCall({email: email, otp: otp});
     const resultData = result.data as any;
     if (resultData.code !== 200) {
-        console.log(resultData.message);
         return {code: resultData.code, message: resultData.message}
     }
     console.log(resultData);
@@ -43,7 +46,6 @@ export async function validateOTP(email: string, otp: string) {
         const userCredential = await signInWithCustomToken(auth, resultData.token);
         const cred = userCredential.user;
         const idToken = await getIdTokenAndSetClaimsIfNecessary(cred);
-        console.log(idToken);
         const user : IUser = {
             provider: "mailto",
             identityType: "mailto",

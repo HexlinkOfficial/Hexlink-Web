@@ -42,5 +42,6 @@ module.exports = {
         "ignoreTemplateLiterals": true,
       },
     ],
+    "linebreak-style": 0,
   },
 };

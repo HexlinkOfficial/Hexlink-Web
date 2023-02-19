@@ -35,6 +35,7 @@
                             maxlength="1" v-model="code[index]" @input="handleInput" @keypress="isNumber"
                             @keydown.delete="handleDelete" @paste="onPaste" />
                     </div>
+                    <p>Didn't receive the verification code? Resend the code</p>
                     <button class="cta-btn" @click="verifyOTP">Verify</button>
                 </div>
             </div>
@@ -119,8 +120,8 @@ const onPaste = (event: Event) => {
 }
 
 const sendOTP = async () => {
-    await genOTP(email.value);
     show.value = !show.value;
+    await genOTP(email.value);
 }
 
 const verifyOTP = async () => {

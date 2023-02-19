@@ -2,11 +2,12 @@ import { ethers, Contract } from "ethers";
 import type { Provider } from "@ethersproject/providers";
 import type { Chain } from "../../common";
 export declare const redPacketInterface: ethers.utils.Interface;
-export declare const hexlinkErc721Interface: ethers.utils.Interface;
 export declare const tokenFactoryInterface: ethers.utils.Interface;
 export declare function redPacketAddress(chain: Chain): string;
 export declare function tokenFactoryAddress(chain: Chain): string;
 export declare function redPacketContract(provider: Provider): Promise<Contract>;
+export declare const HEXLINK_ERC721_VERSION_LATEST = 1;
+export declare function hexlinkErc721Interface(version?: number): ethers.utils.Interface;
 export declare function hexlinkErc721Contract(address: string, provider: Provider): Promise<Contract>;
 export declare function hexlinkErc721Metadata(erc721: Contract): Promise<{
     name: any;
@@ -14,5 +15,6 @@ export declare function hexlinkErc721Metadata(erc721: Contract): Promise<{
     validator: any;
     tokenURI: any;
     maxSupply: any;
+    transferrable: any;
 }>;
 export declare function tokenFactory(provider: Provider): Promise<Contract>;

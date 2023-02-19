@@ -201,6 +201,11 @@
         "internalType": "address",
         "name": "validator_",
         "type": "address"
+      },
+      {
+        "internalType": "bool",
+        "name": "transferrable_",
+        "type": "bool"
       }
     ],
     "name": "init",
@@ -505,6 +510,19 @@
   },
   {
     "inputs": [],
+    "name": "transferrable",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "validator",
     "outputs": [
       {
@@ -514,6 +532,19 @@
       }
     ],
     "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "version",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "pure",
     "type": "function"
   }
 ]

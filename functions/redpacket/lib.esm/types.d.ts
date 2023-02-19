@@ -34,6 +34,7 @@ export interface RedPacketErc721 extends RedPacketBase {
     symbol: string;
     tokenURI: string;
     split: number;
+    transferrable: boolean;
 }
 export interface RedPacketInput extends RedPacket, GasInput {
 }

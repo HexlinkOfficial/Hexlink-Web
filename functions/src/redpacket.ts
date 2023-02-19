@@ -95,7 +95,7 @@ async function buildMintErc721Op(
   return {
     to: redPacket.metadata.token,
     value: "0x0",
-    callData: hexlinkErc721Interface.encodeFunctionData("mint", [claimer, signature]),
+    callData: hexlinkErc721Interface().encodeFunctionData("mint", [claimer, signature]),
     callGasLimit: "0x0",
   };
 }

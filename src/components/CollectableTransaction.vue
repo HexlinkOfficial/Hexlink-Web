@@ -139,11 +139,9 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, watch, computed, onMounted } from 'vue';
+import { ref, onMounted } from 'vue';
 import Loading from "@/components/Loading.vue";
-import { copy } from "@/web3/utils";
-import { getAssetTransfers, loadTokenLogo } from '@/web3/tokens';
-import { useTokenStore } from '@/stores/token';
+import { getAssetTransfers } from '@/web3/tokens';
 import { useChainStore } from '@/stores/chain';
 import { useAccountStore } from '@/stores/account';
 import { prettyPrintAddress } from "../../functions/common";
@@ -151,13 +149,11 @@ import { profilePic, options } from "@/assets/imageAssets";
 import { useNftStore } from '@/stores/nft';
 
 const loading = ref<boolean>(false);
-const transfer = ref<any[]>([]);
 const transactionByDate = ref<any>([]);
 
 const loadTransactions = async (erc721Address: string[]) => {
   loading.value = true;
   const orderGroup: any = {};
-  const tempList: any = []
 
   const historyList = await getAssetTransfers({
     wallet: useAccountStore().account!.address,

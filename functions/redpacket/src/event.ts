@@ -122,7 +122,7 @@ export function parseMinted(
 ) {
     const events = receipt.logs.filter(
         (log: any) => log.address.toLowerCase() === token.toLowerCase()
-    ).map((log: any) => hexlinkErc721Interface.parseLog(log));
+    ).map((log: any) => hexlinkErc721Interface().parseLog(log));
     const event = events.find(
         (e: any) => e.name === "Transfer" && equal(
             e.args.from, ethers.constants.AddressZero

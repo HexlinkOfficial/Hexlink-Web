@@ -382,9 +382,15 @@ export function buildDeployErc721Op(
     chain: Chain,
     input: RedPacketErc721Input,
 ): Op {
-    const initData = hexlinkErc721Interface.encodeFunctionData(
+    const initData = hexlinkErc721Interface().encodeFunctionData(
         "init",
-        [input.name, input.symbol, input.tokenURI, input.split, validator()]
+        [
+            input.name,
+            input.symbol,
+            input.tokenURI,
+            input.split, validator(), 
+            input.transferrable
+        ]
     );
     const callData = tokenFactoryInterface.encodeFunctionData(
         "deployErc721",

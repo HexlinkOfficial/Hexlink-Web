@@ -62,7 +62,7 @@ export function parseDeployed(chain, receipt, creator, salt) {
     return event?.args;
 }
 export function parseMinted(receipt, token, claimer) {
-    const events = receipt.logs.filter((log) => log.address.toLowerCase() === token.toLowerCase()).map((log) => hexlinkErc721Interface.parseLog(log));
+    const events = receipt.logs.filter((log) => log.address.toLowerCase() === token.toLowerCase()).map((log) => hexlinkErc721Interface().parseLog(log));
     const event = events.find((e) => e.name === "Transfer" && equal(e.args.from, ethers.constants.AddressZero) && equal(e.args.to, claimer));
     return event?.args.tokenId;
 }

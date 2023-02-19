@@ -254,6 +254,7 @@ const nftAirdrop = ref<NftAirdrop>({
   estimatedGas: "0",
   validator: validator(),
   validationRules: [],
+  transferrable: true,
 });
 
 const setAccount = (account: AccountType) => {

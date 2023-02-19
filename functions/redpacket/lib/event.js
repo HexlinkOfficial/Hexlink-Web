@@ -69,7 +69,7 @@ function parseDeployed(chain, receipt, creator, salt) {
 }
 exports.parseDeployed = parseDeployed;
 function parseMinted(receipt, token, claimer) {
-    const events = receipt.logs.filter((log) => log.address.toLowerCase() === token.toLowerCase()).map((log) => redpacket_1.hexlinkErc721Interface.parseLog(log));
+    const events = receipt.logs.filter((log) => log.address.toLowerCase() === token.toLowerCase()).map((log) => (0, redpacket_1.hexlinkErc721Interface)().parseLog(log));
     const event = events.find((e) => e.name === "Transfer" && equal(e.args.from, ethers_1.ethers.constants.AddressZero) && equal(e.args.to, claimer));
     return event === null || event === void 0 ? void 0 : event.args.tokenId;
 }

@@ -10,7 +10,7 @@ const operation_1 = require("./graphql/operation");
 const transaction_1 = require("./graphql/transaction");
 const body_parser_1 = __importDefault(require("body-parser"));
 const app = (0, express_1.default)();
-const port = 8080;
+const port = 9999;
 const queues = queue_1.Queues.getInstance();
 // parse application/x-www-form-urlencoded
 app.use(body_parser_1.default.urlencoded({ extended: false }));

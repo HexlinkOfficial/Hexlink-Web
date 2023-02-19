@@ -20,4 +20,5 @@ select_permissions:
         - id
         - metadata
         - op_id
+        - type
       filter: {}

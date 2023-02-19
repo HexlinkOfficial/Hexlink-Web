@@ -32,5 +32,9 @@ select_permissions:
         - id
         - metadata
         - op_id
+        - type
         - user_id
-      filter: {}
+        - validation_data
+      filter:
+        user_id:
+          _eq: X-Hasura-User-Id

@@ -109,7 +109,7 @@ function parseRedPacket(op: any) : RedPacketDB | undefined {
 }
 
 export async function getCreatedRedPackets() : Promise<CreateRedPacketOp[]> {
-  const client = setUrqlClientIfNecessary(
+  const client = await setUrqlClientIfNecessary(
     useAuthStore().user!.idToken!
   );
   const result = await client.query(
@@ -140,7 +140,7 @@ export async function getCreatedRedPackets() : Promise<CreateRedPacketOp[]> {
 export async function getRedPacket(
   redPacketId: string
 ) : Promise<RedPacketDB | undefined> {
-  const client = setUrqlClientIfNecessary(
+  const client = await setUrqlClientIfNecessary(
     useAuthStore().user!.idToken!
   );
   const result = await client.query(
@@ -170,7 +170,7 @@ export async function getRedPacket(
 export async function getRedPacketPrivate(
   redPacketId: string
 ) : Promise<RedPacketDB | undefined> {
-  const client = setUrqlClientIfNecessary(
+  const client = await setUrqlClientIfNecessary(
     useAuthStore().user!.idToken!
   );
   const result = await client.query(

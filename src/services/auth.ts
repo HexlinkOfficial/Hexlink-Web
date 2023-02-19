@@ -23,9 +23,6 @@ import { useAccountStore } from '@/stores/account';
 import { useTokenStore } from '@/stores/token';
 
 const auth = getAuth(app)
-if (process.env.FUNCTIONS_EMULATOR === "true") {
-    connectAuthEmulator(auth, "http://localhost:9099");
-}
 const functions = getFunctions()
 
 export async function genOTP(email: string) {

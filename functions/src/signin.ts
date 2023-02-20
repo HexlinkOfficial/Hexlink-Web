@@ -1,4 +1,4 @@
-import {validate} from "deep-email-validator";
+import * as EmailValidator from "node-email-validation";
 import sendgridMail from "@sendgrid/mail";
 import {Firebase} from "./firebase";
 import * as functions from "firebase-functions";
@@ -41,14 +41,7 @@ const validateEmail = async (email: string) => {
     return false;
   }
 
-  return await validate({
-    email,
-    validateRegex: true,
-    validateMx: true,
-    validateTypo: true,
-    validateDisposable: true,
-    validateSMTP: true,
-  });
+  return EmailValidator.is_email_valid(email);
 };
 
 const randomCode = (length: number) => {

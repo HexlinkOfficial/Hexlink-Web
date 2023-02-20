@@ -4,11 +4,12 @@ import * as functions from "firebase-functions";
 import {
   RedPacketMetadata,
   getRedPacket,
+  isClaimed,
 } from "./graphql/redpacket";
 import type {RedPacket} from "./graphql/redpacket";
 import {signWithKmsKey} from "./kms";
 import {ethers} from "ethers";
-import {toEthSignedMessageHash} from "./account";
+import {getInfuraProvider, toEthSignedMessageHash} from "./account";
 import {KMS_KEY_TYPE, kmsConfig} from "./config";
 
 import {
@@ -24,7 +25,6 @@ import type {Chain, OpInput} from "../common";
 import {submit} from "./services/operation";
 import {insertRequest} from "./graphql/request";
 import {RequestData, preprocess, validateAndBuildUserOp} from "./operation";
-
 
 const secrets = functions.config().doppler || {};
 
@@ -117,6 +117,15 @@ function validateRedPacket(
   return true;
 }
 
+async function validateTransaction(chain: Chain, input: OpInput) {
+  const provider = getInfuraProvider(chain);
+  await provider.estimateGas({
+    to: input.to,
+    data: input.callData,
+    value: input.value,
+  });
+}
+
 export const claimRedPacket = functions.https.onCall(
     async (data, context) => {
       const result = await preprocess(data, context);
@@ -127,10 +136,7 @@ export const claimRedPacket = functions.https.onCall(
 
       const redPacket = await getRedPacket(data.redPacketId);
       if (!redPacket) {
-        return {code: 400, message: "Failed to load redpacket"};
-      }
-      if (!validateRedPacket(redPacket, data.secret)) {
-        return {code: 422, message: "validation failed"};
+        return {code: 400, message: "redpacket_not_found"};
       }
 
       let input;
@@ -138,6 +144,18 @@ export const claimRedPacket = functions.https.onCall(
         input = await buildClaimErc20Op(chain, redPacket, account.address);
       } else {
         input = await buildMintErc721Op(chain, redPacket, account.address);
+      }
+
+      if (!validateRedPacket(redPacket, data.secret)) {
+        return {code: 422, message: "input_validation_error"};
+      }
+      if (await isClaimed(redPacket.id, uid)) {
+        return {code: 422, message: "already_claimed"};
+      }
+      try {
+        await validateTransaction(chain, input);
+      } catch {
+        return {code: 422, message: "tx_validation_error"};
       }
 
       const action = {
@@ -273,6 +291,11 @@ export const createRedPacketErc721 = functions.https.onCall(
         postData.input = await validateAndBuildUserOp(
             chain, account, data.request
         );
+        try {
+          await validateTransaction(chain, postData.input);
+        } catch {
+          return {code: 422, message: "tx_validation_error"};
+        }
       }
       const resp = await submit(chain, postData);
       return {code: 200, id: resp.id};

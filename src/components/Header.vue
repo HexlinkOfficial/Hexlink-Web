@@ -75,7 +75,7 @@
               <div class="profile_log dropdown" @click="activeDropDown('profile')" :class="active && 'show'">
                 <div class="user" data-toggle="dropdown">
                   <img class="profile" :src="user?.photoURL" :size="64" referrerpolicy="no-referrer"/>
-                  <span>@{{ user?.provider?.includes("twitter") && user.handle }}</span>
+                  <span>{{ userHandle }}</span>
                   <img src="@/assets/svg/arrowDown.svg" alt="arrow down icon" style="margin-right: 0.5rem; width: 1rem"/>
                 </div>
                 <!-- dropdown menu -->
@@ -85,8 +85,8 @@
                       <div class="user2">
                         <span class="thumb"><img :src="user?.photoURL" :size="64" referrerpolicy="no-referrer" /></span>
                         <div class="user-info">
-                          <h5>{{ user?.provider?.includes("twitter") && user?.displayName }}</h5>
-                          <span>@{{ user?.provider?.includes("twitter") && user?.handle }}</span>
+                          <h5>{{ user?.displayName }}</h5>
+                          <span>{{ userHandle }}</span>
                         </div>
                       </div>
                     </div>
@@ -202,7 +202,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import { useAuthStore } from '@/stores/auth';
 import { useWalletStore } from '@/stores/wallet';
 import { useChainStore } from '@/stores/chain';
@@ -212,11 +212,9 @@ import { switchNetwork } from "@/web3/network";
 import { connectWallet, disconnectWallet} from "@/web3/wallet";
 import { useAccountStore } from "@/stores/account";
 import { signOutFirebase } from "@/services/auth";
-import type { Account } from "../../functions/common";
 import useClipboard from 'vue-clipboard3';
 import { useRoute } from "vue-router";
 
-const newLocal = "wallet-presence";
 const authStore = useAuthStore();
 const user = authStore.user!;
 const walletStore = useWalletStore();
@@ -242,6 +240,13 @@ const addressTextLong = function (address: string | undefined) {
   }
   return "0x";
 };
+
+const userHandle = computed(() => {
+  if (useAuthStore().user?.provider.includes("twitter")) {
+    return "@" + user.handle;
+  }
+  return user?.handle;
+});
 
 const root = ref<HTMLElement | null>(null);
 
@@ -273,6 +278,7 @@ const doCopy = (address: string | undefined) => {
 onMounted(() => {
   document.addEventListener('click', closeDropDown);
   getComponentName();
+  console.log(useAuthStore().user);
 });
 
 onBeforeUnmount(() => {

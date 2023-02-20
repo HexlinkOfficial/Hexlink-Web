@@ -8,8 +8,9 @@ class PrivateFirebase {
 
   constructor() {
     const secrets = functions.config().doppler || {};
-
-    this.app = admin.initializeApp({projectId: secrets.VITE_FIREBASE_PROJECT_ID,});
+    this.app = admin.initializeApp({
+      projectId: secrets.VITE_FIREBASE_PROJECT_ID,
+    });
     this.db = admin.firestore();
     this.db.settings({ignoreUndefinedProperties: true});
     this.storage = admin.storage();

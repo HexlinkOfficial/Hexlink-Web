@@ -261,6 +261,30 @@
         "inputs": [
             {
                 "internalType": "bytes32",
+                "name": "packetId",
+                "type": "bytes32"
+            },
+            {
+                "internalType": "address",
+                "name": "claimer",
+                "type": "address"
+            }
+        ],
+        "name": "getClaimedCount",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "bytes32",
                 "name": "id",
                 "type": "bytes32"
             }

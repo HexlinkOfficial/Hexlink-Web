@@ -333,7 +333,7 @@ export async function callClaimRedPacket(
         secret
     });
     if ((result.data as any)?.code == 422) {
-        throw new Error("validation failed");
+        throw new Error(result.data.message);
     }
 }
 

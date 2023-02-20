@@ -54,7 +54,7 @@ export async function getRedPacket(
   ).toPromise();
   if (result.error) {
     console.log("Failed to get red packet", result.error);
-    return undefined;
+    throw new Error("graphql_error");
   }
   const rp = result.data?.redpacket_by_pk;
   return {
@@ -65,4 +65,36 @@ export async function getRedPacket(
     type: rp.type,
     validationData: JSON.parse(rp.validation_data),
   };
+}
+
+export const GET_REDPACKET_CLAIM = gql`
+  query GetRedPacketClaim(
+    $redPacketId: String!
+    $claimerId: String!
+  ) {
+    redpacket_claim (
+        where: {
+          redpacket_id: { _eq: $redPacketId },
+          claimer_id: { _eq: $claimerId }
+        },
+        limit: 1
+    ) {
+        id
+    }
+  }
+`;
+
+export async function isClaimed(
+    redPacketId: string,
+    claimerId: string
+) : Promise<boolean> {
+  const result = await client().query(
+      GET_REDPACKET_CLAIM,
+      {redPacketId, claimerId}
+  ).toPromise();
+  if (result.error) {
+    console.log("Failed to get red packet", result.error);
+    throw new Error("graphql_error");
+  }
+  return (result.data?.redpacket_claim.length || 0) > 0;
 }

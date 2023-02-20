@@ -26,6 +26,7 @@ const auth = getAuth(app)
 const functions = getFunctions()
 
 export async function genOTP(email: string) {
+    console.log("gen otp");
     const genOTPCall = httpsCallable(functions, 'genOTP');
     await genOTPCall({email: email});
 }
@@ -49,7 +50,7 @@ export async function validateOTP(email: string, otp: string) {
             uid: cred.uid,
             providerUid: email,
             handle: email,
-            displayName: email,
+            displayName: "Anonymous",
             nameHash: nameHashWithVersion("mailto", email),
             idToken,
         };

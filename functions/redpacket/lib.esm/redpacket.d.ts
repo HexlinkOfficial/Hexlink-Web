@@ -6,7 +6,6 @@ export declare const tokenFactoryInterface: ethers.utils.Interface;
 export declare function redPacketAddress(chain: Chain): string;
 export declare function tokenFactoryAddress(chain: Chain): string;
 export declare function redPacketContract(provider: Provider): Promise<Contract>;
-export declare const HEXLINK_ERC721_VERSION_LATEST = 1;
 export declare function hexlinkErc721Interface(version?: number): ethers.utils.Interface;
 export declare function hexlinkErc721Contract(address: string, provider: Provider): Promise<Contract>;
 export declare function hexlinkErc721Metadata(erc721: Contract): Promise<{

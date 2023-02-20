@@ -24,6 +24,7 @@
     "asn1": "^0.2.6",
     "asn1.js": "^5.4.1",
     "bignumber.js": "^9.1.0",
+    "cross-fetch": "^3.1.5",
     "crypto": "^1.0.1",
     "deep-email-validator": "^0.1.21",
     "ethereumjs-util": "^7.1.5",

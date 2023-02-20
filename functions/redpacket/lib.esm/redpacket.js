@@ -2,7 +2,7 @@
 import { ethers } from "ethers";
 import { getChainFromProvider } from "../../common";
 import RED_PACKET_ABI from "./abi/HAPPY_RED_PACKET_ABI.json";
-import HEXLINK_ERC721_ABI_V1 from "./abi/HEXLINK_ERC721_ABI_V1.json";
+import HEXLINK_ERC721_ABI from "./abi/HEXLINK_ERC721_ABI.json";
 import HEXLINK_TOKEN_FACTORY_ABI from "./abi/HEXLINK_TOKEN_FACTORY_ABI.json";
 import ADDRESSES from "./addresses.json";
 export const redPacketInterface = new ethers.utils.Interface(RED_PACKET_ABI);
@@ -16,31 +16,11 @@ export function tokenFactoryAddress(chain) {
 export async function redPacketContract(provider) {
     return new ethers.Contract(redPacketAddress(await getChainFromProvider(provider)), RED_PACKET_ABI, provider);
 }
-export const HEXLINK_ERC721_VERSION_LATEST = 1;
-function hexlinkErc721Abi(version) {
-    if (version != 1) { // only support version 1 now
-        throw new Error("Unsupported version");
-    }
-    return HEXLINK_ERC721_ABI_V1;
-}
 export function hexlinkErc721Interface(version) {
-    return new ethers.utils.Interface(hexlinkErc721Abi(version || HEXLINK_ERC721_VERSION_LATEST));
-}
-async function getVersion(address, provider) {
-    try {
-        const abi = [
-            "function version() pure returns (uint256)",
-        ];
-        const contract = new ethers.Contract(address, abi, provider);
-        return (await contract.version()).toNumber();
-    }
-    catch (err) {
-        return HEXLINK_ERC721_VERSION_LATEST;
-    }
+    return new ethers.utils.Interface(HEXLINK_ERC721_ABI);
 }
 export async function hexlinkErc721Contract(address, provider) {
-    const version = await getVersion(address, provider);
-    return new ethers.Contract(address, hexlinkErc721Abi(version), provider);
+    return new ethers.Contract(address, HEXLINK_ERC721_ABI, provider);
 }
 export async function hexlinkErc721Metadata(erc721) {
     return {
@@ -53,5 +33,5 @@ export async function hexlinkErc721Metadata(erc721) {
     };
 }
 export async function tokenFactory(provider) {
-    return new ethers.Contract(tokenFactoryAddress(await getChainFromProvider(provider)), hexlinkErc721Abi(HEXLINK_ERC721_VERSION_LATEST), provider);
+    return new ethers.Contract(tokenFactoryAddress(await getChainFromProvider(provider)), HEXLINK_ERC721_ABI, provider);
 }

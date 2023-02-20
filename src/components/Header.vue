@@ -278,7 +278,6 @@ const doCopy = (address: string | undefined) => {
 onMounted(() => {
   document.addEventListener('click', closeDropDown);
   getComponentName();
-  console.log(useAuthStore().user);
 });
 
 onBeforeUnmount(() => {

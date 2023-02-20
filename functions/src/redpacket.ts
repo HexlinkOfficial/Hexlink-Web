@@ -117,15 +117,6 @@ function validateRedPacket(
   return true;
 }
 
-async function validateTransaction(chain: Chain, input: OpInput) {
-  const provider = getInfuraProvider(chain);
-  await provider.estimateGas({
-    to: input.to,
-    data: input.callData,
-    value: input.value,
-  });
-}
-
 export const claimRedPacket = functions.https.onCall(
     async (data, context) => {
       const result = await preprocess(data, context);
@@ -139,6 +130,7 @@ export const claimRedPacket = functions.https.onCall(
         return {code: 400, message: "redpacket_not_found"};
       }
 
+      const provider = getInfuraProvider(chain);
       let input;
       if (redPacket.type === "erc20") {
         input = await buildClaimErc20Op(chain, redPacket, account.address);
@@ -153,7 +145,11 @@ export const claimRedPacket = functions.https.onCall(
         return {code: 422, message: "already_claimed"};
       }
       try {
-        await validateTransaction(chain, input);
+        await provider.estimateGas({
+          to: input.to,
+          data: input.callData,
+          value: input.value,
+        });
       } catch {
         return {code: 422, message: "tx_validation_error"};
       }
@@ -292,7 +288,12 @@ export const createRedPacketErc721 = functions.https.onCall(
             chain, account, data.request
         );
         try {
-          await validateTransaction(chain, postData.input);
+          const provider = getInfuraProvider(chain);
+          await provider.estimateGas({
+            to: postData.input.to,
+            data: postData.input.callData,
+            value: postData.input.value,
+          });
         } catch {
           return {code: 422, message: "tx_validation_error"};
         }

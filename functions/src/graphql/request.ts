@@ -37,6 +37,5 @@ export async function insertRequest(
         args: JSON.stringify(i.args),
       }))}
   ).toPromise();
-  console.log(result);
   return result.data.insert_request.returning;
 }

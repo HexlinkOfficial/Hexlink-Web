@@ -47,6 +47,10 @@ export async function insertOp(
             request_id: i.requestId,
         }))}
     ).toPromise();
+    if (result.error) {
+        console.log(result.error);
+        throw new Error("Failed to insert operation");
+    }
     return result.data.insert_operation.returning;
 }
 
@@ -62,5 +66,9 @@ export async function updateOp(
         UPDATE_OPERATION,
         {id, tx, error}
     ).toPromise();
+    if (result.error) {
+        console.log(result.error);
+        throw new Error("Failed to update operation");
+    }
     return result.data.update_operation_by_pk.returning;
 }

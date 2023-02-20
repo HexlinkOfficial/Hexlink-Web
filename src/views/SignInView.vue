@@ -35,8 +35,11 @@
                             maxlength="1" v-model="code[index]" @input="handleInput" @keypress="isNumber"
                             @keydown.delete="handleDelete" @paste="onPaste" />
                     </div>
-                    <p>Didn't receive the verification code? Resend the code</p>
-                    <button class="cta-btn" @click="verifyOTP">Verify</button>
+                    <p v-if="!isResendLink" class="resend-plain">Resend the verification code in {{ countDown }}s.</p>
+                    <a v-if="isResendLink" class="resend" @click="resendOTP">Resend the verification code.</a>
+                    <Button class="cta-btn" type="primary" :loading="isLoading" @click="verifyOTP">
+                        Verify
+                    </Button>
                 </div>
             </div>
         </transition>
@@ -48,6 +51,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { Button } from 'ant-design-vue';
 import { twitterSocialLogin, signOutFirebase, genOTP, validateOTP } from '@/services/auth'
 import { useAuthStore } from '@/stores/auth'
 import hexlink from "@/assets/logo/blue-logo.svg";
@@ -61,6 +65,9 @@ let dataFromPaste: string[] | undefined;
 const keysAllowed: string[] = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9",];
 const show = ref<boolean>(true);
 const email = ref<string>("");
+const isResendLink = ref<boolean>(false);
+const countDown = ref<number>(60);
+const isLoading = ref(false);
 
 const onSubmit = (e: Event) => {
     e.preventDefault();
@@ -96,7 +103,6 @@ const handleInput = (event: Event) => {
             }
         }
     }
-    console.log(code);
 }
 
 const handleDelete = (event: Event) => {
@@ -119,17 +125,37 @@ const onPaste = (event: Event) => {
     }
 }
 
+const countDownTimer = () => {
+    let interval = setInterval(() => {
+        if (countDown.value > 0) {
+            countDown.value--;
+        } else {
+            clearInterval(interval);
+            isResendLink.value = true;
+        }
+    }, 1000)
+}
+
 const sendOTP = async () => {
     show.value = !show.value;
+    countDownTimer();
+    await genOTP(email.value);
+}
+
+const resendOTP = async() => {
+    countDown.value = 60;
+    isResendLink.value = false;
+    countDownTimer();
     await genOTP(email.value);
 }
 
 const verifyOTP = async () => {
+    isLoading.value = true;
     const result = await validateOTP(email.value, code.join(""));
     if (result?.code === 200) {
         router.push(store.returnUrl || "/");
     }
-    // should show an error message in UI
+    isLoading.value = false;
 }
 </script>
 
@@ -178,6 +204,11 @@ a {
   text-align: center;
   font-weight: bold;
   margin-bottom: 30px; }
+.resend {
+  text-align: center; }
+.resend-plain {
+  color: #808080;
+  text-align: center;}
 .btn-text {
     margin: 0; }
 .social-login {
@@ -211,6 +242,7 @@ a {
     margin-top: 10px;
     margin-bottom: 20px;
     width: 100%;
+    height: auto;
     border-radius: 10px;
     border: none; }
 .cta-btn:hover {

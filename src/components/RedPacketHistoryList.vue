@@ -29,7 +29,7 @@
                     <div style="display: flex;">
                       <div class="sent-info">
                         <div class="info-1">
-                          {{ showStatus(op) == 'Sent' ? 'Created' : 'Error' }}
+                          {{ showStatus(op) == 'Sent' ? 'Created' : showStatus(op) }}
                         </div>
                       </div>
                     </div>
@@ -46,7 +46,7 @@
                           Amount: {{ normalizedDbBalance(op) }}
                         </span>
                       </template>
-                      <div style="overflow: auto; white-space: nowrap; margin-left: 0.25rem; width: 50px;display: flex;justify-content: flex-end; font-size: 12px;">
+                      <div style="overflow: auto; white-space: nowrap; margin-left: 0.25rem; width: 50px;display: flex;justify-content: flex-end;">
                         - {{ prettyPrintNumber(normalizedDbBalance(op).toString()) }}
                       </div>
                     </a-tooltip>
@@ -66,7 +66,7 @@
                       </span>
                     </a-tooltip>
                     <div style="display: flex; flex-direction: column; margin-left: 0.5rem;">
-                      <span class="from-text">{{ op.redpacket.metadata.name }}</span>
+                      <span class="from-text" style="margin-left: 0rem;">{{ op.redpacket.metadata.name }}</span>
                       <span style="font-size: 12px; color: rgb(100,116,139)">
                         {{ op.redpacket.metadata.symbol }}
                       </span>
@@ -127,6 +127,7 @@
                 </div>
               </div>
             </div>
+
             <div v-if="op.type == 'create_redpacket' && width <= 990" class="record-box" style="margin-right: 0.5rem; height: auto; align-items: flex-start;">
               <div class="redpacket-details" v-if="showStatus(op) == 'Sent'" style="position: absolute; width: 80%; height: 90%;" @click="openRedpacket(op)">
               </div>
@@ -144,7 +145,7 @@
                   <div style="display: flex;">
                     <div class="sent-info">
                       <div class="info-1">
-                        {{ showStatus(op) == 'Sent' ? 'Created' : 'Error' }}
+                        {{ showStatus(op) == 'Sent' ? 'Created' : showStatus(op) }}
                       </div>
                     </div>
                   </div>
@@ -186,7 +187,7 @@
                         </span>
                       </a-tooltip>
                       <div style="display: flex; flex-direction: column; margin-left: 0.5rem;">
-                        <span class="from-text">{{ op.redpacket.metadata.name }}</span>
+                        <span class="from-text" style="margin-left: 0rem;">{{ op.redpacket.metadata.name }}</span>
                         <span style="font-size: 12px; color: rgb(100,116,139)">
                           {{ op.redpacket.metadata.symbol }}
                         </span>
@@ -195,8 +196,18 @@
                   </div>
                   <i v-if="showStatus(op) == 'Sent'" class="fa fa-paper-plane share-button" aria-hidden="true"
                     @click="share(op.redpacket)"></i>
+                  <a-tooltip v-if="showStatus(op) != 'Sent' && showStatus(op) != 'Pending'" placement="top">
+                    <template #title>
+                      <span>
+                        Check on blockchain explorer
+                      </span>
+                    </template>
+                    <a :href="useChainStore().chain.blockExplorerUrls[0]+'/tx/'+op.tx" target="_blank">
+                      <i class="fa-solid fa-arrow-up-from-bracket"></i>
+                    </a>
+                  </a-tooltip>
                 </div>
-                <div class="claim-status" v-if="op.redpacket && op.txStatus == 'success'">
+                <div class="claim-status" v-if="op.redpacket && op.txStatus == 'success'" style="margin: 10px 0;">
                   <div class="progress-bar">
                     <span v-if="op.redpacket.type === 'erc20'" class="box-progress"
                       :style="{width: progress(op.redpacket) + '%' }"></span>
@@ -283,7 +294,7 @@
                       </span>
                     </a-tooltip>
                     <div style="display: flex; flex-direction: column; margin-left: 0.5rem;">
-                      <span class="from-text">{{ op.redpacket.metadata.name }}</span>
+                      <span class="from-text" style="margin-left: 0rem;">{{ op.redpacket.metadata.name }}</span>
                       <span style="font-size: 12px; color: rgb(100,116,139)">
                         {{ op.redpacket.metadata.symbol }}#{{ op.claim?.claimed }}
                       </span>
@@ -379,8 +390,20 @@
                       </div>
                       <i v-if="showClaimStatus(op) == 'Claimed'" class="fa fa-paper-plane share-button" aria-hidden="true"
                         @click="share(op.redpacket)"></i>
+                      <i v-if="showClaimStatus(op) != 'Claimed'" class="fa fa-paper-plane share-button" aria-hidden="true"
+                        @click="share(op.redpacket)"></i>
+                      <a-tooltip v-if="showClaimStatus(op) != 'Claimed' && showStatus(op) != 'Pending'" placement="top">
+                        <template #title>
+                          <span>
+                            Check on blockchain explorer
+                          </span>
+                        </template>
+                        <a :href="useChainStore().chain.blockExplorerUrls[0]+'/tx/'+op.tx" target="_blank">
+                          <i class="fa-solid fa-arrow-up-from-bracket"></i>
+                        </a>
+                      </a-tooltip>
                     </div>
-                    <div class="claim-status" v-if="op.claim">
+                    <div class="claim-status" v-if="op.claim" style="margin: 10px 0;">
                       <div v-if="showClaimStatus(op) != 'Error'" style="display: flex; align-items: center;">
                         <div v-if="op.redpacket.type === 'erc721'">
                           <a-tooltip placement="top">

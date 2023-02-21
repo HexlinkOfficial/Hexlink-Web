@@ -23,7 +23,7 @@ npm run deploy
 1. Remember to build the project before serving/deploying to include your code changes
 2. If you are adding new functions, you will need deploy it first otherwise emulators won't pick up the change
 3. Ensure doppler is properly set up and it's reading secrets correctly. You can manually run `doppler secrets download --no-file | jq '{doppler: .}'` at your terminal to check
-4. if Failed to load function definition from source, error `dyld[78072]: missing symbol called` occurred, please follow the steps to fix:
+4. If Failed to start serve `npm run serve`, error `dyld[78072]: missing symbol called` occurred, please follow the steps to fix:
    - Start a new shell using Rosetta2: 
      - `$ arch -x86_64 zsh`
    - In that shell, reinstall the x64 version of Node.js

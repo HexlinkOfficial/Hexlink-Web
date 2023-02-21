@@ -138,7 +138,7 @@ onMounted(async () => {
 .cta-button {
   display: flex;
   justify-content: center;
-  width: 175px;
+  width: 170px;
   padding-top: 0.5rem;
   padding-bottom: 0.5rem;
   padding-left: 0.75rem;
@@ -170,7 +170,7 @@ onMounted(async () => {
 .airdrop-status {
     display: flex;
   flex-direction: row;
-  padding: 16px 16px 16px 6px;
+  padding: 16px 16px 16px 16px;
   border-radius: 5px;
   width: 100%;
   min-height: 70px;

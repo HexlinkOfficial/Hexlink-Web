@@ -13,7 +13,7 @@
             <div style="font-size: 0.875rem; line-height: 1.25rem;">{{ new Date(name).toLocaleString("en-US", options) }}</div>
           </div>
           <div v-for="(op, i) in value" :key="i" class="history-record">
-            <div v-if="op.type == 'create_redpacket'" class="record-box">
+            <div v-if="op.type == 'create_redpacket' && width > 990" class="record-box">
               <div class="sending-status" style="display: block; position: relative;">
                 <img v-if="showStatus(op) == 'Pending'" src="@/assets/svg/createRedpacketPending.svg"/>
                 <div v-if="showStatus(op) == 'Sent'" class="icon">
@@ -127,7 +127,119 @@
                 </div>
               </div>
             </div>
-            <div v-if="op.type == 'claim_redpacket'" class="record-box">
+            <div v-if="op.type == 'create_redpacket' && width <= 990" class="record-box" style="height: auto;">
+              <div v-if="showStatus(op) == 'Sent'" style="position: absolute; width: 80%; height: 100%;" @click="openRedpacket(op)">
+              </div>
+              <div style="display: flex; align-items: center; flex-direction: column; align-items: flex-start; width: 100%;">
+                <div class="content" style="flex: 1 1; width: 100%; overflow-x: auto; overflow-y: visible; text-overflow: ellipsis; white-space: nowrap; display: flex; flex-direction: row; height: 20px;">
+                  <div style="display: flex; align-items: center;">
+                    <div style="display: flex; align-items: center;">
+                      <div style="display: flex;">
+                        <div class="sending-status" style="display: block; position: relative; margin-right: 0.25rem;">
+                          <div v-if="showStatus(op) == 'Pending'" style="width: 19px; height: 19px;">
+                            <img src="@/assets/svg/createRedpacketPending.svg" style="width: 10px; height: 10px;" />
+                          </div>
+                          <div v-if="showStatus(op) == 'Sent'" class="icon" style="width: 19px; height: 19px;">
+                            <img src="@/assets/svg/createRedpacketSent.svg" style="width: 10px; height: 10px;" />
+                          </div>
+                          <div v-if="showStatus(op) == 'Error'" class="icon"
+                            style="background-color: rgb(253, 71, 85); width: 19px; height: 19px;">
+                            <img src="@/assets/svg/createRedpacketError.svg" style="width: 19px; height: 19px;" />
+                          </div>
+                        </div>
+                        <div class="sent-info">
+                          <div class="info-1">
+                            {{ showStatus(op) == 'Sent' ? 'Created' : 'Error' }}
+                          </div>
+                        </div>
+                      </div>
+                      <div class="amount" style="color: #6a6d7c; white-space: nowrap; margin-left: 0; font-size: 12px;">
+                        <div v-if="op.redpacket.type === 'erc20'" class="sent-info">
+                          <a-tooltip placement="top">
+                            <template #title>
+                              <span>
+                                Amount: {{ normalizedDbBalance(op) }}
+                              </span>
+                            </template>
+                            <div
+                              style="overflow: auto; white-space: nowrap; margin-left: 0.25rem; width: 50px;display: flex;justify-content: flex-end;">
+                              - {{ prettyPrintNumber(normalizedDbBalance(op).toString()) }}
+                            </div>
+                          </a-tooltip>
+                          <div class="token-icon" style="margin-right: 0.25rem; margin-left: 0.25rem;">
+                            <img :src="op.redpacket.token.logoURI">
+                          </div>
+                          {{ op.redpacket.metadata.mode == 2 ? 'Random' : 'Equal' }}ly
+                        </div>
+                        <div v-if="op.redpacket.type === 'erc721'" style="display: flex; align-items: center;">
+                          <a-tooltip placement="top">
+                            <template #title>
+                              <img :src="ipfsUrl(op.redpacket.metadata.tokenURI)" style="max-width: 100px;" :size="64"
+                                referrerpolicy="no-referrer" rel="preload" />
+                            </template>
+                            <span class="thumb">
+                              <img :src="ipfsUrl(op.redpacket.metadata.tokenURI)" style="border: 2px solid #D9D9D9;" :size="64"
+                                referrerpolicy="no-referrer" rel="preload" />
+                            </span>
+                          </a-tooltip>
+                          <div style="display: flex; flex-direction: column; margin-left: 0.5rem;">
+                            <span class="from-text">{{ op.redpacket.metadata.name }}</span>
+                            <span style="font-size: 12px; color: rgb(100,116,139)">
+                              {{ op.redpacket.metadata.symbol }}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="share" v-if="op.redpacket" style="justify-content: flex-start;">
+                      <i v-if="showStatus(op) == 'Sent'" class="fa fa-paper-plane share-button" aria-hidden="true"
+                        @click="share(op.redpacket)"></i>
+                      <span v-if="showStatus(op) != 'Sent'" class="pending-text"
+                        :style="showStatus(op) == 'Pending' ? 'margin-left: 5.5rem;' : ''">{{ showDetailStatus(op) }}</span>
+                    </div>
+                  </div>
+                  <div style="overflow: hidden; white-space: nowrap; text-overflow: ellipsis;">
+                    
+                  </div>
+                </div>
+                <div class="tab" style="width: 80%; margin-left: 23px;">
+                  <div style="color: #6a6d7c; white-space: nowrap; margin-left: 0; font-size: 12px;">
+                    <div style="display: flex;">{{ new Date(op.createdAt).toLocaleString().split(',')[1] }}</div>
+                  </div>
+                  <div>
+                    <div class="progress-bar" style="margin: 5px 0;">
+                      <span v-if="op.redpacket.type === 'erc20'" class="box-progress"
+                        :style="{width: progress(op.redpacket) + '%' }"></span>
+                      <span v-if="op.redpacket.type === 'erc721'" class="box-progress"
+                        :style="{ width: progressErc721(op.redpacket.metadata.token, op.redpacket.metadata.maxSupply) + '%' }"></span>
+                    </div>
+                    <div class="claimed-data">
+                      <p class="claimed-number" v-if="op.redpacket.type === 'erc20'">
+                        Claimed:&nbsp;
+                        <strong>{{ split(op.redpacket) }}/{{ op.redpacket.metadata.split }}</strong>
+                        &nbsp;Share
+                      </p>
+                      <p class="claimed-number" v-if="op.redpacket.type === 'erc721'">
+                        Claimed:&nbsp;
+                        <strong>{{ findTokenId(op.redpacket.metadata.token) }}/{{ op.redpacket.metadata.maxSupply }}</strong>
+                        &nbsp;Share
+                      </p>
+                      <p class="claimed-number-left" v-if="op.redpacket.type === 'erc20'">
+                        Left:&nbsp;
+                        <strong>{{ normalize(op.redpacket.state?.balance || op.redpacket.metadata.balance, op.redpacket.token) }}</strong>
+                        &nbsp;{{ op.redpacket.token.symbol }}
+                      </p>
+                      <p class="claimed-number-left" v-if="op.redpacket.type === 'erc721'">
+                        Left:&nbsp;
+                        <strong>{{ parseInt(op.redpacket.metadata.maxSupply) - findTokenId(op.redpacket.metadata.token) }}</strong>
+                        &nbsp;
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div v-if="op.type == 'claim_redpacket' && width > 990" class="record-box">
               <div class="status-icon" style="display: block; position: relative;">
                 <div class="icon" :style="showClaimStatus(op) == 'Error' ? 'background-color: #FD4755;' : ''">
                   <img v-if="showClaimStatus(op) != 'Claimed' && showClaimStatus(op) != 'Error'" src="@/assets/svg/claimRedpacketPending.svg"/>
@@ -244,6 +356,8 @@ import type { RedPacket } from "../../functions/redpacket";
 import { options } from "@/assets/imageAssets";
 import { ipfsUrl } from "@/web3/storage";
 import { prettyPrintNumber } from "@/web3/utils";
+import { useWindowSize } from '@vueuse/core'
+import router from '@/router';
 
 const createdRpOps = ref<CreateRedPacketOp[]>([]);
 const claimedRpOps = ref<ClaimRedPacketOp[]>([]);
@@ -257,6 +371,7 @@ const luckHistoryByDate = ref<any>([]);
 const tokenIdAddress = ref<string[]>([]);
 const createdCount = ref<number>(0);
 const claimedCount = ref<number>(0);
+const { width, height } = useWindowSize()
 
 interface tokenIDMap {
   address: string,
@@ -513,6 +628,10 @@ const aggregatedClaimed = async function(
   }
   return op;
 }
+
+const openRedpacket = (op: any) => {
+  router.push({ query: { details: op.redpacket.id } });
+}
 </script>
 
 <style lang="less" scoped>
@@ -596,9 +715,7 @@ i:hover {
   white-space: nowrap;
   font-weight: 600;
   font-size: 12px;
-  color: #000;
-  @media (max-width: 990px) {
-    flex-direction: column; } }
+  color: #000; }
 .icon {
   display: flex;
   justify-content: center;

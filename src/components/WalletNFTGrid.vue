@@ -94,7 +94,9 @@ onMounted(async () => {
   justify-content: center;
   align-items: center;
   padding: 16px 20px;
-  transition: opacity .3s ease-out; }
+  transition: opacity .3s ease-out;
+  @media (max-width: 640px) {
+    padding: 10px 10px; } }
 .card_details {
   position: relative;
   z-index: 1;

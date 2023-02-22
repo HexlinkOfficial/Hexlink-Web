@@ -8,7 +8,7 @@
       <div class="card_footer">
         <div class="card_details">
           <div class="card_details_box">
-            <div>
+            <div style="width: 100%;">
               <div class="box-content">
                 <div class="collection_name_text">{{ props.nftImage!.nft.symbol }}</div>
                 <a :href="getOpenseaUrl(props.nftImage!.nft)" target="_blank">
@@ -106,8 +106,7 @@ const getOpenseaUrl = (nft: nftImage) => {
   line-height: 1.25rem;
   color: #262833;
   font-weight: 500;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  overflow: scroll;
   white-space: nowrap;
   white-space: pre;
   margin-bottom: 0rem;
@@ -123,4 +122,6 @@ const getOpenseaUrl = (nft: nftImage) => {
   overflow: hidden;
   transition: transform .2s cubic-bezier(.5, 1, .89, 1);
   box-shadow: 0 0 15px 1px rgb(0 0 0 / 10%); }
+::-webkit-scrollbar {
+  display: none; }
 </style>

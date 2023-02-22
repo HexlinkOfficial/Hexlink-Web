@@ -56,29 +56,8 @@ const loadTokens = async () => {
 onMounted(loadTokens);
 watch(() => useChainStore().current, loadTokens);
 
-const isGreen = ref(true);
-
-const props = defineProps({
-  balance: {
-    type: Object as () => string,
-    required: false,
-  }
-});
-
-const price = (token: Token) : number => {
-  return 0;
-}
-
 const usdValue = (token: Token) : string => {
   return "0.00";
-};
-
-const getPortfolioRatio = (token: Token) => {
-  const balance = Number(props.balance || 0);
-  if (balance > 0) {
-    return usdValue(token) * 100 / balance;
-  }
-  return 0;
 };
 </script>
 

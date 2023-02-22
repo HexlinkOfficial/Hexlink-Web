@@ -1,6 +1,6 @@
 <template>
   <div v-if="claimStatus == ''" class="claim-card transition" :style="claimItem == 'erc721' ? 'height: 500px;' : ''">
-    <router-link to="/redpackets">
+    <router-link to="/airdrop">
       <svg class="redpacket_close transition" width="30" height="30" viewBox="0 0 30 30" fill="none"
         xmlns="http://www.w3.org/2000/svg">
         <path
@@ -41,7 +41,7 @@
       <span style="font-size: 20px; margin-top: 1rem;">{{ loadText() }}</span><br>
     </h2>
     <div class="cta-container transition" style="margin-top: 340px;">
-      <router-link to="/redpackets">
+      <router-link to="/airdrop">
         <button class="cta">OK</button>
       </router-link>
     </div>

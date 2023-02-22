@@ -833,11 +833,6 @@ input::-webkit-inner-spin-button {
   @media (max-width: 990px) {
     top: 50vh;
     left: 50%; } }
-// .claim-card:hover {
-//   box-shadow: 0px 30px 30px rgba(0, 0, 0, 0.2);
-//   height: 430px;
-//   width: 330px;
-//   color: white; }
 .transition {
   transition: .3s cubic-bezier(.3, 0, 0, 1.3) }
 .redpacket_close {

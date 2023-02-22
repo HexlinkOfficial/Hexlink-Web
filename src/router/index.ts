@@ -22,7 +22,7 @@ const router = createRouter({
       component: () => import('@/views/AdminView.vue')
     },
     {
-      path: '/redpackets',
+      path: '/airdrop',
       name: 'red pockets view',
       component: () => import('@/views/RedPacketsView.vue')
     },
@@ -32,7 +32,7 @@ const router = createRouter({
       component: () => import('@/views/AirdropShare.vue')
     },
     {
-      path: '/redpacket/send',
+      path: '/airdrop/send',
       name: 'red pocket send view',
       component: () => import('@/views/RedPacketSendView.vue')
     },

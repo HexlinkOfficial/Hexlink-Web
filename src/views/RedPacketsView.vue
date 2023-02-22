@@ -1,5 +1,5 @@
 <template>
-  <Layout :hidden="showClaim || showDetails" :active="1">
+  <Layout :hidden="showClaim || showDetails || showTokenSendModal" :active="1">
     <lockScreen v-if="isLocked" @lock="lock"></lockScreen>
     <RedPacketBase v-if="!isLocked">
       <RedPacektHistoryList></RedPacektHistoryList>
@@ -7,6 +7,7 @@
   </Layout>
   <RedPacketClaim v-if="showClaim"></RedPacketClaim>
   <RedPacketDetail v-if="showDetails"></RedPacketDetail>
+  <RedPacketSendModal v-if="showTokenSendModal"></RedPacketSendModal>
 </template>
 
 <script setup lang="ts">
@@ -20,6 +21,7 @@ import RedPacketClaim from "@/components/RedPacketClaim.vue";
 import RedPacketDetail from "@/components/RedPacketDetail.vue";
 import Layout from "@/components/Layout.vue";
 import lockScreen from "@/components/lockScreen.vue";
+import RedPacketSendModal from "@/components/RedPacketSendModal.vue";
 
 const isLocked = ref<boolean>(true);
 const whitelist = useWhitelistStore();
@@ -39,6 +41,10 @@ const showClaim = computed(() => {
 const showDetails = computed(() => {
   return !!useRoute().query.details;
 });
+
+const showTokenSendModal = computed(() => {
+  return !!useRoute().query.action;
+})
 
 const lock = () => {
   isLocked.value = false;

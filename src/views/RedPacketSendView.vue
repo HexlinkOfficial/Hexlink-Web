@@ -12,7 +12,6 @@ import RedPacketBase from "@/components/RedPacketBase.vue";
 import RedPacketSend from "@/components/RedPacketSend.vue";
 import RedpacketConfirm from "@/components/RedPacketConfirm.vue";
 import Layout from "@/components/Layout.vue";
-
 import { useRedPacketStore } from '@/stores/redpacket';
 import { storeToRefs } from 'pinia';
 

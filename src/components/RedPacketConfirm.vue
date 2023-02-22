@@ -77,7 +77,7 @@ const createRedPacket = async () => {
 const router = useRouter();
 const closeModal = () => {
   if (store.status == 'success') {
-    router.push("/redpackets");
+    router.push("/airdrop");
   }
   store.setStatus("");
 }

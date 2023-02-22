@@ -20,6 +20,7 @@
             <div class="qrcode">
                 <canvas id="canvas"></canvas>
             </div>
+            <p class="countdown">The QR code will be refreshed in {{countDown}} seconds.</p>
             <p class="or"><span>or copy the claim link</span></p>
             <button class="cta-btn" @click="copy(claimUrl, 'Claim URL Copied')" style="margin-bottom: 50px;">Copy</button>
         </div>
@@ -38,6 +39,8 @@ import { copy } from "@/web3/utils";
 const secret = ref<string | undefined>();
 const redPacket = ref<RedPacketDB | undefined>();
 const claimUrl = ref<string>("");
+let countDown = ref<number>(5);
+
 onMounted(async () => {
     const route = useRoute();
     const redPacketId = route.params.id;
@@ -105,8 +108,17 @@ const genQrCode = async() => {
 
 const refreshQrCode = async () => {
     await genQrCode();
-    await delay(5000);
+    await countDownTimer(30);
     await refreshQrCode();
+}
+
+async function countDownTimer(total: number) {
+    countDown.value = total;
+    while(countDown.value > 0) {
+        console.log(countDown);
+        await delay(1000);
+        countDown.value -= 1;
+    }
 }
 
 onMounted(refreshQrCode);
@@ -121,7 +133,7 @@ onMounted(refreshQrCode);
     border-radius: 15px;
     overflow: hidden;
     margin: 20px;
-    margin-bottom: calc(1rem + 20px); }
+    margin-bottom: calc(1rem + 10px); }
 .subtitle {
     color: rgba(0, 0, 0, 0.6);
     font-weight: 500; }
@@ -151,6 +163,10 @@ onMounted(refreshQrCode);
     width: 100vw;
     height: 100vh;
     background-color: white; }
+.countdown {
+    color: rgba(0, 0, 0, 0.6);
+    font-weight: 500;  
+    font-size: 14px;}
 .or {
     text-align: center;
     font-weight: bold;

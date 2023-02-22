@@ -78,18 +78,6 @@ const isValidOTP = (updatedAt: string) => {
   return time < expiredAfter;
 };
 
-export const refreshCustomToken = functions.https.onCall(
-    async (_data, context) => {
-      Firebase.getInstance();
-      const uid = context.auth?.uid;
-      if (!uid) {
-        return {code: 401, message: "Unauthorized"};
-      }
-
-      const customToken = await createCustomToken(uid);
-      return {code: 200, token: customToken};
-    });
-
 const createCustomToken = async (uid: string) => {
   const claims = {
     "https://hasura.io/jwt/claims": {

@@ -2,7 +2,7 @@ import {getAuth} from "firebase-admin/auth";
 import {ethers} from "ethers";
 import {hexlContract, nameHash} from "../common";
 import type {Chain} from "../common";
-
+import {getUserById} from "./graphql/user";
 import * as functions from "firebase-functions";
 
 const ALCHEMY_KEYS : {[key: string]: string} = {
@@ -13,6 +13,7 @@ const ALCHEMY_KEYS : {[key: string]: string} = {
 const secrets = functions.config().doppler || {};
 
 const TWITTER_PROVIDER_ID = "twitter.com";
+const EMAIL_PROVIDER_ID = "mailto";
 
 export interface GenNameHashSuccess {
   code: 200;
@@ -38,20 +39,38 @@ export async function genNameHash(
   }
 
   const userInfoList = user.providerData;
+
+  // custom token will not have provider data stored with it
+  if (!userInfoList || userInfoList.length < 1) {
+    const user = await getUserById(uid);
+    if (!user || !user.email) {
+      return {code: 400, message: "Invalid uid: no provider data nor valid record in user table."};
+    }
+
+    const name = calcNameHash(EMAIL_PROVIDER_ID, user.email, version);
+    return {code: 200, nameHash: name};
+  }
+
   for (const userInfo of userInfoList) {
     if (userInfo.providerId.toLowerCase() === TWITTER_PROVIDER_ID) {
-      let name = nameHash(TWITTER_PROVIDER_ID, userInfo.uid);
-      if (process.env.FUNCTIONS_EMULATOR && version) {
-        name = ethers.utils.keccak256(
-            ethers.utils.toUtf8Bytes(name + "@" + version)
-        );
-      }
+      const name = calcNameHash(TWITTER_PROVIDER_ID, userInfo.uid, version);
       return {code: 200, nameHash: name};
     }
   }
 
-  return {code: 400, message: "Invalid uid: not provided with twitter"};
+  return {code: 400, message: "Invalid uid: not provided with valid provider"};
 }
+
+const calcNameHash = (providerId: string, id: string, version?: number) => {
+  let name = nameHash(providerId, id);
+  if (process.env.FUNCTIONS_EMULATOR && version) {
+    name = ethers.utils.keccak256(
+        ethers.utils.toUtf8Bytes(name + "@" + version)
+    );
+  }
+
+  return name;
+};
 
 export const getAlchemyProvider = (
     chainId: string

@@ -282,7 +282,6 @@ i:hover {
     height: 150px; } }
 .transaction-detail {
   border-radius: 0.75rem;
-  margin-top: 1rem;
   padding: 0.5rem;
   overflow: visible; }
 .transaction-detail .token-table {

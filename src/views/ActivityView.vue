@@ -9,7 +9,7 @@
                 <div class="title">
                   <div class="title-col">
                     <div class="content">
-                      <div class="text">Transactions</div>
+                      <div class="text">Activities</div>
                       <img src="@/assets/svg/colon.svg"/>
                     </div>
                   </div>

@@ -37,23 +37,8 @@
                     </div>
                   </div>
                 </div>
-                <div class="views">
-                  <div class="detail-view">
-                    <button class="listView-button" @click="transactionView = false; nftView = true"
-                      :class="nftView && 'show'">Collections</button>
-                    <button class="listView-button" @click="nftView = false; transactionView = true"
-                      :class="transactionView && 'show'">History</button>
-                  </div>
-                </div>
               </div>
-              <div v-if="transactionView" class="token-listDetail">
-                <div class="token-table">
-                  <div style="overflow: visible; border-radius: 0.75rem;">
-                    <CollectableTransaction></CollectableTransaction>
-                  </div>
-                </div>
-              </div>
-              <div v-if="nftView" class="nft-gridDetail">
+              <div class="nft-gridDetail">
                 <WalletNFTGrid></WalletNFTGrid>
               </div>
             </div>
@@ -68,12 +53,7 @@
 import { ref } from "vue";
 import Layout from "../components/Layout.vue";
 import WalletNFTGrid from "@/components/WalletNFTGrid.vue";
-import CollectableTransaction from "@/components/CollectableTransaction.vue";
 import { useNftStore } from '@/stores/nft';
-
-const nftView = ref<boolean>(true);
-const transactionView = ref<boolean>(false);
-const totalNfts = ref<number>(0);
 </script>
 
 <style lang="less" scoped>
@@ -281,120 +261,6 @@ const totalNfts = ref<number>(0);
           width: 1rem;
           height: 1rem;
           margin-left: 0.75rem; }
-  .token-list .views {
-    margin-top: 0.75rem;
-    grid-column: span 4 / span 4;
-  
-    @media (min-width: 640px) {
-      display: flex;
-      margin-top: 0; } }
-    .token-list .views .detail-view {
-      display: flex;
-      padding: 0.125rem;
-      transition-property: background-color, border-color, color, fill, stroke;
-      border-radius: 50px;
-      border-style: solid;
-      border-width: 1px;
-      border-color: rgb(71, 85, 105);
-    
-      @media (min-width: 640px) {
-        margin-left: 0.75rem;
-        margin-left: 0.875rem;
-        max-width: 28rem; } }
-      .token-list .views .detail-view button {
-        padding-top: 0.5rem;
-        padding-bottom: 0.5rem;
-        padding-left: 0.75rem;
-        padding-right: 0.75rem;
-        color: #000;
-        font-size: 0.875rem;
-        line-height: 1.25rem;
-        font-weight: 800;
-        line-height: 1.25rem;
-        width: 50%;
-        border-radius: 50px;
-        @media (min-width: 640px) {
-          padding-left: 1.5rem;
-          padding-right: 1.5rem;
-          width: 150px; }
-        @media (min-width: 768px) {
-          padding-left: 1.5rem;
-          padding-right: 1.5rem;
-          width: 150px; } }
-      .token-list .views .detail-view .listView-button {
-        opacity: 1;
-        background-color: rgba(7, 106, 224,0);
-  color: rgb(71, 85, 105); }
-      .token-list .views .detail-view .listView-button:hover {
-        opacity: 1;
-        color: rgb(7, 106, 224); }
-      .token-list .views .detail-view .listView-button.show {
-        opacity: 1;
-        background-color: rgb(7, 106, 224);
-        color: white; }
-.token-listDetail {
-  border-radius: 0.75rem;
-  margin-top: 1.75rem; }
-  .token-listDetail .token-table {
-    display: flex;
-    margin-left: -1rem;
-    margin-right: -1rem;
-    flex-direction: column;
-  
-    @media (min-width: 640px) {
-      margin-left: 0;
-      margin-right: 0; } }
-    .token-listDetail .token-table table {
-      min-width: 100%;
-      table-layout: auto;
-      border-color: inherit;
-      text-indent: 0; }
-      .token-listDetail .token-table .table-thread {
-        display: none;
-        border-bottom: 1px solid #e5e7eb;
-        @media (min-width: 640px) {
-          display: table-header-group; } }
-        .token-listDetail .token-table .table-thread .toke-header {
-          font-weight: 400;
-          cursor: pointer; }
-          .token-listDetail .token-table .table-thread .toke-header .token-header-data {
-            display: flex;
-            align-items: center; }
-        .token-listDetail .token-table .table-thread .portfolio-percentage-header {
-          display: none;
-          font-weight: 400;
-          cursor: pointer;
-
-          @media (min-width: 1024px) {
-            display: table-cell; } }
-          .token-listDetail .token-table .table-thread .portfolio-percentage-header .portfolio-percentage-header-data {
-            display: flex;
-            align-items: center; }
-          .token-listDetail .token-table .table-thread .portfolio-percentage-header .portfolio-percentage-header-sign {
-            display: flex;
-            margin-left: 0.5rem;
-            flex-direction: column;
-            align-items: center; }
-        .token-listDetail .token-table .table-thread .price-header {
-          display: none;
-          font-weight: 400;
-          cursor: pointer;
-        
-          @media (min-width: 768px) {
-            display: table-cell; } }
-          .token-listDetail .token-table .table-thread .price-header .price-header-data {
-            display: flex;
-            align-items: center; }
-        .token-listDetail .token-table .table-thread .balance-header {
-          font-weight: 400;
-          text-align: right;
-          cursor: pointer;
-        
-          @media (min-width: 768px) {
-            text-align: left; } }
-          .token-listDetail .token-table .table-thread .balance-header .balance-header-data {
-            display: flex;
-            align-items: center; }
 img,
 svg {
   vertical-align: middle; }

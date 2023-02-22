@@ -66,7 +66,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
 import WalletTokenList from "@/components/WalletTokenList.vue";
 import WalletNFTGrid from "@/components/WalletNFTGrid.vue";
 import { useChainStore } from '@/stores/chain';

@@ -26,7 +26,9 @@
 </template>
 
 <script setup lang="ts">
+import { onMounted } from 'vue'
 import type { nftImage } from '@/web3/tokens';
+import { useChainStore } from '@/stores/chain';
 
 const props = defineProps({
   nftImage: Object
@@ -45,7 +47,13 @@ const getImageSource = () => {
 }
 
 const getOpenseaUrl = (nft: nftImage) => {
-  return 'https://opensea.io/assets/ethereum/' + nft.contract + '/' + nft.id;
+  if (useChainStore().chain.name == "goerli") {
+    return 'https://testnets.opensea.io/assets/goerli/' + nft.contract + '/' + nft.id;
+  } else if (useChainStore().chain.name == "polygon") {
+    return 'https://opensea.io/assets/matic/' + nft.contract + '/' + nft.id;
+  } else if (useChainStore().chain.name == "arbitrum") {
+    return 'https://opensea.io/assets/arbitrum/' + nft.contract + '/' + nft.id;
+  }
 }
 </script>
 

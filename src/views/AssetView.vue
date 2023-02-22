@@ -39,14 +39,6 @@
                   </div>
                 </div>
               </div>
-              <div class="views">
-                <div class="detail-view">
-                  <button class="listView-button" @click="tokenTransaction = false; tokenView = true"
-                    :class="tokenView && 'show'">Tokens</button>
-                  <button class="listView-button" @click="tokenView = false; tokenTransaction = true"
-                    :class="tokenTransaction && 'show'">History</button>
-                </div>
-              </div>
             </div>
             <div v-if="tokenView" class="token-listDetail">
               <div class="token-table">
@@ -54,9 +46,6 @@
                   <WalletTokenList></WalletTokenList>
                 </div>
               </div>
-            </div>
-            <div v-if="tokenTransaction" class="transaction-detail">
-              <AssetTransaction></AssetTransaction>
             </div>
           </div>
         </div>
@@ -68,21 +57,12 @@
 <script setup lang="ts">
 import { ref, computed } from "vue";
 import WalletTokenList from "@/components/WalletTokenList.vue";
-import AssetTransaction from "@/components/AssetTransaction.vue";
-import { useChainStore } from '@/stores/chain';
-import { useAccountStore } from "@/stores/account";
 import { useWalletStore } from "@/stores/wallet";
 import { BigNumber } from "bignumber.js";
 import { connectWallet } from "@/web3/wallet";
 
-const tokenTransaction = ref<boolean>(false);
 const tokenView = ref<boolean>(true);
 const sendTo = ref<string>("");
-
-const blockExplorer = computed(() => {
-  const account = useAccountStore().account?.address;
-  return `${useChainStore().chain.blockExplorerUrls[0]}/address/${account}`;
-});
 
 const price = computed(() => {
   return BigNumber(0);
@@ -346,57 +326,6 @@ const openSend = async () => {
           width: 1rem;
           height: 1rem;
           margin-left: 0.75rem; }
-  .token-list .views {
-    margin-top: 0.75rem;
-    grid-column: span 4 / span 4;
-  
-    @media (min-width: 640px) {
-      display: flex;
-      margin-top: 0; } }
-    .token-list .views .detail-view {
-      display: flex;
-      padding: 0.125rem;
-      transition-property: background-color, border-color, color, fill, stroke;
-      border-radius: 50px;
-      border-style: solid;
-      border-width: 1px;
-      border-color: rgb(71, 85, 105);
-    
-      @media (min-width: 640px) {
-        margin-left: 0.75rem;
-        margin-left: 0.875rem;
-        max-width: 28rem; } }
-      .token-list .views .detail-view button {
-        padding-top: 0.5rem;
-        padding-bottom: 0.5rem;
-        padding-left: 0.75rem;
-        padding-right: 0.75rem;
-        color: #000;
-        font-size: 0.875rem;
-        line-height: 1.25rem;
-        font-weight: 800;
-        line-height: 1.25rem;
-        width: 50%;
-        border-radius: 50px;
-        @media (min-width: 640px) {
-          padding-left: 1.5rem;
-          padding-right: 1.5rem;
-          width: 150px; }
-        @media (min-width: 768px) {
-          padding-left: 1.5rem;
-          padding-right: 1.5rem;
-          width: 150px; } }
-      .token-list .views .detail-view .listView-button {
-        opacity: 1;
-        background-color: rgba(7, 106, 224,0);
-  color: rgb(71, 85, 105); }
-      .token-list .views .detail-view .listView-button:hover {
-        opacity: 1;
-        color: rgb(7, 106, 224); }
-      .token-list .views .detail-view .listView-button.show {
-        opacity: 1;
-        background-color: rgb(7, 106, 224);
-        color: white; }
 .token-listDetail {
   border-radius: 0.75rem;
   margin-top: 1.75rem; }
@@ -489,9 +418,6 @@ const openSend = async () => {
 img,
 svg {
   vertical-align: middle; }
-.transaction-detail {
-  border-radius: 0.75rem;
-  margin-top: 1.75rem; }
 .invite-content .input-group-text {
   background: #556ee6;
   color: #fff; }

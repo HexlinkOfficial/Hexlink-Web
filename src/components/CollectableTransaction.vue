@@ -45,7 +45,7 @@
                 </div>
               </div>
               <div class="token-amount">
-                <div style="display: flex; align-items: center;">
+                <div class="sent-info">
                   <a-tooltip placement="top">
                     <template #title>
                       <img :src="getNFTdata(r.tx.tokenID, r.asset.address)!.image" :size="64" referrerpolicy="no-referrer" rel="preload" />
@@ -232,10 +232,19 @@ const getNFTdata = (id: string, contract: string) => {
 
 onMounted(async () => {
   await loadTransactions(useNftStore().contracts);
+  console.log(transactionByDate.value);
 });
 </script>
 
 <style lang="less" scoped>
+.sent-info {
+  display: flex;
+  align-items: center;
+  flex-shrink: 1;
+  white-space: nowrap;
+  font-size: 0.875rem;
+  color: #000;
+}
 i {
   color: rgba(0, 0, 0, 0.3);
   font-size: 15px;

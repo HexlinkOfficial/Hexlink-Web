@@ -196,7 +196,7 @@ import { useChainStore } from "@/stores/chain";
 import { getPriceInfo } from "@/web3/network";
 import { hash, calcGas } from "../../functions/common";
 import { redpacketErc721Id } from "../../functions/redpacket";
-import type { NftAirdrop } from "../../functions/redpacket";
+import type { RedPacketErc721Input } from "../../functions/redpacket";
 import type { BalanceMap } from "@/web3/tokens";
 import { getBalances } from "@/web3/tokens";
 import { useAccountStore } from '@/stores/account';
@@ -219,8 +219,6 @@ const tokenStore = useTokenStore();
 const walletStore = useWalletStore();
 const chooseGasDrop = ref<boolean>(false);
 const tokens = ref<Token[]>([]);
-const sendStatus = ref<string>("");
-const message = ref<string>("Let's go!");
 const imageColor = ref<string>("");
 const getColorStatus = ref<string>("");
 const enableDynamic = ref<boolean>(false);
@@ -241,7 +239,12 @@ function createObjectURL(file: File) {
       : window.webkitURL.createObjectURL(file);
 }
 
-const nftAirdrop = ref<NftAirdrop>({
+interface RawRedPacketErc721Input extends RedPacketErc721Input {
+  splitInput: string;
+  file?: File,
+}
+
+const nftAirdrop = ref<RawRedPacketErc721Input>({
   id: "",
   name: "",
   symbol: "",
@@ -255,6 +258,8 @@ const nftAirdrop = ref<NftAirdrop>({
   validator: validator(),
   validationRules: [],
   transferrable: true,
+  creator: useAccountStore().account?.address || "",
+  sponsorGas: true,
 });
 
 const setAccount = (account: AccountType) => {
@@ -413,9 +418,9 @@ const confirmNFT = async () => {
   if (validateInput()) {
     nftAirdrop.value.salt = hash(new Date().toISOString());
     nftAirdrop.value.split = Number(nftAirdrop.value.splitInput);
+    nftAirdrop.value.creator = useAccountStore().account!.address;
     nftAirdrop.value.id = redpacketErc721Id(
       useChainStore().chain,
-      useAccountStore().account!.address,
       nftAirdrop.value
     );
     if (!nftAirdrop.value.tokenURI) {

@@ -35,7 +35,7 @@ import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { useRedPacketStore } from '@/stores/redpacket';
 import { createNewRedPacket, createRedPacketErc721 } from "@/web3/redpacket";
-import type { RedPacketInput, NftAirdrop } from "../../functions/redpacket";
+import type { RedPacketInput, RedPacketErc721Input } from "../../functions/redpacket";
 
 const props = defineProps({
   mode: String
@@ -64,7 +64,7 @@ const createRedPacket = async () => {
   } else {
     try {
       await createRedPacketErc721(
-        store.redpacket! as NftAirdrop,
+        store.redpacket! as RedPacketErc721Input,
         store.account == "hexlink",
         false // dryrun
       );

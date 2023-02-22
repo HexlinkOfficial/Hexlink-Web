@@ -23,12 +23,9 @@ import type { RedPacketInput, RedPacketErc721Input } from "../../functions/redpa
 import {
     redPacketContract,
     buildRedPacketOps,
-    tokenFactoryInterface,
+    buildDeployErc721Ops,
     tokenFactoryAddress,
-    hexlinkErc721Interface,
     hexlinkErc721Contract,
-    hexlinkSwapAddress,
-    hexlinkSwapInterface,
 } from "../../functions/redpacket";
 
 import { useChainStore } from "@/stores/chain";
@@ -97,68 +94,6 @@ async function buildApproveTx(
             value: ethers.utils.hexValue(0),
         }
     }];
-}
-
-function buildGasSponsorshipOps(
-    chain: Chain,
-    redpacket: address,
-    hexlAccount: string,
-    input: RedPacketInput
-) {
-    const data = redPacketInterface.encodeFunctionData("deposit", [input.id])
-    if (isNativeCoin(input.gasToken, chain)) {
-        return [{
-            name: "deposit",
-            function: "deposit",
-            args: {packetId: input.id, value: input.gasSponsorship},
-            input: {
-                to: redpacket,
-                callGasLimit: "0",
-                callData,
-                value: ethers.utils.hexValue(input.gasSponsorship),
-            }
-        }];
-    } else {
-        const approveData = erc20Interface.encodeFunctionData(
-            "approve", [hexlAccount, input.gasSponsorship]
-        );
-        const swapAndDepositData = hexlinkSwapInterface.encodeFunctionData(
-            "swapAndCall",
-            [input.gasToken, input.gasSponsorship, redpacket, data]
-        );
-        return [
-            {
-                name: "approve",
-                function: "approve",
-                args: {
-                    operator: hexlinkSwapAddress(chain),
-                    amount: input.gasSponsorship
-                },
-                input: {
-                    to: input.gasToken,
-                    callGasLimit: "0",
-                    callData: ,
-                    value: ethers.utils.hexValue(input.gasSponsorship),
-                }
-            },
-            {
-                name: "swapAndDeposit",
-                function: "swapAndCall",
-                args: {
-                    token: input.gasToken,
-                    amountIn: input.gasSponsorship,
-                    to: redpacket,
-                    data: { deposit: input.id }
-                },
-                input: {
-                    to: hexlinkSwapAddress(chain),
-                    callGasLimit: "0",
-                    callData: swapAndDepositData,
-                    value: "0",
-                }
-            }
-        ];
-    }
 }
 
 async function buildDepositErc20TokenOp(
@@ -303,10 +238,10 @@ async function createRedPacketTxForMetamask(
         }
     }
  
-    userOps = userOps.concat(buildGasSponsorshipOps(
-        chain, redPacketAddress(chain), hexlAccount, input
+    userOps = userOps.concat(await buildRedPacketOps(
+        useChainStore().provider,
+        input
     ));
-    userOps = userOps.concat(buildRedPacketOps(chain, input));
     return await buildTransactionsForMetamask(
         hexlAccount,
         walletAccount,
@@ -351,13 +286,10 @@ async function buildCreateRedPacketRequest(
     deploy?: DeployRequest,
 }> {
     const hexlAccount = useAccountStore().account!.address;
-    const chain = useChainStore().chain;
-
-    let userOps : Op[] = [];
-    userOps = userOps.concat(buildGasSponsorshipOps(
-        chain, redPacketAddress(chain), hexlAccount, input
-    ));
-    userOps = userOps.concat(buildRedPacketOps(chain, input));
+    let userOps : Op[] = await buildRedPacketOps(
+        useChainStore().provider,
+        input
+    );
     return await buildUserOpRequest(
         userOps.map(op => op.input),
         input.gasToken
@@ -448,37 +380,6 @@ export async function queryErc721TokenId(address: string) : Promise<number> {
     return info.toNumber();
 }
 
-export function buildDeployErc721Op(
-    chain: Chain,
-    input: RedPacketErc721Input,
-): Op {
-    const initData = hexlinkErc721Interface().encodeFunctionData(
-        "init",
-        [
-            input.name,
-            input.symbol,
-            input.tokenURI,
-            input.split, validator(), 
-            input.transferrable
-        ]
-    );
-    const callData = tokenFactoryInterface.encodeFunctionData(
-        "deployErc721",
-        [input.salt, initData]
-    );
-    return {
-        name: "create_redpacket_erc721",
-        function: "deployErc721",
-        args: input,
-        input: {
-            to: tokenFactoryAddress(chain),
-            value: "0",
-            callGasLimit: "0",
-            callData
-        }
-    }
-}
-
 export async function createRedPacketErc721ForMetamask(
     input: RedPacketErc721Input,
 ) : Promise<Transaction[]> {
@@ -502,13 +403,8 @@ export async function createRedPacketErc721ForMetamask(
         txes = txes.concat(tx);
         userOps = userOps.concat(op);
     }
-
-    userOps.push(buildDeployErc721Op(chain, input));
-    const redpacket = await tokenFactoryContract(
-        useChainStore().provider
-    ).predictErc721Address(input.salt);
-    userOps = userOps.concat(buildGasSponsorshipOps(
-        chain, redpacket, hexlAccount, input
+    userOps = userOps.concat(await buildDeployErc721Ops(
+        useChainStore().provider, input
     ));
     return await buildTransactionsForMetamask(
         hexlAccount,
@@ -527,15 +423,9 @@ async function buildCreateRedPacketErc721Request(
 }> {
     const hexlAccount = useAccountStore().account!.address;
     const chain = useChainStore().chain;
-
-    let userOps : Op[] = [];
-    userOps = userOps.concat(buildDeployErc721Op(chain, input));
-    const redpacket = await tokenFactoryContract(
-        useChainStore().provider
-    ).predictErc721Address(input.salt);
-    userOps = userOps.concat(buildGasSponsorshipOps(
-        chain, redpacket, hexlAccount, input
-    ));
+    const userOps = await buildDeployErc721Ops(
+        useChainStore().provider, input
+    );
     return await buildUserOpRequest(
         userOps.map(op => op.input),
         input.gasToken

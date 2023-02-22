@@ -1,6 +1,8 @@
-import { ethers } from "ethers";
+import { ethers, BigNumber as EthBigNumber } from "ethers";
 
-import type { Chain } from "../../functions/common";
+import { isNativeCoin, isWrappedCoin } from "../../functions/common";
+import type { Chain, BigNumberish } from "../../functions/common";
+import { hexlinkSwap } from "../../functions/redpacket";
 import { useWalletStore } from "@/stores/wallet";
 import { useRedPacketStore } from "@/stores/redpacket";
 import { useChainStore } from '@/stores/chain';
@@ -80,13 +82,19 @@ export function getInfuraProvider(chain: Chain) {
 }
 
 export async function getPriceInfo(chain: Chain, gasToken: string) : Promise<{
-    gasPrice: string,
-    tokenPrice: string
+    gasPrice: BigNumberish,
+    tokenPrice: BigNumberish
 }> {
     const provider = getInfuraProvider(chain);
     const {gasPrice} = await provider.getFeeData();
-    const swap = await hexlinkSwap(provider);
-    const tokenPrice = await swap.priceOf(gasToken);
+    let tokenPrice;
+    if (isNativeCoin(gasToken, chain) || isWrappedCoin(gasToken, chain)) {
+        tokenPrice = EthBigNumber.from(10).pow(18);
+    } else {
+        const swap = await hexlinkSwap(provider);
+        tokenPrice = await swap.priceOf(gasToken);
+    }
+
     return {gasPrice, tokenPrice}
 }
 

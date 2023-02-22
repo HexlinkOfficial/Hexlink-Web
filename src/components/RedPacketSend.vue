@@ -240,6 +240,8 @@ const redpacket = ref<RawRedPacketInput>({
   estimatedGas: "0",
   validator: validator(),
   validationRules: [],
+  creator: useAccountStore().account?.address || "",
+  sponsorGas: true,
 });
 
 const token = computed(() => tokenStore.token(redpacket.value.token));
@@ -302,7 +304,7 @@ const setGas = async() => {
   const price = await getPriceInfo(chain, redpacket.value.gasToken);
   const sponsorshipAmount =
     EthBigNumber.from(200000).mul(redpacket.value.split || 0);
-    redpacket.value.gasSponsorship = calcGas(
+  redpacket.value.gasSponsorship = calcGas(
     chain,
     tokenStore.token(redpacket.value.gasToken),
     sponsorshipAmount,
@@ -384,7 +386,7 @@ const validateInput = () => {
   return true;
 };
 
-const confirmRedPacket = function () {
+const confirmRedPacket = async function () {
   if (validateInput()) {
     redpacket.value.salt = hash(new Date().toISOString());
     redpacket.value.balance = tokenAmount(
@@ -396,7 +398,9 @@ const confirmRedPacket = function () {
     }
     const chain = useChainStore().chain;
     const account = useAccountStore().account!.address;
-    redpacket.value.id = redpacketId(chain, account, redpacket.value);
+    redpacket.value.creator = account;
+    redpacket.value.id = redpacketId(chain, redpacket.value);
+    await setGas();
     useRedPacketStore().beforeCreate(redpacket.value);
   }
 };

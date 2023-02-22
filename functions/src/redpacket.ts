@@ -94,7 +94,7 @@ async function buildMintErc721Op(
   return {
     to: redPacket.metadata.token,
     value: "0x0",
-    callData: hexlinkErc721Interface().encodeFunctionData(
+    callData: hexlinkErc721Interface.encodeFunctionData(
         "mint",
         [claimer, refunder(chain), signature]
     ),
@@ -197,7 +197,7 @@ export const createRedPacket = functions.https.onCall(
       }
       const {uid, account, chain} = result as RequestData;
 
-      const rpId = redpacketId(chain, account.address, data.redPacket);
+      const rpId = redpacketId(chain, data.redPacket);
       const action = {
         type: "insert_redpacket",
         params: {
@@ -245,7 +245,7 @@ export const createRedPacketErc721 = functions.https.onCall(
         return result;
       }
       const {uid, account, chain} = result as RequestData;
-      const rpId = redpacketErc721Id(chain, account.address, data.erc721);
+      const rpId = redpacketErc721Id(chain, data.erc721);
       const salt = ethers.utils.keccak256(
           ethers.utils.defaultAbiCoder.encode(
               ["address", "bytes32"],

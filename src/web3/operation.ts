@@ -14,7 +14,6 @@ import {
     isContract,
     refunder,
     DEPLOYMENT_GASCOST,
-    gasTokenPricePerGwei,
     encodeValidateAndCall,
     hash,
     isNativeCoin,

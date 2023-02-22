@@ -15,6 +15,8 @@ export const tokenFactoryInterface =
   new ethers.utils.Interface(HEXLINK_TOKEN_FACTORY_ABI);
 export const hexlinkSwapInterface =
   new ethers.utils.Interface(HEXLINK_SWAP_ABI);
+export const hexlinkErc721Interface = 
+  new ethers.utils.Interface(HEXLINK_ERC721_ABI);
 
 export function redPacketAddress(chain: Chain) : string {
   return (ADDRESSES as any)[chain.name].redpacket as string;
@@ -32,10 +34,6 @@ export async function redPacketContract(
       RED_PACKET_ABI,
       provider
   );
-}
-
-export function hexlinkErc721Interface() {
-  return new ethers.utils.Interface(HEXLINK_ERC721_ABI);
 }
 
 export async function hexlinkErc721Contract(
@@ -60,7 +58,7 @@ export async function hexlinkErc721Metadata(erc721: Contract) {
   }
 }
 
-export async function tokenFactory(
+export async function tokenFactoryContract(
   provider: Provider
 ) : Promise<Contract> {
   return new ethers.Contract(

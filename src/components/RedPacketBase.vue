@@ -7,20 +7,20 @@
                         <div class="status-box">
                             <div style="margin: 0 10px;">
                                 <div class="title">
-                                    <span>Total Created</span>
+                                    <span>{{ Object.keys(useStatusStore().status[0])[0] }}</span>
                                 </div>
                                 <div class="price">
-                                    <Loading v-if="loading" class="loading"/>
-                                    <span v-if="!loading">{{ props.status[0] }}</span>
+                                    <!-- <Loading v-if="loading" class="loading"/> -->
+                                    <span>{{ Object.values(useStatusStore().status[0])[0] }}</span>
                                 </div>
                             </div>
                             <div style="margin: 0 10px;">
                                 <div class="title">
-                                    <span>Total Claimed</span>
+                                    <span>{{ Object.keys(useStatusStore().status[1])[0] }}</span>
                                 </div>
                                 <div class="price">
-                                    <Loading v-if="loading" class="loading" />
-                                    <span v-if="!loading">{{ props.status[1] }}</span>
+                                    <!-- <Loading v-if="loading" class="loading" /> -->
+                                    <span>{{ Object.values(useStatusStore().status[1])[0] }}</span>
                                 </div>
                             </div>
                         </div>
@@ -90,20 +90,21 @@
 </template>
   
 <script setup lang="ts">
-import { send } from "process";
+// import { send } from "process";
 import { computed, onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
 import Loading from "@/components/Loading.vue";
+import { useStatusStore } from '@/stores/airdropStatus';
 
-const props = defineProps({
-    status: Array(),
-});
+// const loading = ref<boolean>(true);
+// const statusTitle1 = ref<string>("");
+// const statusValue1 = ref<string>("");
+// const statusTitle2 = ref<string>("");
+// const statusValue2 = ref<string>("");
 
-const loading = ref<boolean>(true);
-
-function delay(ms: number) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
+// function delay(ms: number) {
+//     return new Promise(resolve => setTimeout(resolve, ms));
+// }
 
 const selected  = computed(() => {
     if (useRoute().path == '/redpacket/send') {
@@ -115,11 +116,12 @@ const selected  = computed(() => {
     }
 });
 
-onMounted(async () => {
-    loading.value = true;
-    await delay(1000);
-    loading.value = false;
-})
+// onMounted(async () => {
+//     loading.value = true;
+//     statusTitle1.value = await Object.keys(useStatusStore().status[0])[0];
+//     statusValue1.value = await Object.values(useStatusStore().status[0])[0];
+//     loading.value = false;
+// })
 </script>
   
 <style lang="less" scoped>

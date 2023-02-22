@@ -1,8 +1,8 @@
 <template>
   <Layout :hidden="showClaim || showDetails" :active="1">
     <lockScreen v-if="isLocked" @lock="lock"></lockScreen>
-    <RedPacketBase v-if="!isLocked" :status="passStatus">
-      <RedPacektHistoryList @expressStatus="onExpressStatus"></RedPacektHistoryList>
+    <RedPacketBase v-if="!isLocked">
+      <RedPacektHistoryList></RedPacektHistoryList>
     </RedPacketBase>
   </Layout>
   <RedPacketClaim v-if="showClaim"></RedPacketClaim>
@@ -43,12 +43,4 @@ const showDetails = computed(() => {
 const lock = () => {
   isLocked.value = false;
 };
-
-const onExpressStatus = (value: number[]) => {
-  statusArray.value = value;
-}
-
-const passStatus = computed(() => {
-  return statusArray.value;
-})
 </script>

@@ -268,7 +268,7 @@ const loadText = () => {
 .claim-card {
   background-color: #fff;
   height: 400px;
-  width: 300px;
+  width: 350px;
   position: fixed;
   margin: auto;
   left: 50%;
@@ -302,7 +302,7 @@ const loadText = () => {
   width: 100%;}
 .claim-card h2 {
   text-align: center;
-  margin-top: 45%;
+  margin-top: 9rem;
   position: absolute;
   z-index: 55;
   font-size: 26px;

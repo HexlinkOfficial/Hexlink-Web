@@ -108,7 +108,7 @@
                 <div class="claim-status" v-if="op.redpacket && op.txStatus != 'success'"></div>
                 <div class="share" v-if="op.redpacket">
                   <i v-if="showStatus(op) == 'Sent'" class="fa fa-paper-plane share-button" aria-hidden="true" @click="share(op.redpacket)"></i>
-                  <span v-if="showStatus(op) != 'Sent'" class="pending-text" :style="showStatus(op) == 'Pending' ? 'margin-left: 5.5rem;' : ''">{{ showDetailStatus(op) }}</span>
+                  <span v-if="showStatus(op) != 'Sent'" class="pending-text" :style="showStatus(op) == 'Pending' ? 'margin-left: 3.5rem;' : ''">{{ showDetailStatus(op) }}</span>
                 </div>
                 <div class="cta">
                   <router-link :to="{ query: { details: op.redpacket.id } }" v-if="showStatus(op) == 'Sent'">
@@ -140,7 +140,7 @@
                   <img src="@/assets/svg/createRedpacketError.svg" />
                 </div>
               </div>
-              <div style="width: 100%; margin-left: 0.875rem;">
+              <div style="width: 100%; margin-left: 0.875rem; margin-right: 0.5rem;">
                 <div class="action-and-time">
                   <div style="display: flex;">
                     <div class="sent-info">
@@ -154,7 +154,7 @@
                   </div>
                 </div>
                 <div style="display: flex; justify-content: space-between; margin-right: 0.5rem;">
-                  <div class="token-amount" v-if="op.redpacket" style="margin-left: 0rem; flex-direction: column; align-items: flex-start;">
+                  <div class="token-amount" v-if="op.redpacket" style="margin-left: 0rem; flex-direction: column; align-items: flex-start; align-items: center;">
                     <div v-if="op.redpacket.type === 'erc20'" class="sent-info">
                       Amount:
                       <a-tooltip placement="top">
@@ -340,7 +340,7 @@
                   <img v-if="showClaimStatus(op) == 'Error'" src="@/assets/svg/claimRedpacketError.svg" />
                 </div>
               </div>
-              <div style="width: 100%; margin-left: 0.875rem;">
+              <div style="width: 100%; margin-left: 0.875rem; margin-right: 0.5rem;">
                 <div class="action-and-time">
                   <div style="display: flex;">
                     <div class="sent-info">
@@ -355,7 +355,7 @@
                 </div>
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-right: 0.5rem; width: 100%;">
                   <div style="display: flex; margin-right: 0.5rem; flex-direction: column; width: 100%;">
-                    <div style="display: flex; justify-content: space-between;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
                       <div class="token-amount" v-if="op.claim"
                         style="margin-left: 0rem; flex-direction: column; align-items: flex-start; justify-content: center;">
                         <div class="sent-info" v-if="op.redpacket.type === 'erc20' && showClaimStatus(op) == 'Claimed'">
@@ -403,22 +403,24 @@
                         </a>
                       </a-tooltip>
                     </div>
-                    <div class="claim-status" v-if="op.claim" style="margin: 10px 0;">
+                    <div class="claim-status" v-if="op.claim" :style="showClaimStatus(op) != 'Pending' ? 'margin: 10px 0;' : 'margin-bottom: 10px; margin-top: -10px;'">
                       <div v-if="showClaimStatus(op) != 'Error'" style="display: flex; align-items: center;">
                         <div v-if="op.redpacket.type === 'erc721'">
-                          <a-tooltip placement="top">
-                            <template #title>
-                              <img :src="ipfsUrl(op.redpacket.metadata.tokenURI)" style="max-width: 100px;" :size="64"
-                                referrerpolicy="no-referrer" rel="preload" />
-                            </template>
-                            <span class="thumb">
-                              <img :src="ipfsUrl(op.redpacket.metadata.tokenURI)" style="border: 2px solid #D9D9D9; border-radius: 5px;"
-                                :size="64" referrerpolicy="no-referrer" rel="preload" />
-                            </span>
-                          </a-tooltip>
-                        </div>
-                        <div v-if="op.redpacket.type != 'erc20'" class="arrow" style="margin-left: 0.5rem; margin-right: 0.5rem;">
-                          <img src="@/assets/svg/backwardArrow.svg" />
+                          <div style="display: flex; align-items: center;">
+                            <a-tooltip placement="top">
+                              <template #title>
+                                <img :src="ipfsUrl(op.redpacket.metadata.tokenURI)" style="max-width: 100px;" :size="64"
+                                  referrerpolicy="no-referrer" rel="preload" />
+                              </template>
+                              <span class="thumb">
+                                <img :src="ipfsUrl(op.redpacket.metadata.tokenURI)" style="border: 2px solid #D9D9D9; border-radius: 5px;"
+                                  :size="64" referrerpolicy="no-referrer" rel="preload" />
+                              </span>
+                            </a-tooltip>
+                            <div class="arrow" style="margin-left: 0.5rem; margin-right: 0.5rem;">
+                              <img src="@/assets/svg/backwardArrow.svg" />
+                            </div>
+                          </div>
                         </div>
                         <div style="display: flex; align-items: center;">
                           <span class="thumb">
@@ -465,6 +467,7 @@ import { ipfsUrl } from "@/web3/storage";
 import { prettyPrintNumber } from "@/web3/utils";
 import { useWindowSize } from '@vueuse/core'
 import router from '@/router';
+import { useStatusStore } from '@/stores/airdropStatus';
 
 const createdRpOps = ref<CreateRedPacketOp[]>([]);
 const claimedRpOps = ref<ClaimRedPacketOp[]>([]);
@@ -486,8 +489,6 @@ interface tokenIDMap {
 }
 const tokenIdtable = ref<tokenIDMap[]>([]);
 
-const emit = defineEmits(["expressStatus"])
-
 const loadData = async function() {
   loading.value = true;
   if (useAccountStore().account) {
@@ -500,7 +501,8 @@ const loadData = async function() {
   extractDate();
   extractTokenId();
   console.log(luckHistoryByDate.value);
-  emit("expressStatus", [createdCount, claimedCount]);
+  useStatusStore().setStatus([{ 'Total Created': createdCount }, { 'Total Claimed': claimedCount }]);
+  console.log("Status: ", useStatusStore().status);
 };
 
 const extractTokenId = () => {

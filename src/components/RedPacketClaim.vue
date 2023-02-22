@@ -1,5 +1,5 @@
 <template>
-  <div v-if="claimStatus == ''" class="claim-card transition" :style="claimItem == 'erc721' && 'height: 500px;'">
+  <div v-if="claimStatus == ''" class="claim-card transition" :style="claimItem == 'erc721' ? 'height: 500px;' : ''">
     <router-link to="/redpackets">
       <svg class="redpacket_close transition" width="30" height="30" viewBox="0 0 30 30" fill="none"
         xmlns="http://www.w3.org/2000/svg">
@@ -28,7 +28,7 @@
       </div>
       <small >Best Wishes!</small>
     </h2>
-    <div class="cta-container transition" :style="claimItem == 'erc721' && 'margin-top: 410px;'">
+    <div class="cta-container transition" :style="claimItem == 'erc721' ? 'margin-top: 410px;' : ''">
       <button class="cta" @click="claim">Claim</button>
     </div>
     <div :class="claimItem == 'erc721' ? 'card_circle721 transition' : 'card_circle transition'"></div>

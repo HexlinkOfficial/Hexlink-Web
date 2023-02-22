@@ -10,16 +10,15 @@
                   <div class="title-col">
                     <div class="content">
                       <div class="text">Transactions</div>
-                      <svg width="4" height="16" viewBox="0 0 4 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M2 9C2.55228 9 3 8.55228 3 8C3 7.44772 2.55228 7 2 7C1.44772 7 1 7.44772 1 8C1 8.55228 1.44772 9 2 9Z"
-                          fill="black" stroke="black" stroke-linecap="round" stroke-linejoin="round" />
-                        <path d="M2 3C2.55228 3 3 2.55228 3 2C3 1.44772 2.55228 1 2 1C1.44772 1 1 1.44772 1 2C1 2.55228 1.44772 3 2 3Z"
-                          fill="black" stroke="black" stroke-linecap="round" stroke-linejoin="round" />
-                        <path
-                          d="M2 15C2.55228 15 3 14.5523 3 14C3 13.4477 2.55228 13 2 13C1.44772 13 1 13.4477 1 14C1 14.5523 1.44772 15 2 15Z"
-                          fill="black" stroke="black" stroke-linecap="round" stroke-linejoin="round" />
-                      </svg>
+                      <img src="@/assets/svg/colon.svg"/>
                     </div>
+                  </div>
+                </div>
+              </div>
+              <div class="token-listDetail">
+                <div class="token-table">
+                  <div style="overflow: visible; border-radius: 0.75rem;">
+                    <TransactionList></TransactionList>
                   </div>
                 </div>
               </div>
@@ -33,9 +32,22 @@
 
 <script setup lang="ts">
 import Layout from "@/components/Layout.vue";
+import TransactionList from "@/components/TransactionList.vue";
 </script>
 
 <style lang="less" scoped>
+.token-listDetail .token-table {
+  display: flex;
+  margin-left: -1rem;
+  margin-right: -1rem;
+  flex-direction: column;
+
+  @media (min-width: 640px) {
+    margin-left: 0;
+    margin-right: 0; } }
+.token-listDetail {
+  border-radius: 0.75rem;
+  margin-top: 1.75rem; }
 .card {
   margin-bottom: 1.875rem;
   background-color: #fff;
@@ -84,7 +96,7 @@ import Layout from "@/components/Layout.vue";
   font-size: 1.25rem;
   line-height: 1.75rem;
   font-weight: 600; }
-.token-list .title .title-col .content svg {
+.token-list .title .title-col .content img {
   display: inline-flex;
   transition-property: background-color, border-color, color, fill, stroke;
   justify-content: center;

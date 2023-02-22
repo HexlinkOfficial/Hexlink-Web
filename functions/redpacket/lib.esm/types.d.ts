@@ -1,4 +1,3 @@
-import type { PriceInfo } from "../../common";
 export interface HexlinkUserInfo {
     provider: string;
     handle: string;
@@ -9,7 +8,6 @@ export interface GasInput {
     gasToken: string;
     gasSponsorship: string;
     estimatedGas: string;
-    priceInfo?: PriceInfo;
 }
 export type ValidationRuleType = "dynamic_secrets";
 export interface ValidationRule {
@@ -19,8 +17,9 @@ export interface RedPacketBase {
     id: string;
     salt: string;
     validator: string;
+    creator: string;
+    sponsorGas: boolean;
     contract?: string;
-    creator?: string;
     validationRules: ValidationRule[];
 }
 export interface RedPacket extends RedPacketBase {

@@ -4,47 +4,19 @@ import { isNativeCoin, erc20Interface } from "../../common";
 import type {RedPacket, RedPacketInput} from "./types";
 import { redPacketInterface, redPacketAddress } from "./redpacket";
 
-export function buildGasSponsorshipOp(
-    hexlAccount: string,
-    refunder: string,
-    input: {id: string, gasToken: string, gasSponsorship: string},
-) : Op {
-    return {
-        name: "depositGasSponsorship",
-        function: "deposit",
-        args: {
-            ref: input.id,
-            receipt: refunder,
-            token: input.gasToken,
-            amount: input.gasSponsorship
-        },
-        input: {
-            to: hexlAccount,
-            value: EthBigNumber.from(0),
-            callData: accountInterface.encodeFunctionData(
-                "deposit", [
-                    input.id,
-                    refunder,
-                    input.gasToken,
-                    input.gasSponsorship
-                ]
-            ),
-            callGasLimit: EthBigNumber.from(0) // no limit
-        }
-    };
-}
-
 export function buildRedPacketOps(
     chain: Chain,
     input: RedPacket
 ) : Op[] {
     const packet = {
-       token: input.token,
-       salt: input.salt,
-       balance: input.balance,
-       validator: input.validator,
-       split: input.split,
-       mode: input.mode,
+        creator: input.creator,
+        token: input.token,
+        salt: input.salt,
+        balance: input.balance,
+        validator: input.validator,
+        split: input.split,
+        mode: input.mode,
+        sponsorGas: true,
     };
     const redPacketAddr = redPacketAddress(chain);
     if (isNativeCoin(input.token, chain)) {

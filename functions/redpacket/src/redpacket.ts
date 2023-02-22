@@ -7,11 +7,14 @@ import type {Chain} from "../../common";
 import RED_PACKET_ABI from "./abi/HAPPY_RED_PACKET_ABI.json";
 import HEXLINK_ERC721_ABI from "./abi/HEXLINK_ERC721_ABI.json";
 import HEXLINK_TOKEN_FACTORY_ABI from "./abi/HEXLINK_TOKEN_FACTORY_ABI.json";
+import HEXLINK_SWAP_ABI from "./abi/HEXLINK_SWAP_ABI.json";
 import ADDRESSES from "./addresses.json";
 
 export const redPacketInterface = new ethers.utils.Interface(RED_PACKET_ABI);
 export const tokenFactoryInterface =
   new ethers.utils.Interface(HEXLINK_TOKEN_FACTORY_ABI);
+export const hexlinkSwapInterface =
+  new ethers.utils.Interface(HEXLINK_SWAP_ABI);
 
 export function redPacketAddress(chain: Chain) : string {
   return (ADDRESSES as any)[chain.name].redpacket as string;
@@ -63,6 +66,20 @@ export async function tokenFactory(
   return new ethers.Contract(
       tokenFactoryAddress(await getChainFromProvider(provider)),
       HEXLINK_ERC721_ABI,
+      provider
+  );
+}
+
+export function hexlinkSwapAddress(chain: Chain) : string {
+  return (ADDRESSES as any)[chain.name].swap as string;
+}
+
+export async function hexlinkSwap(
+  provider: Provider
+) : Promise<Contract> {
+  return new ethers.Contract(
+      hexlinkSwapAddress(await getChainFromProvider(provider)),
+      HEXLINK_SWAP_ABI,
       provider
   );
 }

@@ -66,7 +66,6 @@ export const GET_CREATED_REDPACKETS = gql`
             redpackets {
               id,
               metadata,
-              deposit,
               created_at,
               validation_data,
               type
@@ -81,7 +80,6 @@ export const GET_CREATED_REDPACKETS = gql`
 export interface RedPacketDBRaw {
   id: string,
   metadata: string,
-  deposit: string,
   created_at: string
 }
 
@@ -93,7 +91,6 @@ function parseRedPacket(op: any) : RedPacketDB | undefined {
     return {
       id: r.id,
       metadata: JSON.parse(r.metadata),
-      deposit: JSON.parse(r.deposit),
       createdAt: new Date(r.created_at),
       type: r.type,
     };

@@ -326,23 +326,20 @@ async function delay(ms: number) {
 
 const setGas = async () => {
   const chain = useChainStore().chain;
-  const priceInfo = await getPriceInfo(chain);
-  nftAirdrop.value.priceInfo = priceInfo;
+  const price = await getPriceInfo(chain, nftAirdrop.value.gasToken);
   const sponsorshipAmount =
     EthBigNumber.from(200000).mul(nftAirdrop.value.splitInput || 0);
   nftAirdrop.value.gasSponsorship = calcGas(
     chain,
     tokenStore.token(nftAirdrop.value.gasToken),
     sponsorshipAmount,
-    priceInfo,
-    true, // prepay
+    price,
   ).toString();
   nftAirdrop.value.estimatedGas = calcGas(
     chain,
     tokenStore.token(nftAirdrop.value.gasToken),
     EthBigNumber.from(estimatedGasAmount),
-    priceInfo,
-    false, // prepay
+    price,
   ).toString();
 }
 

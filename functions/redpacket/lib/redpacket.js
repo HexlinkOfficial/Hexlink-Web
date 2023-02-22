@@ -12,15 +12,17 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.tokenFactory = exports.hexlinkErc721Metadata = exports.hexlinkErc721Contract = exports.hexlinkErc721Interface = exports.redPacketContract = exports.tokenFactoryAddress = exports.redPacketAddress = exports.tokenFactoryInterface = exports.redPacketInterface = void 0;
+exports.hexlinkSwap = exports.hexlinkSwapAddress = exports.tokenFactory = exports.hexlinkErc721Metadata = exports.hexlinkErc721Contract = exports.hexlinkErc721Interface = exports.redPacketContract = exports.tokenFactoryAddress = exports.redPacketAddress = exports.hexlinkSwapInterface = exports.tokenFactoryInterface = exports.redPacketInterface = void 0;
 const ethers_1 = require("ethers");
 const common_1 = require("../../common");
 const HAPPY_RED_PACKET_ABI_json_1 = __importDefault(require("./abi/HAPPY_RED_PACKET_ABI.json"));
 const HEXLINK_ERC721_ABI_json_1 = __importDefault(require("./abi/HEXLINK_ERC721_ABI.json"));
 const HEXLINK_TOKEN_FACTORY_ABI_json_1 = __importDefault(require("./abi/HEXLINK_TOKEN_FACTORY_ABI.json"));
+const HEXLINK_SWAP_ABI_json_1 = __importDefault(require("./abi/HEXLINK_SWAP_ABI.json"));
 const addresses_json_1 = __importDefault(require("./addresses.json"));
 exports.redPacketInterface = new ethers_1.ethers.utils.Interface(HAPPY_RED_PACKET_ABI_json_1.default);
 exports.tokenFactoryInterface = new ethers_1.ethers.utils.Interface(HEXLINK_TOKEN_FACTORY_ABI_json_1.default);
+exports.hexlinkSwapInterface = new ethers_1.ethers.utils.Interface(HEXLINK_SWAP_ABI_json_1.default);
 function redPacketAddress(chain) {
     return addresses_json_1.default[chain.name].redpacket;
 }
@@ -35,7 +37,7 @@ function redPacketContract(provider) {
     });
 }
 exports.redPacketContract = redPacketContract;
-function hexlinkErc721Interface(version) {
+function hexlinkErc721Interface() {
     return new ethers_1.ethers.utils.Interface(HEXLINK_ERC721_ABI_json_1.default);
 }
 exports.hexlinkErc721Interface = hexlinkErc721Interface;
@@ -64,3 +66,13 @@ function tokenFactory(provider) {
     });
 }
 exports.tokenFactory = tokenFactory;
+function hexlinkSwapAddress(chain) {
+    return addresses_json_1.default[chain.name].swap;
+}
+exports.hexlinkSwapAddress = hexlinkSwapAddress;
+function hexlinkSwap(provider) {
+    return __awaiter(this, void 0, void 0, function* () {
+        return new ethers_1.ethers.Contract(hexlinkSwapAddress(yield (0, common_1.getChainFromProvider)(provider)), HEXLINK_SWAP_ABI_json_1.default, provider);
+    });
+}
+exports.hexlinkSwap = hexlinkSwap;

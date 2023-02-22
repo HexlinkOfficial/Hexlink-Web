@@ -157,7 +157,7 @@ import { vOnClickOutside } from '@/services/directive';
 import { getBalances } from "@/web3/tokens";
 import { getPriceInfo } from "@/web3/network";
 import { BigNumber as EthBigNumber } from "ethers";
-import { calcGas, tokenAmount, type PriceInfo } from "../../functions/common";
+import { calcGas, tokenAmount } from "../../functions/common";
 import { BigNumber } from "bignumber.js";
 import { ethers } from "ethers";
 import { sendToken } from "@/web3/operation";
@@ -184,7 +184,6 @@ interface TokenTransaction {
   token: string,
   gasToken: string,
   estimatedGas: string,
-  priceInfo?: PriceInfo | undefined;
 }
 
 const transaction = ref<TokenTransaction>({
@@ -238,14 +237,12 @@ async function delay(ms: number) {
 
 const setGas = async () => {
   const chain = useChainStore().chain;
-  const priceInfo = await getPriceInfo(chain);
-  transaction.value.priceInfo = priceInfo;
+  const price = await getPriceInfo(chain, transaction.value.gasToken);
   transaction.value.estimatedGas = calcGas(
     chain,
     tokenStore.token(transaction.value.gasToken),
     EthBigNumber.from(estimatedGasAmount),
-    priceInfo,
-    false, // prepay
+    price,
   ).toString();
 }
 

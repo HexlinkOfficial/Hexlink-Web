@@ -8,15 +8,15 @@ import {
   DeployRequest,
   GasObject,
   OpInput,
-  PriceConfigs,
   UserOpRequest,
   accountInterface,
-  gasTokenPricePerGwei,
+  hexlinkSwapAddress,
   getChain,
   hexlAddress,
   hexlInterface,
   isContract,
   refunder,
+  isAllowedGasToken,
 } from "../common";
 import {accountAddress, getInfuraProvider} from "./account";
 import type {Error, GenAddressSuccess} from "./account";
@@ -45,17 +45,17 @@ export async function preprocess(data: any, context: any) {
 }
 
 export function validateGas(chain: Chain, gas: GasObject, deployed: boolean) {
-  if (gas.receiver !== refunder(chain)) {
-    throw new Error("invalid gas refunder");
+  if (gas.swapper !== hexlinkSwapAddress(chain)) {
+    throw new Error("unsupported swapper");
   }
-  const price = gasTokenPricePerGwei(
-      chain, gas.token, PriceConfigs[chain.name]
-  );
+  if (gas.receiver !== refunder(chain)) {
+    throw new Error("invalid gas refund receiver");
+  }
+  if (!isAllowedGasToken(gas.token, chain)) {
+    throw new Error("invalid gas token");
+  }
   if (!deployed && EthBigNumber.from(gas.baseGas).lt(DEPLOYMENT_GASCOST)) {
     throw new Error("insufficient base gas for deployment");
-  }
-  if (EthBigNumber.from(gas.price).lt(price)) {
-    throw new Error("invalid gas price");
   }
 }
 
@@ -70,7 +70,7 @@ export async function validateAndBuildUserOp(
   const req = request.params;
   const data = accountInterface.encodeFunctionData(
       "validateAndCallWithGasRefund",
-      [req.txData, req.nonce, req.signature, req.gas]
+      [req.txData, req.nonce, req.gas, req.signature]
   );
   const provider = getInfuraProvider(chain);
   const deployed = await isContract(provider, account.address);

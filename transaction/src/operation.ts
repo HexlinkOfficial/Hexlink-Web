@@ -93,12 +93,6 @@ async function processAction(
       params.redPacketId,
     );
     if (created !== undefined) {
-      const deposit = parseDeposit(
-        receipt,
-        params.redPacketId,
-        op.account,
-        params.refunder,
-      );
       await insertRedPacket(
         params.userId,
         [{
@@ -118,12 +112,6 @@ async function processAction(
             contract: redPacketAddress(chain),
           },
           opId: op.id,
-          deposit: {
-            receipt: deposit?.receipt,
-            token: deposit?.token,
-            amount: deposit?.amount.toString(),
-            priceInfo: params.priceInfo,
-          },
           validationData: buildValidationData(params),
         }]
       );
@@ -147,12 +135,6 @@ async function processAction(
           getInfuraProvider(chain)
         )
       );
-      const deposit = parseDeposit(
-        receipt,
-        params.redPacketId,
-        op.account,
-        params.refunder,
-      );
       await insertRedPacket(
         params.userId,
         [{
@@ -168,12 +150,6 @@ async function processAction(
             ...metadata,
           },
           opId: op.id,
-          deposit: {
-            receipt: deposit?.receipt,
-            token: deposit?.token,
-            amount: deposit?.amount.toString(),
-            priceInfo: params.priceInfo,
-          },
           validationData: buildValidationData(params),
         }]
       );

@@ -15,16 +15,10 @@ export interface Op {
     input: OpInput;
 }
 export interface GasObject {
+    swapper: string;
     receiver: string;
     token: string;
     baseGas?: BigNumberish;
-    price: BigNumberish;
-}
-export interface Deposit {
-    ref: string;
-    receipt: string;
-    token: string;
-    amount: BigNumberish;
 }
 export interface UserOpRequest {
     txData: string;

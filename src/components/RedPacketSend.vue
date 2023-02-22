@@ -299,22 +299,20 @@ async function delay(ms: number) {
 
 const setGas = async() => {
   const chain = useChainStore().chain;
-  const priceInfo = await getPriceInfo(chain);
-  redpacket.value.priceInfo = priceInfo;
-  const sponsorshipAmount = EthBigNumber.from(200000).mul(redpacket.value.split || 0);
-  redpacket.value.gasSponsorship = calcGas(
+  const price = await getPriceInfo(chain, redpacket.value.gasToken);
+  const sponsorshipAmount =
+    EthBigNumber.from(200000).mul(redpacket.value.split || 0);
+    redpacket.value.gasSponsorship = calcGas(
     chain,
     tokenStore.token(redpacket.value.gasToken),
     sponsorshipAmount,
-    priceInfo,
-    true, // prepay
+    price,
   ).toString();
   redpacket.value.estimatedGas = calcGas(
     chain,
     tokenStore.token(redpacket.value.gasToken),
     EthBigNumber.from(estimatedGasAmount),
-    priceInfo,
-    false, // prepay
+    price,
   ).toString();
 }
 

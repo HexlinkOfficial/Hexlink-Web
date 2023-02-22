@@ -75,12 +75,12 @@ export async function encodeValidateAndCall(params: {
   if (params.gas) {
     const message = ethers.utils.keccak256(
       ethers.utils.defaultAbiCoder.encode(
-          ["bytes", "uint256", "tuple(address, address, uint256, uint256)"],
+          ["bytes", "uint256", "tuple(address, address, address, uint256)"],
           [params.txData, params.nonce, [
-            params.gas.receiver,
+            params.gas.swapper,
             params.gas.token,
+            params.gas.receiver,
             params.gas.baseGas,
-            params.gas.price
           ]]
       )
     );
@@ -90,8 +90,8 @@ export async function encodeValidateAndCall(params: {
       [
         params.txData,
         params.nonce,
+        params.gas,
         signature,
-        params.gas
       ]
     );
     return { data, signature}
@@ -109,23 +109,4 @@ export async function encodeValidateAndCall(params: {
     );
     return { data, signature}
   }
-}
-
-function equal(one: string | undefined, two: string | undefined) : boolean {
-  return (one || "").toLowerCase() === (two || "").toLowerCase();
-}
-
-export function parseDeposit(
-  receipt: TransactionReceipt,
-  ref: string,
-  from: string,
-  to: string,
-) {
-  const events = receipt.logs.filter(
-      (log: any) => log.address.toLowerCase() == from.toLowerCase()
-  ).map((log: any) => accountInterface.parseLog(log));
-  const event = events.find(
-      (e: any) => e.name === "Deposit" && equal(e.args.ref, ref) && equal(e.args.receipt, to)
-  );
-  return event?.args;
 }

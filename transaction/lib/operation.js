@@ -59,7 +59,6 @@ async function processAction(op, chain, action, receipt) {
     if (action.type === "insert_redpacket") {
         const created = (0, redpacket_2.parseCreated)(chain, receipt, params.redPacketId);
         if (created !== undefined) {
-            const deposit = (0, common_1.parseDeposit)(receipt, params.redPacketId, op.account, params.refunder);
             await (0, redpacket_1.insertRedPacket)(params.userId, [{
                     id: params.redPacketId,
                     type: "erc20",
@@ -77,12 +76,6 @@ async function processAction(op, chain, action, receipt) {
                         contract: (0, redpacket_2.redPacketAddress)(chain),
                     },
                     opId: op.id,
-                    deposit: {
-                        receipt: deposit === null || deposit === void 0 ? void 0 : deposit.receipt,
-                        token: deposit === null || deposit === void 0 ? void 0 : deposit.token,
-                        amount: deposit === null || deposit === void 0 ? void 0 : deposit.amount.toString(),
-                        priceInfo: params.priceInfo,
-                    },
                     validationData: buildValidationData(params),
                 }]);
         }
@@ -95,7 +88,6 @@ async function processAction(op, chain, action, receipt) {
         const deployed = (0, redpacket_2.parseDeployed)(chain, receipt, op.account, params.salt);
         if (deployed !== undefined) {
             const metadata = await (0, redpacket_2.hexlinkErc721Metadata)(await (0, redpacket_2.hexlinkErc721Contract)(deployed.deployed, (0, utils_1.getInfuraProvider)(chain)));
-            const deposit = (0, common_1.parseDeposit)(receipt, params.redPacketId, op.account, params.refunder);
             await (0, redpacket_1.insertRedPacket)(params.userId, [{
                     id: params.redPacketId,
                     creator: params.creator,
@@ -109,12 +101,6 @@ async function processAction(op, chain, action, receipt) {
                         ...metadata,
                     },
                     opId: op.id,
-                    deposit: {
-                        receipt: deposit === null || deposit === void 0 ? void 0 : deposit.receipt,
-                        token: deposit === null || deposit === void 0 ? void 0 : deposit.token,
-                        amount: deposit === null || deposit === void 0 ? void 0 : deposit.amount.toString(),
-                        priceInfo: params.priceInfo,
-                    },
                     validationData: buildValidationData(params),
                 }]);
         }

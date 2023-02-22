@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.parseDeposit = exports.encodeValidateAndCall = exports.encodeExecBatch = exports.encodeExec = exports.encodeInit = exports.hexlAccount = exports.accountContract = exports.nameHash = exports.accountInterface = exports.DEPLOYMENT_GASCOST = void 0;
+exports.encodeValidateAndCall = exports.encodeExecBatch = exports.encodeExec = exports.encodeInit = exports.hexlAccount = exports.accountContract = exports.nameHash = exports.accountInterface = exports.DEPLOYMENT_GASCOST = void 0;
 const ethers_1 = require("ethers");
 const ACCOUNT_SIMPLE_ABI_json_1 = __importDefault(require("./abi/ACCOUNT_SIMPLE_ABI.json"));
 const utils_1 = require("./utils");
@@ -57,18 +57,18 @@ function encodeValidateAndCall(params) {
     return __awaiter(this, void 0, void 0, function* () {
         let data;
         if (params.gas) {
-            const message = ethers_1.ethers.utils.keccak256(ethers_1.ethers.utils.defaultAbiCoder.encode(["bytes", "uint256", "tuple(address, address, uint256, uint256)"], [params.txData, params.nonce, [
-                    params.gas.receiver,
+            const message = ethers_1.ethers.utils.keccak256(ethers_1.ethers.utils.defaultAbiCoder.encode(["bytes", "uint256", "tuple(address, address, address, uint256)"], [params.txData, params.nonce, [
+                    params.gas.swapper,
                     params.gas.token,
+                    params.gas.receiver,
                     params.gas.baseGas,
-                    params.gas.price
                 ]]));
             const signature = yield params.sign(message);
             data = exports.accountInterface.encodeFunctionData("validateAndCallWithGasRefund", [
                 params.txData,
                 params.nonce,
+                params.gas,
                 signature,
-                params.gas
             ]);
             return { data, signature };
         }
@@ -81,12 +81,3 @@ function encodeValidateAndCall(params) {
     });
 }
 exports.encodeValidateAndCall = encodeValidateAndCall;
-function equal(one, two) {
-    return (one || "").toLowerCase() === (two || "").toLowerCase();
-}
-function parseDeposit(receipt, ref, from, to) {
-    const events = receipt.logs.filter((log) => log.address.toLowerCase() == from.toLowerCase()).map((log) => exports.accountInterface.parseLog(log));
-    const event = events.find((e) => e.name === "Deposit" && equal(e.args.ref, ref) && equal(e.args.receipt, to));
-    return event === null || event === void 0 ? void 0 : event.args;
-}
-exports.parseDeposit = parseDeposit;

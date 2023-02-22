@@ -57,7 +57,8 @@ export interface RedPacketClaim {
 export interface RedPacketOnchainState {
     balance: string,
     split: number,
-    createdAt: Date
+    createdAt: Date,
+    sponsorship: string,
 }
 
 export interface RedPacketDB {

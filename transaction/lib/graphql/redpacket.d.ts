@@ -9,7 +9,6 @@ export declare function insertRedPacket(uid: string, data: {
     creator: HexlinkUserInfo;
     metadata: any;
     opId: number;
-    deposit: any;
     validationData: any;
     type: "erc20" | "erc721";
 }[]): Promise<{

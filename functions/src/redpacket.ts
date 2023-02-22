@@ -53,29 +53,28 @@ async function buildClaimErc20Op(
 ) : Promise<OpInput> {
   const message = ethers.utils.keccak256(
       ethers.utils.defaultAbiCoder.encode(
-          ["bytes32", "address"],
-          [redPacket.id, claimer]
+          ["bytes32", "address", "address"],
+          [redPacket.id, claimer, refunder(chain)]
       )
   );
   const signature = await sign(redPacket.metadata.validator, message);
   const metadata = redPacket.metadata as RedPacketMetadata;
-  const args = {
+  const packet = {
     creator: metadata.creator,
-    packet: {
-      token: metadata.token,
-      salt: metadata.salt,
-      balance: metadata.balance,
-      validator: metadata.validator,
-      split: metadata.split,
-      mode: metadata.mode,
-    },
-    claimer,
-    signature,
+    token: metadata.token,
+    salt: metadata.salt,
+    balance: metadata.balance,
+    validator: metadata.validator,
+    split: metadata.split,
+    mode: metadata.mode,
+    sponsorGas: true,
   };
   return {
     to: redPacketAddress(chain),
     value: "0x0",
-    callData: redPacketInterface.encodeFunctionData("claim", [args]),
+    callData: redPacketInterface.encodeFunctionData("claim", [
+      packet, claimer, refunder(chain), signature,
+    ]),
     callGasLimit: "0x0",
   };
 }
@@ -87,15 +86,18 @@ async function buildMintErc721Op(
 ) : Promise<OpInput> {
   const message = ethers.utils.keccak256(
       ethers.utils.defaultAbiCoder.encode(
-          ["uint256", "address", "address"],
-          [chain.chainId, redPacket.metadata.token, claimer]
+          ["uint256", "address", "address", "address"],
+          [chain.chainId, redPacket.metadata.token, claimer, refunder(chain)]
       )
   );
   const signature = await sign(redPacket.metadata.validator, message);
   return {
     to: redPacket.metadata.token,
     value: "0x0",
-    callData: hexlinkErc721Interface().encodeFunctionData("mint", [claimer, signature]),
+    callData: hexlinkErc721Interface().encodeFunctionData(
+        "mint",
+        [claimer, refunder(chain), signature]
+    ),
     callGasLimit: "0x0",
   };
 }
@@ -203,7 +205,6 @@ export const createRedPacket = functions.https.onCall(
           redPacketId: rpId,
           creator: data.creator,
           refunder: refunder(chain),
-          priceInfo: data.redPacket.priceInfo,
           validationRules: data.redPacket.validationRules,
         },
       };
@@ -259,7 +260,6 @@ export const createRedPacketErc721 = functions.https.onCall(
           salt,
           creator: data.creator,
           refunder: refunder(chain),
-          priceInfo: data.erc721.priceInfo,
           validationRules: data.erc721.validationRules,
         },
       };

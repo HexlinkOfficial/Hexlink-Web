@@ -20,6 +20,7 @@ import {
     isNativeCoin,
     hexlContract,
 } from "../../functions/common/";
+import { hexlinkSwapAddress } from "../../functions/redpacket/";
 import { genDeployAuthProof } from "./oracle";
 import { signMessage } from "./wallet";
 import { useWalletStore } from "@/stores/wallet";
@@ -64,14 +65,10 @@ export async function buildUserOpRequest(
     const deployed = await isContract(provider, hexlAccount);
     const priceInfo = await getPriceInfo(chain);
     const gas = {
-        receiver: refunder(chain),
+        swapper: hexlinkSwapAddress(chain),
         token: gasToken,
+        receiver: refunder(chain),
         baseGas: deployed ? "0" : DEPLOYMENT_GASCOST,
-        price: gasTokenPricePerGwei(
-            chain,
-            gasToken,
-            priceInfo,
-        )
     };
     const nonce = deployed ? await account.nonce() : 0;
     const {data, signature} = await encodeValidateAndCall({

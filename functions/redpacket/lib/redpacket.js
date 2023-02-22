@@ -59,7 +59,7 @@ function hexlinkErc721Metadata(erc721) {
 exports.hexlinkErc721Metadata = hexlinkErc721Metadata;
 function tokenFactoryContract(provider) {
     return __awaiter(this, void 0, void 0, function* () {
-        return new ethers_1.ethers.Contract(tokenFactoryAddress(yield (0, common_1.getChainFromProvider)(provider)), HEXLINK_ERC721_ABI_json_1.default, provider);
+        return new ethers_1.ethers.Contract(tokenFactoryAddress(yield (0, common_1.getChainFromProvider)(provider)), HEXLINK_TOKEN_FACTORY_ABI_json_1.default, provider);
     });
 }
 exports.tokenFactoryContract = tokenFactoryContract;

@@ -63,7 +63,7 @@ export async function tokenFactoryContract(
 ) : Promise<Contract> {
   return new ethers.Contract(
       tokenFactoryAddress(await getChainFromProvider(provider)),
-      HEXLINK_ERC721_ABI,
+      HEXLINK_TOKEN_FACTORY_ABI,
       provider
   );
 }

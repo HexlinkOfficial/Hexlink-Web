@@ -182,10 +182,16 @@ export async function buildDeployErc721Ops(
             )
         }
     });
+    const salt = ethers.utils.keccak256(
+        ethers.utils.defaultAbiCoder.encode(
+            ["address", "bytes32"],
+            [input.creator, input.salt]
+        )
+    );
     return userOps.concat(await buildGasSponsorshipOps(
         provider,
         hexlinkErc721Interface.encodeFunctionData("deposit", []),
-        await tokenFactory.predictErc721Address(input.salt),
+        await tokenFactory.predictErc721Address(salt),
         input,
     ));
 }

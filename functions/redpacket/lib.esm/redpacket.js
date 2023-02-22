@@ -33,7 +33,7 @@ export async function hexlinkErc721Metadata(erc721) {
     };
 }
 export async function tokenFactoryContract(provider) {
-    return new ethers.Contract(tokenFactoryAddress(await getChainFromProvider(provider)), HEXLINK_ERC721_ABI, provider);
+    return new ethers.Contract(tokenFactoryAddress(await getChainFromProvider(provider)), HEXLINK_TOKEN_FACTORY_ABI, provider);
 }
 export function hexlinkSwapAddress(chain) {
     return ADDRESSES[chain.name].swap;

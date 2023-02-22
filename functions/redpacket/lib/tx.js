@@ -153,7 +153,8 @@ function buildDeployErc721Ops(provider, input) {
                 callData: tokenFactory.interface.encodeFunctionData("deployErc721", [input.salt, initData])
             }
         });
-        return userOps.concat(yield buildGasSponsorshipOps(provider, redpacket_1.hexlinkErc721Interface.encodeFunctionData("deposit", []), yield tokenFactory.predictErc721Address(input.salt), input));
+        const salt = ethers_1.ethers.utils.keccak256(ethers_1.ethers.utils.defaultAbiCoder.encode(["address", "bytes32"], [input.creator, input.salt]));
+        return userOps.concat(yield buildGasSponsorshipOps(provider, redpacket_1.hexlinkErc721Interface.encodeFunctionData("deposit", []), yield tokenFactory.predictErc721Address(salt), input));
     });
 }
 exports.buildDeployErc721Ops = buildDeployErc721Ops;

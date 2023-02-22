@@ -1,9 +1,9 @@
 <template>
     <div class="share-card" @wheel.prevent @touchmove.prevent @scroll.prevent>
         <div class="header">
-            <router-link to="/">
+            <RouterLink to="/">
                 <img src="../assets/logo/blue2-logo.svg" alt="" style="height: 40px; margin: 40px; overflow: visible;" />
-            </router-link>
+            </RouterLink>
         </div>
         <div class="body">
             <div class="scan-icon">
@@ -20,6 +20,7 @@
             <div class="qrcode">
                 <canvas id="canvas"></canvas>
             </div>
+            <p class="countdown">The QR code will be refreshed in {{countDown}} seconds.</p>
             <p class="or"><span>or copy the claim link</span></p>
             <button class="cta-btn" @click="copy(claimUrl, 'Claim URL Copied')" style="margin-bottom: 50px;">Copy</button>
         </div>
@@ -38,6 +39,8 @@ import { copy } from "@/web3/utils";
 const secret = ref<string | undefined>();
 const redPacket = ref<RedPacketDB | undefined>();
 const claimUrl = ref<string>("");
+let countDown = ref<number>(5);
+
 onMounted(async () => {
     const route = useRoute();
     const redPacketId = route.params.id;
@@ -67,14 +70,55 @@ const genQrCode = async() => {
     }
     console.log(url);
     claimUrl.value = url;
-    let canvas = document.getElementById('canvas')
+    var canvas = document.getElementById('canvas')
     await QRCode.toCanvas(canvas, url);
+
+    let context = canvas.getContext("2d");  
+    const image = new Image();
+
+    image.src = redPacket.value?.creator?.logoURI;
+    image.crossOrigin = 'anonymous';
+    image.onload = () => {
+        const coverage = 0.15;
+        const width = Math.round(canvas.width * coverage);
+        const x = (canvas.width - width) / 2;
+        let y = x;
+        let height = width;
+        let radius = 4; 
+        context.shadowOffsetX = 0;
+        context.shadowOffsetY = 2;
+        context.shadowBlur = 4;
+        context.shadowColor = '#00000040';
+        context.lineWidth = 8;
+        context.beginPath();
+        context.moveTo(x + radius, y);
+        context.arcTo(x + width, y, x + width, y + height, radius);
+        context.arcTo(x + width, y + height, x, y + height, radius);
+        context.arcTo(x, y + height, x, y, radius);
+        context.arcTo(x, y, x + width, y, radius);
+        context.closePath();
+        context.strokeStyle = '#fff';
+        context.stroke();
+        context.clip();
+        context.fillStyle = '#fff';
+        context.fillRect(x, x, width, height);
+        context.drawImage(image, x, x, width, height);
+    };
 }
 
 const refreshQrCode = async () => {
     await genQrCode();
-    await delay(5000);
+    await countDownTimer(30);
     await refreshQrCode();
+}
+
+async function countDownTimer(total: number) {
+    countDown.value = total;
+    while(countDown.value > 0) {
+        console.log(countDown);
+        await delay(1000);
+        countDown.value -= 1;
+    }
 }
 
 onMounted(refreshQrCode);
@@ -89,7 +133,7 @@ onMounted(refreshQrCode);
     border-radius: 15px;
     overflow: hidden;
     margin: 20px;
-    margin-bottom: calc(1rem + 20px); }
+    margin-bottom: calc(1rem + 10px); }
 .subtitle {
     color: rgba(0, 0, 0, 0.6);
     font-weight: 500; }
@@ -119,6 +163,10 @@ onMounted(refreshQrCode);
     width: 100vw;
     height: 100vh;
     background-color: white; }
+.countdown {
+    color: rgba(0, 0, 0, 0.6);
+    font-weight: 500;  
+    font-size: 14px;}
 .or {
     text-align: center;
     font-weight: bold;

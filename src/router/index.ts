@@ -42,11 +42,6 @@ const router = createRouter({
       component: () => import('@/views/AirdropNFT.vue')
     },
     {
-      path: '/collectables',
-      name: 'collectable view',
-      component: () => import('@/views/CollectablesView.vue')
-    },
-    {
       path: '/activities',
       name: 'activity view',
       component: () => import('@/views/ActivityView.vue')

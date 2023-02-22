@@ -19,7 +19,7 @@
           </div>
         </div>
       </div>
-      <div style="display: flex; justify-content: center;">
+      <div style="display: flex; justify-content: center; width: 100%; padding: 0 15px;">
         <button class="cta-button" @click="goToStep2">Continue</button>
       </div>
     </form>
@@ -123,7 +123,7 @@
           </div>
         </div>
       </div>
-      <div style="display: flex; justify-content: center;">
+      <div style="display: flex; justify-content: center; width: 100%; padding: 0 15px;">
         <button class="cta-button">Send</button>
       </div>
     </form>
@@ -517,8 +517,8 @@ const validateEmail = (input: string) => {
   color: white;
   padding: 10px;
   margin-top: 10px;
-  margin-bottom: 30px;
-  width: 80%;
+  margin-bottom: 20px;
+  width: 100%;
   border-radius: 50px;
   border: none; }
 .token-box {

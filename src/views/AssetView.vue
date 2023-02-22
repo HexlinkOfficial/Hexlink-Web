@@ -41,10 +41,10 @@
               </div>
               <div class="views">
                 <div class="detail-view">
-                  <button class="listView-button" @click="tokenTransaction = false; tokenView = true"
+                  <button class="listView-button" @click="collectableView = false; tokenView = true"
                     :class="tokenView && 'show'">Tokens</button>
-                  <button class="listView-button" @click="tokenView = false; tokenTransaction = true"
-                    :class="tokenTransaction && 'show'">History</button>
+                  <button class="listView-button" @click="tokenView = false; collectableView = true"
+                    :class="collectableView && 'show'">Collectables</button>
                 </div>
               </div>
             </div>
@@ -55,8 +55,8 @@
                 </div>
               </div>
             </div>
-            <div v-if="tokenTransaction" class="transaction-detail">
-              <AssetTransaction></AssetTransaction>
+            <div v-if="collectableView" class="nft-gridDetail">
+              <WalletNFTGrid></WalletNFTGrid>
             </div>
           </div>
         </div>
@@ -66,16 +66,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
 import WalletTokenList from "@/components/WalletTokenList.vue";
-import AssetTransaction from "@/components/AssetTransaction.vue";
+import WalletNFTGrid from "@/components/WalletNFTGrid.vue";
 import { useChainStore } from '@/stores/chain';
 import { useAccountStore } from "@/stores/account";
 import { useWalletStore } from "@/stores/wallet";
 import { BigNumber } from "bignumber.js";
 import { connectWallet } from "@/web3/wallet";
 
-const tokenTransaction = ref<boolean>(false);
+const collectableView = ref<boolean>(false);
 const tokenView = ref<boolean>(true);
 const sendTo = ref<string>("");
 
@@ -107,6 +107,9 @@ const openSend = async () => {
 </script>
 
 <style lang="less" scoped>
+.nft-gridDetail {
+  border-radius: 0.75rem;
+  margin-top: 1.75rem; }
 .content-body {
   margin-left: 9.5rem; }
 @media only screen and (max-width: 990px) {
@@ -322,9 +325,8 @@ const openSend = async () => {
     align-items: center;
     grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 0.75rem;
-  
-    @media (min-width: 640px) {
-      display: flex; } }
+    @media (max-width: 640px) {
+      display: none; } }
     .token-list .title .title-col {
       display: flex; 
       justify-content: space-between; 
@@ -409,57 +411,6 @@ const openSend = async () => {
     @media (min-width: 640px) {
       margin-left: 0;
       margin-right: 0; } }
-    .token-listDetail .token-table table {
-      min-width: 100%;
-      table-layout: auto;
-      border-color: inherit;
-      text-indent: 0; }
-      .token-listDetail .token-table .table-thread {
-        display: none;
-        border-bottom: 1px solid #e5e7eb;
-        @media (min-width: 640px) {
-          display: table-header-group; } }
-        .token-listDetail .token-table .table-thread .toke-header {
-          font-weight: 400;
-          cursor: pointer; }
-          .token-listDetail .token-table .table-thread .toke-header .token-header-data {
-            display: flex;
-            align-items: center; }
-        .token-listDetail .token-table .table-thread .portfolio-percentage-header {
-          display: none;
-          font-weight: 400;
-          cursor: pointer;
-
-          @media (min-width: 1024px) {
-            display: table-cell; } }
-          .token-listDetail .token-table .table-thread .portfolio-percentage-header .portfolio-percentage-header-data {
-            display: flex;
-            align-items: center; }
-          .token-listDetail .token-table .table-thread .portfolio-percentage-header .portfolio-percentage-header-sign {
-            display: flex;
-            margin-left: 0.5rem;
-            flex-direction: column;
-            align-items: center; }
-        .token-listDetail .token-table .table-thread .price-header {
-          display: none;
-          font-weight: 400;
-          cursor: pointer;
-        
-          @media (min-width: 768px) {
-            display: table-cell; } }
-          .token-listDetail .token-table .table-thread .price-header .price-header-data {
-            display: flex;
-            align-items: center; }
-        .token-listDetail .token-table .table-thread .balance-header {
-          font-weight: 400;
-          text-align: right;
-          cursor: pointer;
-        
-          @media (min-width: 768px) {
-            text-align: left; } }
-          .token-listDetail .token-table .table-thread .balance-header .balance-header-data {
-            display: flex;
-            align-items: center; }
 .account-setup {
   display: flex;
   flex-direction: row;
@@ -489,9 +440,6 @@ const openSend = async () => {
 img,
 svg {
   vertical-align: middle; }
-.transaction-detail {
-  border-radius: 0.75rem;
-  margin-top: 1.75rem; }
 .invite-content .input-group-text {
   background: #556ee6;
   color: #fff; }

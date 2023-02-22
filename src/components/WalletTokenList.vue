@@ -1,5 +1,5 @@
 <template>
-  <div v-for="(token, i) in useTokenStore().visiableTokens" :key="i" class="token-detail">
+  <div v-if="!loading" v-for="(token, i) in useTokenStore().visiableTokens" :key="i" class="token-detail">
     <div style="padding: 0.75rem; display: flex; align-items: center; justify-content: space-between; width: 100%;">
       <div class="token-description">
         <div class="token-logo">

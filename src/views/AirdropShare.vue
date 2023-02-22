@@ -6,23 +6,29 @@
             </RouterLink>
         </div>
         <div class="body">
-            <div class="scan-icon">
-                <svg style="width: 12px;" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M2 12H22" stroke="black" stroke-width="1.5" stroke-linecap="round" />
-                    <path d="M2 8V5C2 3.34315 3.34315 2 5 2H8" stroke="black" stroke-width="1.5" stroke-linecap="round" />
-                    <path d="M22 16L22 19C22 20.6569 20.6569 22 19 22L16 22" stroke="black" stroke-width="1.5" stroke-linecap="round" />
-                    <path d="M16 2L19 2C20.6569 2 22 3.34315 22 5L22 8" stroke="black" stroke-width="1.5" stroke-linecap="round" />
-                    <path d="M8 22L5 22C3.34315 22 2 20.6569 2 19L2 16" stroke="black" stroke-width="1.5" stroke-linecap="round" />
-                </svg>
+            <div v-if="redPacket == undefined">
+                <h2>Invalid airdrop link</h2>
+                <p>Please double check the airdrop link</p>
             </div>
-            <h2>Scan QR Code</h2>
-            <p class="subtitle">Scan this QR code to claim your airdrop</p>
-            <div class="qrcode">
-                <canvas id="canvas"></canvas>
+            <div v-if="redPacket != undefined" class="qr-section">
+                <div class="scan-icon">
+                    <svg style="width: 12px;" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M2 12H22" stroke="black" stroke-width="1.5" stroke-linecap="round" />
+                        <path d="M2 8V5C2 3.34315 3.34315 2 5 2H8" stroke="black" stroke-width="1.5" stroke-linecap="round" />
+                        <path d="M22 16L22 19C22 20.6569 20.6569 22 19 22L16 22" stroke="black" stroke-width="1.5" stroke-linecap="round" />
+                        <path d="M16 2L19 2C20.6569 2 22 3.34315 22 5L22 8" stroke="black" stroke-width="1.5" stroke-linecap="round" />
+                        <path d="M8 22L5 22C3.34315 22 2 20.6569 2 19L2 16" stroke="black" stroke-width="1.5" stroke-linecap="round" />
+                    </svg>
+                </div>
+                <h2>Scan QR Code</h2>
+                <p class="subtitle">Scan this QR code to claim your airdrop</p>
+                <div class="qrcode">
+                    <canvas id="canvas"></canvas>
+                </div>
+                <p v-if="countDown >= 1" class="countdown">The QR code will be refreshed in {{countDown}} seconds.</p>
+                <p class="or"><span>or copy the claim link</span></p>
+                <button class="cta-btn" @click="copy(claimUrl, 'Claim URL Copied')" style="margin-bottom: 50px;">Copy</button>
             </div>
-            <p class="countdown">The QR code will be refreshed in {{countDown}} seconds.</p>
-            <p class="or"><span>or copy the claim link</span></p>
-            <button class="cta-btn" @click="copy(claimUrl, 'Claim URL Copied')" style="margin-bottom: 50px;">Copy</button>
         </div>
     </div>
 </template>
@@ -40,6 +46,7 @@ const secret = ref<string | undefined>();
 const redPacket = ref<RedPacketDB | undefined>();
 const claimUrl = ref<string>("");
 let countDown = ref<number>(5);
+let canvasRendered = false;
 
 onMounted(async () => {
     const route = useRoute();
@@ -68,9 +75,13 @@ const genQrCode = async() => {
     if (secret.value) {
         url += `&otp=${genTotpCode(secret.value)}`;
     }
-    console.log(url);
     claimUrl.value = url;
-    var canvas = document.getElementById('canvas')
+    var canvas = document.getElementById('canvas');
+    if (canvas == null) {
+        return;
+    } else {
+        canvasRendered = true;
+    }
     await QRCode.toCanvas(canvas, url);
 
     let context = canvas.getContext("2d");  
@@ -108,14 +119,13 @@ const genQrCode = async() => {
 
 const refreshQrCode = async () => {
     await genQrCode();
-    await countDownTimer(30);
+    await countDownTimer(canvasRendered ? 30 : 0.1);
     await refreshQrCode();
 }
 
 async function countDownTimer(total: number) {
     countDown.value = total;
     while(countDown.value > 0) {
-        console.log(countDown);
         await delay(1000);
         countDown.value -= 1;
     }
@@ -152,6 +162,11 @@ onMounted(refreshQrCode);
 .body {
     width: 100%;
     height: calc(100% - 70px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column; }
+.qr-section {
     display: flex;
     align-items: center;
     justify-content: center;

@@ -1,9 +1,9 @@
 <template>
     <div class="share-card" @wheel.prevent @touchmove.prevent @scroll.prevent>
         <div class="header">
-            <router-link to="/">
+            <RouterLink to="/">
                 <img src="../assets/logo/blue2-logo.svg" alt="" style="height: 40px; margin: 40px; overflow: visible;" />
-            </router-link>
+            </RouterLink>
         </div>
         <div class="body">
             <div class="scan-icon">
@@ -67,8 +67,40 @@ const genQrCode = async() => {
     }
     console.log(url);
     claimUrl.value = url;
-    let canvas = document.getElementById('canvas')
+    var canvas = document.getElementById('canvas')
     await QRCode.toCanvas(canvas, url);
+
+    let context = canvas.getContext("2d");  
+    const image = new Image();
+
+    image.src = redPacket.value?.creator?.logoURI;
+    image.crossOrigin = 'anonymous';
+    image.onload = () => {
+        const coverage = 0.15;
+        const width = Math.round(canvas.width * coverage);
+        const x = (canvas.width - width) / 2;
+        let y = x;
+        let height = width;
+        let radius = 4; 
+        context.shadowOffsetX = 0;
+        context.shadowOffsetY = 2;
+        context.shadowBlur = 4;
+        context.shadowColor = '#00000040';
+        context.lineWidth = 8;
+        context.beginPath();
+        context.moveTo(x + radius, y);
+        context.arcTo(x + width, y, x + width, y + height, radius);
+        context.arcTo(x + width, y + height, x, y + height, radius);
+        context.arcTo(x, y + height, x, y, radius);
+        context.arcTo(x, y, x + width, y, radius);
+        context.closePath();
+        context.strokeStyle = '#fff';
+        context.stroke();
+        context.clip();
+        context.fillStyle = '#fff';
+        context.fillRect(x, x, width, height);
+        context.drawImage(image, x, x, width, height);
+    };
 }
 
 const refreshQrCode = async () => {

@@ -20,27 +20,14 @@
           </button>
         </div>
       </div>
-      <div class="upload-box-wrap" style="flex-direction: row; justify-content: space-evenly; border: 0px; padding: 16px 16px;" v-if="nftAirdrop.file">
-        <div>
+      <div class="upload-box-wrap" style="justify-content: space-evenly; border: 0px; padding: 16px 16px;" v-if="nftAirdrop.file">
+        <div v-if="!showPreview">
           <span class="title">NFT</span>
           <div class="nft-pic">
             <img :src="createObjectURL(nftAirdrop.file)" />
           </div>
         </div>
-        <div>
-          <button 
-            type="button"
-            @click="removeFile" 
-            class="changePicButton"
-          >
-            <svg style="color: rgb(22, 22, 26);" viewBox="0 0 24 24" fill="none" width="24" height="24" xlmns="http://www.w3.org/2000/svg">
-              <path fill-rule="evenodd" clip-rule="evenodd"
-                d="M17.5303 7.53033C17.8232 7.23744 17.8232 6.76256 17.5303 6.46967C17.2374 6.17678 16.7626 6.17678 16.4697 6.46967L12 10.9393L7.53033 6.46967C7.23744 6.17678 6.76256 6.17678 6.46967 6.46967C6.17678 6.76256 6.17678 7.23744 6.46967 7.53033L10.9393 12L6.46967 16.4697C6.17678 16.7626 6.17678 17.2374 6.46967 17.5303C6.76256 17.8232 7.23744 17.8232 7.53033 17.5303L12 13.0607L16.4697 17.5303C16.7626 17.8232 17.2374 17.8232 17.5303 17.5303C17.8232 17.2374 17.8232 16.7626 17.5303 16.4697L13.0607 12L17.5303 7.53033Z"
-                fill="currentColor"></path>
-            </svg>
-          </button>
-        </div>
-        <div>
+        <div v-if="showPreview">
           <span class="title">Preview</span>
           <div class="nft-preview">
             <Loading v-if="getColorStatus === ''" style="padding-bottom: 45px;" />
@@ -59,6 +46,16 @@
               :style="'background:' + imageColor" 
             ></NFTCard>
           </div>
+        </div>
+        <div style="display: flex; padding: 10px; width: 150px; justify-content: space-between; align-items: center;">
+          <button type="button" @click="removeFile" class="changePicButton">
+            <svg style="color: rgb(22, 22, 26);" viewBox="0 0 24 24" fill="none" width="24" height="24" xlmns="http://www.w3.org/2000/svg">
+              <path fill-rule="evenodd" clip-rule="evenodd"
+                d="M17.5303 7.53033C17.8232 7.23744 17.8232 6.76256 17.5303 6.46967C17.2374 6.17678 16.7626 6.17678 16.4697 6.46967L12 10.9393L7.53033 6.46967C7.23744 6.17678 6.76256 6.17678 6.46967 6.46967C6.17678 6.76256 6.17678 7.23744 6.46967 7.53033L10.9393 12L6.46967 16.4697C6.17678 16.7626 6.17678 17.2374 6.46967 17.5303C6.76256 17.8232 7.23744 17.8232 7.53033 17.5303L12 13.0607L16.4697 17.5303C16.7626 17.8232 17.2374 17.8232 17.5303 17.5303C17.8232 17.2374 17.8232 16.7626 17.5303 16.4697L13.0607 12L17.5303 7.53033Z"
+                fill="currentColor"></path>
+            </svg>
+          </button>
+          <button type="button" @click="showPreview = !showPreview" class="changePicButton" style="width: auto; color: black; padding: 10px;" :style="showPreview ? 'background: #076ae0; color: white;' : ''">Preview</button>
         </div>
       </div>
     </div>
@@ -102,22 +99,24 @@
     <div class="enable-switch">
       <p>Enable dynamic share link</p>
       <a-switch v-model:checked="enableDynamic" style="margin-left: 1rem;" />
+      <div class="tooltip fade" data-title="Service gas fee is determined by the market, not Hexlink">
+        <img style="margin-left: 1rem; width: 16px;" src="@/assets/svg/info.svg" />
+      </div>
     </div>
     <div class="gas-estimation">
       <p>
         <img style="width: 20px; height: 20px;" src="https://i.postimg.cc/RhXfgJR1/gas-pump.png" />
-        Estimated Service Fee:
+        Estimated Fee:
         <a-tooltip placement="top">
           <template #title>
             <span>The real service fee may differ per network conditions</span>
           </template>
-          <b>{{ totalServiceFee.substring(0, 6) }}</b>
+          <b>{{ totalServiceFee.substring(0,6) }}</b>
         </a-tooltip>
       </p>
       <div class="total-choose-token">
         <div class="token-select">
-          <div 
-            class="mode-dropdown" 
+          <div class="mode-dropdown" 
             :class="chooseGasDrop && 'active'" 
             @click.stop="chooseGasDrop = !chooseGasDrop;"
             v-on-click-outside.bubble="chooseGasHandle">
@@ -127,7 +126,7 @@
             <div class="mode-text2">{{ gasToken.symbol }}</div>
             <input class="mode-input" type="text" placeholder="select" readonly>
             <div class="mode-options">
-              <div class="mode-option" v-for="(token, index) of tokens" :key="index" @click="tokenGasChoose(token)">
+              <div class="mode-option" v-for="(token, index) of tokens" :key="index" @click="tokenChoose('gas', token)">
                 <div class="token-icon">
                   <img :src="token.logoURI" />
                 </div>
@@ -143,14 +142,7 @@
         </div>
       </div>
       <div class="tooltip fade" data-title="Service gas fee is determined by the market, not Hexlink">
-        <svg style="margin-left: 1rem; width: 16px;" width="22" height="22" viewBox="0 0 22 22" fill="none"
-          xmlns="http://www.w3.org/2000/svg">
-          <path
-            d="M11 21C16.5228 21 21 16.5228 21 11C21 5.47715 16.5228 1 11 1C5.47715 1 1 5.47715 1 11C1 16.5228 5.47715 21 11 21Z"
-            stroke="#898989" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-          <path d="M11 15V11" stroke="#898989" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-          <path d="M11 8V7" stroke="#898989" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-        </svg>
+        <img style="margin-left: 1rem; width: 16px;" src="@/assets/svg/info.svg" />
       </div>
     </div>
   </div>
@@ -222,6 +214,7 @@ const tokens = ref<Token[]>([]);
 const imageColor = ref<string>("");
 const getColorStatus = ref<string>("");
 const enableDynamic = ref<boolean>(false);
+const showPreview = ref<boolean>(false);
 
 const hexlAccountBalances = ref<BalanceMap>({});
 const hexlAccountBalance = (token: string): string => {
@@ -366,6 +359,14 @@ const chooseGasHandle: OnClickOutsideHandler = (event) => {
   chooseGasDrop.value = false;
 }
 
+const tokenChoose =
+  async (mode: "token" | "gas", token: Token) => {
+    if (mode === "gas") {
+      nftAirdrop.value.gasToken = token.address;
+      setGas();
+    }
+  };
+
 onMounted(genTokenList);
 onMounted(refreshGas);
 
@@ -465,12 +466,11 @@ const getColor = async (nft: nftImage) => {
   min-width: 40px; }
 .enable-switch {
   display: flex;
+  width: 100%;
+  justify-content: flex-end;
   align-items: center;
   p {
-    margin-bottom: 0rem; }
-  @media (max-width: 768px) {
-    width: 100%;
-    justify-content: flex-end; } }
+    margin-bottom: 0rem; } }
 .nft-preview {
   border: 2px dashed rgba(22, 22, 26, 0.1);
   border-radius: 16px;
@@ -499,6 +499,7 @@ const getColor = async (nft: nftImage) => {
   border-radius: 16px; }
 .choose-account {
   display: flex;
+  flex-direction: column;
   margin: 16px;
   justify-content: center;
   align-items: center;
@@ -509,9 +510,7 @@ const getColor = async (nft: nftImage) => {
     align-items: center;
     width: 1rem;
     height: 1rem;
-    margin-left: 0.75rem; }
-  @media (max-width: 768px) {
-    flex-direction: column; } }
+    margin-left: 0.75rem; } }
 .mode-options {
   display: flex;
   align-items: center;
@@ -692,12 +691,13 @@ const getColor = async (nft: nftImage) => {
   cursor: text; }
 .gas-station {
   display: flex;
-  margin: 16px;
-  justify-content: space-between;
-  @media (max-width: 768px) {
-    margin: 0px; } }
+  flex-direction: column;
+  margin: 0px;
+  padding: 20px 10px; }
 .gas-estimation {
   display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
   p {
     margin-bottom: 0rem;
     margin-right: 1rem;
@@ -741,7 +741,7 @@ const getColor = async (nft: nftImage) => {
   flex-shrink: 0;
   flex-basis: auto;
   display: flex;
-  margin-top: 25px; }
+  margin-top: 16px; }
 .button-text {
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -825,18 +825,8 @@ const getColor = async (nft: nftImage) => {
   line-height: 1.25rem;
   font-weight: 800;
   line-height: 1.25rem;
-  width: 50%;
+  width: 70%;
   border-radius: 50px;
-  @media (min-width: 640px) {
-    padding-left: 1.5rem;
-    padding-right: 1.5rem;
-    width: 200px; }
-  @media (min-width: 768px) {
-    padding-left: 1.5rem;
-    padding-right: 1.5rem;
-    width: 200px; }
-  @media (max-width: 640px) {
-    width: 70%; }
   opacity: 1;
   background-color: rgb(7, 106, 224);
   color: white; }
@@ -844,11 +834,10 @@ const getColor = async (nft: nftImage) => {
   background-color: rgba(7, 106, 224,0.9); }
 .create {
   display: flex;
+  justify-content: center;
   margin: 16px;
   margin-top: 32px;
-  flex-direction: row-reverse;
-  @media (max-width: 640px) {
-    justify-content: center; } }
+  flex-direction: row-reverse; }
 input:focus {
   outline: none;
   box-shadow: none; }

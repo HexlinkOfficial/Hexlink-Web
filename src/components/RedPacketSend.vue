@@ -325,11 +325,19 @@ const refreshGas = async () => {
 };
 
 const totalServiceFee = computed(() => {
-  return BigNumber(
-    redpacket.value.gasSponsorship
-  ).plus(redpacket.value.estimatedGas).div(
-    tokenBase(gasToken.value)
-  ).dp(4).toString();
+  if (useRedPacketStore().account === "hexlink") {
+    return BigNumber(
+      redpacket.value.gasSponsorship
+    ).plus(redpacket.value.estimatedGas).div(
+      tokenBase(gasToken.value)
+    ).dp(4).toString();
+  } else {
+    return BigNumber(
+      redpacket.value.gasSponsorship
+    ).div(
+      tokenBase(gasToken.value)
+    ).dp(4).toString();
+  }
 })
 
 const tokenChoose =
@@ -393,7 +401,7 @@ const confirmRedPacket = async function () {
       redpacket.value.balanceInput,
       tokenStore.token(redpacket.value.token).decimals
     ).toString();
-    if (enableDynamic) {
+    if (enableDynamic.value) {
       redpacket.value.validationRules.push({type: "dynamic_secrets"});
     }
     const chain = useChainStore().chain;

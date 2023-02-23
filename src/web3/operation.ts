@@ -26,7 +26,7 @@ import { useWalletStore } from "@/stores/wallet";
 import { nameHashWithVersion } from "@/web3/account";
 
 import { getFunctions, httpsCallable } from 'firebase/functions'
-import { getInfuraProvider, getPriceInfo } from "./network";
+import { getInfuraProvider } from "./network";
 const functions = getFunctions();
 
 export function buildOpInput(params: {
@@ -62,7 +62,6 @@ export async function buildUserOpRequest(
     const account = accountContract(provider, hexlAccount);
 
     const deployed = await isContract(provider, hexlAccount);
-    const priceInfo = await getPriceInfo(chain);
     const gas = {
         swapper: hexlinkSwapAddress(chain),
         token: gasToken,

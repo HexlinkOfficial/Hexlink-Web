@@ -10,8 +10,7 @@
             </div>
             <div class="price">${{ price }}</div>
             <div style="display: flex; margin-top: 1rem; margin-bottom: 1rem;">
-              <router-link 
-                :to="sendTo">
+              <router-link :to="sendTo">
                 <button class="cta-button" @click="openSend">
                   <img src="@/assets/svg/send.svg" style="margin-right: 5px;" alt="send icon" />
                   Send

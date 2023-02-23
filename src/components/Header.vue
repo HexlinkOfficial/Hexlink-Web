@@ -225,7 +225,7 @@ const componentTitle = ref<string>("");
 
 const getComponentName = () => {
   const router = useRoute();
-  if (router.path == "/redpackets") {
+  if (router.path == "/airdrop") {
     componentTitle.value = "Hexlink Drop";
   } else if (router.path == "/") {
     componentTitle.value = "Assets";

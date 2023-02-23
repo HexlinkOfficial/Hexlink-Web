@@ -83,14 +83,10 @@
       </div>
     </div>
     <div class="gas-station">
-      <div class="enable-switch">
-        <p>Enable dynamic share link</p>
-        <a-switch v-model:checked="enableDynamic" style="margin-left: 1rem;" />
-      </div>
       <div class="gas-estimation">
         <p>
           <img style="width: 20px; height: 20px;" src="https://i.postimg.cc/RhXfgJR1/gas-pump.png"/>
-          Estimated Service Fee: 
+          Estimated Fee: 
           <a-tooltip placement="top">
             <template #title>
               <span>The real service fee may differ per network conditions</span>
@@ -124,13 +120,14 @@
           </div>
         </div>
         <div class="tooltip fade" data-title="Service gas fee is determined by the market, not Hexlink">
-          <svg style="margin-left: 1rem; width: 16px;" width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path
-              d="M11 21C16.5228 21 21 16.5228 21 11C21 5.47715 16.5228 1 11 1C5.47715 1 1 5.47715 1 11C1 16.5228 5.47715 21 11 21Z"
-              stroke="#898989" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-            <path d="M11 15V11" stroke="#898989" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-            <path d="M11 8V7" stroke="#898989" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-          </svg>
+          <img style="margin-left: 1rem; width: 16px;" src="@/assets/svg/info.svg"/>
+        </div>
+      </div>
+      <div class="enable-switch">
+        <p>Enable dynamic share link</p>
+        <a-switch v-model:checked="enableDynamic" style="margin-left: 1rem;" />
+        <div class="tooltip fade" data-title="Service gas fee is determined by the market, not Hexlink">
+          <img style="margin-left: 1rem; width: 16px;" src="@/assets/svg/info.svg" />
         </div>
       </div>
     </div>
@@ -155,13 +152,8 @@
       ></RedPacketAccount>
     </div>
     <div class="create">
-        <button class="connect-wallet-button" @click="confirmRedPacket" style="width: auto;">
-          <svg style="margin-right: 10px;" width="18" height="18" viewBox="0 0 18 18" fill="none"
-            xmlns="http://www.w3.org/2000/svg">
-            <path
-              d="M16 2.50025V3.51125C16.5304 3.51125 17.0391 3.72196 17.4142 4.09703C17.7893 4.47211 18 4.98081 18 5.51125V15.5112C18 16.0416 17.7893 16.5504 17.4142 16.9254C17.0391 17.3005 16.5304 17.5112 16 17.5112H2C1.46957 17.5112 0.96086 17.3005 0.58579 16.9254C0.21071 16.5504 0 16.0416 0 15.5112V5.51125C0 4.46625 0.835 3.51825 1.813 3.23925L12.813 0.0962511C13.1851 -0.0100989 13.5768 -0.0286089 13.9573 0.0421711C14.3377 0.112951 14.6966 0.271091 15.0055 0.504141C15.3145 0.737191 15.5651 1.03878 15.7377 1.38516C15.9102 1.73154 16 2.11326 16 2.50025ZM12.5 9.01123C12.1022 9.01123 11.7206 9.16933 11.4393 9.45063C11.158 9.73193 11 10.1134 11 10.5112C11 10.909 11.158 11.2906 11.4393 11.5719C11.7206 11.8532 12.1022 12.0112 12.5 12.0112C12.8978 12.0112 13.2794 11.8532 13.5607 11.5719C13.842 11.2906 14 10.909 14 10.5112C14 10.1134 13.842 9.73193 13.5607 9.45063C13.2794 9.16933 12.8978 9.01123 12.5 9.01123ZM14 2.50025C14.0001 2.42966 13.9852 2.35986 13.9563 2.29544C13.9274 2.23102 13.8853 2.17345 13.8326 2.1265C13.7798 2.07955 13.7178 2.04429 13.6505 2.02305C13.5832 2.00181 13.5121 1.99506 13.442 2.00325L13.362 2.01925L8.14 3.51125H14V2.50025Z"
-              fill="white" />
-          </svg>
+        <button class="connect-wallet-button" @click="confirmRedPacket" style="width: 90%;">
+          <img style="margin-right: 10px;" src="@/assets/svg/redPacket.svg"/>
           Confirm Red Packet
         </button>
     </div>
@@ -194,7 +186,6 @@ import { hash, tokenAmount } from "../../functions/common";
 import type { RedPacketInput } from "../../functions/redpacket";
 import { calcGas } from "../../functions/common";
 import { redpacketId } from "../../functions/redpacket";
-
 const estimatedGasAmount = "250000"; // hardcoded, can optimize later
 const chooseTotalDrop = ref<boolean>(false);
 const openDropdown = ref<boolean>(false);
@@ -204,29 +195,23 @@ const modalRef = ref<any>(null);
 const modal = ref<boolean>(false);
 const hasBalanceWarning = ref<boolean>(false);
 const enableDynamic = ref<boolean>(false);
-
 const tokenStore = useTokenStore();
 const walletStore = useWalletStore();
 const redPacketStore = useRedPacketStore();
-
 const hexlAccountBalances = ref<BalanceMap>({});
 const hexlAccountBalance = (token: string) : string => {
   return hexlAccountBalances.value[token]?.normalized || "0";
 }
-
 const walletAccountBalances = ref<BalanceMap>({});
 const walletAccountBalance = (token: string) : string => {
   return walletAccountBalances.value[token]?.normalized || "0";
 }
-
 const setAccount = (account: AccountType) => {
   useRedPacketStore().setAccount(account);
 }
-
 interface RawRedPacketInput extends RedPacketInput {
   balanceInput: string,
 }
-
 const redpacket = ref<RawRedPacketInput>({
   id: "",
   mode: 2,
@@ -243,21 +228,17 @@ const redpacket = ref<RawRedPacketInput>({
   creator: useAccountStore().account?.address || "",
   sponsorGas: true,
 });
-
 const token = computed(() => tokenStore.token(redpacket.value.token));
 const gasToken = computed(() => tokenStore.token(redpacket.value.gasToken));
-
 const tokenBalance = (token: string) => {
   if (redPacketStore.account == "hexlink") {
     return hexlAccountBalance(token);
   }
   return walletAccountBalance(token);
 };
-
 const redPacketTokenBalance = computed(
   () => tokenBalance(redpacket.value.token)
 );
-
 const genTokenList = async function () {
     hexlAccountBalances.value = await getBalances(
       useAccountStore().account!.address, 
@@ -281,7 +262,6 @@ const genTokenList = async function () {
       setDefaultToken(hexlAccountBalance);
     }
 }
-
 const setDefaultToken = function (getBalance: (t: string) => string) {
     const nativeCoin = tokenStore.nativeCoin;
     if (Number(getBalance(nativeCoin.address)) > 0 || tokens.value.length == 0) {
@@ -292,13 +272,11 @@ const setDefaultToken = function (getBalance: (t: string) => string) {
       redpacket.value.gasToken = tokens.value[0].address
     }
 }
-
 async function delay(ms: number) {
     return new Promise( ( resolve, _reject ) => {
         window.setTimeout( () => resolve(null), ms );
     } );
 }
-
 const setGas = async() => {
   const chain = useChainStore().chain;
   const price = await getPriceInfo(chain, redpacket.value.gasToken);
@@ -317,13 +295,11 @@ const setGas = async() => {
     price,
   ).toString();
 }
-
 const refreshGas = async () => {
   await setGas();
   await delay(5000);
   await refreshGas();
 };
-
 const totalServiceFee = computed(() => {
   if (useRedPacketStore().account === "hexlink") {
     return BigNumber(
@@ -339,7 +315,6 @@ const totalServiceFee = computed(() => {
     ).dp(4).toString();
   }
 })
-
 const tokenChoose =
   async (mode: "token" | "gas", token: Token) => {
     if (mode === "token") {
@@ -349,10 +324,8 @@ const tokenChoose =
       setGas();
     }
   };
-
 onMounted(genTokenList);
 onMounted(refreshGas);
-
 watch(() => useChainStore().current, genTokenList);
 watch(() => useWalletStore().connected, genTokenList);
 watch([
@@ -369,19 +342,16 @@ watch(
     }
   }
 );
-
 const tryConnectWallet = async function () {
   if (typeof window.ethereum == 'undefined') {
     console.log('MetaMask is not installed!');
   }
   await connectWallet();
 };
-
 const modeLabels = ["", "Equally", "Randomly"];
 const modeChoose = (gameMode: 1 | 2) => {
   redpacket.value.mode = gameMode;
 }
-
 const validateInput = () => {
   if (Number(redpacket.value.balanceInput) == 0) {
     message.error("Number of tokens to deposit cannot be 0");
@@ -412,7 +382,6 @@ const confirmRedPacket = async function () {
     useRedPacketStore().beforeCreate(redpacket.value);
   }
 };
-
 const chooseTotalHandle: OnClickOutsideHandler = (event) => {
   chooseTotalDrop.value = false;
 }
@@ -422,7 +391,6 @@ const dropdownHandle: OnClickOutsideHandler = (event) => {
 const chooseGasHandle: OnClickOutsideHandler = (event) => {
   chooseGasDrop.value = false;
 }
-
 onClickOutside(
   modalRef,
   (event) => {
@@ -445,11 +413,11 @@ onClickOutside(
 .enable-switch {
   display: flex;
   align-items: center;
+  width: 100%;
+  justify-content: flex-end;
+  margin-top: 0.75rem;
   p {
-    margin-bottom: 0rem; }
-  @media (max-width: 768px) {
-    width: 100%;
-    justify-content: flex-end; } }
+    margin-bottom: 0rem; } }
 .connectWallet {
   display: flex;
   width: 100%;
@@ -459,27 +427,13 @@ onClickOutside(
 .connect-wallet-button {
   display: flex;
   justify-content: center;
-  padding-top: 0.5rem;
-  padding-bottom: 0.5rem;
-  padding-left: 0.75rem;
-  padding-right: 0.75rem;
-  color: #000;
-  font-size: 0.875rem;
+  padding: 10px;
   line-height: 1.25rem;
-  font-weight: 800;
-  line-height: 1.25rem;
-  width: 50%;
   border-radius: 50px;
-  @media (min-width: 640px) {
-    padding-left: 1.5rem;
-    padding-right: 1.5rem;
-    width: 200px; }
-  @media (min-width: 768px) {
-    padding-left: 1.5rem;
-    padding-right: 1.5rem;
-    width: 200px; }
   opacity: 1;
   background-color: rgb(7, 106, 224);
+  margin-top: 30px;
+  margin-bottom: 20px;
   color: white; }
 .connect-wallet-button:hover {
   background-color: rgba(7, 106, 224,0.9);
@@ -491,13 +445,11 @@ onClickOutside(
   padding: 0px; }
 .red-packet .mode-and-share {
   display: flex;
+  flex-direction: column;
   gap: 16px;
   margin: 16px;
-  @media (max-width: 640px) {
-    margin-left: 0rem;
-    margin-right: 0rem; }
-  @media (max-width: 768px) {
-    flex-direction: column; } }
+  margin-left: 0rem;
+  margin-right: 0rem; }
 .red-packet .mode-and-share .game-mode {
   display: flex;
   flex: 1 1 10%;
@@ -506,12 +458,9 @@ onClickOutside(
     align-items: center;
     margin-left: 1rem;
     margin-bottom: 0rem;
-    font-weight: 600;
+    font-weight: 500;
     line-height: 1.5;
-    font-size: 16px;
-    @media (max-width: 640px) {
-      font-size: 14px;
-      font-weight: 500; } } }
+    font-size: 14px; } }
 .red-packet .mode-and-share .share-number {
   flex: 1 1 0%;
   display: flex;
@@ -519,21 +468,17 @@ onClickOutside(
     margin-left: 1rem;
     margin-right: 0rem;
     margin-bottom: 0rem;
-    font-weight: 600;
+    font-weight: 500;
     line-height: 1.5;
-    font-size: 16px;
+    font-size: 14px;
     display: flex;
-    align-items: center;
-    @media (max-width: 640px) {
-      font-size: 14px;
-      font-weight: 500; } } }
+    align-items: center; } }
 .red-packet .total-amount {
   display: flex;
   gap: 16px;
   margin: 16px;
-  @media (max-width: 640px) {
-    margin-left: 0rem;
-    margin-right: 0rem; } }
+  margin-left: 0rem;
+  margin-right: 0rem; }
 .red-packet .total-amount .box {
   position: relative;
   padding: 10px 12px;
@@ -870,27 +815,22 @@ input[type=number] {
     flex-direction: row-reverse;
     margin-right: 1rem;
     width: 50%;
-    @media (max-width: 640px) {
-      font-size: 14px;
-      font-weight: 400; } } }
+    font-size: 14px;
+    font-weight: 400; } }
 .token-list {
   display: grid;
   flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 0.75rem;
-  @media (min-width: 640px) {
-    display: flex; } }
+  gap: 0.75rem; }
 .token-list .title {
   display: grid;
   flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 0.75rem;
-  @media (min-width: 640px) {
-    display: flex;} }
+  gap: 0.75rem; }
 .token-list .title .title-col {
   display: flex;
   justify-content: space-between;
@@ -904,8 +844,7 @@ input[type=number] {
   font-size: 1.25rem;
   line-height: 1.75rem;
   font-weight: 600;
-  @media (max-width: 768px) {
-    width: 9rem; } }
+  width: 9rem; }
 .token-list .title .title-col .content svg {
   display: inline-flex;
   transition-property: background-color, border-color, color, fill, stroke;
@@ -926,11 +865,7 @@ input[type=number] {
   border-radius: 50px;
   border-style: solid;
   border-width: 1px;
-  border-color: rgb(71, 85, 105);
-  @media (min-width: 640px) {
-    margin-left: 0.75rem;
-    margin-left: 0.875rem;
-    max-width: 28rem; } }
+  border-color: rgb(71, 85, 105); }
 .token-list .views .detail-view button {
   padding-top: 0.5rem;
   padding-bottom: 0.5rem;
@@ -942,11 +877,7 @@ input[type=number] {
   font-weight: 800;
   line-height: 1.25rem;
   width: 50%;
-  border-radius: 50px;
-  @media (min-width: 640px) {
-    padding-left: 1.5rem;
-    padding-right: 1.5rem;
-    width: 150px; } }
+  border-radius: 50px; }
 .token-list .views .detail-view .listView-button {
   opacity: 1;
   background-color: rgba(7, 106, 224, 0);
@@ -957,12 +888,11 @@ input[type=number] {
   color: white; }
 .gas-station {
   display: flex;
-  margin: 16px;
-  justify-content: space-between;
-  @media (max-width: 768px) {
-    margin: 0px; } }
+  flex-direction: column;
+  margin: 0px; }
 .gas-estimation {
   display: flex;
+  justify-content: flex-end;
   p {
     margin-bottom: 0rem;
     margin-right: 1rem;
@@ -1004,7 +934,7 @@ input[type=number] {
   transform: translate3d(0,3px,0); }
 .choose-account {
   display: flex;
-  margin: 16px;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   svg {
@@ -1014,17 +944,13 @@ input[type=number] {
     align-items: center;
     width: 1rem;
     height: 1rem;
-    margin-left: 0.75rem; }
-  @media (max-width: 768px) {
-    flex-direction: column; } }
+    margin-left: 0.75rem; } }
 .create {
   display: flex;
-  margin: 16px;
+  justify-content: center;
   flex-direction: row-reverse; }
 .balance-warning {
-  @media (max-width: 767px) {
-    display: none; }
-  display: flex;
+  display: none;
   justify-content: flex-end;
   align-items: center;
   flex: 2 1 0%;
@@ -1042,10 +968,6 @@ input[type=number] {
   color: #FE646F;
   width: auto; }
 .balance-warning-mobile {
-  @media (min-width: 768px) {
-    display: none; }
-  @media (min-width: 640px) {
-    margin-left: 16px; }
   display: flex;
   align-items: center;
   font-weight: 700;

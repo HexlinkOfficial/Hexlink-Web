@@ -5,8 +5,8 @@
                 <div class="airdrop-status">
                     <div>
                         <div class="cta-box">
-                            <router-link to="/">
-                                <button class="cta-button">
+                            <router-link :to="airdropToken">
+                                <button class="cta-button" @click="openSend">
                                     <img src="@/assets/svg/coin.svg" alt="token icon"/>
                                     Airdrop Token
                                 </button>
@@ -43,17 +43,17 @@
                         </div>
                         <div class="views">
                         <div class="detail-view">
-                            <router-link to="/redpackets">
+                            <router-link to="/airdrop">
                                 <button class="listView-button" :class="selected == 'history' ? 'show' : ''">
                                     Luck History
                                 </button>
                             </router-link>
-                            <router-link to="/redpacket/send">
+                            <router-link to="/airdrop/send">
                                 <button class="listView-button" :class="selected == 'send' ? 'show' : ''">
                                     Send Luck
                                 </button>
                             </router-link>
-                            <router-link to="/redpacket/airdropCollectable">
+                            <router-link to="/airdrop/airdropCollectable">
                                 <button class="listView-button" :class="selected == 'airdropNFTs' ? 'show' : ''">
                                     Send NFTs
                                 </button>
@@ -75,33 +75,37 @@ import { computed, onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
 import Loading from "@/components/Loading.vue";
 import { useStatusStore } from '@/stores/airdropStatus';
+import { useWalletStore } from '@/stores/wallet';
+import { connectWallet } from "@/web3/wallet";
 
-// const loading = ref<boolean>(true);
-// const statusTitle1 = ref<string>("");
-// const statusValue1 = ref<string>("");
-// const statusTitle2 = ref<string>("");
-// const statusValue2 = ref<string>("");
-
-// function delay(ms: number) {
-//     return new Promise(resolve => setTimeout(resolve, ms));
-// }
+const airdropToken = ref<string>("");
 
 const selected  = computed(() => {
-    if (useRoute().path == '/redpacket/send') {
+    if (useRoute().path == '/airdrop/send') {
         return 'send';
-    } else if (useRoute().path == '/redpackets') {
+    } else if (useRoute().path == '/airdrop') {
         return 'history';
     } else {
         return 'airdropNFTs'
     }
 });
 
-// onMounted(async () => {
-//     loading.value = true;
-//     statusTitle1.value = await Object.keys(useStatusStore().status[0])[0];
-//     statusValue1.value = await Object.values(useStatusStore().status[0])[0];
-//     loading.value = false;
-// })
+const openSend = async () => {
+    // check if wallet is connected
+    const walletStore = useWalletStore();
+    // if connected, open send modal
+    if (walletStore.connected) {
+        airdropToken.value = "/airdrop?action=send";
+    } else {
+        // if not connected, connect wallet then open send modal
+        airdropToken.value = "";
+        if (typeof window.ethereum == 'undefined') {
+            console.log('MetaMask is not installed!');
+        }
+        await connectWallet();
+        await openSend();
+    }
+}
 </script>
   
 <style lang="less" scoped>

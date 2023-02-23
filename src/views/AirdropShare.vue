@@ -64,7 +64,7 @@ async function delay(ms: number) {
 }
 
 const genQrCode = async() => {
-    let url = window.location.origin + `/redpackets?claim=${redPacket.value?.id}`;
+    let url = window.location.origin + `/airdrop?claim=${redPacket.value?.id}`;
     if (secret.value) {
         url += `&otp=${genTotpCode(secret.value)}`;
     }

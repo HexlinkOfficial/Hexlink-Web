@@ -4,6 +4,24 @@
             <div class="col-xxl-6">
                 <div class="airdrop-status">
                     <div>
+                        <div class="status-box">
+                            <div style="margin: 0 10px;">
+                                <div class="title">
+                                    <span>{{ statusTitle }}</span>
+                                </div>
+                                <div class="price">
+                                    <span>{{ statusData }}</span>
+                                </div>
+                            </div>
+                            <!-- <div style="margin: 0 10px;">
+                                <div class="title">
+                                    <span>{{ Object.keys(useStatusStore().status[1])[0] }}</span>
+                                </div>
+                                <div class="price">
+                                    <span>{{ Object.values(useStatusStore().status[1])[0] }}</span>
+                                </div>
+                            </div> -->
+                        </div>
                         <div class="cta-box">
                             <router-link :to="airdropToken">
                                 <button class="cta-button" @click="openSend('token')">
@@ -71,6 +89,8 @@ import { useWalletStore } from '@/stores/wallet';
 import { connectWallet } from "@/web3/wallet";
 
 const airdropToken = ref<string>("");
+const statusTitle = ref<string>("");
+const statusData = ref<any>();
 
 const selected  = computed(() => {
     if (useRoute().path == '/airdrop/send') {
@@ -99,6 +119,11 @@ const openSend = async (to: string) => {
         await openSend(to);
     }
 }
+
+onMounted(() => {
+    statusTitle.value = Object.keys(useStatusStore().status[0])[0].toString();
+    statusData.value = Object.values(useStatusStore().status[0])[0]?.toString();
+})
 </script>
   
 <style lang="less" scoped>
@@ -117,7 +142,7 @@ const openSend = async (to: string) => {
 .cta-button {
   display: flex;
   justify-content: center;
-  width: 170px;
+  width: 180px;
   padding-top: 0.5rem;
   padding-bottom: 0.5rem;
   padding-left: 0.75rem;

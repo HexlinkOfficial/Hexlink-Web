@@ -158,7 +158,7 @@ const showGasToken = computed(() => {
     display: flex;
     flex-direction: row;
     padding: 10px;
-    max-width: 335px;
+    width: 335px;
     min-height: 110px;
     transition: all 0.2s ease; }
 .account-card:hover {

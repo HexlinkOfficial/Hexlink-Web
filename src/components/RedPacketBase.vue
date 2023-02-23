@@ -46,28 +46,9 @@
                         <div class="title">
                         <div class="title-col">
                             <div class="content">
-                            <div class="text">Share your love</div>
+                            <div class="text">Airdrop</div>
                             <img src="@/assets/svg/colon.svg"/>
                             </div>
-                        </div>
-                        </div>
-                        <div class="views">
-                        <div class="detail-view">
-                            <router-link to="/airdrop">
-                                <button class="listView-button" :class="selected == 'history' ? 'show' : ''">
-                                    Luck History
-                                </button>
-                            </router-link>
-                            <router-link to="/airdrop/send">
-                                <button class="listView-button" :class="selected == 'send' ? 'show' : ''">
-                                    Send Luck
-                                </button>
-                            </router-link>
-                            <router-link to="/airdrop/airdropCollectable">
-                                <button class="listView-button" :class="selected == 'airdropNFTs' ? 'show' : ''">
-                                    Send NFTs
-                                </button>
-                            </router-link>
                         </div>
                         </div>
                     </div>

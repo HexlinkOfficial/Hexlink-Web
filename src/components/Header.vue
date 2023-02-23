@@ -7,9 +7,6 @@
             <div class="header-left">
               <div class="brand-logo">
                 <router-link to="/">
-                  <div class="header-title">
-                    <h2 style="margin-bottom: 0rem; font-size: 1.4rem; font-weight: 600;">{{ componentTitle }}</h2>
-                  </div>
                   <img class="header-logo" src="../assets/logo/blue2-logo.svg" alt="" />
                 </router-link>
               </div>
@@ -223,17 +220,6 @@ const { toClipboard } = useClipboard();
 const ownerAccountAddress = useAccountStore().account?.owner;
 const componentTitle = ref<string>("");
 
-const getComponentName = () => {
-  const router = useRoute();
-  if (router.path == "/airdrop") {
-    componentTitle.value = "Hexlink Drop";
-  } else if (router.path == "/") {
-    componentTitle.value = "Assets";
-  } else if (router.path == "/activities") {
-    componentTitle.value = "Transactions";
-  }
-}
-
 const addressTextLong = function (address: string | undefined) {
   if (address) {
     return prettyPrintAddress(address, 5, 6);
@@ -277,7 +263,6 @@ const doCopy = (address: string | undefined) => {
 
 onMounted(() => {
   document.addEventListener('click', closeDropDown);
-  getComponentName();
 });
 
 onBeforeUnmount(() => {

@@ -9,7 +9,7 @@
   <RedPacketDetail v-if="showDetails"></RedPacketDetail>
   <RedPacketSendModal v-if="showTokenSendModal && status === ''"></RedPacketSendModal>
   <RedPacketNFTModal v-if="showNFTSendModal && status === ''"></RedPacketNFTModal>
-  <RedpacketConfirm v-if="status !== ''" :mode="'token'"></RedpacketConfirm>
+  <RedpacketConfirm v-if="status !== ''" :mode="showTokenSendModal ? 'token' : 'nft'"></RedpacketConfirm>
 </template>
 
 <script setup lang="ts">

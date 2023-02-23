@@ -196,6 +196,8 @@ async function createRedPacketTxForMetamask(
     let txes : any[] = [];
     let value : EthBigNumber = EthBigNumber.from(0);
 
+    console.log("token: ", input);
+
     if (tokenEqual(input.token, input.gasToken)) {
         const toTransfer = EthBigNumber.from(
             input.gasSponsorship).add(input.balance);
@@ -364,6 +366,7 @@ export async function queryRedPacketInfo(
         useChainStore().provider,
     );
     const info = await redPacket.getPacket(rp.id);
+    console.log(info.createdAt)
     return {
         createdAt: new Date(info.createdAt.toNumber() * 1000),
         balance: info.balance.toString(),

@@ -42,6 +42,7 @@ const createRedPacket = async () => {
   store.setStatus("processing");
   message.value = "Processing";
   if(props.mode == 'token') {
+    console.log(props.mode);
     try {
       await createNewRedPacket(
         store.redpacket! as RedPacketInput,
@@ -57,6 +58,7 @@ const createRedPacket = async () => {
       message.value = "Something went wrong...";
     }
   } else {
+    console.log(props.mode);
     try {
       await createRedPacketErc721(
         store.redpacket! as RedPacketErc721Input,

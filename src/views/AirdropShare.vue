@@ -21,13 +21,13 @@
                     </svg>
                 </div>
                 <h2>Scan QR Code</h2>
-                <p class="subtitle">Scan this QR code to claim your airdrop</p>
+                <p class="subtitle">Scan this QR code to claim your airdrop from <b>{{redPacketOwnerName}}</b> with no need to connect wallet.</p>
                 <div class="qrcode">
                     <canvas id="canvas"></canvas>
                 </div>
                 <p v-if="countDown >= 1" class="countdown">The QR code will be refreshed in {{countDown}} seconds.</p>
                 <p class="or"><span>or copy the claim link</span></p>
-                <button class="cta-btn" @click="copy(claimUrl, 'Claim URL Copied')" style="margin-bottom: 50px;">Copy</button>
+                <button class="cta-btn" @click="copy(claimUrl, 'C laim URL Copied')" style="margin-bottom: 50px;">Copy</button>
             </div>
         </div>
     </div>
@@ -44,6 +44,7 @@ import { copy } from "@/web3/utils";
 
 const secret = ref<string | undefined>();
 const redPacket = ref<RedPacketDB | undefined>();
+const redPacketOwnerName = ref<string | undefined>();
 const claimUrl = ref<string>("");
 let countDown = ref<number>(5);
 let canvasRendered = false;
@@ -52,6 +53,8 @@ onMounted(async () => {
     const route = useRoute();
     const redPacketId = route.params.id;
     redPacket.value = await getRedPacketPrivate(redPacketId as string);
+    redPacketOwnerName.value = redPacket.value?.creator?.displayName;
+    console.log(redPacketOwnerName.value);
     const validationRules = redPacket.value?.metadata.validationRules || [];
     const validationData = redPacket.value?.validationData || [];
     for (const index in validationRules) {
@@ -145,6 +148,7 @@ onMounted(refreshQrCode);
     margin: 20px;
     margin-bottom: calc(1rem + 10px); }
 .subtitle {
+    width: 70%;
     color: rgba(0, 0, 0, 0.6);
     font-weight: 500; }
 .body h2 {

@@ -25,6 +25,7 @@ import type {Chain, OpInput} from "../common";
 import {submit} from "./services/operation";
 import {insertRequest} from "./graphql/request";
 import {RequestData, preprocess, validateAndBuildUserOp} from "./operation";
+import {rateLimiter} from "./ratelimiter";
 
 const secrets = functions.config().doppler || {};
 
@@ -127,6 +128,11 @@ export const claimRedPacket = functions.https.onCall(
       }
       const {uid, account, chain} = result as RequestData;
 
+      const isQuotaExceeded = await rateLimiter("claimRedPacket", `uid_${uid}`, 10, 1);
+      if (isQuotaExceeded) {
+        return {code: 429, message: "Too many requests of claimRedPacket."};
+      }
+
       const redPacket = await getRedPacket(data.redPacketId);
       if (!redPacket) {
         return {code: 400, message: "redpacket_not_found"};
@@ -197,6 +203,11 @@ export const createRedPacket = functions.https.onCall(
       }
       const {uid, account, chain} = result as RequestData;
 
+      const isQuotaExceeded = await rateLimiter("createRedPacket", `uid_${uid}`, 60, 3);
+      if (isQuotaExceeded) {
+        return {code: 429, message: "Too many requests of createRedPacket."};
+      }
+
       const rpId = redpacketId(chain, data.redPacket);
       const action = {
         type: "insert_redpacket",
@@ -245,6 +256,12 @@ export const createRedPacketErc721 = functions.https.onCall(
         return result;
       }
       const {uid, account, chain} = result as RequestData;
+
+      const isQuotaExceeded = await rateLimiter("createRedPacketErc721", `uid_${uid}`, 60, 3);
+      if (isQuotaExceeded) {
+        return {code: 429, message: "Too many requests of createRedPacketErc721."};
+      }
+
       const rpId = redpacketErc721Id(chain, data.erc721);
       const salt = ethers.utils.keccak256(
           ethers.utils.defaultAbiCoder.encode(

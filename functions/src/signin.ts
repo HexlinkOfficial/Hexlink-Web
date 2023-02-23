@@ -4,17 +4,30 @@ import {Firebase} from "./firebase";
 import * as functions from "firebase-functions";
 import {getUser, insertUser, updateOTP} from "./graphql/user";
 import {getAuth} from "firebase-admin/auth";
+import {rateLimiter} from "./ratelimiter";
 
 const secrets = functions.config().doppler || {};
 const CHARS = "0123456789";
 const OTP_LEN = 6;
 const expiredAfter = 10 * 60000;
 
-export const genOTP = functions.https.onCall(async (data, _context) => {
+export const genOTP = functions.https.onCall(async (data, context) => {
   Firebase.getInstance();
   const isValidEmail = await validateEmail(data.email);
   if (!isValidEmail) {
     return {code: 400, message: "Invalid email"};
+  }
+
+  let ip: string;
+  if (process.env.FUNCTIONS_EMULATOR) {
+    ip = context.rawRequest.headers.origin || "http://localhost:5173";
+  } else {
+    ip = context.rawRequest.ip;
+  }
+
+  const isQuotaExceeded = await rateLimiter("genOTP", `ip_${ip}`, 60, 1);
+  if (isQuotaExceeded) {
+    return {code: 429, message: "Too many requests of genOTP."};
   }
 
   const otp = randomCode(OTP_LEN);
@@ -57,6 +70,11 @@ export const validateOTP = functions.https.onCall(async (data, _context) => {
   Firebase.getInstance();
   if (!data.email || !data.otp) {
     return {code: 400, message: "Email or OTP is missing."};
+  }
+
+  const isQuotaExceeded = await rateLimiter("validateOTP", `email_${data.email}`, 300, 5);
+  if (isQuotaExceeded) {
+    return {code: 429, message: "Too many requests of validateOTP."};
   }
 
   const user = await getUser(data.email);

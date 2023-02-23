@@ -9,7 +9,6 @@ const queue_1 = require("./queue");
 const operation_1 = require("./graphql/operation");
 const transaction_1 = require("./graphql/transaction");
 const body_parser_1 = __importDefault(require("body-parser"));
-const ratelimiter_1 = require("./ratelimiter");
 const app = (0, express_1.default)();
 const port = 9999;
 const queues = queue_1.Queues.getInstance();
@@ -26,9 +25,6 @@ app.post('/submit/:chain', async (req, res) => {
         });
         return;
     }
-    console.log("Final test!!!");
-    const test = (0, ratelimiter_1.rateLimiter)("submit", "ip_123", 10, 1);
-    console.log(test);
     const input = {
         chain: req.params.chain,
         ...req.body

@@ -5,7 +5,6 @@ import {insertOp} from "./graphql/operation";
 import type {OperationInput} from "./types";
 import { insertTx } from "./graphql/transaction";
 import bodyParser from "body-parser";
-import { rateLimiter } from "./ratelimiter";
 
 const app = express();
 const port = 9999;
@@ -25,10 +24,6 @@ app.post('/submit/:chain', async (req: express.Request, res: express.Response) =
     });
     return;
   }
-
-  console.log("Final test!!!");
-  const test = rateLimiter("submit", "ip_123", 10, 1);
-  console.log(test);
 
   const input = {
     chain: req.params.chain,

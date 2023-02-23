@@ -22,7 +22,7 @@ export async function genDeployAuthProof(
     let genAuthProof: HttpsCallable;
     if (identityType === "twitter.com" && authType === "oauth") {
         genAuthProof = httpsCallable(functions, 'genTwitterOAuthProof');
-    } else if (identityType === "mailto" && authType === "otp") {
+    } else if (identityType === "email" && authType === "otp") {
         genAuthProof = httpsCallable(functions, 'genEmailOTPProof');
     }
 

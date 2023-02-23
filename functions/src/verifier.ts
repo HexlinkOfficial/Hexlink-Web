@@ -9,8 +9,8 @@ import {
 } from "./account";
 import {Firebase} from "./firebase";
 
-const TWITTER_PROVIDER_ID = "twitter.com";
-const EMAIL_PROVIDER_ID = "mailto";
+const TWITTER_IDENTITY_TYPE = "twitter.com";
+const EMAIL_IDENTITY_TYPE = "email";
 const OAUTH_AUTH_TYPE = "oauth";
 const OTP_AUTH_TYPE = "otp";
 
@@ -33,7 +33,7 @@ export const genTwitterOAuthProof = functions.https.onCall(
         return {code: 401, message: "Unauthorized Call"};
       }
 
-      return genAuthProof(uid, TWITTER_PROVIDER_ID, OAUTH_AUTH_TYPE,
+      return genAuthProof(uid, TWITTER_IDENTITY_TYPE, OAUTH_AUTH_TYPE,
           data.requestId, data.version);
     });
 
@@ -45,7 +45,7 @@ export const genEmailOTPProof = functions.https.onCall(
         return {code: 401, message: "Unauthorized Call"};
       }
 
-      return genAuthProof(uid, EMAIL_PROVIDER_ID, OTP_AUTH_TYPE,
+      return genAuthProof(uid, EMAIL_IDENTITY_TYPE, OTP_AUTH_TYPE,
           data.requestId, data.version);
     });
 

@@ -45,7 +45,7 @@ export async function validateOTP(email: string, otp: string) {
         const idToken = await getIdTokenAndSetClaimsIfNecessary(cred);
         const user : IUser = {
             provider: "mailto",
-            identityType: "mailto",
+            identityType: "email",
             authType: "otp",
             uid: cred.uid,
             providerUid: email,

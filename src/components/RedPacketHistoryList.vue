@@ -674,14 +674,7 @@ const showClaimStatus = (op: any) => {
 }
 
 const share = (redPacket: RedPacketDB | undefined) => {
-  if (redPacket?.metadata.validationRules && redPacket?.metadata.validationRules?.length > 0) {
-    window.open(location.origin + "/airdrop/share/" + redPacket?.id);
-  } else {
-    return copy(
-      window.location.origin + route.path + "?claim=" + redPacket?.id,
-      'Successfully copied your red packet share link!'
-    );
-  }
+  window.open(location.origin + "/airdrop/share/" + redPacket?.id);
 };
 
 const normalize = (balance: string | undefined, token: Token) : string => {

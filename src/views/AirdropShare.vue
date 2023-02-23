@@ -52,9 +52,9 @@ onMounted(async () => {
         const data = validationData[index];
         if (rule.type === "dynamic_secrets") {
             secret.value = data.secret;
-            await genQrCode();
         }
     }
+    await genQrCode();
 });
 
 async function delay(ms: number) {

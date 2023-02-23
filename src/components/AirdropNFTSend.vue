@@ -437,7 +437,7 @@ const confirmNFT = async () => {
       );
       createNotification("Waiting to upload your NFT picture", "error");
     }
-    if (enableDynamic) {
+    if (enableDynamic.value) {
       nftAirdrop.value.validationRules.push({type: "dynamic_secrets"});
     }
     console.log(nftAirdrop.value);

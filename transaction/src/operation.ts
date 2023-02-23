@@ -1,10 +1,9 @@
-import {ethers, BigNumber as EthBigNumber, PopulatedTransaction } from "ethers";
+import {ethers, PopulatedTransaction } from "ethers";
 import {
   insertRedPacketClaim,
   insertRedPacket,
 } from "./graphql/redpacket";
 import type {Chain} from "../../functions/common";
-import {PriceConfigs, parseDeposit} from "../../functions/common";
 import {
   parseDeployed,
   parseClaimed,
@@ -31,10 +30,8 @@ export async function buildTx(
   unsignedTx.type = 2;
   unsignedTx.nonce = await provider.getTransactionCount(unsignedTx.from);
   const feeData = await provider.getFeeData();
-  unsignedTx.maxPriorityFeePerGas =
-    feeData.maxPriorityFeePerGas || EthBigNumber.from(0);
-  unsignedTx.maxFeePerGas = feeData.maxFeePerGas ||
-    EthBigNumber.from(PriceConfigs[chain.name]);
+  unsignedTx.maxPriorityFeePerGas = feeData.maxPriorityFeePerGas || undefined;
+  unsignedTx.maxFeePerGas = feeData.maxFeePerGas || undefined;
   return unsignedTx;
 }
 

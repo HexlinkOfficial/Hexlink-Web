@@ -94,8 +94,7 @@ export async function getPriceInfo(chain: Chain, gasToken: string) : Promise<{
         const swap = await hexlinkSwap(provider);
         tokenPrice = await swap.priceOf(gasToken);
     }
-
-    return {gasPrice, tokenPrice}
+    return {gasPrice: gasPrice.mul(2), tokenPrice}
 }
 
 export async function getRefunder(chain: Chain) : Promise<string> {

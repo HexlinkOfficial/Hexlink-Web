@@ -303,7 +303,7 @@ const setGas = async() => {
   const chain = useChainStore().chain;
   const price = await getPriceInfo(chain, redpacket.value.gasToken);
   const sponsorshipAmount =
-    EthBigNumber.from(200000).mul(redpacket.value.split || 0);
+    EthBigNumber.from(300000).mul(redpacket.value.split || 0);
   redpacket.value.gasSponsorship = calcGas(
     chain,
     tokenStore.token(redpacket.value.gasToken),

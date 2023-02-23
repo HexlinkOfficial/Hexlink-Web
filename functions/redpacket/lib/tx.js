@@ -34,11 +34,9 @@ function buildGasSponsorshipOps(provider, depositData, redpacket, input) {
         }
         else {
             const swap = yield (0, redpacket_1.hexlinkSwap)(provider);
-            const approveData = common_1.erc20Interface.encodeFunctionData("approve", [swap.address, input.gasSponsorship]);
-            const swapAndDepositData = swap.interface.encodeFunctionData("swapAndCall", [input.gasToken, input.gasSponsorship, redpacket, depositData]);
             return [
                 {
-                    name: "approve",
+                    name: "approveSwap",
                     function: "approve",
                     args: {
                         operator: swap.address,
@@ -47,8 +45,8 @@ function buildGasSponsorshipOps(provider, depositData, redpacket, input) {
                     input: {
                         to: input.gasToken,
                         callGasLimit: "0",
-                        callData: approveData,
-                        value: toHexValue(input.gasSponsorship),
+                        callData: common_1.erc20Interface.encodeFunctionData("approve", [swap.address, input.gasSponsorship]),
+                        value: "0",
                     }
                 },
                 {
@@ -63,7 +61,7 @@ function buildGasSponsorshipOps(provider, depositData, redpacket, input) {
                     input: {
                         to: swap.address,
                         callGasLimit: "0",
-                        callData: swapAndDepositData,
+                        callData: swap.interface.encodeFunctionData("swapAndCall", [input.gasToken, input.gasSponsorship, redpacket, depositData]),
                         value: "0",
                     }
                 }

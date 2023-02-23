@@ -4,26 +4,6 @@
             <div class="col-xxl-6">
                 <div class="airdrop-status">
                     <div>
-                        <div class="status-box">
-                            <div style="margin: 0 10px;">
-                                <div class="title">
-                                    <span>{{ Object.keys(useStatusStore().status[0])[0] }}</span>
-                                </div>
-                                <div class="price">
-                                    <!-- <Loading v-if="loading" class="loading"/> -->
-                                    <span>{{ Object.values(useStatusStore().status[0])[0] }}</span>
-                                </div>
-                            </div>
-                            <div style="margin: 0 10px;">
-                                <div class="title">
-                                    <span>{{ Object.keys(useStatusStore().status[1])[0] }}</span>
-                                </div>
-                                <div class="price">
-                                    <!-- <Loading v-if="loading" class="loading" /> -->
-                                    <span>{{ Object.values(useStatusStore().status[1])[0] }}</span>
-                                </div>
-                            </div>
-                        </div>
                         <div class="cta-box">
                             <router-link to="/">
                                 <button class="cta-button">

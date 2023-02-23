@@ -1,5 +1,4 @@
 import * as functions from "firebase-functions";
-import {PriceConfigs} from "../common";
 
 const secrets = functions.config().doppler;
 
@@ -39,13 +38,3 @@ export const kmsConfig = () => new Map<string, KMS_CONFIG_TYPE>([
   [KMS_KEY_TYPE[KMS_KEY_TYPE.operator], identityVerifierOperatorConfig()],
   [KMS_KEY_TYPE[KMS_KEY_TYPE.validator], identityVerifierValidatorConfig()],
 ]);
-
-export const priceConfig = functions.https.onCall(
-    (data, context) => {
-      const uid = context.auth?.uid;
-      if (!uid) {
-        return {code: 401, message: "Unauthorized Call"};
-      }
-      return {priceConfig: PriceConfigs[data.chain]};
-    }
-);

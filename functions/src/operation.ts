@@ -10,7 +10,6 @@ import {
   OpInput,
   UserOpRequest,
   accountInterface,
-  hexlinkSwapAddress,
   getChain,
   hexlAddress,
   hexlInterface,
@@ -18,6 +17,7 @@ import {
   refunder,
   isAllowedGasToken,
 } from "../common";
+import {hexlinkSwapAddress} from "../redpacket";
 import {accountAddress, getInfuraProvider} from "./account";
 import type {Error, GenAddressSuccess} from "./account";
 import {submit} from "./services/operation";

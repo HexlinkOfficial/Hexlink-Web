@@ -406,6 +406,7 @@ export async function createRedPacketErc721ForMetamask(
     userOps = userOps.concat(await buildDeployErc721Ops(
         useChainStore().provider, input
     ));
+    console.log(userOps);
     return await buildTransactionsForMetamask(
         hexlAccount,
         walletAccount,

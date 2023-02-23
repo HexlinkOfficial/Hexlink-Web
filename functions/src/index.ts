@@ -22,13 +22,6 @@ exports.genTwitterOAuthProof = genTwitterOAuthProof;
 exports.calcEthAddress = calcEthAddress;
 
 import {
-  priceConfig,
-} from "./config";
-
-exports.priceConfig = priceConfig;
-// exports.refunder = refunder;
-
-import {
   claimRedPacket,
   createRedPacket,
   createRedPacketErc721,

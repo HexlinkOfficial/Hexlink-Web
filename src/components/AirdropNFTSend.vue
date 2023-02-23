@@ -202,7 +202,7 @@ import { getBalances } from "@/web3/tokens";
 import { useAccountStore } from '@/stores/account';
 import { useWalletStore } from '@/stores/wallet';
 import RedPacketAccount from "@/components/RedPacketAccount.vue";
-import {createRedPacketErc721, validator} from "@/web3/redpacket";
+import { validator} from "@/web3/redpacket";
 import { uploadToIPFS } from "@/web3/storage";
 import {BigNumber as EhtBigNumber} from "ethers";
 import { createNotification } from "@/web3/utils";
@@ -278,11 +278,19 @@ const tokenBalance = (token: string) => {
 };
 
 const totalServiceFee = computed(() => {
-  return BigNumber(
-    nftAirdrop.value.gasSponsorship
-  ).plus(nftAirdrop.value.estimatedGas).div(
-    tokenBase(gasToken.value)
-  ).dp(4).toString();
+  if (useRedPacketStore().account === "hexlink") {
+    return BigNumber(
+      nftAirdrop.value.gasSponsorship
+    ).plus(nftAirdrop.value.estimatedGas).div(
+      tokenBase(gasToken.value)
+    ).dp(4).toString();
+  } else {
+    return BigNumber(
+      nftAirdrop.value.gasSponsorship
+    ).div(
+      tokenBase(gasToken.value)
+    ).dp(4).toString();
+  }
 })
 
 const tokenGasChoose = async (token: Token) => {
@@ -333,7 +341,7 @@ const setGas = async () => {
   const chain = useChainStore().chain;
   const price = await getPriceInfo(chain, nftAirdrop.value.gasToken);
   const sponsorshipAmount =
-    EthBigNumber.from(200000).mul(nftAirdrop.value.splitInput || 0);
+    EthBigNumber.from(300000).mul(nftAirdrop.value.splitInput || 0);
   nftAirdrop.value.gasSponsorship = calcGas(
     chain,
     tokenStore.token(nftAirdrop.value.gasToken),
@@ -432,6 +440,7 @@ const confirmNFT = async () => {
     if (enableDynamic) {
       nftAirdrop.value.validationRules.push({type: "dynamic_secrets"});
     }
+    console.log(nftAirdrop.value);
     useRedPacketStore().beforeCreate(nftAirdrop.value);
   }
 }

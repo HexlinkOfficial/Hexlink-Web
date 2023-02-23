@@ -37,7 +37,7 @@ const router = createRouter({
       component: () => import('@/views/RedPacketSendView.vue')
     },
     {
-      path: '/redpacket/airdropCollectable',
+      path: '/airdrop/airdropCollectable',
       name: 'red pocket send NFTs',
       component: () => import('@/views/AirdropNFT.vue')
     },

@@ -7,7 +7,8 @@
   </Layout>
   <RedPacketClaim v-if="showClaim"></RedPacketClaim>
   <RedPacketDetail v-if="showDetails"></RedPacketDetail>
-  <RedPacketSendModal v-if="showTokenSendModal"></RedPacketSendModal>
+  <RedPacketSendModal v-if="showTokenSendModal && status === ''"></RedPacketSendModal>
+  <RedpacketConfirm v-if="status !== ''" :mode="'token'"></RedpacketConfirm>
 </template>
 
 <script setup lang="ts">
@@ -22,11 +23,15 @@ import RedPacketDetail from "@/components/RedPacketDetail.vue";
 import Layout from "@/components/Layout.vue";
 import lockScreen from "@/components/lockScreen.vue";
 import RedPacketSendModal from "@/components/RedPacketSendModal.vue";
+import RedpacketConfirm from "@/components/RedPacketConfirm.vue";
+import { storeToRefs } from 'pinia';
+import { useRedPacketStore } from '@/stores/redpacket';
 
 const isLocked = ref<boolean>(true);
 const whitelist = useWhitelistStore();
 const myAccount = useAccountStore();
 const statusArray = ref<number[]>([]);
+const { status } = storeToRefs(useRedPacketStore());
 
 onMounted(() => {
   if (whitelist.whitelist.includes(myAccount.account!.address)) {

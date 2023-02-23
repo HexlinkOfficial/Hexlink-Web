@@ -1,6 +1,6 @@
 <template>
   <div v-if="store.status === 'confirming'" class="claim-success-card transition" @wheel.prevent @touchmove.prevent @scroll.prevent >
-    <router-link :to="props.mode == 'token' ? '/redpacket/send' : '/redpacket/airdropCollectable'">
+    <router-link :to="props.mode == 'token' ? '/airdrop?action=send' : '/redpacket/airdropCollectable'">
       <img @click="closeModal" class="redpacket_close transition" src="@/assets/svg/close.svg"/>
     </router-link>
     <h2 class="transition">
@@ -9,19 +9,19 @@
     <div class="cta-container transition" style="margin-top: 340px;">
       <button class="cta" @click="createRedPacket">Confirm</button>
     </div>
-    <div class="card_circle transition" style="margin-top: -100px;"></div>
+    <!-- <div class="card_circle transition" style="margin-top: -100px;"></div> -->
   </div>
   <div v-if="store.status !== 'confirming'" class="claim-success-card transition">
     <h2 class="transition">
       <div class="spinner-lg" :class="store.status">
         <div class="check"></div>
       </div>
-      <span style="font-size: 20px; margin-top: 1rem;">{{ message }}</span><br>
+      <span style="font-size: 20px; margin-top: 2rem;">{{ message }}</span><br>
     </h2>
     <div class="cta-container transition" style="margin-top: 340px;">
       <button @click="closeModal" class="cta">Close</button>
     </div>
-    <div class="card_circle transition" style="margin-top: -100px;"></div>
+    <!-- <div class="card_circle transition" style="margin-top: -100px;"></div> -->
   </div>
 </template>
 
@@ -90,10 +90,10 @@ const closeModal = () => {
   @radius: 60px,
   @border-width: 12px,
   @check-thickness: 12px,
-  @success-color: #fff,
-  @error-color: #fff,
-  @default-color: #fff,
-  @background-color: #FD4755,
+  @success-color: #308AF5,
+  @error-color: #FD4755,
+  @default-color: #308AF5,
+  @background-color: #fff,
 ) {
   @check-size: @radius * .57;
   display: inline-block;
@@ -215,7 +215,7 @@ const closeModal = () => {
   box-shadow: 0px 10px 20px rgb(0 0 0 / 10%);
   height: 430px;
   width: 330px;
-  color: white;
+  color: black;
   @media (max-width: 990px) {
     top: 50vh;
     left: 50%; } }
@@ -233,16 +233,16 @@ const closeModal = () => {
   font-size: 26px;
   width: 100%;
   margin-top: 80px;
-  color: #fff;
+  color: black;
   display: flex;
   align-items: center;
   flex-direction: column; }
 .claim-success-card h2 small {
   font-weight: normal;
   font-size: 65%;
-  color: #fff; }
+  color: black; }
 .claim-success-card h2 i {
-  color: #fff; }
+  color: black; }
 .transition {
   transition: .3s cubic-bezier(.3, 0, 0, 1.3) }
 .cta-container {

@@ -427,16 +427,8 @@ onClickOutside(
 .connect-wallet-button {
   display: flex;
   justify-content: center;
-  padding-top: 0.5rem;
-  padding-bottom: 0.5rem;
-  padding-left: 0.75rem;
-  padding-right: 0.75rem;
-  color: #000;
-  font-size: 0.875rem;
+  padding: 10px;
   line-height: 1.25rem;
-  font-weight: 800;
-  line-height: 1.25rem;
-  width: 50%;
   border-radius: 50px;
   opacity: 1;
   background-color: rgb(7, 106, 224);

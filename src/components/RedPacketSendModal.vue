@@ -4,7 +4,7 @@
       <img class="redpacket_close transition" src="@/assets/svg/closeButton.svg" alt="close button" />
     </router-link>
     <div style="display: block; padding: 1rem 0 1rem 0;">
-      <h2 class="people-title">Send Token</h2>
+      <h2 class="people-title">Airdrop Token</h2>
       <div style="padding: 0 1rem;">
         <RedPacketSend></RedPacketSend>
       </div>

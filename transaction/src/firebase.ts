@@ -1,7 +1,9 @@
 /* tslint:disable:max-classes-per-file */
 import * as admin from "firebase-admin";
 
-// const serviceAccount = JSON.parse(process.env.GOOGLE_CREDENTIAL_JSON!);
+const serviceAccount = JSON.parse(process.env.GOOGLE_CREDENTIAL_JSON!);
+console.log("admin test");
+console.log(serviceAccount);
 class PrivateFirebase {
   app: admin.app.App;
   auth: admin.auth.Auth;
@@ -10,7 +12,7 @@ class PrivateFirebase {
 
   constructor() {
     this.app = admin.initializeApp({
-        // credential: admin.credential.cert(serviceAccount),
+        credential: admin.credential.cert(serviceAccount),
         databaseURL: "https://bridge23-27764-default-rtdb.firebaseio.com"
     });
     this.storage = admin.storage();

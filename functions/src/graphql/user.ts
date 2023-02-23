@@ -31,7 +31,7 @@ export const GET_USER = gql`
 `;
 
 export const GET_USER_BY_ID = gql`
-  query GetUser($id: uuid!) {
+  query GetUserById($id: uuid!) {
     user_by_pk(id: $id) {
         id
         email
@@ -122,18 +122,18 @@ export async function getUserById(
     return undefined;
   }
 
-  const user = result.data?.user;
+  const user = result.data?.user_by_pk;
   if (user === undefined || user.length < 1) {
     console.log("Empty user data", user);
     return undefined;
   }
 
   return {
-    id: user[0].id,
-    email: user[0].email,
-    otp: user[0].otp,
-    updatedAt: user[0].updated_at,
-    isActive: user[0].is_active,
+    id: user.id,
+    email: user.email,
+    otp: user.otp,
+    updatedAt: user.updated_at,
+    isActive: user.is_active,
   };
 }
 

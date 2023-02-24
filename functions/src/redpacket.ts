@@ -35,7 +35,7 @@ async function sign(signer: string, message: string) : Promise<string> {
     return await validator.signMessage(ethers.utils.arrayify(message));
   } else {
     const keyType = KMS_KEY_TYPE[KMS_KEY_TYPE.validator];
-    const kmsValidator = kmsConfig().get(keyType)!.publicAddress;
+    const kmsValidator = kmsConfig().get(keyType)!.publicAddress!;
     if (signer.toLowerCase() == kmsValidator.toLowerCase()) {
       return await signWithKmsKey(
           keyType,

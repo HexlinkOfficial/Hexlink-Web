@@ -39,7 +39,7 @@ const getVersionName = async function(keyType: string) {
       config.locationId,
       config.keyRingId,
       config.keyId,
-      config.versionId
+      config.versionId!
   );
 };
 
@@ -53,7 +53,7 @@ export const getEthAddressFromPublicKey = async function(
       config.locationId,
       config.keyRingId,
       keyId,
-      config.versionId
+      config.versionId!
   );
   const publicKey = await getPublicKey(versionName);
   const publicKeyPem = publicKey.pem || "";
@@ -77,7 +77,7 @@ export const signWithKmsKey = async function(
 ) : Promise<Signature | string> {
   const digestBuffer = Buffer.from(ethers.utils.arrayify(message));
   const signature = await getKmsSignature(digestBuffer, keyType);
-  const address = kmsConfig().get(keyType)!.publicAddress;
+  const address = kmsConfig().get(keyType)!.publicAddress!;
   const [r, s] = await calculateRS(signature as Buffer);
   const v = calculateRecoveryParam(
       digestBuffer,
@@ -170,4 +170,63 @@ const calculateRecoveryParam = (
   }
 
   throw new Error("Failed to calculate recovery param");
+};
+
+
+const getSymmKeyName = async function() {
+  const config: KMS_CONFIG_TYPE = kmsConfig().get("encryptor")!;
+  return client.cryptoKeyPath(
+      config.projectId,
+      config.locationId,
+      config.keyRingId,
+      config.keyId);
+};
+
+export const encryptWithSymmKey = async function(plaintext: string) {
+  const plaintextBuffer = Buffer.from(plaintext);
+  const keyName = await getSymmKeyName();
+  const plaintextCrc32c = crc32c.calculate(plaintextBuffer);
+
+  const [encryptResponse] = await client.encrypt({
+    name: keyName,
+    plaintext: plaintextBuffer,
+    plaintextCrc32c: {
+      value: plaintextCrc32c,
+    },
+  });
+
+  const ciphertext = encryptResponse.ciphertext;
+
+  if (!ciphertext || !encryptResponse.verifiedPlaintextCrc32c ||
+    !encryptResponse.ciphertextCrc32c ||
+    crc32c.calculate(ciphertext) !==
+    Number(encryptResponse.ciphertextCrc32c!.value)) {
+    throw new Error("Encrypt: request corrupted in-transit");
+  }
+
+  const encode = Buffer.from(ciphertext).toString("base64");
+
+  return encode;
+};
+
+export const decryptWithSymmKey = async function(text: string) {
+  const ciphertext = Buffer.from(text, "base64");
+  const keyName = await getSymmKeyName();
+  const ciphertextCrc32c = crc32c.calculate(ciphertext);
+
+  const [decryptResponse] = await client.decrypt({
+    name: keyName,
+    ciphertext: ciphertext,
+    ciphertextCrc32c: {
+      value: ciphertextCrc32c,
+    },
+  });
+  const plaintextBuffer = Buffer.from(decryptResponse.plaintext!);
+
+  if (crc32c.calculate(plaintextBuffer) !==
+      Number(decryptResponse.plaintextCrc32c!.value)) {
+    throw new Error("Decrypt: response corrupted in-transit");
+  }
+
+  return plaintextBuffer.toString("utf8");
 };

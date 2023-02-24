@@ -5,6 +5,7 @@ import * as functions from "firebase-functions";
 import {getUser, insertUser, updateOTP} from "./graphql/user";
 import {getAuth} from "firebase-admin/auth";
 import {rateLimiter} from "./ratelimiter";
+import {decryptWithSymmKey, encryptWithSymmKey} from "./kms";
 
 const secrets = functions.config().doppler || {};
 const CHARS = "0123456789";
@@ -30,12 +31,14 @@ export const genOTP = functions.https.onCall(async (data, context) => {
     return {code: 429, message: "Too many requests of genOTP."};
   }
 
-  const otp = randomCode(OTP_LEN);
+  const plainOTP = randomCode(OTP_LEN);
+  const encryptedOTP = await encryptWithSymmKey(plainOTP);
+
   const user = await getUser(data.email);
   if (!user || !user.id) {
-    await insertUser([{email: data.email, otp: otp, isActive: true}]);
+    await insertUser([{email: data.email, otp: encryptedOTP, isActive: true}]);
   } else {
-    await updateOTP({id: user.id!, otp: otp, isActive: true});
+    await updateOTP({id: user.id!, otp: encryptedOTP, isActive: true});
   }
 
   sendgridMail.setApiKey(secrets.SENDGRID_API_KEY);
@@ -43,8 +46,18 @@ export const genOTP = functions.https.onCall(async (data, context) => {
     to: data.email,
     from: "info@hexlink.io",
     subject: "Hexlink Login Code",
-    text: `Hi,\n\nYour Hexlink login code is ${otp}. The code will expire in 10 minutes.\n\nRegards,\nHexlink`,
-    html: `<p>Hi,<br><br>Your Hexlink login code is <br><br><span style="color: #b58d21; font-size: 20px; font-weight: bold;">${otp}</span><br><br>The code will expire in 10 minutes.<br><br>Regards,<br>Hexlink</p>`,
+    text: `Hi,\n\nThank you for choosing Hexlink. Use the following OTP to complete your Log in procedures. OTP is valid for 5 minute.\n${plainOTP}\n\nRegards,\nHexlink`,
+    html: `<div style="font-family: Helvetica,Arial,sans-serif;min-width:1000px;overflow:auto;line-height:2">
+      <div style="margin:10px auto;width:100%;padding:10px 0">
+        <div style="border-bottom:1px solid #eee">
+          <p href="" style="font-size:1.6em;background: #1890ff;color: #fff;text-decoration:none;font-weight:600">Hexlink</p>
+        </div>
+        <p style="font-size:1.5em">Hi,</p>
+        <p style="font-size:1.4em">Thank you for choosing Hexlink. Use the following OTP to complete your Log in procedures. OTP is valid for 5 minutes.</p>
+        <h2 style="background: #1890ff;margin: 0 auto;width: max-content;padding: 0 10px;color: #fff;border-radius: 4px;">${plainOTP}</h2>
+        <p style="font-size:1.1em;">Regards,<br />Hexlink</p>
+      </div>
+    </div>`,
   });
   return {code: 200, sentAt: new Date().getTime()};
 });
@@ -82,7 +95,8 @@ export const validateOTP = functions.https.onCall(async (data, _context) => {
     return {code: 400, message: "No record for the email, " + data.email};
   }
 
-  if (user.otp === data.otp && user.isActive && isValidOTP(user.updatedAt)) {
+  const plainOTP = <string> await decryptWithSymmKey(user.otp);
+  if (plainOTP === data.otp && user.isActive && isValidOTP(user.updatedAt)) {
     const customToken = await createCustomToken(user.id);
     await updateOTP({id: user.id!, otp: user.otp, isActive: false});
     return {code: 200, token: customToken};

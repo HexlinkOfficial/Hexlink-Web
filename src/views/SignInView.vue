@@ -37,7 +37,7 @@
                     </div>
                     <p v-if="!isResendLink" class="resend-plain">Resend the verification code in {{ countDown }}s.</p>
                     <a v-if="isResendLink" class="resend" @click="resendOTP">Resend the verification code.</a>
-                    <Button class="cta-btn" type="primary" :loading="isLoading" @click="verifyOTP">
+                    <Button class="cta-btn" type="primary" :loading="isLoading" :disabled="isDisabled" @click="verifyOTP">
                         Verify
                     </Button>
                     <p v-if="isRateExceeded" style="color: #FF5C5C; text-align: center;">Too many attempts. Please wait for five minutes.</p>
@@ -69,6 +69,7 @@ const show = ref<boolean>(true);
 const email = ref<string>("");
 const isResendLink = ref<boolean>(false);
 const isRateExceeded = ref<boolean>(false);
+const isDisabled = ref<boolean>(true);
 const otpValidataionFailed = ref<boolean>(false);
 const countDown = ref<number>(60);
 const isLoading = ref(false);
@@ -93,6 +94,11 @@ const isNumber = (event: Event) => {
 const handleInput = (event: Event) => {
     const inputType = (event as InputEvent).inputType;
     let currentActiveElement = event.target as HTMLInputElement;
+    if (currentActiveElement.id.split("_")[1] === "5") {
+        isDisabled.value = false;
+    } else {
+        isDisabled.value = true;
+    }
     if (inputType === "insertText")
         (currentActiveElement.nextElementSibling as HTMLElement)?.focus();
     if (inputType === "insertFromPaste" && dataFromPaste) {

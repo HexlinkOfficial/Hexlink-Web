@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
 import type { IAuth, IUser } from "@/types";
+import hexlinkLogo from "@/assets/logo/blue-logo.svg";
 
 export const useAuthStore = defineStore({
     id: 'auth',
@@ -21,6 +22,9 @@ export const useAuthStore = defineStore({
         signIn(user: IUser) {
             console.log("User logged in");
             this.user = user;
+            if (!this.user.photoURL) {
+                this.user.photoURL = hexlinkLogo;
+            }
             this.authenticated = true;
         },
         refreshIdToken(idToken: string) {

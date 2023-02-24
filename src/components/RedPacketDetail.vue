@@ -68,15 +68,14 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
-
 import { normalizeBalance } from "../../functions/common";
 import type { Token } from "../../functions/common";
-
 import type { RedPacketDB, RedPacketClaim } from "@/types";
 import { getRedPacket } from '@/graphql/redpacket';
 import { getRedPacketClaims } from '@/graphql/redpacketClaim';
 import Loading from "@/components/Loading.vue";
 import { loadAndSetErc20Token } from '@/web3/tokens';
+import type { RedPacket, RedPacketErc721 } from "../../functions/redpacket";
 
 const redPacket = ref<RedPacketDB | undefined>();
 const claimers = ref<RedPacketClaim[]>();
@@ -87,9 +86,13 @@ const loadData = async function() {
   const id = useRoute().query.details!.toString();
   redPacket.value = await getRedPacket(id);
   if (redPacket.value) {
-    redPacket.value.token = await loadAndSetErc20Token(
-      redPacket.value.metadata.token
-    );
+    if (redPacket.value.type === 'erc20') {
+      redPacket.value.token = await loadAndSetErc20Token(
+        (redPacket.value.metadata as RedPacket).token
+      );
+    } else if (redPacket.value.type === 'erc721') {
+      console.log(redPacket.value);
+    }
     claimers.value = await getRedPacketClaims(id);
     console.log(claimers.value);
   }

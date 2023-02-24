@@ -31,7 +31,7 @@
               <i v-if="isInputAddress" class="fa-solid fa-circle-check fa-2x"></i>
           </div>
           <div class="name" style="">
-            <div style="color: #076AE0; font-size: 1rem; font-weight: 600;">
+            <div class="confirmAddress">
               <span v-if="!isInputAddress">{{ transaction.to }}</span>
               <span v-if="isInputAddress">{{ transaction.to.toString().substring(0,21).toLowerCase() }}<br>{{
               transaction.to.toString().substring(21,).toLowerCase() }}</span>
@@ -375,6 +375,12 @@ const validateEmail = (input: string) => {
 </script>
 
 <style lang="less" scoped>
+.confirmAddress {
+  color: #076AE0;
+  font-size: 1rem;
+  font-weight: 600;
+  @media (max-width: 640px) {
+    font-size: 0.75rem; } }
 .gotoStep1 {
   width: 3rem;
   height: 3rem;

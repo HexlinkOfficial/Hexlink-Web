@@ -5,6 +5,7 @@ import {insertOp} from "./graphql/operation";
 import type {OperationInput} from "./types";
 import { insertTx } from "./graphql/transaction";
 import bodyParser from "body-parser";
+import {auth} from "./middleware/auth";
 
 const app = express();
 const port = 9999;
@@ -14,6 +15,7 @@ const queues = Queues.getInstance();
 app.use(bodyParser.urlencoded({ extended: false }))
 // parse application/json
 app.use(bodyParser.json())
+app.use(auth)
 
 app.post('/submit/:chain', async (req: express.Request, res: express.Response) => {
   const opQueue = queues.getOpQueue(req.params.chain)!;
@@ -29,6 +31,8 @@ app.post('/submit/:chain', async (req: express.Request, res: express.Response) =
     chain: req.params.chain,
     ...req.body
   } as OperationInput;
+  console.log("wowow");
+  console.log(input);
   if (req.body.tx) {
     const [{id: txId}] = await insertTx([
       {tx: req.body.tx, chain: req.params.chain}

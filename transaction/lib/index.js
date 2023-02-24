@@ -9,6 +9,7 @@ const queue_1 = require("./queue");
 const operation_1 = require("./graphql/operation");
 const transaction_1 = require("./graphql/transaction");
 const body_parser_1 = __importDefault(require("body-parser"));
+const auth_1 = require("./middleware/auth");
 const app = (0, express_1.default)();
 const port = 9999;
 const queues = queue_1.Queues.getInstance();
@@ -16,6 +17,7 @@ const queues = queue_1.Queues.getInstance();
 app.use(body_parser_1.default.urlencoded({ extended: false }));
 // parse application/json
 app.use(body_parser_1.default.json());
+app.use(auth_1.auth);
 app.post('/submit/:chain', async (req, res) => {
     const opQueue = queues.getOpQueue(req.params.chain);
     if (!req.body.input && !req.body.tx) {
@@ -29,6 +31,8 @@ app.post('/submit/:chain', async (req, res) => {
         chain: req.params.chain,
         ...req.body
     };
+    console.log("wowow");
+    console.log(input);
     if (req.body.tx) {
         const [{ id: txId }] = await (0, transaction_1.insertTx)([
             { tx: req.body.tx, chain: req.params.chain }

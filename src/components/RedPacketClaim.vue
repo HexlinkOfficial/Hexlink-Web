@@ -100,7 +100,11 @@ onMounted(async () => {
 
     const otpCode = route.query.otp?.toString()!;
     if (otpCode != null) {
-      timeLeft = await claimCountdown(redPacket.value.id, otpCode);
+      timeLeft.value = await claimCountdown(
+        useChainStore().chain,
+        redPacket.value.id,
+        otpCode
+      );
       countDownTimerInterval.value = setInterval(() => {
         timeLeft.value -= 1;
         // console.log("parent"+timeLeft.value);

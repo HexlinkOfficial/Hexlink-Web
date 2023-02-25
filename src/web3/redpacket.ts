@@ -490,10 +490,69 @@ export async function claimCountdown(chain: Chain, redPacketId: string, code: st
     return (result.data as any).countdown;
 }
 
-export async function refundRedPacket(chain: Chain, redPacketId: string) {
+async function buildRefundErc20Op(
+    chain: Chain,
+    redPacket: RedPacket
+) : Promise<OpInput> {
+  const metadata = redPacket.metadata as RedPacketMetadata;
+  const packet = {
+    creator: metadata.creator,
+    token: metadata.token,
+    salt: metadata.salt,
+    balance: metadata.balance,
+    validator: metadata.validator,
+    split: metadata.split,
+    mode: metadata.mode,
+    sponsorGas: true,
+  };
+
+  return {
+    to: redPacketAddress(chain),
+    value: "0x0",
+    callData: redPacketInterface.encodeFunctionData(
+        "refund", [packet]
+    ),
+    callGasLimit: "0x0",
+  };
+}
+
+async function buildWithdrawErc721Op(
+    redPacket: RedPacket
+) : Promise<OpInput> {
+  return {
+    to: redPacket.metadata.token,
+    value: "0x0",
+    callData: hexlinkErc721Interface.encodeFunctionData(
+        "withdraw", []
+    ),
+    callGasLimit: "0x0",
+  };
+}
+
+async function buildRefundRedPacketRequest(
+    chain: Chain,
+    redPacket: RedPacketDB
+): Promise<{
+    params: UserOpRequest,
+    deploy?: DeployRequest,
+}> {
+    const hexlAccount = useAccountStore().account!.address;
+    const userOps = redPacket.type === "erc20"
+        ? [await buildRefundErc20Op(chain, redPacket)]
+        : [await buildWithdrawErc721Op(redPacket)];
+    return await buildUserOpRequest(
+        userOps.map(op => op.input),
+        input.gasToken
+    );
+}
+
+export async function refundRedPacket(chain: Chain, redPacket: RedPacketDB) {
+    const request = buildRefundRedPacketRequest(chain, redPacket)
     const refundRedPacketFunction = httpsCallable(functions, 'refundRedPacket');
     const result = await refundRedPacketFunction({
-        chain: chain.name, redPacketId
+        chain: chain.name,
+        redPacketId: redPacket.id,
+        request
     });
     return (result.data as any).id;
 }

@@ -351,43 +351,6 @@ export const createRedPacketErc721 = functions.https.onCall(
     }
 );
 
-async function buildRefundErc20Op(
-    redPacket: RedPacket
-) : Promise<OpInput> {
-  const metadata = redPacket.metadata as RedPacketMetadata;
-  const packet = {
-    creator: metadata.creator,
-    token: metadata.token,
-    salt: metadata.salt,
-    balance: metadata.balance,
-    validator: metadata.validator,
-    split: metadata.split,
-    mode: metadata.mode,
-    sponsorGas: true,
-  };
-  return {
-    to: redPacket.metadata.token,
-    value: "0x0",
-    callData: hexlinkErc721Interface.encodeFunctionData(
-        "refund", [packet]
-    ),
-    callGasLimit: "0x0",
-  };
-}
-
-async function buildWithdrawErc721Op(
-    redPacket: RedPacket
-) : Promise<OpInput> {
-  return {
-    to: redPacket.metadata.token,
-    value: "0x0",
-    callData: hexlinkErc721Interface.encodeFunctionData(
-        "withdraw", []
-    ),
-    callGasLimit: "0x0",
-  };
-}
-
 export const refundRedPacket = functions.https.onCall(
     async (data, context) => {
       const result = await preprocess(data, context);
@@ -409,27 +372,27 @@ export const refundRedPacket = functions.https.onCall(
       }
 
       const provider = getInfuraProvider(chain);
-      let input;
       let to;
       if (redPacket.type === "erc20") {
-        input = await buildRefundErc20Op(redPacket);
-        to = redPacketAddress(chain);
         const contract = await redPacketContract(provider);
-        const state = contract.getPacket(redPacket.id);
+        const state = await contract.getPacket(redPacket.id);
         if (state.balance.eq(0) && state.gasSponsorship.eq(0)) {
           return {code: 400, message: "redpacket_already_funded"};
         }
+        to = redPacketAddress(chain);
       } else {
-        input = await buildWithdrawErc721Op(redPacket);
-        to = redPacket.metadata.token;
         const contract = await hexlinkErc721Contract(
             redPacket.metadata.token, provider
         );
         if ((await contract.gasSponsorship()).eq(0)) {
           return {code: 400, message: "redpacket_already_funded"};
         }
+        to = redPacket.metadata.token;
       }
 
+      const input = await validateAndBuildUserOp(
+          chain, account, data.request
+      );
       try {
         await provider.estimateGas({
           to: input.to,

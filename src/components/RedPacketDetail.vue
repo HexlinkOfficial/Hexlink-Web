@@ -25,14 +25,13 @@
         <img src="https://token.metaswap.codefi.network/assets/networkLogos/ethereum.svg" height="20" style="margin-left:0.5rem;margin-right:0.5rem;" data-v-c970699f="">
       </div>
       <div>
-        <button v-if="!showRefund" class="cta-button" style="background: #D9D9D9;" @mouseover="buttonText = Math.round(timeLeft).toString() + ' mins left to refund'" @mouseleave="buttonText = 'Refund'">
+        <button
+          class="cta-button"
+          style="background: #D9D9D9;"
+          @mouseover="buttonText = 'Coming soon'"
+          @mouseleave="buttonText = 'Refund'"
+        >
           {{ buttonText }}
-        </button>
-        <button v-if="!showRefund  && balanceLeft == '0' && gasLeft == '0'" class="cta-button" style="background: #D9D9D9;">
-            {{ buttonText }}
-          </button>
-        <button v-if="showRefund" class="cta-button">
-          Refund
         </button>
       </div>
       <div v-if="loading" class="claimers-list">
@@ -89,15 +88,15 @@
 import { ref, onMounted, computed } from "vue";
 import { useRoute } from "vue-router";
 import { normalizeBalance } from "../../functions/common";
-import type { Token } from "../../functions/common";
 import type { RedPacketDB, RedPacketClaim } from "@/types";
 import { getRedPacket } from '@/graphql/redpacket';
 import { getRedPacketClaims } from '@/graphql/redpacketClaim';
 import Loading from "@/components/Loading.vue";
 import { loadAndSetErc20Token } from '@/web3/tokens';
-import type { RedPacket, RedPacketErc721 } from "../../functions/redpacket";
-import { queryRedPacketInfo, queryErc721RedPacketInfo } from "@/web3/redpacket";
+import type { RedPacket } from "../../functions/redpacket";
+import { queryRedPacketInfo, queryErc721RedPacketInfo, refundRedPacket } from "@/web3/redpacket";
 import { BigNumber } from "bignumber.js";
+import { useChainStore } from "@/stores/chain";
 
 const redPacket = ref<RedPacketDB | undefined>();
 const claimers = ref<RedPacketClaim[]>();
@@ -121,14 +120,12 @@ const loadData = async function() {
       redPacket.value.token = await loadAndSetErc20Token(
         (redPacket.value.metadata as RedPacket).token
       );
-      console.log(redPacket.value.token.logoURI);
     } else if (redPacket.value.type === 'erc721') {
       claimItem.value = 'erc721';
       balanceLeft.value = await (await queryErc721RedPacketInfo(redPacket.value.metadata.token)).balanceLeft;
       gasLeft.value = await (await queryErc721RedPacketInfo(redPacket.value.metadata.token)).sponsorship;
     }
     claimers.value = await getRedPacketClaims(id);
-    console.log(claimers.value);
   }
   // check if show refund button
   let dateTime = new Date().getTime();
@@ -143,12 +140,15 @@ const loadData = async function() {
     showRefund.value = false;
     timeLeft.value = (dateTime - redPacket.value?.createdAt.getTime()!) / 24 / 60;
   }
-  showRefund.value = true;
+  showRefund.value = false;
   loading.value = false;
 };
 
-const refund= async() => {
-  const id = await refund();
+const refund = async() => {
+  await refundRedPacket(
+    useChainStore().chain,
+    redPacket.value!
+  );
 }
 
 const totalServiceFee = computed(() => {

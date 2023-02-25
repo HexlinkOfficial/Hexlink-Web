@@ -44,16 +44,21 @@
                 </a>
               </div>
               <div class="claimed-amount">
-                <a-tooltip placement="top">
-                  <template #title>
-                    <span>
-                      Amount: {{ normalizeBalance(v.claimed!.toString(), redPacket!.token!.decimals).normalized }}
-                    </span>
-                  </template>
-                  {{ normalizeBalance(v.claimed!.toString(), redPacket!.token!.decimals).normalized.substring(0, 5) }}
-                </a-tooltip>
-                <div class="token-icon" style="margin-right: 0.25rem; margin-left: 0.25rem;">
-                  <img src="https://token.metaswap.codefi.network/assets/networkLogos/ethereum.svg">
+                <div v-if="claimItem == 'erc20'" style="display: flex; align-items: center;">
+                  <a-tooltip placement="top">
+                    <template #title>
+                      <span>
+                        Amount: {{ normalizeBalance(v.claimed!.toString(), redPacket!.token!.decimals).normalized }}
+                      </span>
+                    </template>
+                    {{ normalizeBalance(v.claimed!.toString(), redPacket!.token!.decimals).normalized.substring(0, 7) }}
+                  </a-tooltip>
+                  <div class="token-icon" style="margin-right: 0.25rem; margin-left: 0.25rem;">
+                    <img :src="redPacket?.token?.logoURI">
+                  </div>
+                </div>
+                <div v-if="claimItem == 'erc721'">
+                  <span>{{ v.claimed }}</span>
                 </div>
               </div>
             </div>
@@ -68,28 +73,35 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
-
 import { normalizeBalance } from "../../functions/common";
 import type { Token } from "../../functions/common";
-
 import type { RedPacketDB, RedPacketClaim } from "@/types";
 import { getRedPacket } from '@/graphql/redpacket';
 import { getRedPacketClaims } from '@/graphql/redpacketClaim';
 import Loading from "@/components/Loading.vue";
 import { loadAndSetErc20Token } from '@/web3/tokens';
+import type { RedPacket, RedPacketErc721 } from "../../functions/redpacket";
+import { queryErc721TokenId } from "@/web3/redpacket";
 
 const redPacket = ref<RedPacketDB | undefined>();
 const claimers = ref<RedPacketClaim[]>();
 const loading = ref<boolean>(true);
+const claimItem = ref<string>("");
 
 const loadData = async function() {
   loading.value = true;
   const id = useRoute().query.details!.toString();
   redPacket.value = await getRedPacket(id);
   if (redPacket.value) {
-    redPacket.value.token = await loadAndSetErc20Token(
-      redPacket.value.metadata.token
-    );
+    if (redPacket.value.type === 'erc20') {
+      claimItem.value = 'erc20';
+      redPacket.value.token = await loadAndSetErc20Token(
+        (redPacket.value.metadata as RedPacket).token
+      );
+      console.log(redPacket.value.token.logoURI);
+    } else if (redPacket.value.type === 'erc721') {
+      claimItem.value = 'erc721';
+    }
     claimers.value = await getRedPacketClaims(id);
     console.log(claimers.value);
   }

@@ -2,10 +2,14 @@
   <div v-if="loading" class="loading-state">
     <Loading />
   </div>
-  <div v-if="createdRpOps.length == 0 && !loading" class="no-history">
-    <div style="text-align: center;">You have no luck history yet! Go send some luck~</div>
+  <div v-if="createdRpOps.length === 0 && !loading" style="display: flex; align-items: center; justify-content: center;">
+    <EmptyContent 
+      title="Start by receiving the first token"
+      message="Unlocking the potential of Hexlink by depositing your first token or claim your first airdrop"
+    >
+    </EmptyContent>
   </div>
-  <div v-if="!loading" class="token-listDetail">
+  <div v-if="createdRpOps.length != 0 && !loading" class="token-listDetail">
     <div class="token-table">
       <div style="overflow: visible; border-radius: 0.75rem;">
         <div v-for="(value, name, index) in luckHistoryByDate" :key="index" style="position: relative; ">
@@ -466,6 +470,7 @@ import { prettyPrintNumber } from "@/web3/utils";
 import { useWindowSize } from '@vueuse/core'
 import router from '@/router';
 import { useStatusStore } from '@/stores/airdropStatus';
+import EmptyContent from '@/components/EmptyContent.vue';
 
 import { getCreatedRedPackets } from '@/graphql/redpacket';
 import { getClaimedRedPackets } from '@/graphql/redpacketClaim';

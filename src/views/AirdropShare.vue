@@ -11,23 +11,22 @@
                 <p>Please double check the airdrop link</p>
             </div>
             <div v-if="redPacket != undefined" class="qr-section">
-                <div class="scan-icon">
-                    <svg style="width: 12px;" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M2 12H22" stroke="black" stroke-width="1.5" stroke-linecap="round" />
-                        <path d="M2 8V5C2 3.34315 3.34315 2 5 2H8" stroke="black" stroke-width="1.5" stroke-linecap="round" />
-                        <path d="M22 16L22 19C22 20.6569 20.6569 22 19 22L16 22" stroke="black" stroke-width="1.5" stroke-linecap="round" />
-                        <path d="M16 2L19 2C20.6569 2 22 3.34315 22 5L22 8" stroke="black" stroke-width="1.5" stroke-linecap="round" />
-                        <path d="M8 22L5 22C3.34315 22 2 20.6569 2 19L2 16" stroke="black" stroke-width="1.5" stroke-linecap="round" />
-                    </svg>
+                <div class="title">
+                    <img class="owner-logo" :src="redPacket.creator?.logoURI">  
+                    <div class="owner"> 
+                        <div class="owner-name-title">
+                            <h2 class="owner-name">{{redPacketOwnerName}}</h2>
+                            <img class="airdrop-logo" src="../assets/airdrop-icon.png">
+                        </div>
+                        <p class="owner-handle">@{{redPacketOwnerHandle}}</p>
+                    </div>
                 </div>
-                <h2>Scan QR Code</h2>
-                <p class="subtitle">Scan this QR code to claim your airdrop</p>
+                <p class="subtitle">Claim your airdrop with no need to connect wallet</p>
                 <div class="qrcode">
                     <canvas id="canvas"></canvas>
                 </div>
-                <p v-if="countDown >= 1" class="countdown">The QR code will be refreshed in {{countDown}} seconds.</p>
                 <p class="or"><span>or copy the claim link</span></p>
-                <button class="cta-btn" @click="copy(claimUrl, 'Claim URL Copied')" style="margin-bottom: 50px;">Copy</button>
+                <button class="cta-btn" @click="copy(claimUrl, 'C laim URL Copied')" style="margin-bottom: 50px;">Copy</button>
             </div>
         </div>
     </div>
@@ -44,6 +43,8 @@ import { copy } from "@/web3/utils";
 
 const secret = ref<string | undefined>();
 const redPacket = ref<RedPacketDB | undefined>();
+const redPacketOwnerName = ref<string | undefined>();
+const redPacketOwnerHandle = ref<string | undefined>();
 const claimUrl = ref<string>("");
 let countDown = ref<number>(5);
 let canvasRendered = false;
@@ -52,6 +53,8 @@ onMounted(async () => {
     const route = useRoute();
     const redPacketId = route.params.id;
     redPacket.value = await getRedPacketPrivate(redPacketId as string);
+    redPacketOwnerName.value = redPacket.value?.creator?.displayName;
+    redPacketOwnerHandle.value = redPacket.value?.creator?.handle;
     const validationRules = redPacket.value?.metadata.validationRules || [];
     const validationData = redPacket.value?.validationData || [];
     for (const index in validationRules) {
@@ -144,10 +147,36 @@ onMounted(refreshQrCode);
     overflow: hidden;
     margin: 20px;
     margin-bottom: calc(1rem + 10px); }
-.subtitle {
+.airdrop-logo {
+    width: auto;
+    height: 1.3rem;
+    margin-left: 5px;
+    margin-top: 5px;
+}
+.owner-logo {
+    width: auto;
+    height: 4.5rem;
+    border-radius: 9999px;
+}
+.owner {
+    margin-left: 10px;
+    margin-top: 10px;}
+.owner-name-title {
+    display: flex;}
+.owner-name {
+    color: rgba(0, 0, 0, 0.6);
+    font-weight: 500; 
+    margin-bottom: 5px;}
+.owner-handle {
     color: rgba(0, 0, 0, 0.6);
     font-weight: 500; }
+.subtitle {
+    width: 100%;
+    color: rgba(0, 0, 0, 0.6);
+    font-size: 18px;
+    font-weight: 500; }
 .body h2 {
+    text-align: center;
     font-size: 24px;
     font-weight: 600; }
 .scan-icon {
@@ -166,14 +195,25 @@ onMounted(refreshQrCode);
     align-items: center;
     justify-content: center;
     flex-direction: column; }
+.header {
+    width: 100%;
+    height: 70px; }
+.title {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: auto;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom-width: 1px;
+    border-color: rgba(0, 0, 0, 0.6);
+    border-bottom-style: dashed;}
 .qr-section {
     display: flex;
     align-items: center;
     justify-content: center;
     flex-direction: column; }
-.header {
-    width: 100%;
-    height: 70px; }
 .share-card {
     width: 100vw;
     height: 100vh;

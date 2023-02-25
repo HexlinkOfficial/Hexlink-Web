@@ -1,5 +1,12 @@
 <template>
-  <div v-if="!loading" v-for="(token, i) in useTokenStore().visiableTokens" :key="i" class="token-detail">
+  <div v-if="!loading && !hasContent">
+    <EmptyContent 
+      title="Start by receiving the first token"
+      message="Unlocking the potential of Hexlink by depositing your first token or claim your first airdrop"
+    >
+    </EmptyContent>
+  </div>
+  <div v-if="!loading && hasContent" v-for="(token, i) in useTokenStore().visiableTokens" :key="i" class="token-detail">
     <div style="padding: 0.75rem; display: flex; align-items: center; justify-content: space-between; width: 100%;">
       <div class="token-description">
         <div class="token-logo">
@@ -37,9 +44,11 @@ import type { BalanceMap } from "@/web3/tokens";
 import Loading from "@/components/Loading.vue";
 import { useAccountStore } from '@/stores/account';
 import { useTokenStore } from '@/stores/token';
+import EmptyContent from '@/components/EmptyContent.vue';
 
 const loading = ref<boolean>(true);
 const balances = ref<BalanceMap>({});
+const hasContent = ref<boolean>(false);
 const balance = (token: Token) : string => {
   return balances.value[token.address]?.normalized || "0";
 }
@@ -51,6 +60,7 @@ const loadTokens = async () => {
     balances.value = await getBalances(account, balances.value);
     await updatePreferences(balances.value);
   }
+  useTokenStore().visiableTokens.length > 0 ? hasContent.value = true : hasContent.value = false;
   loading.value = false;
 }
 onMounted(loadTokens);

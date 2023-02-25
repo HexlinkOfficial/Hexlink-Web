@@ -37,9 +37,11 @@
                     </div>
                     <p v-if="!isResendLink" class="resend-plain">Resend the verification code in {{ countDown }}s.</p>
                     <a v-if="isResendLink" class="resend" @click="resendOTP">Resend the verification code.</a>
-                    <Button class="cta-btn" type="primary" :loading="isLoading" @click="verifyOTP">
+                    <Button class="cta-btn" type="primary" :loading="isLoading" :disabled="isDisabled" @click="verifyOTP">
                         Verify
                     </Button>
+                    <p v-if="isRateExceeded" style="color: #FF5C5C; text-align: center;">Too many attempts. Please wait for five minutes.</p>
+                    <p v-if="otpValidataionFailed" style="color: #FF5C5C; text-align: center;">Invalid email or otp. Please try again.</p>
                 </div>
             </div>
         </transition>
@@ -66,6 +68,9 @@ const keysAllowed: string[] = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
 const show = ref<boolean>(true);
 const email = ref<string>("");
 const isResendLink = ref<boolean>(false);
+const isRateExceeded = ref<boolean>(false);
+const isDisabled = ref<boolean>(true);
+const otpValidataionFailed = ref<boolean>(false);
 const countDown = ref<number>(60);
 const isLoading = ref(false);
 
@@ -89,6 +94,11 @@ const isNumber = (event: Event) => {
 const handleInput = (event: Event) => {
     const inputType = (event as InputEvent).inputType;
     let currentActiveElement = event.target as HTMLInputElement;
+    if (currentActiveElement.id.split("_")[1] === "5") {
+        isDisabled.value = false;
+    } else {
+        isDisabled.value = true;
+    }
     if (inputType === "insertText")
         (currentActiveElement.nextElementSibling as HTMLElement)?.focus();
     if (inputType === "insertFromPaste" && dataFromPaste) {
@@ -139,23 +149,42 @@ const countDownTimer = () => {
 const sendOTP = async () => {
     show.value = !show.value;
     countDownTimer();
-    await genOTP(email.value);
+    const result = await genOTP(email.value);
+    if (result === 429) {
+        console.error("Too many requests to send otp.");
+    }
 }
 
 const resendOTP = async() => {
     countDown.value = 60;
     isResendLink.value = false;
     countDownTimer();
-    await genOTP(email.value);
+    const result = await genOTP(email.value);
+    if (result === 429) {
+        console.error("Too many requests to send otp.");
+    }
 }
 
 const verifyOTP = async () => {
+    isRateExceeded.value = false;
+    otpValidataionFailed.value = false;
     isLoading.value = true;
-    const result = await validateOTP(email.value, code.join(""));
-    if (result?.code === 200) {
-        router.push(store.returnUrl || "/");
+    try {
+        const result = await validateOTP(email.value, code.join(""));
+        if (result?.code === 200) {
+            router.push(store.returnUrl || "/");
+        } else if (result?.code === 429) {
+            isRateExceeded.value = true;
+        } else if (result?.code === 400) {
+            if (!isRateExceeded.value) {
+                otpValidataionFailed.value = true;
+            }
+        }
+    } catch (err) {
+        console.log(err);
+    } finally {
+        isLoading.value = false;
     }
-    isLoading.value = false;
 }
 </script>
 

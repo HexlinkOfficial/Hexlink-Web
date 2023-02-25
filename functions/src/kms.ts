@@ -1,6 +1,6 @@
 /* eslint-disable require-jsdoc */
 import * as kms from "@google-cloud/kms";
-import * as asn1 from "asn1.js";
+import {DERElement} from "asn1-ts";
 import * as crypto from "crypto";
 import * as ethers from "ethers";
 import * as crc32c from "fast-crc32c";
@@ -39,7 +39,7 @@ const getVersionName = async function(keyType: string) {
       config.locationId,
       config.keyRingId,
       config.keyId,
-      config.versionId
+      config.versionId!
   );
 };
 
@@ -53,7 +53,7 @@ export const getEthAddressFromPublicKey = async function(
       config.locationId,
       config.keyRingId,
       keyId,
-      config.versionId
+      config.versionId!
   );
   const publicKey = await getPublicKey(versionName);
   const publicKeyPem = publicKey.pem || "";
@@ -67,7 +67,7 @@ export const getEthAddressFromPublicKey = async function(
 };
 
 function hex(sig: Signature) : string {
-  return "0x" + sig.r + sig.s + sig.v.toString(16);
+  return "0x" + sig.r + sig.s + sig.recoveryParam.toString(16);
 }
 
 export const signWithKmsKey = async function(
@@ -77,7 +77,7 @@ export const signWithKmsKey = async function(
 ) : Promise<Signature | string> {
   const digestBuffer = Buffer.from(ethers.utils.arrayify(message));
   const signature = await getKmsSignature(digestBuffer, keyType);
-  const address = kmsConfig().get(keyType)!.publicAddress;
+  const address = kmsConfig().get(keyType)!.publicAddress!;
   const [r, s] = await calculateRS(signature as Buffer);
   const v = calculateRecoveryParam(
       digestBuffer,
@@ -117,20 +117,14 @@ const getKmsSignature = async function(digestBuffer: Buffer, keyType: string) {
     throw new Error("AsymmetricSign: response corrupted in-transit");
   }
 
-  return signResponse.signature as Buffer;
+  return Buffer.from(signResponse.signature);
 };
 
-const EcdsaSigAsnParse = asn1.define("EcdsaSig", function(_this: any) {
-  _this.seq().obj(
-      _this.key("r").int(),
-      _this.key("s").int(),
-  );
-});
-
 const calculateRS = async function(signature: Buffer) {
-  const decoded = EcdsaSigAsnParse.decode(signature, "der");
-  const r: BN = decoded.r;
-  let s: BN = decoded.s;
+  const der = new DERElement();
+  der.fromBytes(signature);
+  const r: BN = new BN.BN(der.sequence[0].toString());
+  let s: BN = new BN.BN(der.sequence[1].toString());
 
   const secp256k1N = new BN.BN(
       "fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141",
@@ -170,4 +164,67 @@ const calculateRecoveryParam = (
   }
 
   throw new Error("Failed to calculate recovery param");
+};
+
+
+const getSymmKeyName = async function() {
+  let config: KMS_CONFIG_TYPE = kmsConfig().get("encryptor")!;
+  if (process.env.FUNCTIONS_EMULATOR) {
+    config = kmsConfig().get("encryptorTest")!;
+  }
+
+  return client.cryptoKeyPath(
+      config.projectId,
+      config.locationId,
+      config.keyRingId,
+      config.keyId);
+};
+
+export const encryptWithSymmKey = async function(plaintext: string) {
+  const plaintextBuffer = Buffer.from(plaintext);
+  const keyName = await getSymmKeyName();
+  const plaintextCrc32c = crc32c.calculate(plaintextBuffer);
+
+  const [encryptResponse] = await client.encrypt({
+    name: keyName,
+    plaintext: plaintextBuffer,
+    plaintextCrc32c: {
+      value: plaintextCrc32c,
+    },
+  });
+
+  const ciphertext = encryptResponse.ciphertext;
+
+  if (!ciphertext || !encryptResponse.verifiedPlaintextCrc32c ||
+    !encryptResponse.ciphertextCrc32c ||
+    crc32c.calculate(ciphertext) !==
+    Number(encryptResponse.ciphertextCrc32c!.value)) {
+    throw new Error("Encrypt: request corrupted in-transit");
+  }
+
+  const encode = Buffer.from(ciphertext).toString("base64");
+
+  return encode;
+};
+
+export const decryptWithSymmKey = async function(text: string) {
+  const ciphertext = Buffer.from(text, "base64");
+  const keyName = await getSymmKeyName();
+  const ciphertextCrc32c = crc32c.calculate(ciphertext);
+
+  const [decryptResponse] = await client.decrypt({
+    name: keyName,
+    ciphertext: ciphertext,
+    ciphertextCrc32c: {
+      value: ciphertextCrc32c,
+    },
+  });
+  const plaintextBuffer = Buffer.from(decryptResponse.plaintext!);
+
+  if (crc32c.calculate(plaintextBuffer) !==
+      Number(decryptResponse.plaintextCrc32c!.value)) {
+    throw new Error("Decrypt: response corrupted in-transit");
+  }
+
+  return plaintextBuffer.toString("utf8");
 };

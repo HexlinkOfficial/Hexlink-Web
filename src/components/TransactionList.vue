@@ -2,10 +2,14 @@
   <div v-if="loading" class="loading-state">
     <Loading />
   </div>
-  <div v-if="!loading && transactionByDate.length == 0" class="no-history">
-    <div style="text-align: center;">You have no transaction history yet!</div>
+  <div v-if="!loading && Object.keys(transactionByDate).length === 0">
+    <EmptyContent 
+      title="Start by receiving the first token"
+      message="Unlocking the potential of Hexlink by depositing your first token or claim your first airdrop"
+    >
+    </EmptyContent>
   </div>
-  <div v-if="!loading" class="transaction-detail">
+  <div v-if="!loading && Object.keys(transactionByDate).length != 0" class="transaction-detail">
     <div style="overflow: visible; border-radius: 0.75rem;">
       <div v-for="(value, name, index) in transactionByDate" :key="index" style="position: relative;">
         <div class="history-date">
@@ -150,6 +154,7 @@ import { prettyPrintAddress } from "../../functions/common";
 import { profilePic, options } from "@/assets/imageAssets";
 import { prettyPrintNumber } from "@/web3/utils";
 import { useNftStore } from '@/stores/nft';
+import EmptyContent from '@/components/EmptyContent.vue';
 
 const loading = ref<boolean>(false);
 const transfer = ref<any>();

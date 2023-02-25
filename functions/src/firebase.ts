@@ -9,8 +9,9 @@ class PrivateFirebase {
 
   constructor() {
     const secrets = functions.config().doppler || {};
+    const serviceAccount = JSON.parse(secrets.GOOGLE_CREDENTIAL_JSON!);
     this.app = admin.initializeApp({
-      projectId: secrets.VITE_FIREBASE_PROJECT_ID,
+      credential: admin.credential.cert(serviceAccount),
       databaseURL: "https://bridge23-27764-default-rtdb.firebaseio.com",
     });
     this.db = admin.firestore();

@@ -2,7 +2,7 @@
     <div class="share-card" @wheel.prevent @touchmove.prevent @scroll.prevent>
         <div class="header">
             <RouterLink to="/">
-                <img src="../assets/logo/blue2-logo.svg" alt="" style="height: 40px; margin: 40px; overflow: visible;" />
+                <img src="@/assets/svg/logo-beta2.svg" alt="" class="logo" />
             </RouterLink>
         </div>
         <div class="body">
@@ -14,14 +14,12 @@
                 <div class="title">
                     <img class="owner-logo" :src="redPacket.creator?.logoURI">  
                     <div class="owner"> 
-                        <div class="owner-name-title">
-                            <h2 class="owner-name">{{redPacketOwnerName}}</h2>
-                            <img class="airdrop-logo" src="../assets/airdrop-icon.png">
-                        </div>
-                        <p class="owner-handle">@{{redPacketOwnerHandle}}</p>
+                        <span class="owner-name-title">{{ redPacketOwnerName }}</span>
+                        <span class="owner-handle">@{{redPacketOwnerHandle}}</span>
                     </div>
                 </div>
-                <p class="subtitle">Claim your airdrop with no need to connect wallet</p>
+                <h2>🔥 Claim Your Airdrop 🔥</h2>
+                <h2 style="color: #076ae0;">WITHOUT CONNECTING WALLET</h2>
                 <div class="qrcode">
                     <canvas id="canvas"></canvas>
                 </div>
@@ -138,6 +136,13 @@ onMounted(refreshQrCode);
 </script>
 
 <style lang="less" scoped>
+.logo {
+    height: 40px;
+    margin: 30px;
+    overflow: visible;
+    @media (max-width: 640px) {
+    margin: 20px;
+    height: 30px; } }
 .qrcode {
     display: flex;
     align-items: center;
@@ -146,7 +151,9 @@ onMounted(refreshQrCode);
     border-radius: 15px;
     overflow: hidden;
     margin: 20px;
-    margin-bottom: calc(1rem + 10px); }
+    margin-bottom: calc(1rem + 10px);
+    width: 200px;
+    height: 200px; }
 .airdrop-logo {
     width: auto;
     height: 1.3rem;
@@ -155,21 +162,23 @@ onMounted(refreshQrCode);
 }
 .owner-logo {
     width: auto;
-    height: 4.5rem;
-    border-radius: 9999px;
+    height: 3rem;
+    border-radius: 50px;
 }
 .owner {
-    margin-left: 10px;
-    margin-top: 10px;}
+    margin-left: 10px;}
 .owner-name-title {
-    display: flex;}
-.owner-name {
-    color: rgba(0, 0, 0, 0.6);
-    font-weight: 500; 
-    margin-bottom: 5px;}
+    display: flex;
+    color: rgba(0, 0, 0, 0.8);
+    font-weight: 700;
+    font-size: 16px;
+    line-height: 1.25rem;  }
 .owner-handle {
+    margin-bottom: 0rem;
     color: rgba(0, 0, 0, 0.6);
-    font-weight: 500; }
+    font-weight: 700;
+    font-size: 16px;
+    line-height: 1.25rem; }
 .subtitle {
     width: 100%;
     color: rgba(0, 0, 0, 0.6);
@@ -177,8 +186,8 @@ onMounted(refreshQrCode);
     font-weight: 500; }
 .body h2 {
     text-align: center;
-    font-size: 24px;
-    font-weight: 600; }
+    font-size: 20px;
+    font-weight: 800; }
 .scan-icon {
     width: 30px;
     height: 30px;
@@ -204,11 +213,7 @@ onMounted(refreshQrCode);
     justify-content: center;
     width: 100%;
     height: auto;
-    margin-bottom: 20px;
-    padding-bottom: 10px;
-    border-bottom-width: 1px;
-    border-color: rgba(0, 0, 0, 0.6);
-    border-bottom-style: dashed;}
+    margin-bottom: 30px; }
 .qr-section {
     display: flex;
     align-items: center;

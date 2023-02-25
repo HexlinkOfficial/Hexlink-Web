@@ -331,7 +331,16 @@
                 </div>
                 <div class="cta">
                   <i v-if="showClaimStatus(op) == 'Claimed'" className="fa fa-twitter"></i>
-                  <i v-if="showClaimStatus(op) != 'Claimed'" className="fa-solid fa-arrow-up-from-bracket"></i>
+                  <a-tooltip v-if="showClaimStatus(op) != 'Claimed' && showStatus(op) != 'Pending'" placement="top">
+                      <template #title>
+                        <span>
+                          Check on blockchain explorer
+                        </span>
+                      </template>
+                      <a :href="useChainStore().chain.blockExplorerUrls[0] + '/tx/' + op.tx" target="_blank">
+                        <i class="fa-solid fa-arrow-up-from-bracket"></i>
+                      </a>
+                    </a-tooltip>
                 </div>
               </div>
             </div>

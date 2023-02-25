@@ -7,7 +7,7 @@
       <span style="padding: 5px;">Withdraw</span>
     </button> -->
     <!-- <div class="card_circle transition"></div> -->
-    <div style="display: flex; align-items: center; justify-content: center; padding: 20px; margin-top: 20px;">
+    <div class="gift-icon">
       <img src="@/assets/svg/gift.svg"/>
     </div>
     <h2 class="transition">
@@ -19,7 +19,12 @@
       </span>
       <div style="padding: 5px;">
         <img src="https://i.postimg.cc/RhXfgJR1/gas-pump.png" data-v-c8c9ceac="" style="width: 20px; height: 20px;">
-        <span style="font-size: 15px;">Gas left: </span>
+        <span style="font-size: 15px;">Gas left: {{ totalServiceFee }}</span>
+      </div>
+      <div v-if="showRefund">
+        <button class="cta-button">
+          Refund
+        </button>
       </div>
       <div v-if="loading" class="claimers-list">
         <Loading style="margin-top: 25%;"/>
@@ -72,37 +77,48 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { useRoute } from "vue-router";
 import { normalizeBalance } from "../../functions/common";
 import type { Token } from "../../functions/common";
 import type { RedPacketDB, RedPacketClaim } from "@/types";
-import { getRedPacket, getRedPacketPrivate } from '@/graphql/redpacket';
+import { getRedPacket } from '@/graphql/redpacket';
 import { getRedPacketClaims } from '@/graphql/redpacketClaim';
 import Loading from "@/components/Loading.vue";
 import { loadAndSetErc20Token } from '@/web3/tokens';
 import type { RedPacket, RedPacketErc721 } from "../../functions/redpacket";
-import { queryErc721TokenId } from "@/web3/redpacket";
+import { queryRedPacketInfo, queryErc721RedPacketInfo } from "@/web3/redpacket";
+import { BigNumber } from "bignumber.js";
 
 const redPacket = ref<RedPacketDB | undefined>();
 const claimers = ref<RedPacketClaim[]>();
 const loading = ref<boolean>(true);
 const claimItem = ref<string>("");
+const gasLeft = ref<any>();
+const showRefund = ref<boolean>(false);
 
 const loadData = async function() {
   loading.value = true;
   const id = useRoute().query.details!.toString();
   redPacket.value = await getRedPacket(id);
-  console.log(redPacket.value);
+  let dateTime = new Date().getTime();
+  if ((dateTime - redPacket.value?.createdAt.getTime()!) > 86400000) {
+    showRefund.value = true;
+  } else {
+    showRefund.value = false;
+  }
+  // createdAt.value = redPacket.value?.createdAt.getTime();
   if (redPacket.value) {
     if (redPacket.value.type === 'erc20') {
       claimItem.value = 'erc20';
+      gasLeft.value = await (await queryRedPacketInfo(redPacket.value)).sponsorship;
       redPacket.value.token = await loadAndSetErc20Token(
         (redPacket.value.metadata as RedPacket).token
       );
       console.log(redPacket.value.token.logoURI);
     } else if (redPacket.value.type === 'erc721') {
       claimItem.value = 'erc721';
+      gasLeft.value = await (await queryErc721RedPacketInfo(redPacket.value.metadata.token)).sponsorship;
     }
     claimers.value = await getRedPacketClaims(id);
     console.log(claimers.value);
@@ -110,10 +126,31 @@ const loadData = async function() {
   loading.value = false;
 };
 
+const totalServiceFee = computed(() => {
+  return BigNumber(gasLeft.value).div(new BigNumber(10).pow(18)).dp(4).toString();
+})
+
 onMounted(loadData);
 </script>
 
 <style lang="less" scoped>
+.cta-button {
+  margin-top: 10px;
+  padding: 8px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  line-height: 1rem;
+  width: 100px;
+  border-radius: 50px;
+  opacity: 1;
+  background-color: #076ae0;
+  color: white; }
+.gift-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  margin-top: 20px; }
 .withdraw-button {
   position: absolute;
   z-index: 50;
@@ -181,7 +218,7 @@ onMounted(loadData);
 .claimers-list {
   width: 95%;
   height: 250px;
-  margin-top: 30px;
+  margin-top: 20px;
   overflow: auto; }
 .claim-card {
   background-color: #fff;

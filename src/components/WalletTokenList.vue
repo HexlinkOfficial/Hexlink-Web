@@ -45,12 +45,20 @@ import Loading from "@/components/Loading.vue";
 import { useAccountStore } from '@/stores/account';
 import { useTokenStore } from '@/stores/token';
 import EmptyContent from '@/components/EmptyContent.vue';
+import { getTokenPrices } from "@/services/price";
+import { BigNumber } from "bignumber.js";
 
 const loading = ref<boolean>(true);
 const balances = ref<BalanceMap>({});
 const hasContent = ref<boolean>(false);
+const prices = ref<{[token: string]: number}>({});
+
 const balance = (token: Token) : string => {
   return balances.value[token.address]?.normalized || "0";
+}
+
+const price = (token: Token) : number => {
+  return prices.value[token.address] || 0;
 }
 
 const loadTokens = async () => {
@@ -61,13 +69,23 @@ const loadTokens = async () => {
     await updatePreferences(balances.value);
   }
   useTokenStore().visiableTokens.length > 0 ? hasContent.value = true : hasContent.value = false;
+  const tokensToCheckPrice = useTokenStore().visiableTokens.filter(
+    t => Number(balance(t)) > 0
+  ).map(t => t.address);
+  prices.value = await getTokenPrices(useChainStore().chain, tokensToCheckPrice);
   loading.value = false;
 }
 onMounted(loadTokens);
 watch(() => useChainStore().current, loadTokens);
 
 const usdValue = (token: Token) : string => {
-  return "0.00";
+  const value = new BigNumber(
+    price(token)
+  ).times(balance(token));
+  if (value.gt("0.0001")) {
+    return value.dp(4).toString()
+  }
+  return "0";
 };
 </script>
 

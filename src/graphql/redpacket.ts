@@ -84,6 +84,7 @@ export interface RedPacketDBRaw {
 }
 
 function parseRedPacket(op: any) : RedPacketDB | undefined {
+  console.log(op);
   const r = (op.redpackets || []).length > 0
     ? op.redpackets[0]
     : undefined;

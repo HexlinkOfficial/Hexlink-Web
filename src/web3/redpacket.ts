@@ -363,7 +363,6 @@ export async function queryRedPacketInfo(
     const redPacket = await redPacketContract(
         useChainStore().provider,
     );
-    console.log(redPacket);
     const info = await redPacket.getPacket(rp.id);
     return {
         balanceLeft: info.balance.toString(),
@@ -483,10 +482,18 @@ export async function createRedPacketErc721(
     }
 }
 
-export async function claimCountdown(redPacketId: string, code: string) {
+export async function claimCountdown(chain: Chain, redPacketId: string, code: string) {
     const callClaimCountdown = httpsCallable(functions, 'claimCountdown');
     const result = await callClaimCountdown({
-        redPacketId, code
+        chain: chain.name, redPacketId, code
     });
     return (result.data as any).countdown;
+}
+
+export async function refundRedPacket(chain: Chain, redPacketId: string) {
+    const refundRedPacketFunction = httpsCallable(functions, 'refundRedPacket');
+    const result = await refundRedPacketFunction({
+        chain: chain.name, redPacketId
+    });
+    return (result.data as any).id;
 }

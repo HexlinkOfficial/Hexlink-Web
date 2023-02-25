@@ -65,13 +65,14 @@ import type { RedPacketDB } from "@/types";
 import type { RedPacket, RedPacketErc721 } from "functions/redpacket/lib";
 import { useRedPacketStore } from '@/stores/redpacket';
 import CountdownSpinner from '@/components/CountdownSpinner.vue';
+import { useChainStore } from "@/stores/chain";
 
 const redPacket = ref<RedPacketDB | undefined>();
 const redPacketTokenIcon = ref<string>("");
 const redPacketToken = ref<string>("");
 const claimItem = ref<string>("");
 let timeLeft = ref<number>(5);
-let countDownTimerInterval = null;
+let countDownTimerInterval = ref<any>(null);
 
 const route = useRoute();
 const store = useRedPacketStore();
@@ -131,11 +132,11 @@ const closeModal = () => {
   store.setClaimStatus("");
 }
 function onCountDownTimesUp() {
-  clearInterval(countDownTimerInterval);
+  clearInterval(countDownTimerInterval.value);
 }
 
 onMounted(async () => {
-  countDownTimerInterval = setInterval(() => {
+  countDownTimerInterval.value = setInterval(() => {
     timeLeft.value -= 1;
     // console.log("parent"+timeLeft.value);
     if (timeLeft.value === 0) {

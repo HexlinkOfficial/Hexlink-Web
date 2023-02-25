@@ -20,6 +20,8 @@ import {
   redpacketErc721Id,
   tokenFactoryAddress,
   hexlinkErc721Interface,
+  redPacketContract,
+  hexlinkErc721Contract,
 } from "../redpacket";
 import {refunder, genTotpCode, matchTotpCode} from "../common";
 import type {Chain, OpInput} from "../common";
@@ -398,13 +400,12 @@ export const refundRedPacket = functions.https.onCall(
         return {code: 429, message: "Too many requests of refundRedPacket."};
       }
 
-      if (redPacket.userId !== uid) {
-        return {code: 401, message: "Not authorized"};
-      }
-
       const redPacket = await getRedPacket(data.redPacketId);
       if (!redPacket) {
         return {code: 400, message: "redpacket_not_found"};
+      }
+      if (redPacket.userId !== uid) {
+        return {code: 401, message: "Not authorized"};
       }
 
       const provider = getInfuraProvider(chain);
@@ -413,9 +414,20 @@ export const refundRedPacket = functions.https.onCall(
       if (redPacket.type === "erc20") {
         input = await buildRefundErc20Op(redPacket);
         to = redPacketAddress(chain);
+        const contract = await redPacketContract(provider);
+        const state = contract.getPacket(redPacket.id);
+        if (state.balance.eq(0) && state.gasSponsorship.eq(0)) {
+          return {code: 400, message: "redpacket_already_funded"};
+        }
       } else {
         input = await buildWithdrawErc721Op(redPacket);
         to = redPacket.metadata.token;
+        const contract = await hexlinkErc721Contract(
+            redPacket.metadata.token, provider
+        );
+        if ((await contract.gasSponsorship()).eq(0)) {
+          return {code: 400, message: "redpacket_already_funded"};
+        }
       }
 
       try {

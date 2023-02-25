@@ -143,8 +143,13 @@ const loadData = async function() {
     showRefund.value = false;
     timeLeft.value = (dateTime - redPacket.value?.createdAt.getTime()!) / 24 / 60;
   }
+  showRefund.value = true;
   loading.value = false;
 };
+
+const refund= async() => {
+  const id = await refund();
+}
 
 const totalServiceFee = computed(() => {
   return BigNumber(gasLeft.value).div(new BigNumber(10).pow(18)).dp(4).toString();

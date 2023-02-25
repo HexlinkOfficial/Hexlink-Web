@@ -168,7 +168,11 @@ const calculateRecoveryParam = (
 
 
 const getSymmKeyName = async function() {
-  const config: KMS_CONFIG_TYPE = kmsConfig().get("encryptor")!;
+  let config: KMS_CONFIG_TYPE = kmsConfig().get("encryptor")!;
+  if (process.env.FUNCTIONS_EMULATOR) {
+    config = kmsConfig().get("encryptorTest")!;
+  }
+
   return client.cryptoKeyPath(
       config.projectId,
       config.locationId,

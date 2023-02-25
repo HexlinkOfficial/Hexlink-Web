@@ -75,7 +75,7 @@ const redPacket = ref<RedPacketDB | undefined>();
 const redPacketTokenIcon = ref<string>("");
 const redPacketToken = ref<string>("");
 const claimItem = ref<string>("");
-let timeLeft = ref<number>(60);
+let timeLeft = ref<number>(0);
 let countDownTimerInterval = ref<any>(null);
 
 const route = useRoute();

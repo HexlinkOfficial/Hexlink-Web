@@ -196,7 +196,7 @@ export const claimRedPacket = functions.https.onCall(
         params: {
           redPacketId: redPacket.id,
           token: redPacket.metadata.token,
-          creatorId: redPacket.user_id,
+          creatorId: redPacket.userId,
           claimerId: uid,
           claimer: data.claimer,
           type: redPacket.type,
@@ -393,10 +393,13 @@ export const refundRedPacket = functions.https.onCall(
         return result;
       }
       const {uid, account, chain} = result as RequestData;
-
       const isQuotaExceeded = await rateLimiter("refundRedPacket", `uid_${uid}`, 10, 1);
       if (isQuotaExceeded) {
         return {code: 429, message: "Too many requests of refundRedPacket."};
+      }
+
+      if (redPacket.userId !== uid) {
+        return {code: 401, message: "Not authorized"};
       }
 
       const redPacket = await getRedPacket(data.redPacketId);
@@ -424,6 +427,7 @@ export const refundRedPacket = functions.https.onCall(
       } catch {
         return {code: 422, message: "tx_validation_error"};
       }
+
       const [{id: reqId}] = await insertRequest(
           uid,
           [{

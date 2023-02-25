@@ -38,7 +38,7 @@ export interface RedPacketErc721Metadata extends RedPacketMetadataBase {
 
 export interface RedPacket {
   id: string,
-  user_id: string,
+  userId: string,
   metadata: RedPacketMetadata | RedPacketErc721Metadata,
   creator: string,
   validationData: any[],
@@ -59,7 +59,7 @@ export async function getRedPacket(
   const rp = result.data?.redpacket_by_pk;
   return {
     id: rp.id,
-    user_id: rp.user_id,
+    userId: rp.user_id,
     metadata: JSON.parse(rp.metadata),
     creator: JSON.parse(rp.creator),
     type: rp.type,

@@ -23,7 +23,7 @@
         <button class="cta-button" @click="goToStep2">Continue</button>
       </div>
     </form>
-    <form v-if="showStep2" class="form-send" @submit.prevent="onSubmit">
+    <form v-if="showStep2 && sendStatus == ''" class="form-send" @submit.prevent="onSubmit">
       <div style="text-align: center; background: white; padding: 35px 20px 5px;">
         <div class="profile-info">
           <div class="profile-wrapper">
@@ -136,7 +136,7 @@
           <span style="font-size: 20px; margin-top: 1rem;">{{ message }}</span>
         </h2>
       </div>
-      <div style="display: flex; justify-content: center;">
+      <div style="display: flex; justify-content: center; width: 100%; padding: 0 15px;">
         <button @click="closeModal" class="cta-button">OK</button>
       </div>
     </div>

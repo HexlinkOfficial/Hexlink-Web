@@ -14,7 +14,6 @@ class PrivateFirebase {
     }
     this.app = admin.app();
     this.db = admin.firestore();
-    this.db.settings({ignoreUndefinedProperties: true});
     this.storage = admin.storage();
     this.database = admin.database();
   }

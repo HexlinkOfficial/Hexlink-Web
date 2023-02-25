@@ -26,9 +26,9 @@ async function trySendTx(
 
 const redisConfig = {
     redis: {
-        password: '0fqbQm7sA2IwPNK1RWK9mlflbtQDcHYq',
-        host: 'redis-16634.c253.us-central1-1.gce.cloud.redislabs.com',
-        port: 16634
+        password: process.env.REDIS_PASSWORD!,
+        host: process.env.REDIS_HOST!,
+        port: parseInt(process.env.REDIS_PORT!, 10)
     }
 }
 

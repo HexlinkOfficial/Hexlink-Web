@@ -21,8 +21,14 @@
         <img src="https://i.postimg.cc/RhXfgJR1/gas-pump.png" data-v-c8c9ceac="" style="width: 20px; height: 20px;">
         <span style="font-size: 15px;">Gas left: {{ totalServiceFee }}</span>
       </div>
-      <div v-if="showRefund">
-        <button class="cta-button">
+      <div>
+        <button v-if="!showRefund" class="cta-button" style="background: #D9D9D9;" @mouseover="buttonText = Math.round(timeLeft).toString() + ' mins left to refund'" @mouseleave="buttonText = 'Refund'">
+          {{ buttonText }}
+        </button>
+        <button v-if="!showRefund  && balanceLeft == '0' && gasLeft == '0'" class="cta-button" style="background: #D9D9D9;">
+            {{ buttonText }}
+          </button>
+        <button v-if="showRefund" class="cta-button">
           Refund
         </button>
       </div>
@@ -94,23 +100,21 @@ const redPacket = ref<RedPacketDB | undefined>();
 const claimers = ref<RedPacketClaim[]>();
 const loading = ref<boolean>(true);
 const claimItem = ref<string>("");
-const gasLeft = ref<any>();
+const gasLeft = ref<string>("");
 const showRefund = ref<boolean>(false);
+const timeLeft = ref<number>(0);
+const buttonText = ref<string>("Refund");
+const balanceLeft = ref<string>("");
 
 const loadData = async function() {
   loading.value = true;
   const id = useRoute().query.details!.toString();
   redPacket.value = await getRedPacket(id);
-  let dateTime = new Date().getTime();
-  if ((dateTime - redPacket.value?.createdAt.getTime()!) > 86400000) {
-    showRefund.value = true;
-  } else {
-    showRefund.value = false;
-  }
   // createdAt.value = redPacket.value?.createdAt.getTime();
   if (redPacket.value) {
     if (redPacket.value.type === 'erc20') {
       claimItem.value = 'erc20';
+      balanceLeft.value = await (await queryRedPacketInfo(redPacket.value)).balanceLeft;
       gasLeft.value = await (await queryRedPacketInfo(redPacket.value)).sponsorship;
       redPacket.value.token = await loadAndSetErc20Token(
         (redPacket.value.metadata as RedPacket).token
@@ -118,10 +122,24 @@ const loadData = async function() {
       console.log(redPacket.value.token.logoURI);
     } else if (redPacket.value.type === 'erc721') {
       claimItem.value = 'erc721';
+      balanceLeft.value = await (await queryErc721RedPacketInfo(redPacket.value.metadata.token)).balanceLeft;
       gasLeft.value = await (await queryErc721RedPacketInfo(redPacket.value.metadata.token)).sponsorship;
     }
     claimers.value = await getRedPacketClaims(id);
     console.log(claimers.value);
+  }
+  // check if show refund button
+  let dateTime = new Date().getTime();
+  if ((dateTime - redPacket.value?.createdAt.getTime()!) > 86400000) {
+    if (balanceLeft.value == "0" && gasLeft.value == "0") {
+      showRefund.value = false;
+    } else {
+      showRefund.value = true;
+    }
+    timeLeft.value = 0;
+  } else {
+    showRefund.value = false;
+    timeLeft.value = (dateTime - redPacket.value?.createdAt.getTime()!) / 24 / 60;
   }
   loading.value = false;
 };
@@ -140,7 +158,7 @@ onMounted(loadData);
   font-size: 0.75rem;
   font-weight: 800;
   line-height: 1rem;
-  width: 100px;
+  min-width: 100px;
   border-radius: 50px;
   opacity: 1;
   background-color: #076ae0;

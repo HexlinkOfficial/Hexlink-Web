@@ -24,11 +24,19 @@ async function trySendTx(
     }
 }
 
+const redisConfig = {
+    redis: {
+        password: '0fqbQm7sA2IwPNK1RWK9mlflbtQDcHYq',
+        host: 'redis-16634.c253.us-central1-1.gce.cloud.redislabs.com',
+        port: 16634
+    }
+}
+
 class PrivateQueues {
     opQueues : Map<string, Queue.Queue> = new Map<string, Queue.Queue>();
     txQueues : Map<string, Queue.Queue> = new Map<string, Queue.Queue>();
     coordinatorQueues : Map<string, Queue.Queue> = new Map<string, Queue.Queue>();
-    storageQueue : Queue.Queue = new Queue("storage");
+    storageQueue : Queue.Queue = new Queue("storage", redisConfig);
 
     constructor() {
         SUPPORTED_CHAINS.forEach(chain => {
@@ -52,7 +60,7 @@ class PrivateQueues {
         txQueue: Queue.Queue
     ) : Queue.Queue {
         const senderPool = SenderPool.getInstance();
-        const queue = new Queue(this.queueName(chain, "coordinator"));
+        const queue = new Queue(this.queueName(chain, "coordinator"), redisConfig);
         console.log("Initiating coordinator queue " + queue.name);
         queue.process("poll", 1, async (job) => {
             const signer = senderPool.getSenderInIdle(chain.name);
@@ -104,7 +112,10 @@ class PrivateQueues {
     private initOperationQueue(chain: Chain) : Queue.Queue {
         const queue = new Queue(
             this.queueName(chain, "operation"),
-            { settings: {maxStalledCount: 0} }
+            {
+                settings: {maxStalledCount: 0},
+                redis: redisConfig.redis
+            }
         );
         console.log("Initiating operation queue " + queue.name);
         return queue;
@@ -112,7 +123,7 @@ class PrivateQueues {
 
     private initTransactionQueue(chain: Chain) : Queue.Queue {
         const senderPool = SenderPool.getInstance();
-        const queue = new Queue(this.queueName(chain, "transaction"));
+        const queue = new Queue(this.queueName(chain, "transaction"), redisConfig);
         console.log("Initiating transaction queue " + queue.name);
         queue.process(async(job: any) => {
             try {

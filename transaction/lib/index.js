@@ -19,6 +19,7 @@ app.use(body_parser_1.default.urlencoded({ extended: false }));
 app.use(body_parser_1.default.json());
 app.use(auth_1.auth);
 app.post('/submit/:chain', async (req, res) => {
+    console.log("HELPPP");
     const opQueue = queues.getOpQueue(req.params.chain);
     if (!req.body.input && !req.body.tx) {
         res.status(400).json({
@@ -31,23 +32,30 @@ app.post('/submit/:chain', async (req, res) => {
         chain: req.params.chain,
         ...req.body
     };
+    console.log("input");
     try {
         if (req.body.tx) {
             const [{ id: txId }] = await (0, transaction_1.insertTx)([
                 { tx: req.body.tx, chain: req.params.chain }
             ]);
+            console.log("insertTx");
             const [{ id: opId }] = await (0, operation_1.insertOp)([{ txId, ...input }]);
+            console.log("insertOp");
             const txQueue = queues.getTxQueue(req.params.chain);
             await txQueue.add({
                 id: txId,
                 txHash: req.body.tx,
                 ops: [{ id: opId, ...input }],
             });
+            console.log("txQueue");
             res.status(200).json({ id: opId });
         }
         else {
+            console.log("no tx");
             const [{ id }] = await (0, operation_1.insertOp)([input]);
+            console.log("insertOp - no");
             await opQueue.add({ id, ...input });
+            console.log("opQueue");
             res.status(200).json({ id });
         }
     }

@@ -21,17 +21,17 @@
 </template>
 
 <script setup lang="ts">
+import { time } from "console";
 import { onMounted } from "vue";
-import { bool } from "vue-types";
+import { number } from "vue-types";
 
 const FULL_DASH_ARRAY = 283;
 
-const TIME_LIMIT = 30;
 let timePassed = 0;
-let timeLeft = TIME_LIMIT;
 let timerInterval = null;
 
 const props = defineProps({
+  countdown: Number,
   claimAction: Function
 });
 
@@ -40,17 +40,21 @@ function onTimesUp() {
 }
 
 onMounted(async () => {
+  let overall = props.countdown as number
+  let timeLeft: number = overall;
   document
     .getElementById("base-timer-path-remaining")
     .classList.add("red");
-
+  // console.log("haha" + timeLeft);
   timerInterval = setInterval(() => {
-    timePassed = timePassed += 1;
-    timeLeft = TIME_LIMIT - timePassed;
-    setCircleDasharray();
+    timePassed += 1;
+    timeLeft = overall - timePassed;
+    setCircleDasharray(timeLeft, overall);
     setRemainingPathColor(timeLeft);
-
-    if (timeLeft === 0) {
+    
+    // need to compare with 1 rather than 0
+    if (timeLeft <= 1) {
+      console.log("timeup");
       onTimesUp();
     }
   }, 1000);
@@ -73,14 +77,14 @@ function setRemainingPathColor(timeLeft: number) {
   }
 }
 
-function calculateTimeFraction() {
-  const rawTimeFraction = timeLeft / TIME_LIMIT;
-  return rawTimeFraction - (1 / TIME_LIMIT) * (1 - rawTimeFraction);
+function calculateTimeFraction(timeLeft: number, total: number) {
+  const rawTimeFraction = timeLeft / total;
+  return rawTimeFraction - (1 / total) * (1 - rawTimeFraction);
 }
 
-function setCircleDasharray() {
+function setCircleDasharray(timeLeft: number, total: number) {
   const circleDasharray = `${(
-    calculateTimeFraction() * FULL_DASH_ARRAY
+    calculateTimeFraction(timeLeft, total) * FULL_DASH_ARRAY
   ).toFixed(0)} 283`;
   document
     .getElementById("base-timer-path-remaining")

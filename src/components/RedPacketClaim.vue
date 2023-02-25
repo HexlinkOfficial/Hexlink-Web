@@ -29,7 +29,7 @@
       <small >Best Wishes!</small>
     </h2>
     <div class="cta-container transition" :style="claimItem == 'erc721' ? 'margin-top: 380px;' : ''">
-      <CountdownSpinner div v-if="timeLeft > 0" :claim-action="claim"></CountdownSpinner>
+      <CountdownSpinner div v-if="timeLeft > 1" :claim-action="claim" :countdown=timeLeft></CountdownSpinner>
       <div v-if="timeLeft <= 0" class="footer">
         Token expired
       </div>
@@ -138,7 +138,7 @@ function onCountDownTimesUp() {
 onMounted(async () => {
   countDownTimerInterval = setInterval(() => {
     timeLeft.value -= 1;
-    console.log(timeLeft)
+    // console.log("parent"+timeLeft.value);
     if (timeLeft.value === 0) {
       onCountDownTimesUp();
     }

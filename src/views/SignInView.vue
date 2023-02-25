@@ -59,6 +59,7 @@ import { useAuthStore } from '@/stores/auth'
 import hexlink from "@/assets/logo/blue-logo.svg";
 import background from "@/assets/background.png";
 import secure from "@/assets/secure.svg";
+import { createNotification } from '@/web3/utils';
 
 const store = useAuthStore();
 const router = useRouter();
@@ -147,11 +148,13 @@ const countDownTimer = () => {
 }
 
 const sendOTP = async () => {
-    show.value = !show.value;
-    countDownTimer();
-    const result = await genOTP(email.value);
-    if (result === 429) {
-        console.error("Too many requests to send otp.");
+    if(email.value != "") {
+        show.value = !show.value;
+        countDownTimer();
+        const result = await genOTP(email.value);
+        if (result === 429) {
+            console.error("Too many requests to send otp.");
+        }
     }
 }
 

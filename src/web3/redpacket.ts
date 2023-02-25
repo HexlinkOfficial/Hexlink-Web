@@ -363,6 +363,7 @@ export async function queryRedPacketInfo(
     const redPacket = await redPacketContract(
         useChainStore().provider,
     );
+    console.log(redPacket);
     const info = await redPacket.getPacket(rp.id);
     return {
         balanceLeft: info.balance.toString(),

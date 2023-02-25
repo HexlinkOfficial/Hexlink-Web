@@ -17,9 +17,12 @@
           <i className="fa fa-twitter"></i>
         </a>
       </span>
-      <div style="padding: 5px;">
+      <div style="padding: 10px 5px 5px 5px; display: flex; align-items: center;">
         <img src="https://i.postimg.cc/RhXfgJR1/gas-pump.png" data-v-c8c9ceac="" style="width: 20px; height: 20px;">
-        <span style="font-size: 15px;">Gas left: {{ totalServiceFee }}</span>
+        <span style="font-size: 15px;">
+          Gas left: {{ totalServiceFee }}
+        </span>
+        <img src="https://token.metaswap.codefi.network/assets/networkLogos/ethereum.svg" height="20" style="margin-left:0.5rem;margin-right:0.5rem;" data-v-c970699f="">
       </div>
       <div>
         <button v-if="!showRefund" class="cta-button" style="background: #D9D9D9;" @mouseover="buttonText = Math.round(timeLeft).toString() + ' mins left to refund'" @mouseleave="buttonText = 'Refund'">
@@ -110,7 +113,6 @@ const loadData = async function() {
   loading.value = true;
   const id = useRoute().query.details!.toString();
   redPacket.value = await getRedPacket(id);
-  // createdAt.value = redPacket.value?.createdAt.getTime();
   if (redPacket.value) {
     if (redPacket.value.type === 'erc20') {
       claimItem.value = 'erc20';

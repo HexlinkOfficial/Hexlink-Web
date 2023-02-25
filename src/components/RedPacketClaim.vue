@@ -1,5 +1,5 @@
 <template>
-  <div v-if="store.claimStatus == ''" class="claim-card transition" :style="claimItem == 'erc721' ? 'height: 500px;' : ''">
+  <div v-if="store.claimStatus == ''" class="claim-card transition" :style="claimItem == 'erc721' ? 'height: 520px;' : ''">
     <router-link to="/airdrop">
       <svg class="redpacket_close transition" width="30" height="30" viewBox="0 0 30 30" fill="none"
         xmlns="http://www.w3.org/2000/svg">
@@ -28,8 +28,8 @@
       </div>
       <small >Best Wishes!</small>
     </h2>
-    <div class="cta-container transition" :style="claimItem == 'erc721' ? 'margin-top: 380px;' : ''">
-      <CountdownSpinner div v-if="timeLeft > 1" :claim-action="claim" :countdown=timeLeft></CountdownSpinner>
+    <div class="cta-container transition" :style="claimItem == 'erc721' ? 'margin-top: 400px;' : ''">
+      <CountdownSpinner div v-if="timeLeft > 0" :claim-action="claim" :countdown=timeLeft></CountdownSpinner>
       <div v-if="timeLeft <= 0" class="footer">
         Token expired
       </div>
@@ -48,7 +48,6 @@
         <button @click="closeModal" class="cta">OK</button>
       </router-link>
     </div>
-    <!-- <div class="card_circle transition" style="margin-top: -100px;"></div> -->
   </div>
 </template>
 
@@ -346,7 +345,7 @@ onMounted(async () => {
   margin-top: -100px; }
 .claim-card:hover .card_circle721 {
   border-radius: 0;
-  margin-top: -20px; }
+  margin-top: -35px; }
 .card_circle {
   height: 400px;
   width: 450px;
@@ -437,7 +436,7 @@ onMounted(async () => {
   margin-bottom: 0px;
   padding-bottom: 5px;
   padding-top: 5px;
-  background-color: #FD4755;
+  background-color: #076ae0;
   color: white;
   text-align: center;
 }

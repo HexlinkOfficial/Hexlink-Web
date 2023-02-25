@@ -137,14 +137,14 @@ body {
 }
 
 .base-timer__path-remaining.red {
-  color: #FD4755;
+  color: #076ae0;
 }
 
 .cta {
   position: absolute;
   top: 0;
   left: 0;
-  color: #FD4755;
+  color: #076ae0;
   border-radius: 100px;
   font-size: 17px;
   width: 100px;

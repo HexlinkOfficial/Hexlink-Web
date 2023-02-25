@@ -60,12 +60,13 @@ const redisOpts = {
     }
   },
 }
+const queueOpts = process.env.VITE_USE_REDIS_LOCAL ? {} : redisOpts;
 
 class PrivateQueues {
     opQueues : Map<string, Queue.Queue> = new Map<string, Queue.Queue>();
     txQueues : Map<string, Queue.Queue> = new Map<string, Queue.Queue>();
     coordinatorQueues : Map<string, Queue.Queue> = new Map<string, Queue.Queue>();
-    storageQueue : Queue.Queue = new Queue("storage", redisOpts);
+    storageQueue : Queue.Queue = new Queue("storage", queueOpts);
 
     constructor() {
         SUPPORTED_CHAINS.forEach(chain => {
@@ -89,7 +90,7 @@ class PrivateQueues {
         txQueue: Queue.Queue
     ) : Queue.Queue {
         const senderPool = SenderPool.getInstance();
-        const queue = new Queue(this.queueName(chain, "coordinator"), redisOpts);
+        const queue = new Queue(this.queueName(chain, "coordinator"), queueOpts);
         console.log("Initiating coordinator queue " + queue.name);
         queue.process("poll", 1, async (job) => {
             const signer = senderPool.getSenderInIdle(chain.name);
@@ -143,7 +144,7 @@ class PrivateQueues {
             this.queueName(chain, "operation"),
             {
                 settings: {maxStalledCount: 0},
-                ...redisOpts
+                ...queueOpts
             }
         );
         console.log("Initiating operation queue " + queue.name);
@@ -152,7 +153,7 @@ class PrivateQueues {
 
     private initTransactionQueue(chain: Chain) : Queue.Queue {
         const senderPool = SenderPool.getInstance();
-        const queue = new Queue(this.queueName(chain, "transaction"), redisOpts);
+        const queue = new Queue(this.queueName(chain, "transaction"), queueOpts);
         console.log("Initiating transaction queue " + queue.name);
         queue.process(async(job: any) => {
             try {

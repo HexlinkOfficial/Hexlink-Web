@@ -166,10 +166,13 @@ export const claimRedPacket = functions.https.onCall(
 
       const provider = getInfuraProvider(chain);
       let input;
+      let to : string;
       if (redPacket.type === "erc20") {
         input = await buildClaimErc20Op(chain, redPacket, account.address);
+        to = redPacketAddress(chain);
       } else {
         input = await buildMintErc721Op(chain, redPacket, account.address);
+        to = redPacket.metadata.token;
       }
 
       if (!validateRedPacket(redPacket, data.secret)) {
@@ -202,7 +205,7 @@ export const claimRedPacket = functions.https.onCall(
       const [{id: reqId}] = await insertRequest(
           uid,
           [{
-            to: redPacketAddress(chain),
+            to,
             args: {
               redPacketId: redPacket.id,
               token: redPacket.metadata.token,
@@ -342,6 +345,100 @@ export const createRedPacketErc721 = functions.https.onCall(
         }
       }
       const resp = await submit(chain, postData);
+      return {code: 200, id: resp.id};
+    }
+);
+
+async function buildRefundErc20Op(
+    redPacket: RedPacket
+) : Promise<OpInput> {
+  const metadata = redPacket.metadata as RedPacketMetadata;
+  const packet = {
+    creator: metadata.creator,
+    token: metadata.token,
+    salt: metadata.salt,
+    balance: metadata.balance,
+    validator: metadata.validator,
+    split: metadata.split,
+    mode: metadata.mode,
+    sponsorGas: true,
+  };
+  return {
+    to: redPacket.metadata.token,
+    value: "0x0",
+    callData: hexlinkErc721Interface.encodeFunctionData(
+        "refund", [packet]
+    ),
+    callGasLimit: "0x0",
+  };
+}
+
+async function buildWithdrawErc721Op(
+    redPacket: RedPacket
+) : Promise<OpInput> {
+  return {
+    to: redPacket.metadata.token,
+    value: "0x0",
+    callData: hexlinkErc721Interface.encodeFunctionData(
+        "withdraw", []
+    ),
+    callGasLimit: "0x0",
+  };
+}
+
+export const refundRedPacket = functions.https.onCall(
+    async (data, context) => {
+      const result = await preprocess(data, context);
+      if (result.code !== 200) {
+        return result;
+      }
+      const {uid, account, chain} = result as RequestData;
+
+      const isQuotaExceeded = await rateLimiter("refundRedPacket", `uid_${uid}`, 10, 1);
+      if (isQuotaExceeded) {
+        return {code: 429, message: "Too many requests of refundRedPacket."};
+      }
+
+      const redPacket = await getRedPacket(data.redPacketId);
+      if (!redPacket) {
+        return {code: 400, message: "redpacket_not_found"};
+      }
+
+      const provider = getInfuraProvider(chain);
+      let input;
+      let to;
+      if (redPacket.type === "erc20") {
+        input = await buildRefundErc20Op(redPacket);
+        to = redPacketAddress(chain);
+      } else {
+        input = await buildWithdrawErc721Op(redPacket);
+        to = redPacket.metadata.token;
+      }
+
+      try {
+        await provider.estimateGas({
+          to: input.to,
+          data: input.callData,
+          value: input.value,
+        });
+      } catch {
+        return {code: 422, message: "tx_validation_error"};
+      }
+      const [{id: reqId}] = await insertRequest(
+          uid,
+          [{
+            to,
+            args: {redPacketId: redPacket.id},
+          }]
+      );
+      const resp = await submit(chain, {
+        type: "refund_redpacket",
+        input,
+        account: account.address,
+        userId: uid,
+        actions: [],
+        requestId: reqId,
+      });
       return {code: 200, id: resp.id};
     }
 );

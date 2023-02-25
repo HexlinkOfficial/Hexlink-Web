@@ -111,7 +111,7 @@ export const GET_REDPACKET_VALIDATION_DATA = gql`
 
 export async function getRedPacketValidation(
     redPacketId: string
-) : Promise<RedPacket | undefined> {
+) : Promise<any[]> {
   const result = await client().query(
       GET_REDPACKET_VALIDATION_DATA,
       {id: redPacketId}

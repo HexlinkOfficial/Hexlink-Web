@@ -1,7 +1,7 @@
 import {Firebase} from "./firebase";
 import * as admin from "firebase-admin";
 
-const txServiceRateDBRef = "transaction/rates/";
+const txServiceRateDBRef = "functions/rates/";
 const timestampKey = "timestamp";
 
 export const rateLimiter = async (

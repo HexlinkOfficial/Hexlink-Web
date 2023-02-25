@@ -26,7 +26,7 @@ export const genOTP = functions.https.onCall(async (data, context) => {
     ip = context.rawRequest.ip;
   }
 
-  const isQuotaExceeded = await rateLimiter("genOTP", `ip_${ip}`, 60, 1);
+  const isQuotaExceeded = await rateLimiter("genOTP", `ip_${ip}`, 60, 3);
   if (isQuotaExceeded) {
     return {code: 429, message: "Too many requests of genOTP."};
   }
@@ -85,7 +85,7 @@ export const validateOTP = functions.https.onCall(async (data, _context) => {
     return {code: 400, message: "Email or OTP is missing."};
   }
 
-  const isQuotaExceeded = await rateLimiter("validateOTP", `email_${data.email}`, 300, 5);
+  const isQuotaExceeded = await rateLimiter("validateOTP", `email_${data.email}`, 300, 15);
   if (isQuotaExceeded) {
     return {code: 429, message: "Too many requests of validateOTP."};
   }

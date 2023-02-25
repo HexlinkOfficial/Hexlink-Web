@@ -1,5 +1,4 @@
 import * as admin from "firebase-admin";
-import * as functions from "firebase-functions";
 
 class PrivateFirebase {
   app : admin.app.App;
@@ -8,12 +7,7 @@ class PrivateFirebase {
   database: admin.database.Database;
 
   constructor() {
-    const secrets = functions.config().doppler || {};
-    const serviceAccount = JSON.parse(secrets.GOOGLE_CREDENTIAL_JSON!);
-    this.app = admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount),
-      databaseURL: "https://bridge23-27764-default-rtdb.firebaseio.com",
-    });
+    this.app = admin.initializeApp();
     this.db = admin.firestore();
     this.db.settings({ignoreUndefinedProperties: true});
     this.storage = admin.storage();

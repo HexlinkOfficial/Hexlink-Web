@@ -2,10 +2,14 @@
   <div v-if="loading" class="loading-state">
     <Loading />
   </div>
-  <div v-if="!loading && totalNfts == 0" class="no-history">
-    <div style="text-align: center;">You have no NFTs!</div>
+  <div v-if="!loading && totalNfts === 0">
+    <EmptyContent 
+      title="Start by receiving the first NFT"
+      message="Unlocking the potential of Hexlink by depositing your first NFT or claim your first airdrop"
+    >
+    </EmptyContent>
   </div>
-  <div v-if="!loading" class="box">
+  <div v-if="!loading && totalNfts != 0" class="box">
     <div class="nft_grid">
       <NFTCard 
         v-for="(value, index) in nftImages" 
@@ -26,6 +30,7 @@ import Loading from "@/components/Loading.vue";
 import type { openSea, nftImage, bindedNFT } from '@/web3/tokens';
 import NFTCard from './NFTCard.vue';
 import { getBackcgroundColor } from '@/web3/utils';
+import EmptyContent from '@/components/EmptyContent.vue';
 
 const imageColor = ref<string[]>([]);
 const nftImages = ref<bindedNFT[]>([]);

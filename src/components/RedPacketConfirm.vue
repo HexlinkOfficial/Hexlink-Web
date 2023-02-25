@@ -139,9 +139,9 @@ onMounted(async () => {
   @radius: 60px,
   @border-width: 12px,
   @check-thickness: 12px,
-  @success-color: #308AF5,
+  @success-color: #076ae0,
   @error-color: #FD4755,
-  @default-color: #308AF5,
+  @default-color: #076ae0,
   @background-color: #fff,
 ) {
   @check-size: @radius * .57;
@@ -304,7 +304,7 @@ onMounted(async () => {
   width: 100%; }
 .cta {
   color: #fff;
-  background-color: #308AF5;
+  background-color: #076ae0;
   padding: 10px 25px;
   border-radius: 50px;
   font-size: 17px;

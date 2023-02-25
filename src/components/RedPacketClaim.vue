@@ -41,14 +41,14 @@
       <div class="spinner-lg" :class="store.claimStatus">
         <div class="check"></div>
       </div>
-      <span style="font-size: 20px; margin-top: 1rem;">{{ loadText() }}</span><br>
+      <span style="font-size: 20px; margin-top: 1rem; color: black;">{{ loadText() }}</span><br>
     </h2>
     <div class="cta-container transition" style="margin-top: 340px;">
       <router-link to="/airdrop">
         <button @click="closeModal" class="cta">OK</button>
       </router-link>
     </div>
-    <div class="card_circle transition" style="margin-top: -100px;"></div>
+    <!-- <div class="card_circle transition" style="margin-top: -100px;"></div> -->
   </div>
 </template>
 
@@ -153,10 +153,10 @@ onMounted(async () => {
   @radius: 60px,
   @border-width: 12px,
   @check-thickness: 12px,
-  @success-color: #fff,
-  @error-color: #fff,
-  @default-color: #fff,
-  @background-color: #FD4755,
+  @success-color: #076ae0,
+  @error-color: #FD4755,
+  @default-color: #076ae0,
+  @background-color: #fff,
 ) {
   @check-size: @radius * .57;
   display: inline-block;
@@ -350,7 +350,7 @@ onMounted(async () => {
 .card_circle {
   height: 400px;
   width: 450px;
-  background-color: #FD4755;
+  background-color: #076ae0;
   position: absolute;
   border-radius: 50%;
   margin-left: -80px;
@@ -358,10 +358,10 @@ onMounted(async () => {
 .card_circle721 {
   height: 400px;
   width: 450px;
-  background-color: #FD4755;
+  background-color: #076ae0;
   position: absolute;
   border-radius: 50%;
-  margin-left: -80px;
+  margin-left: -53px;
   margin-top: -280px; }
 .transition {
   transition: .3s cubic-bezier(.3, 0, 0, 1.3) }
@@ -387,7 +387,7 @@ onMounted(async () => {
   margin-top: 340px; }
 .cta {
   color: #fff;
-  background-color: #FD4755;
+  background-color: #076ae0;
   padding: 10px 25px;
   border-radius: 50px;
   font-size: 17px;
@@ -395,7 +395,7 @@ onMounted(async () => {
   width: 10rem;
   font-weight: bold; }
 .cta:hover {
-  background-color: rgba(253,71,85,0.8); }
+  background-color: rgba(7,106,224,0.8); }
 .token-icon {
   border-radius: 50%;
   width: 20px;

@@ -30,9 +30,12 @@
     </h2>
     <div class="cta-container transition" :style="claimItem == 'erc721' ? 'margin-top: 400px;' : ''">
       <button v-if="route.query.otp?.toString() == null" class="cta" @click="claim">Claim</button>
-      <CountdownSpinner v-if="timeLeft > 0 && route.query.otp?.toString() != null" :claim-action="claim" :countdown=timeLeft></CountdownSpinner>
-      <div v-if="timeLeft <= 0 && route.query.otp?.toString() != null" class="footer">
+      <button v-if="route.query.otp?.toString() != null && timeLeft > 0" @click="claim" class="cta" >Claim</button>
+      <div v-if="route.query.otp?.toString() != null && timeLeft <= 0" class="footer">
         Token expired
+      </div>
+      <div v-if="route.query.otp?.toString() != null && timeLeft > 0" class="footer">
+        The request will expire in {{ timeLeft }} seconds
       </div>
     </div>
     <div :class="claimItem == 'erc721' ? 'card_circle721 transition' : 'card_circle transition'"></div>

@@ -1,21 +1,29 @@
 import { defineStore } from 'pinia';
-import type { RedPacketInput, RedPacketErc721Input } from "../../functions/redpacket";
+import type { RedPacketInput, RedPacketErc721Input, RedPacketDB} from "../../functions/redpacket";
 
 type Status = "" | "confirming" | "processing" | "error" | "success";
+type ClaimStatus = "" | "loading" | "success" | "error";
 export type AccountType = "hexlink" | "wallet";
 
-interface CreatingRedPacket {
+interface RedPacketStore {
   status: Status;
   redpacket: RedPacketInput | RedPacketErc721Input | undefined;
   account: AccountType;
+  claimStatus: ClaimStatus;
+  claim: {
+    redpacket: RedPacketDB;
+    opId: number;
+  } | undefined
 }
 
 export const useRedPacketStore = defineStore({
   id: 'redpacket',
-  state: (): CreatingRedPacket => ({
+  state: (): RedPacketStore => ({
     status: "",
     redpacket: undefined,
     account: "hexlink",
+    claimStatus: "",
+    claim: undefined
   }),
   persist: true,
   actions: {
@@ -29,6 +37,13 @@ export const useRedPacketStore = defineStore({
     },
     setStatus(status: Status) {
       this.status = status;
+    },
+    setClaimStatus(claimStatus: ClaimStatus) {
+      this.claimStatus = claimStatus;
+    },
+    afterClaimed(redpacket: RedPacketDB, opId: number) {
+      this.claim = { redpacket, opId };
+      this.claimStatus = "success";
     },
     setAccount(account: AccountType) {
       this.account = account;

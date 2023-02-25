@@ -62,7 +62,6 @@ export async function connectWallet() {
 
   const ownerAccountAddress = useAccountStore().account?.owner;
   const store = useWalletStore();
-  console.log("Account 0: ", accounts[0]);
   if (ownerAccountAddress != null && accounts.map(acc => acc.toLowerCase()).includes(ownerAccountAddress.toLowerCase())) {
     store.connectWallet(
       wallet,

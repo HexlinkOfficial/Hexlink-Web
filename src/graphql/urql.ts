@@ -18,7 +18,7 @@ function createUrqlWsClient(idToken: string) {
     });
 };
 
-export function createUrqlClient(idToken: string, policy: string = 'cache-first') {
+export function createUrqlClient(idToken: string, policy: string = 'cache-and-network') {
     const wsClient = createUrqlWsClient(idToken);
     return createClient({
         url: import.meta.env.VITE_HASURA_URL,

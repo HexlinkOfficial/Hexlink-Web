@@ -54,7 +54,6 @@ const createRedPacket = async () => {
       console.log("Failed to create redpacket with");
       console.log(e);
       store.setStatus("error");
-      message.value = "Something went wrong...";
     }
   } else {
     try {
@@ -69,7 +68,6 @@ const createRedPacket = async () => {
       console.log("Failed to create redpacket with");
       console.log(e);
       store.setStatus("error");
-      message.value = "Something went wrong...";
     }
   }
 }

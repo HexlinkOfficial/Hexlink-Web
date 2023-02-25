@@ -83,12 +83,12 @@ export interface Op {
 }
   
 export interface CreateRedPacketOp extends Op {
-    type: "create_redpacket" | "create_redpacket_erc721",
+    type: "create_redpacket",
     redpacket?: RedPacketDB,
 }
 
 export interface ClaimRedPacketOp extends Op {
-    type: "claim_redpacket" | "claim_redpacket_erc721",
+    type: "claim_redpacket",
     claim?: RedPacketClaim,
     redpacket?: RedPacketDB,
 }

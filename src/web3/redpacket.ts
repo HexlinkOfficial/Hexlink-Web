@@ -195,9 +195,6 @@ async function createRedPacketTxForMetamask(
     let userOps : Op[] = [];
     let txes : any[] = [];
     let value : EthBigNumber = EthBigNumber.from(0);
-
-    console.log("token: ", input);
-
     if (tokenEqual(input.token, input.gasToken)) {
         const toTransfer = EthBigNumber.from(
             input.gasSponsorship).add(input.balance);
@@ -323,7 +320,7 @@ export async function createNewRedPacket(
 export async function callClaimRedPacket(
     redPacket: RedPacketDB,
     secret: string | undefined,
-) : Promise<void> {
+) : Promise<{id: number}> {
     const claimRedPacket = httpsCallable(functions, 'claimRedPacket');
     const chain = getChain(redPacket.chain!);
     const result = await claimRedPacket({
@@ -336,6 +333,7 @@ export async function callClaimRedPacket(
     if ((result.data as any)?.code == 422) {
         throw new Error(result.data.message);
     }
+    return {id: result.data.id};
 }
 
 export async function callCreateRedPacket(
@@ -386,7 +384,7 @@ export async function queryErc721RedPacketInfo(
         balanceLeft: supply.sub(tokenId).toString(),
         claimsLeft: supply.sub(tokenId).toString(),
         sponsorship: sponsorship.toString(),
-    }
+    } as RedPacketOnchainState;
 }
 
 export async function createRedPacketErc721ForMetamask(

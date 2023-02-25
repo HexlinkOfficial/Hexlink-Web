@@ -19,6 +19,7 @@ import { useAuthStore } from "@/stores/auth";
 import urql from "@urql/vue";
 import { createClient, defaultExchanges, subscriptionExchange } from '@urql/vue';
 import { createClient as createWSClient } from 'graphql-ws';
+import { clearUrqlClient } from '@/graphql/urql';
 
 let vueApp: any;
 const wsClient = createWSClient({

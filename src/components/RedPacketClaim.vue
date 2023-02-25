@@ -1,5 +1,5 @@
 <template>
-  <div v-if="claimStatus == ''" class="claim-card transition" :style="claimItem == 'erc721' ? 'height: 500px;' : ''">
+  <div v-if="store.claimStatus == ''" class="claim-card transition" :style="claimItem == 'erc721' ? 'height: 500px;' : ''">
     <router-link to="/airdrop">
       <svg class="redpacket_close transition" width="30" height="30" viewBox="0 0 30 30" fill="none"
         xmlns="http://www.w3.org/2000/svg">
@@ -33,16 +33,16 @@
     </div>
     <div :class="claimItem == 'erc721' ? 'card_circle721 transition' : 'card_circle transition'"></div>
   </div>
-  <div v-if="claimStatus !== ''" class="claim-success-card transition">
+  <div v-if="store.claimStatus !== ''" class="claim-success-card transition">
     <h2 class="transition">
-      <div class="spinner-lg" :class="claimStatus">
+      <div class="spinner-lg" :class="store.claimStatus">
         <div class="check"></div>
       </div>
       <span style="font-size: 20px; margin-top: 1rem;">{{ loadText() }}</span><br>
     </h2>
     <div class="cta-container transition" style="margin-top: 340px;">
       <router-link to="/airdrop">
-        <button class="cta">OK</button>
+        <button @click="closeModal" class="cta">OK</button>
       </router-link>
     </div>
     <div class="card_circle transition" style="margin-top: -100px;"></div>
@@ -51,6 +51,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
+import { useRouter } from "vue-router";
 import { getRedPacket } from '@/graphql/redpacket';
 import { useRoute } from "vue-router";
 import { callClaimRedPacket } from "@/web3/redpacket";
@@ -60,14 +61,15 @@ import { ipfsUrl } from "@/web3/storage";
 import { getChain } from "../../functions/common";
 import type { RedPacketDB } from "@/types";
 import type { RedPacket, RedPacketErc721 } from "functions/redpacket/lib";
+import { useRedPacketStore } from '@/stores/redpacket';
 
 const redPacket = ref<RedPacketDB | undefined>();
 const redPacketTokenIcon = ref<string>("");
 const redPacketToken = ref<string>("");
-const claimStatus = ref<string>("");
 const claimItem = ref<string>("");
 
 const route = useRoute();
+const store = useRedPacketStore();
 onMounted(async () => {
   claimItem.value = "";
   redPacket.value = await getRedPacket(route.query.claim!.toString());
@@ -89,32 +91,40 @@ onMounted(async () => {
       redPacketTokenIcon.value = ipfsUrl(metadata.tokenURI) || "";
     }
   } else {
-    claimStatus.value = "error";
+    store.setClaimStatus("error");
   }
 });
 
 const claim = async () => {
-  claimStatus.value = 'loading';
+  store.setClaimStatus("loading");
   try {
     const otp = route.query.otp?.toString();
-    await callClaimRedPacket(redPacket.value!, otp);
-    claimStatus.value = 'success';
+    const {id} = await callClaimRedPacket(redPacket.value!, otp);
+    store.afterClaimed(redPacket.value!, id);
   } catch (e) {
     console.log("Failed to claim redpacket with error");
     console.log(e);
-    claimStatus.value = 'error';
+    store.setClaimStatus("error");
   }
 }
 
 const loadText = () => {
-  if (claimStatus.value == 'success') {
+  if (store.claimStatus == 'success') {
     return 'Claim Successful!';
-  } else if (claimStatus.value == 'error') {
+  } else if (store.claimStatus == 'error') {
     return 'Uhmmmm, something went wrong!';
   } else {
     return 'Processing...';
   }
 };
+
+const router = useRouter();
+const closeModal = () => {
+  if (store.status == 'success') {
+    router.push("/airdrop");
+  }
+  store.setClaimStatus("");
+}
 </script>
 
 <style lang="less" scoped>

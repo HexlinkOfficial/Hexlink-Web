@@ -474,11 +474,12 @@ import EmptyContent from '@/components/EmptyContent.vue';
 
 import { getCreatedRedPackets } from '@/graphql/redpacket';
 import { getClaimedRedPackets } from '@/graphql/redpacketClaim';
-import { getOpStatus } from "@/graphql/operation";
+import { getOpStatus, getClaimByOp } from "@/graphql/operation";
 
 import { storeToRefs } from 'pinia'
 import { useRedPacketStore } from '@/stores/redpacket';
 import type { RedPacketErc721 } from 'functions/redpacket/lib/types';
+import { useAuthStore } from '@/stores/auth';
 
 const createdRpOps = ref<CreateRedPacketOp[]>([]);
 const claimedRpOps = ref<ClaimRedPacketOp[]>([]);
@@ -526,27 +527,42 @@ async function delay(ms: number) {
 }
 const updateData = async () : Promise<boolean> => {
   let completed = true;
-  const updateOp = async (op : any) => {
+  const updateOp = async (op : any, type: "create" | "claim") => {
     if (op.txStatus || op.error) {
       return op;
     }
     const opStatus = await getOpStatus(op.id);
     if (opStatus.txStatus || opStatus.error) {
-      return {...op, ...opStatus};
+      if (type === 'claim') {
+        const {claim} = await getClaimByOp(op.id);
+        return {
+          ...op,
+          ...opStatus,
+          claim: {
+            ...op.claim,
+            ...claim
+          }
+        };
+      } else {
+        return {...op, ...opStatus};
+      }
     } else {
       completed = false;
       return op;
     }
   };
   createdRpOps.value = await Promise.all(
-    createdRpOps.value.map(op => updateOp(op))
+    createdRpOps.value.map(op => updateOp(op, 'create'))
+  );
+  claimedRpOps.value = await Promise.all(
+    claimedRpOps.value.map(op => updateOp(op, 'claim'))
   );
   return completed;
 }
 const refreshData = async () => {
   refreshing.value = "running";
   const completed = await updateData();
-  if (!completed) {
+  if (!completed || refreshing.value === "scheduled") {
     refreshing.value = "scheduled";
     await delay(3000);
     await refreshData();
@@ -556,7 +572,7 @@ const refreshData = async () => {
   }
 };
 
-const {status, redpacket} = storeToRefs(useRedPacketStore());
+const {status, redpacket, claimStatus, claim} = storeToRefs(useRedPacketStore());
 watch(status, async (newStatus, _) => {
   if (newStatus === "success") {
     if (redpacket.value?.opId) {
@@ -573,11 +589,36 @@ watch(status, async (newStatus, _) => {
             }
           }));
       }
-      // if (op.type == 'claim_redpacket') { }
     }
     postProcess();
     if (refreshing.value === 'done') {
       refreshData();
+    } else if (refreshing.value === 'running') {
+      refreshing.value = "scheduled";
+    }
+  }
+});
+watch(claimStatus, async (newStatus, _) => {
+  if (newStatus === "success") {
+    if (claim.value?.opId) {
+      const op = await getOpStatus(claim.value?.opId);
+      if (op.type == 'claim_redpacket') {
+          claimedRpOps.value.push(await aggregatedClaimed({
+            ...op,
+            type: "claim_redpacket",
+            redpacket: claim.value.redpacket,
+            claim: {
+              createdAt: op.createdAt,
+              claimer: useAuthStore().userInfo,
+            }
+          }));
+      }
+    }
+    postProcess();
+    if (refreshing.value === 'done') {
+      refreshData();
+    } else if (refreshing.value === 'running') {
+      refreshing.value = "scheduled";
     }
   }
 });

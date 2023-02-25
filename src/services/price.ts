@@ -22,13 +22,13 @@ export async function getTokenPrices(
     chain: Chain,
     tokens: string[]
 ) : Promise<{[token: string]: number}> {
-    if (!SUPPORTED_CHAINS.includes(chain.name)) {
-      return {};
-    }
     const tokensToSearch = tokens.filter(t => t != ethers.constants.AddressZero);
     let prices = {};
     if (tokensToSearch.length !== tokens.length) {
         prices[ethers.constants.AddressZero] = await getCoinPrice(chain);
+    }
+    if (!SUPPORTED_CHAINS.includes(chain.name)) {
+      return prices;
     }
     const params = {
         contract_addresses: tokensToSearch.join(","),

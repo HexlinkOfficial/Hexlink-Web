@@ -98,3 +98,28 @@ export async function isClaimed(
   }
   return (result.data?.redpacket_claim.length || 0) > 0;
 }
+
+export const GET_REDPACKET_VALIDATION_DATA = gql`
+  query GetRedPacket($id: String!) {
+    redpacket_by_pk(id: $id) {
+        id
+        validation_data
+    }
+  }
+`;
+
+
+export async function getRedPacketValidation(
+    redPacketId: string
+) : Promise<RedPacket | undefined> {
+  const result = await client().query(
+      GET_REDPACKET_VALIDATION_DATA,
+      {id: redPacketId}
+  ).toPromise();
+  if (result.error) {
+    console.log("Failed to get red packet", result.error);
+    throw new Error("graphql_error");
+  }
+  const rp = result.data?.redpacket_by_pk;
+  return JSON.parse(rp.validation_data);
+}

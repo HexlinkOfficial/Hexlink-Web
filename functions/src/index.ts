@@ -27,11 +27,13 @@ import {
   claimRedPacket,
   createRedPacket,
   createRedPacketErc721,
+  claimCountdown,
 } from "./redpacket";
 
 exports.claimRedPacket = claimRedPacket;
 exports.createRedPacket = createRedPacket;
 exports.createRedPacketErc721 = createRedPacketErc721;
+exports.claimCountdown = claimCountdown;
 
 import {
   sendToken,

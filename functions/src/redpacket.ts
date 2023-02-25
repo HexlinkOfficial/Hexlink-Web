@@ -5,6 +5,7 @@ import {
   RedPacketMetadata,
   getRedPacket,
   isClaimed,
+  getRedPacketValidation,
 } from "./graphql/redpacket";
 import type {RedPacket} from "./graphql/redpacket";
 import {signWithKmsKey} from "./kms";
@@ -20,7 +21,7 @@ import {
   tokenFactoryAddress,
   hexlinkErc721Interface,
 } from "../redpacket";
-import {refunder, matchTotpCode} from "../common";
+import {refunder, genTotpCode, matchTotpCode} from "../common";
 import type {Chain, OpInput} from "../common";
 import {submit} from "./services/operation";
 import {insertRequest} from "./graphql/request";
@@ -119,6 +120,31 @@ function validateRedPacket(
   }
   return true;
 }
+
+export const claimCountdown = functions.https.onCall(
+    async (data, context) => {
+      const uid = context.auth?.uid;
+      if (!uid) {
+        return {code: 401, message: "Unauthorized"};
+      }
+      const validation = await getRedPacketValidation(data.redPacketId);
+      const filtered = validation.filter((v: any) => v.type === "dynamic_secrets");
+      if (filtered.length == 0) {
+        return {code: 400, message: "dynamic secret is not enabled for this airdrop"};
+      }
+      const now = new Date().getTime();
+      const epoch = Math.floor(now / 1000.0);
+      const toExpire = 60 - epoch % 60;
+      const secret = filtered[0].secret;
+      if (data.code === genTotpCode(secret)) {
+        return {code: 200, countdown: 60 + toExpire};
+      } else if (data.code === genTotpCode(secret, now - 60000)) {
+        return {code: 200, countdown: toExpire};
+      } else {
+        return {code: 200, countdown: 0};
+      }
+    }
+);
 
 export const claimRedPacket = functions.https.onCall(
     async (data, context) => {

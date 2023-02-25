@@ -481,3 +481,11 @@ export async function createRedPacketErc721(
         return await processTxAndSave(input, txes, callCreateRedPacketErc721, dryrun);
     }
 }
+
+export async function claimCountdown(redPacketId: string, code: string) {
+    const callClaimCountdown = httpsCallable(functions, 'claimCountdown');
+    const result = await callClaimCountdown({
+        redPacketId, code
+    });
+    return (result.data as any).countdown;
+}

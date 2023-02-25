@@ -54,7 +54,7 @@ import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { getRedPacket } from '@/graphql/redpacket';
 import { useRoute } from "vue-router";
-import { callClaimRedPacket } from "@/web3/redpacket";
+import { callClaimRedPacket, claimCountdown } from "@/web3/redpacket";
 import { loadAndSetErc20Token } from '@/web3/tokens';
 import { switchNetwork } from "@/web3/network";
 import { ipfsUrl } from "@/web3/storage";

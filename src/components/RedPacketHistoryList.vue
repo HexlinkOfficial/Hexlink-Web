@@ -456,7 +456,7 @@ import { RouterLink, useRoute } from 'vue-router';
 import { loadErc20Token } from '@/web3/tokens';
 import { useChainStore } from "@/stores/chain";
 
-import type { ClaimRedPacketOp, CreateRedPacketOp, RedPacketDB, Op } from '@/types';
+import type { ClaimRedPacketOp, CreateRedPacketOp, RedPacketDB } from '@/types';
 import Loading from "@/components/Loading.vue";
 import { useAccountStore } from '@/stores/account';
 import { useTokenStore } from '@/stores/token';

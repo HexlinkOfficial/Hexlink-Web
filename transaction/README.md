@@ -11,6 +11,7 @@ npm run build
 
 ### local testing
 ```sh
+redis-server
 doppler run -- npm run start
 ```
 

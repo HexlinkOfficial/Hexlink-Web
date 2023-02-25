@@ -169,8 +169,9 @@
     </RedPacketAccount>
   </div>
   <div class="create">
-    <button class="connect-wallet-button" @click="confirmNFT">
-      Create
+    <button class="connect-wallet-button" @click="confirmNFT" style="width: 90%;">
+      <img style="margin-right: 10px;" src="@/assets/svg/redPacket.svg"/>
+      Confirm Red Packet
     </button>
   </div>
 </template>
@@ -817,25 +818,19 @@ const getColor = async (nft: nftImage) => {
 .connect-wallet-button {
   display: flex;
   justify-content: center;
-  padding-top: 0.5rem;
-  padding-bottom: 0.5rem;
-  color: #000;
-  font-size: 0.875rem;
+  padding: 10px;
   line-height: 1.25rem;
-  font-weight: 800;
-  line-height: 1.25rem;
-  width: 70%;
   border-radius: 50px;
   opacity: 1;
   background-color: rgb(7, 106, 224);
+  margin-top: 30px;
+  margin-bottom: 20px;
   color: white; }
 .connect-wallet-button:hover {
   background-color: rgba(7, 106, 224,0.9); }
 .create {
   display: flex;
   justify-content: center;
-  margin: 16px;
-  margin-top: 32px;
   flex-direction: row-reverse; }
 input:focus {
   outline: none;

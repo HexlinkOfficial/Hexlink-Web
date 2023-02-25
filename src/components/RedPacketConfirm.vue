@@ -1,7 +1,7 @@
 <template>
   <div v-if="store.status === 'confirming'" class="claim-success-card transition" @wheel.prevent @touchmove.prevent @scroll.prevent >
     <router-link :to="props.mode == 'token' ? '/airdrop?action=send' : '/redpacket/airdropCollectable'">
-      <img @click="closeModal" class="redpacket_close transition" src="@/assets/svg/close.svg"/>
+      <img @click="closeModal" class="redpacket_close transition" src="@/assets/svg/closeButton.svg"/>
     </router-link>
     <h2 class="transition">
       <span style="font-size: 20px; margin-top: 4rem;">{{ message }}</span><br>

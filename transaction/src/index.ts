@@ -31,25 +31,30 @@ app.post('/submit/:chain', async (req: express.Request, res: express.Response) =
     chain: req.params.chain,
     ...req.body
   } as OperationInput;
-  console.log("wowow");
-  console.log(input);
-  if (req.body.tx) {
-    const [{id: txId}] = await insertTx([
-      {tx: req.body.tx, chain: req.params.chain}
-    ]);
-    const [{id: opId}] = await insertOp([{txId, ...input}]);
-    const txQueue = queues.getTxQueue(req.params.chain)!;
-    await txQueue.add({
-      id: txId,
-      txHash: req.body.tx,
-      ops: [{id: opId, ...input}],
-    });
-    res.status(200).json({ id: opId });
-  } else {
-    const [{id}] = await insertOp([input]);
-    await opQueue.add({id, ...input});
-    res.status(200).json({ id });
+
+  try {
+    if (req.body.tx) {
+      const [{id: txId}] = await insertTx([
+        {tx: req.body.tx, chain: req.params.chain}
+      ]);
+      const [{id: opId}] = await insertOp([{txId, ...input}]);
+      const txQueue = queues.getTxQueue(req.params.chain)!;
+      await txQueue.add({
+        id: txId,
+        txHash: req.body.tx,
+        ops: [{id: opId, ...input}],
+      });
+      res.status(200).json({ id: opId });
+    } else {
+      const [{id}] = await insertOp([input]);
+      await opQueue.add({id, ...input});
+      res.status(200).json({ id });
+    }
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ err });
   }
+
 });
 
 // start the Express server

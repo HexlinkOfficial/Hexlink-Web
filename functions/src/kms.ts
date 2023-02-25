@@ -1,6 +1,6 @@
 /* eslint-disable require-jsdoc */
 import * as kms from "@google-cloud/kms";
-import * as asn1 from "asn1.js";
+import {DERElement} from "asn1-ts";
 import * as crypto from "crypto";
 import * as ethers from "ethers";
 import * as crc32c from "fast-crc32c";
@@ -67,7 +67,7 @@ export const getEthAddressFromPublicKey = async function(
 };
 
 function hex(sig: Signature) : string {
-  return "0x" + sig.r + sig.s + sig.v.toString(16);
+  return "0x" + sig.r + sig.s + sig.recoveryParam.toString(16);
 }
 
 export const signWithKmsKey = async function(
@@ -117,20 +117,14 @@ const getKmsSignature = async function(digestBuffer: Buffer, keyType: string) {
     throw new Error("AsymmetricSign: response corrupted in-transit");
   }
 
-  return signResponse.signature as Buffer;
+  return Buffer.from(signResponse.signature);
 };
 
-const EcdsaSigAsnParse = asn1.define("EcdsaSig", function(_this: any) {
-  _this.seq().obj(
-      _this.key("r").int(),
-      _this.key("s").int(),
-  );
-});
-
 const calculateRS = async function(signature: Buffer) {
-  const decoded = EcdsaSigAsnParse.decode(signature, "der");
-  const r: BN = decoded.r;
-  let s: BN = decoded.s;
+  const der = new DERElement();
+  der.fromBytes(signature);
+  const r: BN = new BN.BN(der.sequence[0].toString());
+  let s: BN = new BN.BN(der.sequence[1].toString());
 
   const secp256k1N = new BN.BN(
       "fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141",

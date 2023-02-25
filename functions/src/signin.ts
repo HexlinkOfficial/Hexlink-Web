@@ -54,8 +54,8 @@ export const genOTP = functions.https.onCall(async (data, context) => {
         </div>
         <p style="font-size:1.5em">Hi,</p>
         <p style="font-size:1.4em">Thank you for choosing Hexlink. Use the following OTP to complete your Log in procedures. OTP is valid for 5 minutes.</p>
-        <h2 style="background: #1890ff;margin: 0 auto;width: max-content;padding: 0 10px;color: #fff;border-radius: 4px;">${plainOTP}</h2>
-        <p style="font-size:1.1em;">Regards,<br />Hexlink</p>
+        <h2 style="font-size:2.5em; background: #1890ff;margin: 0 auto;width: max-content;padding: 0 10px;color: #fff;border-radius: 4px;">${plainOTP}</h2>
+        <p style="font-size:1.4em;">Regards,<br />Hexlink</p>
       </div>
     </div>`,
   });

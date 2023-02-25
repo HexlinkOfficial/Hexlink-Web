@@ -130,8 +130,8 @@ onMounted(() => {
   padding-bottom: 0.5rem;
   padding-left: 0.75rem;
   padding-right: 0.75rem;
-  margin-right: 5px;
-  margin-left: 5px;
+  margin-right: 2.5px;
+  margin-left: 2.5px;
   align-items: center;
   color: #000;
   font-size: 0.875rem;

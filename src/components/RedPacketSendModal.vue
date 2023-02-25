@@ -3,8 +3,8 @@
     <router-link to="/airdrop">
       <img class="redpacket_close transition" src="@/assets/svg/closeButton.svg" alt="close button" />
     </router-link>
-    <div style="display: block; padding: 1rem 0 1rem 0;">
-      <div style="padding: 0 1rem; margin-top: 2rem;">
+    <div class="box">
+      <div class="box-wrapper">
         <RedPacketSend></RedPacketSend>
       </div>
     </div>
@@ -16,6 +16,16 @@ import RedPacketSend from '@/components/RedPacketSend.vue';
 </script>
 
 <style lang="less" scoped>
+.box-wrapper {
+  padding: 0 1rem;
+  margin-top: 2rem;
+  @media (max-width: 640px) {
+    padding: 0 0.75rem;} }
+.box {
+  display: block; 
+  padding: 1.5rem 10px;
+  @media (max-width: 640px) {
+    padding: 1.5rem 5px; } }
 .send-token-card {
   background-color: #fff;
   height: 600px;

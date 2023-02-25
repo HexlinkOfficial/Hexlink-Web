@@ -1,10 +1,31 @@
 <template>
   <div v-if="store.status === 'confirming'" class="claim-success-card transition" @wheel.prevent @touchmove.prevent @scroll.prevent >
-    <router-link :to="props.mode == 'token' ? '/airdrop?action=send' : '/redpacket/airdropCollectable'">
+    <router-link :to="props.mode == 'token' ? '/airdrop?action=send' : '/airdrop?action=airdropNFT'">
       <img @click="closeModal" class="redpacket_close transition" src="@/assets/svg/closeButton.svg"/>
     </router-link>
     <h2 class="transition">
-      <span style="font-size: 20px; margin-top: 4rem;">{{ message }}</span><br>
+      <img src="@/assets/svg/calculator.svg" style="margin-bottom: 5px;"/>
+      <span>Airdrop Details</span>
+      <img v-if="store.redpacket?.type == 'erc721'" :src="getERC721Image()" alt="nft-pic" style="width: 100px; height: 100px; border-radius: 15px; margin-top: 20px;"/>
+      <span v-if="store.redpacket?.type == 'erc20'" style="display: flex; align-items: center; font-size: 18px; margin-top: 30px;">
+        <span>
+          <span>Airdrop Amount:</span>
+          <span style="margin: 0 5px;">{{ (store.redpacket as RedPacketInput).balanceInput }}</span>
+        </span>
+        <img :src="token?.logoURI" style="width: 20px; height: 20px;"/>
+      </span>
+      <span v-if="store.redpacket?.type == 'erc20'" style="display: flex; align-items: center; justify-content: center;">+</span>
+      <div v-if="store.redpacket?.type == 'erc721'">
+        <span style="font-size: 20px;">{{ (store.redpacket as RedPacketErc721Input).name }}</span>
+      </div>
+      <div style="display: flex; font-size: 18px; align-items: center;" :style="store.redpacket?.type == 'erc20' ? '' : 'margin-top: 10px;'">
+          <span>Total Gas: </span>
+          <span style="display: flex; align-items: center;">
+            <span style="margin: 0 5px;">{{ (Number(estimatedGasFee) + Number(estimatedGasSponsorship)).toFixed(5) }}</span>
+            <img :src="gasToken?.logoURI" style="width: 20px; height: 20px;"/>
+          </span>
+        </div>
+      <!-- <span style="font-size: 20px; margin-top: 2rem;">{{ message }}</span><br> -->
     </h2>
     <div class="cta-container transition" style="margin-top: 340px;">
       <button class="cta" @click="createRedPacket">Confirm</button>
@@ -26,16 +47,23 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { useRouter } from "vue-router";
 import { useRedPacketStore } from '@/stores/redpacket';
 import { createNewRedPacket, createRedPacketErc721 } from "@/web3/redpacket";
 import type { RedPacketInput, RedPacketErc721Input } from "../../functions/redpacket";
+import { createNotification } from '@/web3/utils';
+import { loadAndSetErc20Token, loadErc721Token } from "@/web3/tokens";
+import type { Token } from "../../functions/common";
+import { BigNumber } from "bignumber.js";
+import { ipfsUrl } from "@/web3/storage";
 
 const props = defineProps({
   mode: String
 });
 
+const token = ref<Token>();
+const gasToken = ref<Token>();
 const message = ref<string>("Let's go!");
 const store = useRedPacketStore();
 const createRedPacket = async () => {
@@ -54,6 +82,7 @@ const createRedPacket = async () => {
       console.log("Failed to create redpacket with");
       console.log(e);
       store.setStatus("error");
+      createNotification("Failed to create redpacket with" + e as string, "error");
     }
   } else {
     try {
@@ -68,6 +97,7 @@ const createRedPacket = async () => {
       console.log("Failed to create redpacket with");
       console.log(e);
       store.setStatus("error");
+      createNotification("Failed to create redpacket with" + e as string, "error");
     }
   }
 }
@@ -79,6 +109,27 @@ const closeModal = () => {
   }
   store.setStatus("");
 }
+
+const estimatedGasFee = computed(() => {
+  return BigNumber(store.redpacket?.estimatedGas!).div(new BigNumber(10).pow(18)).dp(4).toString();
+})
+
+const estimatedGasSponsorship = computed(() => {
+  return BigNumber(store.redpacket?.gasSponsorship!).div(new BigNumber(10).pow(18)).dp(4).toString();
+})
+
+const getERC721Image = () => {
+  const uri = (store.redpacket! as RedPacketErc721Input).tokenURI;
+  return ipfsUrl(uri);
+}
+
+onMounted(async () => {
+  console.log(store.redpacket);
+  if (store.redpacket?.type === 'erc20') {
+    token.value = await loadAndSetErc20Token(store.redpacket?.token!);
+  }
+  gasToken.value = await loadAndSetErc20Token(store.redpacket?.gasToken!);
+})
 </script>
 
 <style lang="less" scoped>
@@ -88,9 +139,9 @@ const closeModal = () => {
   @radius: 60px,
   @border-width: 12px,
   @check-thickness: 12px,
-  @success-color: #308AF5,
+  @success-color: #076ae0,
   @error-color: #FD4755,
-  @default-color: #308AF5,
+  @default-color: #076ae0,
   @background-color: #fff,
 ) {
   @check-size: @radius * .57;
@@ -230,7 +281,7 @@ const closeModal = () => {
   z-index: 55;
   font-size: 26px;
   width: 100%;
-  margin-top: 80px;
+  margin-top: 60px;
   color: black;
   display: flex;
   align-items: center;
@@ -253,7 +304,7 @@ const closeModal = () => {
   width: 100%; }
 .cta {
   color: #fff;
-  background-color: #308AF5;
+  background-color: #076ae0;
   padding: 10px 25px;
   border-radius: 50px;
   font-size: 17px;

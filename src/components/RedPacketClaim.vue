@@ -1,5 +1,5 @@
 <template>
-  <div v-if="store.claimStatus == ''" class="claim-card transition" :style="claimItem == 'erc721' ? 'height: 500px;' : ''">
+  <div v-if="store.claimStatus == ''" class="claim-card transition" :style="claimItem == 'erc721' ? 'height: 520px;' : ''">
     <router-link to="/airdrop">
       <svg class="redpacket_close transition" width="30" height="30" viewBox="0 0 30 30" fill="none"
         xmlns="http://www.w3.org/2000/svg">
@@ -28,8 +28,11 @@
       </div>
       <small >Best Wishes!</small>
     </h2>
-    <div class="cta-container transition" :style="claimItem == 'erc721' ? 'margin-top: 410px;' : ''">
-      <button class="cta" @click="claim">Claim</button>
+    <div class="cta-container transition" :style="claimItem == 'erc721' ? 'margin-top: 400px;' : ''">
+      <CountdownSpinner div v-if="timeLeft > 0" :claim-action="claim" :countdown=timeLeft></CountdownSpinner>
+      <div v-if="timeLeft <= 0" class="footer">
+        Token expired
+      </div>
     </div>
     <div :class="claimItem == 'erc721' ? 'card_circle721 transition' : 'card_circle transition'"></div>
   </div>
@@ -38,14 +41,13 @@
       <div class="spinner-lg" :class="store.claimStatus">
         <div class="check"></div>
       </div>
-      <span style="font-size: 20px; margin-top: 1rem;">{{ loadText() }}</span><br>
+      <span style="font-size: 20px; margin-top: 1rem; color: black;">{{ loadText() }}</span><br>
     </h2>
     <div class="cta-container transition" style="margin-top: 340px;">
       <router-link to="/airdrop">
         <button @click="closeModal" class="cta">OK</button>
       </router-link>
     </div>
-    <div class="card_circle transition" style="margin-top: -100px;"></div>
   </div>
 </template>
 
@@ -62,11 +64,14 @@ import { getChain } from "../../functions/common";
 import type { RedPacketDB } from "@/types";
 import type { RedPacket, RedPacketErc721 } from "functions/redpacket/lib";
 import { useRedPacketStore } from '@/stores/redpacket';
+import CountdownSpinner from '@/components/CountdownSpinner.vue';
 
 const redPacket = ref<RedPacketDB | undefined>();
 const redPacketTokenIcon = ref<string>("");
 const redPacketToken = ref<string>("");
 const claimItem = ref<string>("");
+let timeLeft = ref<number>(5);
+let countDownTimerInterval = null;
 
 const route = useRoute();
 const store = useRedPacketStore();
@@ -125,6 +130,19 @@ const closeModal = () => {
   }
   store.setClaimStatus("");
 }
+function onCountDownTimesUp() {
+  clearInterval(countDownTimerInterval);
+}
+
+onMounted(async () => {
+  countDownTimerInterval = setInterval(() => {
+    timeLeft.value -= 1;
+    // console.log("parent"+timeLeft.value);
+    if (timeLeft.value === 0) {
+      onCountDownTimesUp();
+    }
+  }, 1000);
+});
 </script>
 
 <style lang="less" scoped>
@@ -134,10 +152,10 @@ const closeModal = () => {
   @radius: 60px,
   @border-width: 12px,
   @check-thickness: 12px,
-  @success-color: #fff,
-  @error-color: #fff,
-  @default-color: #fff,
-  @background-color: #FD4755,
+  @success-color: #076ae0,
+  @error-color: #FD4755,
+  @default-color: #076ae0,
+  @background-color: #fff,
 ) {
   @check-size: @radius * .57;
   display: inline-block;
@@ -277,7 +295,7 @@ const closeModal = () => {
   color: #fff; }
 .claim-card {
   background-color: #fff;
-  height: 400px;
+  height: 440px;
   width: 350px;
   position: fixed;
   margin: auto;
@@ -293,7 +311,7 @@ const closeModal = () => {
     left: 50%; }}
 .claim-card:hover {
   box-shadow: 0px 30px 30px rgba(0, 0, 0, 0.2);
-  height: 430px;
+  height: 480px;
   width: 330px;
   color: white; }
 .claim-card:hover h2 {
@@ -327,11 +345,11 @@ const closeModal = () => {
   margin-top: -100px; }
 .claim-card:hover .card_circle721 {
   border-radius: 0;
-  margin-top: -20px; }
+  margin-top: -35px; }
 .card_circle {
   height: 400px;
   width: 450px;
-  background-color: #FD4755;
+  background-color: #076ae0;
   position: absolute;
   border-radius: 50%;
   margin-left: -80px;
@@ -339,10 +357,10 @@ const closeModal = () => {
 .card_circle721 {
   height: 400px;
   width: 450px;
-  background-color: #FD4755;
+  background-color: #076ae0;
   position: absolute;
   border-radius: 50%;
-  margin-left: -80px;
+  margin-left: -53px;
   margin-top: -280px; }
 .transition {
   transition: .3s cubic-bezier(.3, 0, 0, 1.3) }
@@ -360,7 +378,7 @@ const closeModal = () => {
   display: flex;
   justify-content: center;
   text-align: center;
-  margin-top: 310px;
+  margin-top: 300px;
   position: absolute;
   z-index: 55;
   width: 100%; }
@@ -368,7 +386,7 @@ const closeModal = () => {
   margin-top: 340px; }
 .cta {
   color: #fff;
-  background-color: #FD4755;
+  background-color: #076ae0;
   padding: 10px 25px;
   border-radius: 50px;
   font-size: 17px;
@@ -376,7 +394,7 @@ const closeModal = () => {
   width: 10rem;
   font-weight: bold; }
 .cta:hover {
-  background-color: rgba(253,71,85,0.8); }
+  background-color: rgba(7,106,224,0.8); }
 .token-icon {
   border-radius: 50%;
   width: 20px;
@@ -410,4 +428,16 @@ const closeModal = () => {
   height: 110px;
   border: 2px solid white;
   border-radius: 15px; }
+.footer {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  margin-bottom: 0px;
+  padding-bottom: 5px;
+  padding-top: 5px;
+  background-color: #076ae0;
+  color: white;
+  text-align: center;
+}
 </style>

@@ -119,16 +119,22 @@
             </div>
           </div>
         </div>
-        <div class="tooltip fade" data-title="Service gas fee is determined by the market, not Hexlink">
+        <a-tooltip placement="topRight">
+          <template #title>
+            Service gas fee is determined by the market, not by HexLink.
+          </template>
           <img style="margin-left: 1rem; width: 16px;" src="@/assets/svg/info.svg"/>
-        </div>
+        </a-tooltip>
       </div>
       <div class="enable-switch">
         <p>Enable dynamic share link</p>
         <a-switch v-model:checked="enableDynamic" style="margin-left: 1rem;" />
-        <div class="tooltip fade" data-title="Service gas fee is determined by the market, not Hexlink">
-          <img style="margin-left: 1rem; width: 16px;" src="@/assets/svg/info.svg" />
-        </div>
+        <a-tooltip placement="bottomRight">
+            <template #title>
+              Service gas fee is determined by the market, not by HexLink.
+            </template>
+            <img style="margin-left: 1rem; width: 16px;" src="@/assets/svg/info.svg" />
+          </a-tooltip>
       </div>
     </div>
     <div class="choose-account">
@@ -898,41 +904,6 @@ input[type=number] {
     margin-bottom: 0rem;
     margin-right: 1rem;
     font-weight: 500; } }
-.tooltip {
-  position: relative; }
-.tooltip:before,
-.tooltip:after {
-  display: block;
-  opacity: 0;
-  pointer-events: none;
-  position: absolute; }
-.tooltip:after {
-  border-right: 6px solid transparent;
-  border-bottom: 6px solid rgba(0, 0, 0, .75);
-  border-left: 6px solid transparent;
-  content: '';
-  height: 0;
-  top: 20px;
-  left: 20px;
-  width: 0; }
-.tooltip:before {
-  background: rgba(0, 0, 0, .75);
-  border-radius: 15px;
-  color: #fff;
-  content: attr(data-title);
-  font-size: 12px;
-  padding: 6px 10px;
-  top: 26px;
-  right: -15px;
-  white-space: nowrap; }
-.tooltip.fade:after,
-.tooltip.fade:before {
-  transform: translate3d(0,-10px,0);
-  transition: all .15s ease-in-out; }
-.tooltip.fade:hover:after,
-.tooltip.fade:hover:before {
-  opacity: 1;
-  transform: translate3d(0,3px,0); }
 .choose-account {
   display: flex;
   flex-direction: column;

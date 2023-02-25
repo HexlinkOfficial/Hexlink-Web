@@ -154,7 +154,10 @@ const sendOTP = async () => {
         const result = await genOTP(email.value);
         if (result === 429) {
             console.error("Too many requests to send otp.");
+            createNotification("Too many requests to send otp.", "error");
         }
+    } else {
+        createNotification("Please enter email to continue", "error");
     }
 }
 
@@ -165,6 +168,7 @@ const resendOTP = async() => {
     const result = await genOTP(email.value);
     if (result === 429) {
         console.error("Too many requests to send otp.");
+        createNotification("Too many requests to send otp.", "error");
     }
 }
 
@@ -185,6 +189,7 @@ const verifyOTP = async () => {
         }
     } catch (err) {
         console.log(err);
+        createNotification(err as string, "error");
     } finally {
         isLoading.value = false;
     }

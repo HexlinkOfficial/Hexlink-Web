@@ -227,6 +227,7 @@ const redpacket = ref<RawRedPacketInput>({
   validationRules: [],
   creator: useAccountStore().account?.address || "",
   sponsorGas: true,
+  type: "erc20",
 });
 const token = computed(() => tokenStore.token(redpacket.value.token));
 const gasToken = computed(() => tokenStore.token(redpacket.value.gasToken));

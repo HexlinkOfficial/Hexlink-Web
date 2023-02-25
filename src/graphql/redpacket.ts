@@ -163,7 +163,6 @@ export async function getRedPacket(
   }
 }
 
-
 export async function getRedPacketPrivate(
   redPacketId: string
 ) : Promise<RedPacketDB | undefined> {

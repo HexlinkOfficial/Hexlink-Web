@@ -20,8 +20,12 @@ export const useRedPacketStore = defineStore({
   persist: true,
   actions: {
     beforeCreate(redpacket: RedPacketInput | RedPacketErc721Input) {
-      this.status = "confirming";
       this.redpacket = redpacket;
+      this.status = "confirming";
+    },
+    afterCreate(opId?: number) {
+      this.redpacket.opId = opId;
+      this.status = "success";
     },
     setStatus(status: Status) {
       this.status = status;

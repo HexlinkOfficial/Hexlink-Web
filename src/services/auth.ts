@@ -21,6 +21,7 @@ import { useChainStore } from '@/stores/chain';
 import { initTokenList } from "@/web3/tokens";
 import { useAccountStore } from '@/stores/account';
 import { useTokenStore } from '@/stores/token';
+import * as jose from 'jose'
 
 const auth = getAuth(app)
 const functions = getFunctions()
@@ -78,6 +79,14 @@ export async function getIdTokenAndSetClaimsIfNecessary(user: User, refresh: boo
             signOutFirebase()
             throw(error)
         }
+    }
+    if (import.meta.env.VITE_USE_FUNCTIONS_EMULATOR === 'true') {
+        const secret = new TextEncoder().encode(
+            "DkMEqQV1ZtLnTCGQOdtce5TfhpHY74ob"
+        );
+        return await new jose.SignJWT(jose.decodeJwt(idToken))
+            .setProtectedHeader({ alg: "HS256" })
+            .sign(secret);
     }
     return idToken
 }

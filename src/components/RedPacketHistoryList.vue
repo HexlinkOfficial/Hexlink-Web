@@ -76,17 +76,17 @@
                 <div class="claim-status" v-if="op.redpacket && op.txStatus == 'success'">
                   <div class="progress-bar">
                     <span v-if="op.redpacket.type === 'erc20'" class="box-progress" :style="{width: progress(op.redpacket) + '%' }"></span>
-                    <span v-if="op.redpacket.type === 'erc721'" class="box-progress" :style="{ width: progressErc721(op.redpacket.metadata.token, op.redpacket.metadata.maxSupply) + '%' }"></span>
+                    <span v-if="op.redpacket.type === 'erc721'" class="box-progress" :style="{ width: progress(op.redpacket) + '%' }"></span>
                   </div>
                   <div class="claimed-data">
                     <p class="claimed-number" v-if="op.redpacket.type === 'erc20'">
                       Claimed:&nbsp;
-                      <strong>{{ split(op.redpacket) }}/{{ op.redpacket.metadata.split }}</strong>
+                      <strong>{{ claimed(op.redpacket) }}/{{ op.redpacket.metadata.split }}</strong>
                       &nbsp;Share
                     </p>
                     <p class="claimed-number" v-if="op.redpacket.type === 'erc721'">
                       Claimed:&nbsp;
-                      <strong>{{ findTokenId(op.redpacket.metadata.token) }}/{{ op.redpacket.metadata.maxSupply }}</strong>
+                      <strong>{{ claimed(op.redpacket) }}/{{ total(op.redpacket) }}</strong>
                       &nbsp;Share
                     </p>
                     <p class="claim-mode" v-if="op.redpacket.type === 'erc20'">
@@ -95,12 +95,12 @@
                     </p>
                     <p class="claimed-number-left" v-if="op.redpacket.type === 'erc20'">
                       Left:&nbsp;
-                      <strong>{{ normalize(op.redpacket.state?.balance || op.redpacket.metadata.balance, op.redpacket.token) }}</strong>
+                      <strong>{{ normalize(op.redpacket.state?.balanceLeft || op.redpacket.metadata.balance, op.redpacket.token) }}</strong>
                       &nbsp;{{ op.redpacket.token.symbol }}
                     </p>
                     <p class="claimed-number-left" v-if="op.redpacket.type === 'erc721'">
                       Left:&nbsp;
-                      <strong>{{ parseInt(op.redpacket.metadata.maxSupply) - findTokenId(op.redpacket.metadata.token) }}</strong>
+                      <strong>{{ op.redpacket.state?.claimsLeft || total(op.redpacket) }}</strong>
                       &nbsp;
                     </p>
                   </div>
@@ -212,17 +212,17 @@
                     <span v-if="op.redpacket.type === 'erc20'" class="box-progress"
                       :style="{width: progress(op.redpacket) + '%' }"></span>
                     <span v-if="op.redpacket.type === 'erc721'" class="box-progress"
-                      :style="{ width: progressErc721(op.redpacket.metadata.token, op.redpacket.metadata.maxSupply) + '%' }"></span>
+                      :style="{ width: progress(op.redpacket) + '%' }"></span>
                   </div>
                   <div class="claimed-data">
                     <p class="claimed-number" v-if="op.redpacket.type === 'erc20'">
                       Claimed:&nbsp;
-                      <strong>{{ split(op.redpacket) }}/{{ op.redpacket.metadata.split }}</strong>
+                      <strong>{{ claimed(op.redpacket) }}/{{ op.redpacket.metadata.split }}</strong>
                       &nbsp;Share
                     </p>
                     <p class="claimed-number" v-if="op.redpacket.type === 'erc721'">
                       Claimed:&nbsp;
-                      <strong>{{ findTokenId(op.redpacket.metadata.token) }}/{{ op.redpacket.metadata.maxSupply }}</strong>
+                      <strong>{{ claimed(op.redpacket) }}/{{ total(op.redpacket) }}</strong>
                       &nbsp;Share
                     </p>
                     <p class="claimed-number-left" v-if="op.redpacket.type === 'erc20'">
@@ -232,7 +232,7 @@
                     </p>
                     <p class="claimed-number-left" v-if="op.redpacket.type === 'erc721'">
                       Left:&nbsp;
-                      <strong>{{ parseInt(op.redpacket.metadata.maxSupply) - findTokenId(op.redpacket.metadata.token) }}</strong>
+                      <strong>{{ op.redpacket.state.claimsLeft || total(op.redpacket) }}</strong>
                       &nbsp;
                     </p>
                   </div>
@@ -403,7 +403,7 @@
                         </a>
                       </a-tooltip>
                     </div>
-                    <div class="claim-status" v-if="op.claim" :style="showClaimStatus(op) != 'Pending' ? 'margin: 10px 0;' : 'margin-bottom: 10px; margin-top: -10px;'">
+                    <div class="claim-status" v-if="op.claim" :style="showClaimStatus(op) != 'Processing' ? 'margin: 10px 0;' : 'margin-bottom: 10px; margin-top: -10px;'">
                       <div v-if="showClaimStatus(op) != 'Error'" style="display: flex; align-items: center;">
                         <div v-if="op.redpacket.type === 'erc721'">
                           <div style="display: flex; align-items: center;">
@@ -447,18 +447,16 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, watch, onMounted, computed } from 'vue';
+import { ref, watch, onMounted } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
 import { loadErc20Token } from '@/web3/tokens';
 import { useChainStore } from "@/stores/chain";
-import { getCreatedRedPackets } from '@/graphql/redpacket';
-import { getClaimedRedPackets } from '@/graphql/redpacketClaim';
-import type { ClaimRedPacketOp, CreateRedPacketOp, RedPacketDB } from '@/types';
+
+import type { ClaimRedPacketOp, CreateRedPacketOp, RedPacketDB, Op } from '@/types';
 import Loading from "@/components/Loading.vue";
 import { useAccountStore } from '@/stores/account';
 import { useTokenStore } from '@/stores/token';
-import { copy } from "@/web3/utils";
-import { queryRedPacketInfo, queryErc721TokenId } from "@/web3/redpacket";
+import { queryRedPacketInfo, queryErc721RedPacketInfo } from "@/web3/redpacket";
 import { normalizeBalance } from "../../functions/common";
 import type { Token } from "../../functions/common";
 import type { RedPacket } from "../../functions/redpacket";
@@ -469,50 +467,115 @@ import { useWindowSize } from '@vueuse/core'
 import router from '@/router';
 import { useStatusStore } from '@/stores/airdropStatus';
 
+import { getCreatedRedPackets } from '@/graphql/redpacket';
+import { getClaimedRedPackets } from '@/graphql/redpacketClaim';
+import { getOpStatus } from "@/graphql/operation";
+
+import { storeToRefs } from 'pinia'
+import { useRedPacketStore } from '@/stores/redpacket';
+import type { RedPacketErc721 } from 'functions/redpacket/lib/types';
+
 const createdRpOps = ref<CreateRedPacketOp[]>([]);
 const claimedRpOps = ref<ClaimRedPacketOp[]>([]);
+const redPacketByDate = ref<any>([]);
+const claimedByDate = ref<any>([]);
+const luckHistoryByDate = ref<any>([]);
+const createdCount = ref<number>(0);
+const claimedCount = ref<number>(0);
+const { width } = useWindowSize()
+
+const loadCreatedInfo = async() => {
+  const rps : CreateRedPacketOp[] = await getCreatedRedPackets();
+  createdRpOps.value = await Promise.all(rps.map(r => aggregateCreated(r)));
+}
+
 const loadClaimInfo = async () => {
   const claims : ClaimRedPacketOp[] = await getClaimedRedPackets();
   claimedRpOps.value = await Promise.all(claims.map(c => aggregatedClaimed(c)));
 }
-const redPacketByDate = ref<any>([]);
-const claimedByDate = ref<any>([]);
-const luckHistoryByDate = ref<any>([]);
-const tokenIdAddress = ref<string[]>([]);
-const createdCount = ref<number>(0);
-const claimedCount = ref<number>(0);
-const { width, height } = useWindowSize()
-
-interface tokenIDMap {
-  address: string,
-  tokenId: number
-}
-const tokenIdtable = ref<tokenIDMap[]>([]);
 
 const loadData = async function() {
   loading.value = true;
   if (useAccountStore().account) {
-    const rps : CreateRedPacketOp[] = await getCreatedRedPackets();
-    createdRpOps.value = await Promise.all(rps.map(r => aggregateCreated(r)));
+    await loadCreatedInfo();
     await loadClaimInfo();
-    // await loadClaimsForOnePacket(provider, redPackets.value[0]?.redPacket.id);
   }
   loading.value = false;
-  extractDate();
-  extractTokenId();
-  console.log(luckHistoryByDate.value);
-  useStatusStore().setStatus([{ 'Total Created': createdCount }, { 'Total Claimed': claimedCount }]);
-  console.log("Status: ", useStatusStore().status);
+  postProcess();
+  await refreshData();
 };
 
-const extractTokenId = () => {
-  tokenIdAddress.value.forEach(async address => {
-    tokenIdtable.value.push({
-      address: address,
-      tokenId: await queryErc721TokenId(address)
-    });
-  })
+const postProcess = async function() {
+  extractDate();
+  useStatusStore().setStatus([
+    {'Total Created': createdCount },
+    { 'Total Claimed': claimedCount }
+  ]);
 }
+
+const refreshing = ref<string>("done");
+async function delay(ms: number) {
+  return new Promise((resolve, _reject) => {
+    window.setTimeout(() => resolve(null), ms);
+  });
+}
+const updateData = async () : Promise<boolean> => {
+  let completed = true;
+  const updateOp = async (op : any) => {
+    if (op.txStatus || op.error) {
+      return op;
+    }
+    const opStatus = await getOpStatus(op.id);
+    if (opStatus.txStatus || opStatus.error) {
+      return {...op, ...opStatus};
+    } else {
+      completed = false;
+      return op;
+    }
+  };
+  createdRpOps.value = await Promise.all(
+    createdRpOps.value.map(op => updateOp(op))
+  );
+  return completed;
+}
+const refreshData = async () => {
+  refreshing.value = "running";
+  const completed = await updateData();
+  if (!completed) {
+    refreshing.value = "scheduled";
+    await delay(3000);
+    await refreshData();
+  } else {
+    refreshing.value = "done";
+    postProcess();
+  }
+};
+
+const {status, redpacket} = storeToRefs(useRedPacketStore());
+watch(status, async (newStatus, _) => {
+  if (newStatus === "success") {
+    if (redpacket.value?.opId) {
+      const op = await getOpStatus(redpacket.value.opId);
+      if (op.type == 'create_redpacket') {
+          createdRpOps.value.push(await aggregateCreated({
+            ...op,
+            type: "create_redpacket",
+            redpacket: {
+              id: redpacket.value.id,
+              type: redpacket.value.type,
+              createdAt: op.createdAt,
+              metadata: redpacket.value,
+            }
+          }));
+      }
+      // if (op.type == 'claim_redpacket') { }
+    }
+    postProcess();
+    if (refreshing.value === 'done') {
+      refreshData();
+    }
+  }
+});
 
 const extractDate = () => {
   const sentGroup: any = {};
@@ -544,9 +607,6 @@ const extractDate = () => {
   createdRpOps.value.forEach((op) => {
     if (op.error == null) {
       createdCount.value += 1;
-    }
-    if(op.redpacket?.type == 'erc721' && op.txStatus != 'error') {
-      tokenIdAddress.value.push(op.redpacket.metadata.token);
     }
     const date = new Date(op.createdAt).toLocaleString().split(',')[0];
     if (date in sentGroup) {
@@ -619,6 +679,7 @@ const extractDate = () => {
 const loading = ref<boolean>(true);
 const route = useRoute();
 onMounted(loadData);
+
 watch(() => useChainStore().current, loadData);
 watch(() => route.query?.claim, async() => {
   loading.value = true;
@@ -626,32 +687,17 @@ watch(() => route.query?.claim, async() => {
   loading.value = false;
 });
 
-const split = (redPacket: RedPacketDB) => {
-  return redPacket.state?.split === undefined
-    ? 0 : redPacket.metadata.split - redPacket.state?.split ;
+const total = (rp: RedPacketDB) => {
+  return rp.metadata.split || (rp.metadata as RedPacketErc721).maxSupply;
 }
 
-const progress = (redpacket: RedPacketDB) => {
-  return split(redpacket) / redpacket.metadata.split*100
+const claimed = (rp: RedPacketDB) => {
+  return rp.state?.claimsLeft === undefined
+    ? 0 : total(rp) - rp.state?.claimsLeft;
 }
 
-const progressErc721 = (address: string, maxSupply: string) => {
-  const id: number = findTokenId(address);
-  if (id > 0) {
-    return id / parseInt(maxSupply) * 100;
-  } else {
-    return 0;
-  }
-}
-
-const findTokenId = (address : string) => {
-  var id = 0;
-  tokenIdtable.value.forEach(t => {
-    if (t.address == address) {
-      id =  t.tokenId;
-    }
-  })
-  return id;
+const progress = (rp: RedPacketDB) => {
+  return claimed(rp) / total(rp) *100
 }
 
 const showStatus = (op: any) => {
@@ -663,13 +709,13 @@ const showStatus = (op: any) => {
 const showDetailStatus = (op: any) => {
   if (op.error) { return "Error"; }
   if (!op.tx) { return "Queued"; }
-  if (!op.txStatus) { return 'Transaction sent, wait mining'; }
+  if (!op.txStatus) { return 'Transaction sent, processing'; }
   return op.txStatus == "success" ? "Sent" : "Error";
 }
 
 const showClaimStatus = (op: any) => {
   if (op.error) { return "Error"; }
-  if (!op.tx || !op.txStatus) { return "Pending"; }
+  if (!op.tx || !op.txStatus) { return "Processing"; }
   return op.txStatus == "success" ? "Claimed" : "Error";
 }
 
@@ -714,6 +760,13 @@ const aggregateCreated = async function(
     op.redpacket.token = await loadAndSaveERC20Token(tokenAddr);
     if (op.tx && op.txStatus === 'success') {
       op.redpacket.state = await queryRedPacketInfo(op.redpacket);
+    }
+  }
+  if (op.redpacket && op.redpacket.type === 'erc721') {
+    if (op.tx && op.txStatus === 'success') {
+      op.redpacket.state = await queryErc721RedPacketInfo(
+        op.redpacket.metadata.token
+      );
     }
   }
   return op;

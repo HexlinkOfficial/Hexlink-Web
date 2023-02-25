@@ -42,15 +42,14 @@ const createRedPacket = async () => {
   store.setStatus("processing");
   message.value = "Processing";
   if(props.mode == 'token') {
-    console.log(props.mode);
     try {
-      await createNewRedPacket(
+      const {opId} = await createNewRedPacket(
         store.redpacket! as RedPacketInput,
         store.account == "hexlink",
         false // dryrun
       );
       message.value = "Done!";
-      store.setStatus("success");
+      store.afterCreate(opId);
     } catch (e) {
       console.log("Failed to create redpacket with");
       console.log(e);
@@ -58,15 +57,14 @@ const createRedPacket = async () => {
       message.value = "Something went wrong...";
     }
   } else {
-    console.log(props.mode);
     try {
-      await createRedPacketErc721(
+      const {opId} = await createRedPacketErc721(
         store.redpacket! as RedPacketErc721Input,
         store.account == "hexlink",
         false // dryrun
       );
       message.value = "Done!";
-      store.setStatus("success");
+      store.afterCreate(opId);
     } catch (e) {
       console.log("Failed to create redpacket with");
       console.log(e);

@@ -366,21 +366,27 @@ export async function queryRedPacketInfo(
         useChainStore().provider,
     );
     const info = await redPacket.getPacket(rp.id);
-    console.log(info.createdAt)
     return {
-        createdAt: new Date(info.createdAt.toNumber() * 1000),
-        balance: info.balance.toString(),
-        split: info.split,
+        balanceLeft: info.balance.toString(),
+        claimsLeft: info.split,
         sponsorship: info.gasSponsorship.toString(),
     } as RedPacketOnchainState;
 }
 
-export async function queryErc721TokenId(address: string) : Promise<number> {
+export async function queryErc721RedPacketInfo(
+    address: string
+) : Promise<RedPacketOnchainState> {
     const redPacketErc721 = await hexlinkErc721Contract(
         address, useChainStore().provider
     );
-    const info = await redPacketErc721.tokenId();
-    return info.toNumber();
+    const supply = await redPacketErc721.maxSupply();
+    const tokenId = await redPacketErc721.tokenId();
+    const sponsorship = await redPacketErc721.gasSponsorship();
+    return {
+        balanceLeft: supply.sub(tokenId).toString(),
+        claimsLeft: supply.sub(tokenId).toString(),
+        sponsorship: sponsorship.toString(),
+    }
 }
 
 export async function createRedPacketErc721ForMetamask(
@@ -409,7 +415,6 @@ export async function createRedPacketErc721ForMetamask(
     userOps = userOps.concat(await buildDeployErc721Ops(
         useChainStore().provider, input
     ));
-    console.log(userOps);
     return await buildTransactionsForMetamask(
         hexlAccount,
         walletAccount,

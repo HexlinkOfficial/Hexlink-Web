@@ -187,7 +187,7 @@ import type { Token } from "../../functions/common";
 import { useChainStore } from "@/stores/chain";
 import { getPriceInfo } from "@/web3/network";
 import { hash, calcGas } from "../../functions/common";
-import { redpacketErc721Id } from "../../functions/redpacket";
+import { redpacketErc721Id, predictErc721Address } from "../../functions/redpacket";
 import type { RedPacketErc721Input } from "../../functions/redpacket";
 import type { BalanceMap } from "@/web3/tokens";
 import { getBalances } from "@/web3/tokens";
@@ -253,6 +253,8 @@ const nftAirdrop = ref<RawRedPacketErc721Input>({
   transferrable: true,
   creator: useAccountStore().account?.address || "",
   sponsorGas: true,
+  type: "erc721",
+  token: "",
 });
 
 const setAccount = (account: AccountType) => {
@@ -285,11 +287,6 @@ const totalServiceFee = computed(() => {
     ).dp(4).toString();
   }
 })
-
-const tokenGasChoose = async (token: Token) => {
-  nftAirdrop.value.gasToken = token.address;
-  setGas();
-};
 
 const genTokenList = async function () {
   hexlAccountBalances.value = await getBalances(
@@ -441,7 +438,9 @@ const confirmNFT = async () => {
     if (enableDynamic.value) {
       nftAirdrop.value.validationRules.push({type: "dynamic_secrets"});
     }
-    console.log(nftAirdrop.value);
+    nftAirdrop.value.token = await predictErc721Address(
+      useChainStore().provider, nftAirdrop.value
+    );
     useRedPacketStore().beforeCreate(nftAirdrop.value);
   }
 }

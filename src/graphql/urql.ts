@@ -1,32 +1,43 @@
-import { createClient } from '@urql/vue';
 import type { Client } from '@urql/vue';
+import { createClient, defaultExchanges, subscriptionExchange } from '@urql/vue';
+import { createClient as createWSClient } from 'graphql-ws';
 import { refreshToken } from '../services/auth';
-import * as jose from 'jose'
 
 let urqlClient: Client | null;
 let urqlClientIdToken: string;
 
-async function getIdToken(token: string) {
-    if (import.meta.env.VITE_USE_FUNCTIONS_EMULATOR === 'true') {
-        const secret = new TextEncoder().encode(
-            "DkMEqQV1ZtLnTCGQOdtce5TfhpHY74ob"
-        );
-        return await new jose.SignJWT(jose.decodeJwt(token))
-            .setProtectedHeader({ alg: "HS256" })
-            .sign(secret);
-    }
-    return token;
-}
+function createUrqlWsClient(idToken: string) {
+    return createWSClient({
+        url: import.meta.env.VITE_HASURA_WS_URL,
+        options: {
+            reconnect: true,
+            connectionParams: {
+                headers: { authorization: `Bearer ${idToken}` }
+            }
+        }
+    });
+};
 
-async function createUrqlClient(idToken: string) {
-    const token = await getIdToken(idToken);
+export function createUrqlClient(idToken: string, policy: string = 'cache-first') {
+    const wsClient = createUrqlWsClient(idToken);
     return createClient({
         url: import.meta.env.VITE_HASURA_URL,
+        requestPolicy: policy,
         fetchOptions: () => {
             return {
-                headers: { authorization: `Bearer ${token}`},
+                headers: { authorization: `Bearer ${idToken}`},
             };
         },
+        exchanges: [
+            ...defaultExchanges,
+            subscriptionExchange({
+                forwardSubscription: (operation) => ({
+                    subscribe: (sink) => ({
+                        unsubscribe: wsClient.subscribe(operation, sink),
+                    }),
+                }),
+            }),
+        ],
     });
 }
 
@@ -34,7 +45,7 @@ export function clearUrqlClient() {
     urqlClient = null
 }
 
-export async function setUrqlClientIfNecessary(idToken: string) {
+export function setUrqlClientIfNecessary(idToken: string) {
     if (!urqlClient || (idToken != urqlClientIdToken && idToken)) {
         urqlClient = createUrqlClient(idToken)
         urqlClientIdToken = idToken

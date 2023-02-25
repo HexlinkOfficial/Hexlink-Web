@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.buildDeployErc721Ops = exports.buildRedPacketOps = void 0;
+exports.predictErc721Address = exports.buildDeployErc721Ops = exports.buildRedPacketOps = void 0;
 const ethers_1 = require("ethers");
 const common_1 = require("../../common");
 const redpacket_1 = require("./redpacket");
@@ -151,8 +151,15 @@ function buildDeployErc721Ops(provider, input) {
                 callData: tokenFactory.interface.encodeFunctionData("deployErc721", [input.salt, initData])
             }
         });
-        const salt = ethers_1.ethers.utils.keccak256(ethers_1.ethers.utils.defaultAbiCoder.encode(["address", "bytes32"], [input.creator, input.salt]));
-        return userOps.concat(yield buildGasSponsorshipOps(provider, redpacket_1.hexlinkErc721Interface.encodeFunctionData("deposit", []), yield tokenFactory.predictErc721Address(salt), input));
+        return userOps.concat(yield buildGasSponsorshipOps(provider, redpacket_1.hexlinkErc721Interface.encodeFunctionData("deposit", []), input.token, input));
     });
 }
 exports.buildDeployErc721Ops = buildDeployErc721Ops;
+function predictErc721Address(provider, input) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const tokenFactory = yield (0, redpacket_1.tokenFactoryContract)(provider);
+        const salt = ethers_1.ethers.utils.keccak256(ethers_1.ethers.utils.defaultAbiCoder.encode(["address", "bytes32"], [input.creator, input.salt]));
+        return yield tokenFactory.predictErc721Address(salt);
+    });
+}
+exports.predictErc721Address = predictErc721Address;

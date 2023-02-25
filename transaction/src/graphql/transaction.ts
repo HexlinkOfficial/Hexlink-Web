@@ -45,6 +45,10 @@ export async function insertTx(
             })),
         }
     ).toPromise();
+    if (result.error) {
+        console.log(result.error);
+        throw new Error("Failed to insert operation");
+    }
     return result.data.insert_transaction.returning;
 }
 
@@ -57,5 +61,9 @@ export async function updateTx(
         UPDATE_TRANSACTION,
         {id, status, error}
     ).toPromise();
+    if (result.error) {
+        console.log(result.error);
+        throw new Error("Failed to insert operation");
+    }
     return result.data.update_transaction_by_pk.returning;
 }

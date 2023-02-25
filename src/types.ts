@@ -55,9 +55,8 @@ export interface RedPacketClaim {
 }
 
 export interface RedPacketOnchainState {
-    balance: string,
-    split: number,
-    createdAt: Date,
+    balanceLeft: string,
+    claimsLeft: number,
     sponsorship: string,
 }
 
@@ -65,7 +64,6 @@ export interface RedPacketDB {
     id: string,
     metadata: RedPacket | RedPacketErc721,
     creator?: HexlinkUserInfo,
-    deposit?: Deposit,
     createdAt: Date,
     state?: RedPacketOnchainState,
     token?: Token,

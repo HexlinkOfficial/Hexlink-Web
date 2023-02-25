@@ -13,7 +13,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onMounted } from "vue";
+import { computed, ref, onMounted, watch} from "vue";
 import { useRoute } from "vue-router";
 import { useWhitelistStore } from "@/stores/whitelist";
 import { useAccountStore } from '@/stores/account';
@@ -32,7 +32,6 @@ import { useRedPacketStore } from '@/stores/redpacket';
 const isLocked = ref<boolean>(true);
 const whitelist = useWhitelistStore();
 const myAccount = useAccountStore();
-const statusArray = ref<number[]>([]);
 const { status } = storeToRefs(useRedPacketStore());
 
 onMounted(() => {

@@ -22,13 +22,13 @@
 
 <script setup lang="ts">
 import { time } from "console";
-import { onMounted } from "vue";
+import { onMounted, ref } from "vue";
 import { number } from "vue-types";
 
 const FULL_DASH_ARRAY = 283;
 
 let timePassed = 0;
-let timerInterval = null;
+let countDownTimerInterval = ref<any>(null);
 
 const props = defineProps({
   countdown: Number,
@@ -36,7 +36,7 @@ const props = defineProps({
 });
 
 function onTimesUp() {
-  clearInterval(timerInterval);
+  clearInterval(countDownTimerInterval.value);
 }
 
 onMounted(async () => {
@@ -45,8 +45,8 @@ onMounted(async () => {
   document
     .getElementById("base-timer-path-remaining")
     .classList.add("red");
-  // console.log("haha" + timeLeft);
-  timerInterval = setInterval(() => {
+
+    countDownTimerInterval.value = setInterval(() => {
     timePassed += 1;
     timeLeft = overall - timePassed;
     setCircleDasharray(timeLeft, overall);

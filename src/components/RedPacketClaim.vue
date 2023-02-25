@@ -28,8 +28,11 @@
       </div>
       <small >Best Wishes!</small>
     </h2>
-    <div class="cta-container transition" :style="claimItem == 'erc721' ? 'margin-top: 410px;' : ''">
-      <button class="cta" @click="claim">Claim</button>
+    <div class="cta-container transition" :style="claimItem == 'erc721' ? 'margin-top: 380px;' : ''">
+      <CountdownSpinner div v-if="timeLeft > 0" :claim-action="claim"></CountdownSpinner>
+      <div v-if="timeLeft <= 0" class="footer">
+        Token expired
+      </div>
     </div>
     <div :class="claimItem == 'erc721' ? 'card_circle721 transition' : 'card_circle transition'"></div>
   </div>
@@ -62,11 +65,14 @@ import { getChain } from "../../functions/common";
 import type { RedPacketDB } from "@/types";
 import type { RedPacket, RedPacketErc721 } from "functions/redpacket/lib";
 import { useRedPacketStore } from '@/stores/redpacket';
+import CountdownSpinner from '@/components/CountdownSpinner.vue';
 
 const redPacket = ref<RedPacketDB | undefined>();
 const redPacketTokenIcon = ref<string>("");
 const redPacketToken = ref<string>("");
 const claimItem = ref<string>("");
+let timeLeft = ref<number>(5);
+let countDownTimerInterval = null;
 
 const route = useRoute();
 const store = useRedPacketStore();
@@ -125,6 +131,19 @@ const closeModal = () => {
   }
   store.setClaimStatus("");
 }
+function onCountDownTimesUp() {
+  clearInterval(countDownTimerInterval);
+}
+
+onMounted(async () => {
+  countDownTimerInterval = setInterval(() => {
+    timeLeft.value -= 1;
+    console.log(timeLeft)
+    if (timeLeft.value === 0) {
+      onCountDownTimesUp();
+    }
+  }, 1000);
+});
 </script>
 
 <style lang="less" scoped>
@@ -277,7 +296,7 @@ const closeModal = () => {
   color: #fff; }
 .claim-card {
   background-color: #fff;
-  height: 400px;
+  height: 440px;
   width: 350px;
   position: fixed;
   margin: auto;
@@ -293,7 +312,7 @@ const closeModal = () => {
     left: 50%; }}
 .claim-card:hover {
   box-shadow: 0px 30px 30px rgba(0, 0, 0, 0.2);
-  height: 430px;
+  height: 480px;
   width: 330px;
   color: white; }
 .claim-card:hover h2 {
@@ -360,7 +379,7 @@ const closeModal = () => {
   display: flex;
   justify-content: center;
   text-align: center;
-  margin-top: 310px;
+  margin-top: 300px;
   position: absolute;
   z-index: 55;
   width: 100%; }
@@ -410,4 +429,16 @@ const closeModal = () => {
   height: 110px;
   border: 2px solid white;
   border-radius: 15px; }
+.footer {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  margin-bottom: 0px;
+  padding-bottom: 5px;
+  padding-top: 5px;
+  background-color: #FD4755;
+  color: white;
+  text-align: center;
+}
 </style>

@@ -7,7 +7,7 @@
             <div class="header-left">
               <div class="brand-logo">
                 <router-link to="/">
-                  <img class="header-logo" src="../assets/logo/blue2-logo.svg" alt="" />
+                  <img class="header-logo" src="@/assets/svg/logo-beta2.svg" alt="" />
                 </router-link>
               </div>
             </div>

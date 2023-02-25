@@ -150,7 +150,7 @@ const showGasToken = computed(() => {
     justify-content: flex-end;
     z-index: 50;
     @media (min-width: 400px) {
-        left: 165px; } }
+        left: 9.5rem; } }
 .account-card {
     background-color: #fff;
     box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.1);
@@ -158,7 +158,7 @@ const showGasToken = computed(() => {
     display: flex;
     flex-direction: row;
     padding: 10px;
-    width: 335px;
+    width: 310px;
     min-height: 110px;
     transition: all 0.2s ease; }
 .account-card:hover {

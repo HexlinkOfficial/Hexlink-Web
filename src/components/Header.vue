@@ -31,9 +31,8 @@
                       <div class="network-items" @click="switchNetwork({...MUMBAI})">
                         <button>
                           <div style="display: flex; margin-right: 0.75rem; align-items: center; height: 1.25rem; width: 18px;">
-                            <svg v-if="useChainStore().chain.name == 'mumbai'" width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <path d="M17 1L6 12L1 7" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                            </svg>
+                            <img v-if="useChainStore().chain.name == 'mumbai'" src="@/assets/svg/checkBlack.svg"/>
+                            <img v-if="useChainStore().chain.name != 'mumbai'" src="@/assets/svg/checkWhite.svg"/>
                           </div>
                           <div style="display: flex; white-space: nowrap; align-items: center; width: calc(100% - 18px); ">
                             <div style="position: relative; margin-right: 0.75rem; min-width: max-content; ">
@@ -51,9 +50,8 @@
                       <div class="network-items" @click="switchNetwork({...GOERLI})">
                         <button>
                           <div style="display: flex; margin-right: 0.75rem; align-items: center; height: 1.25rem; width: 18px;">
-                            <svg v-if="useChainStore().chain.name == 'goerli'" width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <path d="M17 1L6 12L1 7" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                            </svg>
+                            <img v-if="useChainStore().chain.name == 'goerli'" src="@/assets/svg/checkBlack.svg"/>
+                            <img v-if="useChainStore().chain.name != 'goerli'" src="@/assets/svg/checkWhite.svg"/>
                           </div>
                           <div style="display: flex; white-space: nowrap; align-items: center; width: calc(100% - 18px); ">
                             <div style="position: relative; margin-right: 0.75rem; min-width: max-content; ">
@@ -561,10 +559,6 @@ cursor: pointer; }
       margin-top: 10px;
       color: #64748B;
     }
-    // .profile_log .dropdown-menu .user-balance p {
-    //   margin-bottom: 0px;
-    //   font-weight: 500;
-    //   color: #495057; }
   .profile_log .dropdown-menu .dropdown-item {
     padding: 10px 20px;
     border-top: 1px solid #f1f1f1;
@@ -604,11 +598,9 @@ cursor: pointer; }
   width: 18rem;
   z-index: 1;
   transition: height 0.3s ease-in-out;
-  border-radius: 0.5rem; }
-  // .dropdown-menu[data-bs-popper] {
-  //   top: 100%;
-  //   left: 0;
-  //   margin-top: 0.125rem; }
+  border-radius: 0.5rem;
+  @media (max-width: 640px) {
+    width: 15rem; } }
 .dropdown-menu.show {
   transition: 0.2s ease-in-out;
   display: block; }
@@ -738,13 +730,13 @@ cursor: pointer; }
       padding-top: 1.5rem;
       padding-bottom: 1.5rem;
       right: 1.5rem;
-      left: 4rem;
       max-height: 20rem;
       background-color: white;
       box-shadow: 0 1.5rem 4rem rgba(22, 28, 45, 0.15);
       background-clip: padding-box;
       border: 0px solid rgba(0, 0, 0, 0.15);
       border-radius: 0.5rem;
+      width: 15rem;
       @media (min-width: 640px) {
         position: absolute;
         left: 0;
@@ -755,9 +747,7 @@ cursor: pointer; }
         box-shadow: 0 1.5rem 4rem rgba(22, 28, 45, 0.15);
         background-clip: padding-box;
         border: 0px solid rgba(0, 0, 0, 0.15);
-        border-radius: 0.5rem;
-      }
-    }
+        border-radius: 0.5rem; } }
     .selectnetwork .dropdown-menu .box .title {
       padding-left: 1rem;
       padding-right: 1rem;

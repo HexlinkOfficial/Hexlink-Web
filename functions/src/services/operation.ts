@@ -9,7 +9,7 @@ const LOCAL_URL = "http://localhost:9999/submit/";
 const PROD_URL = secrets.TRANSACTION_SERVICE_URL!;
 
 function txServiceUrl() {
-  if (process.env.FUNCTIONS_EMULATOR !== "true") {
+  if (process.env.FUNCTIONS_EMULATOR === "true") {
     return LOCAL_URL;
   } else {
     return PROD_URL;

@@ -99,7 +99,7 @@ onMounted(async () => {
     }
 
     const otpCode = route.query.otp?.toString()!;
-    if (otpCode == null) {
+    if (otpCode != null) {
       timeLeft = await claimCountdown(redPacket.value.id, otpCode);
       countDownTimerInterval.value = setInterval(() => {
         timeLeft.value -= 1;

@@ -29,8 +29,9 @@
       <small >Best Wishes!</small>
     </h2>
     <div class="cta-container transition" :style="claimItem == 'erc721' ? 'margin-top: 400px;' : ''">
-      <CountdownSpinner div v-if="timeLeft > 0" :claim-action="claim" :countdown=timeLeft></CountdownSpinner>
-      <div v-if="timeLeft <= 0" class="footer">
+      <button v-if="route.query.otp?.toString() == null" class="cta" @click="claim">Claim</button>
+      <CountdownSpinner v-if="timeLeft > 0 && route.query.otp?.toString() != null" :claim-action="claim" :countdown=timeLeft></CountdownSpinner>
+      <div v-if="timeLeft <= 0 && route.query.otp?.toString() != null" class="footer">
         Token expired
       </div>
     </div>
@@ -71,7 +72,7 @@ const redPacket = ref<RedPacketDB | undefined>();
 const redPacketTokenIcon = ref<string>("");
 const redPacketToken = ref<string>("");
 const claimItem = ref<string>("");
-let timeLeft = ref<number>(5);
+let timeLeft = ref<number>(60);
 let countDownTimerInterval = ref<any>(null);
 
 const route = useRoute();
@@ -95,6 +96,18 @@ onMounted(async () => {
       const metadata = redPacket.value!.metadata as RedPacketErc721;
       redPacketToken.value = metadata.symbol;
       redPacketTokenIcon.value = ipfsUrl(metadata.tokenURI) || "";
+    }
+
+    const otpCode = route.query.otp?.toString()!;
+    if (otpCode != null) {
+      timeLeft = await claimCountdown(redPacket.value.id, otpCode);
+      countDownTimerInterval.value = setInterval(() => {
+        timeLeft.value -= 1;
+        // console.log("parent"+timeLeft.value);
+        if (timeLeft.value === 0) {
+          onCountDownTimesUp();
+        }
+      }, 1000);
     }
   } else {
     store.setClaimStatus("error");
@@ -131,19 +144,11 @@ const closeModal = () => {
   }
   store.setClaimStatus("");
 }
+
 function onCountDownTimesUp() {
   clearInterval(countDownTimerInterval.value);
 }
 
-onMounted(async () => {
-  countDownTimerInterval.value = setInterval(() => {
-    timeLeft.value -= 1;
-    // console.log("parent"+timeLeft.value);
-    if (timeLeft.value === 0) {
-      onCountDownTimesUp();
-    }
-  }, 1000);
-});
 </script>
 
 <style lang="less" scoped>

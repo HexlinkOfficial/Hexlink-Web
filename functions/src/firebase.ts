@@ -7,9 +7,13 @@ class PrivateFirebase {
   database: admin.database.Database;
 
   constructor() {
-    this.app = admin.initializeApp();
+    try {
+      admin.initializeApp();
+    } catch (err) {
+      console.log(err);
+    }
+    this.app = admin.app();
     this.db = admin.firestore();
-    this.db.settings({ignoreUndefinedProperties: true});
     this.storage = admin.storage();
     this.database = admin.database();
   }

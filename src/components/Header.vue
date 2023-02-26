@@ -83,7 +83,7 @@
                         <span class="thumb"><img :src="user?.photoURL" :size="64" referrerpolicy="no-referrer" /></span>
                         <div class="user-info">
                           <h5>{{ user?.displayName }}</h5>
-                          <span>{{ userHandle }}</span>
+                          <span>{{ userHandle.length > 28 ? userHandle.substring(0,6) + '...' + userHandle.slice(-10) : userHandle }}</span>
                         </div>
                       </div>
                     </div>
@@ -595,12 +595,11 @@ cursor: pointer; }
   background-color: #fff;
   background-clip: padding-box;
   border: 0px solid rgba(0, 0, 0, 0.15);
-  width: 18rem;
+  width: auto;
+  min-width: 15rem;
   z-index: 1;
   transition: height 0.3s ease-in-out;
-  border-radius: 0.5rem;
-  @media (max-width: 640px) {
-    width: 15rem; } }
+  border-radius: 0.5rem; }
 .dropdown-menu.show {
   transition: 0.2s ease-in-out;
   display: block; }

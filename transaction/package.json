@@ -9,6 +9,9 @@
     "start": "npm run build && nodemon .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "engines" : {
+    "node" : "18"
+  },
   "author": "",
   "license": "ISC",
   "dependencies": {

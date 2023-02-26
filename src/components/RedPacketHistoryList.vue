@@ -336,7 +336,6 @@
                 </div>
               </div>
             </div>
-
             <div v-if="op.type == 'claim_redpacket' && width <= 990" class="mobile-record-box" style="display: flex; border-top: 1px solid #e5e7eb; padding: 0.5rem 1rem 0 0; flex-direction: column;">
               <div class="created-info" style="display: flex; align-items: center; width: 100%; padding-right: 0.5rem; justify-content: space-between;">
                   <div class="status" style="display: flex; flex-direction: row; align-items: center;">

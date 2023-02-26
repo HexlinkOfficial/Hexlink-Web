@@ -45,7 +45,7 @@ async function sign(signer: string, message: string) : Promise<string> {
           toEthSignedMessageHash(message)
       ) as string;
     } else {
-      throw new Error("invalid validator");
+      throw new Error(`invalid validator, signer is ${signer}, kms validator is ${kmsValidator}`);
     }
   }
 }

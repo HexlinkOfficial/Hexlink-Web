@@ -18,6 +18,7 @@ app.use(bodyParser.json())
 app.use(auth)
 
 app.post('/submit/:chain', async (req: express.Request, res: express.Response) => {
+  console.log("Received submit request.");
   const opQueue = queues.getOpQueue(req.params.chain)!;
   if (!req.body.input && !req.body.tx) {
     res.status(400).json({

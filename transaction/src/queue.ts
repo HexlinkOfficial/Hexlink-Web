@@ -42,25 +42,29 @@ const subscriber: Redis = new Redis(redisPort, redisHost,{
 });
 subscriber.setMaxListeners(50);
 
-const redisOpts = {
-  createClient(type: string) {
-    switch (type) {
-      case 'client':
-        return client
-      case 'subscriber':
-        return subscriber
-      default:
-        const rClient = new Redis(redisPort, redisHost, {
-            password: process.env.REDIS_PASSWORD!,
-            maxRetriesPerRequest: null,
-            enableReadyCheck: false
-        });
-        rClient.setMaxListeners(50);
-        return rClient;
-    }
-  },
+let queueOpts: any;
+if (process.env.VITE_USE_REDIS_LOCAL) {
+    queueOpts = {};
+} else {
+    queueOpts = {
+        createClient(type: string) {
+          switch (type) {
+            case 'client':
+              return client
+            case 'subscriber':
+              return subscriber
+            default:
+              const rClient = new Redis(redisPort, redisHost, {
+                  password: process.env.REDIS_PASSWORD!,
+                  maxRetriesPerRequest: null,
+                  enableReadyCheck: false
+              });
+              rClient.setMaxListeners(50);
+              return rClient;
+          }
+        },
+      }
 }
-const queueOpts = process.env.VITE_USE_REDIS_LOCAL ? {} : redisOpts;
 
 class PrivateQueues {
     opQueues : Map<string, Queue.Queue> = new Map<string, Queue.Queue>();

@@ -29,6 +29,10 @@ async function insertRedPacketClaim(data) {
             });
         }),
     }).toPromise();
+    if (result.error) {
+        console.log(result.error);
+        throw new Error("Failed to insert redpacket");
+    }
     return result.data.insert_redpacket_claim.returning;
 }
 exports.insertRedPacketClaim = insertRedPacketClaim;
@@ -56,6 +60,10 @@ async function insertRedPacket(uid, data) {
             type: d.type,
         })),
     }).toPromise();
+    if (result.error) {
+        console.log(result.error);
+        throw new Error("Failed to insert redpacket");
+    }
     return result.data.insert_redpacket.returning;
 }
 exports.insertRedPacket = insertRedPacket;

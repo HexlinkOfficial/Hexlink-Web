@@ -32,6 +32,10 @@ export async function insertRedPacketClaim(
         })),
       }
   ).toPromise();
+  if (result.error) {
+      console.log(result.error);
+      throw new Error("Failed to insert redpacket");
+  }
   return result.data.insert_redpacket_claim.returning;
 }
 
@@ -74,5 +78,9 @@ export async function insertRedPacket(
         })),
       }
   ).toPromise();
+  if (result.error) {
+      console.log(result.error);
+      throw new Error("Failed to insert redpacket");
+  }
   return result.data.insert_redpacket.returning;
 }

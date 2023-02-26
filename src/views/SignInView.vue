@@ -97,8 +97,6 @@ const handleInput = (event: Event) => {
     let currentActiveElement = event.target as HTMLInputElement;
     if (currentActiveElement.id.split("_")[1] === "5") {
         isDisabled.value = false;
-    } else {
-        isDisabled.value = true;
     }
     if (inputType === "insertText")
         (currentActiveElement.nextElementSibling as HTMLElement)?.focus();
@@ -130,6 +128,7 @@ const onPaste = (event: Event) => {
         .trim()
         .split("");
     if (dataFromPaste) {
+        isDisabled.value = false;
         for (const num of dataFromPaste) {
             if (!keysAllowed.includes(num)) event.preventDefault();
         }

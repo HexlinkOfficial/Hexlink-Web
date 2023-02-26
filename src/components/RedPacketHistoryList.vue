@@ -485,17 +485,15 @@ const loadData = async function() {
     await loadClaimInfo();
   }
   loading.value = false;
-  postProcess();
-  await refreshData();
-};
-
-const postProcess = async function() {
+  createdCount.value = 0;
+  claimedCount.value = 0;
   extractDate();
   useStatusStore().setStatus([
-    {'Total Created': createdCount },
+    { 'Total Created': createdCount },
     { 'Total Claimed': claimedCount }
   ]);
-}
+  await refreshData();
+};
 
 const refreshing = ref<string>("done");
 async function delay(ms: number) {
@@ -608,7 +606,9 @@ const extractDate = () => {
   const claimedOrderedGroup: any = {}
   claimedRpOps.value.forEach((op) => {
     if(op.error == null) {
-      claimedCount.value += 1;
+      if (op.type == "claim_redpacket") {
+        claimedCount.value += 1
+      }
     }
     const date = new Date(op.createdAt).toLocaleString().split(',')[0];
     if (date in claimGroup) {
@@ -630,7 +630,9 @@ const extractDate = () => {
 
   createdRpOps.value.forEach((op) => {
     if (op.error == null) {
-      createdCount.value += 1;
+      if (op.type == "create_redpacket") {
+        createdCount.value += 1;
+      }
     }
     const date = new Date(op.createdAt).toLocaleString().split(',')[0];
     if (date in sentGroup) {
@@ -839,7 +841,7 @@ const openRedpacket = (op: any) => {
   font-weight: 800;
   // margin-left: 5.5rem;
   text-align: center;
-  color: #076AE0; }
+  color: rgb(253, 71, 85);; }
 .claim-mode {
   display: flex;
   margin: 0px;

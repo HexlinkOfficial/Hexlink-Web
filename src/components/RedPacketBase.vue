@@ -103,6 +103,7 @@ const openSend = async (to: string) => {
 
 onMounted(() => {
     if(useStatusStore().status[0]) {
+        console.log(Object.values(useStatusStore().status[0]));
         statusTitle.value = Object.keys(useStatusStore().status[0])[0].toString();
         statusData.value = Object.values(useStatusStore().status[0])[0]?.toString();
     }

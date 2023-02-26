@@ -86,7 +86,7 @@ export async function getPriceInfo(chain: Chain, gasToken: string) : Promise<{
     tokenPrice: BigNumberish
 }> {
     const provider = getInfuraProvider(chain);
-    const {gasPrice} = await provider.getFeeData();
+    const {maxFeePerGas} = await provider.getFeeData();
     let tokenPrice;
     if (isNativeCoin(gasToken, chain) || isWrappedCoin(gasToken, chain)) {
         tokenPrice = EthBigNumber.from(10).pow(18);
@@ -94,7 +94,7 @@ export async function getPriceInfo(chain: Chain, gasToken: string) : Promise<{
         const swap = await hexlinkSwap(provider);
         tokenPrice = await swap.priceOf(gasToken);
     }
-    return {gasPrice: gasPrice.mul(2), tokenPrice}
+    return {gasPrice: maxFeePerGas.mul(2), tokenPrice}
 }
 
 export async function getRefunder(chain: Chain) : Promise<string> {

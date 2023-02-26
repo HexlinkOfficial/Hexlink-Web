@@ -25,7 +25,6 @@ async function trySendTx(
     }
 }
 
-
 const redisHost = process.env.REDIS_HOST!;
 const redisPort = parseInt(process.env.REDIS_PORT!, 10);
 const client: Redis = new Redis(redisPort, redisHost, {

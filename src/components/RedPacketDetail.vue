@@ -20,7 +20,7 @@
       <div style="padding: 10px 5px 5px 5px; display: flex; align-items: center;">
         <img src="https://i.postimg.cc/RhXfgJR1/gas-pump.png" data-v-c8c9ceac="" style="width: 20px; height: 20px;">
         <span style="font-size: 15px;">
-          Gas left: {{ totalServiceFee }}
+          Gas left: {{ gasLeftNormalized }}
         </span>
         <img src="https://token.metaswap.codefi.network/assets/networkLogos/ethereum.svg" height="20" style="margin-left:0.5rem;margin-right:0.5rem;" data-v-c970699f="">
       </div>
@@ -115,15 +115,15 @@ const loadData = async function() {
   if (redPacket.value) {
     if (redPacket.value.type === 'erc20') {
       claimItem.value = 'erc20';
-      balanceLeft.value = await (await queryRedPacketInfo(redPacket.value)).balanceLeft;
-      gasLeft.value = await (await queryRedPacketInfo(redPacket.value)).sponsorship;
+      balanceLeft.value = (await queryRedPacketInfo(redPacket.value)).balanceLeft;
+      gasLeft.value = (await queryRedPacketInfo(redPacket.value)).sponsorship;
       redPacket.value.token = await loadAndSetErc20Token(
         (redPacket.value.metadata as RedPacket).token
       );
     } else if (redPacket.value.type === 'erc721') {
       claimItem.value = 'erc721';
-      balanceLeft.value = await (await queryErc721RedPacketInfo(redPacket.value.metadata.token)).balanceLeft;
-      gasLeft.value = await (await queryErc721RedPacketInfo(redPacket.value.metadata.token)).sponsorship;
+      balanceLeft.value = (await queryErc721RedPacketInfo(redPacket.value.metadata.token)).balanceLeft;
+      gasLeft.value = (await queryErc721RedPacketInfo(redPacket.value.metadata.token)).sponsorship;
     }
     claimers.value = await getRedPacketClaims(id);
   }
@@ -151,8 +151,8 @@ const refund = async() => {
   );
 }
 
-const totalServiceFee = computed(() => {
-  return BigNumber(gasLeft.value).div(new BigNumber(10).pow(18)).dp(4).toString();
+const gasLeftNormalized = computed(() => {
+  return BigNumber(gasLeft.value).div(new BigNumber(10).pow(18)).dp(6).toString();
 })
 
 onMounted(loadData);

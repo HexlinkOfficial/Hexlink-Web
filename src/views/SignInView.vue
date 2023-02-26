@@ -222,8 +222,6 @@ input[type="number"] {
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-left: 1rem;
-    margin-right: 1rem;
     background-color: rgb(228, 229, 247);
     height: 100vh; }
 .social-login img {
@@ -235,7 +233,8 @@ a {
     border-radius: 15px;
     background-color: #ffff;
     padding: 1.8rem;
-    box-shadow: 2px 5px 20px rgba(0, 0, 0, 0.1); }
+    margin: 1rem;
+    box-shadow: 0px 5px 20px rgb(0 0 0 / 15%); }
 .subtitle {
   text-align: center;
   font-weight: bold;

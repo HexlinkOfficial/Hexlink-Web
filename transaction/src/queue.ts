@@ -1,5 +1,4 @@
 import Queue from "bull";
-import Redis from "ioredis";
 import {ethers} from "ethers";
 import {insertTx, updateTx} from "./graphql/transaction";
 import {updateOp} from "./graphql/operation";
@@ -25,52 +24,11 @@ async function trySendTx(
     }
 }
 
-
-const redisHost = process.env.REDIS_HOST!;
-const redisPort = parseInt(process.env.REDIS_PORT!, 10);
-const client: Redis = new Redis(redisPort, redisHost, {
-    password: process.env.REDIS_PASSWORD!,
-    maxRetriesPerRequest: null,
-    enableReadyCheck: false
-});
-client.setMaxListeners(50);
-
-const subscriber: Redis = new Redis(redisPort, redisHost,{
-    password: process.env.REDIS_PASSWORD!,
-    maxRetriesPerRequest: null,
-    enableReadyCheck: false
-});
-subscriber.setMaxListeners(50);
-
-let queueOpts: any;
-if (process.env.VITE_USE_REDIS_LOCAL) {
-    queueOpts = {};
-} else {
-    queueOpts = {
-        createClient(type: string) {
-          switch (type) {
-            case 'client':
-              return client
-            case 'subscriber':
-              return subscriber
-            default:
-              const rClient = new Redis(redisPort, redisHost, {
-                  password: process.env.REDIS_PASSWORD!,
-                  maxRetriesPerRequest: null,
-                  enableReadyCheck: false
-              });
-              rClient.setMaxListeners(50);
-              return rClient;
-          }
-        },
-      }
-}
-
 class PrivateQueues {
     opQueues : Map<string, Queue.Queue> = new Map<string, Queue.Queue>();
     txQueues : Map<string, Queue.Queue> = new Map<string, Queue.Queue>();
     coordinatorQueues : Map<string, Queue.Queue> = new Map<string, Queue.Queue>();
-    storageQueue : Queue.Queue = new Queue("storage", queueOpts);
+    storageQueue : Queue.Queue = new Queue("storage");
 
     constructor() {
         SUPPORTED_CHAINS.forEach(chain => {
@@ -94,7 +52,7 @@ class PrivateQueues {
         txQueue: Queue.Queue
     ) : Queue.Queue {
         const senderPool = SenderPool.getInstance();
-        const queue = new Queue(this.queueName(chain, "coordinator"), queueOpts);
+        const queue = new Queue(this.queueName(chain, "coordinator"));
         console.log("Initiating coordinator queue " + queue.name);
         queue.process("poll", 1, async (job) => {
             const signer = senderPool.getSenderInIdle(chain.name);
@@ -148,7 +106,6 @@ class PrivateQueues {
             this.queueName(chain, "operation"),
             {
                 settings: {maxStalledCount: 0},
-                ...queueOpts
             }
         );
         console.log("Initiating operation queue " + queue.name);
@@ -157,7 +114,7 @@ class PrivateQueues {
 
     private initTransactionQueue(chain: Chain) : Queue.Queue {
         const senderPool = SenderPool.getInstance();
-        const queue = new Queue(this.queueName(chain, "transaction"), queueOpts);
+        const queue = new Queue(this.queueName(chain, "transaction"));
         console.log("Initiating transaction queue " + queue.name);
         queue.process(async(job: any) => {
             try {

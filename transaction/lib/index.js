@@ -19,6 +19,7 @@ app.use(body_parser_1.default.urlencoded({ extended: false }));
 app.use(body_parser_1.default.json());
 app.use(auth_1.auth);
 app.post('/submit/:chain', async (req, res) => {
+    console.log("Received submit request.");
     const opQueue = queues.getOpQueue(req.params.chain);
     if (!req.body.input && !req.body.tx) {
         res.status(400).json({

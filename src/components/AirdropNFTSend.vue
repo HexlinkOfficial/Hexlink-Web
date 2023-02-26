@@ -256,6 +256,7 @@ const nftAirdrop = ref<RawRedPacketErc721Input>({
   sponsorGas: true,
   type: "erc721",
   token: "",
+  maxSupply: 0,
 });
 
 const setAccount = (account: AccountType) => {
@@ -442,6 +443,7 @@ const confirmNFT = async () => {
     nftAirdrop.value.token = await predictErc721Address(
       useChainStore().provider, nftAirdrop.value
     );
+    nftAirdrop.value.maxSupply = nftAirdrop.value.split;
     useRedPacketStore().beforeCreate(nftAirdrop.value);
   }
 }

@@ -51,10 +51,7 @@ export interface TransactionInput {
 }
 
 export function validator() : string {
-    if (import.meta.env.VITE_USE_FUNCTIONS_EMULATOR) {
-        return "0xEF2e3F91209F88A3143e36Be10D52502162426B3";
-    }
-    return "0x030ffbc193c3f9f4c6378beb506eecb0933fd457";
+    return import.meta.env.VITE_AIRDROP_VALIDATOR;
 }
 
 async function simulate(to: string, data: string, value: string) {

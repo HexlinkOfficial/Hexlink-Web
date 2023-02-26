@@ -70,8 +70,8 @@ import { useWalletStore } from '@/stores/wallet';
 import { connectWallet } from "@/web3/wallet";
 
 const airdropToken = ref<string>("");
-const statusTitle = ref<string>("");
-const statusData = ref<any>();
+const statusTitle = ref<string>("Total Created");
+const statusData = ref<string | undefined>("0");
 
 const selected  = computed(() => {
     if (useRoute().path == '/airdrop/send') {
@@ -106,6 +106,9 @@ onMounted(() => {
         console.log(Object.values(useStatusStore().status[0]));
         statusTitle.value = Object.keys(useStatusStore().status[0])[0].toString();
         statusData.value = Object.values(useStatusStore().status[0])[0]?.toString();
+    } else {
+        statusTitle.value = "Total Created";
+        statusData.value = "0";
     }
 })
 </script>

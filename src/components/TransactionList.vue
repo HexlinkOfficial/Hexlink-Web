@@ -18,10 +18,10 @@
         <div v-for="(r, i) in value" :key="i" class="history-record">
           <div v-if="width > 990" class="record-box">
             <div style="display: block; position: relative;">
-              <div class="icon" :style="r.tx.tokenID == 'NaN' ? 'background-color: rgb(253, 71, 85);' : ''">
-                <img v-if="r.action.type == 'receive' && r.tx.tokenID != 'NaN'" src="@/assets/svg/claimRedpacketClaimed.svg"/>
-                <img v-if="r.action.type == 'send' && r.tx.tokenID != 'NaN'" src="@/assets/svg/createRedpacketSent.svg"/>
-                <img v-if="r.tx.tokenID == 'NaN'" src="@/assets/svg/createRedpacketError.svg" />
+              <div class="icon" :style="(r.action.type != 'send' && r.action.type != 'receive') ? 'background-color: rgb(253, 71, 85);' : ''">
+                <img v-if="r.action.type == 'receive'" src="@/assets/svg/claimRedpacketClaimed.svg"/>
+                <img v-if="r.action.type == 'send'" src="@/assets/svg/createRedpacketSent.svg"/>
+                <img v-if="r.action.type != 'send' && r.action.type != 'receive'" src="@/assets/svg/createRedpacketError.svg" />
               </div>
             </div>
             <div class="record-detail">
@@ -142,13 +142,13 @@
             <div class="created-info" style="display: flex; align-items: center; width: 100%; padding-right: 0.5rem; justify-content: space-between;">
               <div class="status" style="display: flex; flex-direction: row; align-items: center;">
                 <div class="sending-status">
-                  <div v-if="r.action.type == 'receive' && r.tx.tokenID != 'NaN'" class="mobile-icon">
+                  <div v-if="r.action.type == 'receive'" class="mobile-icon">
                     <img src="@/assets/svg/claimRedpacketClaimed-small.svg" />
                   </div>
-                  <div v-if="r.action.type == 'send' && r.tx.tokenID != 'NaN'" class="mobile-icon">
+                  <div v-if="r.action.type == 'send'" class="mobile-icon">
                     <img src="@/assets/svg/createRedpacketSent-small.svg" />
                   </div>
-                  <div v-if="r.tx.tokenID == 'NaN'" class="mobile-icon" style="background-color: rgb(253, 71, 85);">
+                  <div v-if="r.action.type != 'send' && r.action.type != 'receive'" class="mobile-icon" style="background-color: rgb(253, 71, 85);">
                     <img src="@/assets/svg/claimRedpacketError-small.svg" />
                   </div>
                 </div>

@@ -289,15 +289,12 @@ const setGas = async() => {
   const price = await getPriceInfo(chain, redpacket.value.gasToken);
   const sponsorshipAmount =
     EthBigNumber.from(300000).mul(redpacket.value.split || 0);
-  console.log(price);
-  console.log(sponsorshipAmount);
   redpacket.value.gasSponsorship = calcGas(
     chain,
     tokenStore.token(redpacket.value.gasToken),
     sponsorshipAmount,
     price,
   ).toString();
-  console.log(redpacket.value.gasSponsorship);
   redpacket.value.estimatedGas = calcGas(
     chain,
     tokenStore.token(redpacket.value.gasToken),
@@ -405,7 +402,6 @@ const chooseGasHandle: OnClickOutsideHandler = (event) => {
 onClickOutside(
   modalRef,
   (event) => {
-    console.log(event)
     modal.value = false
   },
 );

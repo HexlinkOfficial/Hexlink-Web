@@ -5,6 +5,7 @@ export const GET_FRIENDSHIPS_URL = "https://api.twitter.com/1.1/friendships/show
 export const GET_USER_V2_URL = "https://api.twitter.com/2/users/by/username/";
 export const GET_TWEET_V2_URL = "https://api.twitter.com/2/tweets/";
 export const TWITTER_URL = "https://twitter.com/";
+export const GET_USERNAME_BY_ID_V2_URL = "https://api.twitter.com/2/users/";
 
 const secrets = functions.config().doppler;
 export const twitterConfig1 = () => ({

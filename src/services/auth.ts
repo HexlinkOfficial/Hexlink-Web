@@ -129,17 +129,17 @@ export async function twitterSocialLogin() {
     try {
         const result = await signInWithPopup(auth, provider);
         const idToken = await getIdTokenAndSetClaimsIfNecessary(result.user);
-        const providerUid = result.user.providerData[0].uid;
+        const handle = result.user.reloadUserInfo.screenName;
         const user : IUser = {
             provider: "twitter.com",
             identityType: "twitter.com",
             authType: "oauth",
             uid: result.user.uid,
-            providerUid,
-            handle: result.user.reloadUserInfo.screenName,
+            providerUid: result.user.providerData[0].uid,
+            handle,
             displayName: result.user.displayName || undefined,
             photoURL: result.user.photoURL || undefined,
-            nameHash: nameHashWithVersion("twitter.com", providerUid),
+            nameHash: nameHashWithVersion("twitter.com", handle),
             idToken,
         };
         useAuthStore().signIn(user);

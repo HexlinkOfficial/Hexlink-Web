@@ -12,6 +12,7 @@ import {
   GET_TWEET_V2_URL,
   GET_USER_V2_URL,
   twitterConfig1,
+  GET_USERNAME_BY_ID_V2_URL,
   TWITTER_URL} from "./config";
 import {parseHtmlString} from "./utils";
 import {Firebase} from "../firebase";
@@ -56,7 +57,7 @@ export const autoCaptureFollowers = functions.https.onCall(
         return {code: 401, message: "Unauthorized Call"};
       }
 
-      const user = await getUser(data.userName);
+      const user = await getUserByUsername(data.userName);
 
       if (user.data.public_metrics.followers_count < 5000) {
         const followers = await getFollowers(user.data.id);
@@ -67,7 +68,7 @@ export const autoCaptureFollowers = functions.https.onCall(
     }
 );
 
-const getUser = async function(userName: string) {
+const getUserByUsername = async function(userName: string) {
   const requestUrl = GET_USER_V2_URL + userName +
       "?user.fields=created_at,public_metrics";
   return await twitterApiCall(requestUrl) as TwitterUser;
@@ -77,6 +78,11 @@ const getFollowers = async function(userId: string) {
   const followerUrl = GET_FOLLOWERS_V2_URL + userId +
       "/followers?user.fields=created_at,public_metrics";
   return await twitterApiCall(followerUrl) as TwitterFollowers;
+};
+
+export const getUserById = async function(userId: string) {
+  const requestUrl = GET_USERNAME_BY_ID_V2_URL + userId;
+  return await twitterApiCall(requestUrl) as TwitterUser;
 };
 
 const getFriendshipsFromTwitter = async function(

@@ -124,7 +124,6 @@ const getERC721Image = () => {
 }
 
 onMounted(async () => {
-  console.log(store.redpacket);
   if (store.redpacket?.type === 'erc20') {
     token.value = await loadAndSetErc20Token(store.redpacket?.token!);
   }

@@ -4,6 +4,7 @@ import {hexlContract, nameHash} from "../common";
 import type {Chain} from "../common";
 import {getUserById} from "./graphql/user";
 import * as functions from "firebase-functions";
+import {getUserById as getTwitterUserById} from "./twitter/twitter";
 
 const ALCHEMY_KEYS : {[key: string]: string} = {
   "5": "U4LBbkMIAKCf4GpjXn7nB7H1_P9GiU4b",
@@ -14,6 +15,9 @@ const secrets = functions.config().doppler || {};
 
 const TWITTER_PROVIDER_ID = "twitter.com";
 const EMAIL_PROVIDER_ID = "mailto";
+
+export const TWITTER_IDENTITY_TYPE = "twitter.com";
+export const EMAIL_IDENTITY_TYPE = "email";
 
 export interface GenNameHashSuccess {
   code: 200;
@@ -29,19 +33,27 @@ export interface Error {
   message: string;
 }
 
+async function getTwitterHandle(uid: string) : Promise<string> {
+  const user = await getTwitterUserById(uid);
+  return user.username;
+}
+
 export async function genNameHash(
     uid: string,
-    version?: number
+    version?: number,
+    identity?: string,
 ) : Promise<GenNameHashSuccess | Error> {
   const user = await getAuth().getUser(uid);
   if (!user) {
     return {code: 400, message: "Invalid uid: failed to get the user."};
   }
 
-  const userInfoList = user.providerData;
-
   // custom token will not have provider data stored with it
+  const userInfoList = user.providerData;
   if (!userInfoList || userInfoList.length < 1) {
+    if (identity && identity !== EMAIL_IDENTITY_TYPE) {
+      return {code: 400, message: "identity type not match"};
+    }
     const user = await getUserById(uid);
     if (!user || !user.email) {
       return {code: 400, message: "Invalid uid: no provider data nor valid record in user table."};
@@ -51,9 +63,13 @@ export async function genNameHash(
     return {code: 200, nameHash: name};
   }
 
-  for (const userInfo of userInfoList) {
+  for (const userInfo of (userInfoList || [])) {
     if (userInfo.providerId.toLowerCase() === TWITTER_PROVIDER_ID) {
-      const name = calcNameHash(TWITTER_PROVIDER_ID, userInfo.uid, version);
+      if (identity && identity !== TWITTER_IDENTITY_TYPE) {
+        return {code: 400, message: "identity type not match"};
+      }
+      const handle = await getTwitterHandle(userInfo.uid);
+      const name = calcNameHash(TWITTER_PROVIDER_ID, handle, version);
       return {code: 200, nameHash: name};
     }
   }

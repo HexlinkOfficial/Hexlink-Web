@@ -6,11 +6,11 @@ import {
   GenNameHashSuccess,
   genNameHash,
   toEthSignedMessageHash,
+  TWITTER_IDENTITY_TYPE,
+  EMAIL_IDENTITY_TYPE,
 } from "./account";
 import {Firebase} from "./firebase";
 
-const TWITTER_IDENTITY_TYPE = "twitter.com";
-const EMAIL_IDENTITY_TYPE = "email";
 const OAUTH_AUTH_TYPE = "oauth";
 const OTP_AUTH_TYPE = "otp";
 
@@ -51,7 +51,7 @@ export const genEmailOTPProof = functions.https.onCall(
 
 const genAuthProof = async (uid: string, identity: string,
     auth: string, requestId: string, version?: number) => {
-  const result = await genNameHash(uid, version);
+  const result = await genNameHash(uid, version, identity);
   if (result.code !== 200) {
     return result;
   }

@@ -32,7 +32,6 @@ import QRCode from "qrcode";
 import { copy } from "@/web3/utils";
 
 onMounted(() => {
-  console.log(useChainStore().chain);
   genQrCode();
 })
 

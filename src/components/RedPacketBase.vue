@@ -7,10 +7,11 @@
                         <div class="status-box">
                             <div style="margin: 0 10px;">
                                 <div class="title">
-                                    <span>{{ statusTitle }}</span>
+                                    <span v-if="!loading">{{ statusTitle }}</span>
                                 </div>
                                 <div class="price">
-                                    <span>{{ statusData }}</span>
+                                    <Loading v-if="loading" class="loading" />
+                                    <span v-if="!loading">{{ statusData }}</span>
                                 </div>
                             </div>
                             <!-- <div style="margin: 0 10px;">
@@ -72,6 +73,7 @@ import { connectWallet } from "@/web3/wallet";
 const airdropToken = ref<string>("");
 const statusTitle = ref<string>("Total Created");
 const statusData = ref<string | undefined>("0");
+const loading = ref<boolean>(true);
 
 const selected  = computed(() => {
     if (useRoute().path == '/airdrop/send') {
@@ -101,15 +103,22 @@ const openSend = async (to: string) => {
     }
 }
 
-onMounted(() => {
+function delay(ms: number) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+onMounted(async () => {
+    loading.value = true;
     if(useStatusStore().status[0]) {
-        console.log(Object.values(useStatusStore().status[0]));
+        console.log("HAHA: ", useStatusStore().status[0]);
         statusTitle.value = Object.keys(useStatusStore().status[0])[0].toString();
         statusData.value = Object.values(useStatusStore().status[0])[0]?.toString();
     } else {
         statusTitle.value = "Total Created";
         statusData.value = "0";
     }
+    await delay(1000);
+    loading.value = false;
 })
 </script>
   

@@ -22,9 +22,9 @@ export const useStatusStore = defineStore({
     },
     reset() {
       this.status = [
-      { 'Total Created': 0 },
-      { 'Total Claimed': 0 }
-    ]
+        { 'Total Created': 0 },
+        { 'Total Claimed': 0 }
+      ]
     }
   },
 })

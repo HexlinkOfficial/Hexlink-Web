@@ -13,15 +13,15 @@
     <div style="overflow: visible; border-radius: 0.75rem;">
       <div v-for="(value, name, index) in transactionByDate" :key="index" style="position: relative;">
         <div class="history-date">
-          <div style="font-size: 0.875rem; line-height: 1.25rem;">{{ new Date(name).toLocaleString("en-US", options) }}
-          </div>
+          <div style="font-size: 0.875rem; line-height: 1.25rem;">{{ width > 990 ? new Date(name).toLocaleString("en-US", options) : new Date(name).toLocaleString().split(',')[0] }}</div>
         </div>
         <div v-for="(r, i) in value" :key="i" class="history-record">
-          <div class="record-box">
+          <div v-if="width > 990" class="record-box">
             <div style="display: block; position: relative;">
-              <div class="icon">
+              <div class="icon" :style="(r.action.type != 'send' && r.action.type != 'receive') ? 'background-color: rgb(253, 71, 85);' : ''">
                 <img v-if="r.action.type == 'receive'" src="@/assets/svg/claimRedpacketClaimed.svg"/>
-                <img v-if="r.action.type == 'send'" src="@/assets/svg/createRedpacketSent.svg" />
+                <img v-if="r.action.type == 'send'" src="@/assets/svg/createRedpacketSent.svg"/>
+                <img v-if="r.action.type != 'send' && r.action.type != 'receive'" src="@/assets/svg/createRedpacketError.svg" />
               </div>
             </div>
             <div class="record-detail">
@@ -137,6 +137,114 @@
               </div>
             </div>
           </div>
+          
+          <div v-if="width <= 990" class="mobile-record-box" style="display: flex; border-top: 1px solid #e5e7eb; padding: 0.5rem 1rem 0 0; flex-direction: column;">
+            <div class="created-info" style="display: flex; align-items: center; width: 100%; padding-right: 0.5rem; justify-content: space-between;">
+              <div class="status" style="display: flex; flex-direction: row; align-items: center;">
+                <div class="sending-status">
+                  <div v-if="r.action.type == 'receive'" class="mobile-icon">
+                    <img src="@/assets/svg/claimRedpacketClaimed-small.svg" />
+                  </div>
+                  <div v-if="r.action.type == 'send'" class="mobile-icon">
+                    <img src="@/assets/svg/createRedpacketSent-small.svg" />
+                  </div>
+                  <div v-if="r.action.type != 'send' && r.action.type != 'receive'" class="mobile-icon" style="background-color: rgb(253, 71, 85);">
+                    <img src="@/assets/svg/claimRedpacketError-small.svg" />
+                  </div>
+                </div>
+                <div class="created-info" style="display: flex; align-items: center; margin-left: 0.5rem;">
+                  <div class="sent-info">
+                    <div class="info-1">
+                      {{ r.action.type == 'receive' ? 'Receive' : 'Send' }}
+                    </div>
+                  </div>
+                </div>
+                <div class="timestamp" style="color: #6a6d7c; white-space: nowrap; margin-left: 0; font-size: 12px; margin-left: 0.5rem;">
+                  <div style="display: flex;">{{ new Date(r.tx.timestamp).toLocaleString().split(',')[1] }}</div>
+                </div>
+              </div>
+              <div class="callToAction">
+                <a-tooltip placement="top">
+                  <template #title>
+                    <span>
+                      Check on blockchain explorer
+                    </span>
+                  </template>
+                  <a :href="useChainStore().chain.blockExplorerUrls[0] + '/tx/' + r.tx.hash" target="_blank">
+                    <i class="fa-solid fa-arrow-up-from-bracket"></i>
+                  </a>
+                </a-tooltip>
+              </div>
+            </div>
+            <div class="created-content" style="display: flex; align-items: center; flex-direction: row; justify-content: space-between; margin: 10px 0px;">
+              <div class="received" style="width: 45%;">
+                <div v-if="r.asset.decimals != -1" class="sent-info" style="align-items: center;">
+                  <div class="token-icon" style="margin-right: 0rem; margin-left: 0rem; width: 32px; height: 32px;">
+                    <img :src="loadTokenLogo(r.asset.address)">
+                  </div>
+                  <span style="margin-left: 0.5rem;">
+                    {{ r.action.type == 'receive' ? '+' : '-' }} {{
+                      r.amount.normalized.toString().length > 8 ? r.amount.normalized.toString().substring(0,9) : r.amount.normalized.toString()
+                    }}
+                  </span>
+                </div>
+                <div v-if="r.asset.decimals == -1" style="display: flex; align-items: center;">
+                  <div style="display: flex; align-items: center;">
+                    <div class="nft">
+                      <a-tooltip placement="top">
+                        <template #title>
+                          <img :src="getNFTdata(r.tx.tokenID, r.asset.address)!.image" style="max-width: 100px;" :size="64"
+                            referrerpolicy="no-referrer" rel="preload" />
+                        </template>
+                        <span class="thumb" style="width: 32px; height: 32px; border-radius: 5px; border: 2px solid #D9D9D9;">
+                          <img :src="getNFTdata(r.tx.tokenID, r.asset.address)!.image" style="border-radius: 5px;" :size="64"
+                            referrerpolicy="no-referrer" rel="preload" />
+                        </span>
+                      </a-tooltip>
+                    </div>
+                    <div style="display: flex; flex-direction: column; margin-left: 0.5rem;">
+                      <span class="from-text" style="margin-left: 0rem;">{{ getNFTdata(r.tx.tokenID, r.asset.address)!.symbol }}</span>
+                      <span style="font-size: 12px; color: rgb(100,116,139)">{{ getNFTdata(r.tx.tokenID, r.asset.address)!.name }} #{{ getNFTdata(r.tx.tokenID, r.asset.address)!.nftId }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="arrow" style="width: 5%;">
+                <img src="@/assets/svg/backwardArrow.svg"/>
+              </div>
+              <div class="from" style="width: 50%;">
+                <div style="display: flex; align-items: center;">
+                  <span class="thumb">
+                    <img :src="profilePic[Math.floor(Math.random() * profilePic.length)]" :size="64" referrerpolicy="no-referrer" />
+                  </span>
+                  <div style="display: flex; flex-direction: column; margin-left: 0.5rem;">
+                    <span class="from-text">{{ r.action.type == 'receive' ? 'From' : 'To' }}</span>
+                    <a-tooltip v-if="r.action.type == 'receive'" placement="top">
+                      <template #title>
+                        <span>
+                          Address: {{ r.action.from }}
+                        </span>
+                      </template>
+                      <span style="font-size: 12px; color: rgb(100,116,139)">{{
+                        prettyPrintAddress(r.action.from, 5,
+                          6)
+                      }}</span>
+                    </a-tooltip>
+                    <a-tooltip v-if="r.action.type == 'send'" placement="top">
+                      <template #title>
+                        <span>
+                          Address: {{ r.action.to }}
+                        </span>
+                      </template>
+                      <span style="font-size: 12px; color: rgb(100,116,139)">{{
+                        prettyPrintAddress(r.action.to, 5, 6)
+                      }}</span>
+                    </a-tooltip>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -155,10 +263,12 @@ import { profilePic, options } from "@/assets/imageAssets";
 import { prettyPrintNumber } from "@/web3/utils";
 import { useNftStore } from '@/stores/nft';
 import EmptyContent from '@/components/EmptyContent.vue';
+import { useWindowSize } from '@vueuse/core';
 
 const loading = ref<boolean>(false);
 const transfer = ref<any>();
 const transactionByDate = ref<any>([]);
+const { width } = useWindowSize();
 
 const loadTransactions = async (tokenAddress: string[], erc721Address: string[]) => {
   loading.value = true;
@@ -249,6 +359,15 @@ onMounted(async () => {
 </script>
 
 <style lang="less" scoped>
+.mobile-icon {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 55px;
+  border-width: 1px;
+  background-color: #4BAE4F; }
 .info-1 {
   display: flex;
   font-size: 1rem;
@@ -262,7 +381,7 @@ i:hover {
   overflow: auto;
   white-space: nowrap;
   margin-left: 0.25rem;
-  width: 50px;
+  width: 60px;
   display: flex;
   justify-content: flex-end; }
 .transaction-time {

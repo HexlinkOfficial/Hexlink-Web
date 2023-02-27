@@ -1,6 +1,6 @@
 <template>
   <div class="login-card" :style="{ backgroundImage: `url(${background})` }">
-    <div class="card">
+    <div class="card" :style="!show ? 'display: flex; align-items: center; justify-content: center;' : ''">
       <form @submit="onSubmit">
         <transition name="fade">
             <div v-if="show" class="step1">
@@ -8,7 +8,7 @@
                     <img :src="hexlink" style="width:2.5rem; height: 2.5rem;" />
                 </div>
                 <h2 class="title">Welcome To HexLink</h2>
-                <p class="subtitle">Address-less experience with Hexlink Auth Protocal</p>
+                <p class="subtitle">Crypto for everyone</p>
                 <div class="social-login">
                     <button size="large" @click="twitter_login" className="twitter-btn">
                         <i class="fa fa-twitter"></i>
@@ -19,7 +19,9 @@
                 <div class="email-login">
                     <input type="text" v-model="email" placeholder="Enter Email" name="uname" class="email-input" required>
                 </div>
-                <button class="cta-btn" @click="sendOTP">Log In</button>
+                <Button class="cta-btn" :loading="isLoadingLogin" @click="sendOTP">
+                    Log In
+                </Button>
             </div>
         </transition>
         <transition name="fade">
@@ -37,7 +39,7 @@
                     </div>
                     <p v-if="!isResendLink" class="resend-plain">Resend the verification code in {{ countDown }}s.</p>
                     <a v-if="isResendLink" class="resend" @click="resendOTP">Resend the verification code.</a>
-                    <Button class="cta-btn" type="primary" :loading="isLoading" :disabled="isDisabled" @click="verifyOTP">
+                    <Button class="cta-btn" style="margin-bottom: 0px;" type="primary" :loading="isLoading" :disabled="isDisabled" @click="verifyOTP">
                         Verify
                     </Button>
                     <p v-if="isRateExceeded" style="color: #FF5C5C; text-align: center;">Too many attempts. Please wait for five minutes.</p>
@@ -73,6 +75,7 @@ const isRateExceeded = ref<boolean>(false);
 const isDisabled = ref<boolean>(true);
 const otpValidataionFailed = ref<boolean>(false);
 const countDown = ref<number>(60);
+const isLoadingLogin = ref(false);
 const isLoading = ref(false);
 
 const onSubmit = (e: Event) => {
@@ -148,12 +151,15 @@ const countDownTimer = () => {
 
 const sendOTP = async () => {
     if(email.value != "") {
-        show.value = !show.value;
-        countDownTimer();
+        isLoadingLogin.value = true;
         const result = await genOTP(email.value);
         if (result === 429) {
             console.error("Too many requests to send otp.");
             createNotification("Too many requests to send otp.", "error");
+        }
+        else if (result === 200) {
+            show.value = !show.value;
+            countDownTimer();
         }
     } else {
         createNotification("Please enter email to continue", "error");
@@ -201,15 +207,14 @@ const verifyOTP = async () => {
 .fade-enter-from, .fade-leave-to  {
   display: none;}
 input[type="number"] {
-  width: 50px;
-  height: 50px;
+  width: 40px;
+  height: 40px;
   font-size: 2rem;
   text-align: center;
   border-radius: 0.5rem;
   box-shadow: none;
   border: 1px solid #999;
-  margin-top: 8px;
-  margin-bottom: 25px;
+  margin: 8px 5px 25px 8px;
   caret-color: transparent !important; }
 /* Chrome, Safari, Edge, Opera */
 input::-webkit-outer-spin-button,
@@ -222,8 +227,6 @@ input[type="number"] {
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-left: 1rem;
-    margin-right: 1rem;
     background-color: rgb(228, 229, 247);
     height: 100vh; }
 .social-login img {
@@ -231,15 +234,16 @@ input[type="number"] {
 a {
     text-decoration: none; }
 .card {
-    width: 450px;
+    width: 350px;
     border-radius: 15px;
     background-color: #ffff;
     padding: 1.8rem;
-    box-shadow: 2px 5px 20px rgba(0, 0, 0, 0.1); }
+    margin: 1rem;
+    box-shadow: 0px 5px 20px rgb(0 0 0 / 15%); }
 .subtitle {
   text-align: center;
   font-weight: bold;
-  margin-bottom: 30px; }
+  margin-bottom: 20px; }
 .resend {
   text-align: center; }
 .resend-plain {

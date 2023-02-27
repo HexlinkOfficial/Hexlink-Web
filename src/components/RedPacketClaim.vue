@@ -28,7 +28,7 @@
       </div>
       <small >Best Wishes!</small>
     </h2>
-    <div class="cta-container transition" :style="claimItem == 'erc721' ? 'margin-top: 400px;' : ''">
+    <div class="cta-container transition" :style="claimItem == 'erc721' ? 'margin-top: 420px;' : 'margin-top: 340px;'">
       <button v-if="route.query.otp?.toString() == null" class="cta" @click="claim">Claim</button>
       <button v-if="route.query.otp?.toString() != null && timeLeft > 0" @click="claim" class="cta" >Claim</button>
       <div v-if="route.query.otp?.toString() != null && timeLeft <= 0" class="footer">
@@ -365,7 +365,7 @@ function onCountDownTimesUp() {
   background-color: #076ae0;
   position: absolute;
   border-radius: 50%;
-  margin-left: -80px;
+  margin-left: -53px;
   margin-top: -280px; }
 .card_circle721 {
   height: 400px;
@@ -396,7 +396,7 @@ function onCountDownTimesUp() {
   z-index: 55;
   width: 100%; }
 .claim-card:hover .cta-container {
-  margin-top: 340px; }
+  margin-top: 370px; }
 .cta {
   color: #fff;
   background-color: #076ae0;

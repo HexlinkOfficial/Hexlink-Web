@@ -23,6 +23,13 @@ export const useNftStore = defineStore({
       this.name = name;
       this.nftId = nftId;
       this.image = image;
+    },
+    reset() {
+      this.contracts = [],
+      this.symbol = [],
+      this.name = [],
+      this.nftId = [],
+      this.image = []
     }
-  }
+  },
 })

@@ -5,7 +5,10 @@ export const useStatusStore = defineStore({
   state: (): {
     status: Array<any>
   } => ({
-    status: []
+    status: [
+      { 'Total Created': 0 },
+      { 'Total Claimed': 0 }
+    ]
   }),
   persist: true,
   getters: {
@@ -17,5 +20,11 @@ export const useStatusStore = defineStore({
     setStatus(statusArr: any) {
       this.status = statusArr;
     },
+    reset() {
+      this.status = [
+        { 'Total Created': 0 },
+        { 'Total Claimed': 0 }
+      ]
+    }
   },
 })

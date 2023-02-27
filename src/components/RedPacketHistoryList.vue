@@ -131,118 +131,110 @@
                 </div>
               </div>
             </div>
-
-            <div v-if="op.type == 'create_redpacket' && width <= 990" class="record-box" style="margin-right: 0.5rem; height: auto; align-items: flex-start;">
-              <div class="redpacket-details" v-if="showStatus(op) == 'Sent'" style="position: absolute; width: 80%; height: 90%;" @click="openRedpacket(op)">
-              </div>
-              <div class="sending-status" style="display: block; position: relative;">
-                <img v-if="showStatus(op) == 'Pending'" src="@/assets/svg/createRedpacketPending.svg" />
-                <div v-if="showStatus(op) == 'Sent'" class="icon">
-                  <img src="@/assets/svg/createRedpacketSent.svg" />
-                </div>
-                <div v-if="showStatus(op) == 'Error'" class="icon" style="background-color: rgb(253, 71, 85);">
-                  <img src="@/assets/svg/createRedpacketError.svg" />
-                </div>
-              </div>
-              <div style="width: 100%; margin-left: 0.875rem; margin-right: 0.5rem;">
-                <div class="action-and-time">
-                  <div style="display: flex;">
+            <div v-if="op.type == 'create_redpacket' && width <= 990" class="mobile-record-box" style="display: flex; border-top: 1px solid #e5e7eb; padding: 0.5rem 1rem 0 0; flex-direction: column;">
+              <div class="created-info" style="display: flex; align-items: center; width: 100%; padding-right: 0.5rem; justify-content: space-between;">
+                <div class="status" style="display: flex; flex-direction: row; align-items: center;">
+                  <div class="sending-status">
+                    <img v-if="showStatus(op) == 'Pending'" src="@/assets/svg/createRedpacketPending.svg" style="height: 1.25rem; width: 1.25rem;"/>
+                    <div v-if="showStatus(op) == 'Sent'" class="mobile-icon">
+                      <img src="@/assets/svg/createRedpacketSent-small.svg" />
+                    </div>
+                    <div v-if="showStatus(op) == 'Error'" class="mobile-icon" style="background-color: rgb(253, 71, 85);">
+                      <img src="@/assets/svg/createRedpacketError-small.svg" />
+                    </div>
+                  </div>
+                  <div class="created-info" style="display: flex; align-items: center; margin-left: 0.5rem;">
                     <div class="sent-info">
                       <div class="info-1">
                         {{ showStatus(op) == 'Sent' ? 'Created' : showStatus(op) }}
                       </div>
                     </div>
                   </div>
-                  <div style="color: #6a6d7c; white-space: nowrap; margin-left: 0; font-size: 12px; margin-left: 0.5rem;">
+                  <div class="timestamp" style="color: #6a6d7c; white-space: nowrap; margin-left: 0; font-size: 12px; margin-left: 0.5rem;">
                     <div style="display: flex;">{{ new Date(op.createdAt).toLocaleString().split(',')[1] }}</div>
                   </div>
                 </div>
-                <div style="display: flex; justify-content: space-between; margin-right: 0.5rem;">
-                  <div class="token-amount" v-if="op.redpacket" style="margin-left: 0rem; flex-direction: column; align-items: flex-start; align-items: center;">
-                    <div v-if="op.redpacket.type === 'erc20'" class="sent-info">
-                      Amount:
-                      <a-tooltip placement="top">
-                        <template #title>
-                          <span>
-                            Amount: {{ normalizedDbBalance(op) }}
-                          </span>
-                        </template>
-                        <div
-                          style="overflow: auto; white-space: nowrap; margin-left: 0.25rem; width: auto; display: flex;justify-content: flex-end;">
-                          - {{ prettyPrintNumber(normalizedDbBalance(op).toString()) }}
-                        </div>
-                      </a-tooltip>
-                      <div class="token-icon" style="margin-right: 0.25rem; margin-left: 0.25rem;">
-                        <img :src="op.redpacket.token.logoURI">
-                      </div>
-                    </div>
-                    <div v-if="op.redpacket.type === 'erc20'" class="sent-info">
-                      <span>Mode: {{ op.redpacket.metadata.mode == 2 ? 'Random' : 'Equal' }}</span>
-                    </div>
-                    <div v-if="op.redpacket.type === 'erc721'" style="display: flex; align-items: center;">
-                      <a-tooltip placement="top">
-                        <template #title>
-                          <img :src="ipfsUrl(op.redpacket.metadata.tokenURI)" style="max-width: 100px;" :size="64"
-                            referrerpolicy="no-referrer" rel="preload" />
-                        </template>
-                        <span class="thumb">
-                          <img :src="ipfsUrl(op.redpacket.metadata.tokenURI)" style="border: 2px solid #D9D9D9; border-radius: 5px;" :size="64"
-                            referrerpolicy="no-referrer" rel="preload" />
-                        </span>
-                      </a-tooltip>
-                      <div style="display: flex; flex-direction: column; margin-left: 0.5rem;">
-                        <span class="from-text" style="margin-left: 0rem;">{{ op.redpacket.metadata.name }}</span>
-                        <span style="font-size: 12px; color: rgb(100,116,139)">
-                          {{ op.redpacket.metadata.symbol }}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                  <i v-if="showStatus(op) == 'Sent'" class="fa fa-paper-plane share-button" aria-hidden="true"
-                    @click="share(op.redpacket)"></i>
+                <div class="callToAction">
+                  <i v-if="showStatus(op) == 'Sent'" class="fa fa-paper-plane share-button" aria-hidden="true" @click="share(op.redpacket)"></i>
                   <a-tooltip v-if="showStatus(op) != 'Sent' && showStatus(op) != 'Pending'" placement="top">
                     <template #title>
                       <span>
                         Check on blockchain explorer
                       </span>
                     </template>
-                    <a :href="useChainStore().chain.blockExplorerUrls[0]+'/tx/'+op.tx" target="_blank">
+                    <a :href="useChainStore().chain.blockExplorerUrls[0] + '/tx/' + op.tx" target="_blank">
                       <i class="fa-solid fa-arrow-up-from-bracket"></i>
                     </a>
                   </a-tooltip>
                 </div>
-                <div class="claim-status" v-if="op.redpacket && op.txStatus == 'success'" style="margin: 10px 0;">
-                  <div class="progress-bar">
-                    <span v-if="op.redpacket.type === 'erc20'" class="box-progress"
-                      :style="{width: progress(op.redpacket) + '%' }"></span>
-                    <span v-if="op.redpacket.type === 'erc721'" class="box-progress"
-                      :style="{ width: progress(op.redpacket) + '%' }"></span>
+              </div>
+              <div class="created-content" style="display: flex; align-items: center; flex-direction: row; justify-content: space-between;">
+                <div class="image" style="width: 15%;">
+                  <div v-if="op.redpacket.type === 'erc20'" class="sent-info">
+                    <div class="token-icon" style="margin-right: 0rem; margin-left: 0rem; width: 32px; height: 32px;">
+                      <img :src="op.redpacket.token.logoURI">
+                    </div>
                   </div>
-                  <div class="claimed-data">
-                    <p class="claimed-number" v-if="op.redpacket.type === 'erc20'">
-                      Claimed:&nbsp;
-                      <strong>{{ claimed(op.redpacket) }}/{{ op.redpacket.metadata.split }}</strong>
-                      &nbsp;Share
-                    </p>
-                    <p class="claimed-number" v-if="op.redpacket.type === 'erc721'">
-                      Claimed:&nbsp;
-                      <strong>{{ claimed(op.redpacket) }}/{{ total(op.redpacket) }}</strong>
-                      &nbsp;Share
-                    </p>
-                    <p class="claimed-number-left" v-if="op.redpacket.type === 'erc20'">
-                      Left:&nbsp;
-                      <strong>{{ normalize(op.redpacket.state?.balance || op.redpacket.metadata.balance, op.redpacket.token) }}</strong>
-                      &nbsp;{{ op.redpacket.token.symbol }}
-                    </p>
-                    <p class="claimed-number-left" v-if="op.redpacket.type === 'erc721'">
-                      Left:&nbsp;
-                      <strong>{{ op.redpacket.state.claimsLeft || total(op.redpacket) }}</strong>
-                      &nbsp;
-                    </p>
+                  <div v-if="op.redpacket.type === 'erc721'" style="display: flex; align-items: center;">
+                    <a-tooltip placement="top">
+                      <template #title>
+                        <img :src="ipfsUrl(op.redpacket.metadata.tokenURI)" style="max-width: 100px;" :size="64"
+                          referrerpolicy="no-referrer" rel="preload" />
+                      </template>
+                      <span class="thumb" style="width: 32px; height: 32px; border-radius: 5px; border: 2px solid #D9D9D9;">
+                        <img :src="ipfsUrl(op.redpacket.metadata.tokenURI)" style="border-radius: 5px;" :size="64"
+                          referrerpolicy="no-referrer" rel="preload" />
+                      </span>
+                    </a-tooltip>
+                  </div>
+                </div>
+                <div class="progress" style="width: 85%;">
+                  <div class="claim-status" v-if="op.redpacket" style="margin: 10px 0;">
+                    <div v-if="op.redpacket.type === 'erc20'" class="amount">
+                      <p class="claimed-number">
+                        Total:&nbsp;
+                        <strong>{{ normalizedDbBalance(op).toString() }}</strong> 
+                        &nbsp;{{ op.redpacket.token.symbol }}
+                      </p>
+                    </div>
+                    <div v-if="op.redpacket.type === 'erc721'" class="amount">
+                      <p class="claimed-number">
+                        <span style="margin-left: 0rem;">{{ op.redpacket.metadata.name }} | {{ op.redpacket.metadata.symbol }}</span>
+                      </p>
+                    </div>
+                    <div class="progress-bar" style="margin: 0;">
+                      <span v-if="op.redpacket.type === 'erc20'" class="box-progress"
+                        :style="{ width: progress(op.redpacket) + '%' }"></span>
+                      <span v-if="op.redpacket.type === 'erc721'" class="box-progress"
+                        :style="{ width: progress(op.redpacket) + '%' }"></span>
+                    </div>
+                    <div class="claimed-data" style="margin-top: 0px;">
+                      <p class="claimed-number" v-if="op.redpacket.type === 'erc20'">
+                        Claimed:&nbsp;
+                        <strong>{{ claimed(op.redpacket) }}/{{ op.redpacket.metadata.split }}</strong>
+                        &nbsp;Share
+                      </p>
+                      <p class="claimed-number" v-if="op.redpacket.type === 'erc721'">
+                        Claimed:&nbsp;
+                        <strong>{{ claimed(op.redpacket) }}/{{ total(op.redpacket) }}</strong>
+                        &nbsp;Share
+                      </p>
+                      <p class="claimed-number-left" v-if="op.redpacket.type === 'erc20'">
+                        Left:&nbsp;
+                        <strong>{{ normalize(op.redpacket.state?.balance || op.redpacket.metadata.balance, op.redpacket.token) }}</strong>
+                        &nbsp;{{ op.redpacket.token.symbol }}
+                      </p>
+                      <p class="claimed-number-left" v-if="op.redpacket.type === 'erc721'">
+                        Left:&nbsp;
+                        <strong>{{ op.redpacket.state?.claimsLeft || total(op.redpacket) }}</strong>
+                        &nbsp;
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
+
 
             <div v-if="op.type == 'claim_redpacket' && width > 990" class="record-box">
               <div class="status-icon" style="display: block; position: relative;">
@@ -344,109 +336,87 @@
                 </div>
               </div>
             </div>
-            <div v-if="op.type == 'claim_redpacket' && width <= 990" class="record-box" style="margin-right: 0.5rem; height: auto; align-items: flex-start;">
-              <div class="status-icon" style="display: block; position: relative;">
-                <div class="icon" :style="showClaimStatus(op) == 'Error' ? 'background-color: #FD4755;' : ''">
-                  <img v-if="showClaimStatus(op) != 'Claimed' && showClaimStatus(op) != 'Error'"
-                    src="@/assets/svg/claimRedpacketPending.svg" />
-                  <img v-if="showClaimStatus(op) == 'Claimed'" src="@/assets/svg/claimRedpacketClaimed.svg" />
-                  <img v-if="showClaimStatus(op) == 'Error'" src="@/assets/svg/claimRedpacketError.svg" />
-                </div>
+            <div v-if="op.type == 'claim_redpacket' && width <= 990" class="mobile-record-box" style="display: flex; border-top: 1px solid #e5e7eb; padding: 0.5rem 1rem 0 0; flex-direction: column;">
+              <div class="created-info" style="display: flex; align-items: center; width: 100%; padding-right: 0.5rem; justify-content: space-between;">
+                  <div class="status" style="display: flex; flex-direction: row; align-items: center;">
+                    <div class="sending-status">
+                      <img v-if="showClaimStatus(op) != 'Claimed' && showClaimStatus(op) != 'Error'" src="@/assets/svg/claimRedpacketPending-small.svg"/>
+                      <div v-if="showClaimStatus(op) == 'Claimed'" class="mobile-icon">
+                        <img src="@/assets/svg/claimRedpacketClaimed-small.svg" />
+                      </div>
+                      <div v-if="showStatus(op) == 'Error'" class="mobile-icon" style="background-color: rgb(253, 71, 85);">
+                        <img src="@/assets/svg/claimRedpacketError-small.svg" />
+                      </div>
+                    </div>
+                    <div class="created-info" style="display: flex; align-items: center; margin-left: 0.5rem;">
+                      <div class="sent-info">
+                        <div class="info-1">
+                          {{ showClaimStatus(op) }}
+                        </div>
+                      </div>
+                    </div>
+                    <div class="timestamp" style="color: #6a6d7c; white-space: nowrap; margin-left: 0; font-size: 12px; margin-left: 0.5rem;">
+                      <div style="display: flex;">{{ new Date(op.createdAt).toLocaleString().split(',')[1] }}</div>
+                    </div>
+                  </div>
+                  <div class="callToAction">
+                    <i v-if="showStatus(op) == 'Sent'" class="fa fa-paper-plane share-button" aria-hidden="true" @click="share(op.redpacket)"></i>
+                    <a-tooltip v-if="showStatus(op) != 'Sent' && showStatus(op) != 'Pending'" placement="top">
+                      <template #title>
+                        <span>
+                          Check on blockchain explorer
+                        </span>
+                      </template>
+                      <a :href="useChainStore().chain.blockExplorerUrls[0] + '/tx/' + op.tx" target="_blank">
+                        <i class="fa-solid fa-arrow-up-from-bracket"></i>
+                      </a>
+                    </a-tooltip>
+                  </div>
               </div>
-              <div style="width: 100%; margin-left: 0.875rem; margin-right: 0.5rem;">
-                <div class="action-and-time">
-                  <div style="display: flex;">
-                    <div class="sent-info">
-                      <div class="info-1">
-                        {{ showClaimStatus(op) }}
+              <div class="created-content" style="display: flex; align-items: center; flex-direction: row; justify-content: space-between; margin: 10px 0px;">
+                <div class="received" style="width: 35%;">
+                  <div v-if="op.redpacket.type === 'erc20'" class="sent-info" style="align-items: center;">
+                    <div class="token-icon" style="margin-right: 0rem; margin-left: 0rem; width: 32px; height: 32px;">
+                      <img :src="op.redpacket.token.logoURI">
+                    </div>
+                    <span style="margin-left: 0.5rem;" v-if="showClaimStatus(op) != 'Error'">+ {{ normalizeClaimAmount(op).toString() }}</span>
+                  </div>
+                  <div v-if="op.redpacket.type === 'erc721'" style="display: flex; align-items: center;">
+                    <div style="display: flex; align-items: center;">
+                      <div class="nft">
+                        <a-tooltip placement="top">
+                          <template #title>
+                            <img :src="ipfsUrl(op.redpacket.metadata.tokenURI)" style="max-width: 100px;" :size="64"
+                              referrerpolicy="no-referrer" rel="preload" />
+                          </template>
+                          <span class="thumb" style="width: 32px; height: 32px; border-radius: 5px; border: 2px solid #D9D9D9;">
+                            <img :src="ipfsUrl(op.redpacket.metadata.tokenURI)" style="border-radius: 5px;" :size="64"
+                              referrerpolicy="no-referrer" rel="preload" />
+                          </span>
+                        </a-tooltip>
+                      </div>
+                      <div style="display: flex; flex-direction: column; margin-left: 0.5rem;">
+                        <span class="from-text" style="margin-left: 0rem;">{{ op.redpacket.metadata.name }}</span>
+                        <span style="font-size: 12px; color: rgb(100,116,139)">{{ op.redpacket.metadata.symbol }}#{{ op.claim?.claimed }}</span>
                       </div>
                     </div>
-                  </div>
-                  <div style="color: #6a6d7c; white-space: nowrap; margin-left: 0; font-size: 12px; margin-left: 0.5rem;">
-                    <div style="display: flex;">{{ new Date(op.createdAt).toLocaleString().split(',')[1] }}</div>
                   </div>
                 </div>
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-right: 0.5rem; width: 100%;">
-                  <div style="display: flex; margin-right: 0.5rem; flex-direction: column; width: 100%;">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                      <div class="token-amount" v-if="op.claim"
-                        style="margin-left: 0rem; flex-direction: column; align-items: flex-start; justify-content: center;">
-                        <div class="sent-info" v-if="op.redpacket.type === 'erc20' && showClaimStatus(op) == 'Claimed'">
-                          Amount:
-                          <a-tooltip placement="top">
-                            <template #title>
-                              <span>
-                                Amount: {{ normalizeClaimAmount(op) }}
-                              </span>
-                            </template>
-                            <div
-                              style="overflow: auto; white-space: nowrap; margin-left: 0.25rem; width: 50px;display: flex;justify-content: flex-end;">
-                              + {{ prettyPrintNumber(normalizeClaimAmount(op).toString()) }}
-                            </div>
-                          </a-tooltip>
-                          <div class="token-icon" style="margin-right: 0.25rem; margin-left: 0.25rem;">
-                            <img :src="op.redpacket.token?.logoURI || ipfsUrl(op.redpacket.metadata.tokenURI)">
-                          </div>
-                        </div>
-                        <div v-if="op.redpacket.type === 'erc721' && showClaimStatus(op) == 'Claimed'"
-                          style="display: flex; align-items: center;">
-                          Collection:
-                          <span class="from-text">{{ op.redpacket.metadata.name }}</span>
-                        </div>
-                        <div v-if="op.redpacket.type === 'erc721' && showClaimStatus(op) == 'Claimed'"
-                          style="display: flex; align-items: center;">
-                          NFT:
-                          <span class="from-text" style="color: rgb(100,116,139)">
-                            {{ op.redpacket.metadata.symbol }}#{{ op.claim?.claimed }}
-                          </span>
-                        </div>
-                      </div>
-                      <i v-if="showClaimStatus(op) == 'Claimed'" class="fa fa-paper-plane share-button" aria-hidden="true"
-                        @click="share(op.redpacket)"></i>
-                      <i v-if="showClaimStatus(op) != 'Claimed'" class="fa fa-paper-plane share-button" aria-hidden="true"
-                        @click="share(op.redpacket)"></i>
-                      <a-tooltip v-if="showClaimStatus(op) != 'Claimed' && showStatus(op) != 'Pending'" placement="top">
-                        <template #title>
-                          <span>
-                            Check on blockchain explorer
-                          </span>
-                        </template>
-                        <a :href="useChainStore().chain.blockExplorerUrls[0]+'/tx/'+op.tx" target="_blank">
-                          <i class="fa-solid fa-arrow-up-from-bracket"></i>
-                        </a>
-                      </a-tooltip>
-                    </div>
-                    <div class="claim-status" v-if="op.claim" :style="showClaimStatus(op) != 'Processing' ? 'margin: 10px 0;' : 'margin-bottom: 10px; margin-top: -10px;'">
-                      <div v-if="showClaimStatus(op) != 'Error'" style="display: flex; align-items: center;">
-                        <div v-if="op.redpacket.type === 'erc721'">
-                          <div style="display: flex; align-items: center;">
-                            <a-tooltip placement="top">
-                              <template #title>
-                                <img :src="ipfsUrl(op.redpacket.metadata.tokenURI)" style="max-width: 100px;" :size="64"
-                                  referrerpolicy="no-referrer" rel="preload" />
-                              </template>
-                              <span class="thumb">
-                                <img :src="ipfsUrl(op.redpacket.metadata.tokenURI)" style="border: 2px solid #D9D9D9; border-radius: 5px;"
-                                  :size="64" referrerpolicy="no-referrer" rel="preload" />
-                              </span>
-                            </a-tooltip>
-                            <div class="arrow" style="margin-left: 0.5rem; margin-right: 0.5rem;">
-                              <img src="@/assets/svg/backwardArrow.svg" />
-                            </div>
-                          </div>
-                        </div>
-                        <div style="display: flex; align-items: center;">
-                          <span class="thumb">
-                            <img
-                              :src="op.redpacket.creator.logoURI ? op.redpacket.creator.logoURI : 'https://i.postimg.cc/15QJZwkN/profile.png'"
-                              :size="64" referrerpolicy="no-referrer" />
-                          </span>
-                          <div style="display: flex; flex-direction: column; margin-left: 0.5rem;">
-                            <span class="from-text" style="margin-left: 0rem;">From</span>
-                            <span style="font-size: 12px; color: rgb(100,116,139)">@{{ op.redpacket.creator.handle }}</span>
-                          </div>
-                        </div>
-                      </div>
+                <div class="arrow" style="width: 5%;">
+                  <img src="@/assets/svg/backwardArrow.svg"/>
+                </div>
+                <div class="from" style="width: 60%;">
+                  <div style="display: flex; align-items: center;">
+                    <span class="thumb">
+                      <img
+                        :src="op.redpacket.creator.logoURI ? op.redpacket.creator.logoURI : 'https://i.postimg.cc/15QJZwkN/profile.png'"
+                        :size="64" referrerpolicy="no-referrer" />
+                    </span>
+                    <div style="display: flex; flex-direction: column; margin-left: 0.5rem;">
+                      <span class="from-text" style="margin-left: 0rem;">From</span>
+                      <span style="font-size: 12px; color: rgb(100,116,139)">
+                        {{ useAuthStore().user?.provider == 'mailto' ? "" : "@" }}{{ op.redpacket.creator.handle.length > 18 ? op.redpacket.creator.handle.substring(0, 4) + '...' + op.redpacket.creator.handle.slice(-10) : op.redpacket.creator.handle }}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -464,7 +434,6 @@ import { ref, watch, onMounted } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
 import { loadErc20Token } from '@/web3/tokens';
 import { useChainStore } from "@/stores/chain";
-
 import type { ClaimRedPacketOp, CreateRedPacketOp, RedPacketDB } from '@/types';
 import Loading from "@/components/Loading.vue";
 import { useAccountStore } from '@/stores/account';
@@ -480,11 +449,9 @@ import { useWindowSize } from '@vueuse/core'
 import router from '@/router';
 import { useStatusStore } from '@/stores/airdropStatus';
 import EmptyContent from '@/components/EmptyContent.vue';
-
 import { getCreatedRedPackets } from '@/graphql/redpacket';
 import { getClaimedRedPackets } from '@/graphql/redpacketClaim';
 import { getOpStatus, getClaimByOp } from "@/graphql/operation";
-
 import { storeToRefs } from 'pinia'
 import { useRedPacketStore } from '@/stores/redpacket';
 import type { RedPacketErc721 } from 'functions/redpacket/lib/types';
@@ -497,7 +464,7 @@ const claimedByDate = ref<any>([]);
 const luckHistoryByDate = ref<any>([]);
 const createdCount = ref<number>(0);
 const claimedCount = ref<number>(0);
-const { width } = useWindowSize()
+const { width } = useWindowSize();
 
 const loadCreatedInfo = async() => {
   const rps : CreateRedPacketOp[] = await getCreatedRedPackets();
@@ -516,14 +483,16 @@ const loadData = async function() {
     await loadClaimInfo();
   }
   loading.value = false;
-  postProcess();
+  extractDate();
+  postData();
   await refreshData();
+  console.log("created: ", createdCount.value);
+  console.log("claimed: ", claimedCount.value);
 };
 
-const postProcess = async function() {
-  extractDate();
+const postData = () => {
   useStatusStore().setStatus([
-    {'Total Created': createdCount },
+    { 'Total Created': createdCount },
     { 'Total Claimed': claimedCount }
   ]);
 }
@@ -577,7 +546,7 @@ const refreshData = async () => {
     await refreshData();
   } else {
     refreshing.value = "done";
-    postProcess();
+    postData();
   }
 };
 
@@ -599,9 +568,8 @@ watch(status, async (newStatus, _) => {
           }));
       }
     }
-    postProcess();
     if (refreshing.value === 'done') {
-      refreshData();
+      postData();
     } else if (refreshing.value === 'running') {
       refreshing.value = "scheduled";
     }
@@ -623,7 +591,7 @@ watch(claimStatus, async (newStatus, _) => {
           }));
       }
     }
-    postProcess();
+    postData()
     if (refreshing.value === 'done') {
       refreshData();
     } else if (refreshing.value === 'running') {
@@ -639,7 +607,9 @@ const extractDate = () => {
   const claimedOrderedGroup: any = {}
   claimedRpOps.value.forEach((op) => {
     if(op.error == null) {
-      claimedCount.value += 1;
+      if (op.type == "claim_redpacket") {
+        claimedCount.value += 1
+      }
     }
     const date = new Date(op.createdAt).toLocaleString().split(',')[0];
     if (date in claimGroup) {
@@ -661,7 +631,9 @@ const extractDate = () => {
 
   createdRpOps.value.forEach((op) => {
     if (op.error == null) {
-      createdCount.value += 1;
+      if (op.type == "create_redpacket") {
+        createdCount.value += 1;
+      }
     }
     const date = new Date(op.createdAt).toLocaleString().split(',')[0];
     if (date in sentGroup) {
@@ -845,6 +817,15 @@ const openRedpacket = (op: any) => {
 </script>
 
 <style lang="less" scoped>
+.mobile-icon {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 55px;
+  border-width: 1px;
+  background-color: #4BAE4F; }
 .loader {
   margin: 0 0 2em;
   height: 100px;
@@ -861,7 +842,7 @@ const openRedpacket = (op: any) => {
   font-weight: 800;
   // margin-left: 5.5rem;
   text-align: center;
-  color: #076AE0; }
+  color: rgb(253, 71, 85);; }
 .claim-mode {
   display: flex;
   margin: 0px;
@@ -884,7 +865,8 @@ i:hover {
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
-  color: rgb(15, 23, 42); }
+  color: rgb(15, 23, 42);
+  line-height: 1.25rem; }
 .thumb {
   display: flex;
   overflow: hidden;

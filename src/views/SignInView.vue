@@ -148,12 +148,14 @@ const countDownTimer = () => {
 
 const sendOTP = async () => {
     if(email.value != "") {
-        show.value = !show.value;
-        countDownTimer();
         const result = await genOTP(email.value);
         if (result === 429) {
             console.error("Too many requests to send otp.");
             createNotification("Too many requests to send otp.", "error");
+        }
+        else if (result === 200) {
+            show.value = !show.value;
+            countDownTimer();
         }
     } else {
         createNotification("Please enter email to continue", "error");

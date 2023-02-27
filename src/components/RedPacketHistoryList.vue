@@ -483,8 +483,12 @@ const loadData = async function() {
     await loadClaimInfo();
   }
   loading.value = false;
+  useStatusStore().setStatus([
+    { 'Total Created': createdCount },
+    { 'Total Claimed': claimedCount }
+  ]);
+  // postData();
   extractDate();
-  postData();
   await refreshData();
   console.log("created: ", createdCount.value);
   console.log("claimed: ", claimedCount.value);
@@ -546,7 +550,7 @@ const refreshData = async () => {
     await refreshData();
   } else {
     refreshing.value = "done";
-    postData();
+    extractDate();
   }
 };
 
@@ -569,7 +573,7 @@ watch(status, async (newStatus, _) => {
       }
     }
     if (refreshing.value === 'done') {
-      postData();
+      extractDate();
     } else if (refreshing.value === 'running') {
       refreshing.value = "scheduled";
     }
@@ -591,7 +595,7 @@ watch(claimStatus, async (newStatus, _) => {
           }));
       }
     }
-    postData()
+    extractDate()
     if (refreshing.value === 'done') {
       refreshData();
     } else if (refreshing.value === 'running') {

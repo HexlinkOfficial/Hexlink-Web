@@ -414,7 +414,9 @@
                     </span>
                     <div style="display: flex; flex-direction: column; margin-left: 0.5rem;">
                       <span class="from-text" style="margin-left: 0rem;">From</span>
-                      <span style="font-size: 12px; color: rgb(100,116,139)">@{{ op.redpacket.creator.handle }}</span>
+                      <span style="font-size: 12px; color: rgb(100,116,139)">
+                        {{ useAuthStore().user?.provider == 'mailto' ? "" : "@" }}{{ op.redpacket.creator.handle.length > 18 ? op.redpacket.creator.handle.substring(0, 4) + '...' + op.redpacket.creator.handle.slice(-10) : op.redpacket.creator.handle }}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -432,7 +434,6 @@ import { ref, watch, onMounted } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
 import { loadErc20Token } from '@/web3/tokens';
 import { useChainStore } from "@/stores/chain";
-
 import type { ClaimRedPacketOp, CreateRedPacketOp, RedPacketDB } from '@/types';
 import Loading from "@/components/Loading.vue";
 import { useAccountStore } from '@/stores/account';
@@ -448,11 +449,9 @@ import { useWindowSize } from '@vueuse/core'
 import router from '@/router';
 import { useStatusStore } from '@/stores/airdropStatus';
 import EmptyContent from '@/components/EmptyContent.vue';
-
 import { getCreatedRedPackets } from '@/graphql/redpacket';
 import { getClaimedRedPackets } from '@/graphql/redpacketClaim';
 import { getOpStatus, getClaimByOp } from "@/graphql/operation";
-
 import { storeToRefs } from 'pinia'
 import { useRedPacketStore } from '@/stores/redpacket';
 import type { RedPacketErc721 } from 'functions/redpacket/lib/types';
@@ -465,7 +464,7 @@ const claimedByDate = ref<any>([]);
 const luckHistoryByDate = ref<any>([]);
 const createdCount = ref<number>(0);
 const claimedCount = ref<number>(0);
-const { width } = useWindowSize()
+const { width } = useWindowSize();
 
 const loadCreatedInfo = async() => {
   const rps : CreateRedPacketOp[] = await getCreatedRedPackets();

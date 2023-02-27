@@ -117,7 +117,7 @@ onMounted(async () => {
         statusTitle.value = "Total Created";
         statusData.value = "0";
     }
-    await delay(1000);
+    await delay(2000);
     loading.value = false;
 })
 </script>

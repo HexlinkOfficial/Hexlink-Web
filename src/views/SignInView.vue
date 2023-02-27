@@ -1,6 +1,6 @@
 <template>
   <div class="login-card" :style="{ backgroundImage: `url(${background})` }">
-    <div class="card">
+    <div class="card" :style="!show ? 'display: flex; align-items: center; justify-content: center;' : ''">
       <form @submit="onSubmit">
         <transition name="fade">
             <div v-if="show" class="step1">
@@ -37,7 +37,7 @@
                     </div>
                     <p v-if="!isResendLink" class="resend-plain">Resend the verification code in {{ countDown }}s.</p>
                     <a v-if="isResendLink" class="resend" @click="resendOTP">Resend the verification code.</a>
-                    <Button class="cta-btn" type="primary" :loading="isLoading" :disabled="isDisabled" @click="verifyOTP">
+                    <Button class="cta-btn" style="margin-bottom: 0px;" type="primary" :loading="isLoading" :disabled="isDisabled" @click="verifyOTP">
                         Verify
                     </Button>
                     <p v-if="isRateExceeded" style="color: #FF5C5C; text-align: center;">Too many attempts. Please wait for five minutes.</p>
@@ -203,15 +203,14 @@ const verifyOTP = async () => {
 .fade-enter-from, .fade-leave-to  {
   display: none;}
 input[type="number"] {
-  width: 50px;
-  height: 50px;
+  width: 40px;
+  height: 40px;
   font-size: 2rem;
   text-align: center;
   border-radius: 0.5rem;
   box-shadow: none;
   border: 1px solid #999;
-  margin-top: 8px;
-  margin-bottom: 25px;
+  margin: 8px 5px 25px 8px;
   caret-color: transparent !important; }
 /* Chrome, Safari, Edge, Opera */
 input::-webkit-outer-spin-button,
@@ -231,7 +230,7 @@ input[type="number"] {
 a {
     text-decoration: none; }
 .card {
-    width: 450px;
+    width: 350px;
     border-radius: 15px;
     background-color: #ffff;
     padding: 1.8rem;
@@ -240,7 +239,7 @@ a {
 .subtitle {
   text-align: center;
   font-weight: bold;
-  margin-bottom: 30px; }
+  margin-bottom: 20px; }
 .resend {
   text-align: center; }
 .resend-plain {

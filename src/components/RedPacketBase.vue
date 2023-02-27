@@ -257,9 +257,7 @@ onMounted(() => {
 .token-list .title .title-col .content .text {
     font-size: 1.25rem;
     line-height: 1.75rem;
-    font-weight: 600;
-    @media (max-width: 768px) {
-      width: 9rem; } }
+    font-weight: 600; }
 .token-list .title .title-col .content img {
     display: inline-flex;
     transition-property: background-color, border-color, color, fill, stroke;

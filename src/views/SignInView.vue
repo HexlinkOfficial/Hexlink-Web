@@ -19,7 +19,9 @@
                 <div class="email-login">
                     <input type="text" v-model="email" placeholder="Enter Email" name="uname" class="email-input" required>
                 </div>
-                <button class="cta-btn" @click="sendOTP">Log In</button>
+                <Button class="cta-btn" :loading="isLoadingLogin" @click="sendOTP">
+                    Log In
+                </Button>
             </div>
         </transition>
         <transition name="fade">
@@ -73,6 +75,7 @@ const isRateExceeded = ref<boolean>(false);
 const isDisabled = ref<boolean>(true);
 const otpValidataionFailed = ref<boolean>(false);
 const countDown = ref<number>(60);
+const isLoadingLogin = ref(false);
 const isLoading = ref(false);
 
 const onSubmit = (e: Event) => {
@@ -148,6 +151,7 @@ const countDownTimer = () => {
 
 const sendOTP = async () => {
     if(email.value != "") {
+        isLoadingLogin.value = true;
         const result = await genOTP(email.value);
         if (result === 429) {
             console.error("Too many requests to send otp.");

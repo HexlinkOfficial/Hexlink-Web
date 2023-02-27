@@ -21,6 +21,8 @@ import { useChainStore } from '@/stores/chain';
 import { initTokenList } from "@/web3/tokens";
 import { useAccountStore } from '@/stores/account';
 import { useTokenStore } from '@/stores/token';
+import { useStatusStore } from '@/stores/airdropStatus';
+import { useNftStore } from '@/stores/nft';
 import * as jose from 'jose'
 
 const auth = getAuth(app)
@@ -155,6 +157,8 @@ export function signOutFirebase() {
     useAccountStore().reset();
     useTokenStore().reset();
     useChainStore().reset();
+    useStatusStore().reset();
+    useNftStore().reset();
     return signOut(auth);
 }
 

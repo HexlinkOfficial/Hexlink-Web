@@ -226,7 +226,7 @@
                       </p>
                       <p class="claimed-number-left" v-if="op.redpacket.type === 'erc721'">
                         Left:&nbsp;
-                        <strong>{{ op.redpacket.state.claimsLeft || total(op.redpacket) }}</strong>
+                        <strong>{{ op.redpacket.state?.claimsLeft || total(op.redpacket) }}</strong>
                         &nbsp;
                       </p>
                     </div>

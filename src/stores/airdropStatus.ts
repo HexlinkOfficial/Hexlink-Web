@@ -20,5 +20,11 @@ export const useStatusStore = defineStore({
     setStatus(statusArr: any) {
       this.status = statusArr;
     },
+    reset() {
+      this.status = [
+      { 'Total Created': 0 },
+      { 'Total Claimed': 0 }
+    ]
+    }
   },
 })

@@ -494,6 +494,14 @@ const loadData = async function() {
   await refreshData();
 };
 
+const postData = () => {
+  extractDate();
+  useStatusStore().setStatus([
+    { 'Total Created': createdCount },
+    { 'Total Claimed': claimedCount }
+  ]);
+}
+
 const refreshing = ref<string>("done");
 async function delay(ms: number) {
   return new Promise((resolve, _reject) => {
@@ -543,7 +551,7 @@ const refreshData = async () => {
     await refreshData();
   } else {
     refreshing.value = "done";
-    postProcess();
+    postData();
   }
 };
 
@@ -565,7 +573,7 @@ watch(status, async (newStatus, _) => {
           }));
       }
     }
-    postProcess();
+    postData();
     if (refreshing.value === 'done') {
       refreshData();
     } else if (refreshing.value === 'running') {
@@ -589,7 +597,7 @@ watch(claimStatus, async (newStatus, _) => {
           }));
       }
     }
-    postProcess();
+    postData()
     if (refreshing.value === 'done') {
       refreshData();
     } else if (refreshing.value === 'running') {

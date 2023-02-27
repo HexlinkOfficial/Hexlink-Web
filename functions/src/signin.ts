@@ -90,8 +90,8 @@ export const genOTP = functions.https.onCall(async (data, context) => {
                                             <h1 style="color:#1e1e2d; font-weight:500; margin:0;font-size:32px;font-family:'Rubik',sans-serif;">Get started
                                             </h1>
                                             <p style="font-size:15px; color:#455056; margin:8px 0 0; line-height:24px;">
-                                                Thank you for choosing Hexlink. Use the following OTP to complete your Log in procedures. 
-                                                <br><strong>OTP is valid for 5 minutes</strong>.</p>
+                                                Thank you for choosing Hexlink. Use the following verification code to complete your Log in procedures. 
+                                                <br><strong>Code is valid for 5 minutes</strong>.</p>
                                             <span
                                                 style="display:inline-block; vertical-align:middle; margin:29px 0 26px; border-bottom:1px solid #cecece; width:100px;"></span>
                                             <p

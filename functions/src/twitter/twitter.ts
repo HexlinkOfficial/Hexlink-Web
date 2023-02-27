@@ -5,6 +5,7 @@ import {
   TwitterFollowers,
   TwitterFriendship,
   TwitterTweet,
+  TwitterUserFromId,
   TwitterUser} from "./types";
 import {
   GET_FOLLOWERS_V2_URL,
@@ -82,7 +83,7 @@ const getFollowers = async function(userId: string) {
 
 export const getUserById = async function(userId: string) {
   const requestUrl = GET_USERNAME_BY_ID_V2_URL + userId;
-  return await twitterApiCall(requestUrl) as TwitterUser;
+  return await twitterApiCall(requestUrl) as TwitterUserFromId;
 };
 
 const getFriendshipsFromTwitter = async function(
@@ -161,7 +162,7 @@ const getTweetFromUrl = async function(retweetUrl: string,
 
 const twitterApiCall =
   async function(requestUrl: string) : Promise<TwitterFriendship |
-      TwitterTweet | TwitterUser | TwitterFollowers> {
+      TwitterTweet | TwitterUser | TwitterFollowers | TwitterUserFromId> {
     return new Promise((resolve, reject) => {
       oauth().get(
           requestUrl,

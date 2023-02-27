@@ -22,6 +22,14 @@ interface TwitterUserBase {
   created_at: string
 }
 
+export interface TwitterUserFromId extends TwitterUserBase {
+  data: {
+    id: string,
+    name: string,
+    username: string,
+  }
+}
+
 export interface TwitterUser extends TwitterUserBase {
   data: {
     id: string,

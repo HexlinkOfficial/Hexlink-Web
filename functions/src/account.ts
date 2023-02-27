@@ -35,7 +35,7 @@ export interface Error {
 
 async function getTwitterHandle(uid: string) : Promise<string> {
   const user = await getTwitterUserById(uid);
-  return user.username;
+  return user.data?.username;
 }
 
 export async function genNameHash(
@@ -69,6 +69,9 @@ export async function genNameHash(
         return {code: 400, message: "identity type not match"};
       }
       const handle = await getTwitterHandle(userInfo.uid);
+      if (!handle) {
+        return {code: 400, message: "twitter user not found"};
+      }
       const name = calcNameHash(TWITTER_PROVIDER_ID, handle, version);
       return {code: 200, nameHash: name};
     }

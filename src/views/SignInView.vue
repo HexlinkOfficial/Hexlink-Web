@@ -8,7 +8,7 @@
                     <img :src="hexlink" style="width:2.5rem; height: 2.5rem;" />
                 </div>
                 <h2 class="title">Welcome To HexLink</h2>
-                <p class="subtitle">Address-less experience with Hexlink Auth Protocal</p>
+                <p class="subtitle">Crypto for everyone</p>
                 <div class="social-login">
                     <button size="large" @click="twitter_login" className="twitter-btn">
                         <i class="fa fa-twitter"></i>

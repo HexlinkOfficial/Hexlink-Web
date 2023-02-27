@@ -1,12 +1,16 @@
 <template>
   <div className="app">
-    <div id="preloader" v-show="isLoading"><i>.</i><i>.</i><i>.</i></div>
+    <div id="preloader" v-show="isLoading">
+      <Loading />
+    </div>
+    
     <router-view />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
+import Loading from "@/components/Loading.vue";
 
 const isLoading = ref<boolean>(true);
 
@@ -24,6 +28,9 @@ onMounted(() => {
 
 #preloader {
   position: fixed;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 100%;
   height: 100%;
   left: 0;

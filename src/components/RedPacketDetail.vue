@@ -11,13 +11,17 @@
       <img src="@/assets/svg/gift.svg"/>
     </div>
     <h2 class="transition">
-      <span>
-        Sent by @{{ redPacket?.creator?.handle }}
-        <a class="twitter-link" :href="'https://twitter.com/' + redPacket?.creator?.handle">
+      <span style="margin-top: -10px; font-size: 15px; font-weight: 600;">From</span>
+      <span style="display: flex; margin: 5px 0px; align-items: center;">
+        {{ checkIfEmail() ? "" : "@" }}
+        <span class="sender" @click="copy(redPacket?.creator?.handle ? redPacket?.creator?.handle! : '', 'Copied!')">
+          <b>{{ prettyPrint(redPacket?.creator?.handle ? redPacket?.creator?.handle! : "Anonymous", 30, 4, -10)}}</b>
+        </span>
+        <a v-if="!checkIfEmail()" class="twitter-link" :href="'https://twitter.com/' + redPacket?.creator?.handle" style="margin-left: 5px;">
           <i className="fa fa-twitter"></i>
         </a>
       </span>
-      <div style="padding: 10px 5px 5px 5px; display: flex; align-items: center;">
+      <div style="padding: 5px 5px 5px 5px; display: flex; align-items: center;">
         <img src="https://i.postimg.cc/RhXfgJR1/gas-pump.png" data-v-c8c9ceac="" style="width: 20px; height: 20px;">
         <span style="font-size: 15px;">
           Gas left: {{ gasLeftNormalized }}
@@ -97,6 +101,8 @@ import type { RedPacket } from "../../functions/redpacket";
 import { queryRedPacketInfo, queryErc721RedPacketInfo, refundRedPacket } from "@/web3/redpacket";
 import { BigNumber } from "bignumber.js";
 import { useChainStore } from "@/stores/chain";
+import { checkIfEmail, prettyPrint } from '@/services/util';
+import { copy } from "@/web3/utils";
 
 const redPacket = ref<RedPacketDB | undefined>();
 const claimers = ref<RedPacketClaim[]>();
@@ -159,6 +165,16 @@ onMounted(loadData);
 </script>
 
 <style lang="less" scoped>
+.sender {
+  margin-bottom: 0;
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+  background-color: #F3F4F6;
+  font-size: 1rem;
+  line-height: 1.25rem;
+  border-radius: 0.5rem; }
 .cta-button {
   margin-top: 10px;
   padding: 8px;

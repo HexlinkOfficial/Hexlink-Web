@@ -19,7 +19,7 @@
                 <div class="email-login">
                     <input type="text" v-model="email" placeholder="Enter Email" name="uname" class="email-input" required>
                 </div>
-                <Button class="cta-btn" :loading="isLoadingLogin" @click="sendOTP">
+                <Button class="cta-btn" type="primary" :loading="isLoadingLogin" :disabled="loginDisabled" @click="sendOTP">
                     Log In
                 </Button>
             </div>
@@ -53,7 +53,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { Button } from 'ant-design-vue';
 import { twitterSocialLogin, signOutFirebase, genOTP, validateOTP } from '@/services/auth'
@@ -77,6 +77,7 @@ const otpValidataionFailed = ref<boolean>(false);
 const countDown = ref<number>(60);
 const isLoadingLogin = ref(false);
 const isLoading = ref(false);
+const loginDisabled = ref<boolean>(true);
 
 const onSubmit = (e: Event) => {
     e.preventDefault();
@@ -199,6 +200,14 @@ const verifyOTP = async () => {
         isLoading.value = false;
     }
 }
+
+watch(email, () => {
+    if (email.value == "") {
+        loginDisabled.value = true;
+    } else {
+        loginDisabled.value = false;
+    }
+})
 </script>
 
 <style lang="less" scoped>

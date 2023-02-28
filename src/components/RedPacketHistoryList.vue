@@ -466,6 +466,7 @@ import { storeToRefs } from 'pinia'
 import { useRedPacketStore } from '@/stores/redpacket';
 import type { RedPacketErc721 } from 'functions/redpacket/lib/types';
 import { useAuthStore } from '@/stores/auth';
+import { prettyPrint, checkIfEmail } from '@/services/util';
 
 const createdRpOps = ref<CreateRedPacketOp[]>([]);
 const claimedRpOps = ref<ClaimRedPacketOp[]>([]);
@@ -823,22 +824,6 @@ const aggregatedClaimed = async function(
 
 const openRedpacket = (op: any) => {
   router.push({ query: { details: op.redpacket.id } });
-}
-
-const checkIfEmail = () => {
-  if(useAuthStore().user?.provider == 'mailto'){
-    return true;
-  } else {
-    return false;
-  }
-}
-
-const prettyPrint = (input: string, length: number, firstCut: number, secondCut: number) => {
-  if (input.length > length) {
-    return input.substring(0, firstCut) + "..." + input.slice(secondCut)
-  } else {
-    return input;
-  }
 }
 </script>
 

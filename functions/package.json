@@ -7,6 +7,7 @@
     "build-all": "rimraf lib && npm run build-deps && npm run lint && tsc",
     "build:watch": "tsc --watch",
     "serve": "CLOUD_RUNTIME_CONFIG=\"$(doppler secrets download --no-file | jq '{doppler: .}')\" firebase emulators:start --only functions,auth",
+    "serve2": "CLOUD_RUNTIME_CONFIG=\"$(doppler secrets download --no-file | jq '{doppler: .}')\" firebase emulators:start --only functions",
     "shell": "CLOUD_RUNTIME_CONFIG=\"$(doppler secrets download --no-file | jq '{doppler: .}')\" firebase functions:shell",
     "start": "npm run shell",
     "secrets-sync": "firebase functions:config:unset doppler && firebase functions:config:set doppler=\"$(doppler secrets download --config prd --no-file)\"",

@@ -93,10 +93,6 @@
                       <strong>{{ claimed(op.redpacket) }}/{{ total(op.redpacket) }}</strong>
                       &nbsp;Share
                     </p>
-                    <p class="claim-mode" v-if="op.redpacket.type === 'erc20'">
-                      Mode:&nbsp;
-                      <strong>{{ op.redpacket.metadata.mode == 2 ? 'Random' : 'Equal' }}</strong>
-                    </p>
                     <p class="claimed-number-left" v-if="op.redpacket.type === 'erc20'">
                       Left:&nbsp;
                       <strong>{{ normalize(op.redpacket.state?.balanceLeft || op.redpacket.metadata.balance, op.redpacket.token) }}</strong>
@@ -726,7 +722,7 @@ const claimed = (rp: RedPacketDB) => {
 }
 
 const progress = (rp: RedPacketDB) => {
-  return claimed(rp) / total(rp) *100
+  return claimed(rp) / total(rp) * 100
 }
 
 const showStatus = (op: any) => {

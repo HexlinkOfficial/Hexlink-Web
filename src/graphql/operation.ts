@@ -24,7 +24,7 @@ export const GET_ONE_OP = gql`
 
 export async function getOpStatus(opId: number) : Promise<Op> {
     const client = await setUrqlClientIfNecessary(
-      useAuthStore().user!.idToken!
+      useAuthStore().user?.idToken!
     );
     const result = await client.query(
       GET_ONE_OP,

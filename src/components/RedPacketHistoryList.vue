@@ -2,14 +2,14 @@
   <div v-if="loading" class="loading-state">
     <Loading />
   </div>
-  <div v-if="createdRpOps.length === 0 && !loading" style="display: flex; align-items: center; justify-content: center;">
+  <div v-if="!hasData && !loading" style="display: flex; align-items: center; justify-content: center;">
     <EmptyContent 
       title="Start by receiving the first token"
       message="Unlocking the potential of Hexlink by depositing your first token or claim your first airdrop"
     >
     </EmptyContent>
   </div>
-  <div v-if="createdRpOps.length != 0 && !loading" class="token-listDetail">
+  <div v-if="hasData && !loading" class="token-listDetail">
     <div class="token-table">
       <div style="overflow: visible; border-radius: 0.75rem;">
         <div v-for="(value, name, index) in luckHistoryByDate" :key="index" style="position: relative; ">
@@ -430,7 +430,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, watch, onMounted } from 'vue';
+import { ref, watch, onMounted, computed } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
 import { loadErc20Token } from '@/web3/tokens';
 import { useChainStore } from "@/stores/chain";
@@ -487,17 +487,13 @@ const loadData = async function() {
     { 'Total Created': createdCount },
     { 'Total Claimed': claimedCount }
   ]);
-  // postData();
   extractDate();
   await refreshData();
 };
 
-const postData = () => {
-  useStatusStore().setStatus([
-    { 'Total Created': createdCount },
-    { 'Total Claimed': claimedCount }
-  ]);
-}
+const hasData = computed(() => {
+  return createdRpOps.value.length > 0 || claimedRpOps.value.length > 0;
+});
 
 const refreshing = ref<string>("done");
 async function delay(ms: number) {

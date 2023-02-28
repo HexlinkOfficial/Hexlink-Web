@@ -50,7 +50,7 @@
                           Amount: {{ normalizedDbBalance(op) }}
                         </span>
                       </template>
-                      <div style="overflow: auto; white-space: nowrap; margin-left: 0.25rem; width: 50px;display: flex;justify-content: flex-end;">
+                      <div style="overflow: auto; white-space: nowrap; margin-left: 0.25rem; width: 60px;display: flex;justify-content: flex-end;">
                         - {{ prettyPrintNumber(normalizedDbBalance(op).toString()) }}
                       </div>
                     </a-tooltip>
@@ -269,7 +269,7 @@
                         </span>
                       </template>
                       <div
-                        style="overflow: auto; white-space: nowrap; margin-left: 0.25rem; width: 50px;display: flex;justify-content: flex-end;">
+                        style="overflow: auto; white-space: nowrap; margin-left: 0.25rem; width: 60px;display: flex;justify-content: flex-end;">
                         + {{ prettyPrintNumber(normalizeClaimAmount(op).toString()) }}
                       </div>
                     </a-tooltip>

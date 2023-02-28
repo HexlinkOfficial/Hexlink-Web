@@ -88,8 +88,6 @@ export function getChain(chain: string | number) : Chain {
     return POLYGON;
   } else if (chain === "mumbai" || chain == "80001") {
     return MUMBAI;
-  } else if (chain === "mumbai" || chain == "80001") {
-    return MUMBAI;
   } else if (chain === "galileo" || chain == "3334") {
     return GALILEO;
   }

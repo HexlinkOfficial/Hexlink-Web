@@ -46,6 +46,19 @@ export async function hexlAccount(
   return acc;
 }
 
+export async function setAccountOwner(
+    provider: Provider,
+    account: Account
+): Promise<Account> {
+  const address = account.address;
+  account.isContract = await isContract(provider, address);
+  if (account.isContract) {
+    const contract = accountContract(provider, address);
+    account.owner = await contract.owner();
+  }
+  return account;
+}
+
 export function encodeInit(owner: string, data: string) {
   return accountInterface.encodeFunctionData(
     "init",

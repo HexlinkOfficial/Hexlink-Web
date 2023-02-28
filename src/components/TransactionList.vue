@@ -252,7 +252,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import Loading from "@/components/Loading.vue";
 import { getAssetTransfers, loadTokenLogo } from '@/web3/tokens';
 import { useTokenStore } from '@/stores/token';
@@ -355,6 +355,13 @@ onMounted(async () => {
   })
   await loadTransactions(tokens, useNftStore().contracts);
   console.log(transactionByDate.value);
+});
+watch(() => useChainStore().current, async () => {
+  var tokens: string[] = [];
+  useTokenStore().visiableTokens.forEach(t => {
+    tokens.push(t.address);
+  })
+  await loadTransactions(tokens, useNftStore().contracts);
 });
 </script>
 

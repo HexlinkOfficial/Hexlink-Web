@@ -342,7 +342,7 @@
               <div class="created-info" style="display: flex; align-items: center; width: 100%; padding-right: 0.5rem; justify-content: space-between;">
                   <div class="status" style="display: flex; flex-direction: row; align-items: center;">
                     <div class="sending-status">
-                      <img v-if="showClaimStatus(op) != 'Claimed' && showClaimStatus(op) != 'Error'" src="@/assets/svg/claimRedpacketPending-small.svg"/>
+                      <img v-if="showClaimStatus(op) != 'Claimed' && showClaimStatus(op) != 'Error'" src="@/assets/svg/claimRedpacketPending-small.svg" style="height: 1.25rem; width: 1.25rem;"/>
                       <div v-if="showClaimStatus(op) == 'Claimed'" class="mobile-icon">
                         <img src="@/assets/svg/claimRedpacketClaimed-small.svg" />
                       </div>
@@ -381,7 +381,8 @@
                     <div class="token-icon" style="margin-right: 0rem; margin-left: 0rem; width: 32px; height: 32px;">
                       <img :src="op.redpacket.token.logoURI">
                     </div>
-                    <span style="margin-left: 0.5rem;" v-if="showClaimStatus(op) != 'Error'">+ {{ normalizeClaimAmount(op).toString() }}</span>
+                    <span style="margin-left: 0.5rem;" v-if="showClaimStatus(op) == 'Claimed'">+ {{ normalizeClaimAmount(op).toString() }}</span>
+                    <span class="placeholder-content" style="margin-left: 0.5rem;" v-if="showClaimStatus(op) != 'Claimed' && showClaimStatus(op) != 'Error'"></span>
                   </div>
                   <div v-if="op.redpacket.type === 'erc721'" style="display: flex; align-items: center;">
                     <div style="display: flex; align-items: center;">
@@ -542,7 +543,7 @@ const refreshData = async () => {
   const completed = await updateData();
   if (!completed || refreshing.value === "scheduled") {
     refreshing.value = "scheduled";
-    await delay(3000);
+    await delay(5000);
     await refreshData();
   } else {
     refreshing.value = "done";
@@ -818,6 +819,24 @@ const openRedpacket = (op: any) => {
 </script>
 
 <style lang="less" scoped>
+.placeholder-content {
+  height: 20px;
+  width: 80px;
+  overflow: hidden;
+  background: #000;
+  position: relative;
+  // Animation
+  animation-duration: 1.5s;
+  animation-fill-mode: forwards;
+  animation-iteration-count: infinite;
+  animation-timing-function: linear;
+  animation-name: placeholderAnimate;
+  background: #f6f7f8; // Fallback
+  background: linear-gradient(to right, #eee 2%, #ddd 18%, #eee 33%);
+  background-size: 1300px; }
+@keyframes placeholderAnimate {
+  0%{ background-position: -650px 0; }
+  100%{ background-position: 650px 0; } }
 .mobile-icon {
   display: flex;
   justify-content: center;

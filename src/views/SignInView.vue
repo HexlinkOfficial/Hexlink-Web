@@ -5,15 +5,15 @@
         <transition name="fade">
             <div v-if="show" class="step1">
                 <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem;">
-                    <img :src="hexlink" style="width:2.5rem; height: 2.5rem;" />
+                    <img src="@/assets/svg/logo-beta.svg" style="height: 2.5rem;" />
                 </div>
                 <h2 class="title">Welcome To HexLink</h2>
                 <p class="subtitle">Crypto for everyone</p>
                 <div class="social-login">
-                    <button size="large" @click="twitter_login" className="twitter-btn">
+                    <Button size="large" @click="twitter_login" type="primary" class="twitter-btn" :loading="isTwitterLoading">
                         <i class="fa fa-twitter"></i>
-                        &nbsp;&nbsp;Sign in with Twitter
-                    </button>
+                        <span style="margin: 0 5px;">Sign in with Twitter</span>
+                    </Button>
                 </div>
                 <p class="or"><span>or</span></p>
                 <div class="email-login">
@@ -58,7 +58,6 @@ import { useRouter } from 'vue-router';
 import { Button } from 'ant-design-vue';
 import { twitterSocialLogin, signOutFirebase, genOTP, validateOTP } from '@/services/auth'
 import { useAuthStore } from '@/stores/auth'
-import hexlink from "@/assets/logo/blue-logo.svg";
 import background from "@/assets/background.png";
 import secure from "@/assets/secure.svg";
 import { createNotification } from '@/web3/utils';
@@ -77,6 +76,7 @@ const otpValidataionFailed = ref<boolean>(false);
 const countDown = ref<number>(60);
 const isLoadingLogin = ref(false);
 const isLoading = ref(false);
+const isTwitterLoading = ref<boolean>(false);
 const loginDisabled = ref<boolean>(true);
 
 const onSubmit = (e: Event) => {
@@ -84,6 +84,7 @@ const onSubmit = (e: Event) => {
 }
 
 const twitter_login = async () => {
+    isTwitterLoading.value = true;
     await twitterSocialLogin();
     router.push(store.returnUrl || "/");
 }
@@ -306,6 +307,7 @@ a {
     margin-top: 10px;
     margin-bottom: 20px;
     width: 100%;
+    height: auto;
     border-radius: 10px;
     border: none; }
 .twitter-btn:hover {

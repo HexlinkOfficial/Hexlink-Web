@@ -414,7 +414,7 @@
                     <div style="display: flex; flex-direction: column; margin-left: 0.5rem;">
                       <span class="from-text" style="margin-left: 0rem;">From</span>
                       <span style="font-size: 12px; color: rgb(100,116,139)">
-                        {{ useAuthStore().user?.provider == 'mailto' ? "" : "@" }}{{ op.redpacket.creator.handle.length > 18 ? op.redpacket.creator.handle.substring(0, 4) + '...' + op.redpacket.creator.handle.slice(-10) : op.redpacket.creator.handle }}
+                        {{ checkIfEmail() ? "" : "@" }}{{ op.redpacket.creator.handle.length > 18 ? op.redpacket.creator.handle.substring(0, 4) + '...' + op.redpacket.creator.handle.slice(-10) : op.redpacket.creator.handle }}
                       </span>
                     </div>
                   </div>
@@ -488,6 +488,7 @@ const loadData = async function() {
   ]);
   extractDate();
   await refreshData();
+  console.log(luckHistoryByDate.value);
 };
 
 const hasData = computed(() => {
@@ -811,6 +812,14 @@ const aggregatedClaimed = async function(
 
 const openRedpacket = (op: any) => {
   router.push({ query: { details: op.redpacket.id } });
+}
+
+const checkIfEmail = () => {
+  if(useAuthStore().user?.provider == 'mailto'){
+    return true;
+  } else {
+    return false;
+  }
 }
 </script>
 

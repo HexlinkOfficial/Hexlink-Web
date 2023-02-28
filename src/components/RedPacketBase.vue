@@ -14,14 +14,6 @@
                                     <span v-if="!loading">{{ statusData }}</span>
                                 </div>
                             </div>
-                            <!-- <div style="margin: 0 10px;">
-                                <div class="title">
-                                    <span>{{ Object.keys(useStatusStore().status[1])[0] }}</span>
-                                </div>
-                                <div class="price">
-                                    <span>{{ Object.values(useStatusStore().status[1])[0] }}</span>
-                                </div>
-                            </div> -->
                         </div>
                         <div class="cta-box">
                             <router-link :to="airdropToken">
@@ -63,8 +55,7 @@
   
 <script setup lang="ts">
 // import { send } from "process";
-import { computed, onMounted, ref } from "vue";
-import { useRoute } from "vue-router";
+import { onMounted, ref } from "vue";
 import Loading from "@/components/Loading.vue";
 import { useStatusStore } from '@/stores/airdropStatus';
 import { useWalletStore } from '@/stores/wallet';
@@ -74,16 +65,6 @@ const airdropToken = ref<string>("");
 const statusTitle = ref<string>("Total Created");
 const statusData = ref<string | undefined>("0");
 const loading = ref<boolean>(true);
-
-const selected  = computed(() => {
-    if (useRoute().path == '/airdrop/send') {
-        return 'send';
-    } else if (useRoute().path == '/airdrop') {
-        return 'history';
-    } else {
-        return 'airdropNFTs'
-    }
-});
 
 const openSend = async (to: string) => {
     // check if wallet is connected
@@ -99,7 +80,6 @@ const openSend = async (to: string) => {
             console.log('MetaMask is not installed!');
         }
         await connectWallet();
-        await openSend(to);
     }
 }
 
@@ -110,7 +90,6 @@ function delay(ms: number) {
 onMounted(async () => {
     loading.value = true;
     if(useStatusStore().status[0]) {
-        console.log("HAHA: ", useStatusStore().status[0]);
         statusTitle.value = Object.keys(useStatusStore().status[0])[0].toString();
         statusData.value = Object.values(useStatusStore().status[0])[0]?.toString();
     } else {

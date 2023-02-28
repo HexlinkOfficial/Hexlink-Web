@@ -215,7 +215,6 @@ const walletStore = useWalletStore();
 const active = ref<string>("");
 const { toClipboard } = useClipboard();
 const ownerAccountAddress = useAccountStore().account?.owner;
-const componentTitle = ref<string>("");
 
 const addressTextLong = function (address: string | undefined) {
   if (address) {

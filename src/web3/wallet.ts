@@ -88,7 +88,7 @@ export async function connectWallet() {
         );
       } else {
         const toaster = createToaster({ position: "top", duration: 5000 });
-        toaster.error(`Wrong account! Please connect your owners account!`);
+        toaster.error(`Wrong owner account! Please connect to ${ownerAccountAddress}!`);
       }
     } catch (error: any) {
       console.log(error.message);

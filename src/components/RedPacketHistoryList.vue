@@ -552,7 +552,7 @@ const refreshData = async () => {
   const completed = await updateData();
   if (!completed || refreshing.value === "scheduled") {
     refreshing.value = "scheduled";
-    await delay(5000);
+    await delay(3000);
     await refreshData();
   } else {
     refreshing.value = "done";
@@ -580,7 +580,7 @@ watch(status, async (newStatus, _) => {
     }
     extractDate();
     if (refreshing.value === 'done') {
-      refreshData();
+      await refreshData();
     } else if (refreshing.value === 'running') {
       refreshing.value = "scheduled";
     }
@@ -604,7 +604,7 @@ watch(claimStatus, async (newStatus, _) => {
     }
     extractDate();
     if (refreshing.value === 'done') {
-      refreshData();
+      await refreshData();
     } else if (refreshing.value === 'running') {
       refreshing.value = "scheduled";
     }

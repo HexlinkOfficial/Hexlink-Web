@@ -11,7 +11,7 @@ export const useWalletStore = defineStore({
     } => ({
         connected: false,
         wallet: "",
-        walletIcon: "",
+        walletIcon: "@/assets/svg/wallet.svg",
         account: undefined,
     }),
     persist: true,

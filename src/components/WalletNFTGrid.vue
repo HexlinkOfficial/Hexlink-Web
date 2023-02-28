@@ -14,7 +14,7 @@
       <NFTCard 
         v-for="(value, index) in nftImages" 
         :key="index"
-        :style=" 'background:' + value.color" 
+        :style="'background:' + value.color" 
         :nftImage="value" >
       </NFTCard>
     </div>
@@ -31,6 +31,8 @@ import type { openSea, nftImage, bindedNFT } from '@/web3/tokens';
 import NFTCard from './NFTCard.vue';
 import { getBackcgroundColor } from '@/web3/utils';
 import EmptyContent from '@/components/EmptyContent.vue';
+import { hexlinkErc721Contract, hexlinkErc721Metadata } from "../../functions/redpacket";
+import { useChainStore } from '@/stores/chain';
 
 const imageColor = ref<string[]>([]);
 const nftImages = ref<bindedNFT[]>([]);
@@ -55,9 +57,20 @@ const preloadColors = () => {
   var nftIds: string[] = [];
   var images: string[] = [];
   nftPics.value.map(async (nft: any) => {
+    if (nft.name == "") {
+      const metadata = await hexlinkErc721Metadata(
+        await hexlinkErc721Contract(
+          nft.contract,
+          useChainStore().provider
+        )
+      );
+      symbols.push(metadata.symbol);
+      names.push(metadata.name);
+    } else {
+      symbols.push(nft.symbol);
+      names.push(nft.name);
+    }
     contracts.push(nft.contract);
-    symbols.push(nft.symbol);
-    names.push(nft.name);
     nftIds.push(nft.id);
     images.push(nft.rawUrl == "" ? nft.url : nft.rawUrl);
     nftImages.value.push(await getBackcgroundColor(nft));
@@ -68,6 +81,7 @@ const preloadColors = () => {
 onMounted(async () => {
   await loadNfts();
   preloadColors();
+  console.log(nftImages.value);
 })
 </script>
 

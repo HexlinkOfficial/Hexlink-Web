@@ -104,7 +104,7 @@
                         </div>
                       </div>
                     </div>
-                    <div v-if="walletStore.connected || ownerAccountAddress != null" class="user-balance">
+                    <div v-if="walletStore.connected || useAccountStore().account?.owner != null" class="user-balance">
                       <h5>External Account Address </h5>
                       <div class="user_wallet" style="border: 0 solid #e5e7eb; padding: 10px 0px 0px 0px;">
                         <div class="user2">
@@ -122,7 +122,7 @@
                                 d="M8.9375 15.6025V12.6875C8.9375 12.0526 9.28906 10.9883 10.5093 10.7577C11.5449 10.5635 12.5703 10.5635 12.5703 10.5635C12.5703 10.5635 13.2441 11.0322 12.6875 11.0322C12.1309 11.0322 12.1455 11.75 12.6875 11.75C13.2295 11.75 12.6875 12.4385 12.6875 12.4385L10.5049 14.9141L8.9375 15.6025Z"
                                 fill="white" />
                             </svg>
-                            <div v-if="ownerAccountAddress == null" class="wallet-presence-wrapper">
+                            <div v-if="useAccountStore().account?.owner == null" class="wallet-presence-wrapper">
                               <a-tooltip placement="right">
                                 <template #title>
                                   <span>Start to send money to bind this wallet with Hexlink account</span>
@@ -130,7 +130,7 @@
                                 <img class="wallet-presence" src="../assets/exclamation-mark.png" alt="" />
                               </a-tooltip>
                             </div>
-                            <div v-if="ownerAccountAddress != null && walletStore.connected" class="wallet-presence-wrapper">
+                            <div v-if="useAccountStore().account?.owner != null && walletStore.connected" class="wallet-presence-wrapper">
                               <a-tooltip placement="right">
                                 <template #title>
                                   <span>Wallet is Available</span>
@@ -138,7 +138,7 @@
                                 <img class="wallet-presence" src="../assets/presence_green_dot.png" alt="" />
                               </a-tooltip>
                             </div>
-                            <div v-if="ownerAccountAddress != null && !walletStore.connected" class="wallet-presence-wrapper">
+                            <div v-if="useAccountStore().account?.owner != null && !walletStore.connected" class="wallet-presence-wrapper">
                               <a-tooltip placement="right">
                                 <template #title>
                                   <span>You connect wallet is unavailable in this browser</span>
@@ -149,15 +149,15 @@
                           </div>
                           <div class="user-info">
                             <span style="margin-bottom: 0;" class="smart-contract-address">
-                              <h5 v-if="ownerAccountAddress == null" @click="doCopy(walletStore.account?.address)">
+                              <h5 v-if="useAccountStore().account?.owner == null" @click="doCopy(walletStore.account?.address)">
                                 {{ addressTextLong(walletStore.account?.address) }}
                               </h5>
-                              <h5 v-if="ownerAccountAddress != null" @click="doCopy(ownerAccountAddress)">
-                                {{ addressTextLong(ownerAccountAddress) }}
+                              <h5 v-if="useAccountStore().account?.owner != null" @click="doCopy(useAccountStore().account?.owner)">
+                                {{ addressTextLong(useAccountStore().account?.owner) }}
                               </h5>
                             </span>
                           </div>
-                          <div v-if="ownerAccountAddress == null"> 
+                          <div v-if="useAccountStore().account?.owner == null"> 
                             <a-tooltip placement="bottom">
                               <template #title>
                                 <span>Disconnect</span>
@@ -173,7 +173,7 @@
                         </div>
                       </div>
                     </div>
-                    <div v-if="walletStore.connected == false && ownerAccountAddress == null" style="margin-top: 20px; margin-bottom: 10px; margin-left: 24px; margin-right:24px;">
+                    <div v-if="walletStore.connected == false && useAccountStore().account?.owner == null" style="margin-top: 20px; margin-bottom: 10px; margin-left: 24px; margin-right:24px;">
                       <button class="connect-wallet-button"  @click="connectWallet">
                         <img src="@/assets/svg/wallet.svg" style="margin-right: 10px;"/>
                         Connect Wallet
@@ -202,8 +202,8 @@ import { useAuthStore } from '@/stores/auth';
 import { useWalletStore } from '@/stores/wallet';
 import { useChainStore } from '@/stores/chain';
 import { createToaster } from "@meforma/vue-toaster";
-import { GOERLI, MUMBAI, prettyPrintAddress } from "../../functions/common";
-import { switchNetwork } from "@/web3/network";
+import { GOERLI, MUMBAI, prettyPrintAddress, setAccountOwner } from "../../functions/common";
+import { switchNetwork, getInfuraProvider } from "@/web3/network";
 import { connectWallet, disconnectWallet} from "@/web3/wallet";
 import { useAccountStore } from "@/stores/account";
 import { signOutFirebase } from "@/services/auth";
@@ -214,7 +214,6 @@ const user = authStore.user!;
 const walletStore = useWalletStore();
 const active = ref<string>("");
 const { toClipboard } = useClipboard();
-const ownerAccountAddress = useAccountStore().account?.owner;
 
 const addressTextLong = function (address: string | undefined) {
   if (address) {
@@ -232,7 +231,14 @@ const userHandle = computed(() => {
 
 const root = ref<HTMLElement | null>(null);
 
-const activeDropDown = (value: any) => {
+const activeDropDown = async (value: any) => {
+  const chain = useChainStore().chain;
+  const provider = getInfuraProvider(chain);
+  if (useAccountStore().account?.owner == null){
+    // update the owner if there is one in async
+    setAccountOwner(provider, useAccountStore().account!);
+  }
+
   active.value = active.value === value ? "" : value;
 };
 

@@ -11,6 +11,7 @@ export declare const accountInterface: ethers.utils.Interface;
 export declare function nameHash(schema: string, name: string): string;
 export declare function accountContract(provider: Provider, address: string): Contract;
 export declare function hexlAccount(provider: Provider, hexlink: Contract, nameHash: string): Promise<Account>;
+export declare function setAccountOwner(provider: Provider, account: Account): Promise<Account>;
 export declare function encodeInit(owner: string, data: string): string;
 export declare function encodeExec(op: OpInput): string;
 export declare function encodeExecBatch(ops: OpInput[]): string;

@@ -22,6 +22,15 @@ export async function hexlAccount(provider, hexlink, nameHash) {
     }
     return acc;
 }
+export async function setAccountOwner(provider, account) {
+    const address = account.address;
+    account.isContract = await isContract(provider, address);
+    if (account.isContract) {
+        const contract = accountContract(provider, address);
+        account.owner = await contract.owner();
+    }
+    return account;
+}
 export function encodeInit(owner, data) {
     return accountInterface.encodeFunctionData("init", [owner, data]);
 }

@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.encodeValidateAndCall = exports.encodeExecBatch = exports.encodeExec = exports.encodeInit = exports.hexlAccount = exports.accountContract = exports.nameHash = exports.accountInterface = exports.DEPLOYMENT_GASCOST = void 0;
+exports.encodeValidateAndCall = exports.encodeExecBatch = exports.encodeExec = exports.encodeInit = exports.setAccountOwner = exports.hexlAccount = exports.accountContract = exports.nameHash = exports.accountInterface = exports.DEPLOYMENT_GASCOST = void 0;
 const ethers_1 = require("ethers");
 const ACCOUNT_SIMPLE_ABI_json_1 = __importDefault(require("./abi/ACCOUNT_SIMPLE_ABI.json"));
 const utils_1 = require("./utils");
@@ -41,6 +41,18 @@ function hexlAccount(provider, hexlink, nameHash) {
     });
 }
 exports.hexlAccount = hexlAccount;
+function setAccountOwner(provider, account) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const address = account.address;
+        account.isContract = yield (0, utils_1.isContract)(provider, address);
+        if (account.isContract) {
+            const contract = accountContract(provider, address);
+            account.owner = yield contract.owner();
+        }
+        return account;
+    });
+}
+exports.setAccountOwner = setAccountOwner;
 function encodeInit(owner, data) {
     return exports.accountInterface.encodeFunctionData("init", [owner, data]);
 }

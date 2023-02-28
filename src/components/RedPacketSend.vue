@@ -83,15 +83,25 @@
       </div>
     </div>
     <div class="gas-station">
+      <div class="enable-switch">
+        <p>Enable dynamic share link</p>
+        <a-switch v-model:checked="enableDynamic" style="margin-left: 1rem;" />
+        <a-tooltip placement="bottomRight">
+            <template #title>
+              Service gas fee is determined by the market, not by HexLink.
+            </template>
+            <img style="margin-left: 1rem; width: 16px;" src="@/assets/svg/info.svg" />
+          </a-tooltip>
+      </div>
       <div class="gas-estimation">
         <p>
           <img style="width: 20px; height: 20px;" src="https://i.postimg.cc/RhXfgJR1/gas-pump.png"/>
-          Estimated Fee: 
+          <span class="estimated-fee">Estimated Fee:&nbsp;</span>
           <a-tooltip placement="top">
             <template #title>
               <span>The real service fee may differ per network conditions</span>
             </template>
-            <b>{{ totalServiceFee.substring(0,6) }}</b>
+            <b>&nbsp; {{ totalServiceFee }}</b>
           </a-tooltip>
         </p>
         <div class="total-choose-token">
@@ -125,16 +135,6 @@
           </template>
           <img style="margin-left: 1rem; width: 16px;" src="@/assets/svg/info.svg"/>
         </a-tooltip>
-      </div>
-      <div class="enable-switch">
-        <p>Enable dynamic share link</p>
-        <a-switch v-model:checked="enableDynamic" style="margin-left: 1rem;" />
-        <a-tooltip placement="bottomRight">
-            <template #title>
-              Service gas fee is determined by the market, not by HexLink.
-            </template>
-            <img style="margin-left: 1rem; width: 16px;" src="@/assets/svg/info.svg" />
-          </a-tooltip>
       </div>
     </div>
     <div class="choose-account">
@@ -408,6 +408,9 @@ onClickOutside(
 </script>
 
 <style lang="less" scoped>
+.estimated-fee {
+  @media (max-width: 640px) {
+    display: none; } }
 .ant-switch-handle {
   position: absolute;
   top: 1px;
@@ -422,7 +425,6 @@ onClickOutside(
   align-items: center;
   width: 100%;
   justify-content: flex-end;
-  margin-top: 0.75rem;
   p {
     margin-bottom: 0rem; } }
 .connectWallet {
@@ -896,10 +898,12 @@ input[type=number] {
 .gas-station {
   display: flex;
   flex-direction: column;
-  margin: 0px; }
+  margin: 0px;
+  padding: 0px 10px 20px 10px; }
 .gas-estimation {
   display: flex;
   justify-content: flex-end;
+  margin-top: 20px;
   p {
     margin-bottom: 0rem;
     margin-right: 1rem;

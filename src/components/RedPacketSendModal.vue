@@ -42,7 +42,7 @@ import RedPacketSend from '@/components/RedPacketSend.vue';
   overflow-x: hidden;
   z-index: 55;
   @media (max-width: 990px) {
-    top: 50vh;
+    top: 47vh;
     left: 50%; } }
 .transition {
   transition: .3s cubic-bezier(.3, 0, 0, 1.3) }

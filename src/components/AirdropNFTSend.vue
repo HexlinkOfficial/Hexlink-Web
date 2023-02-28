@@ -106,12 +106,12 @@
     <div class="gas-estimation">
       <p>
         <img style="width: 20px; height: 20px;" src="https://i.postimg.cc/RhXfgJR1/gas-pump.png" />
-        Estimated Fee:
+        <span class="estimated-fee">Estimated Fee:&nbsp;</span>
         <a-tooltip placement="top">
           <template #title>
             <span>The real service fee may differ per network conditions</span>
           </template>
-          <b>{{ totalServiceFee.substring(0,6) }}</b>
+          <b>&nbsp; {{ totalServiceFee }}</b>
         </a-tooltip>
       </p>
       <div class="total-choose-token">
@@ -457,6 +457,9 @@ const getColor = async (nft: nftImage) => {
 </script>
 
 <style lang="less" scoped>
+.estimated-fee {
+  @media (max-width: 640px) {
+    display: none; } }
 .ant-switch-handle {
   position: absolute;
   top: 1px;

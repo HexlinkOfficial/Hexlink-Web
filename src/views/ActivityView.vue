@@ -91,7 +91,9 @@ import TransactionList from "@/components/TransactionList.vue";
   display: flex;
   margin-left: 0.75rem;
   margin-left: 0.875rem;
-  align-items: center; }
+  align-items: center;
+  @media (max-width: 640px) {
+    margin-left: 0rem;  } }
 .token-list .title .title-col .content .text {
   font-size: 1.25rem;
   line-height: 1.75rem;

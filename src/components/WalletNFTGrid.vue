@@ -56,9 +56,10 @@ const preloadColors = () => {
   var names: string[] = [];
   var nftIds: string[] = [];
   var images: string[] = [];
+  var metadata: any = "";
   nftPics.value.map(async (nft: any) => {
     if (nft.name == "") {
-      const metadata = await hexlinkErc721Metadata(
+      metadata = await hexlinkErc721Metadata(
         await hexlinkErc721Contract(
           nft.contract,
           useChainStore().provider
@@ -73,7 +74,19 @@ const preloadColors = () => {
     contracts.push(nft.contract);
     nftIds.push(nft.id);
     images.push(nft.rawUrl == "" ? nft.url : nft.rawUrl);
-    nftImages.value.push(await getBackcgroundColor(nft));
+    nftImages.value.push(await getBackcgroundColor({
+      contract: nft.contract,
+      name: nft.name == "" ? metadata.name : nft.name,
+      symbol: nft.symbol == "" ? metadata.symbol : nft.symbol,
+      id: nft.id,
+      tokenType: nft.tokenType,
+      openSea: nft.openSea,
+      totalSupply: nft.totalSupply,
+      url: nft.url,
+      rawUrl: nft.rawUrl,
+      thumbnail: nft.thumbnail,
+      attributes: nft.attributes,
+    }));
   })
   useNftStore().set(contracts, symbols, names, nftIds, images);
 };

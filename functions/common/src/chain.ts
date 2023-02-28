@@ -21,8 +21,8 @@ export const GOERLI : Chain = {
   fullName: "Goerli Test Network",
   rpcUrls: ["https://goerli.infura.io/v3/"],
   nativeCurrency: {
-    name: "Ethereum",
-    symbol: "ETH",
+    name: "Goerli Ethereum",
+    symbol: "gETH",
     decimals: 18,
   },
   blockExplorerUrls: ["https://goerli.etherscan.io"],

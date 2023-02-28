@@ -5,12 +5,21 @@ const BASE_COIN_URL = "https://api.coingecko.com/api/v3/simple/price";
 const BASE_TOKEN_URL = "https://api.coingecko.com/api/v3/simple/token_price/";
 
 const SUPPORTED_CHAINS = ["arbitrum_nova", "polygon", "ethereum"];
+const MATIC_CHAINS = ["mumbai", "polygon"];
+const EHT_CHAINS = ["goerli", "ethereum", "sepolia", "arbitrum_nova"]
 
 export async function getCoinPrice(chain: Chain) : Promise<{[token: string]: number}> {
-    const coin = chain.nativeCurrency.name;
+    let coin;
+    if (EHT_CHAINS.includes(chain.name)) {
+        coin = "ethereum";
+    }
+    if (MATIC_CHAINS.includes(chain.name)) {
+        coin = "matic-network";
+    }
     const params = {ids: coin, vs_currencies: "usd"};
     try {
       const response = await axios.get(BASE_COIN_URL, { params });
+      console.log(response);
       return response.data[coin.toLowerCase()]["usd"];
     } catch (err: any) {
       console.log(err);

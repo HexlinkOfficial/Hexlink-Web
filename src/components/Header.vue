@@ -141,7 +141,8 @@
                             <div v-if="useAccountStore().account?.owner != null && !walletStore.connected" class="wallet-presence-wrapper">
                               <a-tooltip placement="right">
                                 <template #title>
-                                  <span>You connect wallet is unavailable in this browser</span>
+                                  <span>Your connected wallet is unavailable in this session, please</span>
+                                  <span class="reconnect-text" @click="connectWallet"> reconnect</span>
                                 </template>
                                 <img class="wallet-presence" src="../assets/presence_grey_dot.png" alt="" />
                               </a-tooltip>
@@ -232,11 +233,13 @@ const userHandle = computed(() => {
 const root = ref<HTMLElement | null>(null);
 
 const activeDropDown = async (value: any) => {
-  const chain = useChainStore().chain;
-  const provider = getInfuraProvider(chain);
-  if (useAccountStore().account?.owner == null){
-    // update the owner if there is one in async
-    setAccountOwner(provider, useAccountStore().account!);
+  if (value === 'profile') {
+    const chain = useChainStore().chain;
+    const provider = getInfuraProvider(chain);
+    if (useAccountStore().account?.owner == null){
+      // update the owner if there is one in async
+      setAccountOwner(provider, useAccountStore().account!);
+    }
   }
 
   active.value = active.value === value ? "" : value;
@@ -943,4 +946,12 @@ cursor: pointer; }
   opacity: 1;
   background-color: rgb(7, 106, 224);
   color: white; }
+.reconnect-text {
+  color: #097aec;
+  font-weight: 500;
+}
+.reconnect-text:hover {
+  text-decoration: underline;
+  cursor: pointer;
+}
 </style>

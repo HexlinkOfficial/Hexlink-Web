@@ -233,7 +233,6 @@
               </div>
             </div>
 
-
             <div v-if="op.type == 'claim_redpacket' && width > 990" class="record-box">
               <div class="status-icon" style="display: block; position: relative;">
                 <div class="icon" :style="showClaimStatus(op) == 'Error' ? 'background-color: #FD4755;' : ''">
@@ -414,7 +413,7 @@
                     <div style="display: flex; flex-direction: column; margin-left: 0.5rem;">
                       <span class="from-text" style="margin-left: 0rem;">From</span>
                       <span style="font-size: 12px; color: rgb(100,116,139)">
-                        {{ checkIfEmail() ? "" : "@" }}{{ op.redpacket.creator.handle.length > 18 ? op.redpacket.creator.handle.substring(0, 4) + '...' + op.redpacket.creator.handle.slice(-10) : op.redpacket.creator.handle }}
+                        {{ checkIfEmail() ? "" : "@" }}{{ prettyPrint(op.redpacket.creator.handle)}}
                       </span>
                     </div>
                   </div>
@@ -464,6 +463,14 @@ const luckHistoryByDate = ref<any>([]);
 const createdCount = ref<number>(0);
 const claimedCount = ref<number>(0);
 const { width } = useWindowSize();
+
+const prettyPrint = (input: string) => {
+  if (input.length > 18) {
+    return input.substring(0,4) + "..." + input.slice(-10)
+  } else {
+    return input;
+  }
+}
 
 const loadCreatedInfo = async() => {
   const rps : CreateRedPacketOp[] = await getCreatedRedPackets();

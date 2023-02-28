@@ -224,7 +224,7 @@ const redpacket = ref<RawRedPacketInput>({
   salt: "",
   split: 1,
   balance: "0",
-  balanceInput: "0.0001",
+  balanceInput: "0",
   token: tokenStore.nativeCoin.address,
   gasToken: tokenStore.nativeCoin.address,
   gasSponsorship: "0",

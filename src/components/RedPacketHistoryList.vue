@@ -523,7 +523,7 @@ const updateData = async () : Promise<boolean> => {
             ...claim
           }
         };
-      } else {
+      } else if (type === 'create') {
         return {...op, ...opStatus};
       }
     } else {
@@ -570,8 +570,9 @@ watch(status, async (newStatus, _) => {
           }));
       }
     }
+    extractDate();
     if (refreshing.value === 'done') {
-      extractDate();
+      refreshData();
     } else if (refreshing.value === 'running') {
       refreshing.value = "scheduled";
     }
@@ -593,7 +594,7 @@ watch(claimStatus, async (newStatus, _) => {
           }));
       }
     }
-    extractDate()
+    extractDate();
     if (refreshing.value === 'done') {
       refreshData();
     } else if (refreshing.value === 'running') {

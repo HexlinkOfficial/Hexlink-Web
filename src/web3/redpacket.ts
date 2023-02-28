@@ -256,7 +256,7 @@ async function processTxAndSave(
     const chain = useChainStore().chain;
     if (dryrun) {
         for (let i = 0; i < txes.length; i++) {
-            const gasUsed = await estimateGas(txes[i].tx);
+            const gasUsed = await estimateGas(chain, txes[i].tx);
             console.log({
                 tx: txes[i],
                 gasUsed: EthBigNumber.from(gasUsed).toString()
@@ -266,7 +266,7 @@ async function processTxAndSave(
     }
 
     for (let i = 0; i < txes.length; i++) {
-        const txHash = await sendTransaction(txes[i].input);
+        const txHash = await sendTransaction(chain, txes[i].input);
         if (txes[i].name == "createRedPacket") {
             const opId = await postProcess(chain, redpacket as RedPacketInput, txHash);
             return {id: redpacket.id!, opId};

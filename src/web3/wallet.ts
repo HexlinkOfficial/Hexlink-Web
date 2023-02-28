@@ -111,6 +111,42 @@ export async function connectWallet() {
   });
 }
 
+async function trySwitchNetwork(chain: Chain) : Promise<void> {
+  const netVersion = await window.ethereum.request({
+    method: 'net_version'
+  });
+  if (netVersion === chain.id) {
+    return;
+  }
+
+  const hexifyChainId = ethers.utils.hexValue(Number(chain.chainId));
+  try {
+      await window.ethereum.request({
+          method: 'wallet_switchEthereumChain',
+          params: [{ chainId: hexifyChainId }],
+      });
+  } catch (error: any) {
+      if (error.code === 4902) {
+          await window.ethereum.request({
+              method: "wallet_addEthereumChain",
+              params: [{
+                  chainId: hexifyChainId,
+                  chainName: chain.fullName,
+                  blockExplorerUrls: [...chain.blockExplorerUrls],
+                  nativeCurrency: {...chain.nativeCurrency},
+                  rpcUrls: [...chain.rpcUrls],
+              }],
+          });
+          await window.ethereum.request({
+              method: 'wallet_switchEthereumChain',
+              params: [{ chainId: hexifyChainId }],
+          });
+      } else {
+          console.log(error);
+      }
+  }
+}
+
 export async function signMessage(account: string, message: string) : Promise<string> {
   return await window.ethereum.request({
       method: 'personal_sign',
@@ -118,14 +154,16 @@ export async function signMessage(account: string, message: string) : Promise<st
   });
 }
 
-export async function estimateGas(txParams: any) : Promise<string> {
+export async function estimateGas(chain: Chain, txParams: any) : Promise<string> {
+  await trySwitchNetwork(chain);
   return await window.ethereum.request({
     method: 'eth_estimateGas',
     params: [txParams],
   });
 }
 
-export async function sendTransaction(txParams: any) : Promise<string> {
+export async function sendTransaction(chain: Chain, txParams: any) : Promise<string> {
+  await trySwitchNetwork(chain);
   return await window.ethereum.request({
     method: 'eth_sendTransaction',
     params: [txParams],

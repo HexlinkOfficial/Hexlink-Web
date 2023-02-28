@@ -490,8 +490,6 @@ const loadData = async function() {
   // postData();
   extractDate();
   await refreshData();
-  console.log("created: ", createdCount.value);
-  console.log("claimed: ", claimedCount.value);
 };
 
 const postData = () => {

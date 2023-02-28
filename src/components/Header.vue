@@ -208,7 +208,6 @@ import { connectWallet, disconnectWallet} from "@/web3/wallet";
 import { useAccountStore } from "@/stores/account";
 import { signOutFirebase } from "@/services/auth";
 import useClipboard from 'vue-clipboard3';
-import { useRoute } from "vue-router";
 
 const authStore = useAuthStore();
 const user = authStore.user!;

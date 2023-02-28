@@ -24,47 +24,10 @@ export function alchemyKey(chain: Chain) : string {
 }
 
 export async function switchNetwork(chain: Chain) {
-    const currentChain = useChainStore().chain;
-    if (chain.chainId == currentChain?.chainId) {
+    if (chain.name === useChainStore().chain?.name) {
         return;
     }
-
-    const connected = useWalletStore().connected;
-    if (!currentChain || !connected || Number(chain.chainId) == window.ethereum.networkVersion) {
-        doSwitch(chain);
-        return;
-    }
-
-    if (connected) {
-        const hexifyChainId = ethers.utils.hexValue(Number(chain.chainId));
-        try {
-            await window.ethereum.request({
-                method: 'wallet_switchEthereumChain',
-                params: [{ chainId: hexifyChainId }],
-            });
-            doSwitch(chain);
-        } catch (error: any) {
-            if (error.code === 4902) {
-                await window.ethereum.request({
-                    method: "wallet_addEthereumChain",
-                    params: [{
-                        chainId: hexifyChainId,
-                        chainName: chain.fullName,
-                        blockExplorerUrls: [...chain.blockExplorerUrls],
-                        nativeCurrency: {...chain.nativeCurrency},
-                        rpcUrls: [...chain.rpcUrls],
-                    }],
-                });
-                await window.ethereum.request({
-                    method: 'wallet_switchEthereumChain',
-                    params: [{ chainId: hexifyChainId }],
-                });
-                doSwitch(chain);
-            } else {
-                console.log(error);
-            }
-        }
-    }
+    doSwitch(chain);
 }
 
 export function getProvider(chain: Chain) {

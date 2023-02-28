@@ -197,7 +197,7 @@
                     </div>
                     <div v-if="op.redpacket.type === 'erc721'" class="amount">
                       <p class="claimed-number">
-                        <span style="margin-left: 0rem;">{{ op.redpacket.metadata.name }} | {{ op.redpacket.metadata.symbol }}</span>
+                        <span style="margin-left: 0rem; max-width: 250px; overflow: hidden; white-space: nowrap;">{{ prettyPrint(op.redpacket.metadata.name,20,5,-10) }} | {{ op.redpacket.metadata.symbol }}</span>
                       </p>
                     </div>
                     <div class="progress-bar" style="margin: 0;">
@@ -394,7 +394,12 @@
                         </a-tooltip>
                       </div>
                       <div style="display: flex; flex-direction: column; margin-left: 0.5rem;">
-                        <span class="from-text" style="margin-left: 0rem;">{{ op.redpacket.metadata.name }}</span>
+                        <a-tooltip placement="top">
+                          <template #title>
+                            <span class="from-text" style="margin-left: 0rem; color: white;">{{ op.redpacket.metadata.name }}</span>
+                          </template>
+                          <span class="from-text" style="margin-left: 0rem;">{{ prettyPrint(op.redpacket.metadata.name, 12, 5, -5) }}</span>
+                        </a-tooltip>
                         <span style="font-size: 12px; color: rgb(100,116,139)">{{ op.redpacket.metadata.symbol }}#{{ op.claim?.claimed }}</span>
                       </div>
                     </div>
@@ -412,9 +417,16 @@
                     </span>
                     <div style="display: flex; flex-direction: column; margin-left: 0.5rem;">
                       <span class="from-text" style="margin-left: 0rem;">From</span>
-                      <span style="font-size: 12px; color: rgb(100,116,139)">
-                        {{ checkIfEmail() ? "" : "@" }}{{ prettyPrint(op.redpacket.creator.handle)}}
-                      </span>
+                      <a-tooltip placement="top">
+                          <template #title>
+                            <span style="font-size: 12px; color: rgb(100,116,139); color: white;">
+                              {{ checkIfEmail() ? "" : "@" }}{{ op.redpacket.creator.handle }}
+                            </span>
+                          </template>
+                          <span style="font-size: 12px; color: rgb(100,116,139)">
+                            {{ checkIfEmail() ? "" : "@" }}{{ prettyPrint(op.redpacket.creator.handle, 18, 4, -10) }}
+                          </span>
+                        </a-tooltip>
                     </div>
                   </div>
                 </div>
@@ -463,14 +475,6 @@ const luckHistoryByDate = ref<any>([]);
 const createdCount = ref<number>(0);
 const claimedCount = ref<number>(0);
 const { width } = useWindowSize();
-
-const prettyPrint = (input: string) => {
-  if (input.length > 18) {
-    return input.substring(0,4) + "..." + input.slice(-10)
-  } else {
-    return input;
-  }
-}
 
 const loadCreatedInfo = async() => {
   const rps : CreateRedPacketOp[] = await getCreatedRedPackets();
@@ -828,6 +832,14 @@ const checkIfEmail = () => {
     return false;
   }
 }
+
+const prettyPrint = (input: string, length: number, firstCut: number, secondCut: number) => {
+  if (input.length > length) {
+    return input.substring(0, firstCut) + "..." + input.slice(secondCut)
+  } else {
+    return input;
+  }
+}
 </script>
 
 <style lang="less" scoped>
@@ -998,7 +1010,6 @@ i:hover {
   font-weight: 400;
   line-height: 1.5;
   font-size: 12px;
-  width: 100px;
   color: rgb(91, 112, 131); }
 .claimed-number-left {
   display: flex;
@@ -1007,7 +1018,6 @@ i:hover {
   font-weight: 400;
   line-height: 1.5;
   font-size: 12px;
-  width: 100px;
   color: rgb(91, 112, 131); }
 .claimed-number-left strong {
   font-weight: bold; }

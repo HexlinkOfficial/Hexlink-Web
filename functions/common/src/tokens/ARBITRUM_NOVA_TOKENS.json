@@ -1,6 +1,14 @@
 [
     {
         "chainId": 42170,
+        "symbol": "Ethereum",
+        "name": "ETH",
+        "decimals": 18,
+        "address": "0x0000000000000000000000000000000000000000",
+        "logoURI": "https://token.metaswap.codefi.network/assets/networkLogos/ethereum.svg"
+    },
+    {
+        "chainId": 42170,
         "address": "0xda10009cbd5d07dd0cecc66161fc93d7c9000da1",
         "symbol": "DAI",
         "name": "Dai Stablecoin",
@@ -29,7 +37,7 @@
         "symbol": "BRICK",
         "name": "Bricks",
         "decimals": 18,
-        "logoURI": "https://wallet-asset.matic.network/img/tokens/usdc.svg"
+        "logoURI": "https://nova.arbiscan.io/images/main/empty-token.png?v=1"
     },
     {
         "chainId": 42170,
@@ -37,7 +45,7 @@
         "symbol": "MOON",
         "name": "Moons",
         "decimals": 18,
-        "logoURI": "https://wallet-asset.matic.network/img/tokens/usdc.svg"
+        "logoURI": "https://nova.arbiscan.io/images/main/empty-token.png?v=1"
     },
     {
         "chainId": 42170,
@@ -45,7 +53,7 @@
         "symbol": "TMAP",
         "name": "TreasureMaps",
         "decimals": 18,
-        "logoURI": "https://wallet-asset.matic.network/img/tokens/usdc.svg"
+        "logoURI": "https://nova.arbiscan.io/token/images/dpstmap_32.png"
     },
     {
         "chainId": 42170,
@@ -53,6 +61,14 @@
         "symbol": "DOUBLOON",
         "name": "DPSDoubloon",
         "decimals": 18,
-        "logoURI": "https://wallet-asset.matic.network/img/tokens/usdc.svg"
+        "logoURI": "https://nova.arbiscan.io/token/images/dpsdoubloon_32.png"
+    },
+    {
+        "chainId": 42170,
+        "symbol": "HEXL",
+        "name": "Hexlink",
+        "decimals": 18,
+        "address": "0xE0CBB44Ab7C2f42a3AaCBf8E8C37BEb9C53118b5",
+        "logoURI": "https://hexlink.infura-ipfs.io/ipfs/QmPqsaop3z8qBU5Kp9zoLPREGvtyMBxnTh5sdB5dxpuzjk"
     }
 ]

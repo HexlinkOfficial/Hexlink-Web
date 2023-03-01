@@ -1,0 +1,74 @@
+[
+    {
+        "chainId": 42170,
+        "symbol": "Ethereum",
+        "name": "ETH",
+        "decimals": 18,
+        "address": "0x0000000000000000000000000000000000000000",
+        "logoURI": "https://token.metaswap.codefi.network/assets/networkLogos/ethereum.svg"
+    },
+    {
+        "chainId": 42170,
+        "address": "0xda10009cbd5d07dd0cecc66161fc93d7c9000da1",
+        "symbol": "DAI",
+        "name": "Dai Stablecoin",
+        "decimals": 18,
+        "logoURI": "https://wallet-asset.matic.network/img/tokens/dai.svg"
+    },
+    {
+        "chainId": 42170,
+        "address": "0x750ba8b76187092B0D1E87E28daaf484d1b5273b",
+        "symbol": "USDC",
+        "name": "USD Coin",
+        "decimals": 6,
+        "logoURI": "https://wallet-asset.matic.network/img/tokens/usdc.svg"
+    },
+    {
+        "chainId": 42170,
+        "address": "0x765277EebeCA2e31912C9946eAe1021199B39C61",
+        "symbol": "WETH",
+        "name": "Wrapped Ether",
+        "decimals": 18,
+        "logoURI": "https://wallet-asset.matic.network/img/tokens/eth.svg"
+    },
+    {
+        "chainId": 42170,
+        "address": "0x6dcb98f460457fe4952e12779ba852f82ecc62c1",
+        "symbol": "BRICK",
+        "name": "Bricks",
+        "decimals": 18,
+        "logoURI": "https://nova.arbiscan.io/images/main/empty-token.png?v=1"
+    },
+    {
+        "chainId": 42170,
+        "address": "0x0057Ac2d777797d31CD3f8f13bF5e927571D6Ad0",
+        "symbol": "MOON",
+        "name": "Moons",
+        "decimals": 18,
+        "logoURI": "https://nova.arbiscan.io/images/main/empty-token.png?v=1"
+    },
+    {
+        "chainId": 42170,
+        "address": "0x80A16016cC4A2E6a2CACA8a4a498b1699fF0f844",
+        "symbol": "TMAP",
+        "name": "TreasureMaps",
+        "decimals": 18,
+        "logoURI": "https://nova.arbiscan.io/token/images/dpstmap_32.png"
+    },
+    {
+        "chainId": 42170,
+        "address": "0xeFAeeE334F0Fd1712f9a8cc375f427D9Cdd40d73",
+        "symbol": "DOUBLOON",
+        "name": "DPSDoubloon",
+        "decimals": 18,
+        "logoURI": "https://nova.arbiscan.io/token/images/dpsdoubloon_32.png"
+    },
+    {
+        "chainId": 42170,
+        "symbol": "HEXL",
+        "name": "Hexlink",
+        "decimals": 18,
+        "address": "0xE0CBB44Ab7C2f42a3AaCBf8E8C37BEb9C53118b5",
+        "logoURI": "https://hexlink.infura-ipfs.io/ipfs/QmPqsaop3z8qBU5Kp9zoLPREGvtyMBxnTh5sdB5dxpuzjk"
+    }
+]

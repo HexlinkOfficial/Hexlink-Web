@@ -67,10 +67,10 @@ export async function validateAndBuildUserOp(
         deploy?: DeployRequest,
       },
 ) : Promise<OpInput> {
-  const req = request.params;
+  const req = request?.params;
   const data = accountInterface.encodeFunctionData(
       "validateAndCallWithGasRefund",
-      [req.txData, req.nonce, req.gas, req.signature]
+      [req?.txData, req?.nonce, req?.gas, req?.signature]
   );
   const provider = getInfuraProvider(chain);
   const deployed = await isContract(provider, account.address);

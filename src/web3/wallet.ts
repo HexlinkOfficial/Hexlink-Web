@@ -1,7 +1,7 @@
 import Web3Model from "web3modal";
 import { ethers } from "ethers";
 import { useWalletStore } from "@/stores/wallet"
-import WalletConnect from "@walletconnect/web3-provider";
+import WalletConnectProvider from "@walletconnect/web3-provider";
 import { isContract } from "../../functions/common";
 import type { Account } from "../../functions/common";
 import { useChainStore } from "@/stores/chain";
@@ -21,16 +21,9 @@ async function buildAccount(account: string) : Promise<Account> {
 
 export const providerOptions = {
   walletconnect: {
-    package: WalletConnect, // required
+    package: WalletConnectProvider, // required
     options: {
-      infuraId: import.meta.env.VITE_INFURA_GORLI, //required
-      qrcodeModalOptions: {
-        mobileLinks: [
-          'metamask',
-          'trust',
-          'argent'
-        ]
-      }
+      infuraId: import.meta.env.VITE_INFURA_API_KEY, //required
     },
   },
 };
@@ -92,23 +85,24 @@ export async function connectWallet() {
         walletIcon = "https://i.postimg.cc/j29hn62F/9035092-wallet-icon.png";
       }
     }
-
     const ownerAccountAddress = useAccountStore().account?.owner;
-    if (ownerAccountAddress != null && accounts.map(acc => acc.toLowerCase()).includes(ownerAccountAddress.toLowerCase())) {
+    if (ownerAccountAddress != null && accounts.map((acc: any) => acc.toLowerCase()).includes(ownerAccountAddress.toLowerCase())) {
       store.connectWallet(
         wallet,
         walletIcon,
         await buildAccount(ownerAccountAddress),
+        provider
       );
     } else if (ownerAccountAddress == null) {
       store.connectWallet(
         wallet,
         walletIcon,
         await buildAccount(accounts[0]),
+        provider
       );
     } else {
       try {
-        const result = await library.provider.request({
+        const result = await provider.request({
           method: 'wallet_requestPermissions',
           params: [{ eth_accounts: {} }]
         })
@@ -117,6 +111,7 @@ export async function connectWallet() {
             wallet,
             walletIcon,
             await buildAccount(ownerAccountAddress),
+            provider
           );
         } else {
           toaster.error(`Wrong owner account! Please connect to ${ownerAccountAddress}!`);
@@ -138,29 +133,30 @@ export async function connectWallet() {
     //     // pop out error and disconnect
     //   }
     // });
+    console.log("provider: ", store.provider);
   } catch (error) {
-    console.log(error)
+    console.log("Error: ", error)
   }
 }
 
 export async function trySwitchNetwork(chain: Chain) : Promise<void> {
   const store = useWalletStore();
   const hexifyChainId = ethers.utils.hexValue(Number(chain.chainId));
-  const netVersion = await library.provider?.request({
+  const netVersion = await store.provider!.request({
     method: 'net_version'
   });
   if (netVersion === chain.chainId) {
     return;
   }
   try {
-    await library.provider?.request({
+    await store.provider!.request({
       method: "wallet_switchEthereumChain",
       params: [{ chainId: hexifyChainId }]
     });
   } catch (switchError: any) {
     if (switchError.code === 4902) {
       try {
-        await library.provider?.request({
+        await store.provider!.request({
           method: "wallet_addEthereumChain",
           params: [{
             chainId: hexifyChainId,
@@ -170,7 +166,7 @@ export async function trySwitchNetwork(chain: Chain) : Promise<void> {
             rpcUrls: [...chain.rpcUrls],
           }]
         });
-        await library.provider?.request({
+        await store.provider!.request({
           method: 'wallet_switchEthereumChain',
           params: [{ chainId: hexifyChainId }],
         });
@@ -179,14 +175,15 @@ export async function trySwitchNetwork(chain: Chain) : Promise<void> {
       }
     }
   }
+  console.log("switch to network: ", chain.fullName);
 };
 
 export async function signMessage(account: string, message: string) : Promise<string> {
   let signature: Promise<string>;
   const store = useWalletStore();
-  if (!library) return "";
+  if (!store.provider) throw new Error("Can't sign");
   try {
-      signature = await library.provider?.request({
+      signature = await store.provider!.request({
       method: "personal_sign",
       params: [message, account]
     });
@@ -200,7 +197,7 @@ export async function signMessage(account: string, message: string) : Promise<st
 export async function estimateGas(chain: Chain, txParams: any) : Promise<string> {
   const store = useWalletStore();
   await trySwitchNetwork(chain);
-  return await library.provider?.request({
+  return await store.provider!.request({
     method: 'eth_estimateGas',
     params: [txParams],
   });
@@ -208,8 +205,9 @@ export async function estimateGas(chain: Chain, txParams: any) : Promise<string>
 
 export async function sendTransaction(chain: Chain, txParams: any) : Promise<string> {
   const store = useWalletStore();
+  console.log("provider2: ", store.provider);
   await trySwitchNetwork(chain);
-  return await library.provider?.request({
+  return await store.provider!.request({
     method: 'eth_sendTransaction',
     params: [txParams],
   });

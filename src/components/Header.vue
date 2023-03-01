@@ -165,7 +165,7 @@
                     </div>
                     <div v-if="walletStore.connected == false && useAccountStore().account?.owner == null" style="margin-top: 20px; margin-bottom: 10px; margin-left: 24px; margin-right:24px;">
                       <button class="connect-wallet-button"  @click="connectWallet">
-                        <img src="@/assets/svg/wallet.svg" style="margin-right: 10px;"/>
+                        <img src="@/assets/svg/white-wallet.svg" style="margin-right: 10px;"/>
                         Connect Wallet
                       </button>
                       <div style="font-size: 0.8em; font-weight: 350; margin-top: 15px;">

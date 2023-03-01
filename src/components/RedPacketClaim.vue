@@ -11,8 +11,11 @@
     <h2 class="transition">
       <span style="font-size: 15px;">Claim {{ claimItem == 'erc721' ? 'NFT' : 'Token' }} from</span><br>
       <div style="display: flex; align-items: center; justify-content: center; font-size: 20px;">
-        @{{ redPacket?.creator?.handle }}
-        <a class="twitter-link" :href="'https://twitter.com/' + redPacket?.creator?.handle">
+        {{ checkClaimer(provider) ? "" : "@" }}
+        <span class="sender" @click="copy(handle ? handle : '', 'Copied!')">
+          <b>{{ prettyPrint(handle ? handle : "Anonymous", 25, 10, -10) }}</b>
+        </span>
+        <a v-if="!checkClaimer(provider)" class="twitter-link" :href="'https://twitter.com/' + handle" style="margin-left: 5px;">
           <i className="fa fa-twitter"></i>
         </a>
       </div>
@@ -28,7 +31,7 @@
       </div>
       <small >Best Wishes!</small>
     </h2>
-    <div class="cta-container transition" :style="claimItem == 'erc721' ? 'margin-top: 420px;' : 'margin-top: 340px;'">
+    <div class="cta-container transition" :style="claimItem == 'erc721' ? 'margin-top: 420px;' : 'margin-top: 360px;'">
       <button v-if="route.query.otp?.toString() == null" class="cta" @click="claim">Claim</button>
       <button v-if="route.query.otp?.toString() != null && timeLeft > 0" @click="claim" class="cta" >Claim</button>
       <div v-if="route.query.otp?.toString() != null && timeLeft <= 0" class="footer">
@@ -70,11 +73,15 @@ import type { RedPacket, RedPacketErc721 } from "functions/redpacket/lib";
 import { useRedPacketStore } from '@/stores/redpacket';
 import CountdownSpinner from '@/components/CountdownSpinner.vue';
 import { useChainStore } from "@/stores/chain";
+import { prettyPrint, checkClaimer } from "@/services/util";
+import { copy } from "@/web3/utils";
 
 const redPacket = ref<RedPacketDB | undefined>();
 const redPacketTokenIcon = ref<string>("");
 const redPacketToken = ref<string>("");
 const claimItem = ref<string>("");
+const provider = ref<string>("");
+const handle = ref<string>("");
 let timeLeft = ref<number>(0);
 let countDownTimerInterval = ref<any>(null);
 
@@ -84,6 +91,8 @@ onMounted(async () => {
   claimItem.value = "";
   redPacket.value = await getRedPacket(route.query.claim!.toString());
   if (redPacket.value) {
+    provider.value = redPacket.value.creator!.provider;
+    handle.value = redPacket.value.creator!.handle;
     const network = getChain(redPacket.value.chain!);
     await switchNetwork(network);
     if (redPacket.value.type === 'erc20') {
@@ -159,6 +168,16 @@ function onCountDownTimesUp() {
 </script>
 
 <style lang="less" scoped>
+.sender {
+  margin-bottom: 0;
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+  background-color: #F3F4F6;
+  font-size: 1rem;
+  line-height: 1.25rem;
+  border-radius: 0.5rem; }
 .spinner-lg {
   .generate-spinner(); }
 .generate-spinner(
@@ -326,7 +345,10 @@ function onCountDownTimesUp() {
   box-shadow: 0px 30px 30px rgba(0, 0, 0, 0.2);
   height: 480px;
   width: 330px;
-  color: white; }
+  color: white;
+  .sender {
+    background-color: rgba(0,0,0,0.2);
+  } }
 .claim-card:hover h2 {
   margin-top: 90px;
   color: #fff; }

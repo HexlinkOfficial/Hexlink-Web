@@ -15,3 +15,11 @@ export function checkIfEmail() {
     return false;
   }
 }
+
+export function checkClaimer(provider: string) {
+  if (provider == "mailto") {
+    return true;
+  } else {
+    return false;
+  }
+}

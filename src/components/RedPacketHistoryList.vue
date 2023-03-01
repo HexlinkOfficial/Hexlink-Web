@@ -307,7 +307,7 @@
                         />
                       </span>
                       <div style="display: flex; flex-direction: column; margin-left: 0.5rem;">
-                        <span class="from-text">From</span>
+                        <span class="from-text" style="margin-left: 0rem;">From</span>
                         <span style="font-size: 12px; color: rgb(100,116,139)">@{{ op.redpacket.creator.handle }}</span>
                       </div>
                     </div>

@@ -7,6 +7,7 @@ import { useWalletStore } from "@/stores/wallet";
 import { useRedPacketStore } from "@/stores/redpacket";
 import { useChainStore } from '@/stores/chain';
 import { getFunctions, httpsCallable } from 'firebase/functions'
+import { trySwitchNetwork } from '@/web3/wallet';
 
 const ALCHEMY_KEY = {
     "goerli": "U4LBbkMIAKCf4GpjXn7nB7H1_P9GiU4b",

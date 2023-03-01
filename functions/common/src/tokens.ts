@@ -4,6 +4,8 @@ import type {Chain} from "./chain";
 import GOERLI_TOKENS from "./tokens/GOERLI_TOKENS.json";
 import MUMBAI_TOKENS from "./tokens/MUMBAI_TOKENS.json";
 import POLYGON_TOEKNS from "./tokens/POLYGON_TOKENS.json";
+import ARBITRUM_NOVA_TESTNET_TOKENS from "./tokens/ARBITRUM_NOVA_TESTNET_TOKENS.json";
+import ARBITRUM_NOVA_TOKENS from "./tokens/ARBITRUM_NOVA_TOKENS.json";
 import ADDRESSES from "./addresses.json";
 
 import {BigNumber as EthBigNumber} from "ethers";
@@ -91,6 +93,18 @@ export async function getPopularTokens(chain: Chain) : Promise<TokenDataList> {
     return {
       timestamp: new Date().toISOString(),
       tokens: MUMBAI_TOKENS,
+    };
+  }
+  if (chain.chainId == "421613") {
+    return {
+      timestamp: new Date().toISOString(),
+      tokens: ARBITRUM_NOVA_TESTNET_TOKENS,
+    };
+  }
+  if (chain.chainId == "42170") {
+    return {
+      timestamp: new Date().toISOString(),
+      tokens: ARBITRUM_NOVA_TOKENS,
     };
   }
   return {

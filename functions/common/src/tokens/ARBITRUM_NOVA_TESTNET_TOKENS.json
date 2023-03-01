@@ -1,0 +1,26 @@
+[
+    {
+        "chainId": 421613,
+        "symbol": "USDC",
+        "name": "USD Coin",
+        "decimals": 6,
+        "address": "0x658e6B62e7ab1d2B29a08F85f8442edEed562b48",
+        "logoURI": "https://wallet-asset.matic.network/img/tokens/usdc.svg"
+    },
+    {
+        "chainId": 421613,
+        "symbol": "WETH",
+        "name": "Wrapped Ether",
+        "decimals": 6,
+        "address": "0xC033378c6eEa969C001CE9438973ca4d6460999a",
+        "logoURI": "https://wallet-asset.matic.network/img/tokens/eth.svg"
+    },
+    {
+        "chainId": 421613,
+        "symbol": "DAI",
+        "name": "Stablecoin DAI",
+        "decimals": 18,
+        "address": "0xE65A051E0ae02eB66a11c73B2BA14021B5aadAEE",
+        "logoURI": "https://wallet-asset.matic.network/img/tokens/dai.svg"
+    }
+]

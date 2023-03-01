@@ -78,7 +78,7 @@ export const ARBITRUM_NOVA_TESTNET : Chain = {
   fullName: "Arbitrum Nova Test Network",
   nativeCurrency: {
     name: "Goerli Ethereum",
-    symbol: "gETH",
+    symbol: "WETH",
     decimals: 18,
   },
   blockExplorerUrls: ["https://goerli-rollup-explorer.arbitrum.io"],
@@ -92,7 +92,7 @@ export const ARBITRUM_NOVA : Chain = {
   fullName: "Arbitrum Nova",
   nativeCurrency: {
     name: "Ethereum",
-    symbol: "ETH",
+    symbol: "WETH",
     decimals: 18,
   },
   blockExplorerUrls: ["https://nova-explorer.arbitrum.io/"],

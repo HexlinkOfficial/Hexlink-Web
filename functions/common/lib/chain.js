@@ -65,11 +65,11 @@ exports.GALILEO = {
 exports.ARBITRUM_TESTNET = {
     chainId: "421613",
     rpcUrls: ["https://goerli-rollup.arbitrum.io/rpc"],
-    name: "arbitrum nova testnet",
-    fullName: "Arbitrum Nova Test Network",
+    name: "arbitrum_testnet",
+    fullName: "Arbitrum Test Network",
     nativeCurrency: {
         name: "Goerli Ethereum",
-        symbol: "WETH",
+        symbol: "gETH",
         decimals: 18,
     },
     blockExplorerUrls: ["https://goerli-rollup-explorer.arbitrum.io"],
@@ -82,7 +82,7 @@ exports.ARBITRUM_NOVA = {
     fullName: "Arbitrum Nova",
     nativeCurrency: {
         name: "Ethereum",
-        symbol: "WETH",
+        symbol: "ETH",
         decimals: 18,
     },
     blockExplorerUrls: ["https://nova-explorer.arbitrum.io/"],
@@ -113,7 +113,7 @@ function getChain(chain) {
     else if (chain === "arbitrum_nova" || chain == "42170") {
         return exports.ARBITRUM_NOVA;
     }
-    else if (chain === "arbitrum_nova_testnet" || chain == "421613") {
+    else if (chain === "arbitrum_testnet" || chain == "421613") {
         return exports.ARBITRUM_TESTNET;
     }
     throw new Error("Unsupported chain");

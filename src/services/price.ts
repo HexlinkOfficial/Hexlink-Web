@@ -8,7 +8,7 @@ const SUPPORTED_CHAINS = ["arbitrum_nova", "polygon", "ethereum"];
 const MATIC_CHAINS = ["mumbai", "polygon"];
 const EHT_CHAINS = ["goerli", "ethereum", "sepolia", "arbitrum_nova"]
 
-export async function getCoinPrice(chain: Chain) : Promise<{[token: string]: number}> {
+export async function getCoinPrice(chain: Chain) : Promise<number> {
     let coin;
     if (EHT_CHAINS.includes(chain.name)) {
         coin = "ethereum";
@@ -32,7 +32,7 @@ export async function getTokenPrices(
     tokens: string[]
 ) : Promise<{[token: string]: number}> {
     const tokensToSearch = tokens.filter(t => t != ethers.constants.AddressZero);
-    let prices = {};
+    let prices : {[key: string]: string} = {};
     if (tokensToSearch.length !== tokens.length) {
         prices[ethers.constants.AddressZero] = await getCoinPrice(chain);
     }

@@ -31,20 +31,19 @@
                       </div>
                     </div>
                     <div v-for="(chain, i) in testNet" :key="i">
-                      
                       <!-- Mumbai -->
                       <div class="network-items" @click="switchNetwork({...chain})">
                         <button>
                           <div style="display: flex; margin-right: 0.75rem; align-items: center; height: 1.25rem; width: 18px;">
-                            <img v-if="useChainStore().chain.name == 'mumbai'" src="@/assets/svg/checkBlack.svg"/>
-                            <img v-if="useChainStore().chain.name != 'mumbai'" src="@/assets/svg/checkWhite.svg"/>
+                            <img v-if="useChainStore().chain.name === chain.name" src="@/assets/svg/checkBlack.svg"/>
+                            <img v-if="useChainStore().chain.name !== chain.name" src="@/assets/svg/checkWhite.svg"/>
                           </div>
                           <div style="display: flex; white-space: nowrap; align-items: center; width: calc(100% - 18px); ">
                             <div style="position: relative; margin-right: 0.75rem; min-width: max-content; ">
                               <img :src="chain.logoUrl" height=25 style="margin-left: 0.5rem; margin-right: 0.5rem;" />
                             </div>
                             <div class="items-name">
-                              <span class="item-title">{{ chain.name }}</span>
+                              <span class="item-title">{{ chain.fullName }}</span>
                             </div>
                           </div>
                         </button>

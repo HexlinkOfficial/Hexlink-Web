@@ -84,6 +84,7 @@ const provider = ref<string>("");
 const handle = ref<string>("");
 let timeLeft = ref<number>(0);
 let countDownTimerInterval = ref<any>(null);
+const errorMessage = ref<string>("");
 
 const route = useRoute();
 const store = useRedPacketStore();
@@ -136,9 +137,12 @@ const claim = async () => {
     const otp = route.query.otp?.toString();
     const {id} = await callClaimRedPacket(redPacket.value!, otp);
     store.afterClaimed(redPacket.value!, id);
-  } catch (e) {
+  } catch (e: any) {
     console.log("Failed to claim redpacket with error");
     console.log(e);
+    if(e.toString().includes("already_claimed")) {
+      errorMessage.value = "You already claimed this airdrop!";
+    }
     store.setClaimStatus("error");
   }
 }
@@ -147,6 +151,9 @@ const loadText = () => {
   if (store.claimStatus == 'success') {
     return 'Claim Successful!';
   } else if (store.claimStatus == 'error') {
+    if (errorMessage.value != "") {
+      return errorMessage.value;
+    }
     return 'Uhmmmm, something went wrong!';
   } else {
     return 'Processing...';

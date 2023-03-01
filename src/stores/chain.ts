@@ -27,7 +27,6 @@ export const useChainStore = defineStore({
         },
         reset() {
             this.current = "goerli";
-            this.priceInfos = {};
         }
     },
 });

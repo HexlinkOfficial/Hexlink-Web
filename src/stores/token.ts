@@ -41,7 +41,10 @@ export const useTokenStore = defineStore({
         },
         wrappedCoin: (state) => {
             const c = chain();
-            return state.data[c.name][wrappedCoinAddress(c)];
+            const wrapped = wrappedCoinAddress(c);
+            if (wrapped) {
+                return state.data[c.name][wrapped];
+            }
         },
         stableCoins: (state) => {
             const c = chain();

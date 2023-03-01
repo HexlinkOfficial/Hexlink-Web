@@ -176,7 +176,7 @@ import { useAuthStore } from '@/stores/auth';
 import { useWalletStore } from '@/stores/wallet';
 import { useChainStore } from '@/stores/chain';
 import { createToaster } from "@meforma/vue-toaster";
-import { GOERLI, MUMBAI, ARBITRUM_NOVA, ARBITRUM_NOVA_TESTNET, prettyPrintAddress, setAccountOwner } from "../../functions/common";
+import { GOERLI, MUMBAI, ARBITRUM_NOVA, ARBITRUM_TESTNET, prettyPrintAddress, setAccountOwner } from "../../functions/common";
 import { switchNetwork, getInfuraProvider } from "@/web3/network";
 import { connectWallet, disconnectWallet} from "@/web3/wallet";
 import { useAccountStore } from "@/stores/account";
@@ -191,7 +191,7 @@ const showTestnet = ref<boolean>(false);
 const { toClipboard } = useClipboard();
 
 const mainNet = [ARBITRUM_NOVA];
-const testNet = [GOERLI, MUMBAI, ARBITRUM_NOVA_TESTNET];
+const testNet = [GOERLI, MUMBAI, ARBITRUM_TESTNET];
 
 const addressTextLong = function (address: string | undefined) {
   if (address) {

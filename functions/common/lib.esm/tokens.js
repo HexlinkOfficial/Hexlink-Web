@@ -2,7 +2,7 @@
 import GOERLI_TOKENS from "./tokens/GOERLI_TOKENS.json";
 import MUMBAI_TOKENS from "./tokens/MUMBAI_TOKENS.json";
 import POLYGON_TOEKNS from "./tokens/POLYGON_TOKENS.json";
-import ARBITRUM_NOVA_TESTNET_TOKENS from "./tokens/ARBITRUM_NOVA_TESTNET_TOKENS.json";
+import ARBITRUM_TESTNET_TOKENS from "./tokens/ARBITRUM_TESTNET_TOKENS.json";
 import ARBITRUM_NOVA_TOKENS from "./tokens/ARBITRUM_NOVA_TOKENS.json";
 import ADDRESSES from "./addresses.json";
 import { BigNumber } from "bignumber.js";
@@ -57,7 +57,7 @@ export async function getPopularTokens(chain) {
     if (chain.chainId == "421613") {
         return {
             timestamp: new Date().toISOString(),
-            tokens: ARBITRUM_NOVA_TESTNET_TOKENS,
+            tokens: ARBITRUM_TESTNET_TOKENS,
         };
     }
     if (chain.chainId == "42170") {

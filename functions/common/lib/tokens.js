@@ -16,7 +16,7 @@ exports.tokenAmount = exports.tokenBase = exports.gasTokenDecimals = exports.isA
 const GOERLI_TOKENS_json_1 = __importDefault(require("./tokens/GOERLI_TOKENS.json"));
 const MUMBAI_TOKENS_json_1 = __importDefault(require("./tokens/MUMBAI_TOKENS.json"));
 const POLYGON_TOKENS_json_1 = __importDefault(require("./tokens/POLYGON_TOKENS.json"));
-const ARBITRUM_NOVA_TESTNET_TOKENS_json_1 = __importDefault(require("./tokens/ARBITRUM_NOVA_TESTNET_TOKENS.json"));
+const ARBITRUM_TESTNET_TOKENS_json_1 = __importDefault(require("./tokens/ARBITRUM_TESTNET_TOKENS.json"));
 const ARBITRUM_NOVA_TOKENS_json_1 = __importDefault(require("./tokens/ARBITRUM_NOVA_TOKENS.json"));
 const addresses_json_1 = __importDefault(require("./addresses.json"));
 const bignumber_js_1 = require("bignumber.js");
@@ -80,7 +80,7 @@ function getPopularTokens(chain) {
         if (chain.chainId == "421613") {
             return {
                 timestamp: new Date().toISOString(),
-                tokens: ARBITRUM_NOVA_TESTNET_TOKENS_json_1.default,
+                tokens: ARBITRUM_TESTNET_TOKENS_json_1.default,
             };
         }
         if (chain.chainId == "42170") {

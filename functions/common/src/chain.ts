@@ -70,7 +70,7 @@ export const GALILEO : Chain = {
   logoUrl: "",
 };
 
-export const ARBITRUM_NOVA_TESTNET : Chain = {
+export const ARBITRUM_TESTNET : Chain = {
   chainId: "421613",
   rpcUrls: ["https://goerli-rollup.arbitrum.io/rpc"],
   name: "arbitrum nova testnet",
@@ -98,7 +98,7 @@ export const ARBITRUM_NOVA : Chain = {
   logoUrl: "https://global-uploads.webflow.com/62ed6a1f52cca7f115c61d3b/62f0266f58ad156a291a8324_AN_mark_orange.svg",
 };
 
-export const SUPPORTED_CHAINS = [GOERLI, MUMBAI, ARBITRUM_NOVA, ARBITRUM_NOVA_TESTNET];
+export const SUPPORTED_CHAINS = [GOERLI, MUMBAI, ARBITRUM_NOVA, ARBITRUM_TESTNET];
 
 export async function getChainFromProvider(
     provider: ethers.providers.Provider
@@ -120,7 +120,7 @@ export function getChain(chain: string | number) : Chain {
   } else if (chain === "arbitrum_nova" || chain == "42170") {
     return ARBITRUM_NOVA;
   } else if (chain === "arbitrum_nova_testnet" || chain == "421613") {
-    return ARBITRUM_NOVA_TESTNET;
+    return ARBITRUM_TESTNET;
   }
   throw new Error("Unsupported chain");
 }

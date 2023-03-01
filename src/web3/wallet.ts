@@ -10,8 +10,6 @@ import { createToaster } from "@meforma/vue-toaster";
 import detectEthereumProvider from '@metamask/detect-provider';
 import type { Chain } from "../../functions/common";
 
-let provider, library: any;
-
 async function buildAccount(account: string) : Promise<Account> {
   return {
     address: account,
@@ -51,6 +49,7 @@ function handleEthereum() {
 
 export async function connectWallet() {
   const toaster = createToaster({ position: "top", duration: 4000 });
+  let provider;
   // const metamaskProvider = await detectEthereumProvider()
   // if (!metamaskProvider) {
   //   console.log('MetaMask is not installed!');
@@ -67,8 +66,12 @@ export async function connectWallet() {
   let wallet, walletIcon;
   const store = useWalletStore();
   try {
-    provider = await web3Modal.connect();
-    library = new ethers.providers.Web3Provider(provider);
+    try {
+      provider = await web3Modal.connect();
+    } catch (error) {
+      console.warn(error);
+    }
+    const library = new ethers.providers.Web3Provider(provider);
     const accounts = await library.listAccounts();
     if (accounts.length == 0) {
       throw new Error("Account not found");

@@ -154,7 +154,8 @@
                   </div>
                 </div>
                 <div class="callToAction">
-                  <i v-if="showStatus(op) == 'Sent'" class="fa fa-paper-plane share-button" aria-hidden="true" @click="share(op.redpacket)"></i>
+                  <i v-if="showStatus(op) == 'Sent' && op.redpacket.type === 'erc20' && normalize(op.redpacket.state?.balanceLeft || op.redpacket.metadata.balance, op.redpacket.token) != '0'" class="fa fa-paper-plane share-button" aria-hidden="true" @click="share(op.redpacket)"></i>
+                  <i v-if="showStatus(op) == 'Sent' && op.redpacket.type === 'erc721' && (op.redpacket.state?.claimsLeft || total(op.redpacket)) != '0'" class="fa fa-paper-plane share-button" aria-hidden="true" @click="share(op.redpacket)"></i>
                   <a-tooltip v-if="showStatus(op) != 'Sent' && showStatus(op) != 'Pending'" placement="top">
                     <template #title>
                       <span>

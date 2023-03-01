@@ -41,7 +41,7 @@
                           </div>
                           <div style="display: flex; white-space: nowrap; align-items: center; width: calc(100% - 18px); ">
                             <div style="position: relative; margin-right: 0.75rem; min-width: max-content; ">
-                              <img src="https://token.metaswap.codefi.network/assets/networkLogos/polygon.svg" height=25 style="margin-left: 0.5rem; margin-right: 0.5rem;" />
+                              <img :src="chain.logoUrl" height=25 style="margin-left: 0.5rem; margin-right: 0.5rem;" />
                             </div>
                             <div class="items-name">
                               <span class="item-title">{{ chain.name }}</span>

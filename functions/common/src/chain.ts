@@ -73,7 +73,7 @@ export const GALILEO : Chain = {
 export const ARBITRUM_NOVA_TESTNET : Chain = {
   chainId: "421613",
   rpcUrls: ["https://goerli-rollup.arbitrum.io/rpc"],
-  name: "arbitrum_nova_testnet",
+  name: "arbitrum nova testnet",
   fullName: "Arbitrum Nova Test Network",
   nativeCurrency: {
     name: "Goerli Ethereum",
@@ -81,7 +81,7 @@ export const ARBITRUM_NOVA_TESTNET : Chain = {
     decimals: 18,
   },
   blockExplorerUrls: ["https://goerli-rollup-explorer.arbitrum.io"],
-  logoUrl: "",
+  logoUrl: "https://global-uploads.webflow.com/62ed6a1f52cca7f115c61d3b/62f0266f58ad156a291a8324_AN_mark_orange.svg",
 };
 
 export const ARBITRUM_NOVA : Chain = {
@@ -95,7 +95,7 @@ export const ARBITRUM_NOVA : Chain = {
     decimals: 18,
   },
   blockExplorerUrls: ["https://nova-explorer.arbitrum.io/"],
-  logoUrl: "",
+  logoUrl: "https://global-uploads.webflow.com/62ed6a1f52cca7f115c61d3b/62f0266f58ad156a291a8324_AN_mark_orange.svg",
 };
 
 export const SUPPORTED_CHAINS = [GOERLI, MUMBAI, ARBITRUM_NOVA, ARBITRUM_NOVA_TESTNET];

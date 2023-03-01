@@ -75,6 +75,7 @@
     "vue3-apexcharts": "^1.4.1",
     "vue3-perfect-scrollbar": "^1.6.1",
     "wagmi": "^0.11.7",
+    "web3": "^1.8.2",
     "web3modal": "^1.9.10",
     "webfontloader": "^1.6.28",
     "wonka": "^6.2.3",

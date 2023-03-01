@@ -107,7 +107,7 @@
                 </div>
                 <div class="claim-status" v-if="op.redpacket && op.txStatus != 'success'"></div>
                 <div class="share" v-if="op.redpacket">
-                  <i v-if="showStatus(op) == 'Sent'" class="fa fa-paper-plane share-button" aria-hidden="true" @click="share(op.redpacket)"></i>
+                  <i v-if="showStatus(op) == 'Sent' && op.redpacket.type === 'erc20' && claimed(op.redpacket) != op.redpacket.metadata.split" class="fa fa-paper-plane share-button" aria-hidden="true" @click="share(op.redpacket)"></i>
                   <span v-if="showStatus(op) != 'Sent'" class="pending-text" :style="showStatus(op) == 'Pending' ? 'margin-left: 3.5rem;' : ''">{{ showDetailStatus(op) }}</span>
                 </div>
                 <div class="cta">

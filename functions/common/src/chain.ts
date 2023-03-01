@@ -71,7 +71,35 @@ export const GALILEO : Chain = {
   logoUrl: "",
 };
 
-export const SUPPORTED_CHAINS = [GOERLI, MUMBAI];
+export const ARBITRUM_NOVA_TESTNET : Chain = {
+  chainId: "421613",
+  rpcUrls: ["https://goerli-rollup.arbitrum.io/rpc"],
+  name: "arbitrum_nova_testnet",
+  fullName: "Arbitrum Nova Test Network",
+  nativeCurrency: {
+    name: "Goerli Ethereum",
+    symbol: "WETH",
+    decimals: 18,
+  },
+  blockExplorerUrls: ["https://goerli-rollup-explorer.arbitrum.io"],
+  logoUrl: "",
+};
+
+export const ARBITRUM_NOVA : Chain = {
+  chainId: "42170",
+  rpcUrls: ["https://nova.arbitrum.io/rpc"],
+  name: "arbitrum_nova",
+  fullName: "Arbitrum Nova",
+  nativeCurrency: {
+    name: "Ethereum",
+    symbol: "WETH",
+    decimals: 18,
+  },
+  blockExplorerUrls: ["https://nova-explorer.arbitrum.io/"],
+  logoUrl: "",
+};
+
+export const SUPPORTED_CHAINS = [GOERLI, MUMBAI, ARBITRUM_NOVA, ARBITRUM_NOVA_TESTNET];
 
 export async function getChainFromProvider(
     provider: ethers.providers.Provider
@@ -88,10 +116,12 @@ export function getChain(chain: string | number) : Chain {
     return POLYGON;
   } else if (chain === "mumbai" || chain == "80001") {
     return MUMBAI;
-  } else if (chain === "mumbai" || chain == "80001") {
-    return MUMBAI;
   } else if (chain === "galileo" || chain == "3334") {
     return GALILEO;
+  } else if (chain === "arbitrum_nova" || chain == "42170") {
+    return ARBITRUM_NOVA;
+  } else if (chain === "arbitrum_nova_testnet" || chain == "421613") {
+    return ARBITRUM_NOVA_TESTNET;
   }
   throw new Error("Unsupported chain");
 }

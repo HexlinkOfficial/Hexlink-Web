@@ -158,7 +158,7 @@
       ></RedPacketAccount>
     </div>
     <div class="create">
-        <button class="connect-wallet-button" @click="confirmRedPacket" style="width: 90%;">
+        <button :disabled="hasBalanceWarning" class="connect-wallet-button" @click="confirmRedPacket" style="width: 90%;">
           <img style="margin-right: 10px;" src="@/assets/svg/redPacket.svg"/>
           Confirm Red Packet
         </button>
@@ -446,6 +446,9 @@ onClickOutside(
   color: white; }
 .connect-wallet-button:hover {
   background-color: rgba(7, 106, 224,0.9);
+}
+.connect-wallet-button:disabled {
+  background-color: rgb(106, 165, 237);
 }
 .red-packet {
   visibility: visible;

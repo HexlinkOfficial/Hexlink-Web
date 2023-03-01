@@ -1,5 +1,6 @@
 import type { Account } from "../../functions/common";
 import { defineStore } from 'pinia'
+import { ethers } from "ethers";
 
 export const useWalletStore = defineStore({
     id: 'wallet',

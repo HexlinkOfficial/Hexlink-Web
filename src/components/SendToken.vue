@@ -124,7 +124,7 @@
         </div>
       </div>
       <div style="display: flex; justify-content: center; width: 100%; padding: 0 15px;">
-        <button class="cta-button">Send</button>
+        <button :disabled="hasBalanceWarning" class="cta-button">Send</button>
       </div>
     </form>
     <div v-if="sendStatus != ''" class="form-send">
@@ -527,6 +527,9 @@ const validateEmail = (input: string) => {
   width: 100%;
   border-radius: 50px;
   border: none; }
+.cta-button:disabled {
+  background-color: rgb(106, 165, 237);
+}
 .token-box {
   display: flex;
   flex-direction: column;

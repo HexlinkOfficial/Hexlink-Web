@@ -30,9 +30,10 @@
                         </div>
                       </div>
                     </div>
-                    <div>
+                    <div v-for="(chain, i) in testNet" :key="i">
+                      
                       <!-- Mumbai -->
-                      <div class="network-items" @click="switchNetwork({...MUMBAI})">
+                      <div class="network-items" @click="switchNetwork({...chain})">
                         <button>
                           <div style="display: flex; margin-right: 0.75rem; align-items: center; height: 1.25rem; width: 18px;">
                             <img v-if="useChainStore().chain.name == 'mumbai'" src="@/assets/svg/checkBlack.svg"/>
@@ -43,28 +44,7 @@
                               <img src="https://token.metaswap.codefi.network/assets/networkLogos/polygon.svg" height=25 style="margin-left: 0.5rem; margin-right: 0.5rem;" />
                             </div>
                             <div class="items-name">
-                              <!-- <span class="item-title">{{ MUMBAI.fullName }}</span> -->
-                              <span class="item-title">Mumbai</span>
-                              <!-- <span class="item-balance">$11.39</span> -->
-                            </div>
-                          </div>
-                        </button>
-                      </div>
-                      <!-- Goerli -->
-                      <div class="network-items" @click="switchNetwork({...GOERLI})">
-                        <button>
-                          <div style="display: flex; margin-right: 0.75rem; align-items: center; height: 1.25rem; width: 18px;">
-                            <img v-if="useChainStore().chain.name == 'goerli'" src="@/assets/svg/checkBlack.svg"/>
-                            <img v-if="useChainStore().chain.name != 'goerli'" src="@/assets/svg/checkWhite.svg"/>
-                          </div>
-                          <div style="display: flex; white-space: nowrap; align-items: center; width: calc(100% - 18px); ">
-                            <div style="position: relative; margin-right: 0.75rem; min-width: max-content; ">
-                              <img src="https://token.metaswap.codefi.network/assets/networkLogos/ethereum.svg" height=25 style="margin-left: 0.5rem; margin-right: 0.5rem;" />
-                            </div>
-                            <div class="items-name">
-                              <!-- <span class="item-title">{{ GOERLI.fullName }}</span> -->
-                              <span class="item-title">Goerli</span>
-                              <!-- <span class="item-balance">$11.39</span> -->
+                              <span class="item-title">{{ chain.name }}</span>
                             </div>
                           </div>
                         </button>
@@ -196,10 +176,9 @@ import { useAuthStore } from '@/stores/auth';
 import { useWalletStore } from '@/stores/wallet';
 import { useChainStore } from '@/stores/chain';
 import { createToaster } from "@meforma/vue-toaster";
-import { GOERLI, MUMBAI, prettyPrintAddress, setAccountOwner } from "../../functions/common";
+import { GOERLI, MUMBAI, ARBITRUM_NOVA, ARBITRUM_NOVA_TESTNET, prettyPrintAddress, setAccountOwner } from "../../functions/common";
 import { switchNetwork, getInfuraProvider } from "@/web3/network";
 import { connectWallet, disconnectWallet} from "@/web3/wallet";
-// import { connectWallet as cw } from "@/web3/walletconnect";
 import { useAccountStore } from "@/stores/account";
 import { signOutFirebase } from "@/services/auth";
 import useClipboard from 'vue-clipboard3';
@@ -210,6 +189,9 @@ const walletStore = useWalletStore();
 const active = ref<string>("");
 const showTestnet = ref<boolean>(false);
 const { toClipboard } = useClipboard();
+
+const mainNet = [ARBITRUM_NOVA];
+const testNet = [GOERLI, MUMBAI, ARBITRUM_NOVA_TESTNET];
 
 const addressTextLong = function (address: string | undefined) {
   if (address) {

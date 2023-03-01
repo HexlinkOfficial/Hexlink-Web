@@ -1,4 +1,3 @@
-/* eslint-disable require-jsdoc */
 import type {ethers} from "ethers";
 
 export interface Chain {

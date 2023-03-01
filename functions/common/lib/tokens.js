@@ -36,7 +36,8 @@ function nativeCoinAddress(chain) {
 }
 exports.nativeCoinAddress = nativeCoinAddress;
 function wrappedCoinAddress(chain) {
-    return wrappedCoin(chain).address.toLowerCase();
+    var _a;
+    return (_a = wrappedCoin(chain)) === null || _a === void 0 ? void 0 : _a.address.toLowerCase();
 }
 exports.wrappedCoinAddress = wrappedCoinAddress;
 function stableCoinAddresses(chain) {
@@ -44,11 +45,11 @@ function stableCoinAddresses(chain) {
 }
 exports.stableCoinAddresses = stableCoinAddresses;
 function allowedGasToken(chain) {
+    const wrapped = wrappedCoinAddress(chain);
     return [
         nativeCoinAddress(chain),
-        wrappedCoinAddress(chain),
         ...stableCoinAddresses(chain),
-    ];
+    ].concat(wrapped ? [wrapped] : []);
 }
 exports.allowedGasToken = allowedGasToken;
 // const POLYGON_POPULAR_TOKENS = "https://api-polygon-tokens.polygon.technology/tokenlists/popularTokens.tokenlist.json";
@@ -90,7 +91,11 @@ function isNativeCoin(token, chain) {
 }
 exports.isNativeCoin = isNativeCoin;
 function isWrappedCoin(token, chain) {
-    return equal(token, wrappedCoinAddress(chain));
+    const wrapped = wrappedCoinAddress(chain);
+    if (!wrapped) {
+        return false;
+    }
+    return equal(token, wrapped);
 }
 exports.isWrappedCoin = isWrappedCoin;
 function isStableCoin(token, chain) {

@@ -43,5 +43,30 @@
             { "address": "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174", "decimals": 6 },
             { "address": "0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063", "decimals": 18 }
         ]
+    },
+    "arbitrum_nova_testnet": {
+        "hexlink": "0x7e0B0332aDbEC1a84E1E264f308AE581fcda5684",
+        "nativeCoin": {
+            "address": "0x0000000000000000000000000000000000000000",
+            "decimals": 18
+        },
+        "stableCoins": [
+            { "address": "0xF4856cC575d3BbC39cf264c56D9dF003F965A8f1", "decimals": 18 }
+        ]
+    },
+    "arbitrum_nova": {
+        "hexlink": "0x1e47cA3F46619f8A5CBFB98a23f564c9865E58ce",
+        "nativeCoin": {
+            "address": "0x0000000000000000000000000000000000000000",
+            "decimals": 18
+        },
+        "wrappedCoin": {
+            "address": "0x722e8bdd2ce80a4422e880164f2079488e115365",
+            "decimals": 18
+        },
+        "stableCoins": [
+            { "address": "0x750ba8b76187092b0d1e87e28daaf484d1b5273b", "decimals": 6 },
+            { "address": "0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1", "decimals": 18 }
+        ]
     }
 }

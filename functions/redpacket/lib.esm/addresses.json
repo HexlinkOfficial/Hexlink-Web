@@ -8,5 +8,15 @@
         "redpacket": "0x71adadC8059160472e93A7DfEedDBf3c5752A6B4",
         "tokenFactory": "0x22fEA56f746aEB5AFab7c7375692b5d9E2800E86",
         "swap": "0x06d20b9b71291432627774ff2d543D045674aE17"
+    },
+    "arbitrum_nova_testnet": {
+        "redpacket": "0xC9F0cC80C48Ae03E9f2859ceDB20d3fd78725dcE",
+        "tokenFactory": "0xE0CBB44Ab7C2f42a3AaCBf8E8C37BEb9C53118b5",
+        "swap": "0xb2752E0a433A41f19E9348B720d9B9cf9CC433Ee"
+    },
+    "arbitrum_nova": {
+        "redpacket": "0xccF29Abf005D226AfeD03705513A2e14997EC62B",
+        "tokenFactory": "0xC9F0cC80C48Ae03E9f2859ceDB20d3fd78725dcE",
+        "swap": "0x90c3764E9770Bc39a5b3B74c5b262e3231E9f36e"
     }
 }

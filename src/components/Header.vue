@@ -24,6 +24,10 @@
                     <div class="title">
                       <div class="title-header">
                         <div class="title-text">Networks</div>
+                        <div>
+                          <span style="font-size: 0.75rem; line-height: 1.25rem; color: rgb(100, 116, 139); font-weight: 600;">Testnet?</span>
+                          <a-switch v-model:checked="showTestnet" checked-children="show" un-checked-children="hide" style="margin-left: 5px;" />
+                        </div>
                       </div>
                     </div>
                     <div>
@@ -204,6 +208,7 @@ const authStore = useAuthStore();
 const user = authStore.user!;
 const walletStore = useWalletStore();
 const active = ref<string>("");
+const showTestnet = ref<boolean>(false);
 const { toClipboard } = useClipboard();
 
 const addressTextLong = function (address: string | undefined) {
@@ -730,7 +735,7 @@ cursor: pointer; }
       background-clip: padding-box;
       border: 0px solid rgba(0, 0, 0, 0.15);
       border-radius: 0.5rem;
-      width: 15rem;
+      width: 17rem;
       @media (min-width: 640px) {
         position: absolute;
         left: 0;
@@ -754,7 +759,7 @@ cursor: pointer; }
         justify-content: space-between;
         align-items: center;}
         .selectnetwork .dropdown-menu .box .title .title-header .title-text {
-          font-size: 0.875rem;
+          font-size: 1rem;
           line-height: 1.25rem;
           color: rgb(100,116,139);
           font-weight: 600; }
@@ -764,12 +769,7 @@ cursor: pointer; }
       margin-right: 0.75rem;
       padding-left: 0.75rem;
       padding-right: 0.75rem;
-      
       &:hover {
-        // border-bottom: 1px solid rgb(48, 138, 245);
-        // border-top: 1px solid rgb(48, 138, 245);
-        // border-left: 1px solid rgb(48, 138, 245);
-        // border-right: 1px solid rgb(48, 138, 245);
         background-color: rgba(48, 138, 245,0.2);
       }
 

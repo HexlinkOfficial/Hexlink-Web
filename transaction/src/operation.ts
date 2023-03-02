@@ -15,7 +15,7 @@ import {
 } from "../../functions/redpacket";
 import type {Action, Operation} from "./types";
 import {updateOp} from "./graphql/operation";
-import { getInfuraProvider } from "./utils";
+import { getProvider } from "./utils";
 import { authenticator } from 'otplib';
 
 export async function buildTx(
@@ -129,7 +129,7 @@ async function processAction(
       const metadata = await hexlinkErc721Metadata(
         await hexlinkErc721Contract(
           deployed.deployed,
-          getInfuraProvider(chain)
+          getProvider(chain)
         )
       );
       await insertRedPacket(

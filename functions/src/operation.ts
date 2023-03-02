@@ -18,7 +18,7 @@ import {
   isAllowedGasToken,
 } from "../common";
 import {hexlinkSwapAddress} from "../redpacket";
-import {accountAddress, getInfuraProvider} from "./account";
+import {accountAddress, getProvider} from "./account";
 import type {Error, GenAddressSuccess} from "./account";
 import {submit} from "./services/operation";
 import {insertRequest} from "./graphql/request";
@@ -72,7 +72,7 @@ export async function validateAndBuildUserOp(
       "validateAndCallWithGasRefund",
       [req?.txData, req?.nonce, req?.gas, req?.signature]
   );
-  const provider = getInfuraProvider(chain);
+  const provider = getProvider(chain);
   const deployed = await isContract(provider, account.address);
   validateGas(chain, req.gas, deployed);
   if (deployed) {

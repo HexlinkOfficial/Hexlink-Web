@@ -10,7 +10,7 @@ import {
 import type {RedPacket} from "./graphql/redpacket";
 import {signWithKmsKey} from "./kms";
 import {ethers} from "ethers";
-import {getInfuraProvider, toEthSignedMessageHash} from "./account";
+import {getProvider, toEthSignedMessageHash} from "./account";
 import {KMS_KEY_TYPE, kmsConfig} from "./config";
 
 import {
@@ -166,7 +166,7 @@ export const claimRedPacket = functions.https.onCall(
         return {code: 400, message: "redpacket_not_found"};
       }
 
-      const provider = getInfuraProvider(chain);
+      const provider = getProvider(chain);
       let input;
       let to : string;
       if (redPacket.type === "erc20") {
@@ -336,7 +336,7 @@ export const createRedPacketErc721 = functions.https.onCall(
             chain, account, data.request
         );
         try {
-          const provider = getInfuraProvider(chain);
+          const provider = getProvider(chain);
           await provider.estimateGas({
             to: postData.input.to,
             data: postData.input.callData,
@@ -371,7 +371,7 @@ export const refundRedPacket = functions.https.onCall(
         return {code: 401, message: "Not authorized"};
       }
 
-      const provider = getInfuraProvider(chain);
+      const provider = getProvider(chain);
       let to;
       if (redPacket.type === "erc20") {
         const contract = await redPacketContract(provider);

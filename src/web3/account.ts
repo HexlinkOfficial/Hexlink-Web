@@ -1,7 +1,7 @@
 import { hexlAccount, hexlContract, nameHash } from "../../functions/common";
 import type { Chain } from "../../functions/common";
 import { useAccountStore } from "@/stores/account";
-import { getInfuraProvider } from "./network";
+import { getProvider } from "./network";
 import { ethers } from "ethers";
 
 const ACCOUNT_VERSION = undefined; // for test only
@@ -17,7 +17,7 @@ export function nameHashWithVersion(provider: string, uid: string) {
 };
 
 export async function initHexlAccount(chain: Chain, nameHash: string) : Promise<void> {
-    const provider = getInfuraProvider(chain);
+    const provider = getProvider(chain);
     const hexl = await hexlContract(provider);
     const account = await hexlAccount(provider, hexl, nameHash);
     useAccountStore().setAccount(chain, account, ACCOUNT_VERSION);

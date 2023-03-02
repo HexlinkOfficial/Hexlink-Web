@@ -3,11 +3,9 @@ import { ethers, BigNumber as EthBigNumber } from "ethers";
 import { isNativeCoin, isWrappedCoin } from "../../functions/common";
 import type { Chain, BigNumberish } from "../../functions/common";
 import { hexlinkSwap } from "../../functions/redpacket";
-import { useWalletStore } from "@/stores/wallet";
 import { useRedPacketStore } from "@/stores/redpacket";
 import { useChainStore } from '@/stores/chain';
-import { getFunctions, httpsCallable } from 'firebase/functions'
-import { trySwitchNetwork } from '@/web3/wallet';
+import { httpsCallable } from 'firebase/functions'
 
 const ALCHEMY_KEY = {
     "goerli": "U4LBbkMIAKCf4GpjXn7nB7H1_P9GiU4b",
@@ -32,24 +30,23 @@ export async function switchNetwork(chain: Chain) {
 }
 
 export function getProvider(chain: Chain) {
-    return new ethers.providers.AlchemyProvider(
-        Number(chain!.chainId),
-        alchemyKey(chain),
-    );
-}
-
-export function getInfuraProvider(chain: Chain) {
-    return new ethers.providers.InfuraProvider(
-        Number(chain.chainId),
-        import.meta.env.VITE_INFURA_API_KEY
-    );
+    if (chain.name === "arbitrum_nova") {
+        return new ethers.providers.JsonRpcProvider(
+            {url: chain.rpcUrls[0]}
+        );
+    } else {
+        return new ethers.providers.InfuraProvider(
+            Number(chain.chainId),
+            import.meta.env.VITE_INFURA_API_KEY
+        );
+    }
 }
 
 export async function getPriceInfo(chain: Chain, gasToken: string) : Promise<{
     gasPrice: BigNumberish,
     tokenPrice: BigNumberish
 }> {
-    const provider = getInfuraProvider(chain);
+    const provider = getProvider(chain);
     const {maxFeePerGas} = await provider.getFeeData();
     let tokenPrice;
     if (isNativeCoin(gasToken, chain) || isWrappedCoin(gasToken, chain)) {
@@ -59,10 +56,4 @@ export async function getPriceInfo(chain: Chain, gasToken: string) : Promise<{
         tokenPrice = await swap.priceOf(gasToken);
     }
     return {gasPrice: maxFeePerGas.mul(2), tokenPrice}
-}
-
-export async function getRefunder(chain: Chain) : Promise<string> {
-    const getRefunder = httpsCallable(functions, 'priceInfo');
-    const result = await getRefunder({chain: chain.name});
-    return (result.data as any).refunder as string;
 }

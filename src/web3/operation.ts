@@ -26,7 +26,7 @@ import { useWalletStore } from "@/stores/wallet";
 import { nameHashWithVersion } from "@/web3/account";
 
 import { getFunctions, httpsCallable } from 'firebase/functions'
-import { getInfuraProvider } from "./network";
+import { getProvider } from "./network";
 const functions = getFunctions();
 
 export function buildOpInput(params: {
@@ -150,7 +150,7 @@ export interface Name {
 async function addressOf(chain: Chain, receipt: Name) {
     if (receipt.schema) {
         const nameHash = nameHashWithVersion(receipt.schema, receipt.name);
-        const hexl = await hexlContract(getInfuraProvider(chain));
+        const hexl = await hexlContract(getProvider(chain));
         return await hexl.addressOfName(nameHash);
     }
     return receipt.name;

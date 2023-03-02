@@ -6,11 +6,6 @@ import {getUserById} from "./graphql/user";
 import * as functions from "firebase-functions";
 import {getUserById as getTwitterUserById} from "./twitter/twitter";
 
-const ALCHEMY_KEYS : {[key: string]: string} = {
-  "5": "U4LBbkMIAKCf4GpjXn7nB7H1_P9GiU4b",
-  "80001": "Fj__UEjuIj0Xym6ofwZfJbehuuXGpDxe",
-};
-
 const secrets = functions.config().doppler || {};
 
 const TWITTER_PROVIDER_ID = "twitter.com";
@@ -91,22 +86,18 @@ const calcNameHash = (providerId: string, id: string, version?: number) => {
   return name;
 };
 
-export const getAlchemyProvider = (
-    chainId: string
-) : ethers.providers.Provider => {
-  return new ethers.providers.AlchemyProvider(
-      Number(chainId), ALCHEMY_KEYS[chainId]
-  );
-};
-
-export const getInfuraProvider = (
-    chain: Chain
-) : ethers.providers.Provider => {
-  return new ethers.providers.InfuraProvider(
-      Number(chain.chainId!),
-      secrets.VITE_INFURA_API_KEY,
-  );
-};
+export function getProvider(chain: Chain) {
+  if (chain.name === "arbitrum_nova") {
+    return new ethers.providers.JsonRpcProvider(
+        {url: chain.rpcUrls[0]}
+    );
+  } else {
+    return new ethers.providers.InfuraProvider(
+        Number(chain.chainId),
+        secrets.VITE_INFURA_API_KEY
+    );
+  }
+}
 
 export const accountAddress = async function(
     chain: Chain,
@@ -118,7 +109,7 @@ export const accountAddress = async function(
     return result as Error;
   }
   const {nameHash} = result as GenAddressSuccess;
-  const hexlink = await hexlContract(getInfuraProvider(chain));
+  const hexlink = await hexlContract(getProvider(chain));
   try {
     const address = await hexlink.addressOfName(nameHash);
     return {code: 200, address, nameHash};

@@ -83,7 +83,7 @@ async function processAction(op, chain, action, receipt) {
     if (action.type === "insert_redpacket_erc721") {
         const deployed = (0, redpacket_2.parseDeployed)(chain, receipt, op.account, params.salt);
         if (deployed !== undefined) {
-            const metadata = await (0, redpacket_2.hexlinkErc721Metadata)(await (0, redpacket_2.hexlinkErc721Contract)(deployed.deployed, (0, utils_1.getInfuraProvider)(chain)));
+            const metadata = await (0, redpacket_2.hexlinkErc721Metadata)(await (0, redpacket_2.hexlinkErc721Contract)(deployed.deployed, (0, utils_1.getProvider)(chain)));
             await (0, redpacket_1.insertRedPacket)(params.userId, [{
                     id: params.redPacketId,
                     creator: params.creator,

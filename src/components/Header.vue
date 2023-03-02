@@ -176,7 +176,7 @@ import { useWalletStore } from '@/stores/wallet';
 import { useChainStore } from '@/stores/chain';
 import { createToaster } from "@meforma/vue-toaster";
 import { GOERLI, MUMBAI, ARBITRUM_NOVA, ARBITRUM_TESTNET, prettyPrintAddress, setAccountOwner } from "../../functions/common";
-import { switchNetwork, getInfuraProvider } from "@/web3/network";
+import { switchNetwork, getProvider } from "@/web3/network";
 import { connectWallet, disconnectWallet} from "@/web3/wallet";
 import { useAccountStore } from "@/stores/account";
 import { signOutFirebase } from "@/services/auth";
@@ -211,7 +211,7 @@ const root = ref<HTMLElement | null>(null);
 const activeDropDown = async (value: any) => {
   if (value === 'profile') {
     const chain = useChainStore().chain;
-    const provider = getInfuraProvider(chain);
+    const provider = getProvider(chain);
     if (useAccountStore().account?.owner == null){
       // update the owner if there is one in async
       setAccountOwner(provider, useAccountStore().account!);

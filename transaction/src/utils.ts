@@ -1,11 +1,16 @@
 
 import type {Chain} from "../../functions/common";
-import type { Provider } from "@ethersproject/providers";
-import { InfuraProvider } from "@ethersproject/providers";
+import { ethers } from "ethers";
 
-export function getInfuraProvider(chain: Chain) : Provider {
-    return new InfuraProvider(
-        Number(chain.chainId),
-        process.env.VITE_INFURA_API_KEY,
-    );
-};
+export function getProvider(chain: Chain) {
+    if (chain.name === "arbitrum_nova") {
+        return new ethers.providers.JsonRpcProvider(
+            {url: chain.rpcUrls[0]}
+        );
+    } else {
+        return new ethers.providers.InfuraProvider(
+            Number(chain.chainId),
+            process.env.VITE_INFURA_API_KEY
+        );
+    }
+}

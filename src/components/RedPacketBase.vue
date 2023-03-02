@@ -60,6 +60,7 @@ import Loading from "@/components/Loading.vue";
 import { useStatusStore } from '@/stores/airdropStatus';
 import { useWalletStore } from '@/stores/wallet';
 import { connectWallet } from "@/web3/wallet";
+import { connectWalletConnect } from "@/web3/walletconnect"
 
 const airdropToken = ref<string>("");
 const statusTitle = ref<string>("Total Created");

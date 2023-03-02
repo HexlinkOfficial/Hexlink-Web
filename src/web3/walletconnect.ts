@@ -1,100 +1,72 @@
-import Web3Model from "web3modal";
-import { ethers } from "ethers";
-import { useWalletStore } from "@/stores/wallet"
-import WalletConnectProvider from "@walletconnect/web3-provider";
 import { isContract } from "../../functions/common";
 import type { Account } from "../../functions/common";
+import type { Chain } from "../../functions/common";
+import WalletConnectProvider from "@walletconnect/web3-provider";
+import { providers, ethers } from "ethers";
 import { useChainStore } from "@/stores/chain";
+import { useWalletStore } from "@/stores/wallet";
 import { useAccountStore } from "@/stores/account";
 import { createToaster } from "@meforma/vue-toaster";
-import detectEthereumProvider from '@metamask/detect-provider';
-import type { Chain } from "../../functions/common";
 
-async function buildAccount(account: string) : Promise<Account> {
+async function buildAccount(account: string): Promise<Account> {
   return {
     address: account,
     isContract: await isContract(useChainStore().provider, account),
   };
 }
 
-export const providerOptions = {
-  walletconnect: {
-    package: WalletConnectProvider, // required
-    options: {
-      rpc: {
-        5: 'https://goerli.infura.io/v3/' + import.meta.env.VITE_INFURA_API_KEY,
-        137: 'https://polygon-mainnet.infura.io/v3/' + import.meta.env.VITE_INFURA_API_KEY,
-        80001: 'https://polygon-mumbai.infura.io/v3/' + import.meta.env.VITE_INFURA_API_KEY,
-        421613: 'https://arbitrum-goerli.infura.io/v3/' + import.meta.env.VITE_INFURA_API_KEY,
-        42170: 'https://nova.arbitrum.io/rpc' + import.meta.env.VITE_INFURA_API_KEY,
-      },
-      infuraId: import.meta.env.VITE_INFURA_API_KEY, //required
-    },
+export const provider = new WalletConnectProvider({
+  rpc: {
+    5: 'https://goerli.infura.io/v3/' + import.meta.env.VITE_INFURA_API_KEY,
+    137: 'https://polygon-mainnet.infura.io/v3/' + import.meta.env.VITE_INFURA_API_KEY,
+    80001: 'https://polygon-mumbai.infura.io/v3/' + import.meta.env.VITE_INFURA_API_KEY,
+    421613: 'https://arbitrum-goerli.infura.io/v3/' + import.meta.env.VITE_INFURA_API_KEY,
+    42170: 'https://nova.arbitrum.io/rpc' + import.meta.env.VITE_INFURA_API_KEY,
   },
-};
-
-export const web3Modal = new Web3Model({
-    cacheProvider: true,
-    providerOptions
+  infuraId: "e4ea80f8c3764a1ea0a582a4846d708c"
 });
 
-export async function disconnectWallet() {
-  await web3Modal.clearCachedProvider()
-  const store = useWalletStore();
-  store.disconnectWallet();
-}
-
-function handleEthereum() {
-  const { ethereum } = window;
-  if (ethereum && ethereum.isMetaMask) {
-    console.log('Ethereum successfully detected!');
-    // Access the decentralized web!
-  } else {
-    console.log('Please install MetaMask!');
-  }
-}
-
-export async function connectWallet() {
+export const connectWalletConnect = async () => {
+  let wallet, walletIcon, address, chainId;
   const toaster = createToaster({ position: "top", duration: 4000 });
-  let provider;
-  // const metamaskProvider = await detectEthereumProvider()
-  // if (!metamaskProvider) {
-  //   console.log('MetaMask is not installed!');
-  // }
-
-  if (window.ethereum) {
-    handleEthereum();
-  } else {
-    window.addEventListener('ethereum#initialized', handleEthereum, {
-      once: true,
-    });
-    setTimeout(handleEthereum, 3000); // 3 seconds
-  }
-  let wallet, walletIcon;
   const store = useWalletStore();
   try {
-    try {
-      provider = await web3Modal.connect();
-    } catch (error) {
-      console.warn(error);
-    }
-    const library = new ethers.providers.Web3Provider(provider);
-    const accounts = await library.listAccounts();
+    await provider.enable();
+    const web3Provider = new providers.Web3Provider(provider);
+    const accounts = await web3Provider.listAccounts();
     if (accounts.length == 0) {
       throw new Error("Account not found");
     }
-    if (library.connection.url == "metamask") {
+    address = accounts[0];
+    if (web3Provider.connection.url == "metamask") {
       wallet = "metamask";
       walletIcon = "https://i.postimg.cc/7PMD1BN4/metamask-icon.png";
-    } else if (library.connection.url == "eip-1193:") {
-      console.log(library);
-      wallet = library.provider.wc._peerMeta.name;
-      if (library.provider.wc._peerMeta.icons.length > 0) {
-        walletIcon = library.provider.wc._peerMeta.icons[0];
+    } else if (web3Provider.connection.url == "eip-1193:") {
+      console.log(web3Provider);
+      wallet = web3Provider.provider.wc._peerMeta.name;
+      if (web3Provider.provider.wc._peerMeta.icons.length > 0) {
+        walletIcon = web3Provider.provider.wc._peerMeta.icons[0];
       } else {
         walletIcon = "https://i.postimg.cc/j29hn62F/9035092-wallet-icon.png";
       }
     }
+    chainId = await provider.request({ method: "eth_chainId" });
+    provider.on("disconnect", (code: any, reason: any) => {
+      console.log(code, reason);
+      console.log("disconnected");
+      store.disconnectWallet();
+    });
+    provider.on("accountsChanged", (accounts: any) => {
+      if (accounts.length > 0) {
+        address = accounts[0];
+      }
+    });
+    provider.on("chainChanged", (chainId: any) => {
+      console.log(chainId);
+      chainId = chainId
+      //window.location.reload();
+    });
+
     const ownerAccountAddress = useAccountStore().account?.owner;
     if (ownerAccountAddress != null && accounts.map((acc: any) => acc.toLowerCase()).includes(ownerAccountAddress.toLowerCase())) {
       store.connectWallet(
@@ -131,25 +103,18 @@ export async function connectWallet() {
         toaster.error(error.message);
       }
     }
-    // window.ethereum.on('accountsChanged', async function (accounts: string[]) {
-    //   const ownerAccountAddress = useAccountStore().account?.owner;
-    //   if (ownerAccountAddress != null && accounts.includes(ownerAccountAddress)) {
-    //     // pass
-    //   } else if (ownerAccountAddress != null) {
-    //     // pop out error and disconnect
-    //   } else if (accounts.length > 0) {
-    //     store.switchAccount(await buildAccount(accounts[0]));
-    //   } else {
-    //     // pop out error and disconnect
-    //   }
-    // });
-    console.log("provider: ", store.provider);
-  } catch (error) {
-    console.log("Error: ", error)
+  } catch (e) {
+    console.log(e);
   }
 }
 
-export async function trySwitchNetwork(chain: Chain) : Promise<void> {
+export async function disconnectWallet() {
+  const store = useWalletStore();
+  store.disconnectWallet();
+  await provider.disconnect();
+}
+
+export async function trySwitchNetwork(chain: Chain): Promise<void> {
   const store = useWalletStore();
   const hexifyChainId = ethers.utils.hexValue(Number(chain.chainId));
   const netVersion = await store.provider!.request({
@@ -188,12 +153,12 @@ export async function trySwitchNetwork(chain: Chain) : Promise<void> {
   console.log("switch to network: ", chain.fullName);
 };
 
-export async function signMessage(account: string, message: string) : Promise<string> {
+export async function signMessage(account: string, message: string): Promise<string> {
   let signature: Promise<string>;
   const store = useWalletStore();
   if (!store.provider) throw new Error("Can't sign");
   try {
-      signature = await store.provider!.request({
+    signature = await store.provider!.request({
       method: "personal_sign",
       params: [message, account]
     });
@@ -204,7 +169,7 @@ export async function signMessage(account: string, message: string) : Promise<st
   return "";
 }
 
-export async function estimateGas(chain: Chain, txParams: any) : Promise<string> {
+export async function estimateGas(chain: Chain, txParams: any): Promise<string> {
   const store = useWalletStore();
   await trySwitchNetwork(chain);
   return await store.provider!.request({
@@ -213,7 +178,7 @@ export async function estimateGas(chain: Chain, txParams: any) : Promise<string>
   });
 }
 
-export async function sendTransaction(chain: Chain, txParams: any) : Promise<string> {
+export async function sendTransaction(chain: Chain, txParams: any): Promise<string> {
   const store = useWalletStore();
   console.log("provider2: ", store.provider);
   await trySwitchNetwork(chain);

@@ -30,7 +30,7 @@ export const GOERLI : Chain = {
 
 export const POLYGON : Chain = {
   chainId: "137",
-  rpcUrls: ["https://polygon-rpc.com"],
+  rpcUrls: ["https://polygon-mainnet.infura.io/v3/"],
   name: "polygon",
   fullName: "Polygon Network",
   nativeCurrency: {
@@ -44,7 +44,7 @@ export const POLYGON : Chain = {
 
 export const MUMBAI : Chain = {
   chainId: "80001",
-  rpcUrls: ["https://rpc-mumbai.maticvigil.com/"],
+  rpcUrls: ["https://polygon-mumbai.infura.io/v3/"],
   name: "mumbai",
   fullName: "Polygon Test Network",
   nativeCurrency: {
@@ -72,7 +72,7 @@ export const GALILEO : Chain = {
 
 export const ARBITRUM_TESTNET : Chain = {
   chainId: "421613",
-  rpcUrls: ["https://goerli-rollup.arbitrum.io/rpc"],
+  rpcUrls: ["https://arbitrum-goerli.infura.io/v3/"],
   name: "arbitrum_testnet",
   fullName: "Arbitrum Test Network",
   nativeCurrency: {

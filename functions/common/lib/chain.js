@@ -73,7 +73,7 @@ exports.ARBITRUM_TESTNET = {
         decimals: 18,
     },
     blockExplorerUrls: ["https://goerli-rollup-explorer.arbitrum.io"],
-    logoUrl: "https://global-uploads.webflow.com/62ed6a1f52cca7f115c61d3b/62f0266f58ad156a291a8324_AN_mark_orange.svg",
+    logoUrl: "https://i.postimg.cc/020dzv9j/nova.png",
 };
 exports.ARBITRUM_NOVA = {
     chainId: "42170",
@@ -86,7 +86,7 @@ exports.ARBITRUM_NOVA = {
         decimals: 18,
     },
     blockExplorerUrls: ["https://nova-explorer.arbitrum.io/"],
-    logoUrl: "https://global-uploads.webflow.com/62ed6a1f52cca7f115c61d3b/62f0266f58ad156a291a8324_AN_mark_orange.svg",
+    logoUrl: "https://i.postimg.cc/020dzv9j/nova.png",
 };
 exports.SUPPORTED_CHAINS = [exports.GOERLI, exports.MUMBAI, exports.ARBITRUM_NOVA, exports.ARBITRUM_TESTNET];
 function getChainFromProvider(provider) {

@@ -52,23 +52,23 @@ npm run lint
 
 ### git workflow:
 1. fork repo
-2. git clone \<forked repo\>
-3. git remote add upstream/\<Hexlink repo\>
+2. ```git clone <forked repo>```
+3. ```git remote add upstream/<Hexlink repo>```
 
 
 #### pre code change:
 in local main branch
-1. git fetch --all
-2. git merge upstream/main 
+1. ```git fetch --all```
+2. ```git merge upstream/main```
    or 
-   git pull upstream/main
-3. git checkout -b \<new_work_branch\>
+   ```git pull upstream/main```
+3. ```git checkout -b <new_work_branch>```
 
 #### after code change
-in local \<new_work_branch\>
-1. git add \<all changed files\>
-2. git commit -m "\<PR title and commit msg\>"
-3. git push origin \<new_work_branch\>
+in local <new_work_branch>
+1. ```git add <all changed files>```
+2. ```git commit -m "<PR title and commit msg>"```
+3. ```git push origin <new_work_branch>```
 
 #### on github, HEXlink repo page
 1. create pull request
@@ -78,8 +78,8 @@ in local \<new_work_branch\>
 1. merge PR
 
 #### Other
-1. delete local branch: git branch -D \<branch_name\>
-2. stash current change: git stash
-3. unstash current change: git stash pop
-4. cherry-pick commit from other local branches: git cherry-pick \<commit_number\>
-5. squash commits into one: git rebase i HEAD~\<number of last x commits\>
+1. delete local branch: ```git branch -D <branch_name>```
+2. stash current change: ```git stash```
+3. unstash current change: ```git stash pop```
+4. cherry-pick commit from other local branches: ```git cherry-pick <commit_number>```
+5. squash commits into one: ```git rebase i HEAD~<number of last x commits>```

@@ -76,3 +76,10 @@ in local \<new_work_branch\>
 
 #### after approval
 1. merge PR
+
+#### Other
+1. delete local branch: git branch -D \<branch_name\>
+2. stash current change: git stash
+3. unstash current change: git stash pop
+4. cherry-pick commit from other local branches: git cherry-pick <commit_number>
+5. squash commits into one: git rebase i HEAD~<number of last x commits>

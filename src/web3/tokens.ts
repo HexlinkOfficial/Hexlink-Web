@@ -31,6 +31,9 @@ function alchemyNetwork(chain: Chain) : Network {
     if (chain.chainId == "80001") {
         return Network.MATIC_MUMBAI;
     }
+    if (chain.chainId == "421613") {
+        return Network.ARB_GOERLI;
+    }
     throw new Error("Unsupported network");
 }
 

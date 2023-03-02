@@ -44,7 +44,7 @@
             { "address": "0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063", "decimals": 18 }
         ]
     },
-    "arbitrum_nova_testnet": {
+    "arbitrum_testnet": {
         "hexlink": "0x7e0B0332aDbEC1a84E1E264f308AE581fcda5684",
         "nativeCoin": {
             "address": "0x0000000000000000000000000000000000000000",

@@ -5,12 +5,12 @@ import type { Chain, BigNumberish } from "../../functions/common";
 import { hexlinkSwap } from "../../functions/redpacket";
 import { useRedPacketStore } from "@/stores/redpacket";
 import { useChainStore } from '@/stores/chain';
-import { httpsCallable } from 'firebase/functions'
 
 const ALCHEMY_KEY = {
     "goerli": "U4LBbkMIAKCf4GpjXn7nB7H1_P9GiU4b",
     "polygon": "1GmfWOSlYIlUI0UcCu4Y2O-8DmFJrlqA",
     "mumbai": "Fj__UEjuIj0Xym6ofwZfJbehuuXGpDxe",
+    "arbitrum_testnet": "ePtF_3xEZX-VJoFXnfiu5b_Tt0-bTcx6",
 };
 
 async function doSwitch(chain: Chain) {

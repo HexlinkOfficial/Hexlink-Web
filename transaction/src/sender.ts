@@ -32,7 +32,7 @@ class PrivateSenderPool {
         const sendersInProcess: string[] = this.getSenderInProcess(chain);
         const sendersInIdle = this.senderPoolAddr.filter(k => !sendersInProcess.includes(k));
         if (sendersInIdle.length > 0) {
-            const sender = sendersInIdle[0];
+            const sender = sendersInIdle[Math.floor(Math.random() * sendersInIdle.length)];
             sendersInProcess.push(sender);
             this.senderCache.set(chain, sendersInProcess);
             return new ethers.Wallet(this.senders.get(sender)!);

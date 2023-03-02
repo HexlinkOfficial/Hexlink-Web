@@ -30,10 +30,27 @@
                         </div>
                       </div>
                     </div>
-                    <div v-for="(chain, i) in testNet" :key="i">
-                      <!-- Mumbai -->
+                    <div v-if="showTestnet" v-for="(chain, i) in testNet" :key="i">
                       <div class="network-items" @click="switchNetwork({...chain})">
-                        <button>
+                        <button style="padding: 12px 12px 12px 0px;">
+                          <div style="display: flex; margin-right: 0.75rem; align-items: center; height: 1.25rem; width: 18px;">
+                            <img v-if="useChainStore().chain.name === chain.name" src="@/assets/svg/checkBlack.svg"/>
+                            <img v-if="useChainStore().chain.name !== chain.name" src="@/assets/svg/checkWhite.svg"/>
+                          </div>
+                          <div style="display: flex; white-space: nowrap; align-items: center; width: calc(100% - 18px); ">
+                            <div style="position: relative; margin-right: 0.75rem; min-width: max-content; ">
+                              <img :src="chain.logoUrl" height=25 style="margin-left: 0.5rem; margin-right: 0.5rem;" />
+                            </div>
+                            <div class="items-name">
+                              <span class="item-title">{{ chain.fullName }}</span>
+                            </div>
+                          </div>
+                        </button>
+                      </div>
+                    </div>
+                    <div v-for="(chain, i) in mainNet" :key="i">
+                      <div class="network-items" @click="switchNetwork({...chain})">
+                        <button style="padding: 12px 12px 12px 0px;">
                           <div style="display: flex; margin-right: 0.75rem; align-items: center; height: 1.25rem; width: 18px;">
                             <img v-if="useChainStore().chain.name === chain.name" src="@/assets/svg/checkBlack.svg"/>
                             <img v-if="useChainStore().chain.name !== chain.name" src="@/assets/svg/checkWhite.svg"/>
@@ -716,7 +733,8 @@ cursor: pointer; }
       background-clip: padding-box;
       border: 0px solid rgba(0, 0, 0, 0.15);
       border-radius: 0.5rem;
-      width: 17rem;
+      width: auto;
+      min-width: 18rem;
       @media (min-width: 640px) {
         position: absolute;
         left: 0;
@@ -755,8 +773,7 @@ cursor: pointer; }
       }
 
       @media (min-width: 640px) {
-        padding-left: 1rem;
-        padding-right: 1rem; } }
+        padding-left: 1rem; } }
       .selectnetwork .dropdown-menu .box .network-items button {
         display: flex;
         padding-top: 0.5rem;
@@ -787,7 +804,7 @@ cursor: pointer; }
           font-weight: 500;
           overflow: hidden;
           text-overflow: ellipsis;
-          width: 120px;
+          width: auto;
           overflow: auto;
           white-space: nowrap; }
         .selectnetwork .dropdown-menu .box .network-items .items-name .item-balance {

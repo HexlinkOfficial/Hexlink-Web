@@ -81,7 +81,7 @@ export const ARBITRUM_TESTNET : Chain = {
     decimals: 18,
   },
   blockExplorerUrls: ["https://goerli-rollup-explorer.arbitrum.io"],
-  logoUrl: "https://global-uploads.webflow.com/62ed6a1f52cca7f115c61d3b/62f0266f58ad156a291a8324_AN_mark_orange.svg",
+  logoUrl: "https://i.postimg.cc/020dzv9j/nova.png",
 };
 
 export const ARBITRUM_NOVA : Chain = {
@@ -95,7 +95,7 @@ export const ARBITRUM_NOVA : Chain = {
     decimals: 18,
   },
   blockExplorerUrls: ["https://nova-explorer.arbitrum.io/"],
-  logoUrl: "https://global-uploads.webflow.com/62ed6a1f52cca7f115c61d3b/62f0266f58ad156a291a8324_AN_mark_orange.svg",
+  logoUrl: "https://i.postimg.cc/020dzv9j/nova.png",
 };
 
 export const SUPPORTED_CHAINS = [GOERLI, MUMBAI, ARBITRUM_NOVA, ARBITRUM_TESTNET];

@@ -81,6 +81,7 @@ const openSend = async (to: string) => {
             console.log('MetaMask is not installed!');
         }
         await connectWallet();
+        await openSend(to);
     }
 }
 

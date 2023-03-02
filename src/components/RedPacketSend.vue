@@ -348,6 +348,7 @@ const tryConnectWallet = async function () {
   }
   await connectWallet();
 };
+
 const modeLabels = ["", "Equally", "Randomly"];
 const modeChoose = (gameMode: 1 | 2) => {
   redpacket.value.mode = gameMode;

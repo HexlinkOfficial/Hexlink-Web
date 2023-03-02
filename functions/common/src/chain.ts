@@ -76,8 +76,8 @@ export const ARBITRUM_TESTNET : Chain = {
   name: "arbitrum_testnet",
   fullName: "Arbitrum Test Network",
   nativeCurrency: {
-    name: "Goerli Ethereum",
-    symbol: "gETH",
+    name: "Arbitrum Ethereum",
+    symbol: "aETH",
     decimals: 18,
   },
   blockExplorerUrls: ["https://goerli-rollup-explorer.arbitrum.io"],

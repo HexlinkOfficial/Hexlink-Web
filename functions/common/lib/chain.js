@@ -25,7 +25,7 @@ exports.GOERLI = {
 };
 exports.POLYGON = {
     chainId: "137",
-    rpcUrls: ["https://polygon-rpc.com"],
+    rpcUrls: ["https://polygon-mainnet.infura.io/v3/"],
     name: "polygon",
     fullName: "Polygon Network",
     nativeCurrency: {
@@ -38,7 +38,7 @@ exports.POLYGON = {
 };
 exports.MUMBAI = {
     chainId: "80001",
-    rpcUrls: ["https://rpc-mumbai.maticvigil.com/"],
+    rpcUrls: ["https://polygon-mumbai.infura.io/v3/"],
     name: "mumbai",
     fullName: "Polygon Test Network",
     nativeCurrency: {
@@ -64,12 +64,12 @@ exports.GALILEO = {
 };
 exports.ARBITRUM_TESTNET = {
     chainId: "421613",
-    rpcUrls: ["https://goerli-rollup.arbitrum.io/rpc"],
+    rpcUrls: ["https://arbitrum-goerli.infura.io/v3/"],
     name: "arbitrum_testnet",
     fullName: "Arbitrum Test Network",
     nativeCurrency: {
-        name: "Goerli Ethereum",
-        symbol: "gETH",
+        name: "Arbitrum Ethereum",
+        symbol: "aETH",
         decimals: 18,
     },
     blockExplorerUrls: ["https://goerli-rollup-explorer.arbitrum.io"],

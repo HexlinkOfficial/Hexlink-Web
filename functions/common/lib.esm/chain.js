@@ -87,7 +87,7 @@ export const ARBITRUM = {
         decimals: 18,
     },
     blockExplorerUrls: ["https://explorer.arbitrum.io/"],
-    logoUrl: "https://i.postimg.cc/020dzv9j/nova.png",
+    logoUrl: "https://i.postimg.cc/mkJcpr2T/arbilogo.png",
 };
 export const SUPPORTED_CHAINS = [GOERLI, MUMBAI, ARBITRUM, ARBITRUM_TESTNET];
 export async function getChainFromProvider(provider) {

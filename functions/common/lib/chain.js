@@ -99,7 +99,7 @@ exports.ARBITRUM = {
         decimals: 18,
     },
     blockExplorerUrls: ["https://explorer.arbitrum.io/"],
-    logoUrl: "https://i.postimg.cc/020dzv9j/nova.png",
+    logoUrl: "https://i.postimg.cc/mkJcpr2T/arbilogo.png",
 };
 exports.SUPPORTED_CHAINS = [exports.GOERLI, exports.MUMBAI, exports.ARBITRUM, exports.ARBITRUM_TESTNET];
 function getChainFromProvider(provider) {

@@ -10,9 +10,11 @@ export const useAccountStore = defineStore({
     state: (): {
         accounts: {[key: string]: Account | undefined},
         version?: number, // for test only
+        showTestnet? :boolean
     }=> ({
         accounts: {},
-        version: undefined
+        version: undefined,
+        showTestnet: false,
     }),
     persist: true,
     getters: {
@@ -24,6 +26,9 @@ export const useAccountStore = defineStore({
         setAccount(chain: Chain, account: Account, version?: number) {
             this.accounts[chain.name] = account;
             this.version = version;
+        },
+        setShowTestnet(show: boolean) {
+            this.showTestnet = show;
         },
         reset() {
             SUPPORTED_CHAINS.forEach(chain => delete this.accounts[chain.name]);

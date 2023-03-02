@@ -187,7 +187,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
+import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue';
 import { useAuthStore } from '@/stores/auth';
 import { useWalletStore } from '@/stores/wallet';
 import { useChainStore } from '@/stores/chain';
@@ -205,6 +205,7 @@ import { connectWallet, disconnectWallet} from "@/web3/wallet";
 import { useAccountStore } from "@/stores/account";
 import { signOutFirebase } from "@/services/auth";
 import useClipboard from 'vue-clipboard3';
+import { connectWalletConnect } from "@/web3/walletconnect"
 
 const authStore = useAuthStore();
 const user = authStore.user!;
@@ -268,11 +269,16 @@ const doCopy = (address: string | undefined) => {
 
 onMounted(() => {
   document.addEventListener('click', closeDropDown);
+  showTestnet.value = useAccountStore().showTestnet!;
 });
 
 onBeforeUnmount(() => {
   document.removeEventListener('click', closeDropDown)
 });
+
+watch(showTestnet, () => {
+  useAccountStore().setShowTestnet(showTestnet.value);
+})
 </script>
 
 <style lang="scss" scoped>

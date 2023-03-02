@@ -60,7 +60,7 @@ import Loading from "@/components/Loading.vue";
 import { useStatusStore } from '@/stores/airdropStatus';
 import { useWalletStore } from '@/stores/wallet';
 import { connectWallet } from "@/web3/wallet";
-import { useChainStore } from '@/stores/chain';
+import { connectWalletConnect } from "@/web3/walletconnect"
 
 const airdropToken = ref<string>("");
 const statusTitle = ref<string>("Total Created");
@@ -88,30 +88,24 @@ function delay(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+const loadData = async () => {
+    loading.value = true;
+    if (useStatusStore().airdropStatus[0]) {
+        statusTitle.value = Object.keys(useStatusStore().airdropStatus[0])[0].toString();
+        statusData.value = Object.values(useStatusStore().airdropStatus[0])[0]?.toString();
+    } else {
+        statusTitle.value = "Total Created";
+        statusData.value = "0";
+    }
+    await delay(2000);
+    loading.value = false;
+}
+
 onMounted(async () => {
-    loading.value = true;
-    if(useStatusStore().status[0]) {
-        statusTitle.value = Object.keys(useStatusStore().status[0])[0].toString();
-        statusData.value = Object.values(useStatusStore().status[0])[0]?.toString();
-    } else {
-        statusTitle.value = "Total Created";
-        statusData.value = "0";
-    }
-    await delay(2000);
-    loading.value = false;
+    await loadData();
 })
-watch(() => useChainStore().current, async () => {
-    loading.value = true;
-    if (useStatusStore().status[0]) {
-        statusTitle.value = Object.keys(useStatusStore().status[0])[0].toString();
-        statusData.value = Object.values(useStatusStore().status[0])[0]?.toString();
-    } else {
-        statusTitle.value = "Total Created";
-        statusData.value = "0";
-    }
-    await delay(2000);
-    loading.value = false;
-});
+
+watch(() => useStatusStore().airdropStatus, async () => await loadData());
 </script>
   
 <style lang="less" scoped>

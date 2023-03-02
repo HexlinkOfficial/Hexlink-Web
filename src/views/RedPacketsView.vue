@@ -12,7 +12,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import { useRoute } from "vue-router";
 import RedPacketBase from "@/components/RedPacketBase.vue";
 import RedPacektHistoryList from "@/components/RedPacketHistoryList.vue";

@@ -496,10 +496,6 @@ const loadData = async function() {
     await loadClaimInfo();
   }
   loading.value = false;
-  useStatusStore().setStatus([
-    { 'Total Created': createdCount },
-    { 'Total Claimed': claimedCount }
-  ]);
   extractDate();
   await refreshData();
   console.log(luckHistoryByDate.value);
@@ -614,6 +610,8 @@ watch(claimStatus, async (newStatus, _) => {
 });
 
 const extractDate = () => {
+  var created = 0;
+  var claimed = 0;
   const sentGroup: any = {};
   const claimGroup: any = {};
   const sentOrderedGroup: any = {}
@@ -646,6 +644,7 @@ const extractDate = () => {
     if (op.error == null) {
       if (op.type == "create_redpacket") {
         createdCount.value += 1;
+        created += 1;
       }
     }
     const date = new Date(op.createdAt).toLocaleString().split(',')[0];
@@ -714,6 +713,10 @@ const extractDate = () => {
   })
 
   luckHistoryByDate.value = JSON.parse(JSON.stringify(fullysortedHistory));
+  useStatusStore().setStatus([
+    { 'Total Created': created },
+    { 'Total Claimed': claimed }
+  ]);
 };
 
 const loading = ref<boolean>(true);

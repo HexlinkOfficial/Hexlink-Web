@@ -3,9 +3,9 @@ import { defineStore } from 'pinia';
 export const useStatusStore = defineStore({
   id: 'status',
   state: (): {
-    status: Array<any>
+    airdropStatus: Array<any>
   } => ({
-    status: [
+    airdropStatus: [
       { 'Total Created': 0 },
       { 'Total Claimed': 0 }
     ]
@@ -13,15 +13,15 @@ export const useStatusStore = defineStore({
   persist: true,
   getters: {
     allStatus: (state): any => {
-      return state.status;
+      return state.airdropStatus;
     },
   },
   actions: {
     setStatus(statusArr: any) {
-      this.status = statusArr;
+      this.airdropStatus = statusArr;
     },
     reset() {
-      this.status = [
+      this.airdropStatus = [
         { 'Total Created': 0 },
         { 'Total Claimed': 0 }
       ]

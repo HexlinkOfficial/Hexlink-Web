@@ -1,26 +1,27 @@
 import axios from "axios";
 import { ethers } from "ethers";
+import type { Chain } from "../../functions/common";
 
 const BASE_COIN_URL = "https://api.coingecko.com/api/v3/simple/price";
 const BASE_TOKEN_URL = "https://api.coingecko.com/api/v3/simple/token_price/";
 
-const SUPPORTED_CHAINS = ["arbitrum_nova", "polygon", "ethereum"];
+const SUPPORTED_CHAINS = ["arbitrum_nova", "polygon", "ethereum", "arbitrum_testnet"];
 const MATIC_CHAINS = ["mumbai", "polygon"];
-const EHT_CHAINS = ["goerli", "ethereum", "sepolia", "arbitrum_nova"]
+const EHT_CHAINS = ["goerli", "ethereum", "sepolia", "arbitrum_nova", "arbitrum_testnet"]
 
-export async function getCoinPrice(chain: Chain) : Promise<number> {
-    let coin;
+export async function getCoinPrice(chain: Chain) : Promise<string> {
+    let coin: string;
     if (EHT_CHAINS.includes(chain.name)) {
         coin = "ethereum";
     }
     if (MATIC_CHAINS.includes(chain.name)) {
         coin = "matic-network";
     }
-    const params = {ids: coin, vs_currencies: "usd"};
+    const params = {ids: coin!, vs_currencies: "usd"};
     try {
       const response = await axios.get(BASE_COIN_URL, { params });
       console.log(response);
-      return response.data[coin.toLowerCase()]["usd"];
+      return response.data[coin!.toLowerCase()]["usd"];
     } catch (err: any) {
       console.log(err);
       throw new Error(`Error in 'axiosGetJsonData(${BASE_COIN_URL})': ${err.message}`);
@@ -30,13 +31,13 @@ export async function getCoinPrice(chain: Chain) : Promise<number> {
 export async function getTokenPrices(
     chain: Chain,
     tokens: string[]
-) : Promise<{[token: string]: number}> {
+) : Promise<{[token: string]: string}> {
     const tokensToSearch = tokens.filter(t => t != ethers.constants.AddressZero);
     let prices : {[key: string]: string} = {};
     if (tokensToSearch.length !== tokens.length) {
         prices[ethers.constants.AddressZero] = await getCoinPrice(chain);
     }
-    if (!SUPPORTED_CHAINS.includes(chain.name)) {
+    if (tokensToSearch.length === 0 || !SUPPORTED_CHAINS.includes(chain.name)) {
       return prices;
     }
     const params = {

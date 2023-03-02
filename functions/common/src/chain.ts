@@ -98,7 +98,21 @@ export const ARBITRUM_NOVA : Chain = {
   logoUrl: "https://i.postimg.cc/020dzv9j/nova.png",
 };
 
-export const SUPPORTED_CHAINS = [GOERLI, MUMBAI, ARBITRUM_NOVA, ARBITRUM_TESTNET];
+export const ARBITRUM : Chain = {
+  chainId: "42161",
+  rpcUrls: ["https://arb1.arbitrum.io/rpc"],
+  name: "arbitrum",
+  fullName: "Arbitrum One",
+  nativeCurrency: {
+    name: "Arbitrum Ethereum",
+    symbol: "AETH",
+    decimals: 18,
+  },
+  blockExplorerUrls: ["https://explorer.arbitrum.io/"],
+  logoUrl: "https://i.postimg.cc/020dzv9j/nova.png",
+};
+
+export const SUPPORTED_CHAINS = [GOERLI, MUMBAI, ARBITRUM, ARBITRUM_TESTNET];
 
 export async function getChainFromProvider(
     provider: ethers.providers.Provider
@@ -121,6 +135,8 @@ export function getChain(chain: string | number) : Chain {
     return ARBITRUM_NOVA;
   } else if (chain === "arbitrum_testnet" || chain == "421613") {
     return ARBITRUM_TESTNET;
+  } else if (chain === "arbitrum" || chain == "42161") {
+    return ARBITRUM;
   }
   throw new Error("Unsupported chain");
 }

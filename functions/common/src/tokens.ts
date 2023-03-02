@@ -3,7 +3,8 @@
 import type {Chain} from "./chain";
 import GOERLI_TOKENS from "./tokens/GOERLI_TOKENS.json";
 import MUMBAI_TOKENS from "./tokens/MUMBAI_TOKENS.json";
-import POLYGON_TOEKNS from "./tokens/POLYGON_TOKENS.json";
+import POLYGON_TOKENS from "./tokens/POLYGON_TOKENS.json";
+import ARBITRUM_TOKENS from "./tokens/ARBITRUM_TOKENS.json";
 import ARBITRUM_TESTNET_TOKENS from "./tokens/ARBITRUM_TESTNET_TOKENS.json";
 import ARBITRUM_NOVA_TOKENS from "./tokens/ARBITRUM_NOVA_TOKENS.json";
 import ADDRESSES from "./addresses.json";
@@ -80,7 +81,7 @@ export async function getPopularTokens(chain: Chain) : Promise<TokenDataList> {
     // return await response.json();
     return {
       timestamp: new Date().toISOString(),
-      tokens: POLYGON_TOEKNS,
+      tokens: POLYGON_TOKENS,
     };
   }
   if (chain.chainId == "5") {
@@ -105,6 +106,12 @@ export async function getPopularTokens(chain: Chain) : Promise<TokenDataList> {
     return {
       timestamp: new Date().toISOString(),
       tokens: ARBITRUM_NOVA_TOKENS,
+    };
+  }
+  if (chain.chainId == "42161") {
+    return {
+      timestamp: new Date().toISOString(),
+      tokens: ARBITRUM_TOKENS,
     };
   }
   return {

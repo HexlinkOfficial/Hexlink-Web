@@ -5,9 +5,9 @@ import type { Chain } from "../../functions/common";
 const BASE_COIN_URL = "https://api.coingecko.com/api/v3/simple/price";
 const BASE_TOKEN_URL = "https://api.coingecko.com/api/v3/simple/token_price/";
 
-const SUPPORTED_CHAINS = ["arbitrum_nova", "polygon", "ethereum", "arbitrum_testnet"];
+const SUPPORTED_CHAINS = ["arbitrum_nova", "polygon", "ethereum", "arbitrum"];
 const MATIC_CHAINS = ["mumbai", "polygon"];
-const EHT_CHAINS = ["goerli", "ethereum", "sepolia", "arbitrum_nova", "arbitrum_testnet"]
+const EHT_CHAINS = ["goerli", "ethereum", "sepolia", "arbitrum_nova", "arbitrum", "arbitrum_testnet"]
 
 export async function getCoinPrice(chain: Chain) : Promise<string> {
     let coin: string;

@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.refunder = exports.getChain = exports.getChainFromProvider = exports.SUPPORTED_CHAINS = exports.ARBITRUM_NOVA = exports.ARBITRUM_TESTNET = exports.GALILEO = exports.MUMBAI = exports.POLYGON = exports.GOERLI = void 0;
+exports.refunder = exports.getChain = exports.getChainFromProvider = exports.SUPPORTED_CHAINS = exports.ARBITRUM = exports.ARBITRUM_NOVA = exports.ARBITRUM_TESTNET = exports.GALILEO = exports.MUMBAI = exports.POLYGON = exports.GOERLI = void 0;
 exports.GOERLI = {
     chainId: "5",
     name: "goerli",
@@ -88,7 +88,20 @@ exports.ARBITRUM_NOVA = {
     blockExplorerUrls: ["https://nova-explorer.arbitrum.io/"],
     logoUrl: "https://i.postimg.cc/020dzv9j/nova.png",
 };
-exports.SUPPORTED_CHAINS = [exports.GOERLI, exports.MUMBAI, exports.ARBITRUM_NOVA, exports.ARBITRUM_TESTNET];
+exports.ARBITRUM = {
+    chainId: "42161",
+    rpcUrls: ["https://arb1.arbitrum.io/rpc"],
+    name: "arbitrum",
+    fullName: "Arbitrum One",
+    nativeCurrency: {
+        name: "Arbitrum Ethereum",
+        symbol: "AETH",
+        decimals: 18,
+    },
+    blockExplorerUrls: ["https://explorer.arbitrum.io/"],
+    logoUrl: "https://i.postimg.cc/020dzv9j/nova.png",
+};
+exports.SUPPORTED_CHAINS = [exports.GOERLI, exports.MUMBAI, exports.ARBITRUM, exports.ARBITRUM_TESTNET];
 function getChainFromProvider(provider) {
     return __awaiter(this, void 0, void 0, function* () {
         const network = yield provider.getNetwork();
@@ -115,6 +128,9 @@ function getChain(chain) {
     }
     else if (chain === "arbitrum_testnet" || chain == "421613") {
         return exports.ARBITRUM_TESTNET;
+    }
+    else if (chain === "arbitrum" || chain == "42161") {
+        return exports.ARBITRUM;
     }
     throw new Error("Unsupported chain");
 }

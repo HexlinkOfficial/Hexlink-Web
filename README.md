@@ -53,7 +53,7 @@ npm run lint
 ### git workflow:
 1. fork repo
 2. ```git clone <forked repo>```
-3. ```git remote add upstream/<Hexlink repo>```
+3. ```git remote add upstream <Hexlink repo>```
 
 
 #### pre code change:

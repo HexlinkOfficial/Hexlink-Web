@@ -187,7 +187,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
+import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue';
 import { useAuthStore } from '@/stores/auth';
 import { useWalletStore } from '@/stores/wallet';
 import { useChainStore } from '@/stores/chain';
@@ -268,11 +268,17 @@ const doCopy = (address: string | undefined) => {
 
 onMounted(() => {
   document.addEventListener('click', closeDropDown);
+  showTestnet.value = useAccountStore().showTestnet!;
 });
 
 onBeforeUnmount(() => {
   document.removeEventListener('click', closeDropDown)
 });
+
+watch(showTestnet, () => {
+  useAccountStore().setShowTestnet(showTestnet.value);
+  console.log("change");
+})
 </script>
 
 <style lang="scss" scoped>

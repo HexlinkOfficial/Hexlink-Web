@@ -210,6 +210,7 @@ const transactionTokenBalance = computed(
 const genTokenList = async function () {
   hexlAccountBalances.value = await getBalances(
     useAccountStore().account!.address,
+    hexlAccountBalances.value,
   );
   tokens.value = tokenStore.tokens.filter(
     t => Number(tokenBalance(t.address)) > 0

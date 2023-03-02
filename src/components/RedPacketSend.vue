@@ -249,10 +249,12 @@ const redPacketTokenBalance = computed(
 const genTokenList = async function () {
     hexlAccountBalances.value = await getBalances(
       useAccountStore().account!.address, 
+      hexlAccountBalances.value,
     );
     if (walletStore.connected) {
       walletAccountBalances.value = await getBalances(
         walletStore.account!.address,
+        walletAccountBalances.value,
       );
     }
     if (redPacketStore.account == "hexlink") {

@@ -124,7 +124,8 @@ const loadData = async function() {
       balanceLeft.value = (await queryRedPacketInfo(redPacket.value)).balanceLeft;
       gasLeft.value = (await queryRedPacketInfo(redPacket.value)).sponsorship;
       redPacket.value.token = await loadAndSetErc20Token(
-        (redPacket.value.metadata as RedPacket).token
+        (redPacket.value.metadata as RedPacket).token,
+        useChainStore().provider,
       );
     } else if (redPacket.value.type === 'erc721') {
       claimItem.value = 'erc721';

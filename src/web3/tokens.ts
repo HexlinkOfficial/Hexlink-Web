@@ -12,7 +12,8 @@ import { useAuthStore } from "@/stores/auth";
 import { useChainStore } from "@/stores/chain";
 import { useTokenStore } from "@/stores/token";
 
-import type { Token, Chain,  NormalizedTokenBalance } from "../../functions/common";
+import { ethers, BigNumber as EthBigNumber } from "ethers";
+import { type Token, type Chain,  type NormalizedTokenBalance, erc20Contract } from "../../functions/common";
 import { normalizeBalance, getPopularTokens } from "../../functions/common";
 import { Alchemy, Network } from "alchemy-sdk";
 import { alchemyKey } from "@/web3/network";
@@ -45,32 +46,59 @@ function alchemy() {
     });
 }
 
-export async function loadAndSetErc20Token(token: string) : Promise<Token> {
+async function getBalance(
+    account: string,
+    token: {
+        address: string,
+        decimals: number,
+    },
+    provider: ethers.providers.Provider
+) : Promise<{
+    address: string,
+    balance: NormalizedTokenBalance
+}> {
+    let balance : EthBigNumber;
+    if (token.address === ethers.constants.AddressZero) {
+        balance = await provider.getBalance(account);
+    } else {
+        balance = await erc20Contract(provider, token.address).balanceOf(account);
+    }
+    return {
+        address: token.address,
+        balance: normalizeBalance(balance.toString(), token.decimals),
+    }
+}
+
+export async function loadAndSetErc20Token(
+    token: string,
+    provider: ethers.providers.Provider
+) : Promise<Token> {
     const tokenStore = useTokenStore();
     if (!tokenStore.token(token)) {
-        tokenStore.set(await loadErc20Token(token));
+        tokenStore.set(await loadErc20Token(token, provider));
     }
     return tokenStore.token(token);
 }
 
-export async function loadErc20Token(token: string) : Promise<Token> {
-    const metadata = await alchemy().core.getTokenMetadata(token);
-    if (metadata.name == null
-        || metadata.symbol == null
-        || metadata.decimals == null) {
-        throw new Error(
-            `Invalid ERC20 metadata for ${token}, got ${JSON.stringify(metadata)}`
-        )
-    }
+export async function loadErc20Token(
+    token: string,
+    provider: ethers.providers.Provider
+) : Promise<Token> {
+    const erc20 = erc20Contract(provider, token);
+    const [name, symbol, decimals] = await Promise.all([
+        erc20.name(),
+        erc20.symbol(),
+        erc20.decimals()
+    ]);
     return {
         address: token,
-        name: metadata.name!,
-        symbol: metadata.symbol!,
-        decimals: metadata.decimals!,
-        logoURI: metadata.logo!,
+        name,
+        symbol,
+        decimals,
+        logoURI: "",
         chain: useChainStore().chain.name,
         chainId: useChainStore().chain.chainId!,
-    }
+    };
 }
 
 export async function initTokenList(chain: Chain) {
@@ -84,28 +112,13 @@ export async function initTokenList(chain: Chain) {
 
 export type BalanceMap = {[key: string] : NormalizedTokenBalance};
 
-export async function getBalances(account: string, balances: BalanceMap = {}) : Promise<BalanceMap> {
+export async function getBalances(account: string) : Promise<BalanceMap> {
     const store = useTokenStore();
-    const nativeCoin = useTokenStore().nativeCoin;
-    const balance = await useChainStore().provider.getBalance(account);
-    balances[nativeCoin.address] = normalizeBalance(
-        balance.toString(),
-        nativeCoin.decimals
+    const provider = useChainStore().provider
+    const balances = await Promise.all(
+        store.tokens.map(t => getBalance(account, t, provider))
     );
-
-    const erc20s = store.tokens.map(
-        t => t.address
-    ).filter(addr => addr != nativeCoin.address);
-    const result = await alchemy().core.getTokenBalances(account, erc20s);
-    result.tokenBalances.map((b, i) => {
-        const decimals = store.token(b.contractAddress).decimals;
-        if (b.tokenBalance && !b.error) {
-            balances[b.contractAddress] = normalizeBalance(
-                b.tokenBalance, decimals
-            );
-        }
-    });
-    return balances;
+    return balances.reduce((prev : any, b) => prev[b.address] = b.balance, {});
 }
 
 export async function updatePreferences(balances: BalanceMap) {

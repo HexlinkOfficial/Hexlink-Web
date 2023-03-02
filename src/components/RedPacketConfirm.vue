@@ -53,10 +53,11 @@ import { useRedPacketStore } from '@/stores/redpacket';
 import { createNewRedPacket, createRedPacketErc721 } from "@/web3/redpacket";
 import type { RedPacketInput, RedPacketErc721Input } from "../../functions/redpacket";
 import { createNotification } from '@/web3/utils';
-import { loadAndSetErc20Token, loadErc721Token } from "@/web3/tokens";
+import { loadAndSetErc20Token } from "@/web3/tokens";
 import type { Token } from "../../functions/common";
 import { BigNumber } from "bignumber.js";
 import { ipfsUrl } from "@/web3/storage";
+import { useChainStore } from "@/stores/chain";
 
 const props = defineProps({
   mode: String
@@ -125,9 +126,15 @@ const getERC721Image = () => {
 
 onMounted(async () => {
   if (store.redpacket?.type === 'erc20') {
-    token.value = await loadAndSetErc20Token(store.redpacket?.token!);
+    token.value = await loadAndSetErc20Token(
+      store.redpacket?.token!,
+      useChainStore().provider,
+    );
   }
-  gasToken.value = await loadAndSetErc20Token(store.redpacket?.gasToken!);
+  gasToken.value = await loadAndSetErc20Token(
+    store.redpacket?.gasToken!,
+    useChainStore().provider,
+  );
 })
 </script>
 

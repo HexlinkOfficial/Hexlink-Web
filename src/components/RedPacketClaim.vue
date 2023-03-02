@@ -71,7 +71,6 @@ import { getChain } from "../../functions/common";
 import type { RedPacketDB } from "@/types";
 import type { RedPacket, RedPacketErc721 } from "functions/redpacket/lib";
 import { useRedPacketStore } from '@/stores/redpacket';
-import CountdownSpinner from '@/components/CountdownSpinner.vue';
 import { useChainStore } from "@/stores/chain";
 import { prettyPrint, checkClaimer } from "@/services/util";
 import { copy } from "@/web3/utils";
@@ -100,7 +99,8 @@ onMounted(async () => {
       claimItem.value = "erc20";
       const metadata = redPacket.value!.metadata as RedPacket;
       const tokenMetadata = await loadAndSetErc20Token(
-        metadata.token
+        metadata.token,
+        useChainStore().provider,
       );
       redPacketToken.value = tokenMetadata.symbol;
       redPacketTokenIcon.value = tokenMetadata.logoURI || "";

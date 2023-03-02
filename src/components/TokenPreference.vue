@@ -175,7 +175,7 @@ const genTokenList = async (text: string, tokenMap: {[key: string]: Token}) => {
         tokenListToShow.value =  filtered;
     } else if (await isContract(useChainStore().provider, text)) {
         try {
-            const token = await loadErc20Token(text);
+            const token = await loadErc20Token(text, useChainStore().provider);
             tokenToImport.value = token;
             showImport.value = true;
         } catch (err: any) {

@@ -786,7 +786,7 @@ const normalizeClaimAmount = (op: ClaimRedPacketOp) => {
 const tokenStore = useTokenStore();
 const loadAndSaveERC20Token = async (tokenAddr: string) : Promise<Token> => {
   if (!tokenStore.token(tokenAddr)) {
-    tokenStore.set(await loadErc20Token(tokenAddr));
+    tokenStore.set(await loadErc20Token(tokenAddr, useChainStore().provider));
   }
   return tokenStore.token(tokenAddr);
 }

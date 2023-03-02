@@ -65,7 +65,7 @@ const loadTokens = async () => {
   loading.value = true;
   const account = useAccountStore().account?.address
   if (account) {
-    balances.value = await getBalances(account, balances.value);
+    balances.value = await getBalances(account);
     await updatePreferences(balances.value);
   }
   useTokenStore().visiableTokens.length > 0 ? hasContent.value = true : hasContent.value = false;

@@ -55,12 +55,11 @@
   
 <script setup lang="ts">
 // import { send } from "process";
-import { onMounted, ref, watch } from "vue";
+import { onMounted, ref } from "vue";
 import Loading from "@/components/Loading.vue";
 import { useStatusStore } from '@/stores/airdropStatus';
 import { useWalletStore } from '@/stores/wallet';
 import { connectWallet } from "@/web3/wallet";
-import { useChainStore } from '@/stores/chain';
 
 const airdropToken = ref<string>("");
 const statusTitle = ref<string>("Total Created");
@@ -100,18 +99,6 @@ onMounted(async () => {
     await delay(2000);
     loading.value = false;
 })
-watch(() => useChainStore().current, async () => {
-    loading.value = true;
-    if (useStatusStore().status[0]) {
-        statusTitle.value = Object.keys(useStatusStore().status[0])[0].toString();
-        statusData.value = Object.values(useStatusStore().status[0])[0]?.toString();
-    } else {
-        statusTitle.value = "Total Created";
-        statusData.value = "0";
-    }
-    await delay(2000);
-    loading.value = false;
-});
 </script>
   
 <style lang="less" scoped>

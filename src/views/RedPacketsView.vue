@@ -1,7 +1,7 @@
 <template>
   <Layout :hidden="showClaim || showDetails || showTokenSendModal || showNFTSendModal" :active="1">
     <RedPacketBase>
-      <RedPacektHistoryList></RedPacektHistoryList>
+      <RedPacektHistoryList @setCreated="updateCreated"></RedPacektHistoryList>
     </RedPacketBase>
   </Layout>
   <RedPacketClaim v-if="showClaim"></RedPacketClaim>
@@ -12,7 +12,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import { useRoute } from "vue-router";
 import RedPacketBase from "@/components/RedPacketBase.vue";
 import RedPacektHistoryList from "@/components/RedPacketHistoryList.vue";
@@ -26,6 +26,12 @@ import { storeToRefs } from 'pinia';
 import { useRedPacketStore } from '@/stores/redpacket';
 
 const { status } = storeToRefs(useRedPacketStore());
+const created = ref<string>("");
+
+const updateCreated = (newCreated: string) => {
+  console.log("Created: ", newCreated);
+  created.value = newCreated;
+}
 
 const showClaim = computed(() => {
   return !!useRoute().query.claim;

@@ -277,7 +277,6 @@ onBeforeUnmount(() => {
 
 watch(showTestnet, () => {
   useAccountStore().setShowTestnet(showTestnet.value);
-  console.log("change");
 })
 </script>
 

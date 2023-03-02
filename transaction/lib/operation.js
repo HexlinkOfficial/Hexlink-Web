@@ -11,15 +11,17 @@ async function buildTx(provider, chain, unsignedTx, from) {
     const { chainId } = await provider.getNetwork();
     unsignedTx.chainId = chainId;
     unsignedTx.from = from;
-    unsignedTx.type = 2;
     unsignedTx.nonce = await provider.getTransactionCount(unsignedTx.from);
     if (chain.name === 'arbitrum' || chain.name === 'arbitrum_testnet') {
+        unsignedTx.type = 1;
         unsignedTx.gasPrice = ethers_1.BigNumber.from(100000000);
     }
     else if (chain.name === 'arbitrum_nova') {
+        unsignedTx.type = 1;
         unsignedTx.gasPrice = ethers_1.BigNumber.from(10000000);
     }
     else {
+        unsignedTx.type = 2;
         const feeData = await provider.getFeeData();
         unsignedTx.maxPriorityFeePerGas = feeData.maxPriorityFeePerGas || undefined;
         unsignedTx.maxFeePerGas = feeData.maxFeePerGas || undefined;

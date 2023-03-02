@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.processActions = exports.buildTx = void 0;
+const ethers_1 = require("ethers");
 const redpacket_1 = require("./graphql/redpacket");
 const redpacket_2 = require("../../functions/redpacket");
 const operation_1 = require("./graphql/operation");
@@ -12,9 +13,17 @@ async function buildTx(provider, chain, unsignedTx, from) {
     unsignedTx.from = from;
     unsignedTx.type = 2;
     unsignedTx.nonce = await provider.getTransactionCount(unsignedTx.from);
-    const feeData = await provider.getFeeData();
-    unsignedTx.maxPriorityFeePerGas = feeData.maxPriorityFeePerGas || undefined;
-    unsignedTx.maxFeePerGas = feeData.maxFeePerGas || undefined;
+    if (chain.name === 'arbitrum' || chain.name === 'arbitrum_testnet') {
+        unsignedTx.gasPrice = ethers_1.BigNumber.from(100000000);
+    }
+    else if (chain.name === 'arbitrum_nova') {
+        unsignedTx.gasPrice = ethers_1.BigNumber.from(10000000);
+    }
+    else {
+        const feeData = await provider.getFeeData();
+        unsignedTx.maxPriorityFeePerGas = feeData.maxPriorityFeePerGas || undefined;
+        unsignedTx.maxFeePerGas = feeData.maxFeePerGas || undefined;
+    }
     return unsignedTx;
 }
 exports.buildTx = buildTx;

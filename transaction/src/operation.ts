@@ -1,4 +1,4 @@
-import {ethers, PopulatedTransaction } from "ethers";
+import {ethers, PopulatedTransaction, BigNumber as EthBigNumber } from "ethers";
 import {
   insertRedPacketClaim,
   insertRedPacket,
@@ -29,9 +29,15 @@ export async function buildTx(
   unsignedTx.from = from;
   unsignedTx.type = 2;
   unsignedTx.nonce = await provider.getTransactionCount(unsignedTx.from);
-  const feeData = await provider.getFeeData();
-  unsignedTx.maxPriorityFeePerGas = feeData.maxPriorityFeePerGas || undefined;
-  unsignedTx.maxFeePerGas = feeData.maxFeePerGas || undefined;
+  if (chain.name === 'arbitrum' || chain.name === 'arbitrum_testnet') {
+    unsignedTx.gasPrice = EthBigNumber.from(100000000);
+  } else if (chain.name === 'arbitrum_nova') {
+    unsignedTx.gasPrice = EthBigNumber.from(10000000);
+  } else {
+    const feeData = await provider.getFeeData();
+    unsignedTx.maxPriorityFeePerGas = feeData.maxPriorityFeePerGas || undefined;
+    unsignedTx.maxFeePerGas = feeData.maxFeePerGas || undefined;
+  }
   return unsignedTx;
 }
 

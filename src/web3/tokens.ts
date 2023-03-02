@@ -34,6 +34,9 @@ function alchemyNetwork(chain: Chain) : Network {
     if (chain.chainId == "421613") {
         return Network.ARB_GOERLI;
     }
+    if (chain.chainId == "42161") {
+        return Network.ARB_MAINNET;
+    }
     throw new Error("Unsupported network");
 }
 

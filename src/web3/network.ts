@@ -11,6 +11,7 @@ const ALCHEMY_KEY = {
     "polygon": "1GmfWOSlYIlUI0UcCu4Y2O-8DmFJrlqA",
     "mumbai": "Fj__UEjuIj0Xym6ofwZfJbehuuXGpDxe",
     "arbitrum_testnet": "ePtF_3xEZX-VJoFXnfiu5b_Tt0-bTcx6",
+    "arbitrum": "Lw4de41huTiNuyyOvyzs_s5jTbCDg1yx",
 };
 
 async function doSwitch(chain: Chain) {

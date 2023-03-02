@@ -479,12 +479,6 @@ const createdCount = ref<number>(0);
 const claimedCount = ref<number>(0);
 const { width } = useWindowSize();
 
-const emit = defineEmits(['setCreated'])
-
-const setStatusData = (createdData: string) => {
-  emit('setCreated', createdData);
-}
-
 const loadCreatedInfo = async() => {
   const rps : CreateRedPacketOp[] = await getCreatedRedPackets();
   createdRpOps.value = await Promise.all(rps.map(r => aggregateCreated(r)));
@@ -502,10 +496,6 @@ const loadData = async function() {
     await loadClaimInfo();
   }
   loading.value = false;
-  useStatusStore().setStatus([
-    { 'Total Created': createdCount },
-    { 'Total Claimed': claimedCount }
-  ]);
   extractDate();
   await refreshData();
   console.log(luckHistoryByDate.value);
@@ -621,6 +611,7 @@ watch(claimStatus, async (newStatus, _) => {
 
 const extractDate = () => {
   var created = 0;
+  var claimed = 0;
   const sentGroup: any = {};
   const claimGroup: any = {};
   const sentOrderedGroup: any = {}
@@ -722,7 +713,10 @@ const extractDate = () => {
   })
 
   luckHistoryByDate.value = JSON.parse(JSON.stringify(fullysortedHistory));
-  setStatusData(created.toString());
+  useStatusStore().setStatus([
+    { 'Total Created': created },
+    { 'Total Claimed': claimed }
+  ]);
 };
 
 const loading = ref<boolean>(true);
@@ -835,10 +829,6 @@ const aggregatedClaimed = async function(
 
 const openRedpacket = (op: any) => {
   router.push({ query: { details: op.redpacket.id } });
-}
-
-function $emit(arg0: string) {
-throw new Error('Function not implemented.');
 }
 </script>
 

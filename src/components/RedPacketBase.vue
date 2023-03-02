@@ -55,7 +55,7 @@
   
 <script setup lang="ts">
 // import { send } from "process";
-import { onMounted, ref } from "vue";
+import { onMounted, ref, watch } from "vue";
 import Loading from "@/components/Loading.vue";
 import { useStatusStore } from '@/stores/airdropStatus';
 import { useWalletStore } from '@/stores/wallet';
@@ -87,18 +87,24 @@ function delay(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-onMounted(async () => {
+const loadData = async () => {
     loading.value = true;
-    if(useStatusStore().status[0]) {
-        statusTitle.value = Object.keys(useStatusStore().status[0])[0].toString();
-        statusData.value = Object.values(useStatusStore().status[0])[0]?.toString();
+    if (useStatusStore().airdropStatus[0]) {
+        statusTitle.value = Object.keys(useStatusStore().airdropStatus[0])[0].toString();
+        statusData.value = Object.values(useStatusStore().airdropStatus[0])[0]?.toString();
     } else {
         statusTitle.value = "Total Created";
         statusData.value = "0";
     }
     await delay(2000);
     loading.value = false;
+}
+
+onMounted(async () => {
+    await loadData();
 })
+
+watch(() => useStatusStore().airdropStatus, async () => await loadData());
 </script>
   
 <style lang="less" scoped>

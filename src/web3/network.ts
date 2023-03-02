@@ -4,6 +4,7 @@ import { isNativeCoin, isWrappedCoin } from "../../functions/common";
 import type { Chain, BigNumberish } from "../../functions/common";
 import { hexlinkSwap } from "../../functions/redpacket";
 import { useRedPacketStore } from "@/stores/redpacket";
+import { useStatusStore } from "@/stores/airdropStatus";
 import { useChainStore } from '@/stores/chain';
 
 const ALCHEMY_KEY = {
@@ -16,6 +17,7 @@ const ALCHEMY_KEY = {
 
 async function doSwitch(chain: Chain) {
     useRedPacketStore().reset();
+    useStatusStore().reset();
     useChainStore().switchNetwork(chain);
 }
 

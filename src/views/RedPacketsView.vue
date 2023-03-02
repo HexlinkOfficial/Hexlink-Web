@@ -1,7 +1,7 @@
 <template>
   <Layout :hidden="showClaim || showDetails || showTokenSendModal || showNFTSendModal" :active="1">
     <RedPacketBase>
-      <RedPacektHistoryList @setCreated="updateCreated"></RedPacektHistoryList>
+      <RedPacektHistoryList></RedPacektHistoryList>
     </RedPacketBase>
   </Layout>
   <RedPacketClaim v-if="showClaim"></RedPacketClaim>
@@ -26,12 +26,6 @@ import { storeToRefs } from 'pinia';
 import { useRedPacketStore } from '@/stores/redpacket';
 
 const { status } = storeToRefs(useRedPacketStore());
-const created = ref<string>("");
-
-const updateCreated = (newCreated: string) => {
-  console.log("Created: ", newCreated);
-  created.value = newCreated;
-}
 
 const showClaim = computed(() => {
   return !!useRoute().query.claim;

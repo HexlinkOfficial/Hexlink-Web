@@ -50,7 +50,18 @@ export async function getPriceInfo(chain: Chain, gasToken: string) : Promise<{
     tokenPrice: BigNumberish
 }> {
     const provider = getProvider(chain);
-    const {maxFeePerGas} = await provider.getFeeData();
+    let gasPrice : EthBigNumber;
+    if (chain.name === 'arbitrum' || chain.name === 'arbitrum_testnet') {
+        gasPrice = EthBigNumber.from(100000000);
+    } else if (chain.name === 'arbitrum') {
+        gasPrice = EthBigNumber.from(10000000);
+    } else {
+        const {maxFeePerGas} = await provider.getFeeData();
+        if (!maxFeePerGas) {
+            throw new Error("failed to get the gas price");
+        }
+        gasPrice = maxFeePerGas.mul(2);
+    }
     let tokenPrice;
     if (isNativeCoin(gasToken, chain) || isWrappedCoin(gasToken, chain)) {
         tokenPrice = EthBigNumber.from(10).pow(18);
@@ -58,5 +69,5 @@ export async function getPriceInfo(chain: Chain, gasToken: string) : Promise<{
         const swap = await hexlinkSwap(provider);
         tokenPrice = await swap.priceOf(gasToken);
     }
-    return {gasPrice: maxFeePerGas.mul(2), tokenPrice}
+    return {gasPrice, tokenPrice}
 }

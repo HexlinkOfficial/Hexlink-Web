@@ -192,6 +192,7 @@ import { hash, tokenAmount } from "../../functions/common";
 import type { RedPacketInput } from "../../functions/redpacket";
 import { calcGas } from "../../functions/common";
 import { redpacketId } from "../../functions/redpacket";
+
 const estimatedGasAmount = "250000"; // hardcoded, can optimize later
 const chooseTotalDrop = ref<boolean>(false);
 const openDropdown = ref<boolean>(false);
@@ -308,19 +309,11 @@ const refreshGas = async () => {
   await refreshGas();
 };
 const totalServiceFee = computed(() => {
-  if (useRedPacketStore().account === "hexlink") {
-    return BigNumber(
-      redpacket.value.gasSponsorship
-    ).plus(redpacket.value.estimatedGas).div(
-      tokenBase(gasToken.value)
-    ).dp(4).toString();
-  } else {
-    return BigNumber(
-      redpacket.value.gasSponsorship
-    ).div(
-      tokenBase(gasToken.value)
-    ).dp(4).toString();
-  }
+  return BigNumber(
+    redpacket.value.gasSponsorship
+  ).plus(redpacket.value.estimatedGas).div(
+    tokenBase(gasToken.value)
+  ).dp(8).toString();
 })
 const tokenChoose =
   async (mode: "token" | "gas", token: Token) => {

@@ -52,8 +52,8 @@ npm run lint
 
 ### git workflow:
 1. fork repo
-2. git clone <forked repo>
-3. git remote add upstream/<Hexlink repo>
+2. git clone \<forked repo\>
+3. git remote add upstream/\<Hexlink repo\>
 
 
 #### pre code change:
@@ -62,13 +62,13 @@ in local main branch
 2. git merge upstream/main 
    or 
    git pull upstream/main
-3. git checkout -b <new_work_branch>
+3. git checkout -b \<new_work_branch\>
 
 #### after code change
-in local <new_work_branch>
-1. git add <all changed files>
-2. git commit -m "<PR title and commit msg>"
-3. git push origin <new_work_branch>
+in local \<new_work_branch\>
+1. git add \<all changed files\>
+2. git commit -m "\<PR title and commit msg\>"
+3. git push origin \<new_work_branch\>
 
 #### on github, HEXlink repo page
 1. create pull request

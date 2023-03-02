@@ -1,8 +1,8 @@
 [
     {
         "chainId": 421613,
-        "symbol": "Ethereum",
-        "name": "ETH",
+        "symbol": "AETH",
+        "name": "Ethereum",
         "decimals": 18,
         "address": "0x0000000000000000000000000000000000000000",
         "logoURI": "https://token.metaswap.codefi.network/assets/networkLogos/ethereum.svg"

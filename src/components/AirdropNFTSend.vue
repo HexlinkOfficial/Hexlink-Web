@@ -275,19 +275,11 @@ const tokenBalance = (token: string) => {
 };
 
 const totalServiceFee = computed(() => {
-  if (useRedPacketStore().account === "hexlink") {
-    return BigNumber(
-      nftAirdrop.value.gasSponsorship
-    ).plus(nftAirdrop.value.estimatedGas).div(
-      tokenBase(gasToken.value)
-    ).dp(4).toString();
-  } else {
-    return BigNumber(
-      nftAirdrop.value.gasSponsorship
-    ).div(
-      tokenBase(gasToken.value)
-    ).dp(4).toString();
-  }
+  return BigNumber(
+    nftAirdrop.value.gasSponsorship
+  ).plus(nftAirdrop.value.estimatedGas).div(
+    tokenBase(gasToken.value)
+  ).dp(8).toString();
 })
 
 const genTokenList = async function () {

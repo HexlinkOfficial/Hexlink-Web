@@ -7,8 +7,10 @@ import { tokenEqual } from "@/web3/utils";
 import { estimateGas, sendTransaction } from "@/web3/wallet";
 
 import type { Op, Chain, UserOpRequest, DeployRequest} from "../../functions/common";
+import type { RedPacket } from "../../functions/redpacket";
 import {
     hash,
+    hexlContract,
     isNativeCoin,
     erc20Interface,
     erc20Contract,
@@ -552,4 +554,66 @@ export async function refundRedPacket(chain: Chain, redPacket: RedPacketDB) {
         request
     });
     return (result.data as any).id;
+}
+
+export async function getCreatedRedPacketsList() {
+    const hexlink = await hexlContract(useChainStore().provider);
+    const address = await hexlink.addressOfName(useAuthStore().user.nameHash);
+    const redPacket = await redPacketContract(useChainStore().provider);
+    const filter = redPacket.filters.Created(null, address, null);
+
+    let events = []
+    const history = await redPacket.queryFilter(filter);
+    events.push(...history);
+
+    let createdRedPackets: RedPacket[] = [];
+    events.forEach((event) => {
+        const args = event.args[2];
+        const redpacket: RedPacket = {
+            id: event.args[0],
+            salt: args[2],
+            validator: args[4],
+            creator: event.args[1],
+            sponsorGas: args[7],
+            token: args[1],
+            mode: args[6],
+            split: args[5],
+            balance: args[3],
+            type: "erc20",
+            validationRules: [],
+            contract: event.address
+        }
+        createdRedPackets.push(redpacket);
+    });
+    console.log("created");
+    console.log(createdRedPackets);
+
+    return createdRedPackets;
+}
+
+export async function getClaimedRedPacketsList() {
+    const hexlink = await hexlContract(useChainStore().provider);
+    const address = await hexlink.addressOfName(useAuthStore().user.nameHash);
+    const redPacket = await redPacketContract(useChainStore().provider);
+    const filter = redPacket.filters.Claimed(null, address, null);
+
+    let events = []
+    const history = await redPacket.queryFilter(filter);
+    events.push(...history);
+
+    let claimedRedPackets = [];
+    events.forEach((event) => {
+        const args = event.args[2];
+        const redpacket = {
+            id: event.args[0],
+            claimer: event.args[1],
+            amount: event.args[2],
+            type: "erc20"
+        }
+        claimedRedPackets.push(redpacket);
+    });
+
+    console.log("claimed");
+    console.log(claimedRedPackets);
+    return claimedRedPackets;
 }

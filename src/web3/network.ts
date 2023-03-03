@@ -53,7 +53,7 @@ export async function getPriceInfo(chain: Chain, gasToken: string) : Promise<{
     let gasPrice : EthBigNumber;
     if (chain.name === 'arbitrum' || chain.name === 'arbitrum_testnet') {
         gasPrice = EthBigNumber.from(100000000);
-    } else if (chain.name === 'arbitrum') {
+    } else if (chain.name === 'arbitrum_nova') {
         gasPrice = EthBigNumber.from(10000000);
     } else {
         const {maxFeePerGas} = await provider.getFeeData();

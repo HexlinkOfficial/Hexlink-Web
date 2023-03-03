@@ -193,7 +193,7 @@ import type { RedPacketInput } from "../../functions/redpacket";
 import { calcGas } from "../../functions/common";
 import { redpacketId } from "../../functions/redpacket";
 
-const estimatedGasAmount = "250000"; // hardcoded, can optimize later
+const estimatedGasAmount = "1600000"; // hardcoded, can optimize later
 const chooseTotalDrop = ref<boolean>(false);
 const openDropdown = ref<boolean>(false);
 const chooseGasDrop = ref<boolean>(false);
@@ -289,7 +289,7 @@ const setGas = async() => {
   const chain = useChainStore().chain;
   const price = await getPriceInfo(chain, redpacket.value.gasToken);
   const sponsorshipAmount =
-    EthBigNumber.from(300000).mul(redpacket.value.split || 0);
+    EthBigNumber.from(1000000).mul(redpacket.value.split || 0);
   redpacket.value.gasSponsorship = calcGas(
     chain,
     tokenStore.token(redpacket.value.gasToken),

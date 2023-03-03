@@ -57,6 +57,7 @@ import { loadAndSetErc20Token, loadErc721Token } from "@/web3/tokens";
 import type { Token } from "../../functions/common";
 import { BigNumber } from "bignumber.js";
 import { ipfsUrl } from "@/web3/storage";
+import { useTokenStore } from "@/stores/token";
 
 const props = defineProps({
   mode: String
@@ -111,11 +112,15 @@ const closeModal = () => {
 }
 
 const estimatedGasFee = computed(() => {
-  return BigNumber(store.redpacket?.estimatedGas!).div(new BigNumber(10).pow(18)).dp(4).toString();
+  const decimals = useTokenStore().token(store.redpacket!.gasToken).decimals;
+  const tokenBase = new BigNumber(10).pow(decimals);
+  return BigNumber(store.redpacket?.estimatedGas!).div(tokenBase).dp(8).toString();
 })
 
 const estimatedGasSponsorship = computed(() => {
-  return BigNumber(store.redpacket?.gasSponsorship!).div(new BigNumber(10).pow(18)).dp(4).toString();
+  const decimals = useTokenStore().token(store.redpacket!.gasToken).decimals;
+  const tokenBase = new BigNumber(10).pow(decimals);
+  return BigNumber(store.redpacket?.gasSponsorship!).div(tokenBase).dp(8).toString();
 })
 
 const getERC721Image = () => {

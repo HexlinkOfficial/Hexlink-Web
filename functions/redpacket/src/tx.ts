@@ -3,10 +3,9 @@ import type { Chain, Op, BigNumberish, } from "../../common";
 import {
     isNativeCoin,
     erc20Interface,
-    accountInterface,
     getChainFromProvider
 } from "../../common";
-import type {RedPacket, RedPacketInput, RedPacketErc721Input } from "./types";
+import type { RedPacketInput, RedPacketErc721Input } from "./types";
 import {
     redPacketContract,
     hexlinkErc721Interface,

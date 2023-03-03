@@ -325,7 +325,7 @@ const setGas = async () => {
   const chain = useChainStore().chain;
   const price = await getPriceInfo(chain, nftAirdrop.value.gasToken);
   const sponsorshipAmount =
-    EthBigNumber.from(300000).mul(nftAirdrop.value.splitInput || 0);
+    EthBigNumber.from(500000).mul(nftAirdrop.value.splitInput || 0);
   nftAirdrop.value.gasSponsorship = calcGas(
     chain,
     tokenStore.token(nftAirdrop.value.gasToken),

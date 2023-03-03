@@ -507,11 +507,11 @@ async function buildRefundErc20Op(
 
   return {
     to: redPacketAddress(chain),
-    value: "0x0",
+    value: "0x00",
     callData: redPacketInterface.encodeFunctionData(
         "refund", [packet]
     ),
-    callGasLimit: "0x0",
+    callGasLimit: "0x00",
   };
 }
 
@@ -520,11 +520,11 @@ async function buildWithdrawErc721Op(
 ) : Promise<OpInput> {
   return {
     to: redPacket.metadata.token,
-    value: "0x0",
+    value: "0x00",
     callData: hexlinkErc721Interface.encodeFunctionData(
         "withdraw", []
     ),
-    callGasLimit: "0x0",
+    callGasLimit: "0x00",
   };
 }
 

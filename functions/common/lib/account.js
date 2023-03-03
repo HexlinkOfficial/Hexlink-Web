@@ -18,6 +18,9 @@ const ACCOUNT_SIMPLE_ABI_json_1 = __importDefault(require("./abi/ACCOUNT_SIMPLE_
 const utils_1 = require("./utils");
 exports.accountInterface = new ethers_1.ethers.utils.Interface(ACCOUNT_SIMPLE_ABI_json_1.default);
 function nameHash(schema, name) {
+    if (schema === "mailto") {
+        name = name.trim().toLowerCase();
+    }
     return (0, utils_1.hash)(`${schema}:${name}`);
 }
 exports.nameHash = nameHash;

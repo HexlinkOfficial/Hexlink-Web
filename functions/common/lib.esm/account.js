@@ -4,6 +4,9 @@ import ACCOUNT_SIMPLE_ABI from "./abi/ACCOUNT_SIMPLE_ABI.json";
 import { hash, isContract } from "./utils";
 export const accountInterface = new ethers.utils.Interface(ACCOUNT_SIMPLE_ABI);
 export function nameHash(schema, name) {
+    if (schema === "mailto") {
+        name = name.trim().toLowerCase();
+    }
     return hash(`${schema}:${name}`);
 }
 export function accountContract(provider, address) {

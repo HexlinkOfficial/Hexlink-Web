@@ -34,12 +34,12 @@ export const providerOptions = {
 };
 
 export const web3Modal = new Web3Model({
-    cacheProvider: false,
+    cacheProvider: true,
     providerOptions
 });
 
 export async function disconnectWallet() {
-  await web3Modal.clearCachedProvider()
+  web3Modal.clearCachedProvider()
   const store = useWalletStore();
   store.disconnectWallet();
 }
@@ -54,9 +54,11 @@ function handleEthereum() {
   }
 }
 
+export const getProvider = async() => await web3Modal.connect();
+
 export async function connectWallet() {
+  const provider = await getProvider();
   const toaster = createToaster({ position: "top", duration: 4000 });
-  let provider;
   // const metamaskProvider = await detectEthereumProvider()
   // if (!metamaskProvider) {
   //   console.log('MetaMask is not installed!');
@@ -73,11 +75,6 @@ export async function connectWallet() {
   let wallet, walletIcon;
   const store = useWalletStore();
   try {
-    try {
-      provider = await web3Modal.connect();
-    } catch (error) {
-      console.warn(error);
-    }
     const library = new ethers.providers.Web3Provider(provider);
     const accounts = await library.listAccounts();
     if (accounts.length == 0) {
@@ -100,14 +97,12 @@ export async function connectWallet() {
         wallet,
         walletIcon,
         await buildAccount(ownerAccountAddress),
-        provider
       );
     } else if (ownerAccountAddress == null) {
       store.connectWallet(
         wallet,
         walletIcon,
         await buildAccount(accounts[0]),
-        provider
       );
     } else {
       try {
@@ -118,7 +113,7 @@ export async function connectWallet() {
             params: [{ eth_accounts: {} }]
           })
         } else {
-          result = await provider.request({
+          result = provider.request({
             method: 'wallet_requestPermissions',
             params: [{ eth_accounts: {} }]
           })
@@ -128,7 +123,6 @@ export async function connectWallet() {
             wallet,
             walletIcon,
             await buildAccount(ownerAccountAddress),
-            provider
           );
         } else {
           toaster.error(`Wrong owner account! Please connect to ${ownerAccountAddress}!`);
@@ -156,79 +150,51 @@ export async function connectWallet() {
 }
 
 export async function trySwitchNetwork(chain: Chain) : Promise<void> {
-  const store = useWalletStore();
+  const provider = window.ethereum || await getProvider();
   const hexifyChainId = ethers.utils.hexValue(Number(chain.chainId));
-  let netVersion;
-  if (window.ethereum) {
-    netVersion = await window.ethereum.request({
-      method: 'net_version'
-    });
-  } else {
-    netVersion = await store.provider!.request({
-      method: 'net_version'
-    });
-  }
+  const netVersion = await provider.request({
+    method: 'net_version'
+  });
+  
   if (netVersion === chain.chainId) {
     return;
   }
+
   try {
-    if (window.ethereum) {
-      await window.ethereum.request({
+    await provider.request({
         method: "wallet_switchEthereumChain",
         params: [{ chainId: hexifyChainId }]
-      });
-    } else {
-      await store.provider!.request({
-        method: "wallet_switchEthereumChain",
-        params: [{ chainId: hexifyChainId }]
-      });
-    }
+    });
   } catch (switchError: any) {
+    console.log(switchError);
     if (switchError.code === 4902) {
       try {
-        if (window.ethereum) {
-          await window.ethereum.request({
-            method: "wallet_addEthereumChain",
-            params: [{
-              chainId: hexifyChainId,
-              chainName: chain.fullName,
-              blockExplorerUrls: [...chain.blockExplorerUrls],
-              nativeCurrency: { ...chain.nativeCurrency },
-              rpcUrls: [...chain.rpcUrls],
-            }]
-          });
-          await store.provider!.request({
-            method: 'wallet_switchEthereumChain',
-            params: [{ chainId: hexifyChainId }],
-          });
-        } else {
-          await store.provider!.request({
-            method: "wallet_addEthereumChain",
-            params: [{
-              chainId: hexifyChainId,
-              chainName: chain.fullName,
-              blockExplorerUrls: [...chain.blockExplorerUrls],
-              nativeCurrency: { ...chain.nativeCurrency },
-              rpcUrls: [...chain.rpcUrls],
-            }]
-          });
-          await store.provider!.request({
-            method: 'wallet_switchEthereumChain',
-            params: [{ chainId: hexifyChainId }],
-          });
-        }
+        const result1 = await provider.request({
+          method: "wallet_addEthereumChain",
+          params: [{
+            chainId: hexifyChainId,
+            chainName: chain.fullName,
+            blockExplorerUrls: [...chain.blockExplorerUrls],
+            nativeCurrency: { ...chain.nativeCurrency },
+            rpcUrls: [...chain.rpcUrls],
+          }]
+        });
+        await provider.request({
+          method: 'wallet_switchEthereumChain',
+          params: [{ chainId: hexifyChainId }],
+        });
       } catch (error) {
         console.error(error);
       }
     }
+    console.log("switch to network: ", chain.fullName);
   }
-  console.log("switch to network: ", chain.fullName);
 };
 
 export async function signMessage(account: string, message: string) : Promise<string> {
+  const provider = await getProvider();
   let signature: Promise<string>;
-  const store = useWalletStore();
-  if (!store.provider) throw new Error("Can't sign");
+  if (provider) throw new Error("Can't sign");
   try {
       if (window.ethereum) {
         signature = await window.ethereum.request({
@@ -236,7 +202,7 @@ export async function signMessage(account: string, message: string) : Promise<st
           params: [message, account]
         });
       } else {
-        signature = await store.provider!.request({
+        signature = await provider.request({
           method: "personal_sign",
           params: [message, account]
         });
@@ -249,7 +215,7 @@ export async function signMessage(account: string, message: string) : Promise<st
 }
 
 export async function estimateGas(chain: Chain, txParams: any) : Promise<string> {
-  const store = useWalletStore();
+  const provider = await getProvider();
   await trySwitchNetwork(chain);
   if (window.ethereum) {
     return await window.ethereum.request({
@@ -257,7 +223,7 @@ export async function estimateGas(chain: Chain, txParams: any) : Promise<string>
       params: [txParams],
     });
   } else {
-    return await store.provider!.request({
+    return await provider.request({
       method: 'eth_estimateGas',
       params: [txParams],
     });
@@ -265,8 +231,7 @@ export async function estimateGas(chain: Chain, txParams: any) : Promise<string>
 }
 
 export async function sendTransaction(chain: Chain, txParams: any) : Promise<string> {
-  const store = useWalletStore();
-  console.log("provider2: ", store.provider);
+  const provider = await getProvider();
   await trySwitchNetwork(chain);
   if (window.ethereum) {
     return await window.ethereum.request({
@@ -274,7 +239,7 @@ export async function sendTransaction(chain: Chain, txParams: any) : Promise<str
       params: [txParams],
     });
   } else {
-    return await store.provider!.request({
+    return await provider.request({
       method: 'eth_sendTransaction',
       params: [txParams],
     });

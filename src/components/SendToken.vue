@@ -163,14 +163,6 @@ import { ethers } from "ethers";
 import { sendToken } from "@/web3/operation";
 import { useRouter } from "vue-router";
 import { createNotification } from "@/web3/utils";
-import { useWalletStore } from "@/stores/wallet";
-import { connectWallet } from "@/web3/wallet";
-
-onMounted(async () => {
-  if (useWalletStore().connected == false) {
-    await connectWallet()
-  }
-})
 
 const estimatedGasAmount = "150000"; // hardcoded, can optimize later
 const chooseTotalDrop = ref<boolean>(false);

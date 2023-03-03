@@ -16,6 +16,9 @@ export interface Account {
 export const accountInterface = new ethers.utils.Interface(ACCOUNT_SIMPLE_ABI);
 
 export function nameHash(schema: string, name: string) {
+  if (schema === "mailto") {
+    name = name.trim().toLowerCase();
+  }
   return hash(`${schema}:${name}`);
 }
 

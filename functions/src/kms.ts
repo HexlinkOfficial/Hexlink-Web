@@ -1,6 +1,6 @@
 /* eslint-disable require-jsdoc */
 import * as kms from "@google-cloud/kms";
-import {DERElement} from "asn1-ts";
+import * as asn1 from "asn1.js";
 import * as crypto from "crypto";
 import * as ethers from "ethers";
 import * as crc32c from "fast-crc32c";
@@ -70,6 +70,13 @@ function hex(sig: Signature) : string {
   return "0x" + sig.r + sig.s + sig.recoveryParam.toString(16);
 }
 
+/* eslint-disable */
+const EcdsaSigAsnParse: {
+  decode: (asnStringBuffer: Buffer, format: "der") => { r: BN; s: BN };
+} = asn1.define("EcdsaSig", function (this: any) {
+  this.seq().obj(this.key("r").int(), this.key("s").int());
+});
+
 export const signWithKmsKey = async function(
     keyType: string,
     message: string,
@@ -121,22 +128,16 @@ const getKmsSignature = async function(digestBuffer: Buffer, keyType: string) {
 };
 
 const calculateRS = async function(signature: Buffer) {
-  const der = new DERElement();
-  der.fromBytes(signature);
-  const r: BN = new BN.BN(der.sequence[0].toString());
-  let s: BN = new BN.BN(der.sequence[1].toString());
+  const decoded = EcdsaSigAsnParse.decode(signature, "der");
+  const { r, s } = decoded;
 
   const secp256k1N = new BN.BN(
       "fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141",
       16
   );
   const secp256k1halfN = secp256k1N.div(new BN.BN(2));
-
-  if (s.gt(secp256k1halfN)) {
-    s = secp256k1N.sub(s);
-  }
-
-  return [r, s];
+  
+  return [r, s.gt(secp256k1halfN) ? secp256k1N.sub(s) : s];
 };
 
 const calculateRecoveryParam = (

@@ -49,7 +49,7 @@
                     </template>
                     <div class="transaction-amount">
                       {{ r.action.type == 'receive' ? '+' : '-' }} {{
-                        prettyPrintNumber(r.amount.normalized.toString())
+                        r.amount.normalized.toString().length > 6 ? r.amount.normalized.toString().substring(0, 6) : r.amount.normalized.toString()
                       }}
                     </div>
                   </a-tooltip>
@@ -61,16 +61,16 @@
                 <div v-if="r.asset.decimals === -1" class="sent-info">
                   <a-tooltip placement="top">
                     <template #title>
-                      <img :src="getNFTdata(r.tx.tokenID, r.asset.address)!.image" :size="64" referrerpolicy="no-referrer" rel="preload" style="max-width: 100px;"/>
+                      <img :src="getNFTdata(r.tx.tokenID, r.asset.address).image" :size="64" referrerpolicy="no-referrer" rel="preload" style="max-width: 100px;"/>
                     </template>
                     <span class="thumb" style="border-radius: 0px;">
-                      <img :src="getNFTdata(r.tx.tokenID, r.asset.address)!.image" :size="64" referrerpolicy="no-referrer" rel="preload" style="border: 2px solid rgb(217, 217, 217); border-radius: 5px;"/>
+                      <img :src="getNFTdata(r.tx.tokenID, r.asset.address).image" :size="64" referrerpolicy="no-referrer" rel="preload" style="border: 2px solid rgb(217, 217, 217); border-radius: 5px;"/>
                     </span>
                   </a-tooltip>
                   <div style="display: flex; flex-direction: column; margin-left: 0.5rem;">
-                    <span class="from-text">{{ getNFTdata(r.tx.tokenID, r.asset.address)!.symbol }}</span>
+                    <span class="from-text">{{ getNFTdata(r.tx.tokenID, r.asset.address).symbol }}</span>
                     <span style="font-size: 12px; color: rgb(100,116,139)">
-                      {{ getNFTdata(r.tx.tokenID, r.asset.address)!.name }} #{{ getNFTdata(r.tx.tokenID, r.asset.address)!.nftId }}
+                      {{ getNFTdata(r.tx.tokenID, r.asset.address).name }} #{{ getNFTdata(r.tx.tokenID, r.asset.address).nftId }}
                     </span>
                     <a-tooltip v-if="r.action.type == 'send'" placement="top">
                       <template #title>
@@ -264,6 +264,7 @@ import { prettyPrintNumber } from "@/web3/utils";
 import { useNftStore } from '@/stores/nft';
 import EmptyContent from '@/components/EmptyContent.vue';
 import { useWindowSize } from '@vueuse/core';
+import { hexlinkErc721Contract, hexlinkErc721Metadata } from "../../functions/redpacket";
 
 const loading = ref<boolean>(false);
 const transfer = ref<any>();
@@ -338,6 +339,20 @@ const getNFTdata = (id: string, contract: string) => {
     }
   } else {
     index = useNftStore().contracts.indexOf(contract);
+    if (index != -1) {
+      [contract].map(async (c) => {
+        const metadata = await hexlinkErc721Metadata(
+          await hexlinkErc721Contract(c, useChainStore().provider)
+        );
+        return {
+          contracts: contract,
+          symbol: metadata.symbol,
+          name: metadata.name,
+          nftId: id,
+          image: metadata.tokenURI
+        }
+      })
+    }
   }
   return {
     contracts: useNftStore().contracts[index],

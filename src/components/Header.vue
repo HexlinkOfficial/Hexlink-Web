@@ -205,7 +205,6 @@ import { connectWallet, disconnectWallet} from "@/web3/wallet";
 import { useAccountStore } from "@/stores/account";
 import { signOutFirebase } from "@/services/auth";
 import useClipboard from 'vue-clipboard3';
-import { connectWalletConnect } from "@/web3/walletconnect"
 
 const authStore = useAuthStore();
 const user = authStore.user!;
@@ -255,12 +254,10 @@ const closeDropDown = (e: any) => {
 const doCopy = (address: string | undefined) => {
   toClipboard(address || "0x").then(
     function () {
-      // alert("Copied");
       const toaster = createToaster({ position: "top", duration: 2000 });
       toaster.success(`Copied`);
     },
     function () {
-      // alert("Can not copy");
       const toaster = createToaster({ position: "top", duration: 2000 });
       toaster.error(`Can not copy`);
     }

@@ -7,7 +7,6 @@ import type { Account } from "../../functions/common";
 import { useChainStore } from "@/stores/chain";
 import { useAccountStore } from "@/stores/account";
 import { createToaster } from "@meforma/vue-toaster";
-import detectEthereumProvider from '@metamask/detect-provider';
 import type { Chain } from "../../functions/common";
 
 async function buildAccount(account: string) : Promise<Account> {
@@ -59,10 +58,6 @@ export const getProvider = async() => await web3Modal.connect();
 export async function connectWallet() {
   const provider = await getProvider();
   const toaster = createToaster({ position: "top", duration: 4000 });
-  // const metamaskProvider = await detectEthereumProvider()
-  // if (!metamaskProvider) {
-  //   console.log('MetaMask is not installed!');
-  // }
 
   if (window.ethereum) {
     handleEthereum();
@@ -132,18 +127,6 @@ export async function connectWallet() {
         toaster.error(error.message);
       }
     }
-    // window.ethereum.on('accountsChanged', async function (accounts: string[]) {
-    //   const ownerAccountAddress = useAccountStore().account?.owner;
-    //   if (ownerAccountAddress != null && accounts.includes(ownerAccountAddress)) {
-    //     // pass
-    //   } else if (ownerAccountAddress != null) {
-    //     // pop out error and disconnect
-    //   } else if (accounts.length > 0) {
-    //     store.switchAccount(await buildAccount(accounts[0]));
-    //   } else {
-    //     // pop out error and disconnect
-    //   }
-    // });
   } catch (error) {
     console.log("Error: ", error);
   }

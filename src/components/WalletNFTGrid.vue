@@ -27,18 +27,15 @@ import { loadErc721Token } from '@/web3/tokens';
 import { useAccountStore } from "@/stores/account";
 import { useNftStore } from '@/stores/nft';
 import Loading from "@/components/Loading.vue";
-import type { openSea, nftImage, bindedNFT } from '@/web3/tokens';
+import type { nftImage, bindedNFT } from '@/web3/tokens';
 import NFTCard from './NFTCard.vue';
 import { getBackcgroundColor } from '@/web3/utils';
 import EmptyContent from '@/components/EmptyContent.vue';
 import { hexlinkErc721Contract, hexlinkErc721Metadata } from "../../functions/redpacket";
 import { useChainStore } from '@/stores/chain';
 
-const imageColor = ref<string[]>([]);
 const nftImages = ref<bindedNFT[]>([]);
 const loading = ref<boolean>(false);
-const nftView = ref<boolean>(true);
-const transactionView = ref<boolean>(false);
 const nftPics = ref<nftImage[]>([]);
 const totalNfts = ref<number>(0);
 
@@ -47,6 +44,7 @@ const loadNfts = async () => {
   const data: any = await loadErc721Token(useAccountStore().account!.address);
   nftPics.value = data[0];
   totalNfts.value = data[1];
+  preloadColors();
   loading.value = false;
 }
 
@@ -93,8 +91,6 @@ const preloadColors = () => {
 
 onMounted(async () => {
   await loadNfts();
-  preloadColors();
-  console.log(nftImages.value);
 })
 </script>
 

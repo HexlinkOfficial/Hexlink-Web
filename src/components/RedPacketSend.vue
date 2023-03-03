@@ -183,7 +183,6 @@ import { getBalances } from "@/web3/tokens";
 import type { BalanceMap } from  "@/web3/tokens";
 import { BigNumber } from "bignumber.js";
 import { validator } from "@/web3/redpacket";
-import { message } from 'ant-design-vue';
 import { useTokenStore } from "@/stores/token";
 import RedPacketAccount from "@/components/RedPacketAccount.vue";
 import { getPriceInfo } from "@/web3/network";
@@ -193,6 +192,7 @@ import type { RedPacketInput } from "../../functions/redpacket";
 import { calcGas } from "../../functions/common";
 import { redpacketId } from "../../functions/redpacket";
 import { getGasCost } from "../../functions/common";
+import { createNotification } from "@/web3/utils";
 
 const estimatedGasAmount = "1600000"; // hardcoded, can optimize later
 const chooseTotalDrop = ref<boolean>(false);
@@ -357,11 +357,11 @@ const modeChoose = (gameMode: 1 | 2) => {
 }
 const validateInput = () => {
   if (Number(redpacket.value.balanceInput) == 0) {
-    message.error("Number of tokens to deposit cannot be 0");
+    createNotification("Number of tokens to deposit cannot be 0", "error");
     return false;
   }
   if (Number(redpacket.value.split) == 0) {
-    message.error("Number of claimers cannot be 0");
+    createNotification("Number of claimers cannot be 0", "error");
     return false;
   }
   return true;

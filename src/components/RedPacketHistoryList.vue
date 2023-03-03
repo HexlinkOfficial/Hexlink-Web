@@ -18,15 +18,17 @@
           </div>
           <div v-for="(op, i) in value" :key="i" class="history-record">
             <div v-if="op.type == 'create_redpacket' && width > 990" class="record-box">
-              <div class="sending-status" style="display: block; position: relative;">
-                <img v-if="showStatus(op) == 'Pending'" src="@/assets/svg/createRedpacketPending.svg"/>
-                <div v-if="showStatus(op) == 'Sent'" class="icon">
-                  <img src="@/assets/svg/createRedpacketSent.svg"/>
+              <a :href="useChainStore().chain.blockExplorerUrls[0] + '/tx/' + op.tx" target="_blank">
+                <div class="sending-status" style="display: block; position: relative;">
+                  <img v-if="showStatus(op) == 'Pending'" src="@/assets/svg/createRedpacketPending.svg"/>
+                  <div v-if="showStatus(op) == 'Sent'" class="icon">
+                    <img src="@/assets/svg/createRedpacketSent.svg"/>
+                  </div>
+                  <div v-if="showStatus(op) == 'Error'" class="icon" style="background-color: rgb(253, 71, 85);">
+                    <img src="@/assets/svg/createRedpacketError.svg" />
+                  </div>
                 </div>
-                <div v-if="showStatus(op) == 'Error'" class="icon" style="background-color: rgb(253, 71, 85);">
-                  <img src="@/assets/svg/createRedpacketError.svg" />
-                </div>
-              </div>
+              </a>
               <div class="record-detail">
                 <div class="action-and-time">
                   <div style="display: block; margin-bottom: 0;">
@@ -169,7 +171,7 @@
                 </div>
               </div>
               <div class="created-content" style="display: flex; align-items: center; flex-direction: row; justify-content: space-between;">
-                <div class="image" style="width: 15%;">
+                <div class="image" style="width: 45px;">
                   <div v-if="op.redpacket.type === 'erc20'" class="sent-info">
                     <div class="token-icon" style="margin-right: 0rem; margin-left: 0rem; width: 32px; height: 32px;">
                       <img :src="op.redpacket.token.logoURI">
@@ -188,7 +190,7 @@
                     </a-tooltip>
                   </div>
                 </div>
-                <div class="progress" style="width: 85%;">
+                <div class="progress" style="width: calc(100% - 45px);">
                   <div class="claim-status" v-if="op.redpacket" style="margin: 10px 0;">
                     <div v-if="op.redpacket.type === 'erc20'" class="amount">
                       <p class="claimed-number">
@@ -236,13 +238,15 @@
             </div>
 
             <div v-if="op.type == 'claim_redpacket' && width > 990" class="record-box">
-              <div class="status-icon" style="display: block; position: relative;">
-                <div class="icon" :style="showClaimStatus(op) == 'Error' ? 'background-color: #FD4755;' : ''">
-                  <img v-if="showClaimStatus(op) != 'Claimed' && showClaimStatus(op) != 'Error'" src="@/assets/svg/claimRedpacketPending.svg"/>
-                  <img v-if="showClaimStatus(op) == 'Claimed'" src="@/assets/svg/claimRedpacketClaimed.svg"/>
-                  <img v-if="showClaimStatus(op) == 'Error'" src="@/assets/svg/claimRedpacketError.svg"/>
+              <a :href="useChainStore().chain.blockExplorerUrls[0] + '/tx/' + op.tx" target="_blank">
+                <div class="status-icon" style="display: block; position: relative;">
+                  <div class="icon" :style="showClaimStatus(op) == 'Error' ? 'background-color: #FD4755;' : ''">
+                    <img v-if="showClaimStatus(op) != 'Claimed' && showClaimStatus(op) != 'Error'" src="@/assets/svg/claimRedpacketPending.svg"/>
+                    <img v-if="showClaimStatus(op) == 'Claimed'" src="@/assets/svg/claimRedpacketClaimed.svg"/>
+                    <img v-if="showClaimStatus(op) == 'Error'" src="@/assets/svg/claimRedpacketError.svg"/>
+                  </div>
                 </div>
-              </div>
+              </a>
               <div class="record-detail">
                 <div class="action-and-time">
                   <div style="display: block; margin-bottom: 0;">
@@ -322,16 +326,16 @@
                 </div>
                 <div class="cta">
                   <i v-if="showClaimStatus(op) == 'Claimed'" className="fa fa-twitter"></i>
-                  <a-tooltip v-if="showClaimStatus(op) != 'Claimed' && showStatus(op) != 'Pending'" placement="top">
-                      <template #title>
-                        <span>
-                          Check on blockchain explorer
-                        </span>
-                      </template>
-                      <a :href="useChainStore().chain.blockExplorerUrls[0] + '/tx/' + op.tx" target="_blank">
-                        <i class="fa-solid fa-arrow-up-from-bracket"></i>
-                      </a>
-                    </a-tooltip>
+                  <a-tooltip v-if="showClaimStatus(op) == 'Error'" placement="top">
+                    <template #title>
+                      <span>
+                        Check on blockchain explorer
+                      </span>
+                    </template>
+                    <a :href="useChainStore().chain.blockExplorerUrls[0] + '/tx/' + op.tx" target="_blank">
+                      <i class="fa-solid fa-arrow-up-from-bracket"></i>
+                    </a>
+                  </a-tooltip>
                 </div>
               </div>
             </div>
@@ -380,6 +384,7 @@
                     </div>
                     <span style="margin-left: 0.5rem;" v-if="showClaimStatus(op) == 'Claimed'">+ {{ normalizeClaimAmount(op).toString() }}</span>
                     <span class="placeholder-content" style="margin-left: 0.5rem;" v-if="showClaimStatus(op) != 'Claimed' && showClaimStatus(op) != 'Error'"></span>
+                    <span v-if="showClaimStatus(op) == 'Error'" style="margin-left: 0.5rem; font-weight: 600;">Claim Error</span>
                   </div>
                   <div v-if="op.redpacket.type === 'erc721'" style="display: flex; align-items: center;">
                     <div style="display: flex; align-items: center;">

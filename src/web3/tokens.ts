@@ -284,34 +284,8 @@ export async function getAssetTransfers(input: {
 }
 
 export function loadTokenLogo(address: string): string {
-    const chain = useChainStore().chain;
-    var logoURI = "";
-    if (chain.chainId == "5") {
-        if (address == "") {
-            return "https://token.metaswap.codefi.network/assets/networkLogos/ethereum.svg";
-        } else {
-            GOERLI_TOKENS.forEach(token => {
-                if (address.toLowerCase() == token.address.toLowerCase()) { logoURI = token.logoURI; }
-            })
-        }
+    if (address === "") {
+        return useTokenStore().nativeCoin!.logoURI!;
     }
-    if (chain.chainId == "137") {
-        if (address == "") {
-            return "https://token.metaswap.codefi.network/assets/networkLogos/polygon.svg";
-        } else {
-            POLYGON_TOEKNS.forEach(token => {
-                if (address.toLowerCase() == token.address.toLowerCase()) { logoURI = token.logoURI; }
-            })
-        }
-    }
-    if (chain.chainId == "80001") {
-        if (address == "") {
-            return "https://token.metaswap.codefi.network/assets/networkLogos/polygon.svg";
-        } else {
-            MUMBAI_TOKENS.forEach(token => {
-                if (address.toLowerCase() == token.address.toLowerCase()) { logoURI = token.logoURI; }
-            })
-        }
-    }
-    return logoURI;
+    return useTokenStore().token(address).logoURI || "";
 }

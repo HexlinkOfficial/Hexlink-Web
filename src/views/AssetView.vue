@@ -65,7 +65,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
+import { ref, computed } from "vue";
 import WalletTokenList from "@/components/WalletTokenList.vue";
 import WalletNFTGrid from "@/components/WalletNFTGrid.vue";
 import { useChainStore } from '@/stores/chain';
@@ -76,12 +76,6 @@ import { connectWallet } from "@/web3/wallet";
 const collectableView = ref<boolean>(false);
 const tokenView = ref<boolean>(true);
 const sendTo = ref<string>("");
-
-// onMounted(async () => {
-//   if (useWalletStore().connected == false) {
-//     await connectWallet()
-//   }
-// })
 
 const blockExplorer = computed(() => {
   const account = useAccountStore().account?.address;

@@ -26,7 +26,7 @@ export const provider = new WalletConnectProvider({
   infuraId: "e4ea80f8c3764a1ea0a582a4846d708c"
 });
 
-export const connectWalletConnect = async () => {
+export const connectWallet = async () => {
   let wallet, walletIcon, address, chainId;
   const toaster = createToaster({ position: "top", duration: 4000 });
   const store = useWalletStore();

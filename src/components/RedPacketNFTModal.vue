@@ -12,16 +12,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from "vue";
 import AirdropNFTSend from '@/components/AirdropNFTSend.vue';
-import { connectWallet } from "@/web3/wallet";
-import { useWalletStore } from "@/stores/wallet";
-
-onMounted(async () => {
-  if (useWalletStore().connected == false) {
-    await connectWallet()
-  }
-})
 </script>
 
 <style lang="less" scoped>

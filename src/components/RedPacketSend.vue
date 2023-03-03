@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!walletStore.connected" class="connectWallet">
+  <!-- <div v-if="!walletStore.connected" class="connectWallet">
     <button v-if="!walletStore.connected" class="connect-wallet-button" @click="tryConnectWallet">
       <svg style="margin-right: 10px;" width="18" height="18" viewBox="0 0 18 18" fill="none"
         xmlns="http://www.w3.org/2000/svg">
@@ -9,7 +9,7 @@
       </svg>
       Connect Wallet
     </button>
-  </div>
+  </div> -->
   <div v-if="walletStore.connected">
     <div class="red-packet">
       <p v-if="hasBalanceWarning" class="balance-warning-mobile"><i class="icofont-warning-alt" style="margin-right: 0.25rem;"></i>Insufficient balance</p>

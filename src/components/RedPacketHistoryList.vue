@@ -498,7 +498,6 @@ const loadData = async function() {
   loading.value = false;
   extractDate();
   await refreshData();
-  console.log(luckHistoryByDate.value);
 };
 
 const hasData = computed(() => {

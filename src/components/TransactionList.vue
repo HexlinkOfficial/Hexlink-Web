@@ -354,7 +354,6 @@ onMounted(async () => {
     tokens.push(t.address);
   })
   await loadTransactions(tokens, useNftStore().contracts);
-  console.log(transactionByDate.value);
 });
 watch(() => useChainStore().current, async () => {
   var tokens: string[] = [];

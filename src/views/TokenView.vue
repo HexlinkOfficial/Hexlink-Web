@@ -14,6 +14,8 @@ import SendToken from "@/components/SendToken.vue";
 import ReceiveToken from "@/components/ReceiveToken.vue";
 import { useRoute } from "vue-router";
 
+
+
 const showSend = computed(() => {
   return useRoute().query.action == "send";
 })

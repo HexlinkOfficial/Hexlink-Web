@@ -272,8 +272,8 @@ onMounted(() => {
   showTestnet.value = useAccountStore().showTestnet!;
 });
 
-onBeforeUnmount(() => {
-  document.removeEventListener('click', closeDropDown)
+onBeforeUnmount(async () => {
+  document.removeEventListener('click', closeDropDown);
 });
 
 watch(showTestnet, () => {

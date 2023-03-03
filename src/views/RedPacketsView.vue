@@ -12,7 +12,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
 import RedPacketBase from "@/components/RedPacketBase.vue";
 import RedPacektHistoryList from "@/components/RedPacketHistoryList.vue";
@@ -24,6 +24,7 @@ import RedpacketConfirm from "@/components/RedPacketConfirm.vue";
 import RedPacketNFTModal from "@/components/RedPacketNFTModal.vue";
 import { storeToRefs } from 'pinia';
 import { useRedPacketStore } from '@/stores/redpacket';
+import { useWalletStore } from '@/stores/wallet';
 
 const { status } = storeToRefs(useRedPacketStore());
 

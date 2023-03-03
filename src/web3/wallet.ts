@@ -34,7 +34,7 @@ export const providerOptions = {
 };
 
 export const web3Modal = new Web3Model({
-    cacheProvider: true,
+    cacheProvider: false,
     providerOptions
 });
 
@@ -87,7 +87,6 @@ export async function connectWallet() {
       wallet = "metamask";
       walletIcon = "https://i.postimg.cc/7PMD1BN4/metamask-icon.png";
     } else if (library.connection.url == "eip-1193:") {
-      console.log(library);
       wallet = library.provider.wc._peerMeta.name;
       if (library.provider.wc._peerMeta.icons.length > 0) {
         walletIcon = library.provider.wc._peerMeta.icons[0];
@@ -112,10 +111,18 @@ export async function connectWallet() {
       );
     } else {
       try {
-        const result = await provider.request({
-          method: 'wallet_requestPermissions',
-          params: [{ eth_accounts: {} }]
-        })
+        let result;
+        if (window.ethereum) {
+          result = await window.ethereum.request({
+            method: 'wallet_requestPermissions',
+            params: [{ eth_accounts: {} }]
+          })
+        } else {
+          result = await provider.request({
+            method: 'wallet_requestPermissions',
+            params: [{ eth_accounts: {} }]
+          })
+        }
         if (result[0].caveats[0].value.includes(ownerAccountAddress.toLowerCase())) {
           store.connectWallet(
             wallet,
@@ -143,7 +150,6 @@ export async function connectWallet() {
     //     // pop out error and disconnect
     //   }
     // });
-    console.log("provider: ", store.provider);
   } catch (error) {
     console.log("Error: ", error)
   }
@@ -152,34 +158,65 @@ export async function connectWallet() {
 export async function trySwitchNetwork(chain: Chain) : Promise<void> {
   const store = useWalletStore();
   const hexifyChainId = ethers.utils.hexValue(Number(chain.chainId));
-  const netVersion = await store.provider!.request({
-    method: 'net_version'
-  });
+  let netVersion;
+  if (window.ethereum) {
+    netVersion = await window.ethereum.request({
+      method: 'net_version'
+    });
+  } else {
+    netVersion = await store.provider!.request({
+      method: 'net_version'
+    });
+  }
   if (netVersion === chain.chainId) {
     return;
   }
   try {
-    await store.provider!.request({
-      method: "wallet_switchEthereumChain",
-      params: [{ chainId: hexifyChainId }]
-    });
+    if (window.ethereum) {
+      await window.ethereum.request({
+        method: "wallet_switchEthereumChain",
+        params: [{ chainId: hexifyChainId }]
+      });
+    } else {
+      await store.provider!.request({
+        method: "wallet_switchEthereumChain",
+        params: [{ chainId: hexifyChainId }]
+      });
+    }
   } catch (switchError: any) {
     if (switchError.code === 4902) {
       try {
-        await store.provider!.request({
-          method: "wallet_addEthereumChain",
-          params: [{
-            chainId: hexifyChainId,
-            chainName: chain.fullName,
-            blockExplorerUrls: [...chain.blockExplorerUrls],
-            nativeCurrency: { ...chain.nativeCurrency },
-            rpcUrls: [...chain.rpcUrls],
-          }]
-        });
-        await store.provider!.request({
-          method: 'wallet_switchEthereumChain',
-          params: [{ chainId: hexifyChainId }],
-        });
+        if (window.ethereum) {
+          await window.ethereum.request({
+            method: "wallet_addEthereumChain",
+            params: [{
+              chainId: hexifyChainId,
+              chainName: chain.fullName,
+              blockExplorerUrls: [...chain.blockExplorerUrls],
+              nativeCurrency: { ...chain.nativeCurrency },
+              rpcUrls: [...chain.rpcUrls],
+            }]
+          });
+          await store.provider!.request({
+            method: 'wallet_switchEthereumChain',
+            params: [{ chainId: hexifyChainId }],
+          });
+        } else {
+          await store.provider!.request({
+            method: "wallet_addEthereumChain",
+            params: [{
+              chainId: hexifyChainId,
+              chainName: chain.fullName,
+              blockExplorerUrls: [...chain.blockExplorerUrls],
+              nativeCurrency: { ...chain.nativeCurrency },
+              rpcUrls: [...chain.rpcUrls],
+            }]
+          });
+          await store.provider!.request({
+            method: 'wallet_switchEthereumChain',
+            params: [{ chainId: hexifyChainId }],
+          });
+        }
       } catch (error) {
         console.error(error);
       }
@@ -193,10 +230,17 @@ export async function signMessage(account: string, message: string) : Promise<st
   const store = useWalletStore();
   if (!store.provider) throw new Error("Can't sign");
   try {
-      signature = await store.provider!.request({
-      method: "personal_sign",
-      params: [message, account]
-    });
+      if (window.ethereum) {
+        signature = await window.ethereum.request({
+          method: "personal_sign",
+          params: [message, account]
+        });
+      } else {
+        signature = await store.provider!.request({
+          method: "personal_sign",
+          params: [message, account]
+        });
+      }
     return signature;
   } catch (error) {
     console.log(error);
@@ -207,18 +251,32 @@ export async function signMessage(account: string, message: string) : Promise<st
 export async function estimateGas(chain: Chain, txParams: any) : Promise<string> {
   const store = useWalletStore();
   await trySwitchNetwork(chain);
-  return await store.provider!.request({
-    method: 'eth_estimateGas',
-    params: [txParams],
-  });
+  if (window.ethereum) {
+    return await window.ethereum.request({
+      method: 'eth_estimateGas',
+      params: [txParams],
+    });
+  } else {
+    return await store.provider!.request({
+      method: 'eth_estimateGas',
+      params: [txParams],
+    });
+  }
 }
 
 export async function sendTransaction(chain: Chain, txParams: any) : Promise<string> {
   const store = useWalletStore();
   console.log("provider2: ", store.provider);
   await trySwitchNetwork(chain);
-  return await store.provider!.request({
-    method: 'eth_sendTransaction',
-    params: [txParams],
-  });
+  if (window.ethereum) {
+    return await window.ethereum.request({
+      method: 'eth_sendTransaction',
+      params: [txParams],
+    });
+  } else {
+    return await store.provider!.request({
+      method: 'eth_sendTransaction',
+      params: [txParams],
+    });
+  }
 }

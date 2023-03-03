@@ -51,11 +51,11 @@ export const connectWalletConnect = async () => {
       }
     }
     chainId = await provider.request({ method: "eth_chainId" });
-    provider.on("disconnect", (code: any, reason: any) => {
-      console.log(code, reason);
-      console.log("disconnected");
-      store.disconnectWallet();
-    });
+    // provider.on("disconnect", (code: any, reason: any) => {
+    //   console.log(code, reason);
+    //   console.log("disconnected");
+    //   store.disconnectWallet();
+    // });
     provider.on("accountsChanged", (accounts: any) => {
       if (accounts.length > 0) {
         address = accounts[0];

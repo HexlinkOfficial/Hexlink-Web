@@ -73,10 +73,15 @@ import { useAccountStore } from "@/stores/account";
 import { useWalletStore } from "@/stores/wallet";
 import { BigNumber } from "bignumber.js";
 import { connectWallet } from "@/web3/wallet";
-
 const collectableView = ref<boolean>(false);
 const tokenView = ref<boolean>(true);
 const sendTo = ref<string>("");
+
+// onMounted(async () => {
+//   if (useWalletStore().connected == false) {
+//     await connectWallet()
+//   }
+// })
 
 const blockExplorer = computed(() => {
   const account = useAccountStore().account?.address;

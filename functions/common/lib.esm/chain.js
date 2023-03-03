@@ -1,3 +1,4 @@
+import { ethers } from "ethers";
 export const GOERLI = {
     chainId: "5",
     name: "goerli",
@@ -120,5 +121,5 @@ export function getChain(chain) {
     throw new Error("Unsupported chain");
 }
 export function refunder(_chain) {
-    return "0x1A811678eEEDF16a1D0dF4b12e290F78a61A28F9";
+    return ethers.constants.AddressZero;
 }

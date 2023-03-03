@@ -1,4 +1,4 @@
-import type {ethers} from "ethers";
+import {ethers} from "ethers";
 
 export interface Chain {
     name: string,
@@ -142,5 +142,5 @@ export function getChain(chain: string | number) : Chain {
 }
 
 export function refunder(_chain: Chain) : string {
-  return "0x1A811678eEEDF16a1D0dF4b12e290F78a61A28F9";
+  return ethers.constants.AddressZero;
 }

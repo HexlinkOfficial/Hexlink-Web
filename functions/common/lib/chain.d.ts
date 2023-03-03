@@ -1,4 +1,4 @@
-import type { ethers } from "ethers";
+import { ethers } from "ethers";
 export interface Chain {
     name: string;
     chainId?: string;

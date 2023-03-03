@@ -26,7 +26,7 @@ export const providerOptions = {
         137: 'https://polygon-mainnet.infura.io/v3/' + import.meta.env.VITE_INFURA_API_KEY,
         80001: 'https://polygon-mumbai.infura.io/v3/' + import.meta.env.VITE_INFURA_API_KEY,
         421613: 'https://arbitrum-goerli.infura.io/v3/' + import.meta.env.VITE_INFURA_API_KEY,
-        42170: 'https://nova.arbitrum.io/rpc' + import.meta.env.VITE_INFURA_API_KEY,
+        42170: 'https://nova.arbitrum.io/rpc',
       },
       infuraId: import.meta.env.VITE_INFURA_API_KEY, //required
     },
@@ -145,7 +145,7 @@ export async function connectWallet() {
     //   }
     // });
   } catch (error) {
-    console.log("Error: ", error)
+    console.log("Error: ", error);
   }
 }
 
@@ -166,26 +166,26 @@ export async function trySwitchNetwork(chain: Chain) : Promise<void> {
         params: [{ chainId: hexifyChainId }]
     });
   } catch (switchError: any) {
-    console.log(switchError);
-    if (switchError.code === 4902) {
-      try {
-        const result1 = await provider.request({
-          method: "wallet_addEthereumChain",
-          params: [{
-            chainId: hexifyChainId,
-            chainName: chain.fullName,
-            blockExplorerUrls: [...chain.blockExplorerUrls],
-            nativeCurrency: { ...chain.nativeCurrency },
-            rpcUrls: [...chain.rpcUrls],
-          }]
-        });
-        await provider.request({
-          method: 'wallet_switchEthereumChain',
-          params: [{ chainId: hexifyChainId }],
-        });
-      } catch (error) {
-        console.error(error);
-      }
+    if (switchError.message.includes("Unrecognized chain ID")) {
+      console.log("hello")
+      const result1 = await provider.request({
+        method: "wallet_addEthereumChain",
+        params: [{
+          chainId: hexifyChainId,
+          chainName: chain.fullName,
+          blockExplorerUrls: [...chain.blockExplorerUrls],
+          nativeCurrency: { ...chain.nativeCurrency },
+          rpcUrls: [...chain.rpcUrls],
+        }]
+      });
+      console.log("hello2")
+      await provider.request({
+        method: 'wallet_switchEthereumChain',
+        params: [{ chainId: hexifyChainId }],
+      });
+      console.log("hello3")
+    } else {
+      throw switchError;
     }
     console.log("switch to network: ", chain.fullName);
   }

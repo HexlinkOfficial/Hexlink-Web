@@ -52,7 +52,7 @@ export const GALILEO = {
 };
 export const ARBITRUM_TESTNET = {
     chainId: "421613",
-    rpcUrls: ["https://arbitrum-goerli.infura.io/v3/"],
+    rpcUrls: ["https://endpoints.omniatech.io/v1/arbitrum/goerli/public"],
     name: "arbitrum_testnet",
     fullName: "Arbitrum Test Network",
     nativeCurrency: {

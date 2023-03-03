@@ -69,7 +69,7 @@ const message = ref<string>("Let's go!");
 const store = useRedPacketStore();
 const createRedPacket = async () => {
   store.setStatus("processing");
-  message.value = "Processing";
+  message.value = "Check your wallet to confirm the operation...";
   if(props.mode == 'token') {
     try {
       const {opId} = await createNewRedPacket(
@@ -84,6 +84,7 @@ const createRedPacket = async () => {
       console.log(e);
       store.setStatus("error");
       createNotification("Failed to create redpacket with" + e as string, "error");
+      message.value = "Something went wrong...";
     }
   } else {
     try {
@@ -99,6 +100,7 @@ const createRedPacket = async () => {
       console.log(e);
       store.setStatus("error");
       createNotification("Failed to create redpacket with" + e as string, "error");
+      message.value = "Something went wrong...";
     }
   }
 }

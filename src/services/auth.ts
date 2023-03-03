@@ -1,21 +1,19 @@
 import {
     getAuth,
-    connectAuthEmulator,
     GoogleAuthProvider,
     TwitterAuthProvider,
     signInWithCustomToken,
     signInWithPopup,
     signOut,
-} from 'firebase/auth';
-import type { User } from 'firebase/auth';
+} from '@firebase/auth';
+import type { User } from '@firebase/auth';
 import type { IUser } from "@/types";
-import { getFunctions, httpsCallable } from 'firebase/functions';
+import { getFunctions, httpsCallable } from '@firebase/functions';
 import { app } from '@/services/firebase';
 import { useAuthStore } from "@/stores/auth";
 import { useWalletStore } from "@/stores/wallet";
 import { switchNetwork } from "@/web3/network";
-import type { Chain } from "../../functions/common";
-import { GOERLI, SUPPORTED_CHAINS} from "../../functions/common";
+import { ARBITRUM, SUPPORTED_CHAINS, type Chain } from "../../functions/common";
 import { initHexlAccount, nameHashWithVersion } from "@/web3/account";
 import { useChainStore } from '@/stores/chain';
 import { initTokenList } from "@/web3/tokens";
@@ -118,7 +116,6 @@ export async function googleSocialLogin() {
         };
         useAuthStore().signIn(user);
         await init();
-        await switchNetwork(GOERLI);
     } catch (error: any) {
         if (error.code == 'auth/popup-closed-by-user') {
             return
@@ -170,5 +167,5 @@ export async function init() {
     await Promise.all(
         SUPPORTED_CHAINS.map((chain: Chain) => initTokenList(chain))
     );
-    await switchNetwork(GOERLI);
+    await switchNetwork(ARBITRUM);
 }

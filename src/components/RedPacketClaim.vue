@@ -32,8 +32,7 @@
       <small >Best Wishes!</small>
     </h2>
     <div class="cta-container transition" :style="claimItem == 'erc721' ? 'margin-top: 420px;' : 'margin-top: 360px;'">
-      <button v-if="route.query.otp?.toString() == null" class="cta" @click="claim">Claim</button>
-      <button v-if="route.query.otp?.toString() != null && timeLeft > 0" @click="claim" class="cta" >Claim</button>
+      <button v-if="claimable" @click="claim" class="cta" :disabled="mounting">{{ claimButtonText }}</button>
       <div v-if="route.query.otp?.toString() != null && timeLeft <= 0" class="footer">
         Token expired
       </div>
@@ -52,14 +51,14 @@
     </h2>
     <div class="cta-container transition" style="margin-top: 340px;">
       <router-link to="/airdrop">
-        <button @click="closeModal" class="cta">OK</button>
+        <button v-if="store.claimStatus !== 'loading'" @click="closeModal" class="cta">OK</button>
       </router-link>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { useRouter } from "vue-router";
 import { getRedPacket } from '@/graphql/redpacket';
 import { useRoute } from "vue-router";
@@ -71,10 +70,10 @@ import { getChain } from "../../functions/common";
 import type { RedPacketDB } from "@/types";
 import type { RedPacket, RedPacketErc721 } from "functions/redpacket/lib";
 import { useRedPacketStore } from '@/stores/redpacket';
-import CountdownSpinner from '@/components/CountdownSpinner.vue';
 import { useChainStore } from "@/stores/chain";
 import { prettyPrint, checkClaimer } from "@/services/util";
 import { copy } from "@/web3/utils";
+import { delay } from "wonka";
 
 const redPacket = ref<RedPacketDB | undefined>();
 const redPacketTokenIcon = ref<string>("");
@@ -85,17 +84,20 @@ const handle = ref<string>("");
 let timeLeft = ref<number>(0);
 let countDownTimerInterval = ref<any>(null);
 const errorMessage = ref<string>("");
+const mounting = ref<boolean>(true);
+const claimButtonText = ref<string>("Loading");
 
 const route = useRoute();
 const store = useRedPacketStore();
 onMounted(async () => {
+  mounting.value = true;
   claimItem.value = "";
   redPacket.value = await getRedPacket(route.query.claim!.toString());
   if (redPacket.value) {
-    provider.value = redPacket.value.creator!.provider;
-    handle.value = redPacket.value.creator!.handle;
     const network = getChain(redPacket.value.chain!);
     await switchNetwork(network);
+    provider.value = redPacket.value.creator!.provider;
+    handle.value = redPacket.value.creator!.handle;
     if (redPacket.value.type === 'erc20') {
       claimItem.value = "erc20";
       const metadata = redPacket.value!.metadata as RedPacket;
@@ -126,9 +128,16 @@ onMounted(async () => {
         }
       }, 1000);
     }
+    mounting.value = false;
+    claimButtonText.value = "Claim";
   } else {
     store.setClaimStatus("error");
   }
+});
+
+const claimable = computed(() => {
+  return route.query.otp?.toString() == null ||
+    (route.query.otp?.toString() != null && timeLeft.value > 0)
 });
 
 const claim = async () => {

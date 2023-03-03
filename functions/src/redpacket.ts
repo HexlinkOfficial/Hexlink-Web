@@ -75,11 +75,11 @@ async function buildClaimErc20Op(
   };
   return {
     to: redPacketAddress(chain),
-    value: "0x0",
+    value: "0x00",
     callData: redPacketInterface.encodeFunctionData("claim", [
       packet, claimer, refunder(chain), signature,
     ]),
-    callGasLimit: "0x0",
+    callGasLimit: "0x00",
   };
 }
 
@@ -97,12 +97,12 @@ async function buildMintErc721Op(
   const signature = await sign(redPacket.metadata.validator, message);
   return {
     to: redPacket.metadata.token,
-    value: "0x0",
+    value: "0x00",
     callData: hexlinkErc721Interface.encodeFunctionData(
         "mint",
         [claimer, refunder(chain), signature]
     ),
-    callGasLimit: "0x0",
+    callGasLimit: "0x00",
   };
 }
 

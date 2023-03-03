@@ -18,7 +18,6 @@ import {
     hexlAddress,
     hexlInterface,
     encodeExecBatch,
-    refunder,
     isContract,
 } from "../../functions/common";
 import type { RedPacketInput, RedPacketErc721Input } from "../../functions/redpacket";
@@ -26,7 +25,6 @@ import {
     redPacketContract,
     buildRedPacketOps,
     buildDeployErc721Ops,
-    tokenFactoryAddress,
     hexlinkErc721Contract,
 } from "../../functions/redpacket";
 
@@ -35,7 +33,7 @@ import { useWalletStore } from "@/stores/wallet";
 import { useAccountStore } from "@/stores/account";
 import { buildOpInput, buildUserOpRequest } from "@/web3/operation";
 
-import { getFunctions, httpsCallable } from 'firebase/functions'
+import { getFunctions, httpsCallable } from '@firebase/functions'
 const functions = getFunctions();
 
 export interface Transaction {
@@ -54,18 +52,6 @@ export interface TransactionInput {
 
 export function validator() : string {
     return import.meta.env.VITE_AIRDROP_VALIDATOR;
-}
-
-async function simulate(to: string, data: string, value: string) {
-    try {
-        await useChainStore().provider.estimateGas(
-            {to, data, value}
-        );
-    } catch(err) {
-        console.log("tx is likely to be reverted");
-        console.log(err);
-        throw err;
-    }
 }
 
 async function buildApproveTx(

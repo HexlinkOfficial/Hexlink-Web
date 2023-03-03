@@ -13,11 +13,11 @@ import {
     accountContract,
     isContract,
     refunder,
-    DEPLOYMENT_GASCOST,
     encodeValidateAndCall,
     hash,
     isNativeCoin,
     hexlContract,
+    getGasCost,
 } from "../../functions/common/";
 import { hexlinkSwapAddress } from "../../functions/redpacket/";
 import { genDeployAuthProof } from "./oracle";
@@ -25,8 +25,9 @@ import { signMessage } from "./wallet";
 import { useWalletStore } from "@/stores/wallet";
 import { nameHashWithVersion } from "@/web3/account";
 
-import { getFunctions, httpsCallable } from 'firebase/functions'
+import { getFunctions, httpsCallable } from '@firebase/functions'
 import { getProvider } from "./network";
+
 const functions = getFunctions();
 
 export function buildOpInput(params: {
@@ -66,7 +67,7 @@ export async function buildUserOpRequest(
         swapper: hexlinkSwapAddress(chain),
         token: gasToken,
         receiver: refunder(chain),
-        baseGas: deployed ? "0" : DEPLOYMENT_GASCOST,
+        baseGas: deployed ? "0" : getGasCost(chain, "deploy"),
     };
     const nonce = deployed ? await account.nonce() : 0;
     const {data, signature} = await encodeValidateAndCall({

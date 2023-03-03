@@ -2,7 +2,6 @@
 import { ethers } from "ethers";
 import ACCOUNT_SIMPLE_ABI from "./abi/ACCOUNT_SIMPLE_ABI.json";
 import { hash, isContract } from "./utils";
-export const DEPLOYMENT_GASCOST = 350000;
 export const accountInterface = new ethers.utils.Interface(ACCOUNT_SIMPLE_ABI);
 export function nameHash(schema, name) {
     return hash(`${schema}:${name}`);

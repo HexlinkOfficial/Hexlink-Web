@@ -13,8 +13,6 @@ export interface Account {
     owner?: string,
 }
 
-export const DEPLOYMENT_GASCOST = 350000;
-
 export const accountInterface = new ethers.utils.Interface(ACCOUNT_SIMPLE_ABI);
 
 export function nameHash(schema: string, name: string) {

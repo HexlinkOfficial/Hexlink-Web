@@ -4,7 +4,6 @@ import {BigNumber as EthBigNumber} from "ethers";
 import {Firebase} from "./firebase";
 import {
   Chain,
-  DEPLOYMENT_GASCOST,
   DeployRequest,
   GasObject,
   OpInput,
@@ -16,6 +15,7 @@ import {
   isContract,
   refunder,
   isAllowedGasToken,
+  getGasCost,
 } from "../common";
 import {hexlinkSwapAddress} from "../redpacket";
 import {accountAddress, getProvider} from "./account";
@@ -54,7 +54,8 @@ export function validateGas(chain: Chain, gas: GasObject, deployed: boolean) {
   if (!isAllowedGasToken(gas.token, chain)) {
     throw new Error("invalid gas token");
   }
-  if (!deployed && EthBigNumber.from(gas.baseGas).lt(DEPLOYMENT_GASCOST)) {
+  const gasCost = getGasCost(chain, "deploy");
+  if (!deployed && EthBigNumber.from(gas.baseGas).lt(gasCost)) {
     throw new Error("insufficient base gas for deployment");
   }
 }
@@ -78,9 +79,9 @@ export async function validateAndBuildUserOp(
   if (deployed) {
     return {
       to: account.address,
-      value: "0x0",
+      value: "0x00",
       callData: data,
-      callGasLimit: "0x0",
+      callGasLimit: "0x00",
     };
   } else {
     if (!request.deploy) {
@@ -97,9 +98,9 @@ export async function validateAndBuildUserOp(
     );
     return {
       to: hexlAddress(chain),
-      value: "0x0",
+      value: "0x00",
       callData: deployData,
-      callGasLimit: "0x0",
+      callGasLimit: "0x00",
     };
   }
 }

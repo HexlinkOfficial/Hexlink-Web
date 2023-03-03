@@ -6,7 +6,6 @@ export interface Account {
     isContract: boolean;
     owner?: string;
 }
-export declare const DEPLOYMENT_GASCOST = 350000;
 export declare const accountInterface: ethers.utils.Interface;
 export declare function nameHash(schema: string, name: string): string;
 export declare function accountContract(provider: Provider, address: string): Contract;

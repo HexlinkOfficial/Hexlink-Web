@@ -205,6 +205,7 @@ import NFTCard from "./NFTCard.vue";
 import { getBackcgroundColor } from '@/web3/utils';
 import type { nftImage } from '@/web3/tokens';
 import Loading from "@/components/Loading.vue";
+import { getGasCost } from "../../functions/common";
 
 const FILE_SIZE_LIMIT = 1024 * 1024 * 5;
 const estimatedGasAmount = "550000"; // hardcoded, can optimize later
@@ -324,8 +325,9 @@ async function delay(ms: number) {
 const setGas = async () => {
   const chain = useChainStore().chain;
   const price = await getPriceInfo(chain, nftAirdrop.value.gasToken);
+  const cost = getGasCost(chain, "claim_erc721_redpacket");
   const sponsorshipAmount =
-    EthBigNumber.from(500000).mul(nftAirdrop.value.splitInput || 0);
+    EthBigNumber.from(cost).mul(nftAirdrop.value.splitInput || 0);
   nftAirdrop.value.gasSponsorship = calcGas(
     chain,
     tokenStore.token(nftAirdrop.value.gasToken),

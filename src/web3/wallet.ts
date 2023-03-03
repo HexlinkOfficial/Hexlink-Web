@@ -175,21 +175,14 @@ export async function trySwitchNetwork(chain: Chain) : Promise<void> {
 };
 
 export async function signMessage(account: string, message: string) : Promise<string> {
-  const provider = await getProvider();
+  const provider = window.ethereum || await getProvider();
   let signature: Promise<string>;
-  if (provider) throw new Error("Can't sign");
+  if (!provider) throw new Error("Can't sign");
   try {
-      if (window.ethereum) {
-        signature = await window.ethereum.request({
-          method: "personal_sign",
-          params: [message, account]
-        });
-      } else {
-        signature = await provider.request({
-          method: "personal_sign",
-          params: [message, account]
-        });
-      }
+    signature = await provider.request({
+      method: "personal_sign",
+      params: [message, account]
+    });
     return signature;
   } catch (error) {
     console.log(error);
@@ -198,33 +191,19 @@ export async function signMessage(account: string, message: string) : Promise<st
 }
 
 export async function estimateGas(chain: Chain, txParams: any) : Promise<string> {
-  const provider = await getProvider();
+  const provider = window.ethereum || await getProvider();
   await trySwitchNetwork(chain);
-  if (window.ethereum) {
-    return await window.ethereum.request({
-      method: 'eth_estimateGas',
-      params: [txParams],
-    });
-  } else {
-    return await provider.request({
-      method: 'eth_estimateGas',
-      params: [txParams],
-    });
-  }
+  return await provider.request({
+    method: 'eth_estimateGas',
+    params: [txParams],
+  });
 }
 
 export async function sendTransaction(chain: Chain, txParams: any) : Promise<string> {
-  const provider = await getProvider();
+  const provider = window.ethereum || await getProvider();
   await trySwitchNetwork(chain);
-  if (window.ethereum) {
-    return await window.ethereum.request({
-      method: 'eth_sendTransaction',
-      params: [txParams],
-    });
-  } else {
-    return await provider.request({
-      method: 'eth_sendTransaction',
-      params: [txParams],
-    });
-  }
+  return await provider.request({
+    method: 'eth_sendTransaction',
+    params: [txParams],
+  });
 }

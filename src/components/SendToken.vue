@@ -133,7 +133,7 @@
           <div class="spinner-lg" :class="sendStatus">
             <div class="check"></div>
           </div>
-          <span style="font-size: 20px; margin-top: 1rem;">{{ message }}</span>
+          <span style="font-size: 20px; margin: 20px 10px; text-align: center;">{{ message }}</span>
         </h2>
       </div>
       <div style="display: flex; justify-content: center; width: 100%; padding: 0 15px;">
@@ -319,7 +319,7 @@ const onSubmit = async (_e: Event) => {
     ).toString();
     try {
       sendStatus.value = "processing";
-      message.value = "Processing";
+      message.value = "Check your wallet to confirm the operation...";
       const status = await sendToken(
         transaction.value.token,
         [{
@@ -337,6 +337,7 @@ const onSubmit = async (_e: Event) => {
       console.log(error);
       sendStatus.value = "error";
       message.value = "Something went wrong...";
+      createNotification("Error: " + error as string, "error");
     }
   }
 }

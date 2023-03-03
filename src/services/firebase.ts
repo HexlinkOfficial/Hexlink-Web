@@ -3,6 +3,7 @@ import { getAuth } from '@firebase/auth';
 import { getStorage, connectStorageEmulator } from '@firebase/storage'
 import { getFunctions, connectFunctionsEmulator } from '@firebase/functions'
 import { getAnalytics } from '@firebase/analytics'
+import { connectAuthEmulator } from 'firebase/auth';
 
 const firebaseConfig = {
     apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -27,5 +28,5 @@ if (import.meta.env.VITE_ENVIRONMENT !== 'production') {
 if (import.meta.env.VITE_USE_FUNCTIONS_EMULATOR === 'true') {
     connectFunctionsEmulator(getFunctions(app), 'localhost', 5001);
     connectStorageEmulator(storage, "localhost", 9199);
-    // connectAuthEmulator(auth, "http://localhost:9099");
+    connectAuthEmulator(auth, "http://localhost:9099");
 }

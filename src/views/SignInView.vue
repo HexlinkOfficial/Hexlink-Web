@@ -154,14 +154,21 @@ const countDownTimer = () => {
 const sendOTP = async () => {
     if(email.value != "") {
         isLoadingLogin.value = true;
-        const result = await genOTP(email.value);
-        if (result === 429) {
-            console.error("Too many requests to send otp.");
-            createNotification("Too many requests to send otp.", "error");
-        }
-        else if (result === 200) {
-            show.value = !show.value;
-            countDownTimer();
+        try {
+            const result = await genOTP(email.value);
+            if (result === 429) {
+                console.error("Too many requests to send otp.");
+                createNotification("Too many requests to send otp.", "error");
+            }
+            else if (result === 200) {
+                show.value = !show.value;
+                countDownTimer();
+            }
+        } catch (err) {
+            console.log(err);
+            createNotification(err as string, "error");
+        } finally {
+            isLoadingLogin.value = false;
         }
     } else {
         createNotification("Please enter email to continue", "error");

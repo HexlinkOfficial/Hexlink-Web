@@ -1,13 +1,18 @@
 export const ACTION_TO_GAS_COST = {
     "default": {
-        "claim_erc20_redpacket": 150000,
-        "claim_erc721_redpacket": 200000,
-        "deploy": 200000,
+        "claim_erc20_redpacket": 300000,
+        "claim_erc721_redpacket": 300000,
+        "deploy": 250000,
+    },
+    "arbitrum_testnet": {
+        "claim_erc20_redpacket": 3000000,
+        "claim_erc721_redpacket": 3000000,
+        "deploy": 2500000,
     },
     "arbitrum": {
-        "claim_erc20_redpacket": 1600000,
-        "claim_erc721_redpacket": 1500000,
-        "deploy": 1200000,
+        "claim_erc20_redpacket": 3000000,
+        "claim_erc721_redpacket": 3000000,
+        "deploy": 2500000,
     },
 };
 export function getGasCost(chain, action) {

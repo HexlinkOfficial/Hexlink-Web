@@ -20,7 +20,6 @@ export async function getCoinPrice(chain: Chain) : Promise<string> {
     const params = {ids: coin!, vs_currencies: "usd"};
     try {
       const response = await axios.get(BASE_COIN_URL, { params });
-      console.log(response);
       return response.data[coin!.toLowerCase()]["usd"];
     } catch (err: any) {
       console.log(err);

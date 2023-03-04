@@ -15,6 +15,12 @@
                         <span style="margin: 0 5px;">Sign in with Twitter</span>
                     </Button>
                 </div>
+                <div class="social-login">
+                    <Button size="large" @click="google_login" type="primary" class="google-btn" :loading="isGoogleLoading">
+                        <i class="fa fa-google"></i>
+                        <span style="margin: 0 5px;">Sign in with Google</span>
+                    </Button>
+                </div>
                 <p class="or"><span>or</span></p>
                 <div class="email-login">
                     <input type="text" v-model="email" placeholder="Enter Email" name="uname" class="email-input" required>
@@ -56,7 +62,7 @@
 import { ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { Button } from 'ant-design-vue';
-import { twitterSocialLogin, signOutFirebase, genOTP, validateOTP } from '@/services/auth'
+import { twitterSocialLogin, signOutFirebase, genOTP, validateOTP, googleSocialLogin } from '@/services/auth'
 import { useAuthStore } from '@/stores/auth'
 import background from "@/assets/background.png";
 import secure from "@/assets/secure.svg";
@@ -77,6 +83,7 @@ const countDown = ref<number>(60);
 const isLoadingLogin = ref(false);
 const isLoading = ref(false);
 const isTwitterLoading = ref<boolean>(false);
+const isGoogleLoading = ref<boolean>(false);
 const loginDisabled = ref<boolean>(true);
 
 const onSubmit = (e: Event) => {
@@ -86,6 +93,12 @@ const onSubmit = (e: Event) => {
 const twitter_login = async () => {
     isTwitterLoading.value = true;
     await twitterSocialLogin();
+    router.push(store.returnUrl || "/");
+}
+
+const google_login = async () => {
+    isGoogleLoading.value = true;
+    await googleSocialLogin();
     router.push(store.returnUrl || "/");
 }
 
@@ -319,6 +332,18 @@ a {
     border-radius: 10px;
     border: none; }
 .twitter-btn:hover {
+    background-color: rgba(29, 161, 242, 0.8); }
+.google-btn {
+    background-color: #1DA1F2;
+    color: white;
+    padding: 18px 20px;
+    margin-top: 10px;
+    margin-bottom: 20px;
+    width: 100%;
+    height: auto;
+    border-radius: 10px;
+    border: none; }
+.google-btn:hover {
     background-color: rgba(29, 161, 242, 0.8); }
 .title {
     margin: 10px 0px 10px 0px;

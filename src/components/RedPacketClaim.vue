@@ -136,7 +136,7 @@ onMounted(async () => {
 
 const claimable = computed(() => {
   const otp = route.query.otp?.toString();
-  return !mounting && (otp == null || (otp != null && timeLeft.value > 0));
+  return !mounting.value && (otp == null || (otp != null && timeLeft.value > 0));
 });
 
 const claim = async () => {

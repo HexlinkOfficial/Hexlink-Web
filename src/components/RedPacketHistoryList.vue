@@ -775,7 +775,7 @@ const normalize = (balance: string | undefined, token: Token) : string => {
   if (normalizedValue.length <= 15) {
     return normalizedValue;
   } else {
-    return normalizeBalance(balance || "0", token.decimals).normalized;
+    return normalizedValue.substring(0,16);
   }
 }
 
@@ -790,7 +790,7 @@ const normalizedDbBalance = (op: CreateRedPacketOp) : string => {
 }
 
 const normalizeClaimAmount = (op: ClaimRedPacketOp) => {
-  return op.claim?.claimed &&op.redpacket?.token ? normalize(
+  return op.claim?.claimed && op.redpacket?.token ? normalize(
     op.claim.claimed, op.redpacket.token
   ) : 0;
 }

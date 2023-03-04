@@ -31,8 +31,8 @@
       </div>
       <small >Best Wishes!</small>
     </h2>
-    <div class="cta-container transition" :style="claimItem == 'erc721' ? 'margin-top: 420px;' : 'margin-top: 360px;'">
-      <button :disabled="!claimable" @click="claim" class="cta">{{ claimButtonText }}</button>
+    <div :id="claimItem == 'erc721' ? 'claim721Button' : 'claim20Button'" class="cta-container transition">
+      <button :id="!claimable ? 'disableButton' : 'regularButton'" :disabled="!claimable" @click="claim" class="" :style="!claimable ? 'background: #D9D9D9;' : 'background: #076ae0;'">{{ claimButtonText }}</button>
       <div v-if="!mounting && route.query.otp?.toString() != null && timeLeft <= 0" class="footer">
         Claim expired
       </div>
@@ -58,7 +58,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, computed, watch } from "vue";
 import { useRouter } from "vue-router";
 import { getRedPacket } from '@/graphql/redpacket';
 import { useRoute } from "vue-router";
@@ -134,10 +134,13 @@ onMounted(async () => {
   }
 });
 
+
 const claimable = computed(() => {
   const otp = route.query.otp?.toString();
-  return !mounting && (otp == null || (otp != null && timeLeft.value > 0));
+  return !mounting.value && (otp == undefined || (otp != undefined && timeLeft.value > 0));
 });
+
+// watch(() => timeLeft.value, () => { claimable });
 
 const claim = async () => {
   store.setClaimStatus("loading");
@@ -183,6 +186,27 @@ function onCountDownTimesUp() {
 </script>
 
 <style lang="less" scoped>
+#disableButton {
+  color: #fff;
+  padding: 10px 25px;
+  border-radius: 50px;
+  font-size: 17px;
+  text-decoration: none;
+  width: 10rem;
+  font-weight: bold;
+  background: #D9D9D9; }
+#regularButton {
+  color: #fff;
+  background-color: #076ae0;
+  padding: 10px 25px;
+  border-radius: 50px;
+  font-size: 17px;
+  text-decoration: none;
+  width: 10rem;
+  font-weight: bold; }
+#regularButton:hover {
+  background-color: rgba(7,106,224,0.8);
+}
 .sender {
   margin-bottom: 0;
   padding-top: 0.25rem;
@@ -342,7 +366,7 @@ function onCountDownTimesUp() {
   color: #fff; }
 .claim-card {
   background-color: #fff;
-  height: 440px;
+  height: 520px;
   width: 350px;
   position: fixed;
   margin: auto;
@@ -355,15 +379,22 @@ function onCountDownTimesUp() {
   z-index: 55; 
   @media (max-width: 990px) {
     top: 50vh;
-    left: 50%; }}
+    left: 50%; }
+  #claim721Button {
+    margin-top: 420px; }
+  #claim20Button {
+    margin-top: 320px; }}
 .claim-card:hover {
   box-shadow: 0px 30px 30px rgba(0, 0, 0, 0.2);
-  height: 480px;
+  height: 540px;
   width: 330px;
   color: white;
   .sender {
-    background-color: rgba(0,0,0,0.2);
-  } }
+    background-color: rgba(0,0,0,0.2); }
+  #claim721Button {
+    margin-top: 410px; }
+  #claim20Button {
+    margin-top: 350px; } }
 .claim-card:hover h2 {
   margin-top: 90px;
   color: #fff; }

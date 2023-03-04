@@ -14,8 +14,6 @@ import {Firebase} from "./firebase";
 const OAUTH_AUTH_TYPE = "oauth";
 const OTP_AUTH_TYPE = "otp";
 
-const secrets = functions.config().doppler || {};
-
 export interface AuthProof {
   name: string,
   requestId: string,
@@ -75,28 +73,16 @@ const genAuthProof = async (uid: string, identity: string,
       )
   );
 
-  let encodedSig;
-  if (process.env.FUNCTIONS_EMULATOR) {
-    // note
-    const validator = new ethers.Wallet(secrets.HARDHAT_VALIDATOR);
-    const signature = await validator.signMessage(
-        ethers.utils.arrayify(message)
-    );
-    encodedSig = ethers.utils.defaultAbiCoder.encode(
-        ["address", "bytes"], [await validator.getAddress(), signature]
-    );
-  } else {
-    const sig = await signWithKmsKey(
-        KMS_KEY_TYPE[KMS_KEY_TYPE.operator],
-        toEthSignedMessageHash(message)
-    ) as string;
-    const validatorAddr = kmsConfig().get(
-        KMS_KEY_TYPE[KMS_KEY_TYPE.operator]
-    )?.publicAddress;
-    encodedSig = ethers.utils.defaultAbiCoder.encode(
-        ["address", "bytes"], [validatorAddr, sig]
-    );
-  }
+  const sig = await signWithKmsKey(
+      KMS_KEY_TYPE[KMS_KEY_TYPE.operator],
+      toEthSignedMessageHash(message)
+  ) as string;
+  const validatorAddr = kmsConfig().get(
+      KMS_KEY_TYPE[KMS_KEY_TYPE.operator]
+  )?.publicAddress;
+  const encodedSig = ethers.utils.defaultAbiCoder.encode(
+      ["address", "bytes"], [validatorAddr, sig]
+  );
 
   const AuthProof: AuthProof = {
     name: nameHash,

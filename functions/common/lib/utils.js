@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.matchTotpCode = exports.genTotpCode = exports.toEthBigNumber = exports.isContract = exports.normalizeBalance = exports.toHex = exports.truncateAddress = exports.prettyPrintTimestamp = exports.prettyPrintTxHash = exports.prettyPrintAddress = exports.hash = void 0;
+exports.matchTotpCode = exports.genTotpCode = exports.toEthBigNumber = exports.isContract = exports.formatOriginalBalance = exports.normalizeBalance = exports.toHex = exports.truncateAddress = exports.prettyPrintTimestamp = exports.prettyPrintTxHash = exports.prettyPrintAddress = exports.hash = void 0;
 const ethers_1 = require("ethers");
 const bignumber_js_1 = require("bignumber.js");
 const totp_generator_1 = __importDefault(require("totp-generator"));
@@ -82,6 +82,15 @@ function normalizeBalance(balance, decimals) {
     }
 }
 exports.normalizeBalance = normalizeBalance;
+function formatOriginalBalance(balance, decimals) {
+    const normalized = new bignumber_js_1.BigNumber(balance).div(new bignumber_js_1.BigNumber(10).pow(decimals));
+    return {
+        value: balance,
+        normalized: normalized.toString(10),
+        updatedAt: new Date(),
+    };
+}
+exports.formatOriginalBalance = formatOriginalBalance;
 function isContract(provider, address) {
     return __awaiter(this, void 0, void 0, function* () {
         try {

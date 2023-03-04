@@ -456,7 +456,7 @@ import Loading from "@/components/Loading.vue";
 import { useAccountStore } from '@/stores/account';
 import { useTokenStore } from '@/stores/token';
 import { queryRedPacketInfo, queryErc721RedPacketInfo } from "@/web3/redpacket";
-import { normalizeBalance } from "../../functions/common";
+import { normalizeBalance, formatOriginalBalance } from "../../functions/common";
 import type { Token } from "../../functions/common";
 import type { RedPacket } from "../../functions/redpacket";
 import { options } from "@/assets/imageAssets";
@@ -771,7 +771,12 @@ const share = (redPacket: RedPacketDB | undefined) => {
 };
 
 const normalize = (balance: string | undefined, token: Token) : string => {
-  return normalizeBalance(balance || "0", token.decimals).normalized;
+  const normalizedValue = formatOriginalBalance(balance || "0", token.decimals).normalized;
+  if (normalizedValue.length <= 8) {
+    return normalizedValue;
+  } else {
+    return normalizeBalance(balance || "0", token.decimals).normalized;
+  }
 }
 
 const normalizedDbBalance = (op: CreateRedPacketOp) : string => {

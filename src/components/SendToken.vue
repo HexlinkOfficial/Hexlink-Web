@@ -1,111 +1,118 @@
 <template>
   <div class="claim-card transition">
     <router-link to="/">
-      <svg class="redpacket_close transition" width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path
-          d="M4.3949 4.39481C6.84957 1.94033 10.0794 0.412944 13.534 0.0729118C16.9886 -0.267121 20.4542 0.601242 23.3403 2.53003C26.2264 4.45882 28.3544 7.32869 29.3617 10.6506C30.3691 13.9725 30.1933 17.541 28.8645 20.7479C27.5357 23.9547 25.136 26.6016 22.0743 28.2375C19.0127 29.8734 15.4785 30.3971 12.074 29.7193C8.66957 29.0415 5.60545 27.2041 3.40381 24.5204C1.20218 21.8366 -0.000751884 18.4724 6.47942e-06 15.0011C-0.001827 13.0309 0.38547 11.0798 1.13966 9.25966C1.89386 7.43954 3.0001 5.78629 4.3949 4.39481ZM18.8931 9.52218L20.4875 11.119C20.6687 11.3019 20.7703 11.5489 20.7703 11.8063C20.7703 12.0637 20.6687 12.3107 20.4875 12.4936L17.9702 15.0011L20.4875 17.5184C20.6687 17.7013 20.7703 17.9483 20.7703 18.2057C20.7703 18.4632 20.6687 18.7102 20.4875 18.8931L18.8931 20.4874C18.7103 20.6686 18.4633 20.7702 18.2058 20.7702C17.9484 20.7702 17.7014 20.6686 17.5185 20.4874L15.0012 17.9701L12.4839 20.4874C12.3011 20.6686 12.054 20.7702 11.7966 20.7702C11.5392 20.7702 11.2922 20.6686 11.1093 20.4874L9.52227 18.8931C9.34111 18.7102 9.23948 18.4632 9.23948 18.2057C9.23948 17.9483 9.34111 17.7013 9.52227 17.5184L12.0322 15.0011L9.52227 12.4838C9.34111 12.301 9.23948 12.054 9.23948 11.7965C9.23948 11.5391 9.34111 11.2921 9.52227 11.1092L11.1093 9.52218C11.2922 9.34102 11.5392 9.23939 11.7966 9.23939C12.054 9.23939 12.3011 9.34102 12.4839 9.52218L15.0012 12.0321L17.5185 9.52218C17.7014 9.34102 17.9484 9.23939 18.2058 9.23939C18.4633 9.23939 18.7103 9.34102 18.8931 9.52218ZM15.0012 2.57337C12.1254 2.57351 9.33867 3.57077 7.11573 5.39526C4.8928 7.21974 3.37125 9.75854 2.81034 12.5791C2.24942 15.3997 2.68384 18.3274 4.03959 20.8636C5.39533 23.3998 7.58851 25.3874 10.2454 26.4878C12.9024 27.5882 15.8586 27.7333 18.6106 26.8984C21.3625 26.0635 23.7398 24.3002 25.3374 21.9091C26.935 19.5179 27.6541 16.6467 27.3721 13.7848C27.0901 10.9228 25.8246 8.24723 23.791 6.2138C22.6373 5.05871 21.2671 4.14257 19.7588 3.51788C18.2505 2.8932 16.6338 2.57223 15.0012 2.57337Z"
-          fill="#076AE0" 
-        />
-      </svg>
+      <img class="redpacket_close transition" src="@/assets/svg/closeButton.svg" alt="close button" />
     </router-link>
-    <form v-if="sendStatus === ''" class="form-send" @submit.prevent="onSubmit">
-        <div style="display: block;">
-          <h2 class="people-title">Send Token</h2>
-          <div style="margin-top: 20px; position: relative;">
-            <div class="people-input-box">
-              <span class="input-search-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" width="1em" height="1em">
-                  <path
-                    d="M20.21 17.544l-2.785-2.785a7.752 7.752 0 0 0 1.114-3.986C18.54 6.49 15.05 3 10.77 3S3 6.49 3 10.773c0 4.282 3.489 7.772 7.77 7.772a7.686 7.686 0 0 0 3.985-1.114l2.784 2.785a1.66 1.66 0 0 0 2.34 0l.33-.33a1.645 1.645 0 0 0 0-2.342zM4.723 10.773c0-3.334 2.714-6.05 6.047-6.05 3.332 0 6.047 2.716 6.047 6.05 0 3.333-2.715 6.049-6.047 6.049-3.333 0-6.047-2.716-6.047-6.05z">
-                  </path>
-                </svg>
-              </span>
-              <input v-model="transaction.to" class="send-people" type="text" placeholder="email or wallet address" aria-expanded="false" autocomplete="off" autocorrect="off">
-            </div>
+    <form v-if="sendStatus === '' && !showStep2" class="form-send" @submit.prevent>
+      <div style="display: block;">
+        <h2 class="people-title">Send Token</h2>
+        <div style="margin-top: 15px; position: relative;">
+          <div class="people-input-box">
+            <span class="input-search-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" width="1em" height="1em">
+                <path
+                  d="M20.21 17.544l-2.785-2.785a7.752 7.752 0 0 0 1.114-3.986C18.54 6.49 15.05 3 10.77 3S3 6.49 3 10.773c0 4.282 3.489 7.772 7.77 7.772a7.686 7.686 0 0 0 3.985-1.114l2.784 2.785a1.66 1.66 0 0 0 2.34 0l.33-.33a1.645 1.645 0 0 0 0-2.342zM4.723 10.773c0-3.334 2.714-6.05 6.047-6.05 3.332 0 6.047 2.716 6.047 6.05 0 3.333-2.715 6.049-6.047 6.049-3.333 0-6.047-2.716-6.047-6.05z">
+                </path>
+              </svg>
+            </span>
+            <input v-model="transaction.to" class="send-people" type="text" placeholder="email or wallet address" aria-expanded="false" autocomplete="off" autocorrect="off">
           </div>
         </div>
-        <div v-if="verifySendTo()" style="display: block;">
-          <div class="input-wrapper">
-            <input 
-              class="send-amount"
-              type="number"
-              v-model="transaction.amountInput" :style="hasBalanceWarning ? 'color: #FE646F;' : ''"
-              autocomplete="off" 
-              placeholder="0.00"
-              autocorrect="off" 
-              title="Token Amount"
-              inputmode="decimal" 
-              min="0" 
-              minlength="1" 
-              step="any" 
-              maxlength="79" 
-              pattern="^[0-9]*[.,]?[0-9]*$" 
-              spellcheck="false" 
-              required
-            >
+      </div>
+      <div style="display: flex; justify-content: center; width: 100%; padding: 0 15px;">
+        <button class="cta-button" @click="goToStep2">Continue</button>
+      </div>
+    </form>
+    <form v-if="showStep2 && sendStatus == ''" class="form-send" @submit.prevent="onSubmit">
+      <div style="text-align: center; background: white; padding: 35px 20px 5px;">
+        <div class="profile-info">
+          <div class="profile-wrapper">
+              <i v-if="!isInputAddress" class="fa-solid fa-circle-check fa-2x"></i>
+              <i v-if="isInputAddress" class="fa-solid fa-circle-check fa-2x"></i>
           </div>
-          <p v-if="hasBalanceWarning" class="balance-warning-mobile">
-            <i style="margin-right: 0.25rem;"></i>Insufficient balance</p>
-          <div class="token-selection-section">
-            <div class="token-select">
-              <div 
-                class="mode-dropdown" 
-                :class="chooseTotalDrop && 'active'" 
-                @click.stop="chooseTotalDrop = !chooseTotalDrop;"
-                v-on-click-outside.bubble="chooseTotalHandle">
-                <div class="token-icon">
-                  <img :src="token.logoURI" />
-                </div>
-                <div class="mode-text2">{{ token.symbol }}</div>
-                <input class="mode-input" type="text" placeholder="select" readonly>
-                <div class="mode-options" style="right: -48px;">
-                  <div class="mode-option" v-for="(token, index) of tokens" :key="index" @click="tokenChoose('token', token)">
-                    <div class="token-icon">
-                      <img :src="token.logoURI" />
-                    </div>
-                    <div class="token-box">
-                      <b>{{ token.symbol }}</b>
-                      <div style="margin-right:0.5rem;">balance {{ tokenBalance(token.address) }}</div>
-                    </div>
+          <div class="name" style="">
+            <div class="confirmAddress">
+              <span v-if="!isInputAddress">{{ transaction.to }}</span>
+              <span v-if="isInputAddress">{{ transaction.to.toString().substring(0,21).toLowerCase() }}<br>{{
+              transaction.to.toString().substring(21,).toLowerCase() }}</span>
+            </div>
+          </div>
+          <div @click="goToStep1" class="gotoStep1">
+            <svg style="width: 1.5rem; height: 1.5rem;" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" width="1em" height="1em">
+              <path fill-rule="evenodd" d="M6.709 6.707a1 1 0 0 1 1.414 0l9.9 9.9a1 1 0 0 1-1.415 1.414l-9.9-9.9a1 1 0 0 1 0-1.414z"
+                clip-rule="evenodd">
+              </path>
+              <path fill-rule="evenodd"
+                d="M18.021 6.707a1 1 0 0 1 0 1.414l-9.9 9.9a1 1 0 0 1-1.413-1.415l9.9-9.899a1 1 0 0 1 1.413 0z" clip-rule="evenodd">
+              </path>
+            </svg>
+          </div>
+        </div>
+      </div>
+      <div v-if="verifySendTo()" style="display: block;">
+        <div class="input-wrapper">
+          <input class="send-amount" type="number" v-model="transaction.amountInput"
+            :style="hasBalanceWarning ? 'color: #FE646F;' : ''" autocomplete="off" placeholder="0.00" autocorrect="off"
+            title="Token Amount" inputmode="decimal" min="0" minlength="1" step="any" maxlength="79"
+            pattern="^[0-9]*[.,]?[0-9]*$" spellcheck="false" required>
+        </div>
+        <p v-if="hasBalanceWarning" class="balance-warning-mobile">
+          <i style="margin-right: 0.25rem;"></i>Insufficient balance
+        </p>
+        <div class="token-selection-section">
+          <div class="token-select">
+            <div class="mode-dropdown" :class="chooseTotalDrop && 'active'"
+              @click.stop="chooseTotalDrop = !chooseTotalDrop;" v-on-click-outside.bubble="chooseTotalHandle">
+              <div class="token-icon">
+                <img :src="token.logoURI" />
+              </div>
+              <div class="mode-text2">{{ token.symbol }}</div>
+              <input class="mode-input" type="text" placeholder="select" readonly>
+              <div class="mode-options" style="right: -48px;">
+                <div class="mode-option" v-for="(token, index) of tokens" :key="index" @click="tokenChoose('token', token)">
+                  <div class="token-icon">
+                    <img :src="token.logoURI" />
+                  </div>
+                  <div class="token-box">
+                    <b>{{ token.symbol }}</b>
+                    <div style="margin-right:0.5rem;">balance {{ tokenBalance(token.address) }}</div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-          <div style="display: flex; margin: 0px; justify-content: center; margin-top: 20px;">
-            <div class="gas-estimation" style="padding: 0 0.5rem 0 0.5rem;">
-              <p>
-                <img style="width: 20px; height: 20px;" src="https://i.postimg.cc/RhXfgJR1/gas-pump.png" />
-                Estimated Fee:
-                <a-tooltip placement="top">
-                  <template #title>
-                    <span>The real service fee may differ per network conditions</span>
-                    </template>
-                    <b>{{ totalServiceFee.substring(0,6) }}</b>
-                </a-tooltip>
-              </p>
-              <div class="total-choose-token">
-                <div class="token-select">
-                  <div 
-                    class="mode-dropdown" 
-                    :class="chooseGasDrop && 'active'" 
-                    @click.stop="chooseGasDrop = !chooseGasDrop;"
-                    v-on-click-outside.bubble="chooseGasHandle">
-                    <div class="token-icon">
-                      <img :src="gasToken.logoURI" />
-                    </div>
-                    <div class="mode-text2">{{ gasToken.symbol }}</div>
-                    <input class="mode-input" type="text" placeholder="select" readonly>
-                    <div class="mode-options">
-                      <div class="mode-option" v-for="(token, index) of tokens" :key="index" @click="tokenChoose('gas', token)">
-                        <div class="token-icon">
-                          <img :src="token.logoURI" />
-                        </div>
-                        <div class="token-box">
-                          <b>{{ token.symbol }}</b>
-                          <div style="margin-right:0.5rem;">
-                            Balance {{ tokenBalance(token.address) }}
-                          </div>
+        </div>
+        <div style="display: flex; margin: 0px; justify-content: center; margin-top: 20px;">
+          <div class="gas-estimation" style="padding: 0 0.5rem 0 0.5rem;">
+            <p>
+              <img style="width: 20px; height: 20px;" src="https://i.postimg.cc/RhXfgJR1/gas-pump.png" />
+              Estimated Fee:
+              <a-tooltip placement="top">
+                <template #title>
+                  <span>The real service fee may differ per network conditions</span>
+                </template>
+                <b>{{ totalServiceFee.substring(0,6) }}</b>
+              </a-tooltip>
+            </p>
+            <div class="total-choose-token">
+              <div class="token-select">
+                <div class="mode-dropdown" :class="chooseGasDrop && 'active'" @click.stop="chooseGasDrop = !chooseGasDrop;"
+                  v-on-click-outside.bubble="chooseGasHandle">
+                  <div class="token-icon">
+                    <img :src="gasToken.logoURI" />
+                  </div>
+                  <div class="mode-text2">{{ gasToken.symbol }}</div>
+                  <input class="mode-input" type="text" placeholder="select" readonly>
+                  <div class="mode-options">
+                    <div class="mode-option" v-for="(token, index) of tokens" :key="index"
+                      @click="tokenChoose('gas', token)">
+                      <div class="token-icon">
+                        <img :src="token.logoURI" />
+                      </div>
+                      <div class="token-box">
+                        <b>{{ token.symbol }}</b>
+                        <div style="margin-right:0.5rem;">
+                          Balance {{ tokenBalance(token.address) }}
                         </div>
                       </div>
                     </div>
@@ -115,8 +122,9 @@
             </div>
           </div>
         </div>
-      <div style="display: flex; justify-content: center;">
-        <button class="cta-button">Send</button>
+      </div>
+      <div style="display: flex; justify-content: center; width: 100%; padding: 0 15px;">
+        <button :disabled="hasBalanceWarning" class="cta-button">Send</button>
       </div>
     </form>
     <div v-if="sendStatus != ''" class="form-send">
@@ -125,10 +133,10 @@
           <div class="spinner-lg" :class="sendStatus">
             <div class="check"></div>
           </div>
-          <span style="font-size: 20px; margin-top: 1rem;">{{ message }}</span>
+          <span style="font-size: 20px; margin: 20px 10px; text-align: center;">{{ message }}</span>
         </h2>
       </div>
-      <div style="display: flex; justify-content: center;">
+      <div style="display: flex; justify-content: center; width: 100%; padding: 0 15px;">
         <button @click="closeModal" class="cta-button">OK</button>
       </div>
     </div>
@@ -149,11 +157,12 @@ import { vOnClickOutside } from '@/services/directive';
 import { getBalances } from "@/web3/tokens";
 import { getPriceInfo } from "@/web3/network";
 import { BigNumber as EthBigNumber } from "ethers";
-import { calcGas, tokenAmount, type PriceInfo } from "../../functions/common";
+import { calcGas, tokenAmount } from "../../functions/common";
 import { BigNumber } from "bignumber.js";
 import { ethers } from "ethers";
 import { sendToken } from "@/web3/operation";
 import { useRouter } from "vue-router";
+import { createNotification } from "@/web3/utils";
 
 const estimatedGasAmount = "150000"; // hardcoded, can optimize later
 const chooseTotalDrop = ref<boolean>(false);
@@ -165,6 +174,7 @@ const hexlAccountBalances = ref<BalanceMap>({});
 const tokens = ref<Token[]>([]);
 const isInputAddress = ref<boolean>(false);
 const message = ref<string>("Let's go!");
+const showStep2 = ref<boolean>(false);
 
 interface TokenTransaction {
   to: string,
@@ -174,7 +184,6 @@ interface TokenTransaction {
   token: string,
   gasToken: string,
   estimatedGas: string,
-  priceInfo?: PriceInfo | undefined;
 }
 
 const transaction = ref<TokenTransaction>({
@@ -228,14 +237,12 @@ async function delay(ms: number) {
 
 const setGas = async () => {
   const chain = useChainStore().chain;
-  const priceInfo = await getPriceInfo(chain);
-  transaction.value.priceInfo = priceInfo;
+  const price = await getPriceInfo(chain, transaction.value.gasToken);
   transaction.value.estimatedGas = calcGas(
     chain,
     tokenStore.token(transaction.value.gasToken),
     EthBigNumber.from(estimatedGasAmount),
-    priceInfo,
-    false, // prepay
+    price,
   ).toString();
 }
 
@@ -295,11 +302,11 @@ const verifySendTo = () => {
       isInputAddress.value = false;
       return true;
     } else {
-      // createNotification("Invalid Input", "error");
+      createNotification("Invalid Input", "error");
       return false;
     }
   } else {
-    // createNotification("Empty Input", "error");
+    createNotification("Empty Input", "error");
     return false;
   }
 };
@@ -312,7 +319,7 @@ const onSubmit = async (_e: Event) => {
     ).toString();
     try {
       sendStatus.value = "processing";
-      message.value = "Processing";
+      message.value = "Check your wallet to confirm the operation...";
       const status = await sendToken(
         transaction.value.token,
         [{
@@ -330,8 +337,21 @@ const onSubmit = async (_e: Event) => {
       console.log(error);
       sendStatus.value = "error";
       message.value = "Something went wrong...";
+      createNotification("Error: " + error as string, "error");
     }
   }
+}
+
+const goToStep2 = () => {
+  showStep2.value = false;
+  if (verifySendTo()) {
+    showStep2.value = true;
+  }
+}
+
+const goToStep1 = () => {
+  showStep2.value = false;
+  transaction.value.to = "";
 }
 
 const router = useRouter();
@@ -356,6 +376,36 @@ const validateEmail = (input: string) => {
 </script>
 
 <style lang="less" scoped>
+.confirmAddress {
+  color: #076AE0;
+  font-size: 1rem;
+  font-weight: 600;
+  @media (max-width: 640px) {
+    font-size: 0.75rem; } }
+.gotoStep1 {
+  width: 3rem;
+  height: 3rem;
+  display: flex;
+  justify-content: center;
+  align-items: center; }
+.profile-info {
+  display: flex;
+  text-align: left;
+  -webkit-box-align: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  justify-content: center;
+  padding: 0.75rem 0.5rem;
+  border-radius: 0.5rem;
+  border: 1.5px solid #076AE0;
+  transition: border-color 150ms ease-in-out; }
+.name {
+  display: flex;
+  position: relative;
+  word-break: break-word;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  flex-direction: column; }
 .spinner-lg {
   .generate-spinner(); }
 .generate-spinner(
@@ -474,10 +524,13 @@ const validateEmail = (input: string) => {
   color: white;
   padding: 10px;
   margin-top: 10px;
-  margin-bottom: 30px;
-  width: 80%;
+  margin-bottom: 20px;
+  width: 100%;
   border-radius: 50px;
   border: none; }
+.cta-button:disabled {
+  background-color: rgb(106, 165, 237);
+}
 .token-box {
   display: flex;
   flex-direction: column;
@@ -503,7 +556,9 @@ const validateEmail = (input: string) => {
   position: relative;
   display: flex;
   justify-content: center;
-  align-items: center; }
+  align-items: center;
+  color: #28a745;
+  margin-left: 1rem; }
 .send-to-wrapper {
   display: flex;
   text-align: left;
@@ -540,7 +595,8 @@ const validateEmail = (input: string) => {
   line-height: 2.25rem;
   font-weight: 500;
   margin-top: 0px;
-  margin-left: 20px; }
+  margin-left: 20px;
+  margin-top: 10px; }
 .people-section {
   display: block;
   background-color: white;
@@ -787,11 +843,6 @@ input::-webkit-inner-spin-button {
   @media (max-width: 990px) {
     top: 50vh;
     left: 50%; } }
-// .claim-card:hover {
-//   box-shadow: 0px 30px 30px rgba(0, 0, 0, 0.2);
-//   height: 430px;
-//   width: 330px;
-//   color: white; }
 .transition {
   transition: .3s cubic-bezier(.3, 0, 0, 1.3) }
 .redpacket_close {

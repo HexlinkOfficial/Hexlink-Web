@@ -1,5 +1,6 @@
 import type { Account } from "../../functions/common";
 import { defineStore } from 'pinia'
+import type { ethers } from "ethers";
 
 export const useWalletStore = defineStore({
     id: 'wallet',
@@ -11,7 +12,7 @@ export const useWalletStore = defineStore({
     } => ({
         connected: false,
         wallet: "",
-        walletIcon: "",
+        walletIcon: "@/assets/svg/wallet.svg",
         account: undefined,
     }),
     persist: true,

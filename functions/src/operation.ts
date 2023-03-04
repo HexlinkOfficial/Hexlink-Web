@@ -4,21 +4,21 @@ import {BigNumber as EthBigNumber} from "ethers";
 import {Firebase} from "./firebase";
 import {
   Chain,
-  DEPLOYMENT_GASCOST,
   DeployRequest,
   GasObject,
   OpInput,
-  PriceConfigs,
   UserOpRequest,
   accountInterface,
-  gasTokenPricePerGwei,
   getChain,
   hexlAddress,
   hexlInterface,
   isContract,
   refunder,
+  isAllowedGasToken,
+  getGasCost,
 } from "../common";
-import {accountAddress, getInfuraProvider} from "./account";
+import {hexlinkSwapAddress} from "../redpacket";
+import {accountAddress, getProvider} from "./account";
 import type {Error, GenAddressSuccess} from "./account";
 import {submit} from "./services/operation";
 import {insertRequest} from "./graphql/request";
@@ -45,17 +45,18 @@ export async function preprocess(data: any, context: any) {
 }
 
 export function validateGas(chain: Chain, gas: GasObject, deployed: boolean) {
+  if (gas.swapper !== hexlinkSwapAddress(chain)) {
+    throw new Error("unsupported swapper");
+  }
   if (gas.receiver !== refunder(chain)) {
-    throw new Error("invalid gas refunder");
+    throw new Error("invalid gas refund receiver");
   }
-  const price = gasTokenPricePerGwei(
-      chain, gas.token, PriceConfigs[chain.name]
-  );
-  if (!deployed && EthBigNumber.from(gas.baseGas).lt(DEPLOYMENT_GASCOST)) {
+  if (!isAllowedGasToken(gas.token, chain)) {
+    throw new Error("invalid gas token");
+  }
+  const gasCost = getGasCost(chain, "deploy");
+  if (!deployed && EthBigNumber.from(gas.baseGas).lt(gasCost)) {
     throw new Error("insufficient base gas for deployment");
-  }
-  if (EthBigNumber.from(gas.price).lt(price)) {
-    throw new Error("invalid gas price");
   }
 }
 
@@ -67,20 +68,20 @@ export async function validateAndBuildUserOp(
         deploy?: DeployRequest,
       },
 ) : Promise<OpInput> {
-  const req = request.params;
+  const req = request?.params;
   const data = accountInterface.encodeFunctionData(
       "validateAndCallWithGasRefund",
-      [req.txData, req.nonce, req.signature, req.gas]
+      [req?.txData, req?.nonce, req?.gas, req?.signature]
   );
-  const provider = getInfuraProvider(chain);
+  const provider = getProvider(chain);
   const deployed = await isContract(provider, account.address);
   validateGas(chain, req.gas, deployed);
   if (deployed) {
     return {
       to: account.address,
-      value: "0x0",
+      value: "0x00",
       callData: data,
-      callGasLimit: "0x0",
+      callGasLimit: "0x00",
     };
   } else {
     if (!request.deploy) {
@@ -97,9 +98,9 @@ export async function validateAndBuildUserOp(
     );
     return {
       to: hexlAddress(chain),
-      value: "0x0",
+      value: "0x00",
       callData: deployData,
-      callGasLimit: "0x0",
+      callGasLimit: "0x00",
     };
   }
 }

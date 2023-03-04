@@ -4,7 +4,7 @@ import {insertTx, updateTx} from "./graphql/transaction";
 import {updateOp} from "./graphql/operation";
 import {processActions, buildTx} from "./operation";
 import type {QueueType} from "./types";
-import { getInfuraProvider } from "./utils";
+import { getProvider } from "./utils";
 import {SUPPORTED_CHAINS} from "../../functions/common";
 import type {Chain} from "../../functions/common";
 import {SenderPool} from "./sender";
@@ -73,7 +73,7 @@ class PrivateQueues {
             }
             const ops = jobs.map((j: any) => j.data as Operation);
 
-            const provider = getInfuraProvider(chain);
+            const provider = getProvider(chain);
             const postPorgress = async (j: any, txId?: number, error?: string) => {
                 await updateOp(j.data.id, txId, error);
                 await j.moveToCompleted("success", false, true);
@@ -104,7 +104,9 @@ class PrivateQueues {
     private initOperationQueue(chain: Chain) : Queue.Queue {
         const queue = new Queue(
             this.queueName(chain, "operation"),
-            { settings: {maxStalledCount: 0} }
+            {
+                settings: {maxStalledCount: 0},
+            }
         );
         console.log("Initiating operation queue " + queue.name);
         return queue;
@@ -116,7 +118,7 @@ class PrivateQueues {
         console.log("Initiating transaction queue " + queue.name);
         queue.process(async(job: any) => {
             try {
-                const provider: ethers.providers.Provider = getInfuraProvider(chain);
+                const provider: ethers.providers.Provider = getProvider(chain);
                 const tx = await trySendTx(provider, job.data);
                 const receipt = await tx.wait();
                 await Promise.all(job.data.ops.map(

@@ -1,6 +1,6 @@
 <template>
-  <div v-if="claimStatus == ''" class="claim-card transition" :style="claimItem == 'erc721' && 'height: 500px;'">
-    <router-link to="/redpackets">
+  <div v-if="store.claimStatus == ''" class="claim-card transition" :style="claimItem == 'erc721' ? 'height: 520px;' : ''">
+    <router-link to="/airdrop">
       <svg class="redpacket_close transition" width="30" height="30" viewBox="0 0 30 30" fill="none"
         xmlns="http://www.w3.org/2000/svg">
         <path
@@ -11,8 +11,11 @@
     <h2 class="transition">
       <span style="font-size: 15px;">Claim {{ claimItem == 'erc721' ? 'NFT' : 'Token' }} from</span><br>
       <div style="display: flex; align-items: center; justify-content: center; font-size: 20px;">
-        @{{ redPacket?.creator?.handle }}
-        <a class="twitter-link" :href="'https://twitter.com/' + redPacket?.creator?.handle">
+        {{ checkClaimer(provider) ? "" : "@" }}
+        <span class="sender" @click="copy(handle ? handle : '', 'Copied!')">
+          <b>{{ prettyPrint(handle ? handle : "Anonymous", 25, 10, -10) }}</b>
+        </span>
+        <a v-if="!checkClaimer(provider)" class="twitter-link" :href="'https://twitter.com/' + handle" style="margin-left: 5px;">
           <i className="fa fa-twitter"></i>
         </a>
       </div>
@@ -28,52 +31,73 @@
       </div>
       <small >Best Wishes!</small>
     </h2>
-    <div class="cta-container transition" :style="claimItem == 'erc721' && 'margin-top: 410px;'">
-      <button class="cta" @click="claim">Claim</button>
+    <div class="cta-container transition" :style="claimItem == 'erc721' ? 'margin-top: 420px;' : 'margin-top: 360px;'">
+      <button v-if="claimable" @click="claim" class="cta" :disabled="mounting">{{ claimButtonText }}</button>
+      <div v-if="route.query.otp?.toString() != null && timeLeft <= 0" class="footer">
+        Token expired
+      </div>
+      <div v-if="route.query.otp?.toString() != null && timeLeft > 0" class="footer">
+        The request will expire in {{ timeLeft }} seconds
+      </div>
     </div>
     <div :class="claimItem == 'erc721' ? 'card_circle721 transition' : 'card_circle transition'"></div>
   </div>
-  <div v-if="claimStatus !== ''" class="claim-success-card transition">
+  <div v-if="store.claimStatus !== ''" class="claim-success-card transition">
     <h2 class="transition">
-      <div class="spinner-lg" :class="claimStatus">
+      <div class="spinner-lg" :class="store.claimStatus">
         <div class="check"></div>
       </div>
-      <span style="font-size: 20px; margin-top: 1rem;">{{ loadText() }}</span><br>
+      <span style="font-size: 20px; margin-top: 1rem; color: black;">{{ loadText() }}</span><br>
     </h2>
     <div class="cta-container transition" style="margin-top: 340px;">
-      <router-link to="/redpackets">
-        <button class="cta">OK</button>
+      <router-link to="/airdrop">
+        <button v-if="store.claimStatus !== 'loading'" @click="closeModal" class="cta">OK</button>
       </router-link>
     </div>
-    <div class="card_circle transition" style="margin-top: -100px;"></div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
+import { useRouter } from "vue-router";
 import { getRedPacket } from '@/graphql/redpacket';
 import { useRoute } from "vue-router";
-import { callClaimRedPacket } from "@/web3/redpacket";
+import { callClaimRedPacket, claimCountdown } from "@/web3/redpacket";
 import { loadAndSetErc20Token } from '@/web3/tokens';
 import { switchNetwork } from "@/web3/network";
 import { ipfsUrl } from "@/web3/storage";
 import { getChain } from "../../functions/common";
 import type { RedPacketDB } from "@/types";
 import type { RedPacket, RedPacketErc721 } from "functions/redpacket/lib";
+import { useRedPacketStore } from '@/stores/redpacket';
+import { useChainStore } from "@/stores/chain";
+import { prettyPrint, checkClaimer } from "@/services/util";
+import { copy } from "@/web3/utils";
+import { delay } from "wonka";
 
 const redPacket = ref<RedPacketDB | undefined>();
 const redPacketTokenIcon = ref<string>("");
 const redPacketToken = ref<string>("");
-const claimStatus = ref<string>("");
 const claimItem = ref<string>("");
+const provider = ref<string>("");
+const handle = ref<string>("");
+let timeLeft = ref<number>(0);
+let countDownTimerInterval = ref<any>(null);
+const errorMessage = ref<string>("");
+const mounting = ref<boolean>(true);
+const claimButtonText = ref<string>("Loading");
 
 const route = useRoute();
+const store = useRedPacketStore();
 onMounted(async () => {
+  mounting.value = true;
   claimItem.value = "";
   redPacket.value = await getRedPacket(route.query.claim!.toString());
   if (redPacket.value) {
     const network = getChain(redPacket.value.chain!);
     await switchNetwork(network);
+    provider.value = redPacket.value.creator!.provider;
+    handle.value = redPacket.value.creator!.handle;
     if (redPacket.value.type === 'erc20') {
       claimItem.value = "erc20";
       const metadata = redPacket.value!.metadata as RedPacket;
@@ -88,46 +112,98 @@ onMounted(async () => {
       redPacketToken.value = metadata.symbol;
       redPacketTokenIcon.value = ipfsUrl(metadata.tokenURI) || "";
     }
+
+    const otpCode = route.query.otp?.toString()!;
+    if (otpCode != null) {
+      timeLeft.value = await claimCountdown(
+        useChainStore().chain,
+        redPacket.value.id,
+        otpCode
+      );
+      countDownTimerInterval.value = setInterval(() => {
+        timeLeft.value -= 1;
+        // console.log("parent"+timeLeft.value);
+        if (timeLeft.value === 0) {
+          onCountDownTimesUp();
+        }
+      }, 1000);
+    }
+    mounting.value = false;
+    claimButtonText.value = "Claim";
   } else {
-    claimStatus.value = "error";
+    store.setClaimStatus("error");
   }
 });
 
+const claimable = computed(() => {
+  return route.query.otp?.toString() == null ||
+    (route.query.otp?.toString() != null && timeLeft.value > 0)
+});
+
 const claim = async () => {
-  claimStatus.value = 'loading';
+  store.setClaimStatus("loading");
   try {
     const otp = route.query.otp?.toString();
-    await callClaimRedPacket(redPacket.value!, otp);
-    claimStatus.value = 'success';
-  } catch (e) {
+    const {id} = await callClaimRedPacket(redPacket.value!, otp);
+    store.afterClaimed(redPacket.value!, id);
+  } catch (e: any) {
     console.log("Failed to claim redpacket with error");
     console.log(e);
-    claimStatus.value = 'error';
+    if(e.toString().includes("already_claimed")) {
+      errorMessage.value = "You already claimed this airdrop!";
+    }
+    store.setClaimStatus("error");
   }
 }
 
 const loadText = () => {
-  if (claimStatus.value == 'success') {
+  if (store.claimStatus == 'success') {
     return 'Claim Successful!';
-  } else if (claimStatus.value == 'error') {
+  } else if (store.claimStatus == 'error') {
+    if (errorMessage.value != "") {
+      return errorMessage.value;
+    }
     return 'Uhmmmm, something went wrong!';
   } else {
     return 'Processing...';
   }
 };
+
+const router = useRouter();
+const closeModal = () => {
+  if (store.status == 'success') {
+    router.push("/airdrop");
+  }
+  store.setClaimStatus("");
+}
+
+function onCountDownTimesUp() {
+  clearInterval(countDownTimerInterval.value);
+}
+
 </script>
 
 <style lang="less" scoped>
+.sender {
+  margin-bottom: 0;
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+  background-color: #F3F4F6;
+  font-size: 1rem;
+  line-height: 1.25rem;
+  border-radius: 0.5rem; }
 .spinner-lg {
   .generate-spinner(); }
 .generate-spinner(
   @radius: 60px,
   @border-width: 12px,
   @check-thickness: 12px,
-  @success-color: #fff,
-  @error-color: #fff,
-  @default-color: #fff,
-  @background-color: #FD4755,
+  @success-color: #076ae0,
+  @error-color: #FD4755,
+  @default-color: #076ae0,
+  @background-color: #fff,
 ) {
   @check-size: @radius * .57;
   display: inline-block;
@@ -267,8 +343,8 @@ const loadText = () => {
   color: #fff; }
 .claim-card {
   background-color: #fff;
-  height: 400px;
-  width: 300px;
+  height: 440px;
+  width: 350px;
   position: fixed;
   margin: auto;
   left: 50%;
@@ -283,9 +359,12 @@ const loadText = () => {
     left: 50%; }}
 .claim-card:hover {
   box-shadow: 0px 30px 30px rgba(0, 0, 0, 0.2);
-  height: 430px;
+  height: 480px;
   width: 330px;
-  color: white; }
+  color: white;
+  .sender {
+    background-color: rgba(0,0,0,0.2);
+  } }
 .claim-card:hover h2 {
   margin-top: 90px;
   color: #fff; }
@@ -302,7 +381,7 @@ const loadText = () => {
   width: 100%;}
 .claim-card h2 {
   text-align: center;
-  margin-top: 45%;
+  margin-top: 9rem;
   position: absolute;
   z-index: 55;
   font-size: 26px;
@@ -317,22 +396,22 @@ const loadText = () => {
   margin-top: -100px; }
 .claim-card:hover .card_circle721 {
   border-radius: 0;
-  margin-top: -20px; }
+  margin-top: -35px; }
 .card_circle {
   height: 400px;
   width: 450px;
-  background-color: #FD4755;
+  background-color: #076ae0;
   position: absolute;
   border-radius: 50%;
-  margin-left: -80px;
+  margin-left: -53px;
   margin-top: -280px; }
 .card_circle721 {
   height: 400px;
   width: 450px;
-  background-color: #FD4755;
+  background-color: #076ae0;
   position: absolute;
   border-radius: 50%;
-  margin-left: -80px;
+  margin-left: -53px;
   margin-top: -280px; }
 .transition {
   transition: .3s cubic-bezier(.3, 0, 0, 1.3) }
@@ -350,15 +429,15 @@ const loadText = () => {
   display: flex;
   justify-content: center;
   text-align: center;
-  margin-top: 310px;
+  margin-top: 300px;
   position: absolute;
   z-index: 55;
   width: 100%; }
 .claim-card:hover .cta-container {
-  margin-top: 340px; }
+  margin-top: 370px; }
 .cta {
   color: #fff;
-  background-color: #FD4755;
+  background-color: #076ae0;
   padding: 10px 25px;
   border-radius: 50px;
   font-size: 17px;
@@ -366,7 +445,7 @@ const loadText = () => {
   width: 10rem;
   font-weight: bold; }
 .cta:hover {
-  background-color: rgba(253,71,85,0.8); }
+  background-color: rgba(7,106,224,0.8); }
 .token-icon {
   border-radius: 50%;
   width: 20px;
@@ -400,4 +479,16 @@ const loadText = () => {
   height: 110px;
   border: 2px solid white;
   border-radius: 15px; }
+.footer {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  margin-bottom: 0px;
+  padding-bottom: 5px;
+  padding-top: 5px;
+  background-color: #076ae0;
+  color: white;
+  text-align: center;
+}
 </style>

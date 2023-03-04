@@ -7,10 +7,7 @@
             <div class="header-left">
               <div class="brand-logo">
                 <router-link to="/">
-                  <div class="header-title">
-                    <h2 style="margin-bottom: 0rem; font-size: 1.4rem; font-weight: 600;">{{ componentTitle }}</h2>
-                  </div>
-                  <img class="header-logo" src="../assets/logo/blue2-logo.svg" alt="" />
+                  <img class="header-logo" src="@/assets/svg/logo-beta2.svg" alt="" />
                 </router-link>
               </div>
             </div>
@@ -27,43 +24,43 @@
                     <div class="title">
                       <div class="title-header">
                         <div class="title-text">Networks</div>
+                        <div>
+                          <span style="font-size: 0.75rem; line-height: 1.25rem; color: rgb(100, 116, 139); font-weight: 600;">Testnet?</span>
+                          <a-switch v-model:checked="showTestnet" checked-children="show" un-checked-children="hide" style="margin-left: 5px;" />
+                        </div>
                       </div>
                     </div>
-                    <div>
-                      <!-- Mumbai -->
-                      <div class="network-items" @click="switchNetwork({...MUMBAI})">
-                        <button>
-                          <div style="display: flex; margin-right: 0.75rem; align-items: center; height: 1.25rem; width: 1.25rem;">
-                            <svg v-if="useChainStore().chain.name == 'mumbai'" width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <path d="M17 1L6 12L1 7" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                            </svg>
+                    <div v-if="showTestnet" v-for="(chain, i) in testNet" :key="i">
+                      <div class="network-items" @click="switchNetwork({...chain})">
+                        <button style="padding: 12px 12px 12px 0px;">
+                          <div style="display: flex; margin-right: 0.75rem; align-items: center; height: 1.25rem; width: 18px;">
+                            <img v-if="useChainStore().chain.name === chain.name" src="@/assets/svg/checkBlack.svg"/>
+                            <img v-if="useChainStore().chain.name !== chain.name" src="@/assets/svg/checkWhite.svg"/>
                           </div>
-                          <div style="display: flex; white-space: nowrap; align-items: center; width: 100%; ">
+                          <div style="display: flex; white-space: nowrap; align-items: center; width: calc(100% - 18px); ">
                             <div style="position: relative; margin-right: 0.75rem; min-width: max-content; ">
-                              <img src="https://token.metaswap.codefi.network/assets/networkLogos/polygon.svg" height=25 style="margin-left: 0.5rem; margin-right: 0.5rem;" />
+                              <img :src="chain.logoUrl" height=25 style="margin-left: 0.5rem; margin-right: 0.5rem;" />
                             </div>
                             <div class="items-name">
-                              <span class="item-title">{{ MUMBAI.fullName }}</span>
-                              <span class="item-balance">$11.39</span>
+                              <span class="item-title">{{ chain.fullName }}</span>
                             </div>
                           </div>
                         </button>
                       </div>
-                      <!-- Goerli -->
-                      <div class="network-items" @click="switchNetwork({...GOERLI})">
-                        <button>
-                          <div style="display: flex; margin-right: 0.75rem; align-items: center; height: 1.25rem; width: 1.25rem;">
-                            <svg v-if="useChainStore().chain.name == 'goerli'" width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <path d="M17 1L6 12L1 7" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                            </svg>
+                    </div>
+                    <div v-for="(chain, i) in mainNet" :key="i">
+                      <div class="network-items" @click="switchNetwork({...chain})">
+                        <button style="padding: 12px 12px 12px 0px;">
+                          <div style="display: flex; margin-right: 0.75rem; align-items: center; height: 1.25rem; width: 18px;">
+                            <img v-if="useChainStore().chain.name === chain.name" src="@/assets/svg/checkBlack.svg"/>
+                            <img v-if="useChainStore().chain.name !== chain.name" src="@/assets/svg/checkWhite.svg"/>
                           </div>
-                          <div style="display: flex; white-space: nowrap; align-items: center; width: 100%; ">
+                          <div style="display: flex; white-space: nowrap; align-items: center; width: calc(100% - 18px); ">
                             <div style="position: relative; margin-right: 0.75rem; min-width: max-content; ">
-                              <img src="https://token.metaswap.codefi.network/assets/networkLogos/ethereum.svg" height=25 style="margin-left: 0.5rem; margin-right: 0.5rem;" />
+                              <img :src="chain.logoUrl" height=25 style="margin-left: 0.5rem; margin-right: 0.5rem;" />
                             </div>
                             <div class="items-name">
-                              <span class="item-title">{{ GOERLI.fullName }}</span>
-                              <span class="item-balance">$11.39</span>
+                              <span class="item-title">{{ chain.fullName }}</span>
                             </div>
                           </div>
                         </button>
@@ -75,7 +72,7 @@
               <div class="profile_log dropdown" @click="activeDropDown('profile')" :class="active && 'show'">
                 <div class="user" data-toggle="dropdown">
                   <img class="profile" :src="user?.photoURL" :size="64" referrerpolicy="no-referrer"/>
-                  <span>@{{ user?.provider?.includes("twitter") && user.handle }}</span>
+                  <span>{{ userHandle }}</span>
                   <img src="@/assets/svg/arrowDown.svg" alt="arrow down icon" style="margin-right: 0.5rem; width: 1rem"/>
                 </div>
                 <!-- dropdown menu -->
@@ -85,8 +82,8 @@
                       <div class="user2">
                         <span class="thumb"><img :src="user?.photoURL" :size="64" referrerpolicy="no-referrer" /></span>
                         <div class="user-info">
-                          <h5>{{ user?.provider?.includes("twitter") && user?.displayName }}</h5>
-                          <span>@{{ user?.provider?.includes("twitter") && user?.handle }}</span>
+                          <h5>{{ user?.displayName }}</h5>
+                          <span>{{ userHandle.length > 28 ? userHandle.substring(0,6) + '...' + userHandle.slice(-10) : userHandle }}</span>
                         </div>
                       </div>
                     </div>
@@ -107,25 +104,14 @@
                         </div>
                       </div>
                     </div>
-                    <div v-if="walletStore.connected || ownerAccountAddress != null" class="user-balance">
+                    <div v-if="walletStore.connected || useAccountStore().account?.owner != null" class="user-balance">
                       <h5>External Account Address </h5>
                       <div class="user_wallet" style="border: 0 solid #e5e7eb; padding: 10px 0px 0px 0px;">
                         <div class="user2">
                           <div class="wallet-image-wrapper">
-                            <img v-if="walletStore.connected" class="wallet-image" :src="walletStore.connected && useWalletStore().walletIcon">
-                            <svg v-if="!walletStore.connected" class="wallet-image" style="margin-right: 0rem;" width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <circle cx="15" cy="15" r="15" fill="#076AE0" />
-                              <path
-                                d="M10.7978 11.0468H20.1728C20.2823 11.0468 20.3917 11.0537 20.5004 11.0676C20.4635 10.8092 20.3748 10.5608 20.2394 10.3376C20.104 10.1144 19.9248 9.92088 19.7126 9.76878C19.5004 9.61668 19.2596 9.50913 19.0047 9.4526C18.7499 9.39608 18.4862 9.39175 18.2296 9.43989L10.5195 10.7562H10.5107C10.0268 10.8487 9.59638 11.1226 9.3075 11.5217C9.74273 11.2122 10.2637 11.0461 10.7978 11.0468V11.0468Z"
-                                fill="white" />
-                              <path
-                                d="M20.1729 11.75H10.7979C10.3007 11.7505 9.82414 11.9483 9.47263 12.2998C9.12111 12.6513 8.92339 13.1279 8.92285 13.625V19.25C8.92339 19.7471 9.12111 20.2237 9.47263 20.5752C9.82414 20.9267 10.3007 21.1245 10.7979 21.125H20.1729C20.67 21.1245 21.1466 20.9267 21.4981 20.5752C21.8496 20.2237 22.0473 19.7471 22.0479 19.25V13.625C22.0473 13.1279 21.8496 12.6513 21.4981 12.2998C21.1466 11.9483 20.67 11.7505 20.1729 11.75V11.75ZM18.7812 17.375C18.5958 17.375 18.4146 17.32 18.2604 17.217C18.1062 17.114 17.9861 16.9676 17.9151 16.7963C17.8442 16.625 17.8256 16.4365 17.8618 16.2546C17.8979 16.0727 17.9872 15.9057 18.1183 15.7746C18.2494 15.6435 18.4165 15.5542 18.5984 15.518C18.7802 15.4818 18.9687 15.5004 19.14 15.5714C19.3113 15.6423 19.4577 15.7625 19.5608 15.9167C19.6638 16.0708 19.7188 16.2521 19.7188 16.4375C19.7188 16.6861 19.62 16.9246 19.4442 17.1004C19.2683 17.2762 19.0299 17.375 18.7812 17.375Z"
-                                fill="white" />
-                              <path
-                                d="M8.9375 15.6025V12.6875C8.9375 12.0526 9.28906 10.9883 10.5093 10.7577C11.5449 10.5635 12.5703 10.5635 12.5703 10.5635C12.5703 10.5635 13.2441 11.0322 12.6875 11.0322C12.1309 11.0322 12.1455 11.75 12.6875 11.75C13.2295 11.75 12.6875 12.4385 12.6875 12.4385L10.5049 14.9141L8.9375 15.6025Z"
-                                fill="white" />
-                            </svg>
-                            <div v-if="ownerAccountAddress == null" class="wallet-presence-wrapper">
+                            <img v-if="walletStore.connected" class="wallet-image" :src="useWalletStore().walletIcon">
+                            <img v-if="!walletStore.connected" class="wallet-image" style="margin-right: 0rem;" src="@/assets/svg/wallet.svg"/> 
+                            <div v-if="useAccountStore().account?.owner == null" class="wallet-presence-wrapper">
                               <a-tooltip placement="right">
                                 <template #title>
                                   <span>Start to send money to bind this wallet with Hexlink account</span>
@@ -133,7 +119,7 @@
                                 <img class="wallet-presence" src="../assets/exclamation-mark.png" alt="" />
                               </a-tooltip>
                             </div>
-                            <div v-if="ownerAccountAddress != null && walletStore.connected" class="wallet-presence-wrapper">
+                            <div v-if="useAccountStore().account?.owner != null && walletStore.connected" class="wallet-presence-wrapper">
                               <a-tooltip placement="right">
                                 <template #title>
                                   <span>Wallet is Available</span>
@@ -141,10 +127,11 @@
                                 <img class="wallet-presence" src="../assets/presence_green_dot.png" alt="" />
                               </a-tooltip>
                             </div>
-                            <div v-if="ownerAccountAddress != null && !walletStore.connected" class="wallet-presence-wrapper">
+                            <div v-if="useAccountStore().account?.owner != null && !walletStore.connected" class="wallet-presence-wrapper">
                               <a-tooltip placement="right">
                                 <template #title>
-                                  <span>You connect wallet is unavailable in this browser</span>
+                                  <span>Your connected wallet is unavailable in this session, please</span>
+                                  <span class="reconnect-text" @click="connectWallet"> reconnect</span>
                                 </template>
                                 <img class="wallet-presence" src="../assets/presence_grey_dot.png" alt="" />
                               </a-tooltip>
@@ -152,15 +139,15 @@
                           </div>
                           <div class="user-info">
                             <span style="margin-bottom: 0;" class="smart-contract-address">
-                              <h5 v-if="ownerAccountAddress == null" @click="doCopy(walletStore.account?.address)">
+                              <h5 v-if="useAccountStore().account?.owner == null" @click="doCopy(walletStore.account?.address)">
                                 {{ addressTextLong(walletStore.account?.address) }}
                               </h5>
-                              <h5 v-if="ownerAccountAddress != null" @click="doCopy(ownerAccountAddress)">
-                                {{ addressTextLong(ownerAccountAddress) }}
+                              <h5 v-if="useAccountStore().account?.owner != null" @click="doCopy(useAccountStore().account?.owner)">
+                                {{ addressTextLong(useAccountStore().account?.owner) }}
                               </h5>
                             </span>
                           </div>
-                          <div v-if="ownerAccountAddress == null"> 
+                          <div v-if="useAccountStore().account?.owner == null"> 
                             <a-tooltip placement="bottom">
                               <template #title>
                                 <span>Disconnect</span>
@@ -176,15 +163,13 @@
                         </div>
                       </div>
                     </div>
-                    <div v-if="walletStore.connected == false && ownerAccountAddress == null" style="margin-top: 20px; margin-bottom: 10px; margin-left: 24px; margin-right:24px;">
+                    <div v-if="walletStore.connected == false && useAccountStore().account?.owner == null" style="margin-top: 20px; margin-bottom: 10px; margin-left: 24px; margin-right:24px;">
                       <button class="connect-wallet-button"  @click="connectWallet">
-                        <svg style="margin-right: 10px;" width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M16 2.50025V3.51125C16.5304 3.51125 17.0391 3.72196 17.4142 4.09703C17.7893 4.47211 18 4.98081 18 5.51125V15.5112C18 16.0416 17.7893 16.5504 17.4142 16.9254C17.0391 17.3005 16.5304 17.5112 16 17.5112H2C1.46957 17.5112 0.96086 17.3005 0.58579 16.9254C0.21071 16.5504 0 16.0416 0 15.5112V5.51125C0 4.46625 0.835 3.51825 1.813 3.23925L12.813 0.0962511C13.1851 -0.0100989 13.5768 -0.0286089 13.9573 0.0421711C14.3377 0.112951 14.6966 0.271091 15.0055 0.504141C15.3145 0.737191 15.5651 1.03878 15.7377 1.38516C15.9102 1.73154 16 2.11326 16 2.50025ZM12.5 9.01123C12.1022 9.01123 11.7206 9.16933 11.4393 9.45063C11.158 9.73193 11 10.1134 11 10.5112C11 10.909 11.158 11.2906 11.4393 11.5719C11.7206 11.8532 12.1022 12.0112 12.5 12.0112C12.8978 12.0112 13.2794 11.8532 13.5607 11.5719C13.842 11.2906 14 10.909 14 10.5112C14 10.1134 13.842 9.73193 13.5607 9.45063C13.2794 9.16933 12.8978 9.01123 12.5 9.01123ZM14 2.50025C14.0001 2.42966 13.9852 2.35986 13.9563 2.29544C13.9274 2.23102 13.8853 2.17345 13.8326 2.1265C13.7798 2.07955 13.7178 2.04429 13.6505 2.02305C13.5832 2.00181 13.5121 1.99506 13.442 2.00325L13.362 2.01925L8.14 3.51125H14V2.50025Z" fill="white" />
-                        </svg>
+                        <img src="@/assets/svg/white-wallet.svg" style="margin-right: 10px;"/>
                         Connect Wallet
                       </button>
                       <div style="font-size: 0.8em; font-weight: 350; margin-top: 15px;">
-                      Connect a wallet for sending tokens, learn more
+                        Connect a wallet for sending tokens, learn more
                       </div>
                     </div>
                     <router-link @click="signOutFirebase" to="signin" class="dropdown-item logout">
@@ -202,39 +187,34 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue';
 import { useAuthStore } from '@/stores/auth';
 import { useWalletStore } from '@/stores/wallet';
 import { useChainStore } from '@/stores/chain';
 import { createToaster } from "@meforma/vue-toaster";
-import { GOERLI, MUMBAI, prettyPrintAddress } from "../../functions/common";
-import { switchNetwork } from "@/web3/network";
+import {
+    GOERLI,
+    MUMBAI,
+    ARBITRUM,
+    ARBITRUM_TESTNET,
+    prettyPrintAddress,
+    setAccountOwner
+} from "../../functions/common";
+import { switchNetwork, getProvider } from "@/web3/network";
 import { connectWallet, disconnectWallet} from "@/web3/wallet";
 import { useAccountStore } from "@/stores/account";
 import { signOutFirebase } from "@/services/auth";
-import type { Account } from "../../functions/common";
 import useClipboard from 'vue-clipboard3';
-import { useRoute } from "vue-router";
 
-const newLocal = "wallet-presence";
 const authStore = useAuthStore();
 const user = authStore.user!;
 const walletStore = useWalletStore();
 const active = ref<string>("");
+const showTestnet = ref<boolean>(false);
 const { toClipboard } = useClipboard();
-const ownerAccountAddress = useAccountStore().account?.owner;
-const componentTitle = ref<string>("");
 
-const getComponentName = () => {
-  const router = useRoute();
-  if (router.path == "/redpackets") {
-    componentTitle.value = "Hexlink Drop";
-  } else if (router.path == "/") {
-    componentTitle.value = "Assets";
-  } else if (router.path == "/activities") {
-    componentTitle.value = "Transactions";
-  }
-}
+const mainNet = [ARBITRUM];
+const testNet = [GOERLI, MUMBAI, ARBITRUM_TESTNET];
 
 const addressTextLong = function (address: string | undefined) {
   if (address) {
@@ -243,9 +223,25 @@ const addressTextLong = function (address: string | undefined) {
   return "0x";
 };
 
+const userHandle = computed(() => {
+  if (useAuthStore().user?.provider.includes("twitter")) {
+    return "@" + user.handle;
+  }
+  return user?.handle;
+});
+
 const root = ref<HTMLElement | null>(null);
 
-const activeDropDown = (value: any) => {
+const activeDropDown = async (value: any) => {
+  if (value === 'profile') {
+    const chain = useChainStore().chain;
+    const provider = getProvider(chain);
+    if (useAccountStore().account?.owner == null){
+      // update the owner if there is one in async
+      setAccountOwner(provider, useAccountStore().account!);
+    }
+  }
+
   active.value = active.value === value ? "" : value;
 };
 
@@ -258,12 +254,10 @@ const closeDropDown = (e: any) => {
 const doCopy = (address: string | undefined) => {
   toClipboard(address || "0x").then(
     function () {
-      // alert("Copied");
       const toaster = createToaster({ position: "top", duration: 2000 });
       toaster.success(`Copied`);
     },
     function () {
-      // alert("Can not copy");
       const toaster = createToaster({ position: "top", duration: 2000 });
       toaster.error(`Can not copy`);
     }
@@ -272,12 +266,16 @@ const doCopy = (address: string | undefined) => {
 
 onMounted(() => {
   document.addEventListener('click', closeDropDown);
-  getComponentName();
+  showTestnet.value = useAccountStore().showTestnet!;
 });
 
-onBeforeUnmount(() => {
-  document.removeEventListener('click', closeDropDown)
+onBeforeUnmount(async () => {
+  document.removeEventListener('click', closeDropDown);
 });
+
+watch(showTestnet, () => {
+  useAccountStore().setShowTestnet(showTestnet.value);
+})
 </script>
 
 <style lang="scss" scoped>
@@ -569,10 +567,6 @@ cursor: pointer; }
       margin-top: 10px;
       color: #64748B;
     }
-    // .profile_log .dropdown-menu .user-balance p {
-    //   margin-bottom: 0px;
-    //   font-weight: 500;
-    //   color: #495057; }
   .profile_log .dropdown-menu .dropdown-item {
     padding: 10px 20px;
     border-top: 1px solid #f1f1f1;
@@ -609,14 +603,11 @@ cursor: pointer; }
   background-color: #fff;
   background-clip: padding-box;
   border: 0px solid rgba(0, 0, 0, 0.15);
-  width: 18rem;
+  width: auto;
+  min-width: 15rem;
   z-index: 1;
   transition: height 0.3s ease-in-out;
   border-radius: 0.5rem; }
-  // .dropdown-menu[data-bs-popper] {
-  //   top: 100%;
-  //   left: 0;
-  //   margin-top: 0.125rem; }
 .dropdown-menu.show {
   transition: 0.2s ease-in-out;
   display: block; }
@@ -746,13 +737,14 @@ cursor: pointer; }
       padding-top: 1.5rem;
       padding-bottom: 1.5rem;
       right: 1.5rem;
-      left: 4rem;
       max-height: 20rem;
       background-color: white;
       box-shadow: 0 1.5rem 4rem rgba(22, 28, 45, 0.15);
       background-clip: padding-box;
       border: 0px solid rgba(0, 0, 0, 0.15);
       border-radius: 0.5rem;
+      width: auto;
+      min-width: 18rem;
       @media (min-width: 640px) {
         position: absolute;
         left: 0;
@@ -763,9 +755,7 @@ cursor: pointer; }
         box-shadow: 0 1.5rem 4rem rgba(22, 28, 45, 0.15);
         background-clip: padding-box;
         border: 0px solid rgba(0, 0, 0, 0.15);
-        border-radius: 0.5rem;
-      }
-    }
+        border-radius: 0.5rem; } }
     .selectnetwork .dropdown-menu .box .title {
       padding-left: 1rem;
       padding-right: 1rem;
@@ -778,7 +768,7 @@ cursor: pointer; }
         justify-content: space-between;
         align-items: center;}
         .selectnetwork .dropdown-menu .box .title .title-header .title-text {
-          font-size: 0.875rem;
+          font-size: 1rem;
           line-height: 1.25rem;
           color: rgb(100,116,139);
           font-weight: 600; }
@@ -788,18 +778,12 @@ cursor: pointer; }
       margin-right: 0.75rem;
       padding-left: 0.75rem;
       padding-right: 0.75rem;
-      
       &:hover {
-        // border-bottom: 1px solid rgb(48, 138, 245);
-        // border-top: 1px solid rgb(48, 138, 245);
-        // border-left: 1px solid rgb(48, 138, 245);
-        // border-right: 1px solid rgb(48, 138, 245);
         background-color: rgba(48, 138, 245,0.2);
       }
 
       @media (min-width: 640px) {
-        padding-left: 1rem;
-        padding-right: 1rem; } }
+        padding-left: 1rem; } }
       .selectnetwork .dropdown-menu .box .network-items button {
         display: flex;
         padding-top: 0.5rem;
@@ -830,7 +814,7 @@ cursor: pointer; }
           font-weight: 500;
           overflow: hidden;
           text-overflow: ellipsis;
-          width: 120px;
+          width: auto;
           overflow: auto;
           white-space: nowrap; }
         .selectnetwork .dropdown-menu .box .network-items .items-name .item-balance {
@@ -948,7 +932,6 @@ cursor: pointer; }
   line-height: 1.25rem;
   font-weight: 800;
   line-height: 1.25rem;
-  width: 50%;
   border-radius: 50px;
   @media (min-width: 640px) {
     padding-left: 1.5rem;
@@ -961,4 +944,12 @@ cursor: pointer; }
   opacity: 1;
   background-color: rgb(7, 106, 224);
   color: white; }
+.reconnect-text {
+  color: #097aec;
+  font-weight: 500;
+}
+.reconnect-text:hover {
+  text-decoration: underline;
+  cursor: pointer;
+}
 </style>

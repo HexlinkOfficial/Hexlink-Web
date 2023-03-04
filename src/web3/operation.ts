@@ -13,20 +13,21 @@ import {
     accountContract,
     isContract,
     refunder,
-    DEPLOYMENT_GASCOST,
-    gasTokenPricePerGwei,
     encodeValidateAndCall,
     hash,
     isNativeCoin,
     hexlContract,
+    getGasCost,
 } from "../../functions/common/";
+import { hexlinkSwapAddress } from "../../functions/redpacket/";
 import { genDeployAuthProof } from "./oracle";
 import { signMessage } from "./wallet";
 import { useWalletStore } from "@/stores/wallet";
 import { nameHashWithVersion } from "@/web3/account";
 
-import { getFunctions, httpsCallable } from 'firebase/functions'
-import { getInfuraProvider, getPriceInfo } from "./network";
+import { getFunctions, httpsCallable } from '@firebase/functions'
+import { getProvider } from "./network";
+
 const functions = getFunctions();
 
 export function buildOpInput(params: {
@@ -62,22 +63,17 @@ export async function buildUserOpRequest(
     const account = accountContract(provider, hexlAccount);
 
     const deployed = await isContract(provider, hexlAccount);
-    const priceInfo = await getPriceInfo(chain);
     const gas = {
-        receiver: refunder(chain),
+        swapper: hexlinkSwapAddress(chain),
         token: gasToken,
-        baseGas: deployed ? "0" : DEPLOYMENT_GASCOST,
-        price: gasTokenPricePerGwei(
-            chain,
-            gasToken,
-            priceInfo,
-        )
+        receiver: refunder(chain),
+        baseGas: deployed ? "0" : getGasCost(chain, "deploy"),
     };
     const nonce = deployed ? await account.nonce() : 0;
     const {data, signature} = await encodeValidateAndCall({
         nonce,
         txData,
-        sign: async (msg: string) => await signMessage(walletAccount, msg),
+        sign: async (msg: string) => await signMessage(walletAccount, "Please confirm this transaction and sign."),
         gas,
     });
     const result = {
@@ -155,7 +151,7 @@ export interface Name {
 async function addressOf(chain: Chain, receipt: Name) {
     if (receipt.schema) {
         const nameHash = nameHashWithVersion(receipt.schema, receipt.name);
-        const hexl = await hexlContract(getInfuraProvider(chain));
+        const hexl = await hexlContract(getProvider(chain));
         return await hexl.addressOfName(nameHash);
     }
     return receipt.name;

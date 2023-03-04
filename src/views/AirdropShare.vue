@@ -1,27 +1,31 @@
 <template>
     <div class="share-card" @wheel.prevent @touchmove.prevent @scroll.prevent>
         <div class="header">
-            <router-link to="/">
-                <img src="../assets/logo/blue2-logo.svg" alt="" style="height: 40px; margin: 40px; overflow: visible;" />
-            </router-link>
+            <RouterLink to="/">
+                <img src="@/assets/svg/logo-beta2.svg" alt="" class="logo" />
+            </RouterLink>
         </div>
         <div class="body">
-            <div class="scan-icon">
-                <svg style="width: 12px;" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M2 12H22" stroke="black" stroke-width="1.5" stroke-linecap="round" />
-                    <path d="M2 8V5C2 3.34315 3.34315 2 5 2H8" stroke="black" stroke-width="1.5" stroke-linecap="round" />
-                    <path d="M22 16L22 19C22 20.6569 20.6569 22 19 22L16 22" stroke="black" stroke-width="1.5" stroke-linecap="round" />
-                    <path d="M16 2L19 2C20.6569 2 22 3.34315 22 5L22 8" stroke="black" stroke-width="1.5" stroke-linecap="round" />
-                    <path d="M8 22L5 22C3.34315 22 2 20.6569 2 19L2 16" stroke="black" stroke-width="1.5" stroke-linecap="round" />
-                </svg>
+            <div v-if="redPacket == undefined">
+                <h2>Invalid airdrop link</h2>
+                <p>Please double check the airdrop link</p>
             </div>
-            <h2>Scan QR Code</h2>
-            <p class="subtitle">Scan this QR code to claim your airdrop</p>
-            <div class="qrcode">
-                <canvas id="canvas"></canvas>
+            <div v-if="redPacket != undefined" class="qr-section">
+                <div class="title">
+                    <img class="owner-logo" :src="redPacket.creator?.logoURI">  
+                    <div class="owner"> 
+                        <span class="owner-name-title">{{ redPacketOwnerName }}</span>
+                        <span class="owner-handle">@{{redPacketOwnerHandle}}</span>
+                    </div>
+                </div>
+                <h2>🔥 Claim Your Airdrop 🔥</h2>
+                <h2 style="color: #076ae0;">WITHOUT CONNECTING WALLET</h2>
+                <div class="qrcode">
+                    <canvas id="canvas"></canvas>
+                </div>
+                <p class="or"><span>or copy the claim link</span></p>
+                <button class="cta-btn" @click="copy(claimUrl, 'C laim URL Copied')" style="margin-bottom: 50px;">Copy</button>
             </div>
-            <p class="or"><span>or copy the claim link</span></p>
-            <button class="cta-btn" @click="copy(claimUrl, 'Claim URL Copied')" style="margin-bottom: 50px;">Copy</button>
         </div>
     </div>
 </template>
@@ -37,11 +41,18 @@ import { copy } from "@/web3/utils";
 
 const secret = ref<string | undefined>();
 const redPacket = ref<RedPacketDB | undefined>();
+const redPacketOwnerName = ref<string | undefined>();
+const redPacketOwnerHandle = ref<string | undefined>();
 const claimUrl = ref<string>("");
+let countDown = ref<number>(5);
+let canvasRendered = false;
+
 onMounted(async () => {
     const route = useRoute();
     const redPacketId = route.params.id;
     redPacket.value = await getRedPacketPrivate(redPacketId as string);
+    redPacketOwnerName.value = redPacket.value?.creator?.displayName;
+    redPacketOwnerHandle.value = redPacket.value?.creator?.handle;
     const validationRules = redPacket.value?.metadata.validationRules || [];
     const validationData = redPacket.value?.validationData || [];
     for (const index in validationRules) {
@@ -49,9 +60,9 @@ onMounted(async () => {
         const data = validationData[index];
         if (rule.type === "dynamic_secrets") {
             secret.value = data.secret;
-            await genQrCode();
         }
     }
+    await genQrCode();
 });
 
 async function delay(ms: number) {
@@ -61,26 +72,77 @@ async function delay(ms: number) {
 }
 
 const genQrCode = async() => {
-    let url = window.location.origin + `/redpackets?claim=${redPacket.value?.id}`;
+    let url = window.location.origin + `/airdrop?claim=${redPacket.value?.id}`;
     if (secret.value) {
         url += `&otp=${genTotpCode(secret.value)}`;
     }
-    console.log(url);
     claimUrl.value = url;
-    let canvas = document.getElementById('canvas')
+    var canvas = document.getElementById('canvas');
+    if (canvas == null) {
+        return;
+    } else {
+        canvasRendered = true;
+    }
     await QRCode.toCanvas(canvas, url);
+
+    let context = canvas.getContext("2d");  
+    const image = new Image();
+
+    image.src = redPacket.value?.creator?.logoURI;
+    image.crossOrigin = 'anonymous';
+    image.onload = () => {
+        const coverage = 0.15;
+        const width = Math.round(canvas.width * coverage);
+        const x = (canvas.width - width) / 2;
+        let y = x;
+        let height = width;
+        let radius = 4; 
+        context.shadowOffsetX = 0;
+        context.shadowOffsetY = 2;
+        context.shadowBlur = 4;
+        context.shadowColor = '#00000040';
+        context.lineWidth = 8;
+        context.beginPath();
+        context.moveTo(x + radius, y);
+        context.arcTo(x + width, y, x + width, y + height, radius);
+        context.arcTo(x + width, y + height, x, y + height, radius);
+        context.arcTo(x, y + height, x, y, radius);
+        context.arcTo(x, y, x + width, y, radius);
+        context.closePath();
+        context.strokeStyle = '#fff';
+        context.stroke();
+        context.clip();
+        context.fillStyle = '#fff';
+        context.fillRect(x, x, width, height);
+        context.drawImage(image, x, x, width, height);
+    };
 }
 
 const refreshQrCode = async () => {
     await genQrCode();
-    await delay(5000);
+    await countDownTimer(canvasRendered ? 30 : 0.1);
     await refreshQrCode();
+}
+
+async function countDownTimer(total: number) {
+    countDown.value = total;
+    while(countDown.value > 0) {
+        await delay(1000);
+        countDown.value -= 1;
+    }
 }
 
 onMounted(refreshQrCode);
 </script>
 
 <style lang="less" scoped>
+.logo {
+    height: 40px;
+    margin: 30px;
+    overflow: visible;
+    @media (max-width: 640px) {
+    margin: 20px;
+    height: 30px; } }
 .qrcode {
     display: flex;
     align-items: center;
@@ -89,13 +151,43 @@ onMounted(refreshQrCode);
     border-radius: 15px;
     overflow: hidden;
     margin: 20px;
-    margin-bottom: calc(1rem + 20px); }
-.subtitle {
+    margin-bottom: calc(1rem + 10px);
+    width: 200px;
+    height: 200px; }
+.airdrop-logo {
+    width: auto;
+    height: 1.3rem;
+    margin-left: 5px;
+    margin-top: 5px;
+}
+.owner-logo {
+    width: auto;
+    height: 3rem;
+    border-radius: 50px;
+}
+.owner {
+    margin-left: 10px;}
+.owner-name-title {
+    display: flex;
+    color: rgba(0, 0, 0, 0.8);
+    font-weight: 700;
+    font-size: 16px;
+    line-height: 1.25rem;  }
+.owner-handle {
+    margin-bottom: 0rem;
     color: rgba(0, 0, 0, 0.6);
+    font-weight: 700;
+    font-size: 16px;
+    line-height: 1.25rem; }
+.subtitle {
+    width: 100%;
+    color: rgba(0, 0, 0, 0.6);
+    font-size: 18px;
     font-weight: 500; }
 .body h2 {
-    font-size: 24px;
-    font-weight: 600; }
+    text-align: center;
+    font-size: 20px;
+    font-weight: 800; }
 .scan-icon {
     width: 30px;
     height: 30px;
@@ -115,10 +207,26 @@ onMounted(refreshQrCode);
 .header {
     width: 100%;
     height: 70px; }
+.title {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: auto;
+    margin-bottom: 30px; }
+.qr-section {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column; }
 .share-card {
     width: 100vw;
     height: 100vh;
     background-color: white; }
+.countdown {
+    color: rgba(0, 0, 0, 0.6);
+    font-weight: 500;  
+    font-size: 14px;}
 .or {
     text-align: center;
     font-weight: bold;

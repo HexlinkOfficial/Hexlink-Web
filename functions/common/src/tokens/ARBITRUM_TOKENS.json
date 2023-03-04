@@ -1,0 +1,50 @@
+[
+    {
+        "chainId": 42161,
+        "symbol": "AETH",
+        "name": "Ethereum",
+        "decimals": 18,
+        "address": "0x0000000000000000000000000000000000000000",
+        "logoURI": "https://token.metaswap.codefi.network/assets/networkLogos/ethereum.svg"
+    },
+    {
+        "chainId": 42161,
+        "symbol": "USDT",
+        "name": "Tether USD",
+        "decimals": 6,
+        "address": "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9",
+        "logoURI": "https://wallet-asset.matic.network/img/tokens/usdc.svg"
+    },
+    {
+        "chainId": 42161,
+        "symbol": "USDC",
+        "name": "USD Coin",
+        "decimals": 6,
+        "address": "0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8",
+        "logoURI": "https://wallet-asset.matic.network/img/tokens/usdc.svg"
+    },
+    {
+        "chainId": 42161,
+        "symbol": "WETH",
+        "name": "Wrapped Ether",
+        "decimals": 6,
+        "address": "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
+        "logoURI": "https://wallet-asset.matic.network/img/tokens/eth.svg"
+    },
+    {
+        "chainId": 42161,
+        "symbol": "DAI",
+        "name": "Stablecoin DAI",
+        "decimals": 18,
+        "address": "0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1",
+        "logoURI": "https://wallet-asset.matic.network/img/tokens/dai.svg"
+    },
+    {
+        "chainId": 42161,
+        "address": "0xfc5A1A6EB076a2C7aD06eD22C90d7E710E35ad0a",
+        "name": "GMX",
+        "symbol": "GMX",
+        "decimals": 18,
+        "logoURI": "https://assets-cdn.trustwallet.com/blockchains/arbitrum/assets/0xfc5A1A6EB076a2C7aD06eD22C90d7E710E35ad0a/logo.png"
+    }
+]

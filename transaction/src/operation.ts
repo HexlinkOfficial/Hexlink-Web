@@ -1,10 +1,9 @@
-import {ethers, BigNumber as EthBigNumber, PopulatedTransaction } from "ethers";
+import {ethers, PopulatedTransaction, BigNumber as EthBigNumber } from "ethers";
 import {
   insertRedPacketClaim,
   insertRedPacket,
 } from "./graphql/redpacket";
 import type {Chain} from "../../functions/common";
-import {PriceConfigs, parseDeposit} from "../../functions/common";
 import {
   parseDeployed,
   parseClaimed,
@@ -16,7 +15,7 @@ import {
 } from "../../functions/redpacket";
 import type {Action, Operation} from "./types";
 import {updateOp} from "./graphql/operation";
-import { getInfuraProvider } from "./utils";
+import { getProvider } from "./utils";
 import { authenticator } from 'otplib';
 
 export async function buildTx(
@@ -28,13 +27,19 @@ export async function buildTx(
   const {chainId} = await provider.getNetwork();
   unsignedTx.chainId = chainId;
   unsignedTx.from = from;
-  unsignedTx.type = 2;
   unsignedTx.nonce = await provider.getTransactionCount(unsignedTx.from);
-  const feeData = await provider.getFeeData();
-  unsignedTx.maxPriorityFeePerGas =
-    feeData.maxPriorityFeePerGas || EthBigNumber.from(0);
-  unsignedTx.maxFeePerGas = feeData.maxFeePerGas ||
-    EthBigNumber.from(PriceConfigs[chain.name]);
+  if (chain.name === 'arbitrum' || chain.name === 'arbitrum_testnet') {
+    unsignedTx.type = 1;
+    unsignedTx.gasPrice = EthBigNumber.from(100000000);
+  } else if (chain.name === 'arbitrum_nova') {
+    unsignedTx.type = 1;
+    unsignedTx.gasPrice = EthBigNumber.from(10000000);
+  } else {
+    unsignedTx.type = 2;
+    const feeData = await provider.getFeeData();
+    unsignedTx.maxPriorityFeePerGas = feeData.maxPriorityFeePerGas || undefined;
+    unsignedTx.maxFeePerGas = feeData.maxFeePerGas || undefined;
+  }
   return unsignedTx;
 }
 
@@ -93,12 +98,6 @@ async function processAction(
       params.redPacketId,
     );
     if (created !== undefined) {
-      const deposit = parseDeposit(
-        receipt,
-        params.redPacketId,
-        op.account,
-        params.refunder,
-      );
       await insertRedPacket(
         params.userId,
         [{
@@ -118,12 +117,6 @@ async function processAction(
             contract: redPacketAddress(chain),
           },
           opId: op.id,
-          deposit: {
-            receipt: deposit?.receipt,
-            token: deposit?.token,
-            amount: deposit?.amount.toString(),
-            priceInfo: params.priceInfo,
-          },
           validationData: buildValidationData(params),
         }]
       );
@@ -144,14 +137,8 @@ async function processAction(
       const metadata = await hexlinkErc721Metadata(
         await hexlinkErc721Contract(
           deployed.deployed,
-          getInfuraProvider(chain)
+          getProvider(chain)
         )
-      );
-      const deposit = parseDeposit(
-        receipt,
-        params.redPacketId,
-        op.account,
-        params.refunder,
       );
       await insertRedPacket(
         params.userId,
@@ -168,12 +155,6 @@ async function processAction(
             ...metadata,
           },
           opId: op.id,
-          deposit: {
-            receipt: deposit?.receipt,
-            token: deposit?.token,
-            amount: deposit?.amount.toString(),
-            priceInfo: params.priceInfo,
-          },
           validationData: buildValidationData(params),
         }]
       );

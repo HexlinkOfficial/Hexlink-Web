@@ -22,7 +22,7 @@ const router = createRouter({
       component: () => import('@/views/AdminView.vue')
     },
     {
-      path: '/redpackets',
+      path: '/airdrop',
       name: 'red pockets view',
       component: () => import('@/views/RedPacketsView.vue')
     },
@@ -30,21 +30,6 @@ const router = createRouter({
       path: '/airdrop/share/:id',
       name: 'airdrop claim QR code',
       component: () => import('@/views/AirdropShare.vue')
-    },
-    {
-      path: '/redpacket/send',
-      name: 'red pocket send view',
-      component: () => import('@/views/RedPacketSendView.vue')
-    },
-    {
-      path: '/redpacket/airdropCollectable',
-      name: 'red pocket send NFTs',
-      component: () => import('@/views/AirdropNFT.vue')
-    },
-    {
-      path: '/collectables',
-      name: 'collectable view',
-      component: () => import('@/views/CollectablesView.vue')
     },
     {
       path: '/activities',

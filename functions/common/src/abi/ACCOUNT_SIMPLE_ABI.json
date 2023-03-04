@@ -45,12 +45,6 @@
     "inputs": [
       {
         "indexed": false,
-        "internalType": "address",
-        "name": "to",
-        "type": "address"
-      },
-      {
-        "indexed": false,
         "internalType": "uint256",
         "name": "payment",
         "type": "uint256"
@@ -297,15 +291,10 @@
         "type": "uint256"
       },
       {
-        "internalType": "bytes",
-        "name": "signature",
-        "type": "bytes"
-      },
-      {
         "components": [
           {
-            "internalType": "address payable",
-            "name": "receiver",
+            "internalType": "address",
+            "name": "swapper",
             "type": "address"
           },
           {
@@ -314,19 +303,24 @@
             "type": "address"
           },
           {
-            "internalType": "uint256",
-            "name": "baseGas",
-            "type": "uint256"
+            "internalType": "address",
+            "name": "receiver",
+            "type": "address"
           },
           {
             "internalType": "uint256",
-            "name": "price",
+            "name": "baseGas",
             "type": "uint256"
           }
         ],
         "internalType": "struct GasPayer.GasPayment",
         "name": "gas",
         "type": "tuple"
+      },
+      {
+        "internalType": "bytes",
+        "name": "signature",
+        "type": "bytes"
       }
     ],
     "name": "validateAndCallWithGasRefund",

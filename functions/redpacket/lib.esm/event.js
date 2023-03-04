@@ -1,26 +1,12 @@
 "use strict";
 import { ethers } from "ethers";
 import { hexlinkErc721Interface, redPacketAddress, redPacketInterface, tokenFactoryAddress, tokenFactoryInterface } from "./redpacket";
-const iface = new ethers.utils.Interface([
-    "event Claimed(bytes32 indexed PacketId, address claimer, uint256 amount)",
-]);
-const legacyIface = new ethers.utils.Interface([
-    "event Claimed(bytes32 indexed PacketId, address indexed claimer, uint256 amount)",
-]);
-const parseClaimedLog = (log) => {
-    try {
-        return iface.parseLog(log);
-    }
-    catch (e) {
-        return legacyIface.parseLog(log);
-    }
-};
 function equal(one, two) {
     return (one || "").toLowerCase() == (two || "").toLowerCase();
 }
 export function parseClaimed(chain, receipt, packetId, claimer) {
     const redpacketAddress = redPacketAddress(chain).toLowerCase();
-    const events = receipt.logs.filter((log) => log.address.toLowerCase() == redpacketAddress).map((log) => parseClaimedLog(log));
+    const events = receipt.logs.filter((log) => log.address.toLowerCase() == redpacketAddress).map((log) => redPacketInterface.parseLog(log));
     const event = events.find((e) => e.name === "Claimed" && equal(e.args.PacketId, packetId) && equal(e.args.claimer, claimer));
     return event?.args.amount;
 }
@@ -30,28 +16,28 @@ export function parseCreated(chain, receipt, packetId) {
     const event = events.find((e) => e.name === "Created" && equal(e.args.PacketId, packetId));
     return event?.args;
 }
-export function redpacketId(chain, account, input) {
-    const redPacketType = "tuple(address,bytes32,uint256,address,uint32,uint8)";
-    return ethers.utils.keccak256(ethers.utils.defaultAbiCoder.encode(["uint256", "address", "address", redPacketType], [
+export function redpacketId(chain, input) {
+    const redPacketType = "tuple(address,address,bytes32,uint256,address,uint32,uint8,bool)";
+    return ethers.utils.keccak256(ethers.utils.defaultAbiCoder.encode(["uint256", "address", redPacketType], [
         Number(chain.chainId),
         redPacketAddress(chain),
-        account,
         [
+            input.creator,
             input.token,
             input.salt,
             input.balance,
             input.validator,
             input.split,
-            input.mode
+            input.mode,
+            input.sponsorGas
         ]
     ]));
 }
-export function redpacketErc721Id(chain, account, input) {
-    const redPacketType = "tuple(address,bytes32,uint256,address,uint32,uint8)";
+export function redpacketErc721Id(chain, input) {
     return ethers.utils.keccak256(ethers.utils.defaultAbiCoder.encode(["uint256", "address", "address", "bytes32"], [
         Number(chain.chainId),
         tokenFactoryAddress(chain),
-        account,
+        input.creator,
         input.salt,
     ]));
 }

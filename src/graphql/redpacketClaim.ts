@@ -102,7 +102,7 @@ async function parseClaims(op: any) {
 }
 
 export async function getClaimedRedPackets() : Promise<ClaimRedPacketOp[]> {
-  const client = setUrqlClientIfNecessary(
+  const client = await setUrqlClientIfNecessary(
     useAuthStore().user!.idToken!
   );
   const result = await client.query(
@@ -136,7 +136,7 @@ export async function getClaimedRedPackets() : Promise<ClaimRedPacketOp[]> {
 export async function getRedPacketClaims(
   redPacketId: string
 ) : Promise<RedPacketClaim[]> {
-  const client = setUrqlClientIfNecessary(
+  const client = await setUrqlClientIfNecessary(
     useAuthStore().user!.idToken!
   );
   const result = await client.query(

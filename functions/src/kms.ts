@@ -8,6 +8,8 @@ import * as BN from "bn.js";
 import {Signature} from "ethers";
 import {KMS_KEY_TYPE, kmsConfig, KMS_CONFIG_TYPE} from "./config";
 
+const MAX_RETRY = 3;
+
 const client = new kms.KeyManagementServiceClient();
 
 const getPublicKey = async function(versionName: string) {
@@ -39,7 +41,7 @@ const getVersionName = async function(keyType: string) {
       config.locationId,
       config.keyRingId,
       config.keyId,
-      config.versionId
+      config.versionId!
   );
 };
 
@@ -53,7 +55,7 @@ export const getEthAddressFromPublicKey = async function(
       config.locationId,
       config.keyRingId,
       keyId,
-      config.versionId
+      config.versionId!
   );
   const publicKey = await getPublicKey(versionName);
   const publicKeyPem = publicKey.pem || "";
@@ -67,8 +69,15 @@ export const getEthAddressFromPublicKey = async function(
 };
 
 function hex(sig: Signature) : string {
-  return "0x" + sig.r + sig.s + sig.v.toString(16);
+  return "0x" + sig.r + sig.s + sig.recoveryParam.toString(16);
 }
+
+/* eslint-disable */
+const EcdsaSigAsnParse: {
+  decode: (asnStringBuffer: Buffer, format: "der") => { r: BN; s: BN };
+} = asn1.define("EcdsaSig", function (this: any) {
+  this.seq().obj(this.key("r").int(), this.key("s").int());
+});
 
 export const signWithKmsKey = async function(
     keyType: string,
@@ -76,19 +85,31 @@ export const signWithKmsKey = async function(
     returnHex = true
 ) : Promise<Signature | string> {
   const digestBuffer = Buffer.from(ethers.utils.arrayify(message));
-  const signature = await getKmsSignature(digestBuffer, keyType);
-  const address = kmsConfig().get(keyType)!.publicAddress;
-  const [r, s] = await calculateRS(signature as Buffer);
+  const address = kmsConfig().get(keyType)!.publicAddress!;
+
+  let signature = await getKmsSignature(digestBuffer, keyType);
+  let [r, s] = await calculateRS(signature as Buffer);
+  
+  let retry = 0;
+  while (shouldRetrySigning(r, s, retry)) {
+    signature = await getKmsSignature(digestBuffer, keyType);
+    [r, s] = await calculateRS(signature as Buffer);
+    retry += 1;
+  }
+
   const v = calculateRecoveryParam(
       digestBuffer,
       r,
       s,
       address);
-  const rHex = r.toString("hex");
-  const sHex = s.toString("hex");
-  const sig = {r: rHex, s: sHex, recoveryParam: v} as Signature;
+
+  const sig = {r: r.toString("hex"), s: s.toString("hex"), recoveryParam: v} as Signature;
   return returnHex ? hex(sig) : sig;
 };
+
+const shouldRetrySigning = function(r: BN, s: BN, retry: number) {
+  return (r.toString("hex").length % 2 == 1 || s.toString("hex").length % 2 == 1) && (retry < MAX_RETRY); 
+}
 
 const getKmsSignature = async function(digestBuffer: Buffer, keyType: string) {
   const digestCrc32c = crc32c.calculate(digestBuffer);
@@ -117,32 +138,20 @@ const getKmsSignature = async function(digestBuffer: Buffer, keyType: string) {
     throw new Error("AsymmetricSign: response corrupted in-transit");
   }
 
-  return signResponse.signature as Buffer;
+  return Buffer.from(signResponse.signature);
 };
-
-const EcdsaSigAsnParse = asn1.define("EcdsaSig", function(_this: any) {
-  _this.seq().obj(
-      _this.key("r").int(),
-      _this.key("s").int(),
-  );
-});
 
 const calculateRS = async function(signature: Buffer) {
   const decoded = EcdsaSigAsnParse.decode(signature, "der");
-  const r: BN = decoded.r;
-  let s: BN = decoded.s;
+  const { r, s } = decoded;
 
   const secp256k1N = new BN.BN(
       "fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141",
       16
   );
   const secp256k1halfN = secp256k1N.div(new BN.BN(2));
-
-  if (s.gt(secp256k1halfN)) {
-    s = secp256k1N.sub(s);
-  }
-
-  return [r, s];
+  
+  return [r, s.gt(secp256k1halfN) ? secp256k1N.sub(s) : s];
 };
 
 const calculateRecoveryParam = (
@@ -170,4 +179,67 @@ const calculateRecoveryParam = (
   }
 
   throw new Error("Failed to calculate recovery param");
+};
+
+
+const getSymmKeyName = async function() {
+  let config: KMS_CONFIG_TYPE = kmsConfig().get("encryptor")!;
+  if (process.env.FUNCTIONS_EMULATOR) {
+    config = kmsConfig().get("encryptorTest")!;
+  }
+
+  return client.cryptoKeyPath(
+      config.projectId,
+      config.locationId,
+      config.keyRingId,
+      config.keyId);
+};
+
+export const encryptWithSymmKey = async function(plaintext: string) {
+  const plaintextBuffer = Buffer.from(plaintext);
+  const keyName = await getSymmKeyName();
+  const plaintextCrc32c = crc32c.calculate(plaintextBuffer);
+
+  const [encryptResponse] = await client.encrypt({
+    name: keyName,
+    plaintext: plaintextBuffer,
+    plaintextCrc32c: {
+      value: plaintextCrc32c,
+    },
+  });
+
+  const ciphertext = encryptResponse.ciphertext;
+
+  if (!ciphertext || !encryptResponse.verifiedPlaintextCrc32c ||
+    !encryptResponse.ciphertextCrc32c ||
+    crc32c.calculate(ciphertext) !==
+    Number(encryptResponse.ciphertextCrc32c!.value)) {
+    throw new Error("Encrypt: request corrupted in-transit");
+  }
+
+  const encode = Buffer.from(ciphertext).toString("base64");
+
+  return encode;
+};
+
+export const decryptWithSymmKey = async function(text: string) {
+  const ciphertext = Buffer.from(text, "base64");
+  const keyName = await getSymmKeyName();
+  const ciphertextCrc32c = crc32c.calculate(ciphertext);
+
+  const [decryptResponse] = await client.decrypt({
+    name: keyName,
+    ciphertext: ciphertext,
+    ciphertextCrc32c: {
+      value: ciphertextCrc32c,
+    },
+  });
+  const plaintextBuffer = Buffer.from(decryptResponse.plaintext!);
+
+  if (crc32c.calculate(plaintextBuffer) !==
+      Number(decryptResponse.plaintextCrc32c!.value)) {
+    throw new Error("Decrypt: response corrupted in-transit");
+  }
+
+  return plaintextBuffer.toString("utf8");
 };

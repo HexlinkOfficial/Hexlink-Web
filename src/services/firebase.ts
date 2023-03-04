@@ -1,7 +1,9 @@
-import { initializeApp } from 'firebase/app'
-import { getStorage, connectStorageEmulator } from 'firebase/storage'
-import { getFunctions, connectFunctionsEmulator } from 'firebase/functions'
-import { getAnalytics } from 'firebase/analytics'
+import { initializeApp } from '@firebase/app'
+import { getAuth } from '@firebase/auth';
+import { getStorage, connectStorageEmulator } from '@firebase/storage'
+import { getFunctions, connectFunctionsEmulator } from '@firebase/functions'
+import { getAnalytics } from '@firebase/analytics'
+import { connectAuthEmulator } from '@firebase/auth';
 
 const firebaseConfig = {
     apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -15,7 +17,9 @@ const firebaseConfig = {
 
 export const app = initializeApp(firebaseConfig)
 export const googleAnalytics = getAnalytics(app)
+export const functions = getFunctions(app);
 export const storage = getStorage(app);
+export const auth = getAuth(app)
 
 if (import.meta.env.VITE_ENVIRONMENT !== 'production') {
     console.log('Using firebase: ' + import.meta.env.VITE_FIREBASE_AUTH_DOMAIN)
@@ -23,6 +27,7 @@ if (import.meta.env.VITE_ENVIRONMENT !== 'production') {
 }
 
 if (import.meta.env.VITE_USE_FUNCTIONS_EMULATOR === 'true') {
-    connectFunctionsEmulator(getFunctions(app), 'localhost', 5001);
+    connectFunctionsEmulator(functions, 'localhost', 5001);
     connectStorageEmulator(storage, "localhost", 9199);
+    connectAuthEmulator(auth, "http://localhost:9099");
 }

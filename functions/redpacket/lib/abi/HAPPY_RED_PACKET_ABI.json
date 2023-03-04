@@ -75,6 +75,11 @@
                 "components": [
                     {
                         "internalType": "address",
+                        "name": "creator",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "address",
                         "name": "token",
                         "type": "address"
                     },
@@ -102,6 +107,11 @@
                         "internalType": "uint8",
                         "name": "mode",
                         "type": "uint8"
+                    },
+                    {
+                        "internalType": "bool",
+                        "name": "sponsorGas",
+                        "type": "bool"
                     }
                 ],
                 "indexed": false,
@@ -111,6 +121,25 @@
             }
         ],
         "name": "Created",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "receiver",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "payment",
+                "type": "uint256"
+            }
+        ],
+        "name": "GasSponsorship",
         "type": "event"
     },
     {
@@ -155,56 +184,59 @@
                         "type": "address"
                     },
                     {
-                        "components": [
-                            {
-                                "internalType": "address",
-                                "name": "token",
-                                "type": "address"
-                            },
-                            {
-                                "internalType": "bytes32",
-                                "name": "salt",
-                                "type": "bytes32"
-                            },
-                            {
-                                "internalType": "uint256",
-                                "name": "balance",
-                                "type": "uint256"
-                            },
-                            {
-                                "internalType": "address",
-                                "name": "validator",
-                                "type": "address"
-                            },
-                            {
-                                "internalType": "uint32",
-                                "name": "split",
-                                "type": "uint32"
-                            },
-                            {
-                                "internalType": "uint8",
-                                "name": "mode",
-                                "type": "uint8"
-                            }
-                        ],
-                        "internalType": "struct HappyRedPacketImpl.RedPacketData",
-                        "name": "packet",
-                        "type": "tuple"
-                    },
-                    {
                         "internalType": "address",
-                        "name": "claimer",
+                        "name": "token",
                         "type": "address"
                     },
                     {
-                        "internalType": "bytes",
-                        "name": "signature",
-                        "type": "bytes"
+                        "internalType": "bytes32",
+                        "name": "salt",
+                        "type": "bytes32"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "balance",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "address",
+                        "name": "validator",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "uint32",
+                        "name": "split",
+                        "type": "uint32"
+                    },
+                    {
+                        "internalType": "uint8",
+                        "name": "mode",
+                        "type": "uint8"
+                    },
+                    {
+                        "internalType": "bool",
+                        "name": "sponsorGas",
+                        "type": "bool"
                     }
                 ],
-                "internalType": "struct HappyRedPacketImpl.RedPacketClaim",
-                "name": "c",
+                "internalType": "struct HappyRedPacketImpl.RedPacketData",
+                "name": "packet",
                 "type": "tuple"
+            },
+            {
+                "internalType": "address",
+                "name": "claimer",
+                "type": "address"
+            },
+            {
+                "internalType": "address",
+                "name": "refundReceiver",
+                "type": "address"
+            },
+            {
+                "internalType": "bytes",
+                "name": "signature",
+                "type": "bytes"
             }
         ],
         "name": "claim",
@@ -216,6 +248,11 @@
         "inputs": [
             {
                 "components": [
+                    {
+                        "internalType": "address",
+                        "name": "creator",
+                        "type": "address"
+                    },
                     {
                         "internalType": "address",
                         "name": "token",
@@ -245,6 +282,11 @@
                         "internalType": "uint8",
                         "name": "mode",
                         "type": "uint8"
+                    },
+                    {
+                        "internalType": "bool",
+                        "name": "sponsorGas",
+                        "type": "bool"
                     }
                 ],
                 "internalType": "struct HappyRedPacketImpl.RedPacketData",
@@ -255,6 +297,43 @@
         "name": "create",
         "outputs": [],
         "stateMutability": "payable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "bytes32",
+                "name": "packetId",
+                "type": "bytes32"
+            }
+        ],
+        "name": "deposit",
+        "outputs": [],
+        "stateMutability": "payable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "bytes32",
+                "name": "packetId",
+                "type": "bytes32"
+            },
+            {
+                "internalType": "address",
+                "name": "claimer",
+                "type": "address"
+            }
+        ],
+        "name": "getClaimedCount",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
         "type": "function"
     },
     {
@@ -283,6 +362,11 @@
                         "internalType": "uint32",
                         "name": "split",
                         "type": "uint32"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "gasSponsorship",
+                        "type": "uint256"
                     }
                 ],
                 "internalType": "struct HappyRedPacketImpl.RedPacket",
@@ -351,6 +435,11 @@
                 "components": [
                     {
                         "internalType": "address",
+                        "name": "creator",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "address",
                         "name": "token",
                         "type": "address"
                     },
@@ -378,6 +467,11 @@
                         "internalType": "uint8",
                         "name": "mode",
                         "type": "uint8"
+                    },
+                    {
+                        "internalType": "bool",
+                        "name": "sponsorGas",
+                        "type": "bool"
                     }
                 ],
                 "internalType": "struct HappyRedPacketImpl.RedPacketData",

@@ -1,68 +1,65 @@
 <template>
-  <div>
-    <div style="position: relative; top: 35px; left: -10px; display: flex; justify-content: flex-end; z-index: 50;">
+  <div style="display: flex; width: 100%; flex-direction: column; align-items: center;">
+    <div class="check">
         <img :style="isChosen ? 'opacity: 1' : 'opacity: 0' " style="width: 20px; height: 20px;"
         src="https://i.postimg.cc/SRjdzYHP/check.png" />
     </div>
-    <div
-        :style="isChosen ? 'box-shadow: 8px 28px 50px rgb(39 44 49 / 7%), 1px 6px 12px rgb(39 44 49 / 4%); transform: translate3D(0, -1px, 0) scale(1.02); transition: all 0.2s ease; border: 2px solid #4BAE4F;' : ''"
+    <div :style="isChosen ? 'box-shadow: 8px 28px 50px rgb(39 44 49 / 7%), 1px 6px 12px rgb(39 44 49 / 4%); transform: translate3D(0, -1px, 0) scale(1.02); transition: all 0.2s ease; border: 2px solid #4BAE4F;' : ''"
         class="account-card" @click="chooseAccount">
         <div class="left">
-        <div>
-            <img class="wallet-image" :src="account.logo">
-            <div class="chain_wrapper">
-            <img class="chain" :src="useChainStore().chain.logoUrl" />
+            <div>
+                <img class="wallet-image" :src="account.logo">
+                <div class="chain_wrapper">
+                    <img class="chain" :src="useChainStore().chain.logoUrl" />
+                </div>
             </div>
         </div>
-        </div>
         <div class="right">
-        <div style="min-width: 100px; margin-left: 0.5rem;">
-            <h2>{{capitalize(account.name)}} Account</h2>
-            <p>Available Balance</p>
-        </div>
-        <div class="balances">
-            <span style="display: flex; align-items: center; margin-bottom: 5px;">
-            <a-tooltip placement="top">
-                <template #title>
-                <span>
-                    Balance:
-                    <b>{{ props.tokenBalance }}</b>
-                    <copy-outlined style="margin-left: 0.5rem; margin-right: 0.5rem;"
-                    @click="copy(props.tokenBalance)" />
+            <div style="min-width: 100px; margin-left: 0.5rem;">
+                <h2>{{capitalize(account.name)}} Account</h2>
+                <p>Available Balance</p>
+            </div>
+            <div class="balances">
+                <span style="display: flex; align-items: center; margin-bottom: 5px;">
+                    <a-tooltip placement="top">
+                        <template #title>
+                            <span>
+                                Balance:
+                                <b>{{ props.tokenBalance }}</b>
+                                <copy-outlined style="margin-left: 0.5rem; margin-right: 0.5rem;"
+                                    @click="copy(props.tokenBalance)" />
+                            </span>
+                        </template>
+                        <span class="balance_item">
+                            <p style="font-weight:600; display: flex; justify-content: flex-end;">
+                                {{ props.tokenBalance.substring(0, 6) }}
+                            </p>
+                        </span>
+                    </a-tooltip>
+                    <img style="width:20px; height: 20px; margin-left: 5px; margin-right: 5px;" :src="token.logoURI" />
+                    <span style="font-size: 12px;"><b>{{ token.symbol }}</b></span>
                 </span>
-                </template>
-                <span class="balance_item">
-                <p style="font-weight:600; display: flex; justify-content: flex-end;">
-                    {{ props.tokenBalance.substring(0, 6) }}
-                </p>
+                <!-- gas -->
+                <span v-if="showGasToken" style="display: flex; align-items: center;">
+                    <a-tooltip placement="bottom">
+                        <template #title>
+                            <span>
+                                Balance:
+                                <b>{{ gasTokenBalance }}</b>
+                                <copy-outlined style="margin-left: 0.5rem; margin-right: 0.5rem;"
+                                    @click="copy(gasTokenBalance)" />
+                            </span>
+                        </template>
+                        <span class="balance_item">
+                            <p style="font-weight:600; display: flex; justify-content: flex-end;">
+                                {{gasTokenBalance.substring(0,6) }}
+                            </p>
+                        </span>
+                    </a-tooltip>
+                    <img style="width:20px; height: 20px; margin-left: 5px; margin-right: 5px;" :src="gasToken.logoURI" />
+                    <span style="font-size: 12px;"><b>{{ gasToken.symbol }}</b></span>
                 </span>
-            </a-tooltip>
-            <img style="width:20px; height: 20px; margin-left: 5px; margin-right: 5px;"
-                :src="token.logoURI"/>
-            <span style="font-size: 12px;"><b>{{ token.symbol }}</b></span>
-            </span>
-            <!-- gas -->
-            <span v-if="showGasToken" style="display: flex; align-items: center;">
-            <a-tooltip placement="bottom">
-                <template #title>
-                <span>
-                    Balance:
-                    <b>{{ gasTokenBalance }}</b>
-                    <copy-outlined style="margin-left: 0.5rem; margin-right: 0.5rem;"
-                    @click="copy(gasTokenBalance)" />
-                </span>
-                </template>
-                <span class="balance_item">
-                <p style="font-weight:600; display: flex; justify-content: flex-end;">
-                    {{gasTokenBalance.substring(0,6) }}
-                </p>
-                </span>
-            </a-tooltip>
-            <img style="width:20px; height: 20px; margin-left: 5px; margin-right: 5px;"
-                :src="gasToken.logoURI" />
-            <span style="font-size: 12px;"><b>{{ gasToken.symbol }}</b></span>
-            </span>
-        </div>
+            </div>
         </div>
     </div>
   </div>
@@ -145,17 +142,24 @@ const showGasToken = computed(() => {
 </script>
 
 <style lang="less" scoped>
+.check {
+    position: relative;
+    top: 12px;
+    left: 150px;
+    display: flex;
+    justify-content: flex-end;
+    z-index: 50;
+    @media (min-width: 400px) {
+        left: 9.5rem; } }
 .account-card {
     background-color: #fff;
     box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.1);
     border-radius: 15px;
     display: flex;
     flex-direction: row;
-    padding: 30px;
-    max-width: 400px;
-    min-height: 130px;
-    margin: 20px;
-    margin-right: 1rem;
+    padding: 10px;
+    width: 310px;
+    min-height: 110px;
     transition: all 0.2s ease; }
 .account-card:hover {
     box-shadow: 8px 28px 50px rgba(39, 44, 49, 0.07),

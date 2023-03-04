@@ -1,20 +1,23 @@
-import { ethers } from "ethers";
+import { ethers, BigNumber as EthBigNumber } from "ethers";
 
-import type { Chain, PriceInfo, PriceConfig } from "../../functions/common";
-import { genPriceInfo } from "../../functions/common";
-import { useWalletStore } from "@/stores/wallet";
+import { isNativeCoin, isWrappedCoin } from "../../functions/common";
+import type { Chain, BigNumberish } from "../../functions/common";
+import { hexlinkSwap } from "../../functions/redpacket";
 import { useRedPacketStore } from "@/stores/redpacket";
+import { useStatusStore } from "@/stores/airdropStatus";
 import { useChainStore } from '@/stores/chain';
-import { getFunctions, httpsCallable } from 'firebase/functions'
 
 const ALCHEMY_KEY = {
     "goerli": "U4LBbkMIAKCf4GpjXn7nB7H1_P9GiU4b",
     "polygon": "1GmfWOSlYIlUI0UcCu4Y2O-8DmFJrlqA",
     "mumbai": "Fj__UEjuIj0Xym6ofwZfJbehuuXGpDxe",
+    "arbitrum_testnet": "ePtF_3xEZX-VJoFXnfiu5b_Tt0-bTcx6",
+    "arbitrum": "Lw4de41huTiNuyyOvyzs_s5jTbCDg1yx",
 };
 
 async function doSwitch(chain: Chain) {
     useRedPacketStore().reset();
+    useStatusStore().reset();
     useChainStore().switchNetwork(chain);
 }
 
@@ -23,93 +26,48 @@ export function alchemyKey(chain: Chain) : string {
 }
 
 export async function switchNetwork(chain: Chain) {
-    const currentChain = useChainStore().chain;
-    if (chain.chainId == currentChain?.chainId) {
+    if (chain.name === useChainStore().chain?.name) {
         return;
     }
-
-    const connected = useWalletStore().connected;
-    if (!currentChain || !connected || Number(chain.chainId) == window.ethereum.networkVersion) {
-        doSwitch(chain);
-        return;
-    }
-
-    if (connected) {
-        const hexifyChainId = ethers.utils.hexValue(Number(chain.chainId));
-        try {
-            await window.ethereum.request({
-                method: 'wallet_switchEthereumChain',
-                params: [{ chainId: hexifyChainId }],
-            });
-            doSwitch(chain);
-        } catch (error: any) {
-            if (error.code === 4902) {
-                await window.ethereum.request({
-                    method: "wallet_addEthereumChain",
-                    params: [{
-                        chainId: hexifyChainId,
-                        chainName: chain.fullName,
-                        blockExplorerUrls: [...chain.blockExplorerUrls],
-                        nativeCurrency: {...chain.nativeCurrency},
-                        rpcUrls: [...chain.rpcUrls],
-                    }],
-                });
-                await window.ethereum.request({
-                    method: 'wallet_switchEthereumChain',
-                    params: [{ chainId: hexifyChainId }],
-                });
-                doSwitch(chain);
-            } else {
-                console.log(error);
-            }
-        }
-    }
+    doSwitch(chain);
 }
 
 export function getProvider(chain: Chain) {
-    return new ethers.providers.AlchemyProvider(
-        Number(chain!.chainId),
-        alchemyKey(chain),
-    );
-}
-
-export function getInfuraProvider(chain: Chain) {
-    return new ethers.providers.InfuraProvider(
-        Number(chain.chainId),
-        import.meta.env.VITE_INFURA_API_KEY
-    );
-}
-
-const functions = getFunctions();
-const priceConfig : {
-    value?: PriceConfig,
-    updatedAt: number,
-} = {updatedAt: new Date().getTime()};
-async function getPriceConfig(chain: Chain) : Promise<PriceConfig> {
-    //refresh every 15mins
-    if (!priceConfig.value || priceConfig.updatedAt < new Date().getTime() - 900000) {
-        const getPriceConfig = httpsCallable(functions, 'priceConfig');
-        const result = await getPriceConfig({chain: chain.name});
-        priceConfig.value = (result.data as any).priceConfig;
-        priceConfig.updatedAt = new Date().getTime();
+    if (chain.name === "arbitrum_nova") {
+        return new ethers.providers.JsonRpcProvider(
+            {url: chain.rpcUrls[0]}
+        );
+    } else {
+        return new ethers.providers.InfuraProvider(
+            Number(chain.chainId),
+            import.meta.env.VITE_INFURA_API_KEY
+        );
     }
-    return priceConfig.value as PriceConfig;
 }
 
-export async function getPriceInfo(chain: Chain) : Promise<PriceInfo> {
-    const priceInfo = useChainStore().priceInfos[chain.name];
-    // refresh every 5s
-    if (!priceInfo?.updatedAt || priceInfo.updatedAt < new Date().getTime() - 5000) {
-        const provider = getInfuraProvider(chain);
-        const priceConfig = await getPriceConfig(chain);
-        const priceInfo = await genPriceInfo(provider, priceConfig);
-        useChainStore().refreshPriceInfo(chain, priceInfo);
+export async function getPriceInfo(chain: Chain, gasToken: string) : Promise<{
+    gasPrice: BigNumberish,
+    tokenPrice: BigNumberish
+}> {
+    const provider = getProvider(chain);
+    let gasPrice : EthBigNumber;
+    if (chain.name === 'arbitrum' || chain.name === 'arbitrum_testnet') {
+        gasPrice = EthBigNumber.from(100000000);
+    } else if (chain.name === 'arbitrum_nova') {
+        gasPrice = EthBigNumber.from(10000000);
+    } else {
+        const {maxFeePerGas} = await provider.getFeeData();
+        if (!maxFeePerGas) {
+            throw new Error("failed to get the gas price");
+        }
+        gasPrice = maxFeePerGas.mul(2);
     }
-    return useChainStore().priceInfos[chain.name];
-}
-
-export async function getRefunder(chain: Chain) : Promise<string> {
-    const getRefunder = httpsCallable(functions, 'priceInfo');
-    const result = await getRefunder({chain: chain.name});
-    return (result.data as any).refunder as string;
+    let tokenPrice;
+    if (isNativeCoin(gasToken, chain) || isWrappedCoin(gasToken, chain)) {
+        tokenPrice = EthBigNumber.from(10).pow(18);
+    } else {
+        const swap = await hexlinkSwap(provider);
+        tokenPrice = await swap.priceOf(gasToken);
+    }
+    return {gasPrice, tokenPrice}
 }

@@ -1,18 +1,43 @@
-import { createClient } from '@urql/vue';
 import type { Client } from '@urql/vue';
+import { createClient, defaultExchanges, subscriptionExchange } from '@urql/vue';
+import { createClient as createWSClient } from 'graphql-ws';
 import { refreshToken } from '../services/auth';
 
 let urqlClient: Client | null;
 let urqlClientIdToken: string;
 
-function createUrqlClient(idToken: string) {
+function createUrqlWsClient(idToken: string) {
+    return createWSClient({
+        url: import.meta.env.VITE_HASURA_WS_URL,
+        options: {
+            reconnect: true,
+            connectionParams: {
+                headers: { authorization: `Bearer ${idToken}` }
+            }
+        }
+    });
+};
+
+export function createUrqlClient(idToken: string, policy: string = 'cache-and-network') {
+    const wsClient = createUrqlWsClient(idToken);
     return createClient({
         url: import.meta.env.VITE_HASURA_URL,
+        requestPolicy: policy,
         fetchOptions: () => {
             return {
                 headers: { authorization: `Bearer ${idToken}`},
             };
         },
+        exchanges: [
+            ...defaultExchanges,
+            subscriptionExchange({
+                forwardSubscription: (operation) => ({
+                    subscribe: (sink) => ({
+                        unsubscribe: wsClient.subscribe(operation, sink),
+                    }),
+                }),
+            }),
+        ],
     });
 }
 

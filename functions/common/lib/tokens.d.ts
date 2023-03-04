@@ -32,10 +32,10 @@ interface IToken {
     decimals: number;
 }
 export declare function nativeCoin(chain: Chain): IToken;
-export declare function wrappedCoin(chain: Chain): IToken;
+export declare function wrappedCoin(chain: Chain): IToken | undefined;
 export declare function stableCoins(chain: Chain): IToken[];
 export declare function nativeCoinAddress(chain: Chain): string;
-export declare function wrappedCoinAddress(chain: Chain): string;
+export declare function wrappedCoinAddress(chain: Chain): string | undefined;
 export declare function stableCoinAddresses(chain: Chain): string[];
 export declare function allowedGasToken(chain: Chain): string[];
 export declare function getPopularTokens(chain: Chain): Promise<TokenDataList>;

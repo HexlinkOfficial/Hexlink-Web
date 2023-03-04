@@ -7,8 +7,10 @@ import { tokenEqual } from "@/web3/utils";
 import { estimateGas, sendTransaction } from "@/web3/wallet";
 
 import type { Op, Chain, UserOpRequest, DeployRequest} from "../../functions/common";
+import type { RedPacket } from "../../functions/redpacket";
 import {
     hash,
+    hexlContract,
     isNativeCoin,
     erc20Interface,
     erc20Contract,
@@ -22,12 +24,10 @@ import {
 import type { RedPacketInput, RedPacketErc721Input } from "../../functions/redpacket";
 import {
     redPacketContract,
-    buildGasSponsorshipOp,
     buildRedPacketOps,
-    tokenFactoryInterface,
+    buildDeployErc721Ops,
     tokenFactoryAddress,
-    hexlinkErc721Interface,
-    hexlinkErc721Contract
+    hexlinkErc721Contract,
 } from "../../functions/redpacket";
 
 import { useChainStore } from "@/stores/chain";
@@ -53,10 +53,7 @@ export interface TransactionInput {
 }
 
 export function validator() : string {
-    if (import.meta.env.VITE_USE_FUNCTIONS_EMULATOR) {
-        return "0xEF2e3F91209F88A3143e36Be10D52502162426B3";
-    }
-    return "0x030ffbc193c3f9f4c6378beb506eecb0933fd457";
+    return import.meta.env.VITE_AIRDROP_VALIDATOR;
 }
 
 async function simulate(to: string, data: string, value: string) {
@@ -197,7 +194,6 @@ async function createRedPacketTxForMetamask(
     let userOps : Op[] = [];
     let txes : any[] = [];
     let value : EthBigNumber = EthBigNumber.from(0);
-
     if (tokenEqual(input.token, input.gasToken)) {
         const toTransfer = EthBigNumber.from(
             input.gasSponsorship).add(input.balance);
@@ -240,8 +236,10 @@ async function createRedPacketTxForMetamask(
         }
     }
  
-    userOps.push(buildGasSponsorshipOp(hexlAccount, refunder(chain), input));
-    userOps = userOps.concat(buildRedPacketOps(chain, input));
+    userOps = userOps.concat(await buildRedPacketOps(
+        useChainStore().provider,
+        input
+    ));
     return await buildTransactionsForMetamask(
         hexlAccount,
         walletAccount,
@@ -260,7 +258,7 @@ async function processTxAndSave(
     const chain = useChainStore().chain;
     if (dryrun) {
         for (let i = 0; i < txes.length; i++) {
-            const gasUsed = await estimateGas(txes[i].tx);
+            const gasUsed = await estimateGas(chain, txes[i].tx);
             console.log({
                 tx: txes[i],
                 gasUsed: EthBigNumber.from(gasUsed).toString()
@@ -270,7 +268,7 @@ async function processTxAndSave(
     }
 
     for (let i = 0; i < txes.length; i++) {
-        const txHash = await sendTransaction(txes[i].input);
+        const txHash = await sendTransaction(chain, txes[i].input);
         if (txes[i].name == "createRedPacket") {
             const opId = await postProcess(chain, redpacket as RedPacketInput, txHash);
             return {id: redpacket.id!, opId};
@@ -286,11 +284,10 @@ async function buildCreateRedPacketRequest(
     deploy?: DeployRequest,
 }> {
     const hexlAccount = useAccountStore().account!.address;
-    const chain = useChainStore().chain;
-
-    let userOps : Op[] = [];
-    userOps.push(buildGasSponsorshipOp(hexlAccount, refunder(chain), input));
-    userOps = userOps.concat(buildRedPacketOps(chain, input));
+    let userOps : Op[] = await buildRedPacketOps(
+        useChainStore().provider,
+        input
+    );
     return await buildUserOpRequest(
         userOps.map(op => op.input),
         input.gasToken
@@ -322,7 +319,7 @@ export async function createNewRedPacket(
 export async function callClaimRedPacket(
     redPacket: RedPacketDB,
     secret: string | undefined,
-) : Promise<void> {
+) : Promise<{id: number}> {
     const claimRedPacket = httpsCallable(functions, 'claimRedPacket');
     const chain = getChain(redPacket.chain!);
     const result = await claimRedPacket({
@@ -333,8 +330,9 @@ export async function callClaimRedPacket(
         secret
     });
     if ((result.data as any)?.code == 422) {
-        throw new Error("validation failed");
+        throw new Error(result.data.message);
     }
+    return {id: result.data.id};
 }
 
 export async function callCreateRedPacket(
@@ -366,41 +364,26 @@ export async function queryRedPacketInfo(
     );
     const info = await redPacket.getPacket(rp.id);
     return {
-        createdAt: new Date(info.createdAt.toNumber() * 1000),
-        balance: info.balance.toString(),
-        split: info.split
+        balanceLeft: info.balance.toString(),
+        claimsLeft: info.split,
+        sponsorship: info.gasSponsorship.toString(),
     } as RedPacketOnchainState;
 }
 
-export async function queryErc721TokenId(address: string) : Promise<number> {
-    const redPacketErc721 = await hexlinkErc721Contract(address, useChainStore().provider);
-    const info = await redPacketErc721.tokenId();
-    return info.toNumber();
-}
-
-export function buildDeployErc721Op(
-    chain: Chain,
-    input: RedPacketErc721Input,
-): Op {
-    const initData = hexlinkErc721Interface.encodeFunctionData(
-        "init",
-        [input.name, input.symbol, input.tokenURI, input.split, validator()]
+export async function queryErc721RedPacketInfo(
+    address: string
+) : Promise<RedPacketOnchainState> {
+    const redPacketErc721 = await hexlinkErc721Contract(
+        address, useChainStore().provider
     );
-    const callData = tokenFactoryInterface.encodeFunctionData(
-        "deployErc721",
-        [input.salt, initData]
-    );
+    const supply = await redPacketErc721.maxSupply();
+    const tokenId = await redPacketErc721.tokenId();
+    const sponsorship = await redPacketErc721.gasSponsorship();
     return {
-        name: "create_redpacket_erc721",
-        function: "deployErc721",
-        args: input,
-        input: {
-            to: tokenFactoryAddress(chain),
-            value: "0",
-            callGasLimit: "0",
-            callData
-        }
-    }
+        balanceLeft: supply.sub(tokenId).toString(),
+        claimsLeft: supply.sub(tokenId).toString(),
+        sponsorship: sponsorship.toString(),
+    } as RedPacketOnchainState;
 }
 
 export async function createRedPacketErc721ForMetamask(
@@ -426,9 +409,9 @@ export async function createRedPacketErc721ForMetamask(
         txes = txes.concat(tx);
         userOps = userOps.concat(op);
     }
-
-    userOps.push(buildGasSponsorshipOp(hexlAccount, refunder(chain), input));
-    userOps.push(buildDeployErc721Op(chain, input));
+    userOps = userOps.concat(await buildDeployErc721Ops(
+        useChainStore().provider, input
+    ));
     return await buildTransactionsForMetamask(
         hexlAccount,
         walletAccount,
@@ -446,10 +429,9 @@ async function buildCreateRedPacketErc721Request(
 }> {
     const hexlAccount = useAccountStore().account!.address;
     const chain = useChainStore().chain;
-
-    let userOps : Op[] = [];
-    userOps.push(buildGasSponsorshipOp(hexlAccount, refunder(chain), input));
-    userOps = userOps.concat(buildDeployErc721Op(chain, input));
+    const userOps = await buildDeployErc721Ops(
+        useChainStore().provider, input
+    );
     return await buildUserOpRequest(
         userOps.map(op => op.input),
         input.gasToken
@@ -497,4 +479,141 @@ export async function createRedPacketErc721(
         const txes = await createRedPacketErc721ForMetamask(input);
         return await processTxAndSave(input, txes, callCreateRedPacketErc721, dryrun);
     }
+}
+
+export async function claimCountdown(chain: Chain, redPacketId: string, code: string) {
+    const callClaimCountdown = httpsCallable(functions, 'claimCountdown');
+    const result = await callClaimCountdown({
+        chain: chain.name, redPacketId, code
+    });
+    return (result.data as any).countdown;
+}
+
+async function buildRefundErc20Op(
+    chain: Chain,
+    redPacket: RedPacket
+) : Promise<OpInput> {
+  const metadata = redPacket.metadata as RedPacketMetadata;
+  const packet = {
+    creator: metadata.creator,
+    token: metadata.token,
+    salt: metadata.salt,
+    balance: metadata.balance,
+    validator: metadata.validator,
+    split: metadata.split,
+    mode: metadata.mode,
+    sponsorGas: true,
+  };
+
+  return {
+    to: redPacketAddress(chain),
+    value: "0x00",
+    callData: redPacketInterface.encodeFunctionData(
+        "refund", [packet]
+    ),
+    callGasLimit: "0x00",
+  };
+}
+
+async function buildWithdrawErc721Op(
+    redPacket: RedPacket
+) : Promise<OpInput> {
+  return {
+    to: redPacket.metadata.token,
+    value: "0x00",
+    callData: hexlinkErc721Interface.encodeFunctionData(
+        "withdraw", []
+    ),
+    callGasLimit: "0x00",
+  };
+}
+
+async function buildRefundRedPacketRequest(
+    chain: Chain,
+    redPacket: RedPacketDB
+): Promise<{
+    params: UserOpRequest,
+    deploy?: DeployRequest,
+}> {
+    const hexlAccount = useAccountStore().account!.address;
+    const userOps = redPacket.type === "erc20"
+        ? [await buildRefundErc20Op(chain, redPacket)]
+        : [await buildWithdrawErc721Op(redPacket)];
+    return await buildUserOpRequest(
+        userOps.map(op => op.input),
+        input.gasToken
+    );
+}
+
+export async function refundRedPacket(chain: Chain, redPacket: RedPacketDB) {
+    const request = buildRefundRedPacketRequest(chain, redPacket)
+    const refundRedPacketFunction = httpsCallable(functions, 'refundRedPacket');
+    const result = await refundRedPacketFunction({
+        chain: chain.name,
+        redPacketId: redPacket.id,
+        request
+    });
+    return (result.data as any).id;
+}
+
+export async function getCreatedRedPacketsList() {
+    const hexlink = await hexlContract(useChainStore().provider);
+    const address = await hexlink.addressOfName(useAuthStore().user.nameHash);
+    const redPacket = await redPacketContract(useChainStore().provider);
+    const filter = redPacket.filters.Created(null, address, null);
+
+    let events = []
+    const history = await redPacket.queryFilter(filter);
+    events.push(...history);
+
+    let createdRedPackets: RedPacket[] = [];
+    events.forEach((event) => {
+        const args = event.args[2];
+        const redpacket: RedPacket = {
+            id: event.args[0],
+            salt: args[2],
+            validator: args[4],
+            creator: event.args[1],
+            sponsorGas: args[7],
+            token: args[1],
+            mode: args[6],
+            split: args[5],
+            balance: args[3],
+            type: "erc20",
+            validationRules: [],
+            contract: event.address
+        }
+        createdRedPackets.push(redpacket);
+    });
+    console.log("created");
+    console.log(createdRedPackets);
+
+    return createdRedPackets;
+}
+
+export async function getClaimedRedPacketsList() {
+    const hexlink = await hexlContract(useChainStore().provider);
+    const address = await hexlink.addressOfName(useAuthStore().user.nameHash);
+    const redPacket = await redPacketContract(useChainStore().provider);
+    const filter = redPacket.filters.Claimed(null, address, null);
+
+    let events = []
+    const history = await redPacket.queryFilter(filter);
+    events.push(...history);
+
+    let claimedRedPackets = [];
+    events.forEach((event) => {
+        const args = event.args[2];
+        const redpacket = {
+            id: event.args[0],
+            claimer: event.args[1],
+            amount: event.args[2],
+            type: "erc20"
+        }
+        claimedRedPackets.push(redpacket);
+    });
+
+    console.log("claimed");
+    console.log(claimedRedPackets);
+    return claimedRedPackets;
 }

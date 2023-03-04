@@ -1,7 +1,7 @@
 import { useWalletStore } from "@/stores/wallet";
 import { genDeployAuthProof as genProof } from "../../functions/common";
 import type { AuthProof } from "../../functions/common";
-import { getFunctions, httpsCallable } from 'firebase/functions'
+import { getFunctions, httpsCallable, type HttpsCallable } from '@firebase/functions'
 import { useAuthStore } from "@/stores/auth";
 import { useChainStore } from "@/stores/chain";
 import { useAccountStore } from "@/stores/account";
@@ -17,7 +17,15 @@ export async function genDeployAuthProof(
         throw new Error("Not connected");
     }
 
-    const genAuthProof = httpsCallable(functions, 'genTwitterOAuthProof');
+    const authType = useAuthStore().user!.authType;
+    const identityType = useAuthStore().user!.identityType;
+    let genAuthProof: HttpsCallable;
+    if (identityType === "twitter.com" && authType === "oauth") {
+        genAuthProof = httpsCallable(functions, 'genTwitterOAuthProof');
+    } else if (identityType === "email" && authType === "otp") {
+        genAuthProof = httpsCallable(functions, 'genEmailOTPProof');
+    }
+
     return await genProof(
         useChainStore().provider,
         useAuthStore().user!.nameHash,

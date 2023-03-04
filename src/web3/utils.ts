@@ -77,3 +77,11 @@ export async function getBackcgroundColor(nft: nftImage) {
         hasOpensea: opensea
     };
 };
+
+export const prettyPrintNumber = (amount: string) => {
+    if (amount.substring(0, 5) == "0.000") {
+        return amount.substring(0, 3) + "..." + amount.slice(-1);
+    } else {
+        return amount.substring(0, 5);
+    }
+};

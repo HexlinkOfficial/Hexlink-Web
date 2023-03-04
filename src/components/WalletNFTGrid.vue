@@ -2,15 +2,19 @@
   <div v-if="loading" class="loading-state">
     <Loading />
   </div>
-  <div v-if="!loading && totalNfts == 0" class="no-history">
-    <div style="text-align: center;">You have no NFTs!</div>
+  <div v-if="!loading && totalNfts === 0">
+    <EmptyContent 
+      title="Start by receiving the first NFT"
+      message="Unlocking the potential of Hexlink by depositing your first NFT or claim your first airdrop"
+    >
+    </EmptyContent>
   </div>
-  <div v-if="!loading" class="box">
+  <div v-if="!loading && totalNfts != 0" class="box">
     <div class="nft_grid">
       <NFTCard 
         v-for="(value, index) in nftImages" 
         :key="index"
-        :style=" 'background:' + value.color" 
+        :style="'background:' + value.color" 
         :nftImage="value" >
       </NFTCard>
     </div>
@@ -23,15 +27,15 @@ import { loadErc721Token } from '@/web3/tokens';
 import { useAccountStore } from "@/stores/account";
 import { useNftStore } from '@/stores/nft';
 import Loading from "@/components/Loading.vue";
-import type { openSea, nftImage, bindedNFT } from '@/web3/tokens';
+import type { nftImage, bindedNFT } from '@/web3/tokens';
 import NFTCard from './NFTCard.vue';
 import { getBackcgroundColor } from '@/web3/utils';
+import EmptyContent from '@/components/EmptyContent.vue';
+import { hexlinkErc721Contract, hexlinkErc721Metadata } from "../../functions/redpacket";
+import { useChainStore } from '@/stores/chain';
 
-const imageColor = ref<string[]>([]);
 const nftImages = ref<bindedNFT[]>([]);
 const loading = ref<boolean>(false);
-const nftView = ref<boolean>(true);
-const transactionView = ref<boolean>(false);
 const nftPics = ref<nftImage[]>([]);
 const totalNfts = ref<number>(0);
 
@@ -40,6 +44,7 @@ const loadNfts = async () => {
   const data: any = await loadErc721Token(useAccountStore().account!.address);
   nftPics.value = data[0];
   totalNfts.value = data[1];
+  preloadColors();
   loading.value = false;
 }
 
@@ -49,21 +54,43 @@ const preloadColors = () => {
   var names: string[] = [];
   var nftIds: string[] = [];
   var images: string[] = [];
+  var metadata: any = "";
   nftPics.value.map(async (nft: any) => {
+    if (nft.name == "") {
+      metadata = await hexlinkErc721Metadata(
+        await hexlinkErc721Contract(
+          nft.contract,
+          useChainStore().provider
+        )
+      );
+      symbols.push(metadata.symbol);
+      names.push(metadata.name);
+    } else {
+      symbols.push(nft.symbol);
+      names.push(nft.name);
+    }
     contracts.push(nft.contract);
-    symbols.push(nft.symbol);
-    names.push(nft.name);
     nftIds.push(nft.id);
     images.push(nft.rawUrl == "" ? nft.url : nft.rawUrl);
-    nftImages.value.push(await getBackcgroundColor(nft));
+    nftImages.value.push(await getBackcgroundColor({
+      contract: nft.contract,
+      name: nft.name == "" ? metadata.name : nft.name,
+      symbol: nft.symbol == "" ? metadata.symbol : nft.symbol,
+      id: nft.id,
+      tokenType: nft.tokenType,
+      openSea: nft.openSea,
+      totalSupply: nft.totalSupply,
+      url: nft.url,
+      rawUrl: nft.rawUrl,
+      thumbnail: nft.thumbnail,
+      attributes: nft.attributes,
+    }));
   })
-  console.log("xxx", nftImages.value);
   useNftStore().set(contracts, symbols, names, nftIds, images);
 };
 
 onMounted(async () => {
   await loadNfts();
-  preloadColors();
 })
 </script>
 
@@ -95,7 +122,9 @@ onMounted(async () => {
   justify-content: center;
   align-items: center;
   padding: 16px 20px;
-  transition: opacity .3s ease-out; }
+  transition: opacity .3s ease-out;
+  @media (max-width: 640px) {
+    padding: 10px 10px; } }
 .card_details {
   position: relative;
   z-index: 1;

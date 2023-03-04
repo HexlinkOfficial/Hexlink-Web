@@ -27,6 +27,7 @@ select_permissions:
   - role: user
     permission:
       columns:
+        - actions
         - chain
         - created_at
         - id
@@ -36,4 +37,6 @@ select_permissions:
         - type
         - updated_at
         - user_id
-      filter: {}
+      filter:
+        user_id:
+          _eq: X-Hasura-User-Id

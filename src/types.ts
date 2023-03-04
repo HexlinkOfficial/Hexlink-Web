@@ -55,16 +55,15 @@ export interface RedPacketClaim {
 }
 
 export interface RedPacketOnchainState {
-    balance: string,
-    split: number,
-    createdAt: Date
+    balanceLeft: string,
+    claimsLeft: number,
+    sponsorship: string,
 }
 
 export interface RedPacketDB {
     id: string,
     metadata: RedPacket | RedPacketErc721,
     creator?: HexlinkUserInfo,
-    deposit?: Deposit,
     createdAt: Date,
     state?: RedPacketOnchainState,
     token?: Token,
@@ -84,12 +83,12 @@ export interface Op {
 }
   
 export interface CreateRedPacketOp extends Op {
-    type: "create_redpacket" | "create_redpacket_erc721",
+    type: "create_redpacket",
     redpacket?: RedPacketDB,
 }
 
 export interface ClaimRedPacketOp extends Op {
-    type: "claim_redpacket" | "claim_redpacket_erc721",
+    type: "claim_redpacket",
     claim?: RedPacketClaim,
     redpacket?: RedPacketDB,
 }

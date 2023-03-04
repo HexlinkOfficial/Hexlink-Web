@@ -16,6 +16,9 @@ exports.tokenAmount = exports.tokenBase = exports.gasTokenDecimals = exports.isA
 const GOERLI_TOKENS_json_1 = __importDefault(require("./tokens/GOERLI_TOKENS.json"));
 const MUMBAI_TOKENS_json_1 = __importDefault(require("./tokens/MUMBAI_TOKENS.json"));
 const POLYGON_TOKENS_json_1 = __importDefault(require("./tokens/POLYGON_TOKENS.json"));
+const ARBITRUM_TOKENS_json_1 = __importDefault(require("./tokens/ARBITRUM_TOKENS.json"));
+const ARBITRUM_TESTNET_TOKENS_json_1 = __importDefault(require("./tokens/ARBITRUM_TESTNET_TOKENS.json"));
+const ARBITRUM_NOVA_TOKENS_json_1 = __importDefault(require("./tokens/ARBITRUM_NOVA_TOKENS.json"));
 const addresses_json_1 = __importDefault(require("./addresses.json"));
 const bignumber_js_1 = require("bignumber.js");
 const utils_1 = require("./utils");
@@ -36,7 +39,8 @@ function nativeCoinAddress(chain) {
 }
 exports.nativeCoinAddress = nativeCoinAddress;
 function wrappedCoinAddress(chain) {
-    return wrappedCoin(chain).address.toLowerCase();
+    var _a;
+    return (_a = wrappedCoin(chain)) === null || _a === void 0 ? void 0 : _a.address.toLowerCase();
 }
 exports.wrappedCoinAddress = wrappedCoinAddress;
 function stableCoinAddresses(chain) {
@@ -44,11 +48,11 @@ function stableCoinAddresses(chain) {
 }
 exports.stableCoinAddresses = stableCoinAddresses;
 function allowedGasToken(chain) {
+    const wrapped = wrappedCoinAddress(chain);
     return [
         nativeCoinAddress(chain),
-        wrappedCoinAddress(chain),
         ...stableCoinAddresses(chain),
-    ];
+    ].concat(wrapped ? [wrapped] : []);
 }
 exports.allowedGasToken = allowedGasToken;
 // const POLYGON_POPULAR_TOKENS = "https://api-polygon-tokens.polygon.technology/tokenlists/popularTokens.tokenlist.json";
@@ -74,6 +78,24 @@ function getPopularTokens(chain) {
                 tokens: MUMBAI_TOKENS_json_1.default,
             };
         }
+        if (chain.chainId == "421613") {
+            return {
+                timestamp: new Date().toISOString(),
+                tokens: ARBITRUM_TESTNET_TOKENS_json_1.default,
+            };
+        }
+        if (chain.chainId == "42170") {
+            return {
+                timestamp: new Date().toISOString(),
+                tokens: ARBITRUM_NOVA_TOKENS_json_1.default,
+            };
+        }
+        if (chain.chainId == "42161") {
+            return {
+                timestamp: new Date().toISOString(),
+                tokens: ARBITRUM_TOKENS_json_1.default,
+            };
+        }
         return {
             tokens: [],
             timestamp: new Date().toDateString(),
@@ -90,7 +112,11 @@ function isNativeCoin(token, chain) {
 }
 exports.isNativeCoin = isNativeCoin;
 function isWrappedCoin(token, chain) {
-    return equal(token, wrappedCoinAddress(chain));
+    const wrapped = wrappedCoinAddress(chain);
+    if (!wrapped) {
+        return false;
+    }
+    return equal(token, wrapped);
 }
 exports.isWrappedCoin = isWrappedCoin;
 function isStableCoin(token, chain) {

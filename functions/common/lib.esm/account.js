@@ -2,9 +2,11 @@
 import { ethers } from "ethers";
 import ACCOUNT_SIMPLE_ABI from "./abi/ACCOUNT_SIMPLE_ABI.json";
 import { hash, isContract } from "./utils";
-export const DEPLOYMENT_GASCOST = 350000;
 export const accountInterface = new ethers.utils.Interface(ACCOUNT_SIMPLE_ABI);
 export function nameHash(schema, name) {
+    if (schema === "mailto") {
+        name = name.trim().toLowerCase();
+    }
     return hash(`${schema}:${name}`);
 }
 export function accountContract(provider, address) {
@@ -22,6 +24,15 @@ export async function hexlAccount(provider, hexlink, nameHash) {
     }
     return acc;
 }
+export async function setAccountOwner(provider, account) {
+    const address = account.address;
+    account.isContract = await isContract(provider, address);
+    if (account.isContract) {
+        const contract = accountContract(provider, address);
+        account.owner = await contract.owner();
+    }
+    return account;
+}
 export function encodeInit(owner, data) {
     return accountInterface.encodeFunctionData("init", [owner, data]);
 }
@@ -34,18 +45,18 @@ export function encodeExecBatch(ops) {
 export async function encodeValidateAndCall(params) {
     let data;
     if (params.gas) {
-        const message = ethers.utils.keccak256(ethers.utils.defaultAbiCoder.encode(["bytes", "uint256", "tuple(address, address, uint256, uint256)"], [params.txData, params.nonce, [
-                params.gas.receiver,
+        const message = ethers.utils.keccak256(ethers.utils.defaultAbiCoder.encode(["bytes", "uint256", "tuple(address, address, address, uint256)"], [params.txData, params.nonce, [
+                params.gas.swapper,
                 params.gas.token,
+                params.gas.receiver,
                 params.gas.baseGas,
-                params.gas.price
             ]]));
         const signature = await params.sign(message);
         data = accountInterface.encodeFunctionData("validateAndCallWithGasRefund", [
             params.txData,
             params.nonce,
+            params.gas,
             signature,
-            params.gas
         ]);
         return { data, signature };
     }
@@ -55,12 +66,4 @@ export async function encodeValidateAndCall(params) {
         data = accountInterface.encodeFunctionData("validateAndCall", [params.txData, params.nonce, signature]);
         return { data, signature };
     }
-}
-function equal(one, two) {
-    return (one || "").toLowerCase() === (two || "").toLowerCase();
-}
-export function parseDeposit(receipt, ref, from, to) {
-    const events = receipt.logs.filter((log) => log.address.toLowerCase() == from.toLowerCase()).map((log) => accountInterface.parseLog(log));
-    const event = events.find((e) => e.name === "Deposit" && equal(e.args.ref, ref) && equal(e.args.receipt, to));
-    return event?.args;
 }

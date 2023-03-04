@@ -66,7 +66,6 @@ export const GET_CREATED_REDPACKETS = gql`
             redpackets {
               id,
               metadata,
-              deposit,
               created_at,
               validation_data,
               type
@@ -81,7 +80,6 @@ export const GET_CREATED_REDPACKETS = gql`
 export interface RedPacketDBRaw {
   id: string,
   metadata: string,
-  deposit: string,
   created_at: string
 }
 
@@ -93,7 +91,6 @@ function parseRedPacket(op: any) : RedPacketDB | undefined {
     return {
       id: r.id,
       metadata: JSON.parse(r.metadata),
-      deposit: JSON.parse(r.deposit),
       createdAt: new Date(r.created_at),
       type: r.type,
     };
@@ -109,7 +106,7 @@ function parseRedPacket(op: any) : RedPacketDB | undefined {
 }
 
 export async function getCreatedRedPackets() : Promise<CreateRedPacketOp[]> {
-  const client = setUrqlClientIfNecessary(
+  const client = await setUrqlClientIfNecessary(
     useAuthStore().user!.idToken!
   );
   const result = await client.query(
@@ -140,7 +137,7 @@ export async function getCreatedRedPackets() : Promise<CreateRedPacketOp[]> {
 export async function getRedPacket(
   redPacketId: string
 ) : Promise<RedPacketDB | undefined> {
-  const client = setUrqlClientIfNecessary(
+  const client = await setUrqlClientIfNecessary(
     useAuthStore().user!.idToken!
   );
   const result = await client.query(
@@ -166,11 +163,10 @@ export async function getRedPacket(
   }
 }
 
-
 export async function getRedPacketPrivate(
   redPacketId: string
 ) : Promise<RedPacketDB | undefined> {
-  const client = setUrqlClientIfNecessary(
+  const client = await setUrqlClientIfNecessary(
     useAuthStore().user!.idToken!
   );
   const result = await client.query(

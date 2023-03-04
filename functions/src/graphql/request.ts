@@ -37,5 +37,9 @@ export async function insertRequest(
         args: JSON.stringify(i.args),
       }))}
   ).toPromise();
+  if (result.error) {
+    console.log(result.error);
+    throw new Error("graphql error");
+  }
   return result.data.insert_request.returning;
 }

@@ -1,10 +1,11 @@
+import { ethers } from "ethers";
 export const GOERLI = {
     chainId: "5",
     name: "goerli",
     fullName: "Goerli Test Network",
     rpcUrls: ["https://goerli.infura.io/v3/"],
     nativeCurrency: {
-        name: "Goerli ETH",
+        name: "Goerli Ethereum",
         symbol: "gETH",
         decimals: 18,
     },
@@ -13,7 +14,7 @@ export const GOERLI = {
 };
 export const POLYGON = {
     chainId: "137",
-    rpcUrls: ["https://polygon-rpc.com"],
+    rpcUrls: ["https://polygon-mainnet.infura.io/v3/"],
     name: "polygon",
     fullName: "Polygon Network",
     nativeCurrency: {
@@ -26,7 +27,7 @@ export const POLYGON = {
 };
 export const MUMBAI = {
     chainId: "80001",
-    rpcUrls: ["https://rpc-mumbai.maticvigil.com/"],
+    rpcUrls: ["https://polygon-mumbai.infura.io/v3/"],
     name: "mumbai",
     fullName: "Polygon Test Network",
     nativeCurrency: {
@@ -50,7 +51,46 @@ export const GALILEO = {
     blockExplorerUrls: ["https://explorer.galileo.web3q.io/"],
     logoUrl: "",
 };
-export const SUPPORTED_CHAINS = [GOERLI, MUMBAI];
+export const ARBITRUM_TESTNET = {
+    chainId: "421613",
+    rpcUrls: ["https://endpoints.omniatech.io/v1/arbitrum/goerli/public"],
+    name: "arbitrum_testnet",
+    fullName: "Arbitrum Test Network",
+    nativeCurrency: {
+        name: "Arbitrum Ethereum",
+        symbol: "aETH",
+        decimals: 18,
+    },
+    blockExplorerUrls: ["https://goerli-rollup-explorer.arbitrum.io"],
+    logoUrl: "https://i.postimg.cc/020dzv9j/nova.png",
+};
+export const ARBITRUM_NOVA = {
+    chainId: "42170",
+    rpcUrls: ["https://nova.arbitrum.io/rpc"],
+    name: "arbitrum_nova",
+    fullName: "Arbitrum Nova",
+    nativeCurrency: {
+        name: "Ethereum",
+        symbol: "ETH",
+        decimals: 18,
+    },
+    blockExplorerUrls: ["https://nova-explorer.arbitrum.io/"],
+    logoUrl: "https://i.postimg.cc/020dzv9j/nova.png",
+};
+export const ARBITRUM = {
+    chainId: "42161",
+    rpcUrls: ["https://arb1.arbitrum.io/rpc"],
+    name: "arbitrum",
+    fullName: "Arbitrum One",
+    nativeCurrency: {
+        name: "Arbitrum Ethereum",
+        symbol: "AETH",
+        decimals: 18,
+    },
+    blockExplorerUrls: ["https://explorer.arbitrum.io/"],
+    logoUrl: "https://i.postimg.cc/mkJcpr2T/arbilogo.png",
+};
+export const SUPPORTED_CHAINS = [GOERLI, MUMBAI, ARBITRUM, ARBITRUM_TESTNET];
 export async function getChainFromProvider(provider) {
     const network = await provider.getNetwork();
     return getChain(network.chainId);
@@ -66,14 +106,20 @@ export function getChain(chain) {
     else if (chain === "mumbai" || chain == "80001") {
         return MUMBAI;
     }
-    else if (chain === "mumbai" || chain == "80001") {
-        return MUMBAI;
-    }
     else if (chain === "galileo" || chain == "3334") {
         return GALILEO;
+    }
+    else if (chain === "arbitrum_nova" || chain == "42170") {
+        return ARBITRUM_NOVA;
+    }
+    else if (chain === "arbitrum_testnet" || chain == "421613") {
+        return ARBITRUM_TESTNET;
+    }
+    else if (chain === "arbitrum" || chain == "42161") {
+        return ARBITRUM;
     }
     throw new Error("Unsupported chain");
 }
 export function refunder(_chain) {
-    return "0x1A811678eEEDF16a1D0dF4b12e290F78a61A28F9";
+    return ethers.constants.AddressZero;
 }

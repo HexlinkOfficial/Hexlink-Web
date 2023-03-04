@@ -32,6 +32,10 @@ export async function insertRedPacketClaim(
         })),
       }
   ).toPromise();
+  if (result.error) {
+      console.log(result.error);
+      throw new Error("Failed to insert redpacket");
+  }
   return result.data.insert_redpacket_claim.returning;
 }
 
@@ -56,7 +60,6 @@ export async function insertRedPacket(
       creator: HexlinkUserInfo,
       metadata: any,
       opId: number,
-      deposit: any,
       validationData: any,
       type: "erc20" | "erc721",
     }[],
@@ -70,11 +73,14 @@ export async function insertRedPacket(
           metadata: JSON.stringify(d.metadata),
           creator: JSON.stringify(d.creator),
           op_id: d.opId,
-          deposit: JSON.stringify(d.deposit),
           validation_data: JSON.stringify(d.validationData),
           type: d.type,
         })),
       }
   ).toPromise();
+  if (result.error) {
+      console.log(result.error);
+      throw new Error("Failed to insert redpacket");
+  }
   return result.data.insert_redpacket.returning;
 }

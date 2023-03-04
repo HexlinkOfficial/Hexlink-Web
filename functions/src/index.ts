@@ -15,28 +15,27 @@ exports.hasRetweeted = hasRetweeted;
 
 import {
   genTwitterOAuthProof,
+  genEmailOTPProof,
   calcEthAddress,
 } from "./verifier";
 
 exports.genTwitterOAuthProof = genTwitterOAuthProof;
+exports.genEmailOTPProof = genEmailOTPProof;
 exports.calcEthAddress = calcEthAddress;
-
-import {
-  priceConfig,
-} from "./config";
-
-exports.priceConfig = priceConfig;
-// exports.refunder = refunder;
 
 import {
   claimRedPacket,
   createRedPacket,
   createRedPacketErc721,
+  claimCountdown,
+  refundRedPacket,
 } from "./redpacket";
 
 exports.claimRedPacket = claimRedPacket;
 exports.createRedPacket = createRedPacket;
 exports.createRedPacketErc721 = createRedPacketErc721;
+exports.claimCountdown = claimCountdown;
+exports.refundRedPacket = refundRedPacket;
 
 import {
   sendToken,
@@ -47,9 +46,7 @@ exports.sendToken = sendToken;
 import {
   genOTP,
   validateOTP,
-  refreshCustomToken,
 } from "./signin";
 
 exports.genOTP = genOTP;
 exports.validateOTP = validateOTP;
-exports.refreshCustomToken = refreshCustomToken;

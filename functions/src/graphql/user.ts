@@ -30,6 +30,19 @@ export const GET_USER = gql`
   }
 `;
 
+export const GET_USER_BY_ID = gql`
+  query GetUserById($id: uuid!) {
+    user_by_pk(id: $id) {
+        id
+        email
+        otp
+        updated_at
+        is_active
+    }
+  }
+`;
+
+
 export const UPDATE_OTP = gql`
     mutation (
         $id: uuid!
@@ -94,6 +107,33 @@ export async function getUser(
     otp: user[0].otp,
     updatedAt: user[0].updated_at,
     isActive: user[0].is_active,
+  };
+}
+
+export async function getUserById(
+    id: string
+) : Promise<User | undefined> {
+  const result = await client().query(
+      GET_USER_BY_ID,
+      {id: id}
+  ).toPromise();
+  if (result.error) {
+    console.log("Failed to get user", result.error);
+    return undefined;
+  }
+
+  const user = result.data?.user_by_pk;
+  if (user === undefined || user.length < 1) {
+    console.log("Empty user data", user);
+    return undefined;
+  }
+
+  return {
+    id: user.id,
+    email: user.email,
+    otp: user.otp,
+    updatedAt: user.updated_at,
+    isActive: user.is_active,
   };
 }
 

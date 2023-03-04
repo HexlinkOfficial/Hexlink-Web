@@ -1,25 +1,27 @@
 <template>
   <div class="login-card" :style="{ backgroundImage: `url(${background})` }">
-    <div class="card">
+    <div class="card" :style="!show ? 'display: flex; align-items: center; justify-content: center;' : ''">
       <form @submit="onSubmit">
         <transition name="fade">
             <div v-if="show" class="step1">
                 <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem;">
-                    <img :src="hexlink" style="width:2.5rem; height: 2.5rem;" />
+                    <img src="@/assets/svg/logo-beta.svg" style="height: 2.5rem;" />
                 </div>
                 <h2 class="title">Welcome To HexLink</h2>
-                <p class="subtitle">Address-less experience with Hexlink Auth Protocal</p>
+                <p class="subtitle">Crypto for everyone</p>
                 <div class="social-login">
-                    <button size="large" @click="twitter_login" className="twitter-btn">
+                    <Button size="large" @click="twitter_login" type="primary" class="twitter-btn" :loading="isTwitterLoading">
                         <i class="fa fa-twitter"></i>
-                        &nbsp;&nbsp;Sign in with Twitter
-                    </button>
+                        <span style="margin: 0 5px;">Sign in with Twitter</span>
+                    </Button>
                 </div>
-                <p class="or"><span>or</span></p>
+                <!-- <p class="or"><span>or</span></p>
                 <div class="email-login">
                     <input type="text" v-model="email" placeholder="Enter Email" name="uname" class="email-input" required>
                 </div>
-                <button class="cta-btn" @click="sendOTP">Log In</button>
+                <Button class="cta-btn" type="primary" :loading="isLoadingLogin" :disabled="loginDisabled" @click="sendOTP">
+                    Log In
+                </Button> -->
             </div>
         </transition>
         <transition name="fade">
@@ -35,7 +37,13 @@
                             maxlength="1" v-model="code[index]" @input="handleInput" @keypress="isNumber"
                             @keydown.delete="handleDelete" @paste="onPaste" />
                     </div>
-                    <button class="cta-btn" @click="verifyOTP">Verify</button>
+                    <p v-if="!isResendLink" class="resend-plain">Resend the verification code in {{ countDown }}s.</p>
+                    <a v-if="isResendLink" class="resend" @click="resendOTP">Resend the verification code.</a>
+                    <Button class="cta-btn" style="margin-bottom: 0px;" type="primary" :loading="isLoading" :disabled="isDisabled" @click="verifyOTP">
+                        Verify
+                    </Button>
+                    <p v-if="isRateExceeded" style="color: #FF5C5C; text-align: center;">Too many attempts. Please wait for five minutes.</p>
+                    <p v-if="otpValidataionFailed" style="color: #FF5C5C; text-align: center;">Invalid email or otp. Please try again.</p>
                 </div>
             </div>
         </transition>
@@ -45,13 +53,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
+import { Button } from 'ant-design-vue';
 import { twitterSocialLogin, signOutFirebase, genOTP, validateOTP } from '@/services/auth'
 import { useAuthStore } from '@/stores/auth'
-import hexlink from "@/assets/logo/blue-logo.svg";
 import background from "@/assets/background.png";
 import secure from "@/assets/secure.svg";
+import { createNotification } from '@/web3/utils';
 
 const store = useAuthStore();
 const router = useRouter();
@@ -60,12 +69,22 @@ let dataFromPaste: string[] | undefined;
 const keysAllowed: string[] = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9",];
 const show = ref<boolean>(true);
 const email = ref<string>("");
+const isResendLink = ref<boolean>(false);
+const isRateExceeded = ref<boolean>(false);
+const isDisabled = ref<boolean>(true);
+const otpValidataionFailed = ref<boolean>(false);
+const countDown = ref<number>(60);
+const isLoadingLogin = ref(false);
+const isLoading = ref(false);
+const isTwitterLoading = ref<boolean>(false);
+const loginDisabled = ref<boolean>(true);
 
 const onSubmit = (e: Event) => {
     e.preventDefault();
 }
 
 const twitter_login = async () => {
+    isTwitterLoading.value = true;
     await twitterSocialLogin();
     router.push(store.returnUrl || "/");
 }
@@ -81,6 +100,9 @@ const isNumber = (event: Event) => {
 const handleInput = (event: Event) => {
     const inputType = (event as InputEvent).inputType;
     let currentActiveElement = event.target as HTMLInputElement;
+    if (currentActiveElement.id.split("_")[1] === "5") {
+        isDisabled.value = false;
+    }
     if (inputType === "insertText")
         (currentActiveElement.nextElementSibling as HTMLElement)?.focus();
     if (inputType === "insertFromPaste" && dataFromPaste) {
@@ -95,7 +117,6 @@ const handleInput = (event: Event) => {
             }
         }
     }
-    console.log(code);
 }
 
 const handleDelete = (event: Event) => {
@@ -112,24 +133,89 @@ const onPaste = (event: Event) => {
         .trim()
         .split("");
     if (dataFromPaste) {
+        isDisabled.value = false;
         for (const num of dataFromPaste) {
             if (!keysAllowed.includes(num)) event.preventDefault();
         }
     }
 }
 
+const countDownTimer = () => {
+    let interval = setInterval(() => {
+        if (countDown.value > 0) {
+            countDown.value--;
+        } else {
+            clearInterval(interval);
+            isResendLink.value = true;
+        }
+    }, 1000)
+}
+
 const sendOTP = async () => {
-    await genOTP(email.value);
-    show.value = !show.value;
+    if(email.value != "") {
+        isLoadingLogin.value = true;
+        try {
+            const result = await genOTP(email.value);
+            if (result === 429) {
+                console.error("Too many requests to send otp.");
+                createNotification("Too many requests to send otp.", "error");
+            }
+            else if (result === 200) {
+                show.value = !show.value;
+                countDownTimer();
+            }
+        } catch (err) {
+            console.log(err);
+            createNotification(err as string, "error");
+        } finally {
+            isLoadingLogin.value = false;
+        }
+    } else {
+        createNotification("Please enter email to continue", "error");
+    }
+}
+
+const resendOTP = async() => {
+    countDown.value = 60;
+    isResendLink.value = false;
+    countDownTimer();
+    const result = await genOTP(email.value);
+    if (result === 429) {
+        console.error("Too many requests to send otp.");
+        createNotification("Too many requests to send otp.", "error");
+    }
 }
 
 const verifyOTP = async () => {
-    const result = await validateOTP(email.value, code.join(""));
-    if (result?.code === 200) {
-        router.push(store.returnUrl || "/");
+    isRateExceeded.value = false;
+    otpValidataionFailed.value = false;
+    isLoading.value = true;
+    try {
+        const result = await validateOTP(email.value, code.join(""));
+        if (result?.code === 200) {
+            router.push(store.returnUrl || "/");
+        } else if (result?.code === 429) {
+            isRateExceeded.value = true;
+        } else if (result?.code === 400) {
+            if (!isRateExceeded.value) {
+                otpValidataionFailed.value = true;
+            }
+        }
+    } catch (err) {
+        console.log(err);
+        createNotification(err as string, "error");
+    } finally {
+        isLoading.value = false;
     }
-    // should show an error message in UI
 }
+
+watch(email, () => {
+    if (email.value == "") {
+        loginDisabled.value = true;
+    } else {
+        loginDisabled.value = false;
+    }
+})
 </script>
 
 <style lang="less" scoped>
@@ -138,15 +224,17 @@ const verifyOTP = async () => {
 .fade-enter-from, .fade-leave-to  {
   display: none;}
 input[type="number"] {
-  width: 50px;
-  height: 50px;
+  width: 40px;
+  height: 40px;
   font-size: 2rem;
   text-align: center;
   border-radius: 0.5rem;
   box-shadow: none;
   border: 1px solid #999;
-  margin-top: 8px;
-  margin-bottom: 25px;
+  margin: 8px 5px 25px 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   caret-color: transparent !important; }
 /* Chrome, Safari, Edge, Opera */
 input::-webkit-outer-spin-button,
@@ -159,8 +247,6 @@ input[type="number"] {
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-left: 1rem;
-    margin-right: 1rem;
     background-color: rgb(228, 229, 247);
     height: 100vh; }
 .social-login img {
@@ -168,15 +254,21 @@ input[type="number"] {
 a {
     text-decoration: none; }
 .card {
-    width: 450px;
+    width: 350px;
     border-radius: 15px;
     background-color: #ffff;
     padding: 1.8rem;
-    box-shadow: 2px 5px 20px rgba(0, 0, 0, 0.1); }
+    margin: 1rem;
+    box-shadow: 0px 5px 20px rgb(0 0 0 / 15%); }
 .subtitle {
   text-align: center;
   font-weight: bold;
-  margin-bottom: 30px; }
+  margin-bottom: 20px; }
+.resend {
+  text-align: center; }
+.resend-plain {
+  color: #808080;
+  text-align: center;}
 .btn-text {
     margin: 0; }
 .social-login {
@@ -210,6 +302,7 @@ a {
     margin-top: 10px;
     margin-bottom: 20px;
     width: 100%;
+    height: auto;
     border-radius: 10px;
     border: none; }
 .cta-btn:hover {
@@ -221,6 +314,7 @@ a {
     margin-top: 10px;
     margin-bottom: 20px;
     width: 100%;
+    height: auto;
     border-radius: 10px;
     border: none; }
 .twitter-btn:hover {

@@ -64,7 +64,7 @@ export async function getTokenPreferences(
     user: IUser,
     chain: Chain
 ) : Promise<Token[]> {
-    const client = setUrqlClientIfNecessary(user.idToken!)
+    const client = await setUrqlClientIfNecessary(user.idToken!)
     const result = await client.query(
         GET_TOKEN_PREFERENCES,
         {userId: user.uid, chain: chain.name}
@@ -91,7 +91,7 @@ export async function insertTokenPreferences(
     user: IUser,
     data: PreferenceInput[],
 ) : Promise<{id: number, metadata: Token, display: boolean}[]> {
-    const client = setUrqlClientIfNecessary(user.idToken!)
+    const client = await setUrqlClientIfNecessary(user.idToken!)
     const result = await client.mutation(
         INSERT_TOKEN_PREFERENCES,
         {
@@ -125,7 +125,7 @@ export async function updateTokenPreference(
         display: boolean,
     },
 ) : Promise<void> {
-    const client = setUrqlClientIfNecessary(user.idToken!);
+    const client = await setUrqlClientIfNecessary(user.idToken!);
     const result = await client.mutation(
         UPDATE_TOKEN_PREFERENCE,
         data

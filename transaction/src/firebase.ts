@@ -9,7 +9,7 @@ class PrivateFirebase {
 
   constructor() {
     this.app = admin.initializeApp({
-        credential: admin.credential.cert(serviceAccount),
+        credential: admin.credential.cert(serviceAccount)
     });
     this.storage = admin.storage();
     this.auth = admin.auth();

@@ -4,102 +4,134 @@
             <div class="col-xxl-6">
                 <div class="airdrop-status">
                     <div>
-                        <div class="title">
-                            <span>Airdrop Status</span>
+                        <div class="status-box">
+                            <div style="margin: 0 10px;">
+                                <div class="title">
+                                    <span v-if="!loading">{{ statusTitle }}</span>
+                                </div>
+                                <div class="price">
+                                    <Loading v-if="loading" class="loading" />
+                                    <span v-if="!loading">{{ statusData }}</span>
+                                </div>
+                            </div>
                         </div>
-                        <div class="price">XXXX</div>
-                        <div style="display: flex; margin-top: 1rem; margin-bottom: 1rem;">
-                            <router-link to="/">
-                                <button class="cta-button">
-                                    <img src="@/assets/svg/coin.svg" style="margin-right: 5px; width: 19px; height: 19px;" alt="token icon"/>
+                        <div class="cta-box">
+                            <router-link :to="airdropToken">
+                                <button class="cta-button" @click="openSend('token')">
+                                    <img src="@/assets/svg/coin.svg" alt="token icon"/>
                                     Airdrop Token
                                 </button>
                             </router-link>
-                            <button class="cta-button">
-                                <img src="@/assets/svg/picture.svg" style="margin-right: 5px; width: 19px; height: 19px;" alt="picture icon" />
-                                Airdrop NFT
-                            </button>
+                            <router-link :to="airdropToken">
+                                <button class="cta-button" @click="openSend('nft')">
+                                    <img src="@/assets/svg/picture.svg" alt="picture icon" />
+                                    Airdrop NFT
+                                </button>
+                            </router-link>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="col-xxl-6">
-            <div class="card">
-                <div class="card-body">
-                <div class="token-list">
-                    <div class="title">
-                    <div class="title-col">
-                        <div class="content">
-                        <div class="text">Share your love</div>
-                        <svg width="4" height="16" viewBox="0 0 4 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path
-                            d="M2 9C2.55228 9 3 8.55228 3 8C3 7.44772 2.55228 7 2 7C1.44772 7 1 7.44772 1 8C1 8.55228 1.44772 9 2 9Z"
-                            fill="black" stroke="black" stroke-linecap="round" stroke-linejoin="round" />
-                            <path
-                            d="M2 3C2.55228 3 3 2.55228 3 2C3 1.44772 2.55228 1 2 1C1.44772 1 1 1.44772 1 2C1 2.55228 1.44772 3 2 3Z"
-                            fill="black" stroke="black" stroke-linecap="round" stroke-linejoin="round" />
-                            <path
-                            d="M2 15C2.55228 15 3 14.5523 3 14C3 13.4477 2.55228 13 2 13C1.44772 13 1 13.4477 1 14C1 14.5523 1.44772 15 2 15Z"
-                            fill="black" stroke="black" stroke-linecap="round" stroke-linejoin="round" />
-                        </svg>
+                <div class="card">
+                    <div class="card-body">
+                    <div class="token-list">
+                        <div class="title">
+                        <div class="title-col">
+                            <div class="content">
+                            <div class="text">Airdrop</div>
+                            <img src="@/assets/svg/colon.svg"/>
+                            </div>
+                        </div>
                         </div>
                     </div>
-                    </div>
-                    <div class="views">
-                    <div class="detail-view">
-                        <router-link to="/redpackets">
-                            <button class="listView-button" :class="selected == 'history' ? 'show' : ''">
-                                Luck History
-                            </button>
-                        </router-link>
-                        <router-link to="/redpacket/send">
-                            <button class="listView-button" :class="selected == 'send' ? 'show' : ''">
-                                Send Luck
-                            </button>
-                        </router-link>
-                        <router-link to="/redpacket/airdropCollectable">
-                            <button class="listView-button" :class="selected == 'airdropNFTs' ? 'show' : ''">
-                                Send NFTs
-                            </button>
-                        </router-link>
-                    </div>
+                    <slot></slot>
                     </div>
                 </div>
-                <slot></slot>
-                </div>
-            </div>
             </div>
         </div>
     </div>
 </template>
   
 <script setup lang="ts">
-import { send } from "process";
-import { computed } from "vue";
-import { useRoute } from "vue-router";
+// import { send } from "process";
+import { onMounted, ref, watch } from "vue";
+import Loading from "@/components/Loading.vue";
+import { useStatusStore } from '@/stores/airdropStatus';
+import { useWalletStore } from '@/stores/wallet';
+import { connectWallet } from "@/web3/wallet";
+import { connectWalletConnect } from "@/web3/walletconnect"
 
-const selected  = computed(() => {
-    if (useRoute().path == '/redpacket/send') {
-        return 'send';
-    } else if (useRoute().path == '/redpackets') {
-        return 'history';
+const airdropToken = ref<string>("");
+const statusTitle = ref<string>("Total Created");
+const statusData = ref<string | undefined>("0");
+const loading = ref<boolean>(true);
+
+const openSend = async (to: string) => {
+    // check if wallet is connected
+    const walletStore = useWalletStore();
+    // if connected, open send modal
+    if (walletStore.connected) {
+        if (to == 'token') airdropToken.value = "/airdrop?action=send";
+        if (to == 'nft') airdropToken.value = "/airdrop?action=airdropNFT";
     } else {
-        return 'airdropNFTs'
+        // if not connected, connect wallet then open send modal
+        airdropToken.value = "";
+        if (typeof window.ethereum == 'undefined') {
+            console.log('MetaMask is not installed!');
+        }
+        await connectWallet();
+        await openSend(to);
     }
-});
+}
+
+function delay(ms: number) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+const loadData = async () => {
+    loading.value = true;
+    if (useStatusStore().airdropStatus[0]) {
+        statusTitle.value = Object.keys(useStatusStore().airdropStatus[0])[0].toString();
+        statusData.value = Object.values(useStatusStore().airdropStatus[0])[0]?.toString();
+    } else {
+        statusTitle.value = "Total Created";
+        statusData.value = "0";
+    }
+    await delay(2000);
+    loading.value = false;
+}
+
+onMounted(async () => {
+    await loadData();
+})
+
+watch(() => useStatusStore().airdropStatus, async () => await loadData());
 </script>
   
 <style lang="less" scoped>
+.status-box {
+    display: flex;
+    align-items: center;
+    justify-content: center; }
+.loading {
+    margin-top: -20px;
+    margin-bottom: 20px;
+    padding: 0px; }
+.cta-box {
+    display: flex;
+    margin-top: 1rem;
+    margin-bottom: 1rem; }
 .cta-button {
   display: flex;
   justify-content: center;
-  width: 175px;
+  width: 180px;
   padding-top: 0.5rem;
   padding-bottom: 0.5rem;
   padding-left: 0.75rem;
   padding-right: 0.75rem;
-  margin-right: 5px;
-  margin-left: 5px;
+  margin-right: 2.5px;
+  margin-left: 2.5px;
   align-items: center;
   color: #000;
   font-size: 0.875rem;
@@ -118,10 +150,14 @@ const selected  = computed(() => {
   color: white; }
 .cta-button:hover {
   background-color: rgba(7, 106, 224, 0.9); }
+.cta-button img {
+    margin-right: 5px;
+    width: 19px;
+    height: 19px; }
 .airdrop-status {
     display: flex;
   flex-direction: row;
-  padding: 16px 16px 16px 6px;
+  padding: 16px 16px 16px 16px;
   border-radius: 5px;
   width: 100%;
   min-height: 70px;
@@ -136,6 +172,7 @@ const selected  = computed(() => {
     align-content: center;
     flex-direction: row;
     font-size: 1rem;
+    font-weight: 500;
     line-height: 1.33;
     color: rgb(138, 147, 165);
     margin-bottom: 4px; }
@@ -158,7 +195,7 @@ const selected  = computed(() => {
     background-color: #fff;
     background-clip: border-box;
     height: calc(100% - 30px);
-    min-height: 55vh;
+    min-height: 50vh;
     margin-bottom: 1.875rem;
     transition: all .5s ease-in-out;
     border: 0px solid transparent;
@@ -216,10 +253,8 @@ const selected  = computed(() => {
 .token-list .title .title-col .content .text {
     font-size: 1.25rem;
     line-height: 1.75rem;
-    font-weight: 600;
-    @media (max-width: 768px) {
-      width: 9rem; } }
-.token-list .title .title-col .content svg {
+    font-weight: 600; }
+.token-list .title .title-col .content img {
     display: inline-flex;
     transition-property: background-color, border-color, color, fill, stroke;
     justify-content: center;

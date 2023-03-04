@@ -6,6 +6,7 @@ npm install
 
 ### Compile and build typescript to js
 ```sh
+export GOOGLE_APPLICATION_CREDENTIALS='\path\key.json'
 npm run build
 ```
 

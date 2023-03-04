@@ -51,14 +51,14 @@ import { BigNumber } from "bignumber.js";
 const loading = ref<boolean>(true);
 const balances = ref<BalanceMap>({});
 const hasContent = ref<boolean>(false);
-const prices = ref<{[token: string]: number}>({});
+const prices = ref<{[token: string]: string}>({});
 
 const balance = (token: Token) : string => {
   return balances.value[token.address]?.normalized || "0";
 }
 
-const price = (token: Token) : number => {
-  return prices.value[token.address] || 0;
+const price = (token: Token) : string => {
+  return prices.value[token.address] || "0";
 }
 
 const loadTokens = async () => {

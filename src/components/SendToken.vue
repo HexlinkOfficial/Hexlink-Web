@@ -38,14 +38,7 @@
             </div>
           </div>
           <div @click="goToStep1" class="gotoStep1">
-            <svg style="width: 1.5rem; height: 1.5rem;" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" width="1em" height="1em">
-              <path fill-rule="evenodd" d="M6.709 6.707a1 1 0 0 1 1.414 0l9.9 9.9a1 1 0 0 1-1.415 1.414l-9.9-9.9a1 1 0 0 1 0-1.414z"
-                clip-rule="evenodd">
-              </path>
-              <path fill-rule="evenodd"
-                d="M18.021 6.707a1 1 0 0 1 0 1.414l-9.9 9.9a1 1 0 0 1-1.413-1.415l9.9-9.899a1 1 0 0 1 1.413 0z" clip-rule="evenodd">
-              </path>
-            </svg>
+            <img src="@/assets/svg/corssBlack.svg" style="width: 1.5rem; height: 1.5rem;"/> 
           </div>
         </div>
       </div>
@@ -91,7 +84,7 @@
                 <template #title>
                   <span>The real service fee may differ per network conditions</span>
                 </template>
-                <b>{{ totalServiceFee.substring(0,6) }}</b>
+                <b>{{ totalServiceFee}}</b>
               </a-tooltip>
             </p>
             <div class="total-choose-token">
@@ -257,7 +250,7 @@ const totalServiceFee = computed(() => {
     transaction.value.estimatedGas
   ).div(
     tokenBase(gasToken.value)
-  ).dp(4).toString();
+  ).dp(10).toString();
 });
 
 const chooseTotalHandle: OnClickOutsideHandler = (event) => {
@@ -330,7 +323,6 @@ const onSubmit = async (_e: Event) => {
         transaction.value.gasToken,
         false // dryrun
       );
-      console.log(status);
       message.value = "Done!";
       sendStatus.value = "success";
     } catch(error) {

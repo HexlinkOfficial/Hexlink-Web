@@ -772,7 +772,7 @@ const share = (redPacket: RedPacketDB | undefined) => {
 
 const normalize = (balance: string | undefined, token: Token) : string => {
   const normalizedValue = formatOriginalBalance(balance || "0", token.decimals).normalized;
-  if (normalizedValue.length <= 8) {
+  if (normalizedValue.length <= 15) {
     return normalizedValue;
   } else {
     return normalizeBalance(balance || "0", token.decimals).normalized;

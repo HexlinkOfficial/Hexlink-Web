@@ -34,7 +34,7 @@
     <div class="cta-container transition" :style="claimItem == 'erc721' ? 'margin-top: 420px;' : 'margin-top: 360px;'">
       <button :disabled="!claimable" @click="claim" class="cta">{{ claimButtonText }}</button>
       <div v-if="!mounting && route.query.otp?.toString() != null && timeLeft <= 0" class="footer">
-        Token expired
+        Claim expired
       </div>
       <div v-if="!mounting && route.query.otp?.toString() != null && timeLeft > 0" class="footer">
         The request will expire in {{ timeLeft }} seconds

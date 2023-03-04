@@ -17,7 +17,6 @@
   "main": "lib/index.js",
   "dependencies": {
     "@google-cloud/kms": "^3.1.0",
-    "@sendgrid/mail": "^7.7.0",
     "@types/node": "^18.11.18",
     "@types/node-fetch": "^2.6.2",
     "@types/nodemailer": "^6.4.5",
@@ -33,6 +32,7 @@
     "firebase-admin": "^11.4.1",
     "firebase-functions": "^4.2.1",
     "graphql": "^16.6.0",
+    "mailgun.js": "^8.2.0",
     "node-email-validation": "^1.0.4",
     "node-fetch": "^2.6.8",
     "node-html-parser": "^6.1.4",

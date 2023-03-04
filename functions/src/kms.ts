@@ -8,6 +8,8 @@ import * as BN from "bn.js";
 import {Signature} from "ethers";
 import {KMS_KEY_TYPE, kmsConfig, KMS_CONFIG_TYPE} from "./config";
 
+const MAX_RETRY = 3;
+
 const client = new kms.KeyManagementServiceClient();
 
 const getPublicKey = async function(versionName: string) {
@@ -83,19 +85,31 @@ export const signWithKmsKey = async function(
     returnHex = true
 ) : Promise<Signature | string> {
   const digestBuffer = Buffer.from(ethers.utils.arrayify(message));
-  const signature = await getKmsSignature(digestBuffer, keyType);
   const address = kmsConfig().get(keyType)!.publicAddress!;
-  const [r, s] = await calculateRS(signature as Buffer);
+
+  let signature = await getKmsSignature(digestBuffer, keyType);
+  let [r, s] = await calculateRS(signature as Buffer);
+  
+  let retry = 0;
+  while (shouldRetrySigning(r, s, retry)) {
+    signature = await getKmsSignature(digestBuffer, keyType);
+    [r, s] = await calculateRS(signature as Buffer);
+    retry += 1;
+  }
+
   const v = calculateRecoveryParam(
       digestBuffer,
       r,
       s,
       address);
-  const rHex = r.toString("hex");
-  const sHex = s.toString("hex");
-  const sig = {r: rHex, s: sHex, recoveryParam: v} as Signature;
+
+  const sig = {r: r.toString("hex"), s: s.toString("hex"), recoveryParam: v} as Signature;
   return returnHex ? hex(sig) : sig;
 };
+
+const shouldRetrySigning = function(r: BN, s: BN, retry: number) {
+  return (r.toString("hex").length % 2 == 1 || s.toString("hex").length % 2 == 1) && (retry < MAX_RETRY); 
+}
 
 const getKmsSignature = async function(digestBuffer: Buffer, keyType: string) {
   const digestCrc32c = crc32c.calculate(digestBuffer);

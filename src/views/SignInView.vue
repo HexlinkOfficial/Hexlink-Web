@@ -22,6 +22,13 @@
                     </Button>
                 </div>
                 <p class="or"><span>or</span></p>
+                <div class="social-login">
+                    <Button size="large" @click="google_login" type="primary" class="google-btn" :loading="isGoogleLoading">
+                        <i class="fa fa-google"></i>
+                        <span style="margin: 0 5px;">Sign in with Google</span>
+                    </Button>
+                </div>
+                <p class="or"><span>or</span></p>
                 <div class="email-login">
                     <input type="text" v-model="email" placeholder="Enter Email" name="uname" class="email-input" required>
                 </div>

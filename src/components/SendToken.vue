@@ -156,6 +156,7 @@ import { ethers } from "ethers";
 import { sendToken } from "@/web3/operation";
 import { useRouter } from "vue-router";
 import { createNotification } from "@/web3/utils";
+import { useTransactionStore } from "@/stores/transaction";
 
 const estimatedGasAmount = "150000"; // hardcoded, can optimize later
 const chooseTotalDrop = ref<boolean>(false);
@@ -324,6 +325,7 @@ const onSubmit = async (_e: Event) => {
         false // dryrun
       );
       console.log(status);
+      useTransactionStore().updateState(status.opId.toString());
       message.value = "Done!";
       sendStatus.value = "success";
     } catch(error) {

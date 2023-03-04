@@ -73,7 +73,7 @@ export async function buildUserOpRequest(
     const {data, signature} = await encodeValidateAndCall({
         nonce,
         txData,
-        sign: async (msg: string) => await signMessage(walletAccount, "Please confirm this transaction and sign."),
+        sign: async (msg: string) => await signMessage(walletAccount, msg),
         gas,
     });
     const result = {
@@ -165,6 +165,7 @@ export async function sendToken(
     dryrun?: boolean,
 ) : Promise<{opId: number}> {
     const chain = useChainStore().chain;
+    console.log(chain);
     const parsedAddresses = await Promise.all(
         to.map(t => addressOf(chain, t))
     );

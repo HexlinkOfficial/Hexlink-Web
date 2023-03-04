@@ -32,11 +32,11 @@
       <small >Best Wishes!</small>
     </h2>
     <div class="cta-container transition" :style="claimItem == 'erc721' ? 'margin-top: 420px;' : 'margin-top: 360px;'">
-      <button v-if="claimable" @click="claim" class="cta" :disabled="mounting">{{ claimButtonText }}</button>
-      <div v-if="route.query.otp?.toString() != null && timeLeft <= 0" class="footer">
+      <button :disabled="!claimable" @click="claim" class="cta">{{ claimButtonText }}</button>
+      <div v-if="!mounting && route.query.otp?.toString() != null && timeLeft <= 0" class="footer">
         Token expired
       </div>
-      <div v-if="route.query.otp?.toString() != null && timeLeft > 0" class="footer">
+      <div v-if="!mounting && route.query.otp?.toString() != null && timeLeft > 0" class="footer">
         The request will expire in {{ timeLeft }} seconds
       </div>
     </div>
@@ -73,7 +73,6 @@ import { useRedPacketStore } from '@/stores/redpacket';
 import { useChainStore } from "@/stores/chain";
 import { prettyPrint, checkClaimer } from "@/services/util";
 import { copy } from "@/web3/utils";
-import { delay } from "wonka";
 
 const redPacket = ref<RedPacketDB | undefined>();
 const redPacketTokenIcon = ref<string>("");
@@ -136,8 +135,8 @@ onMounted(async () => {
 });
 
 const claimable = computed(() => {
-  return route.query.otp?.toString() == null ||
-    (route.query.otp?.toString() != null && timeLeft.value > 0)
+  const otp = route.query.otp?.toString();
+  return !mounting && (otp == null || (otp != null && timeLeft.value > 0));
 });
 
 const claim = async () => {

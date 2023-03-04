@@ -6,7 +6,7 @@
     >
     </EmptyContent>
   </div>
-  <div v-if="!loading && hasContent" v-for="(token, i) in tokenList" :key="i" class="token-detail">
+  <div v-if="!loading && hasContent" v-for="(token, i) in useTokenStore().visiableTokens" :key="i" class="token-detail">
     <div style="padding: 0.75rem; display: flex; align-items: center; justify-content: space-between; width: 100%;">
       <div class="token-description">
         <div class="token-logo">
@@ -47,14 +47,11 @@ import { useTokenStore } from '@/stores/token';
 import EmptyContent from '@/components/EmptyContent.vue';
 import { getTokenPrices } from "@/services/price";
 import { BigNumber } from "bignumber.js";
-import { useRoute } from 'vue-router';
 
 const loading = ref<boolean>(true);
 const balances = ref<BalanceMap>({});
 const hasContent = ref<boolean>(false);
 const prices = ref<{[token: string]: string}>({});
-const tokenList = ref<any>();
-const route = useRoute();
 
 const balance = (token: Token) : string => {
   return balances.value[token.address]?.normalized || "0";
@@ -67,7 +64,6 @@ const price = (token: Token) : string => {
 const loadTokens = async () => {
   loading.value = true;
   const account = useAccountStore().account?.address
-  tokenList.value = useTokenStore().visiableTokens;
   if (account) {
     balances.value = await getBalances(account, balances.value);
     await updatePreferences(balances.value);

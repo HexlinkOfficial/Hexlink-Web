@@ -48,8 +48,6 @@ import EmptyContent from '@/components/EmptyContent.vue';
 import { getTokenPrices } from "@/services/price";
 import { BigNumber } from "bignumber.js";
 import { useRoute } from 'vue-router';
-import { useTransactionStore } from "@/stores/transaction";
-import { delay } from '@/services/util';
 
 const loading = ref<boolean>(true);
 const balances = ref<BalanceMap>({});
@@ -93,13 +91,6 @@ const usdValue = (token: Token) : string => {
   }
   return "0";
 };
-
-watch(() => useTransactionStore().status, async () => {
-  await delay(2000);
-  loading.value = true;
-  await loadTokens();
-  loading.value = false;
-});
 </script>
 
 <style lang="less" scoped>

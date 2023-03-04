@@ -1,52 +1,29 @@
 import * as EmailValidator from "node-email-validation";
-import sendgridMail from "@sendgrid/mail";
 import {Firebase} from "./firebase";
 import * as functions from "firebase-functions";
 import {getUser, insertUser, updateOTP} from "./graphql/user";
 import {getAuth} from "firebase-admin/auth";
 import {rateLimiter} from "./ratelimiter";
 import {decryptWithSymmKey, encryptWithSymmKey} from "./kms";
+import formData from "form-data";
+import Mailgun from "mailgun.js";
 
 const secrets = functions.config().doppler || {};
 const CHARS = "0123456789";
 const OTP_LEN = 6;
 const expiredAfter = 10 * 60000;
 
-export const genOTP = functions.https.onCall(async (data, context) => {
-  Firebase.getInstance();
-  const isValidEmail = await validateEmail(data.email);
-  if (!isValidEmail) {
-    return {code: 400, message: "Invalid email"};
-  }
-
-  let ip: string;
-  if (process.env.FUNCTIONS_EMULATOR) {
-    ip = context.rawRequest.headers.origin || "http://localhost:5173";
-  } else {
-    ip = context.rawRequest.ip;
-  }
-
-  const isQuotaExceeded = await rateLimiter("genOTP", `ip_${ip}`, 60, 3);
-  if (isQuotaExceeded) {
-    return {code: 429, message: "Too many requests of genOTP."};
-  }
-
-  const plainOTP = randomCode(OTP_LEN);
-  const encryptedOTP = await encryptWithSymmKey(plainOTP);
-
-  const user = await getUser(data.email);
-  if (!user || !user.id) {
-    await insertUser([{email: data.email, otp: encryptedOTP, isActive: true}]);
-  } else {
-    await updateOTP({id: user.id!, otp: encryptedOTP, isActive: true});
-  }
-
-  sendgridMail.setApiKey(secrets.SENDGRID_API_KEY);
-  await sendgridMail.send({
-    to: data.email,
-    from: "info@hexlink.io",
+const sendEmail = async (otp: string, receipt: string) => {
+  const mailgun = new Mailgun(formData);
+  const mg = mailgun.client({
+    username: "api",
+    key: secrets.MAILGUN_API_KEY,
+  });
+  const data = {
+    from: "Hexlink <no-reply@hexlink.io>",
+    to: receipt,
     subject: "Hexlink Login Code",
-    text: `Hi,\n\nThank you for choosing Hexlink. Use the following OTP to complete your Log in procedures. OTP is valid for 5 minute.\n${plainOTP}\n\nRegards,\nHexlink`,
+    text: `Hi,\n\nThank you for choosing Hexlink. Use the following OTP to complete your Log in procedures. OTP is valid for 5 minute.\n${otp}\n\nRegards,\nHexlink`,
     html: `<html lang="en-US">
 
     <head>
@@ -98,7 +75,7 @@ export const genOTP = functions.https.onCall(async (data, context) => {
                                                 style="color:#455056; font-size:18px;line-height:20px; margin:0; font-weight: 500;">
                                                 <strong
                                                     style="display: block;font-size: 13px; margin: 0 0 4px; color:rgba(0,0,0,.64); font-weight:normal;">Verification Code</strong>
-                                                    <h2 style="font-size:2.5em; background: #1890ff;margin: 0 auto;width: max-content;padding: 0 10px;color: #fff;border-radius: 4px;">${plainOTP}</h2>
+                                                    <h2 style="font-size:2.5em; background: #1890ff;margin: 0 auto;width: max-content;padding: 0 10px;color: #fff;border-radius: 4px;">${otp}</h2>
                                             </p>
                                         </td>
                                     </tr>
@@ -126,7 +103,41 @@ export const genOTP = functions.https.onCall(async (data, context) => {
         <!--/100% body table-->
     </body>
     </html>`,
-  });
+  };
+  await mg.messages.create("hexlink.io", data);
+};
+
+export const genOTP = functions.https.onCall(async (data, context) => {
+  Firebase.getInstance();
+  data.email = data.email.toLowerCase();
+  const isValidEmail = await validateEmail(data.email);
+  if (!isValidEmail) {
+    return {code: 400, message: "Invalid email"};
+  }
+
+  let ip: string;
+  if (process.env.FUNCTIONS_EMULATOR) {
+    ip = context.rawRequest.headers.origin || "http://localhost:5173";
+  } else {
+    ip = context.rawRequest.ip;
+  }
+
+  const isQuotaExceeded = await rateLimiter("genOTP", `ip_${ip}`, 60, 3);
+  if (isQuotaExceeded) {
+    return {code: 429, message: "Too many requests of genOTP."};
+  }
+
+  const plainOTP = randomCode(OTP_LEN);
+  const encryptedOTP = await encryptWithSymmKey(plainOTP);
+
+  const user = await getUser(data.email);
+  if (!user || !user.id) {
+    await insertUser([{email: data.email, otp: encryptedOTP, isActive: true}]);
+  } else {
+    await updateOTP({id: user.id!, otp: encryptedOTP, isActive: true});
+  }
+
+  await sendEmail(plainOTP, data.email);
   return {code: 200, sentAt: new Date().getTime()};
 });
 
@@ -149,6 +160,7 @@ const randomCode = (length: number) => {
 
 export const validateOTP = functions.https.onCall(async (data, _context) => {
   Firebase.getInstance();
+  data.email = data.email.toLowerCase();
   if (!data.email || !data.otp) {
     return {code: 400, message: "Email or OTP is missing."};
   }

@@ -9,6 +9,7 @@ import {getUserById as getTwitterUserById} from "./twitter/twitter";
 const secrets = functions.config().doppler || {};
 
 const TWITTER_PROVIDER_ID = "twitter.com";
+const GOOGLE_PROVIDER_ID = "google.com";
 const EMAIL_PROVIDER_ID = "mailto";
 
 export const TWITTER_IDENTITY_TYPE = "twitter.com";
@@ -61,13 +62,22 @@ export async function genNameHash(
   for (const userInfo of (userInfoList || [])) {
     if (userInfo.providerId.toLowerCase() === TWITTER_PROVIDER_ID) {
       if (identity && identity !== TWITTER_IDENTITY_TYPE) {
-        return {code: 400, message: "identity type not match"};
+        return {code: 400, message: "identity type not match with twitter provider"};
       }
       const handle = await getTwitterHandle(userInfo.uid);
       if (!handle) {
         return {code: 400, message: "twitter user not found"};
       }
       const name = calcNameHash(TWITTER_PROVIDER_ID, handle, version);
+      return {code: 200, nameHash: name};
+    } else if (userInfo.providerId.toLowerCase() === GOOGLE_PROVIDER_ID) {
+      if (identity && identity !== EMAIL_IDENTITY_TYPE) {
+        return {code: 400, message: "identity type not match with google provider"};
+      }
+      if (!user.email) {
+        return {code: 400, message: "email not found for google social login"};
+      }
+      const name = calcNameHash(EMAIL_PROVIDER_ID, user.email!, version);
       return {code: 200, nameHash: name};
     }
   }

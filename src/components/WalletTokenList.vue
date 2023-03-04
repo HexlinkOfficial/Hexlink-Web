@@ -95,7 +95,7 @@ const usdValue = (token: Token) : string => {
 };
 
 watch(() => useTransactionStore().status, async () => {
-  await delay(3000);
+  await delay(2000);
   loading.value = true;
   await loadTokens();
   loading.value = false;

@@ -165,7 +165,6 @@ export async function sendToken(
     dryrun?: boolean,
 ) : Promise<{opId: number}> {
     const chain = useChainStore().chain;
-    console.log(chain);
     const parsedAddresses = await Promise.all(
         to.map(t => addressOf(chain, t))
     );

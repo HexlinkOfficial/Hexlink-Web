@@ -34,7 +34,7 @@ export async function genOTP(email: string) {
 
 export async function validateOTP(email: string, otp: string) {
     const validateOTPCall = httpsCallable(functions, 'validateOTP');
-    const result = await validateOTPCall({email: email, otp: otp});
+    const result = await validateOTPCall({email, otp});
     const resultData = result.data as any;
     if (resultData.code !== 200) {
         return {code: resultData.code, message: resultData.message}

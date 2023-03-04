@@ -15,13 +15,13 @@
                         <span style="margin: 0 5px;">Sign in with Twitter</span>
                     </Button>
                 </div>
-                <!-- <p class="or"><span>or</span></p>
+                <p class="or"><span>or</span></p>
                 <div class="email-login">
                     <input type="text" v-model="email" placeholder="Enter Email" name="uname" class="email-input" required>
                 </div>
                 <Button class="cta-btn" type="primary" :loading="isLoadingLogin" :disabled="loginDisabled" @click="sendOTP">
                     Log In
-                </Button> -->
+                </Button>
             </div>
         </transition>
         <transition name="fade">
@@ -162,6 +162,7 @@ const sendOTP = async () => {
             }
             else if (result === 200) {
                 show.value = !show.value;
+                email.value = email.value.toLowerCase();
                 countDownTimer();
             }
         } catch (err) {

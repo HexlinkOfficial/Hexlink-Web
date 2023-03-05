@@ -172,14 +172,14 @@
                         Connect a wallet for sending tokens, learn more
                       </div>
                     </div>
-                    <div style="margin-top: 20px; margin-bottom: 10px; margin-left: 24px; margin-right:24px;">
+                    <div v-if="false" style="margin-top: 20px; margin-bottom: 10px; margin-left: 24px; margin-right:24px;">
                       <router-link to="/?action=bind-auth-app">
                         <button class="connect-wallet-button"  @click="connectWallet">
-                          Connect Auth App
+                          Setup Auth App
                         </button>
                       </router-link>
                       <div style="font-size: 0.8em; font-weight: 350; margin-top: 15px;">
-                        Connect Auth App for sending tokens, learn more
+                        Setup Auth App for sending tokens, learn more
                       </div>
                     </div>
                     <router-link @click="signOutFirebase" to="signin" class="dropdown-item logout">

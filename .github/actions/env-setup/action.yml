@@ -1,0 +1,14 @@
+name: "CI Environment Setup"
+description: |
+  Setup a common environment for CI jobs.
+  This should in general be a no-op as it should be run inside a docker container which already has all the components installed.
+  Importantly the installation script checks the versions of tools and will install newer versions if specified for most tools.
+runs:
+  using: "composite"
+  steps:
+    - name: Install yarn
+      run: npm install --global yarn
+      shell: bash
+    - name: Install yarn
+      run: npm install --save-dev typescript --force
+      shell: bash

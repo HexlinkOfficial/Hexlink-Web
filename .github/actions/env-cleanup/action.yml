@@ -1,0 +1,11 @@
+name: "CI Environment Teardown"
+description: "Teardown the environment for CI jobs"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Check for changed and untracked files
+      run: |
+        sudo chmod -R u+r+x ./scripts/changed-files.sh
+        ./scripts/changed-files.sh
+      shell: bash

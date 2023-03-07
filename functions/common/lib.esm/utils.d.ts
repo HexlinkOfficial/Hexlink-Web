@@ -13,6 +13,7 @@ export interface NormalizedTokenBalance {
     updatedAt?: Date;
 }
 export declare function normalizeBalance(balance: string, decimals: number): NormalizedTokenBalance;
+export declare function formatOriginalBalance(balance: string, decimals: number): NormalizedTokenBalance;
 export declare function isContract(provider: Provider, address: string): Promise<boolean>;
 export declare function toEthBigNumber(value: BigNumber | string | number): EthBigNumber;
 export declare function genTotpCode(secret: string, timestamp?: number): string;

@@ -238,9 +238,9 @@ const addressTextLong = function (address: string | undefined) {
 
 const userHandle = computed(() => {
   if (useAuthStore().user?.provider.includes("twitter")) {
-    return "@" + user.handle;
+    return "@" + user.displayName;
   }
-  return user?.handle;
+  return user?.displayName;
 });
 
 const root = ref<HTMLElement | null>(null);

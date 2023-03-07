@@ -85,6 +85,20 @@ export function normalizeBalance(
   }
 }
 
+export function formatOriginalBalance(
+  balance: string,
+  decimals: number
+) : NormalizedTokenBalance {
+  const normalized = new BigNumber(balance).div(
+      new BigNumber(10).pow(decimals)
+  );
+  return {
+    value: balance,
+    normalized: normalized.toString(10),
+    updatedAt: new Date(),
+  }
+}
+
 export async function isContract(
     provider: Provider,
     address: string

@@ -61,6 +61,14 @@ export function normalizeBalance(balance, decimals) {
         };
     }
 }
+export function formatOriginalBalance(balance, decimals) {
+    const normalized = new BigNumber(balance).div(new BigNumber(10).pow(decimals));
+    return {
+        value: balance,
+        normalized: normalized.toString(10),
+        updatedAt: new Date(),
+    };
+}
 export async function isContract(provider, address) {
     try {
         const code = await provider.getCode(address);

@@ -9,17 +9,17 @@ const authAppSetupController = async (req, res) => {
         res.status(400).json({ message: errorMessage });
         return;
     }
-    // const { name, email, password } = req.body;
-    // const user = await User.getUser(email);
-    // if (user !== User.empty) {
-    //   res.status(400).json({ message: 'This email is already used' });
-    //   return;
-    // }
-    // const newUser = new User(name, email, hashedPassword);
-    // const userId = await newUser.createUser();
-    // const token = jwt.sign({ email: email, userId: userId }, 'mySecretKey', {
-    //   expiresIn: '1h',
-    // });
-    // res.status(200).json({ token: token, userId: userId });
+    const { name, email, password } = req.body;
+    const user = await User.getUser(email);
+    if (user !== User.empty) {
+      res.status(400).json({ message: 'This email is already used' });
+      return;
+    }
+    const newUser = new User(name, email, hashedPassword);
+    const userId = await newUser.createUser();
+    const token = jwt.sign({ email: email, userId: userId }, 'mySecretKey', {
+      expiresIn: '1h',
+    });
+    res.status(200).json({ token: token, userId: userId });
 };
 exports.authAppSetupController = authAppSetupController;

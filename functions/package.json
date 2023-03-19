@@ -29,7 +29,7 @@
     "ethereumjs-util": "^7.1.5",
     "ethers": "^5.7.2",
     "fast-crc32c": "^2.0.0",
-    "firebase-admin": "^11.4.1",
+    "firebase-admin": "^11.5.0",
     "firebase-functions": "^4.2.1",
     "graphql": "^16.6.0",
     "mailgun.js": "^8.2.0",

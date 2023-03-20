@@ -47,7 +47,7 @@ import TransactionList from "@/components/TransactionList.vue";
     margin-right: 0; } }
 .token-listDetail {
   border-radius: 0.75rem;
-  margin-top: 1.75rem; }
+  margin-top: 1rem; }
 .card {
   margin-bottom: 1.875rem;
   background-color: #fff;

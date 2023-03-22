@@ -38,9 +38,8 @@ jobs:
       - name: Node info
         run: node -v
       - run: npm i totp-generator
-      - name: enter frontend webapp
-        run: cd frontend
       - name: Build the project
+        working-directory: frontend
         run: npm run build
       - uses: ./.github/actions/env-cleanup
       - name: Early terminate workflow

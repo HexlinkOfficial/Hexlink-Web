@@ -33,7 +33,7 @@ export async function switchNetwork(chain: Chain) {
 }
 
 export function getProvider(chain: Chain) {
-    if (chain.name === "arbitrum_nova") {
+    if (chain.name === "arbitrum_nova" || chain.name === "OKT") {
         return new ethers.providers.JsonRpcProvider(
             {url: chain.rpcUrls[0]}
         );
@@ -56,6 +56,7 @@ export async function getPriceInfo(chain: Chain, gasToken: string) : Promise<{
     } else if (chain.name === 'arbitrum_nova') {
         gasPrice = EthBigNumber.from(10000000);
     } else {
+        console.log("here");
         const {maxFeePerGas} = await provider.getFeeData();
         if (!maxFeePerGas) {
             throw new Error("failed to get the gas price");

@@ -112,7 +112,21 @@ export const ARBITRUM : Chain = {
   logoUrl: "https://i.postimg.cc/mkJcpr2T/arbilogo.png",
 };
 
-export const SUPPORTED_CHAINS = [GOERLI, MUMBAI, ARBITRUM, ARBITRUM_TESTNET];
+export const OK_TESTNET: Chain = {
+  chainId: "65",
+  rpcUrls: ["https://exchaintestrpc.okex.org"],
+  name: "OKT",
+  fullName: "OKT",
+  nativeCurrency: {
+    name: "OKT",
+    symbol: "OKT",
+    decimals: 18,
+  },
+  blockExplorerUrls: ["https://www.oklink.com/okc-test"],
+  logoUrl: "https://static.oklink.com/cdn/assets/imgs/221/C267A35E6CF3829C.png",
+};
+
+export const SUPPORTED_CHAINS = [GOERLI, MUMBAI, ARBITRUM, ARBITRUM_TESTNET, OK_TESTNET];
 
 export async function getChainFromProvider(
     provider: ethers.providers.Provider
@@ -137,6 +151,8 @@ export function getChain(chain: string | number) : Chain {
     return ARBITRUM_TESTNET;
   } else if (chain === "arbitrum" || chain == "42161") {
     return ARBITRUM;
+  } else if (chain === "OKT" || chain == "65") {
+    return OK_TESTNET;
   }
   throw new Error("Unsupported chain");
 }

@@ -208,6 +208,7 @@ import {
     MUMBAI,
     ARBITRUM,
     ARBITRUM_TESTNET,
+    OK_TESTNET,
     prettyPrintAddress,
     setAccountOwner
 } from "../../../../functions/common";
@@ -227,7 +228,7 @@ const showTestnet = ref<boolean>(false);
 const { toClipboard } = useClipboard();
 
 const mainNet = [ARBITRUM];
-const testNet = [GOERLI, MUMBAI, ARBITRUM_TESTNET];
+const testNet = [GOERLI, MUMBAI, ARBITRUM_TESTNET, OK_TESTNET];
 
 const addressTextLong = function (address: string | undefined) {
   if (address) {

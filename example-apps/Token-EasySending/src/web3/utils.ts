@@ -3,7 +3,6 @@ import { BigNumber } from "bignumber.js";
 import type { Token } from "../../../../functions/common";
 import useClipboard from 'vue-clipboard3';
 import { createToaster } from "@meforma/vue-toaster";
-import type { nftImage } from '@/web3/tokens';
 import { FastAverageColor } from 'fast-average-color';
 
 export function toEthBigNumber(value: BigNumber) : EthBigNumber {
@@ -44,39 +43,6 @@ export function createNotification(message: string, mode: string) {
         toaster.error(`Error: ${error}`);
     }
 }
-
-export async function getBackcgroundColor(nft: nftImage) {
-    var output: string = "";
-    var url: string = "";
-    var opensea: boolean = false;
-    if (nft.openSea?.imageUrl != undefined) {
-        url = nft.openSea!.imageUrl;
-        opensea = true;
-    } else {
-        if (nft.rawUrl != "") {
-            url = nft.rawUrl!;
-        } else {
-            url = nft.url!;
-        }
-        opensea = false;
-    }
-    const fac = new FastAverageColor();
-    await fac.getColorAsync(url, { algorithm: 'dominant' })
-        .then(color => {
-            // container.style.backgroundColor = color.rgba;
-            // container.style.color = color.isDark ? '#fff' : '#000';
-            output = color.hex.toString();
-        })
-        .catch(e => {
-            console.log(e);
-            return e;
-        });
-    return {
-        nft: nft,
-        color: output,
-        hasOpensea: opensea
-    };
-};
 
 export const prettyPrintNumber = (amount: string) => {
     if (amount.substring(0, 5) == "0.000") {

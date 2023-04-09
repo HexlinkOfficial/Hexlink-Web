@@ -17,26 +17,6 @@ const router = createRouter({
       component: SignInView
     },
     {
-      path: '/airdrop',
-      name: 'red pockets view',
-      component: () => import('@/views/RedPacketsView.vue')
-    },
-    {
-      path: '/airDropNFT',
-      name: 'airdrop NFT',
-      component: () => import('@/views/AirdropNFT.vue')
-    },
-    {
-      path: '/sendToken',
-      name: 'send token',
-      component: () => import('@/views/SendToken.vue')
-    },
-    {
-      path: '/airdrop/share/:id',
-      name: 'airdrop claim QR code',
-      component: () => import('@/views/AirdropShare.vue')
-    },
-    {
       path: '/:pathMatch(.*)*',
       name: 'error404',
       component: Error404

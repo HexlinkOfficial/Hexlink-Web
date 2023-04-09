@@ -133,24 +133,22 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed, watch } from "vue";
+import { useRouter } from "vue-router";
+import { BigNumber as EthBigNumber } from "ethers";
+import { BigNumber } from "bignumber.js";
+import { ethers } from "ethers";
+import type { OnClickOutsideHandler } from '@vueuse/core';
+import { vOnClickOutside } from '@/services/directive';
 import type { BalanceMap } from "@/web3/tokens";
-import { tokenBase } from "@/web3/utils";
-import type { Token } from "../../../../functions/common";
+import { getBalances } from "@/web3/tokens";
+import { getPriceInfo } from "@/web3/network";
+import { sendToken } from "@/web3/operation";
+import { tokenBase, createNotification } from "@/web3/utils";
 import { useTokenStore } from "@/stores/token";
 import { useAccountStore } from '@/stores/account';
 import { useChainStore } from "@/stores/chain";
-import { hash } from "../../../../functions/common";
-import type { OnClickOutsideHandler } from '@vueuse/core';
-import { vOnClickOutside } from '@/services/directive';
-import { getBalances } from "@/web3/tokens";
-import { getPriceInfo } from "@/web3/network";
-import { BigNumber as EthBigNumber } from "ethers";
-import { calcGas, tokenAmount } from "../../../../functions/common";
-import { BigNumber } from "bignumber.js";
-import { ethers } from "ethers";
-import { sendToken } from "@/web3/operation";
-import { useRouter } from "vue-router";
-import { createNotification } from "@/web3/utils";
+import type { Token } from "../../../../functions/common";
+import { calcGas, tokenAmount, hash } from "../../../../functions/common";
 
 const estimatedGasAmount = "150000"; // hardcoded, can optimize later
 const chooseTotalDrop = ref<boolean>(false);

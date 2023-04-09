@@ -24,28 +24,27 @@ import { genDeployAuthProof } from "./oracle";
 import { signMessage } from "./wallet";
 import { useWalletStore } from "@/stores/wallet";
 import { nameHashWithVersion } from "@/web3/account";
-
 import { getFunctions, httpsCallable } from '@firebase/functions'
 import { getProvider } from "./network";
 
 const functions = getFunctions();
 
-export function buildOpInput(params: {
-    to: string,
-    value?: EthBigNumber,
-    callData?: string | [],
-    callGasLimit?: EthBigNumber,
-}) : OpInput {
-    if (!params.value && !params.callData) {
-        throw new Error("Neither value or data is set");
-    }
-    return {
-        to: params.to,
-        value: params.value || EthBigNumber.from(0),
-        callData: params.callData || [],
-        callGasLimit: params.callGasLimit || EthBigNumber.from(0),
-    }
-}
+// export function buildOpInput(params: {
+//     to: string,
+//     value?: EthBigNumber,
+//     callData?: string | [],
+//     callGasLimit?: EthBigNumber,
+// }) : OpInput {
+//     if (!params.value && !params.callData) {
+//         throw new Error("Neither value or data is set");
+//     }
+//     return {
+//         to: params.to,
+//         value: params.value || EthBigNumber.from(0),
+//         callData: params.callData || [],
+//         callGasLimit: params.callGasLimit || EthBigNumber.from(0),
+//     }
+// }
 
 export async function buildUserOpRequest(
     opInputs: OpInput[],

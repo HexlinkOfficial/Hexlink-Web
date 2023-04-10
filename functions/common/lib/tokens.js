@@ -19,6 +19,7 @@ const POLYGON_TOKENS_json_1 = __importDefault(require("./tokens/POLYGON_TOKENS.j
 const ARBITRUM_TOKENS_json_1 = __importDefault(require("./tokens/ARBITRUM_TOKENS.json"));
 const ARBITRUM_TESTNET_TOKENS_json_1 = __importDefault(require("./tokens/ARBITRUM_TESTNET_TOKENS.json"));
 const ARBITRUM_NOVA_TOKENS_json_1 = __importDefault(require("./tokens/ARBITRUM_NOVA_TOKENS.json"));
+const OKCHAIN_TESTNET_TOKENS_json_1 = __importDefault(require("./tokens/OKCHAIN_TESTNET_TOKENS.json"));
 const addresses_json_1 = __importDefault(require("./addresses.json"));
 const bignumber_js_1 = require("bignumber.js");
 const utils_1 = require("./utils");
@@ -94,6 +95,12 @@ function getPopularTokens(chain) {
             return {
                 timestamp: new Date().toISOString(),
                 tokens: ARBITRUM_TOKENS_json_1.default,
+            };
+        }
+        if (chain.chainId == "65") {
+            return {
+                timestamp: new Date().toISOString(),
+                tokens: OKCHAIN_TESTNET_TOKENS_json_1.default,
             };
         }
         return {

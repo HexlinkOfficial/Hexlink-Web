@@ -6,6 +6,9 @@ on:
       - opened
     branches:
       - main
+  push:
+    branches:
+      - main
 
 jobs:
   setup_env:

@@ -172,6 +172,16 @@
                         Connect a wallet for sending tokens, learn more
                       </div>
                     </div>
+                    <div v-if="false" style="margin-top: 20px; margin-bottom: 10px; margin-left: 24px; margin-right:24px;">
+                      <router-link to="/?action=bind-auth-app">
+                        <button class="connect-wallet-button"  @click="connectWallet">
+                          Setup Auth App
+                        </button>
+                      </router-link>
+                      <div style="font-size: 0.8em; font-weight: 350; margin-top: 15px;">
+                        Setup Auth App for sending tokens, learn more
+                      </div>
+                    </div>
                     <router-link @click="signOutFirebase" to="signin" class="dropdown-item logout">
                       <i class="icofont-logout"></i> Logout
                     </router-link>
@@ -184,6 +194,7 @@
       </div>
     </div>
   </div>
+  <ScanQRCodeModal v-if="showScanQRCodeModal"></ScanQRCodeModal> 
 </template>
 
 <script setup lang="ts">
@@ -205,6 +216,8 @@ import { connectWallet, disconnectWallet} from "@/web3/wallet";
 import { useAccountStore } from "@/stores/account";
 import { signOutFirebase } from "@/services/auth";
 import useClipboard from 'vue-clipboard3';
+import ScanQRCodeModal from './ScanQRCodeModal.vue';
+import { useRoute } from "vue-router";
 
 const authStore = useAuthStore();
 const user = authStore.user!;
@@ -263,6 +276,10 @@ const doCopy = (address: string | undefined) => {
     }
   );
 };
+
+const showScanQRCodeModal = computed(() => {
+  return useRoute().query.action == "bind-auth-app";
+})
 
 onMounted(() => {
   document.addEventListener('click', closeDropDown);

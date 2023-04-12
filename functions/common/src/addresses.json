@@ -84,5 +84,16 @@
             {"address": "0x750ba8b76187092b0d1e87e28daaf484d1b5273b", "decimals": 6},
             {"address": "0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1", "decimals": 18}
         ]
+    },
+    "OKT": {
+        "hexlink": "0xE0CBB44Ab7C2f42a3AaCBf8E8C37BEb9C53118b5",
+        "nativeCoin": {
+            "address": "0x61E1945CfbFb945f4156813410Ea6E34e39fbddB",
+            "decimals": 18
+        },
+        "stableCoins": [
+            {"address": "0xDD5A98C55594dc942fd870D3B7F835680D1Bd5FB", "decimals": 6},
+            {"address": "0xb23AE8b65073CDB2643D82B7F790FF352245deD3", "decimals": 6}
+        ]
     }
 }

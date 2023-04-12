@@ -1,0 +1,26 @@
+[
+    {
+        "chainId": 65,
+        "symbol": "OKB",
+        "name": "OKT",
+        "decimals": 18,
+        "address": "0x61E1945CfbFb945f4156813410Ea6E34e39fbddB",
+        "logoURI": "https://static.oklink.com/cdn/assets/imgs/221/C267A35E6CF3829C.png"
+    },
+    {
+        "chainId": 65,
+        "symbol": "USDT",
+        "name": "USDT",
+        "decimals": 6,
+        "address": "0xDD5A98C55594dc942fd870D3B7F835680D1Bd5FB",
+        "logoURI": "https://wallet-asset.matic.network/img/tokens/usdc.svg"
+    },
+    {
+        "chainId": 65,
+        "symbol": "USDC",
+        "name": "USD Coin",
+        "decimals": 6,
+        "address": "0xb23AE8b65073CDB2643D82B7F790FF352245deD3",
+        "logoURI": "https://wallet-asset.matic.network/img/tokens/usdc.svg"
+    }
+]

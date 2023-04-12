@@ -7,6 +7,7 @@ import POLYGON_TOKENS from "./tokens/POLYGON_TOKENS.json";
 import ARBITRUM_TOKENS from "./tokens/ARBITRUM_TOKENS.json";
 import ARBITRUM_TESTNET_TOKENS from "./tokens/ARBITRUM_TESTNET_TOKENS.json";
 import ARBITRUM_NOVA_TOKENS from "./tokens/ARBITRUM_NOVA_TOKENS.json";
+import OKCHAIN_TESTNET_TOKENS from "./tokens/OKCHAIN_TESTNET_TOKENS.json";
 import ADDRESSES from "./addresses.json";
 
 import {BigNumber as EthBigNumber} from "ethers";
@@ -112,6 +113,12 @@ export async function getPopularTokens(chain: Chain) : Promise<TokenDataList> {
     return {
       timestamp: new Date().toISOString(),
       tokens: ARBITRUM_TOKENS,
+    };
+  }
+  if (chain.chainId == "65") {
+    return {
+      timestamp: new Date().toISOString(),
+      tokens: OKCHAIN_TESTNET_TOKENS,
     };
   }
   return {

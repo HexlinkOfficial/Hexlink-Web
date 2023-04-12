@@ -203,7 +203,9 @@
                       </a-tooltip>
                     </div>
                     <div style="display: flex; flex-direction: column; margin-left: 0.5rem;">
-                      <span class="from-text" style="margin-left: 0rem;">{{ getNFTdata(r.tx.tokenID, r.asset.address)!.symbol }}</span>
+                      <span class="from-text" style="margin-left: 0rem;">{{
+                       getNFTdata(r.tx.tokenID, r.asset.address)!.symbol.toString().length > 8 ? getNFTdata(r.tx.tokenID, r.asset.address)!.symbol.toString().substring(0,7) + "..." + getNFTdata(r.tx.tokenID, r.asset.address)!.symbol.slice(-5) : getNFTdata(r.tx.tokenID, r.asset.address)!.symbol
+                      }}</span>
                       <span style="font-size: 12px; color: rgb(100,116,139)">{{ getNFTdata(r.tx.tokenID, r.asset.address)!.name }} #{{ getNFTdata(r.tx.tokenID, r.asset.address)!.nftId }}</span>
                     </div>
                   </div>

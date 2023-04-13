@@ -1,29 +1,23 @@
 import * as functions from "firebase-functions";
+import {getAuth} from "firebase-admin/auth";
 import * as ethers from "ethers";
 import {signWithKmsKey, getEthAddressFromPublicKey} from "./kms";
 import {kmsConfig, KMS_KEY_TYPE} from "./config";
 import {
-  GenNameHashSuccess,
-  genNameHash,
   toEthSignedMessageHash,
-  TWITTER_IDENTITY_TYPE,
-  EMAIL_IDENTITY_TYPE,
 } from "./account";
 import {Firebase} from "./firebase";
 
-const OAUTH_AUTH_TYPE = "oauth";
-const OTP_AUTH_TYPE = "otp";
-
+const EMAIL_SCHEMA = "mailto";
 export interface AuthProof {
   name: string,
   requestId: string,
-  authType: string,
-  identityType: string,
-  issuedAt: number,
-  signature: string
+  expiredAt: number,
+  proof: string,
+  validator: string
 }
 
-export const genTwitterOAuthProof = functions.https.onCall(
+export const genEmailAuthProof = functions.https.onCall(
     async (data, context) => {
       Firebase.getInstance();
       const uid = context.auth?.uid;
@@ -31,44 +25,28 @@ export const genTwitterOAuthProof = functions.https.onCall(
         return {code: 401, message: "Unauthorized Call"};
       }
 
-      return genAuthProof(uid, TWITTER_IDENTITY_TYPE, OAUTH_AUTH_TYPE,
-          data.requestId, data.version);
+      return genAuthProof(uid, EMAIL_SCHEMA, data.requestId);
     });
 
-export const genEmailOTPProof = functions.https.onCall(
-    async (data, context) => {
-      Firebase.getInstance();
-      const uid = context.auth?.uid;
-      if (!uid) {
-        return {code: 401, message: "Unauthorized Call"};
-      }
-
-      return genAuthProof(uid, EMAIL_IDENTITY_TYPE, OTP_AUTH_TYPE,
-          data.requestId, data.version);
-    });
-
-const genAuthProof = async (uid: string, identity: string,
-    auth: string, requestId: string, version?: number) => {
-  const result = await genNameHash(uid, version, identity);
-  if (result.code !== 200) {
-    return result;
+const genAuthProof = async (uid: string, schema: string,
+    requestId: string) => {
+  const nameHashRes = await genNameHash(schema, uid);
+  if (nameHashRes.code != 200) {
+    return nameHashRes;
   }
-  const {nameHash} = result as GenNameHashSuccess;
 
-  const identityType = hash(identity);
-  const authType = hash(auth);
-
-  // reserve some time for current block
-  const issuedAt = Math.round(Date.now() / 1000) - 30;
+  const expiredAt = Math.round(Date.now() / 1000) + 3600;
+  const validator = kmsConfig().get(
+      KMS_KEY_TYPE[KMS_KEY_TYPE.operator]
+  )!.publicAddress!;
   const message = ethers.utils.keccak256(
       ethers.utils.defaultAbiCoder.encode(
-          ["bytes32", "bytes32", "uint256", "bytes32", "bytes32"],
+          ["bytes32", "bytes32", "uint256", "address"],
           [
-            nameHash,
+            nameHashRes.nameHash!,
             requestId,
-            issuedAt,
-            identityType,
-            authType,
+            expiredAt,
+            validator,
           ]
       )
   );
@@ -77,22 +55,47 @@ const genAuthProof = async (uid: string, identity: string,
       KMS_KEY_TYPE[KMS_KEY_TYPE.operator],
       toEthSignedMessageHash(message)
   ) as string;
-  const validatorAddr = kmsConfig().get(
-      KMS_KEY_TYPE[KMS_KEY_TYPE.operator]
-  )?.publicAddress;
   const encodedSig = ethers.utils.defaultAbiCoder.encode(
-      ["address", "bytes"], [validatorAddr, sig]
+      ["uint256", "address", "bytes"],
+      [expiredAt, validator, sig]
   );
 
   const AuthProof: AuthProof = {
-    name: nameHash,
+    name: nameHashRes.nameHash!,
     requestId: requestId,
-    issuedAt: issuedAt,
-    identityType: identity,
-    authType: auth,
-    signature: encodedSig,
+    expiredAt: expiredAt,
+    validator: validator,
+    proof: encodedSig,
   };
   return {code: 200, authProof: AuthProof};
+};
+
+const genNameHash = async (schema: string, uid: string) => {
+  const user = await getAuth().getUser(uid);
+
+  if (!user) {
+    return {code: 400, message: "Invalid uid: failed to get the user."};
+  }
+
+  if (!user.email) {
+    return {code: 400, message: "Invalid user: email is missing."};
+  }
+
+  const emailArr = user.email?.split("@");
+  if (!emailArr || emailArr.length != 2) {
+    return {code: 400, message: "Invalid user: email is invalid."};
+  }
+
+  const nameHash = calcNameHash(schema, emailArr[1], emailArr[0]);
+  return {code: 200, nameHash: nameHash};
+};
+
+const calcNameHash = function(schema: string, domain: string, handler: string) {
+  const encodedName = ethers.utils.defaultAbiCoder.encode(
+      ["bytes32", "bytes32", "bytes32"],
+      [hash(schema), hash(domain), hash(handler)]
+  );
+  return ethers.utils.keccak256(encodedName);
 };
 
 const hash = function(value: string) {

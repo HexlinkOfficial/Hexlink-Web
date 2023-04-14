@@ -9,13 +9,6 @@ import {
 import {Firebase} from "./firebase";
 
 const EMAIL_SCHEMA = "mailto";
-export interface AuthProof {
-  name: string,
-  requestId: string,
-  expiredAt: number,
-  proof: string,
-  validator: string
-}
 
 export const genEmailAuthProof = functions.https.onCall(
     async (data, context) => {
@@ -25,15 +18,15 @@ export const genEmailAuthProof = functions.https.onCall(
         return {code: 401, message: "Unauthorized Call"};
       }
 
-      return genAuthProof(uid, EMAIL_SCHEMA, data.requestId);
+      const nameHashRes = await genNameHashFromEmail(EMAIL_SCHEMA, uid);
+      if (nameHashRes.code != 200) {
+        return nameHashRes;
+      }
+
+      return genAuthProof(nameHashRes.nameHash!, data.requestId);
     });
 
-const genAuthProof = async (uid: string, schema: string,
-    requestId: string) => {
-  const nameHashRes = await genNameHash(schema, uid);
-  if (nameHashRes.code != 200) {
-    return nameHashRes;
-  }
+const genAuthProof = async (nameHash: string, requestId: string) => {
 
   const expiredAt = Math.round(Date.now() / 1000) + 3600;
   const validator = kmsConfig().get(
@@ -43,7 +36,7 @@ const genAuthProof = async (uid: string, schema: string,
       ethers.utils.defaultAbiCoder.encode(
           ["bytes32", "bytes32", "uint256", "address"],
           [
-            nameHashRes.nameHash!,
+            nameHash,
             requestId,
             expiredAt,
             validator,
@@ -60,17 +53,10 @@ const genAuthProof = async (uid: string, schema: string,
       [expiredAt, validator, sig]
   );
 
-  const AuthProof: AuthProof = {
-    name: nameHashRes.nameHash!,
-    requestId: requestId,
-    expiredAt: expiredAt,
-    validator: validator,
-    proof: encodedSig,
-  };
-  return {code: 200, authProof: AuthProof};
+  return {code: 200, proof: encodedSig};
 };
 
-const genNameHash = async (schema: string, uid: string) => {
+const genNameHashFromEmail = async (schema: string, uid: string) => {
   const user = await getAuth().getUser(uid);
 
   if (!user) {

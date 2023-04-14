@@ -14,13 +14,11 @@ exports.isFollowing = isFollowing;
 exports.hasRetweeted = hasRetweeted;
 
 import {
-  genTwitterOAuthProof,
-  genEmailOTPProof,
+  genEmailAuthProof,
   calcEthAddress,
 } from "./verifier";
 
-exports.genTwitterOAuthProof = genTwitterOAuthProof;
-exports.genEmailOTPProof = genEmailOTPProof;
+exports.genEmailAuthProof = genEmailAuthProof;
 exports.calcEthAddress = calcEthAddress;
 
 import {

@@ -17,10 +17,9 @@ export async function genDeployAuthProof(
         throw new Error("Not connected");
     }
 
-    const authType = useAuthStore().user!.authType;
     const identityType = useAuthStore().user!.identityType;
     let genAuthProof: HttpsCallable;
-    if (identityType === "twitter.com" && authType === "oauth") {
+    if (identityType === "twitter.com") {
         genAuthProof = httpsCallable(functions, 'genTwitterOAuthProof');
     } else if (identityType === "email") {
         genAuthProof = httpsCallable(functions, 'genEmailOTPProof');

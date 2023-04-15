@@ -13,26 +13,27 @@ exports.genDeployAuthProof = void 0;
 const ethers_1 = require("ethers");
 const account_1 = require("./account");
 const hexlink_1 = require("./hexlink");
-const genRequestId = function (provider, nameHash, func, data) {
+const buildAccountInitData = (owner) => __awaiter(void 0, void 0, void 0, function* () {
+    return account_1.accountInterface.encodeFunctionData("init", [owner]);
+});
+const genRequestId = function (provider, owner, func) {
     return __awaiter(this, void 0, void 0, function* () {
         const hexlink = yield (0, hexlink_1.hexlContract)(provider);
-        const result = ethers_1.ethers.utils.keccak256(ethers_1.ethers.utils.defaultAbiCoder.encode(["bytes4", "bytes", "address", "uint256", "uint256"], [
+        const data = buildAccountInitData(owner);
+        const requestId = ethers_1.ethers.utils.keccak256(ethers_1.ethers.utils.defaultAbiCoder.encode(["bytes4", "address", "uint256", "bytes"], [
             func,
-            data,
             hexlink.address,
             (yield provider.getNetwork()).chainId,
-            yield hexlink.nonce(nameHash),
+            data
         ]));
-        return result;
+        return requestId;
     });
 };
-function genDeployAuthProof(provider, nameHash, owner, data, genAuthProof, version) {
+function genDeployAuthProof(provider, owner, genAuthProof) {
     return __awaiter(this, void 0, void 0, function* () {
-        const initData = account_1.accountInterface.encodeFunctionData("init", [owner, data]);
-        const requestId = yield genRequestId(provider, nameHash, hexlink_1.hexlInterface.getSighash("deploy"), initData);
+        const requestId = yield genRequestId(provider, owner, hexlink_1.hexlInterface.getSighash("deploy"));
         return {
-            initData,
-            proof: yield genAuthProof({ requestId, version }),
+            proof: yield genAuthProof({ requestId }),
         };
     });
 }

@@ -1,40 +1,31 @@
 import { useWalletStore } from "@/stores/wallet";
 import { genDeployAuthProof as genProof } from "../../../../functions/common";
-import type { AuthProof } from "../../../../functions/common";
 import { getFunctions, httpsCallable, type HttpsCallable } from '@firebase/functions'
 import { useAuthStore } from "@/stores/auth";
 import { useChainStore } from "@/stores/chain";
-import { useAccountStore } from "@/stores/account";
 
 const functions = getFunctions();
 
-export async function genDeployAuthProof(
-    data: string | [],
-    version?: number,
-) : Promise<{ initData: string, proof: AuthProof }> {
-    const wallet = useWalletStore();
+export async function genDeployAuthProof() : Promise<{ proof: string }> {
+        const wallet = useWalletStore();
     if (!wallet.connected) {
         throw new Error("Not connected");
     }
 
-    const authType = useAuthStore().user!.authType;
     const identityType = useAuthStore().user!.identityType;
     let genAuthProof: HttpsCallable;
-    if (identityType === "twitter.com" && authType === "oauth") {
-        genAuthProof = httpsCallable(functions, 'genTwitterOAuthProof');
+    if (identityType === "twitter.com") {
+        throw new Error("Twitter login is not supported.")
     } else if (identityType === "email") {
-        genAuthProof = httpsCallable(functions, 'genEmailOTPProof');
+        genAuthProof = httpsCallable(functions, 'genEmailAuthProof');
     }
 
     return await genProof(
         useChainStore().provider,
-        useAuthStore().user!.nameHash,
         wallet.account!.address,
-        data,
-        async (params: {requestId: string, version?: number}) => {
+        async (params: {requestId: string}) => {
             const result = await genAuthProof(params);
-            return (result.data as any).authProof as AuthProof;
-        },
-        useAccountStore().version,
+            return (result.data as any).proof as string;
+        }
     );
 }

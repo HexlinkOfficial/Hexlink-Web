@@ -6,49 +6,44 @@ import {accountInterface} from "./account";
 import {hexlContract, hexlInterface} from "./hexlink";
 import type {AuthProof} from "./types";
 
+const buildAccountInitData = async (owner: string) => {
+  return accountInterface.encodeFunctionData("init", [owner]);
+}
+
 const genRequestId = async function(
     provider: Provider,
-    nameHash: string,
-    func: string,
-    data: string | [],
+    owner: string,
+    func: string
 ) {
   const hexlink = await hexlContract(provider);
-  const result = ethers.utils.keccak256(
-      ethers.utils.defaultAbiCoder.encode(
-          ["bytes4", "bytes", "address", "uint256", "uint256"],
-          [
-            func,
-            data,
-            hexlink.address,
-            (await provider.getNetwork()).chainId,
-            await hexlink.nonce(nameHash),
-          ]
-      )
+  const data = buildAccountInitData(owner);
+  const requestId = ethers.utils.keccak256(
+    ethers.utils.defaultAbiCoder.encode(
+      ["bytes4", "address", "uint256", "bytes"],
+      [
+        func,
+        hexlink.address,
+        (await provider.getNetwork()).chainId,
+        data
+      ]
+    )
   );
-  return result;
+  return requestId;
 };
 
 export async function genDeployAuthProof(
     provider: Provider,
-    nameHash: string,
     owner: string,
-    data: string | [],
     genAuthProof: (
-      request: {requestId: string, version?: number}
-    ) => Promise<AuthProof>,
-    version?: number,
-) : Promise<{ initData: string, proof: AuthProof }> {
-  const initData = accountInterface.encodeFunctionData(
-      "init", [owner, data]
-  );
+      request: {requestId: string}
+    ) => Promise<string>
+) : Promise<{ proof: string }> {
   const requestId = await genRequestId(
       provider,
-      nameHash,
-      hexlInterface.getSighash("deploy"),
-      initData
+      owner,
+      hexlInterface.getSighash("deploy")
   );
   return {
-    initData,
-    proof: await genAuthProof({requestId, version}),
+    proof: await genAuthProof({requestId}),
   };
 }

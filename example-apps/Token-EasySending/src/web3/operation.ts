@@ -80,14 +80,8 @@ export async function buildUserOpRequest(
     } as { params: UserOpRequest, deploy?: DeployRequest };
 
     if (!deployed) {
-        const { proof } = await genDeployAuthProof(data);
-        const authProof = {
-            authType: hash(proof.authType),
-            identityType: hash(proof.identityType),
-            issuedAt: EthBigNumber.from(proof.issuedAt),
-            signature: proof.signature,
-        } as AuthProofInput;
-        result.deploy = {authProof, owner: walletAccount};
+        const { proof } = await genDeployAuthProof();
+        result.deploy = {authProof: proof, owner: walletAccount};
     }
     return result;
 }

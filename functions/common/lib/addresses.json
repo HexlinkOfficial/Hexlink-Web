@@ -1,6 +1,6 @@
 {
     "goerli": {
-        "hexlink": "0xbad6a7948a1d3031ee7236d0180b6271fa569148",
+        "hexlink": "0x4c552dC72756A690883f9e8955B231c43c4E598e",
         "nativeCoin": {
             "address": "0x0000000000000000000000000000000000000000",
             "decimals": 18
@@ -16,7 +16,7 @@
         ]
     },
     "mumbai": {
-        "hexlink": "0x78317ef8b020Fe10e845ab8723403cF1e58Ef1Cc",
+        "hexlink": "0x4c552dC72756A690883f9e8955B231c43c4E598e",
         "nativeCoin": {
             "address": "0x0000000000000000000000000000000000000000",
             "decimals": 18
@@ -45,7 +45,7 @@
         ]
     },
     "arbitrum": {
-        "hexlink": "0x1e47cA3F46619f8A5CBFB98a23f564c9865E58ce",
+        "hexlink": "0x4c552dC72756A690883f9e8955B231c43c4E598e",
         "nativeCoin": {
             "address": "0x0000000000000000000000000000000000000000",
             "decimals": 18
@@ -61,7 +61,7 @@
         ]
     },
     "arbitrum_testnet": {
-        "hexlink": "0x7e0B0332aDbEC1a84E1E264f308AE581fcda5684",
+        "hexlink": "0x4c552dC72756A690883f9e8955B231c43c4E598e",
         "nativeCoin": {
             "address": "0x0000000000000000000000000000000000000000",
             "decimals": 18
@@ -71,7 +71,7 @@
         ]
     },
     "arbitrum_nova": {
-        "hexlink": "0x1e47cA3F46619f8A5CBFB98a23f564c9865E58ce",
+        "hexlink": "0x4c552dC72756A690883f9e8955B231c43c4E598e",
         "nativeCoin": {
             "address": "0x0000000000000000000000000000000000000000",
             "decimals": 18
@@ -86,7 +86,7 @@
         ]
     },
     "OKT": {
-        "hexlink": "0xE0CBB44Ab7C2f42a3AaCBf8E8C37BEb9C53118b5",
+        "hexlink": "0x4c552dC72756A690883f9e8955B231c43c4E598e",
         "nativeCoin": {
             "address": "0x61E1945CfbFb945f4156813410Ea6E34e39fbddB",
             "decimals": 18

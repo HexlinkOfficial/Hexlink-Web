@@ -41,6 +41,6 @@ export interface AuthProofInput {
     signature: string;
 }
 export interface DeployRequest {
-    authProof: AuthProofInput;
+    authProof: string;
     owner: string;
 }

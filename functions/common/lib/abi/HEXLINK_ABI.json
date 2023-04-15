@@ -1,16 +1,5 @@
 [
     {
-        "inputs": [
-            {
-                "internalType": "address",
-                "name": "accountBase",
-                "type": "address"
-            }
-        ],
-        "stateMutability": "nonpayable",
-        "type": "constructor"
-    },
-    {
         "inputs": [],
         "name": "Ownable__NotOwner",
         "type": "error"
@@ -68,7 +57,7 @@
                 "type": "address"
             }
         ],
-        "name": "Deploy",
+        "name": "Deployed",
         "type": "event"
     },
     {
@@ -95,25 +84,6 @@
         "inputs": [
             {
                 "indexed": true,
-                "internalType": "bytes32",
-                "name": "name",
-                "type": "bytes32"
-            },
-            {
-                "indexed": true,
-                "internalType": "address",
-                "name": "account",
-                "type": "address"
-            }
-        ],
-        "name": "Reset",
-        "type": "event"
-    },
-    {
-        "anonymous": false,
-        "inputs": [
-            {
-                "indexed": true,
                 "internalType": "address",
                 "name": "implementation",
                 "type": "address"
@@ -124,7 +94,7 @@
     },
     {
         "inputs": [],
-        "name": "accountBase",
+        "name": "accountImplementation",
         "outputs": [
             {
                 "internalType": "address",
@@ -137,112 +107,72 @@
     },
     {
         "inputs": [
-            {
-                "internalType": "bytes32",
-                "name": "name",
-                "type": "bytes32"
-            }
-        ],
-        "name": "addressOfName",
-        "outputs": [
-            {
-                "internalType": "address",
-                "name": "",
-                "type": "address"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "bytes32",
-                "name": "name",
-                "type": "bytes32"
-            },
             {
                 "components": [
                     {
-                        "internalType": "uint256",
-                        "name": "issuedAt",
-                        "type": "uint256"
-                    },
-                    {
                         "internalType": "bytes32",
-                        "name": "identityType",
+                        "name": "schema",
                         "type": "bytes32"
                     },
                     {
                         "internalType": "bytes32",
-                        "name": "authType",
+                        "name": "domain",
                         "type": "bytes32"
                     },
                     {
-                        "internalType": "bytes",
-                        "name": "signature",
-                        "type": "bytes"
+                        "internalType": "bytes32",
+                        "name": "handle",
+                        "type": "bytes32"
                     }
                 ],
-                "internalType": "struct AuthProof",
-                "name": "proof",
-                "type": "tuple"
-            }
-        ],
-        "name": "bumpNonce",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "bytes32",
+                "internalType": "struct Name",
                 "name": "name",
-                "type": "bytes32"
+                "type": "tuple"
             },
             {
                 "internalType": "bytes",
-                "name": "txData",
+                "name": "data",
                 "type": "bytes"
             },
             {
-                "components": [
-                    {
-                        "internalType": "uint256",
-                        "name": "issuedAt",
-                        "type": "uint256"
-                    },
-                    {
-                        "internalType": "bytes32",
-                        "name": "identityType",
-                        "type": "bytes32"
-                    },
-                    {
-                        "internalType": "bytes32",
-                        "name": "authType",
-                        "type": "bytes32"
-                    },
-                    {
-                        "internalType": "bytes",
-                        "name": "signature",
-                        "type": "bytes"
-                    }
-                ],
-                "internalType": "struct AuthProof",
-                "name": "proof",
-                "type": "tuple"
+                "internalType": "bytes",
+                "name": "authProof",
+                "type": "bytes"
             }
         ],
         "name": "deploy",
         "outputs": [
             {
                 "internalType": "address",
-                "name": "",
+                "name": "account",
                 "type": "address"
             }
         ],
         "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "bytes32",
+                "name": "schema",
+                "type": "bytes32"
+            },
+            {
+                "internalType": "bytes32",
+                "name": "domain",
+                "type": "bytes32"
+            }
+        ],
+        "name": "getRegistry",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
         "type": "function"
     },
     {
@@ -267,8 +197,13 @@
             },
             {
                 "internalType": "address",
-                "name": "oracleRegistry",
+                "name": "accountImpl",
                 "type": "address"
+            },
+            {
+                "internalType": "address[]",
+                "name": "registries",
+                "type": "address[]"
             }
         ],
         "name": "init",
@@ -284,20 +219,7 @@
                 "type": "bytes32"
             }
         ],
-        "name": "nonce",
-        "outputs": [
-            {
-                "internalType": "uint96",
-                "name": "",
-                "type": "uint96"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [],
-        "name": "oracleRegistry",
+        "name": "ownedAccount",
         "outputs": [
             {
                 "internalType": "address",
@@ -322,41 +244,6 @@
         "type": "function"
     },
     {
-        "inputs": [
-            {
-                "components": [
-                    {
-                        "internalType": "address",
-                        "name": "to",
-                        "type": "address"
-                    },
-                    {
-                        "internalType": "uint256",
-                        "name": "value",
-                        "type": "uint256"
-                    },
-                    {
-                        "internalType": "bytes",
-                        "name": "callData",
-                        "type": "bytes"
-                    },
-                    {
-                        "internalType": "uint256",
-                        "name": "callGasLimit",
-                        "type": "uint256"
-                    }
-                ],
-                "internalType": "struct Op[]",
-                "name": "ops",
-                "type": "tuple[]"
-            }
-        ],
-        "name": "process",
-        "outputs": [],
-        "stateMutability": "payable",
-        "type": "function"
-    },
-    {
         "inputs": [],
         "name": "proxiableUUID",
         "outputs": [
@@ -372,174 +259,12 @@
     {
         "inputs": [
             {
-                "internalType": "bytes32",
-                "name": "name",
-                "type": "bytes32"
-            },
-            {
                 "internalType": "address",
-                "name": "account",
-                "type": "address"
-            },
-            {
-                "components": [
-                    {
-                        "internalType": "uint256",
-                        "name": "issuedAt",
-                        "type": "uint256"
-                    },
-                    {
-                        "internalType": "bytes32",
-                        "name": "identityType",
-                        "type": "bytes32"
-                    },
-                    {
-                        "internalType": "bytes32",
-                        "name": "authType",
-                        "type": "bytes32"
-                    },
-                    {
-                        "internalType": "bytes",
-                        "name": "signature",
-                        "type": "bytes"
-                    }
-                ],
-                "internalType": "struct AuthProof",
-                "name": "proof",
-                "type": "tuple"
-            }
-        ],
-        "name": "reset",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "bytes32",
-                "name": "name",
-                "type": "bytes32"
-            },
-            {
-                "internalType": "address",
-                "name": "account",
-                "type": "address"
-            },
-            {
-                "components": [
-                    {
-                        "internalType": "uint256",
-                        "name": "issuedAt",
-                        "type": "uint256"
-                    },
-                    {
-                        "internalType": "bytes32",
-                        "name": "identityType",
-                        "type": "bytes32"
-                    },
-                    {
-                        "internalType": "bytes32",
-                        "name": "authType",
-                        "type": "bytes32"
-                    },
-                    {
-                        "internalType": "bytes",
-                        "name": "signature",
-                        "type": "bytes"
-                    }
-                ],
-                "internalType": "struct AuthProof",
-                "name": "proof1",
-                "type": "tuple"
-            },
-            {
-                "components": [
-                    {
-                        "internalType": "uint256",
-                        "name": "issuedAt",
-                        "type": "uint256"
-                    },
-                    {
-                        "internalType": "bytes32",
-                        "name": "identityType",
-                        "type": "bytes32"
-                    },
-                    {
-                        "internalType": "bytes32",
-                        "name": "authType",
-                        "type": "bytes32"
-                    },
-                    {
-                        "internalType": "bytes",
-                        "name": "signature",
-                        "type": "bytes"
-                    }
-                ],
-                "internalType": "struct AuthProof",
-                "name": "proof2",
-                "type": "tuple"
-            }
-        ],
-        "name": "reset2Fac",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "bytes32",
-                "name": "name",
-                "type": "bytes32"
-            },
-            {
-                "internalType": "address",
-                "name": "account",
-                "type": "address"
-            },
-            {
-                "components": [
-                    {
-                        "internalType": "uint256",
-                        "name": "issuedAt",
-                        "type": "uint256"
-                    },
-                    {
-                        "internalType": "bytes32",
-                        "name": "identityType",
-                        "type": "bytes32"
-                    },
-                    {
-                        "internalType": "bytes32",
-                        "name": "authType",
-                        "type": "bytes32"
-                    },
-                    {
-                        "internalType": "bytes",
-                        "name": "signature",
-                        "type": "bytes"
-                    }
-                ],
-                "internalType": "struct AuthProof",
-                "name": "proof",
-                "type": "tuple"
-            }
-        ],
-        "name": "reset2Stage",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "address",
-                "name": "oracleRegistry",
+                "name": "registry",
                 "type": "address"
             }
         ],
-        "name": "setOracleRegistry",
+        "name": "setRegistry",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"
@@ -558,29 +283,16 @@
         "type": "function"
     },
     {
-        "inputs": [],
-        "name": "ttl",
-        "outputs": [
+        "inputs": [
             {
-                "internalType": "uint256",
-                "name": "",
-                "type": "uint256"
+                "internalType": "address",
+                "name": "accountImpl",
+                "type": "address"
             }
         ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [],
-        "name": "twoStageLock",
-        "outputs": [
-            {
-                "internalType": "uint256",
-                "name": "",
-                "type": "uint256"
-            }
-        ],
-        "stateMutability": "view",
+        "name": "upgradeAccount",
+        "outputs": [],
+        "stateMutability": "nonpayable",
         "type": "function"
     },
     {

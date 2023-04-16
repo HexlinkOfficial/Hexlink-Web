@@ -5,10 +5,8 @@ import {
   UserOperationStruct
 } from '@account-abstraction/contracts'
 
-import { arrayify } from 'ethers/lib/utils'
 import { TransactionDetailsForUserOp } from './TransactionDetailsForUserOp'
 import { resolveProperties } from 'ethers/lib/utils'
-import { Signer } from '@ethersproject/abstract-signer'
 import { PaymasterAPI } from './PaymasterAPI'
 import { getUserOpHash, NotPromise, packUserOp } from '@account-abstraction/utils'
 import { calcPreVerificationGas, GasOverheads } from './calcPreVerificationGas'

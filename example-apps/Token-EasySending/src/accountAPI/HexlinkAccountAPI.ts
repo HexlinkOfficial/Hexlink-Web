@@ -3,7 +3,6 @@ import {
   Account,
   Account__factory, Hexlink,
   Hexlink__factory,
-  NameStruct
 } from '@hexlink/contracts'
 
 import { hexConcat } from 'ethers/lib/utils'

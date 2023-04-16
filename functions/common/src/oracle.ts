@@ -6,11 +6,11 @@ import {accountInterface} from "./account";
 import {hexlContract, hexlInterface} from "./hexlink";
 import type {AuthProof} from "./types";
 
-const buildAccountInitData = async (owner: string) => {
+export const buildAccountInitData = async (owner: string) => {
   return accountInterface.encodeFunctionData("init", [owner]);
 }
 
-const genRequestId = async function(
+export const genRequestId = async function(
     provider: Provider,
     owner: string,
     func: string

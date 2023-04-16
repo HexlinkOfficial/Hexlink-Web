@@ -1,24 +1,34 @@
-import { hexlAccount, hexlContract, nameHash } from "../../../../functions/common";
-import type { Chain } from "../../../../functions/common";
-import { useAccountStore } from "@/stores/account";
-import { getProvider } from "./network";
-import { ethers } from "ethers";
+import { ethers, BigNumber as EthBigNumber } from "ethers";
+import type { Provider } from "@ethersproject/providers";
+import { Hexlink__factory, NameStruct } from '@hexlink/contracts'
 
-const ACCOUNT_VERSION = undefined; // for test only
+import { useAuthStore } from "@/stores/auth";
+import { useChainStore } from "@/stores/chain";
+import { hash } from "@/web3/utils";
 
-export function nameHashWithVersion(provider: string, uid: string) {
-    let name = nameHash(provider, uid);
-    if (ACCOUNT_VERSION && import.meta.env.VITE_USE_FUNCTIONS_EMULATOR === 'true') {
-        name = ethers.utils.keccak256(
-            ethers.utils.toUtf8Bytes(name + "@" + ACCOUNT_VERSION)
-        );
-    }
-    return name;
-};
+export function getName(): NameStruct {
+    const user = useAuthStore().user!;
+    return {
+        schema: hash(user.schema),
+        domain: hash(user.domain),
+        handle: hash(user.handle),
+    };
+}
 
-export async function initHexlAccount(chain: Chain, nameHash: string) : Promise<void> {
-    const provider = getProvider(chain);
-    const hexl = await hexlContract(provider);
-    const account = await hexlAccount(provider, hexl, nameHash);
-    useAccountStore().setAccount(chain, account, ACCOUNT_VERSION);
-};
+export function getNameHash() {
+    const name = getName();
+    return ethers.utils.keccak256(
+        ethers.utils.defaultAbiCoder.encode(
+            ['bytes32', 'bytes32', 'bytes32'],
+            [name.schema, name.domain, name.handle]
+        )
+    );
+}
+
+export async function getAddressOfName(provider: Provider) {
+    const hexlink = Hexlink__factory.connect(
+        import.meta.env.ACCOUNT_FACTORY,
+        provider
+    );
+    return await hexlink.ownedAccouunt(getNameHash());
+}

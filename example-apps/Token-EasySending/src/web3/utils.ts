@@ -5,6 +5,10 @@ import useClipboard from 'vue-clipboard3';
 import { createToaster } from "@meforma/vue-toaster";
 import { FastAverageColor } from 'fast-average-color';
 
+export function hash(value: string): string {
+    return ethers.utils.keccak256(ethers.utils.toUtf8Bytes(value));
+}
+
 export function toEthBigNumber(value: BigNumber) : EthBigNumber {
     return EthBigNumber.from(value.toString(10));
 }
@@ -51,3 +55,23 @@ export const prettyPrintNumber = (amount: string) => {
         return amount.substring(0, 5);
     }
 };
+
+export function prettyPrint(input: string, length: number, firstCut: number, secondCut: number) {
+    if (input.length > length) {
+      return input.substring(0, firstCut) + "..." + input.slice(secondCut)
+    } else {
+      return input;
+    }
+  }
+  
+  export function delay(ms: number) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+  
+  export function validateEmail(email: string) {
+    if (/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,24}))$/.test(email)) {
+        return true;
+    } else {
+        return false;
+    }
+  }

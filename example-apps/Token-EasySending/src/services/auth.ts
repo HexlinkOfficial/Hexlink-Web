@@ -60,7 +60,6 @@ export async function validateOTP(email: string, otp: string) {
     } catch (error) {
         console.log(error);
     }
-
 }
 
 export async function getIdTokenAndSetClaimsIfNecessary(user: User, refresh: boolean = false) {
@@ -103,14 +102,13 @@ export async function googleSocialLogin() {
         const idToken = await getIdTokenAndSetClaimsIfNecessary(result.user)
         const user : IUser = {
             provider: "google.com",
-            identityType: "email",
-            authType: "oauth",
+            schema: "mailto",
+            domain: "gmail.com",
+            handle: result.user.email;
             uid: result.user.uid,
             providerUid: result.user.uid, // TODO: ensure this is google uid
-            handle: result.user.email!,
             displayName: result.user.displayName || undefined,
             photoURL: result.user.photoURL || undefined,
-            nameHash: nameHashWithVersion("mailto", result.user.email!),
             idToken
         };
         useAuthStore().signIn(user);
@@ -130,14 +128,13 @@ export async function twitterSocialLogin() {
         const handle = result.user.reloadUserInfo.screenName;
         const user : IUser = {
             provider: "twitter.com",
-            identityType: "twitter.com",
-            authType: "oauth",
+            schema: "https",
+            domain: "twitter.com",
+            handle,
             uid: result.user.uid,
             providerUid: result.user.providerData[0].uid,
-            handle,
             displayName: result.user.displayName || undefined,
             photoURL: result.user.photoURL || undefined,
-            nameHash: nameHashWithVersion("twitter.com", handle),
             idToken,
         };
         useAuthStore().signIn(user);
@@ -153,7 +150,6 @@ export function signOutFirebase() {
     useAccountStore().reset();
     useTokenStore().reset();
     useChainStore().reset();
-    useStatusStore().reset();
     return signOut(auth);
 }
 

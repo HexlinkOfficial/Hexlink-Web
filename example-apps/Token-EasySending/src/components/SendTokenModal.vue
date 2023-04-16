@@ -134,6 +134,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, watch } from "vue";
 import { useRouter } from "vue-router";
+import { HexlinkAccountAPI } from "../bundler/HexlinkAccountAPI";
 import { BigNumber as EthBigNumber } from "ethers";
 import { BigNumber } from "bignumber.js";
 import { ethers } from "ethers";
@@ -141,14 +142,21 @@ import type { OnClickOutsideHandler } from '@vueuse/core';
 import { vOnClickOutside } from '@/services/directive';
 import type { BalanceMap } from "@/web3/tokens";
 import { getBalances } from "@/web3/tokens";
+import { getGasFee } from "../bundler/getGasFee";
+import { getHttpRpcClient} from "../bundler/util/getHttpRpcClient"
 import { getPriceInfo } from "@/web3/network";
+import { printOp } from "../bundler/opUtils";
 import { sendToken } from "@/web3/operation";
 import { tokenBase, createNotification } from "@/web3/utils";
-import { useTokenStore } from "@/stores/token";
 import { useAccountStore } from '@/stores/account';
 import { useChainStore } from "@/stores/chain";
+import { useTokenStore } from "@/stores/token";
+import { useWalletStore } from "@/stores/wallet";
 import type { Token } from "../../../../functions/common";
 import { calcGas, tokenAmount, hash } from "../../../../functions/common";
+
+import config from "../../bundler_config.json";
+import { JsonRpcProvider } from "@ethersproject/providers";
 
 const estimatedGasAmount = "150000"; // hardcoded, can optimize later
 const chooseTotalDrop = ref<boolean>(false);
@@ -316,6 +324,36 @@ const onSubmit = async (_e: Event) => {
         transaction.value.gasToken,
         false // dryrun
       );
+
+      const target = ethers.utils.getAddress(transaction.value.to);
+      const value = ethers.utils.parseEther(transaction.value.amount);
+      const bundlerProvider = new ethers.providers.JsonRpcProvider(config.rpcUrl);
+      const hexlinkAccountAPI = new HexlinkAccountAPI({
+        provider: bundlerProvider,
+        entryPointAddress: config.entryPoint,
+        ownerAddress: useWalletStore().account!.address,
+        factoryAddress: config.accountFactory,
+        paymasterAPI: undefined,
+      });
+      const op = await hexlinkAccountAPI.createSignedUserOp({
+        target,
+        value,
+        data: "0x",
+        ...(await getGasFee(bundlerProvider)),
+      });
+      console.log(`Signed UserOperation: ${await printOp(op)}`);
+      const client = await getHttpRpcClient(
+        bundlerProvider,
+        config.bundlerUrl,
+        config.entryPoint
+      );
+      const uoHash = await client.sendUserOpToBundler(op);
+      console.log(`UserOpHash: ${uoHash}`);
+
+      console.log("Waiting for transaction...");
+      const txHash = await hexlinkAccountAPI.getUserOpReceipt(uoHash);
+      console.log(`Transaction hash: ${txHash}`);
+
       message.value = "Done!";
       sendStatus.value = "success";
     } catch(error) {

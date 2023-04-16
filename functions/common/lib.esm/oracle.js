@@ -2,22 +2,23 @@
 import { ethers } from "ethers";
 import { accountInterface } from "./account";
 import { hexlContract, hexlInterface } from "./hexlink";
-const genRequestId = async function (provider, nameHash, func, data) {
+const buildAccountInitData = async (owner) => {
+    return accountInterface.encodeFunctionData("init", [owner]);
+};
+const genRequestId = async function (provider, owner, func) {
     const hexlink = await hexlContract(provider);
-    const result = ethers.utils.keccak256(ethers.utils.defaultAbiCoder.encode(["bytes4", "bytes", "address", "uint256", "uint256"], [
+    const data = buildAccountInitData(owner);
+    const requestId = ethers.utils.keccak256(ethers.utils.defaultAbiCoder.encode(["bytes4", "address", "uint256", "bytes"], [
         func,
-        data,
         hexlink.address,
         (await provider.getNetwork()).chainId,
-        await hexlink.nonce(nameHash),
+        data
     ]));
-    return result;
+    return requestId;
 };
-export async function genDeployAuthProof(provider, nameHash, owner, data, genAuthProof, version) {
-    const initData = accountInterface.encodeFunctionData("init", [owner, data]);
-    const requestId = await genRequestId(provider, nameHash, hexlInterface.getSighash("deploy"), initData);
+export async function genDeployAuthProof(provider, owner, genAuthProof) {
+    const requestId = await genRequestId(provider, owner, hexlInterface.getSighash("deploy"));
     return {
-        initData,
-        proof: await genAuthProof({ requestId, version }),
+        proof: await genAuthProof({ requestId }),
     };
 }

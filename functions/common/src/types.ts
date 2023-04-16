@@ -49,6 +49,6 @@ export interface AuthProofInput {
 }
 
 export interface DeployRequest {
-  authProof: AuthProofInput,
+  authProof: string;
   owner: string,
 }

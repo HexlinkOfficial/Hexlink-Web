@@ -1,12 +1,10 @@
 name: ci-test
 
 on:
-  pull_request:
-    types:
-      - opened
-    branches:
-      - main
   push:
+    branches: [main]
+  pull_request:
+    branches: [main]
 
 jobs:
   setup_env:

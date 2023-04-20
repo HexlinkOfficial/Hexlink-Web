@@ -9,7 +9,7 @@ const functions = getFunctions();
 export const buildAccountInitData = async (owner: string) => {
     return accountInterface.encodeFunctionData("init", [owner]);
 }
-  
+
 export const genRequestId = async function(
     provider: Provider,
     owner: string,

@@ -95,8 +95,8 @@
                             <img src="@/assets/svg/hexlinkCircle.svg" alt="hexlink logo" style="margin-right: 1rem;"/>
                             <div class="user-info">
                               <span style="margin-bottom: 0;" class="smart-contract-address">
-                                <h5 @click="doCopy(useAccountStore().account?.address)">
-                                  {{ addressTextLong(useAccountStore().account?.address) }}
+                                <h5 @click="doCopy(account.address)">
+                                  {{ addressTextLong(account.address) }}
                                 </h5>
                               </span>
                             </div>
@@ -104,14 +104,14 @@
                         </div>
                       </div>
                     </div>
-                    <div v-if="walletStore.connected || useAccountStore().account?.owner != null" class="user-balance">
+                    <div v-if="walletStore.connected || account.owner" class="user-balance">
                       <h5>External Account Address </h5>
                       <div class="user_wallet" style="border: 0 solid #e5e7eb; padding: 10px 0px 0px 0px;">
                         <div class="user2">
                           <div class="wallet-image-wrapper">
                             <img v-if="walletStore.connected" class="wallet-image" :src="useWalletStore().walletIcon">
-                            <img v-if="!walletStore.connected" class="wallet-image" style="margin-right: 0rem;" src="@/assets/svg/wallet.svg"/> 
-                            <div v-if="useAccountStore().account?.owner == null" class="wallet-presence-wrapper">
+                            <img v-else class="wallet-image" style="margin-right: 0rem;" src="@/assets/svg/wallet.svg"/> 
+                            <div v-if="!account.owner" class="wallet-presence-wrapper">
                               <a-tooltip placement="right">
                                 <template #title>
                                   <span>Start to send money to bind this wallet with Hexlink account</span>
@@ -119,7 +119,7 @@
                                 <img class="wallet-presence" src="../assets/exclamation-mark.png" alt="" />
                               </a-tooltip>
                             </div>
-                            <div v-if="useAccountStore().account?.owner != null && walletStore.connected" class="wallet-presence-wrapper">
+                            <div v-if="account.owner && walletStore.connected" class="wallet-presence-wrapper">
                               <a-tooltip placement="right">
                                 <template #title>
                                   <span>Wallet is Available</span>
@@ -127,7 +127,7 @@
                                 <img class="wallet-presence" src="../assets/presence_green_dot.png" alt="" />
                               </a-tooltip>
                             </div>
-                            <div v-if="useAccountStore().account?.owner != null && !walletStore.connected" class="wallet-presence-wrapper">
+                            <div v-if="account.owner && !walletStore.connected" class="wallet-presence-wrapper">
                               <a-tooltip placement="right">
                                 <template #title>
                                   <span>Your connected wallet is unavailable in this session, please</span>
@@ -139,15 +139,15 @@
                           </div>
                           <div class="user-info">
                             <span style="margin-bottom: 0;" class="smart-contract-address">
-                              <h5 v-if="useAccountStore().account?.owner == null" @click="doCopy(walletStore.account?.address)">
-                                {{ addressTextLong(walletStore.account?.address) }}
+                              <h5 v-if="account.owner" @click="doCopy(account.owner)">
+                                {{ addressTextLong(account.owner) }}
                               </h5>
-                              <h5 v-if="useAccountStore().account?.owner != null" @click="doCopy(useAccountStore().account?.owner)">
-                                {{ addressTextLong(useAccountStore().account?.owner) }}
+                              <h5 v-else @click="doCopy(walletStore.account?.address)">
+                                {{ addressTextLong(account.address) }}
                               </h5>
                             </span>
                           </div>
-                          <div v-if="useAccountStore().account?.owner == null"> 
+                          <div v-if="!account.owner"> 
                             <a-tooltip placement="bottom">
                               <template #title>
                                 <span>Disconnect</span>
@@ -163,7 +163,7 @@
                         </div>
                       </div>
                     </div>
-                    <div v-if="walletStore.connected == false && useAccountStore().account?.owner == null" style="margin-top: 20px; margin-bottom: 10px; margin-left: 24px; margin-right:24px;">
+                    <div v-if="!walletStore.connected && !account.owner" style="margin-top: 20px; margin-bottom: 10px; margin-left: 24px; margin-right:24px;">
                       <button class="connect-wallet-button"  @click="connectWallet">
                         <img src="@/assets/svg/white-wallet.svg" style="margin-right: 10px;"/>
                         Connect Wallet
@@ -210,21 +210,20 @@ import {
     ARBITRUM_TESTNET,
     OK_TESTNET,
     prettyPrintAddress,
-    setAccountOwner
 } from "../../../../functions/common";
 import { switchNetwork, getProvider } from "@/web3/network";
 import { connectWallet, disconnectWallet} from "@/web3/wallet";
-import { useAccountStore } from "@/stores/account";
 import { signOutFirebase } from "@/services/auth";
 import useClipboard from 'vue-clipboard3';
 import ScanQRCodeModal from './ScanQRCodeModal.vue';
 import { useRoute } from "vue-router";
+import { getAccount, type Account } from "@/web3/account";
 
 const authStore = useAuthStore();
 const user = authStore.user!;
 const walletStore = useWalletStore();
 const active = ref<string>("");
-const showTestnet = ref<boolean>(false);
+const showTestnet = ref<boolean>(true);
 const { toClipboard } = useClipboard();
 
 const mainNet = [ARBITRUM];
@@ -237,6 +236,10 @@ const addressTextLong = function (address: string | undefined) {
   return "0x";
 };
 
+const account = computed(async() => {
+    return await getAccount();
+});
+
 const userHandle = computed(() => {
   if (useAuthStore().user?.provider.includes("twitter")) {
     return "@" + user.handle;
@@ -247,15 +250,6 @@ const userHandle = computed(() => {
 const root = ref<HTMLElement | null>(null);
 
 const activeDropDown = async (value: any) => {
-  if (value === 'profile') {
-    const chain = useChainStore().chain;
-    const provider = getProvider(chain);
-    if (useAccountStore().account?.owner == null){
-      // update the owner if there is one in async
-      setAccountOwner(provider, useAccountStore().account!);
-    }
-  }
-
   active.value = active.value === value ? "" : value;
 };
 
@@ -284,16 +278,11 @@ const showScanQRCodeModal = computed(() => {
 
 onMounted(() => {
   document.addEventListener('click', closeDropDown);
-  showTestnet.value = useAccountStore().showTestnet!;
 });
 
 onBeforeUnmount(async () => {
   document.removeEventListener('click', closeDropDown);
 });
-
-watch(showTestnet, () => {
-  useAccountStore().setShowTestnet(showTestnet.value);
-})
 </script>
 
 <style lang="scss" scoped>

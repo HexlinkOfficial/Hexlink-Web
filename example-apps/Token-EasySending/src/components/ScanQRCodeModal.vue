@@ -17,7 +17,7 @@
 
 <script setup lang="ts">
 import { onMounted } from "vue";
-import { useAccountStore } from "@/stores/account";
+import { getAccountAddress } from "@/web3/account";
 import QRCode from "qrcode";
 
 onMounted(() => {
@@ -25,9 +25,9 @@ onMounted(() => {
 })
 
 const genQrCode = async () => {
-    let walletAddress = useAccountStore().account?.address;
+    const account = await getAccountAddress();
     let canvas = document.getElementById('canvas')
-    await QRCode.toCanvas(canvas, walletAddress, { margin: '2', scale: '8', width: '400px' });
+    await QRCode.toCanvas(canvas, account, { margin: '2', scale: '8', width: '400px' });
 }
 </script>
 

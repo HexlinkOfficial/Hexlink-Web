@@ -148,10 +148,10 @@ import { getPriceInfo } from "@/web3/network";
 import { printOp } from "../bundler/opUtils";
 import { sendToken } from "@/web3/operation";
 import { tokenBase, createNotification } from "@/web3/utils";
-import { useAccountStore } from '@/stores/account';
 import { useChainStore } from "@/stores/chain";
 import { useTokenStore } from "@/stores/token";
 import { useWalletStore } from "@/stores/wallet";
+import { getAccountAddress } from "@/web3/account";
 import type { Token } from "../../../../functions/common";
 import { calcGas, tokenAmount, hash } from "../../../../functions/common";
 
@@ -203,7 +203,7 @@ const transactionTokenBalance = computed(
 
 const genTokenList = async function () {
   hexlAccountBalances.value = await getBalances(
-    useAccountStore().account!.address,
+    await getAccountAddress(),
     hexlAccountBalances.value,
   );
   tokens.value = tokenStore.tokens.filter(

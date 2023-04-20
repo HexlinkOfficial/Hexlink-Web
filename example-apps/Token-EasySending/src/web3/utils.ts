@@ -50,7 +50,7 @@ export function createNotification(message: string, mode: string) {
 
 export const prettyPrintNumber = (amount: string) => {
     if (amount.substring(0, 5) == "0.000") {
-        return amount.substring(0, 3) + "..." + amount.slice(-1);
+        return prettyPrint(amount, 8, 3, -1);
     } else {
         return amount.substring(0, 5);
     }
@@ -62,16 +62,16 @@ export function prettyPrint(input: string, length: number, firstCut: number, sec
     } else {
       return input;
     }
-  }
+}
   
-  export function delay(ms: number) {
+export function delay(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
-  }
-  
-  export function validateEmail(email: string) {
+}
+
+export function validateEmail(email: string) {
     if (/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,24}))$/.test(email)) {
         return true;
     } else {
         return false;
     }
-  }
+}

@@ -42,11 +42,11 @@ import { useChainStore } from "@/stores/chain";
 import { getBalances, updatePreferences } from "@/web3/tokens";
 import type { BalanceMap } from "@/web3/tokens";
 import Loading from "@/components/Loading.vue";
-import { useAccountStore } from '@/stores/account';
 import { useTokenStore } from '@/stores/token';
 import EmptyContent from '@/components/EmptyContent.vue';
 import { getTokenPrices } from "@/services/price";
 import { BigNumber } from "bignumber.js";
+import { getAccountAddress } from "@/web3/account";
 
 const loading = ref<boolean>(true);
 const balances = ref<BalanceMap>({});
@@ -63,7 +63,7 @@ const price = (token: Token) : string => {
 
 const loadTokens = async () => {
   loading.value = true;
-  const account = useAccountStore().account?.address
+  const account = await getAccountAddress();
   if (account) {
     balances.value = await getBalances(account, balances.value);
     await updatePreferences(balances.value);

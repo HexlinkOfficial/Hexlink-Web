@@ -14,10 +14,8 @@ import { useAuthStore } from "@/stores/auth";
 import { useWalletStore } from "@/stores/wallet";
 import { switchNetwork } from "@/web3/network";
 import { ARBITRUM, SUPPORTED_CHAINS, type Chain } from "../../../../functions/common";
-import { initHexlAccount, nameHashWithVersion } from "@/web3/account";
 import { useChainStore } from '@/stores/chain';
 import { initTokenList } from "@/web3/tokens";
-import { useAccountStore } from '@/stores/account';
 import { useTokenStore } from '@/stores/token';
 import { useStatusStore } from '@/stores/airdropStatus';
 import * as jose from 'jose'
@@ -147,17 +145,12 @@ export async function twitterSocialLogin() {
 export function signOutFirebase() {
     useWalletStore().disconnectWallet();
     useAuthStore().signOut();
-    useAccountStore().reset();
     useTokenStore().reset();
     useChainStore().reset();
     return signOut(auth);
 }
 
 export async function init() {
-    const user = useAuthStore().user!;
-    await Promise.all(
-        SUPPORTED_CHAINS.map((chain: Chain) => initHexlAccount(chain, user.nameHash))
-    );
     await Promise.all(
         SUPPORTED_CHAINS.map((chain: Chain) => initTokenList(chain))
     );

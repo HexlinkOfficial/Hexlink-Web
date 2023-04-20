@@ -5,9 +5,9 @@ import WalletConnectProvider from "@walletconnect/web3-provider";
 import { isContract } from "../../../../functions/common";
 import type { Account } from "../../../../functions/common";
 import { useChainStore } from "@/stores/chain";
-import { useAccountStore } from "@/stores/account";
 import { createToaster } from "@meforma/vue-toaster";
 import type { Chain } from "../../../../functions/common";
+import { getAccountOwner } from "@/web3/account";
 
 async function buildAccount(account: string) : Promise<Account> {
   return {
@@ -86,14 +86,14 @@ export async function connectWallet() {
         walletIcon = "https://i.postimg.cc/j29hn62F/9035092-wallet-icon.png";
       }
     }
-    const ownerAccountAddress = useAccountStore().account?.owner;
-    if (ownerAccountAddress != null && accounts.map((acc: any) => acc.toLowerCase()).includes(ownerAccountAddress.toLowerCase())) {
+    const owner = await getAccountOwner();
+    if (owner && accounts.map((acc: any) => acc.toLowerCase()).includes(owner.toLowerCase())) {
       store.connectWallet(
         wallet,
         walletIcon,
-        await buildAccount(ownerAccountAddress),
+        await buildAccount(owner),
       );
-    } else if (ownerAccountAddress == null) {
+    } else if (!owner) {
       store.connectWallet(
         wallet,
         walletIcon,
@@ -113,14 +113,14 @@ export async function connectWallet() {
             params: [{ eth_accounts: {} }]
           })
         }
-        if (result[0].caveats[0].value.includes(ownerAccountAddress.toLowerCase())) {
+        if (result[0].caveats[0].value.includes(owner.toLowerCase())) {
           store.connectWallet(
             wallet,
             walletIcon,
-            await buildAccount(ownerAccountAddress),
+            await buildAccount(owner),
           );
         } else {
-          toaster.error(`Wrong owner account! Please connect to ${ownerAccountAddress}!`);
+          toaster.error(`Wrong owner account! Please connect to ${owner}!`);
         }
       } catch (error: any) {
         console.log(error.message);

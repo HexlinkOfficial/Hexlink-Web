@@ -206,7 +206,6 @@ import { createToaster } from "@meforma/vue-toaster";
 import {
     GOERLI,
     MUMBAI,
-    ARBITRUM,
     ARBITRUM_TESTNET,
     OK_TESTNET,
     prettyPrintAddress,
@@ -226,7 +225,7 @@ const active = ref<string>("");
 const showTestnet = ref<boolean>(true);
 const { toClipboard } = useClipboard();
 
-const mainNet = [ARBITRUM];
+const mainNet = [];
 const testNet = [GOERLI, MUMBAI, ARBITRUM_TESTNET, OK_TESTNET];
 
 const addressTextLong = function (address: string | undefined) {

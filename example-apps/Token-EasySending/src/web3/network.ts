@@ -2,7 +2,6 @@ import { ethers, BigNumber as EthBigNumber } from "ethers";
 
 import { isNativeCoin, isWrappedCoin } from "../../../../functions/common";
 import type { Chain, BigNumberish } from "../../../../functions/common";
-import { useStatusStore } from "@/stores/airdropStatus";
 import { useChainStore } from '@/stores/chain';
 
 const ALCHEMY_KEY = {
@@ -14,7 +13,6 @@ const ALCHEMY_KEY = {
 };
 
 async function doSwitch(chain: Chain) {
-    useStatusStore().reset();
     useChainStore().switchNetwork(chain);
 }
 
@@ -40,4 +38,32 @@ export function getProvider(chain: Chain) {
             import.meta.env.VITE_INFURA_API_KEY
         );
     }
+}
+
+
+export async function getPriceInfo(chain: Chain, gasToken: string) : Promise<{
+    gasPrice: BigNumberish,
+    tokenPrice: BigNumberish
+}> {
+    const provider = getProvider(chain);
+    let gasPrice : EthBigNumber;
+    if (chain.name === 'arbitrum' || chain.name === 'arbitrum_testnet') {
+        gasPrice = EthBigNumber.from(100000000);
+    } else if (chain.name === 'arbitrum_nova') {
+        gasPrice = EthBigNumber.from(10000000);
+    } else {
+        const {maxFeePerGas} = await provider.getFeeData();
+        if (!maxFeePerGas) {
+            throw new Error("failed to get the gas price");
+        }
+        gasPrice = maxFeePerGas.mul(2);
+    }
+    let tokenPrice;
+    if (isNativeCoin(gasToken, chain) || isWrappedCoin(gasToken, chain)) {
+        tokenPrice = EthBigNumber.from(10).pow(18);
+    } else {
+        const swap = await hexlinkSwap(provider);
+        tokenPrice = await swap.priceOf(gasToken);
+    }
+    return {gasPrice, tokenPrice}
 }

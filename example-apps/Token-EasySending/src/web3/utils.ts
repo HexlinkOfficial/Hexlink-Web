@@ -4,6 +4,7 @@ import type { Token } from "../../../../functions/common";
 import useClipboard from 'vue-clipboard3';
 import { createToaster } from "@meforma/vue-toaster";
 import { FastAverageColor } from 'fast-average-color';
+import { ethers } from "ethers";
 
 export function hash(value: string): string {
     return ethers.utils.keccak256(ethers.utils.toUtf8Bytes(value));

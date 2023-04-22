@@ -40,38 +40,37 @@ export function getNameHash(name?: NameStruct) {
     );
 }
 
-export async function getAccountAddress(provider: Provider, name?: NameStruct) {
+export async function getAccountAddress(name?: NameStruct) {
     if (!name) { name = getName(); }
     const hexlink = Hexlink__factory.connect(
-        import.meta.env.ACCOUNT_FACTORY,
-        provider
+        import.meta.env.VITE_ACCOUNT_FACTORY,
+        useChainStore().provider
     );
-    return await hexlink.ownedAccouunt(getNameHash(name));
+    return await hexlink.ownedAccount(getNameHash(name));
 }
 
 export async function getAccountOwner(
-    provider: Provider,
-    address!: string
+    address?: string
 ) : Promise<undefined | string> {
     if (!address) { address = await getAccountAddress(); }
-    if (await isContract(account.address)) {
+    if (await isContract(address)) {
         const account = Account_factory.connect(
             address,
-            provider
+            useChainStore().provider
         );
         return await account.owner();
     }
     return undefined;
 }
 
-export async function getAccount(provider: Provider) : Promise<Account> {
+export async function getAccount() : Promise<Account> {
     const name = getName();
     const nameHash = getNameHash(name);
-    const address = await getAccountAddress(provider, name);
+    const address = await getAccountAddress(name);
     return {
         name,
         nameHash,
         address,
-        owner: await getAccountOwner(provider, address)
+        owner: await getAccountOwner(address)
     }
 }

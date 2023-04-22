@@ -144,9 +144,7 @@ import type { BalanceMap } from "@/web3/tokens";
 import { getBalances } from "@/web3/tokens";
 import { getGasFee } from "../bundler/getGasFee";
 import { getHttpRpcClient} from "../bundler/util/getHttpRpcClient"
-import { getPriceInfo } from "@/web3/network";
 import { printOp } from "../bundler/opUtils";
-import { sendToken } from "@/web3/operation";
 import { tokenBase, createNotification } from "@/web3/utils";
 import { useChainStore } from "@/stores/chain";
 import { useTokenStore } from "@/stores/token";
@@ -314,17 +312,6 @@ const onSubmit = async (_e: Event) => {
     try {
       sendStatus.value = "processing";
       message.value = "Check your wallet to confirm the operation...";
-      const status = await sendToken(
-        transaction.value.token,
-        [{
-          schema: isInputAddress.value ? undefined : "mailto",
-          name: transaction.value.to,
-        }],
-        transaction.value.amount,
-        transaction.value.gasToken,
-        false // dryrun
-      );
-
       const target = ethers.utils.getAddress(transaction.value.to);
       const value = ethers.utils.parseEther(transaction.value.amount);
       const bundlerProvider = new ethers.providers.JsonRpcProvider(config.rpcUrl);
@@ -338,7 +325,7 @@ const onSubmit = async (_e: Event) => {
       const op = await hexlinkAccountAPI.createSignedUserOp({
         target,
         value,
-        data: "0x",
+        data: "0x", // TODO: add proper data here
         ...(await getGasFee(bundlerProvider)),
       });
       console.log(`Signed UserOperation: ${await printOp(op)}`);

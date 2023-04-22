@@ -17,7 +17,6 @@ import { ARBITRUM, SUPPORTED_CHAINS, type Chain } from "../../../../functions/co
 import { useChainStore } from '@/stores/chain';
 import { initTokenList } from "@/web3/tokens";
 import { useTokenStore } from '@/stores/token';
-import { useStatusStore } from '@/stores/airdropStatus';
 import * as jose from 'jose'
 
 const auth = getAuth(app)
@@ -102,7 +101,7 @@ export async function googleSocialLogin() {
             provider: "google.com",
             schema: "mailto",
             domain: "gmail.com",
-            handle: result.user.email;
+            handle: result.user.email,
             uid: result.user.uid,
             providerUid: result.user.uid, // TODO: ensure this is google uid
             displayName: result.user.displayName || undefined,

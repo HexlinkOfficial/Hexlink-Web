@@ -151,11 +151,12 @@ import { useTokenStore } from "@/stores/token";
 import { useWalletStore } from "@/stores/wallet";
 import { getAccountAddress } from "@/web3/account";
 import { getPriceInfo } from "@/web3/network";
+import { getName } from '../web3/account'
 import type { Token } from "../../../../functions/common";
 import { calcGas, tokenAmount, hash } from "../../../../functions/common";
+import ERC20_ABI from "../abi/ERC20_ABI.json";
 
 import config from "../../bundler_config.json";
-import { JsonRpcProvider } from "@ethersproject/providers";
 
 const estimatedGasAmount = "150000"; // hardcoded, can optimize later
 const chooseTotalDrop = ref<boolean>(false);
@@ -168,6 +169,7 @@ const tokens = ref<Token[]>([]);
 const isInputAddress = ref<boolean>(false);
 const message = ref<string>("Let's go!");
 const showStep2 = ref<boolean>(false);
+const erc20Interface = new ethers.utils.Interface(ERC20_ABI);
 
 interface TokenTransaction {
   to: string,
@@ -313,6 +315,7 @@ const onSubmit = async (_e: Event) => {
     try {
       sendStatus.value = "processing";
       message.value = "Check your wallet to confirm the operation...";
+
       const target = ethers.utils.getAddress(transaction.value.to);
       const value = ethers.utils.parseEther(transaction.value.amount);
       const bundlerProvider = new ethers.providers.JsonRpcProvider(config.rpcUrl);
@@ -322,11 +325,14 @@ const onSubmit = async (_e: Event) => {
         ownerAddress: useWalletStore().account!.address,
         factoryAddress: config.accountFactory,
         paymasterAPI: undefined,
+        name: getName(),
       });
+
+      const data = erc20Interface.encodeFunctionData("transfer", [target, value]);
       const op = await hexlinkAccountAPI.createSignedUserOp({
         target,
         value,
-        data: "0x", // TODO: add proper data here
+        data,
         ...(await getGasFee(bundlerProvider)),
       });
       console.log(`Signed UserOperation: ${await printOp(op)}`);

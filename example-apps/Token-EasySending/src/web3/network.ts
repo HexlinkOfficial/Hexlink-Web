@@ -40,7 +40,6 @@ export function getProvider(chain: Chain) {
     }
 }
 
-
 export async function getPriceInfo(chain: Chain, gasToken: string) : Promise<{
     gasPrice: BigNumberish,
     tokenPrice: BigNumberish

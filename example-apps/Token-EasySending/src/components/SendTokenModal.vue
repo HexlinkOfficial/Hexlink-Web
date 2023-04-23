@@ -150,6 +150,7 @@ import { useChainStore } from "@/stores/chain";
 import { useTokenStore } from "@/stores/token";
 import { useWalletStore } from "@/stores/wallet";
 import { getAccountAddress } from "@/web3/account";
+import { getPriceInfo } from "@/web3/network";
 import type { Token } from "../../../../functions/common";
 import { calcGas, tokenAmount, hash } from "../../../../functions/common";
 

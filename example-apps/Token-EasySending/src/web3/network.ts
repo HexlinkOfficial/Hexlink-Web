@@ -2,8 +2,6 @@ import { ethers, BigNumber as EthBigNumber } from "ethers";
 
 import { isNativeCoin, isWrappedCoin } from "../../../../functions/common";
 import type { Chain, BigNumberish } from "../../../../functions/common";
-import { hexlinkSwap } from "../../../../functions/redpacket";
-import { useStatusStore } from "@/stores/airdropStatus";
 import { useChainStore } from '@/stores/chain';
 
 const ALCHEMY_KEY = {
@@ -15,7 +13,6 @@ const ALCHEMY_KEY = {
 };
 
 async function doSwitch(chain: Chain) {
-    useStatusStore().reset();
     useChainStore().switchNetwork(chain);
 }
 
@@ -54,7 +51,6 @@ export async function getPriceInfo(chain: Chain, gasToken: string) : Promise<{
     } else if (chain.name === 'arbitrum_nova') {
         gasPrice = EthBigNumber.from(10000000);
     } else {
-        console.log("here");
         const {maxFeePerGas} = await provider.getFeeData();
         if (!maxFeePerGas) {
             throw new Error("failed to get the gas price");

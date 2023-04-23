@@ -134,7 +134,6 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, watch } from "vue";
 import { useRouter } from "vue-router";
-import { HexlinkAccountAPI } from "../bundler/HexlinkAccountAPI";
 import { BigNumber as EthBigNumber } from "ethers";
 import { BigNumber } from "bignumber.js";
 import { ethers } from "ethers";
@@ -142,16 +141,16 @@ import type { OnClickOutsideHandler } from '@vueuse/core';
 import { vOnClickOutside } from '@/services/directive';
 import type { BalanceMap } from "@/web3/tokens";
 import { getBalances } from "@/web3/tokens";
-import { getGasFee } from "../bundler/getGasFee";
-import { getHttpRpcClient} from "../bundler/util/getHttpRpcClient"
-import { getPriceInfo } from "@/web3/network";
-import { printOp } from "../bundler/opUtils";
-import { sendToken } from "@/web3/operation";
+import { HexlinkAccountAPI } from "../accountAPI/HexlinkAccountAPI";
+import { getGasFee } from "../accountAPI/getGasFee";
+import { getHttpRpcClient} from "../accountAPI/util/getHttpRpcClient"
+import { printOp } from "../accountAPI/opUtils";
 import { tokenBase, createNotification } from "@/web3/utils";
-import { useAccountStore } from '@/stores/account';
 import { useChainStore } from "@/stores/chain";
 import { useTokenStore } from "@/stores/token";
 import { useWalletStore } from "@/stores/wallet";
+import { getAccountAddress } from "@/web3/account";
+import { getPriceInfo } from "@/web3/network";
 import type { Token } from "../../../../functions/common";
 import { calcGas, tokenAmount, hash } from "../../../../functions/common";
 
@@ -203,7 +202,7 @@ const transactionTokenBalance = computed(
 
 const genTokenList = async function () {
   hexlAccountBalances.value = await getBalances(
-    useAccountStore().account!.address,
+    await getAccountAddress(),
     hexlAccountBalances.value,
   );
   tokens.value = tokenStore.tokens.filter(
@@ -314,17 +313,6 @@ const onSubmit = async (_e: Event) => {
     try {
       sendStatus.value = "processing";
       message.value = "Check your wallet to confirm the operation...";
-      const status = await sendToken(
-        transaction.value.token,
-        [{
-          schema: isInputAddress.value ? undefined : "mailto",
-          name: transaction.value.to,
-        }],
-        transaction.value.amount,
-        transaction.value.gasToken,
-        false // dryrun
-      );
-
       const target = ethers.utils.getAddress(transaction.value.to);
       const value = ethers.utils.parseEther(transaction.value.amount);
       const bundlerProvider = new ethers.providers.JsonRpcProvider(config.rpcUrl);
@@ -338,7 +326,7 @@ const onSubmit = async (_e: Event) => {
       const op = await hexlinkAccountAPI.createSignedUserOp({
         target,
         value,
-        data: "0x",
+        data: "0x", // TODO: add proper data here
         ...(await getGasFee(bundlerProvider)),
       });
       console.log(`Signed UserOperation: ${await printOp(op)}`);

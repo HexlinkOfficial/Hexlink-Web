@@ -12,6 +12,8 @@ export const useAuthStore = defineStore({
     persist: true,
     getters: {
         userInfo: (state) => ({
+            schema: state.user!.schema,
+            domain: state.user!.domain,
             handle: state.user!.handle,
             displayName: state.user!.displayName,
             provider: state.user!.provider,

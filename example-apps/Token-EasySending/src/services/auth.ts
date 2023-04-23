@@ -14,12 +14,9 @@ import { useAuthStore } from "@/stores/auth";
 import { useWalletStore } from "@/stores/wallet";
 import { switchNetwork } from "@/web3/network";
 import { ARBITRUM, SUPPORTED_CHAINS, type Chain } from "../../../../functions/common";
-import { initHexlAccount, nameHashWithVersion } from "@/web3/account";
 import { useChainStore } from '@/stores/chain';
 import { initTokenList } from "@/web3/tokens";
-import { useAccountStore } from '@/stores/account';
 import { useTokenStore } from '@/stores/token';
-import { useStatusStore } from '@/stores/airdropStatus';
 import * as jose from 'jose'
 
 const auth = getAuth(app)
@@ -60,7 +57,6 @@ export async function validateOTP(email: string, otp: string) {
     } catch (error) {
         console.log(error);
     }
-
 }
 
 export async function getIdTokenAndSetClaimsIfNecessary(user: User, refresh: boolean = false) {
@@ -103,14 +99,13 @@ export async function googleSocialLogin() {
         const idToken = await getIdTokenAndSetClaimsIfNecessary(result.user)
         const user : IUser = {
             provider: "google.com",
-            identityType: "email",
-            authType: "oauth",
+            schema: "mailto",
+            domain: "gmail.com",
+            handle: result.user.email,
             uid: result.user.uid,
             providerUid: result.user.uid, // TODO: ensure this is google uid
-            handle: result.user.email!,
             displayName: result.user.displayName || undefined,
             photoURL: result.user.photoURL || undefined,
-            nameHash: nameHashWithVersion("mailto", result.user.email!),
             idToken
         };
         useAuthStore().signIn(user);
@@ -130,14 +125,13 @@ export async function twitterSocialLogin() {
         const handle = result.user.reloadUserInfo.screenName;
         const user : IUser = {
             provider: "twitter.com",
-            identityType: "twitter.com",
-            authType: "oauth",
+            schema: "https",
+            domain: "twitter.com",
+            handle,
             uid: result.user.uid,
             providerUid: result.user.providerData[0].uid,
-            handle,
             displayName: result.user.displayName || undefined,
             photoURL: result.user.photoURL || undefined,
-            nameHash: nameHashWithVersion("twitter.com", handle),
             idToken,
         };
         useAuthStore().signIn(user);
@@ -150,18 +144,12 @@ export async function twitterSocialLogin() {
 export function signOutFirebase() {
     useWalletStore().disconnectWallet();
     useAuthStore().signOut();
-    useAccountStore().reset();
     useTokenStore().reset();
     useChainStore().reset();
-    useStatusStore().reset();
     return signOut(auth);
 }
 
 export async function init() {
-    const user = useAuthStore().user!;
-    await Promise.all(
-        SUPPORTED_CHAINS.map((chain: Chain) => initHexlAccount(chain, user.nameHash))
-    );
     await Promise.all(
         SUPPORTED_CHAINS.map((chain: Chain) => initTokenList(chain))
     );

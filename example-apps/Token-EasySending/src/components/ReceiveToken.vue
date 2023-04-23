@@ -8,33 +8,36 @@
     <p class="or"></p>
     <div class="qrcode">
       <canvas id="canvas" style="height: 200px; width: 200px;"></canvas>
-      <p class="qrcode-address">{{ useAccountStore().account?.address }}</p>
+      <p class="qrcode-address">{{ walletAddress }}</p>
     </div>
     <p class="or"></p>
     <p class="sending-reminder">Send only token on {{ useChainStore().chain.name }} network(id: {{ useChainStore().chain.chainId }}) to this address.<br>Sending tokens from other chains may result in permanent loss.</p>
     <div style="display: flex; justify-content: center;">
-      <button @click="copy(useAccountStore().account?.address!, 'Claim URL Copied')" class="cta-button">Copy</button>
+      <button @click="copy(walletAddress, 'Claim URL Copied')" class="cta-button">Copy</button>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { useTokenStore } from "@/stores/token";
-import { useAccountStore } from "@/stores/account";
 import { useChainStore } from "@/stores/chain";
 import QRCode from "qrcode";
 import { copy } from "@/web3/utils";
+import { getAccountAddress } from "@/web3/account";
 
-onMounted(() => {
-  genQrCode();
-})
+const walletAddress = ref<string>("");
 
-const genQrCode = async () => {
-  let walletAddress = useAccountStore().account?.address;
-  let canvas = document.getElementById('canvas')
-  await QRCode.toCanvas(canvas, walletAddress, { margin: '2', scale: '6', width: '200px' });
-}
+onMounted(async () => {
+  walletAddress.value = await getAccountAddress();
+  let canvas = document.getElementById('canvas');
+  const address = await Promise.resolve(walletAddress.value);
+  await QRCode.toCanvas(
+    canvas,
+    walletAddress.value,
+    { margin: '2', scale: '6', width: '200px' }
+  );
+});
 </script>
 
 <style lang="less" scoped>

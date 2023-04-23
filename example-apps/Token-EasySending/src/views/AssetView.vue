@@ -10,24 +10,24 @@
             </div>
             <div class="price">${{ price }}</div>
             <div style="display: flex; margin-top: 1rem; margin-bottom: 1rem;">
-              <button class="cta-button" @click="openSend('send')">
+              <button class="cta-button" @click="open('send')">
                 <img src="@/assets/svg/send.svg" style="margin-right: 5px;" alt="send icon" />
                 Send
               </button>
-              <button class="cta-button" @click="openSend('receive')">
+              <button class="cta-button" @click="open('receive')">
                 <img src="@/assets/svg/qrCode.svg" style="margin-right: 5px;" alt="qrcode icon" />
                 Receive
               </button>
               <Teleport to="#modal">
-                <div class="modal-bg" v-if="sendTo == 'send'">
+                <div class="modal-bg" v-if="action == 'send'">
                   <div class="claim-card transition">
-                    <img @click="sendTo = ''" class="redpacket_close transition" src="@/assets/svg/closeButton.svg" alt="close button" />
+                    <img @click="action = ''" class="redpacket_close transition" src="@/assets/svg/closeButton.svg" alt="close button" />
                     <SendTokenModal />
                   </div>
                 </div>
-                <div class="modal-bg" v-if="sendTo == 'receive'">
+                <div class="modal-bg" v-if="action == 'receive'">
                   <div class="receive-card transition">
-                    <img @click="sendTo = ''" class="redpacket_close transition" src="@/assets/svg/closeButton.svg" alt="close button" />
+                    <img @click="action = ''" class="redpacket_close transition" src="@/assets/svg/closeButton.svg" alt="close button" />
                     <ReceiveToken />
                   </div>
                 </div>
@@ -73,26 +73,26 @@ import SendTokenModal from '@/components/SendTokenModal.vue';
 import ReceiveToken from '@/components/ReceiveToken.vue';
 
 const openModal = ref<boolean>(false);
-const sendTo = ref<string>("");
+const action = ref<string>("");
 
 const price = computed(() => {
   return BigNumber(0);
 });
 
-const openSend = async (mode: string) => {
+const open = async (mode: string) => {
   // check if wallet is connected
   const walletStore = useWalletStore();
   // if connected, open send modal
-  if (walletStore.connected) {
-    sendTo.value = mode;
-  } else {
+  if (!walletStore.connected && mode === 'send') {
     // if not connected, connect wallet then open send modal
-    sendTo.value = "";
+    action.value = "";
     if (typeof window.ethereum == 'undefined') {
       console.log('MetaMask is not installed!');
     }
     await connectWallet();
-    await openSend(mode);
+    await open(mode);
+  } else {
+    action.value = mode;
   }
 }
 </script>

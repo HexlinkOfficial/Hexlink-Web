@@ -1,24 +1,76 @@
-import { hexlAccount, hexlContract, nameHash } from "../../../../functions/common";
-import type { Chain } from "../../../../functions/common";
-import { useAccountStore } from "@/stores/account";
-import { getProvider } from "./network";
-import { ethers } from "ethers";
+import { ethers, BigNumber as EthBigNumber } from "ethers";
+import type { Provider } from "@ethersproject/providers";
+import { Hexlink__factory, NameStruct } from '@hexlink/contracts'
 
-const ACCOUNT_VERSION = undefined; // for test only
+import { useAuthStore } from "@/stores/auth";
+import { useChainStore } from "@/stores/chain";
+import { hash } from "@/web3/utils";
 
-export function nameHashWithVersion(provider: string, uid: string) {
-    let name = nameHash(provider, uid);
-    if (ACCOUNT_VERSION && import.meta.env.VITE_USE_FUNCTIONS_EMULATOR === 'true') {
-        name = ethers.utils.keccak256(
-            ethers.utils.toUtf8Bytes(name + "@" + ACCOUNT_VERSION)
+export interface Account {
+    name: NameStruct;
+    nameHash: string;
+    address: string;
+    owner: string | undefined;
+}
+
+async function isContract(provider: Provider, address: string) : Promise<boolean> {
+    try {
+        const code = await provider.getCode(address);
+        if (code !== '0x') return true;
+    } catch (error) {}
+    return false;
+}
+
+export function getName(): NameStruct {
+    const user = useAuthStore().user!;
+    return {
+        schema: hash(user.schema),
+        domain: hash(user.domain),
+        handle: hash(user.handle),
+    };
+}
+
+export function getNameHash(name?: NameStruct) {
+    if (!name) { name = getName(); }
+    return ethers.utils.keccak256(
+        ethers.utils.defaultAbiCoder.encode(
+            ['bytes32', 'bytes32', 'bytes32'],
+            [name.schema, name.domain, name.handle]
+        )
+    );
+}
+
+export async function getAccountAddress(name?: NameStruct) {
+    if (!name) { name = getName(); }
+    const hexlink = Hexlink__factory.connect(
+        import.meta.env.VITE_ACCOUNT_FACTORY,
+        useChainStore().provider
+    );
+    return await hexlink.ownedAccount(getNameHash(name));
+}
+
+export async function getAccountOwner(
+    address?: string
+) : Promise<undefined | string> {
+    if (!address) { address = await getAccountAddress(); }
+    if (await isContract(address)) {
+        const account = Account_factory.connect(
+            address,
+            useChainStore().provider
         );
+        return await account.owner();
     }
-    return name;
-};
+    return undefined;
+}
 
-export async function initHexlAccount(chain: Chain, nameHash: string) : Promise<void> {
-    const provider = getProvider(chain);
-    const hexl = await hexlContract(provider);
-    const account = await hexlAccount(provider, hexl, nameHash);
-    useAccountStore().setAccount(chain, account, ACCOUNT_VERSION);
-};
+export async function getAccount() : Promise<Account> {
+    const name = getName();
+    const nameHash = getNameHash(name);
+    const address = await getAccountAddress(name);
+    return {
+        name,
+        nameHash,
+        address,
+        owner: await getAccountOwner(address)
+    }
+}

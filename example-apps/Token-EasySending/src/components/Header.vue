@@ -220,6 +220,11 @@ import { getAccount, type Account } from "@/web3/account";
 
 const authStore = useAuthStore();
 const user = authStore.user!;
+const account = ref<Account>({
+  address: "0x",
+  isContract: false,
+  owner: "0x",
+});
 const walletStore = useWalletStore();
 const active = ref<string>("");
 const showTestnet = ref<boolean>(true);
@@ -235,9 +240,9 @@ const addressTextLong = function (address: string | undefined) {
   return "0x";
 };
 
-const account = computed(async() => {
-    return await getAccount();
-});
+onMounted(async() => {
+  account.value = await getAccount();
+})
 
 const userHandle = computed(() => {
   if (useAuthStore().user?.provider.includes("twitter")) {

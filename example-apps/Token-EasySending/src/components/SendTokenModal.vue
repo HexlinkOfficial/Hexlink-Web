@@ -134,7 +134,6 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, watch } from "vue";
 import { useRouter } from "vue-router";
-import { HexlinkAccountAPI } from "../bundler/HexlinkAccountAPI";
 import { BigNumber as EthBigNumber } from "ethers";
 import { BigNumber } from "bignumber.js";
 import { ethers } from "ethers";
@@ -142,9 +141,10 @@ import type { OnClickOutsideHandler } from '@vueuse/core';
 import { vOnClickOutside } from '@/services/directive';
 import type { BalanceMap } from "@/web3/tokens";
 import { getBalances } from "@/web3/tokens";
-import { getGasFee } from "../bundler/getGasFee";
-import { getHttpRpcClient} from "../bundler/util/getHttpRpcClient"
-import { printOp } from "../bundler/opUtils";
+import { HexlinkAccountAPI } from "../accountAPI/HexlinkAccountAPI";
+import { getGasFee } from "../accountAPI/getGasFee";
+import { getHttpRpcClient} from "../accountAPI/util/getHttpRpcClient"
+import { printOp } from "../accountAPI/opUtils";
 import { tokenBase, createNotification } from "@/web3/utils";
 import { useChainStore } from "@/stores/chain";
 import { useTokenStore } from "@/stores/token";

@@ -19,29 +19,25 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { useTokenStore } from "@/stores/token";
 import { useChainStore } from "@/stores/chain";
 import QRCode from "qrcode";
 import { copy } from "@/web3/utils";
 import { getAccountAddress } from "@/web3/account";
 
-onMounted(() => {
-  genQrCode();
-});
+const walletAddress = ref<string>("");
 
-const walletAddress = computed(async() => {
-  return await getAccountAddress();
-});
-
-const genQrCode = async () => {
-  let canvas = document.getElementById('canvas')
+onMounted(async () => {
+  walletAddress.value = await getAccountAddress();
+  let canvas = document.getElementById('canvas');
+  const address = await Promise.resolve(walletAddress.value);
   await QRCode.toCanvas(
     canvas,
     walletAddress.value,
     { margin: '2', scale: '6', width: '200px' }
   );
-}
+});
 </script>
 
 <style lang="less" scoped>

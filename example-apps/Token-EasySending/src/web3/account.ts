@@ -21,6 +21,14 @@ async function isContract(provider: Provider, address: string) : Promise<boolean
     return false;
 }
 
+export function createNameStruct(input: string, type: "email" | "twitter"): NameStruct {
+    return {
+        schema: hash((type == "email" && "mailto").toString()),
+        domain: hash((type == "email" && input.split("@")[1]).toString()),
+        handle: hash((type == "email" && input).toString()),
+    }
+}
+
 export function getName(): NameStruct {
     const user = useAuthStore().user!;
     return {

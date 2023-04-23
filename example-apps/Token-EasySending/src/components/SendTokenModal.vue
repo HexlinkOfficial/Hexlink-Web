@@ -149,9 +149,8 @@ import { tokenBase, createNotification } from "@/web3/utils";
 import { useChainStore } from "@/stores/chain";
 import { useTokenStore } from "@/stores/token";
 import { useWalletStore } from "@/stores/wallet";
-import { getAccountAddress } from "@/web3/account";
 import { getPriceInfo } from "@/web3/network";
-import { getName } from '../web3/account'
+import { getName, createNameStruct, getAccountAddress } from '@/web3/account'
 import type { Token } from "../../../../functions/common";
 import { calcGas, tokenAmount, hash } from "../../../../functions/common";
 import ERC20_ABI from "../abi/ERC20_ABI.json";
@@ -316,7 +315,12 @@ const onSubmit = async (_e: Event) => {
       sendStatus.value = "processing";
       message.value = "Check your wallet to confirm the operation...";
 
-      const target = ethers.utils.getAddress(transaction.value.to);
+      const target = validateEmail(transaction.value.to) && ethers.utils.getAddress(
+        await getAccountAddress(
+          createNameStruct(transaction.value.to, "email")
+        )
+      );
+      console.log("Target: ", target);
       const value = ethers.utils.parseEther(transaction.value.amount);
       const bundlerProvider = new ethers.providers.JsonRpcProvider(config.rpcUrl);
       const hexlinkAccountAPI = new HexlinkAccountAPI({

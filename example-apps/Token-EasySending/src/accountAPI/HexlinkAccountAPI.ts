@@ -3,12 +3,14 @@ import {
   Account,
   Account__factory, Hexlink,
   Hexlink__factory,
+  NameStruct
 } from '@hexlink/contracts'
 
 import { hexConcat } from 'ethers/lib/utils'
 import { signMessage } from "../web3/wallet";
 import { BaseApiParams, BaseAccountAPI } from './BaseAccountAPI'
 import { genDeployAuthProof } from '../web3/oracle'
+import { hash } from '../web3/utils'
 
 /**
  * constructor params, added no top of base params:
@@ -18,6 +20,7 @@ import { genDeployAuthProof } from '../web3/oracle'
 export interface HexlinkAccountApiParams extends BaseApiParams {
   ownerAddress: string
   factoryAddress?: string
+  name: NameStruct
 }
 
 /**
@@ -31,15 +34,14 @@ export class HexlinkAccountAPI extends BaseAccountAPI {
    * our account contract.
    */
   accountContract?: Account
-
   factory?: Hexlink
-
-  name?: any
+  name: NameStruct;
 
   constructor (params: HexlinkAccountApiParams) {
     super(params)
     this.factoryAddress = params.factoryAddress
     this.ownerAddress = params.ownerAddress
+    this.name = params.name
   }
 
   async _getAccountContract (): Promise<Account> {
@@ -73,7 +75,6 @@ export class HexlinkAccountAPI extends BaseAccountAPI {
       this.factory.interface.encodeFunctionData(
         'deploy',
         [
-            // TODO need to figure out how to pass in the name struct
             this.name,
             initData,
             proof,

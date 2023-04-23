@@ -151,11 +151,11 @@ import { useTokenStore } from "@/stores/token";
 import { useWalletStore } from "@/stores/wallet";
 import { getAccountAddress } from "@/web3/account";
 import { getPriceInfo } from "@/web3/network";
+import { getName } from '../web3/account'
 import type { Token } from "../../../../functions/common";
 import { calcGas, tokenAmount, hash } from "../../../../functions/common";
 
 import config from "../../bundler_config.json";
-import { JsonRpcProvider } from "@ethersproject/providers";
 
 const estimatedGasAmount = "150000"; // hardcoded, can optimize later
 const chooseTotalDrop = ref<boolean>(false);
@@ -322,6 +322,7 @@ const onSubmit = async (_e: Event) => {
         ownerAddress: useWalletStore().account!.address,
         factoryAddress: config.accountFactory,
         paymasterAPI: undefined,
+        name: getName(),
       });
       const op = await hexlinkAccountAPI.createSignedUserOp({
         target,

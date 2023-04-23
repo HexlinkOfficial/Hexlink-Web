@@ -207,7 +207,6 @@ import {
     GOERLI,
     MUMBAI,
     ARBITRUM_TESTNET,
-    OK_TESTNET,
     prettyPrintAddress,
 } from "../../../../functions/common";
 import { switchNetwork, getProvider } from "@/web3/network";
@@ -231,7 +230,7 @@ const showTestnet = ref<boolean>(true);
 const { toClipboard } = useClipboard();
 
 const mainNet = [];
-const testNet = [GOERLI, MUMBAI, ARBITRUM_TESTNET, OK_TESTNET];
+const testNet = [GOERLI, MUMBAI, ARBITRUM_TESTNET];
 
 const addressTextLong = function (address: string | undefined) {
   if (address) {

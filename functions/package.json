@@ -1,5 +1,5 @@
 {
-  "name": "functions",
+  "name": "@hexlink/functions",
   "scripts": {
     "lint": "eslint --ext .js,.ts .",
     "build-deps": "cd common && npm run build && cd ../redpacket && npm run build && cd ..",

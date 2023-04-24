@@ -13,7 +13,7 @@ import { app } from '@/services/firebase';
 import { useAuthStore } from "@/stores/auth";
 import { useWalletStore } from "@/stores/wallet";
 import { switchNetwork } from "@/web3/network";
-import { ARBITRUM, SUPPORTED_CHAINS, type Chain } from "../../../../functions/common";
+import { GOERLI, SUPPORTED_CHAINS, type Chain } from "../../../../functions/common";
 import { useChainStore } from '@/stores/chain';
 import { initTokenList } from "@/web3/tokens";
 import { useTokenStore } from '@/stores/token';
@@ -153,5 +153,5 @@ export async function init() {
     await Promise.all(
         SUPPORTED_CHAINS.map((chain: Chain) => initTokenList(chain))
     );
-    await switchNetwork(ARBITRUM);
+    await switchNetwork(GOERLI);
 }

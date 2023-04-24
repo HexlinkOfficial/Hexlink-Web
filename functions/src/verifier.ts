@@ -24,10 +24,10 @@ export const genEmailAuthProof = functions.https.onCall(
       }
 
       return genAuthProof(nameHashRes.nameHash!, data.requestId);
-    });
+    }
+);
 
 const genAuthProof = async (nameHash: string, requestId: string) => {
-
   const expiredAt = Math.round(Date.now() / 1000) + 3600;
   const validator = kmsConfig().get(
       KMS_KEY_TYPE[KMS_KEY_TYPE.operator]

@@ -315,12 +315,16 @@ const onSubmit = async (_e: Event) => {
       sendStatus.value = "processing";
       message.value = "Check your wallet to confirm the operation...";
 
-      const target = validateEmail(transaction.value.to) && ethers.utils.getAddress(
+      const target = validateEmail(transaction.value.to) ? ethers.utils.getAddress(
         await getAccountAddress(
           createNameStruct(transaction.value.to, "email")
         )
+      ) : ethers.utils.getAddress(
+        await getAccountAddress(
+          createNameStruct(transaction.value.to, "twitter")
+        )
       );
-      console.log("Target: ", target);
+      console.log(target);
       const value = ethers.utils.parseEther(transaction.value.amount);
       const bundlerProvider = new ethers.providers.JsonRpcProvider(config.rpcUrl);
       const hexlinkAccountAPI = new HexlinkAccountAPI({

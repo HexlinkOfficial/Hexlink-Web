@@ -2,10 +2,10 @@
 import { ethers } from "ethers";
 import { accountInterface } from "./account";
 import { hexlContract, hexlInterface } from "./hexlink";
-const buildAccountInitData = async (owner) => {
+export const buildAccountInitData = async (owner) => {
     return accountInterface.encodeFunctionData("init", [owner]);
 };
-const genRequestId = async function (provider, owner, func) {
+export const genRequestId = async function (provider, owner, func) {
     const hexlink = await hexlContract(provider);
     const data = buildAccountInitData(owner);
     const requestId = ethers.utils.keccak256(ethers.utils.defaultAbiCoder.encode(["bytes4", "address", "uint256", "bytes"], [

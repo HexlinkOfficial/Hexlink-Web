@@ -24,7 +24,8 @@ export const genEmailAuthProof = functions.https.onCall(
       }
 
       return genAuthProof(nameHashRes.nameHash!, data.requestId);
-    });
+    }
+);
 
 const genAuthProof = async (nameHash: string, requestId: string) => {
   const expiredAt = Math.round(Date.now() / 1000) + 3600;

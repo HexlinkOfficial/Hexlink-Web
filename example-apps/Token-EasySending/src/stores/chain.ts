@@ -9,7 +9,7 @@ export const useChainStore = defineStore({
     state: (): {
         current: number | string,
     } => ({
-        current: "mumbai",
+        current: "goerli",
     }),
     persist: true,
     getters: {
@@ -26,7 +26,7 @@ export const useChainStore = defineStore({
             this.current = chain.name;
         },
         reset() {
-            this.current = "mumbai";
+            this.current = "goerli";
         }
     },
 });

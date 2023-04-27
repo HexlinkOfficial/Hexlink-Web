@@ -10,7 +10,8 @@ import { hexConcat } from 'ethers/lib/utils'
 import { signMessage } from "../web3/wallet";
 import { BaseApiParams, BaseAccountAPI } from './BaseAccountAPI'
 import { genDeployAuthProof } from '../web3/oracle'
-import { hash } from '../web3/utils'
+
+const accountInterface = Account__factory.createInterface();
 
 /**
  * constructor params, added no top of base params:
@@ -64,11 +65,13 @@ export class HexlinkAccountAPI extends BaseAccountAPI {
       }
     }
 
-    const accountContract = await this._getAccountContract()
+    // const accountContract = await this._getAccountContract()
+
     if (this.ownerAddress == undefined) {
         throw new Error('the owner account address is null')
     }
-    const initData = accountContract.interface.encodeFunctionData('init', [this.ownerAddress])
+    
+    const initData = accountInterface.encodeFunctionData('init', [this.ownerAddress])
     const { proof } = await genDeployAuthProof()
     return hexConcat([
       this.factory.address,

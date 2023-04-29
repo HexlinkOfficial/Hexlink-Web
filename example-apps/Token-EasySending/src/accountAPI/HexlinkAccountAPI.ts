@@ -1,4 +1,5 @@
 import { BigNumber, BigNumberish } from 'ethers'
+import { ethers } from "ethers";
 import {
   Account,
   Account__factory, Hexlink,
@@ -10,7 +11,10 @@ import { hexConcat } from 'ethers/lib/utils'
 import { signMessage } from "../web3/wallet";
 import { BaseApiParams, BaseAccountAPI } from './BaseAccountAPI'
 import { genDeployAuthProof } from '../web3/oracle'
-import { hash } from '../web3/utils'
+import { getAccountAddress, getName } from '../web3/account'
+
+const accountInterface = Account__factory.createInterface();
+const hexlinkInterface = Hexlink__factory.createInterface();
 
 /**
  * constructor params, added no top of base params:
@@ -64,11 +68,13 @@ export class HexlinkAccountAPI extends BaseAccountAPI {
       }
     }
 
-    const accountContract = await this._getAccountContract()
+    // const accountContract = await this._getAccountContract()
+
     if (this.ownerAddress == undefined) {
         throw new Error('the owner account address is null')
     }
-    const initData = accountContract.interface.encodeFunctionData('init', [this.ownerAddress])
+    
+    const initData = accountInterface.encodeFunctionData('init', [this.ownerAddress])
     const { proof } = await genDeployAuthProof()
     return hexConcat([
       this.factory.address,
@@ -112,5 +118,18 @@ export class HexlinkAccountAPI extends BaseAccountAPI {
         throw new Error('the owner account address is null')
     }
     return await signMessage(this.ownerAddress, userOpHash)
+  }
+
+  async getAccountAddress (): Promise<string> {
+    return getAccountAddress()
+  }
+
+  nameHash(name: NameStruct) : string {
+    return ethers.utils.keccak256(
+        ethers.utils.defaultAbiCoder.encode(
+          ["bytes32", "bytes32", "bytes32"],
+          [name.schema, name.domain, name.handle]
+        )
+    );
   }
 }

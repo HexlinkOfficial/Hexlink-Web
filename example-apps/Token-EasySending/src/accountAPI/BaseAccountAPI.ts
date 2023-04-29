@@ -69,7 +69,14 @@ export abstract class BaseAccountAPI {
       throw new Error(`entryPoint not deployed at ${this.entryPointAddress}`)
     }
 
-    await this.getAccountAddress()
+    if (this.senderAddress == null) {
+      if (this.accountAddress != null) {
+        this.senderAddress = this.accountAddress
+      } else {
+        this.senderAddress = await this.getAccountAddress()
+      }
+    }
+
     return this
   }
 
@@ -97,6 +104,8 @@ export abstract class BaseAccountAPI {
    * @param userOpHash
    */
   abstract signUserOpHash (userOpHash: string): Promise<string>
+
+  abstract getAccountAddress (): Promise<string>
 
   /**
    * check if the contract is already deployed.
@@ -174,7 +183,7 @@ export abstract class BaseAccountAPI {
 
     const value = parseNumber(detailsForUserOp.value) ?? BigNumber.from(0)
     const callData = await this.encodeExecute(detailsForUserOp.target, value, detailsForUserOp.data)
-
+    
     const callGasLimit = parseNumber(detailsForUserOp.gasLimit) ?? await this.provider.estimateGas({
       from: this.entryPointAddress,
       to: this.getAccountAddress(),
@@ -198,25 +207,11 @@ export abstract class BaseAccountAPI {
     return getUserOpHash(op, this.entryPointAddress, chainId)
   }
 
-  /**
-   * return the account's address.
-   * this value is valid even before deploying the contract.
-   */
-  async getAccountAddress (): Promise<string> {
-    if (this.senderAddress == null) {
-      if (this.accountAddress != null) {
-        this.senderAddress = this.accountAddress
-      } else {
-        this.senderAddress = await this.getCounterFactualAddress()
-      }
-    }
-    return this.senderAddress
-  }
-
   async estimateCreationGas (initCode?: string): Promise<BigNumberish> {
     if (initCode == null || initCode === '0x') return 0
     const deployerAddress = initCode.substring(0, 42)
     const deployerCallData = '0x' + initCode.substring(42)
+    
     return await this.provider.estimateGas({ to: deployerAddress, data: deployerCallData })
   }
 
@@ -232,8 +227,8 @@ export abstract class BaseAccountAPI {
       callGasLimit
     } = await this.encodeUserOpCallDataAndGasLimit(info)
     const initCode = await this.getInitCode()
-
-    const initGas = await this.estimateCreationGas(initCode)
+    // const initGas = await this.estimateCreationGas(initCode)
+    const initGas = 1300000
     const verificationGasLimit = BigNumber.from(await this.getVerificationGasLimit())
       .add(initGas)
 

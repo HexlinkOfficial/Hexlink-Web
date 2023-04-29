@@ -41,14 +41,13 @@ export async function validateOTP(email: string, otp: string) {
         const cred = userCredential.user;
         const idToken = await getIdTokenAndSetClaimsIfNecessary(cred);
         const user : IUser = {
-            provider: "mailto",
-            identityType: "email",
-            authType: "otp",
+            provider: "email",
+            schema: "mailto",
+            domain: email.split("@")[1],
+            handle: email,
             uid: cred.uid,
             providerUid: email,
-            handle: email,
             displayName: "Anonymous",
-            nameHash: nameHashWithVersion("mailto", email),
             idToken,
         };
         useAuthStore().signIn(user);
@@ -101,7 +100,7 @@ export async function googleSocialLogin() {
             provider: "google.com",
             schema: "mailto",
             domain: "gmail.com",
-            handle: result.user.email,
+            handle: result.user.email == null ? "" : result.user.email,
             uid: result.user.uid,
             providerUid: result.user.uid, // TODO: ensure this is google uid
             displayName: result.user.displayName || undefined,

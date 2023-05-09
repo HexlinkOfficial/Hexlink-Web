@@ -39,12 +39,7 @@ export const genRequestId = async function(
     return requestId;
 };
 
-export async function genDeployAuthProof() : Promise<{ proof: string }> {
-        const wallet = useWalletStore();
-    if (!wallet.connected) {
-        throw new Error("Not connected");
-    }
-
+export async function genDeployAuthProof(owner: string) : Promise<{ proof: string }> {
     const identityType = useAuthStore().user!.schema;
     let genAuthProof: HttpsCallable;
     if (identityType === "mailto") {
@@ -55,7 +50,7 @@ export async function genDeployAuthProof() : Promise<{ proof: string }> {
 
     const requestId = await genRequestId(
         useChainStore().provider,
-        wallet.account!.address,
+        owner,
         hexlinkInterface.getSighash("deploy")
     );
     const result = await genAuthProof({requestId});

@@ -3,9 +3,7 @@ import {getAuth} from "firebase-admin/auth";
 import * as ethers from "ethers";
 import {signWithKmsKey, getEthAddressFromPublicKey} from "./kms";
 import {kmsConfig, KMS_KEY_TYPE} from "./config";
-import {
-  toEthSignedMessageHash,
-} from "./account";
+import {toEthSignedMessageHash} from "./account";
 import {Firebase} from "./firebase";
 
 const EMAIL_SCHEMA = "mailto";
@@ -17,12 +15,10 @@ export const genEmailAuthProof = functions.https.onCall(
       if (!uid) {
         return {code: 401, message: "Unauthorized Call"};
       }
-
       const nameHashRes = await genNameHashFromEmail(EMAIL_SCHEMA, uid);
       if (nameHashRes.code != 200) {
         return nameHashRes;
       }
-
       return genAuthProof(nameHashRes.nameHash!, data.requestId);
     }
 );
@@ -58,7 +54,6 @@ const genAuthProof = async (nameHash: string, requestId: string) => {
 
 const genNameHashFromEmail = async (schema: string, uid: string) => {
   const user = await getAuth().getUser(uid);
-
   if (!user) {
     return {code: 400, message: "Invalid uid: failed to get the user."};
   }

@@ -63,7 +63,7 @@ export class HexlinkAccountAPI extends BaseAccountAPI {
     if (this.factory == null) {
       if (this.factoryAddress != null && this.factoryAddress !== '') {
         this.factory = Hexlink__factory.connect(this.factoryAddress, this.provider)
-      } else {
+      } else {``
         throw new Error('no factory to get initCode')
       }
     }
@@ -75,7 +75,7 @@ export class HexlinkAccountAPI extends BaseAccountAPI {
     }
     
     const initData = accountInterface.encodeFunctionData('init', [this.ownerAddress])
-    const { proof } = await genDeployAuthProof()
+    const { proof } = await genDeployAuthProof(this.ownerAddress);
     return hexConcat([
       this.factory.address,
       this.factory.interface.encodeFunctionData(

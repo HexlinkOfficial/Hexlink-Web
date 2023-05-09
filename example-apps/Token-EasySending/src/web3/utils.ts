@@ -57,9 +57,9 @@ export const prettyPrintNumber = (amount: string) => {
     }
 };
 
-export function prettyPrint(input: string, length: number, firstCut: number, secondCut: number) {
+export function prettyPrint(input: string, length: number, firstCut: number, secondCut?: number) {
     if (input.length > length) {
-      return input.substring(0, firstCut) + "..." + input.slice(secondCut)
+      return input.substring(0, firstCut) + "..." + input.slice(secondCut ?? -4)
     } else {
       return input;
     }

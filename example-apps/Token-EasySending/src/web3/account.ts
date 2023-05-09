@@ -1,6 +1,11 @@
-import { ethers, BigNumber as EthBigNumber } from "ethers";
-import type { Provider } from "@ethersproject/providers";
-import { Hexlink__factory, NameStruct } from '@hexlink/contracts'
+import { ethers, type BigNumberish } from "ethers";
+import {
+    Hexlink__factory,
+    Account__factory,
+    NameStruct
+} from '@hexlink/contracts'
+
+import { EntryPoint__factory } from "@account-abstraction/contracts";
 
 import { useAuthStore } from "@/stores/auth";
 import { useChainStore } from "@/stores/chain";
@@ -13,12 +18,21 @@ export interface Account {
     owner: string | undefined;
 }
 
-async function isContract(provider: Provider, address: string) : Promise<boolean> {
+export async function isContract(address: string) : Promise<boolean> {
     try {
-        const code = await provider.getCode(address);
+        const code = await useChainStore().provider.getCode(address);
         if (code !== '0x') return true;
     } catch (error) {}
     return false;
+}
+
+export function getNameFromEmail(email: string): NameStruct {
+    const [handle, domain] = email.split("@");
+    return {
+        schema: hash("mailto"),
+        domain: hash(domain),
+        handle: hash(handle),
+    };
 }
 
 export function getName(): NameStruct {
@@ -54,7 +68,7 @@ export async function getAccountOwner(
 ) : Promise<undefined | string> {
     if (!address) { address = await getAccountAddress(); }
     if (await isContract(address)) {
-        const account = Account_factory.connect(
+        const account = Account__factory.connect(
             address,
             useChainStore().provider
         );
@@ -73,4 +87,28 @@ export async function getAccount() : Promise<Account> {
         address,
         owner: await getAccountOwner(address)
     }
+}
+
+export async function getNonce(
+    entryPoint: string,
+    account: string
+) {
+    const ep = EntryPoint__factory.connect(
+        entryPoint,
+        useChainStore().provider
+    );
+    return await ep.getNonce(account, 0);
+}
+
+export function buildAccountExecData(
+    target: string,
+    value?: BigNumberish,
+    data?: string
+) {
+    const iface = new ethers.utils.Interface(Account__factory.abi);
+    return iface.encodeFunctionData("exec", [
+      target,
+      value ?? 0,
+      data ?? []
+    ]);
 }

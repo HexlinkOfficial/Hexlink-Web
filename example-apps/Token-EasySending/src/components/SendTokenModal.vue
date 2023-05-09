@@ -11,7 +11,7 @@
               </path>
             </svg>
           </span>
-          <input v-model="transaction.to" class="send-people" type="text" placeholder="email or wallet address" aria-expanded="false" autocomplete="off" autocorrect="off">
+          <input v-model="transaction.toInput" class="send-people" type="text" placeholder="email or wallet address" aria-expanded="false" autocomplete="off" autocorrect="off">
         </div>
       </div>
     </div>
@@ -23,14 +23,11 @@
     <div style="text-align: center; background: white; padding: 35px 20px 5px;">
       <div class="profile-info">
         <div class="profile-wrapper">
-            <i v-if="!isInputAddress" class="fa-solid fa-circle-check fa-2x"></i>
-            <i v-if="isInputAddress" class="fa-solid fa-circle-check fa-2x"></i>
+            <i class="fa-solid fa-circle-check fa-2x"></i>
         </div>
         <div class="name" style="">
           <div class="confirmAddress">
-            <span v-if="!isInputAddress">{{ transaction.to }}</span>
-            <span v-if="isInputAddress">{{ transaction.to.toString().substring(0,21).toLowerCase() }}<br>{{
-            transaction.to.toString().substring(21,).toLowerCase() }}</span>
+            <span>{{ prettyPrint(transaction.toInput, 14, 7) }}</span>
           </div>
         </div>
         <div @click="goToStep1" class="gotoStep1">
@@ -38,7 +35,7 @@
         </div>
       </div>
     </div>
-    <div v-if="verifySendTo()" style="display: block;">
+    <div style="display: block;">
       <div class="input-wrapper">
         <input class="send-amount" type="number" v-model="transaction.amountInput"
           :style="hasBalanceWarning ? 'color: #FE646F;' : ''" autocomplete="off" placeholder="0.00" autocorrect="off"
@@ -134,7 +131,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, watch } from "vue";
 import { useRouter } from "vue-router";
-import { BigNumber as EthBigNumber } from "ethers";
+import { BigNumber as EthBigNumber, Transaction } from "ethers";
 import { BigNumber } from "bignumber.js";
 import { ethers } from "ethers";
 import type { OnClickOutsideHandler } from '@vueuse/core';
@@ -142,21 +139,29 @@ import { vOnClickOutside } from '@/services/directive';
 import type { BalanceMap } from "@/web3/tokens";
 import { getBalances } from "@/web3/tokens";
 import { HexlinkAccountAPI } from "../accountAPI/HexlinkAccountAPI";
-import { getGasFee } from "../accountAPI/getGasFee";
+import { HttpRpcClient } from "@account-abstraction/sdk";
 import { getHttpRpcClient} from "../accountAPI/util/getHttpRpcClient"
 import { printOp } from "../accountAPI/opUtils";
-import { tokenBase, createNotification } from "@/web3/utils";
+import { tokenBase, createNotification, prettyPrint } from "@/web3/utils";
 import { useChainStore } from "@/stores/chain";
 import { useTokenStore } from "@/stores/token";
 import { useWalletStore } from "@/stores/wallet";
-import { getAccountAddress } from "@/web3/account";
+import {
+  getAccountAddress,
+  getNameFromEmail,
+  getName,
+  isContract,
+  getNonce,
+  buildAccountExecData
+} from "@/web3/account";
 import { getPriceInfo } from "@/web3/network";
-import { getName } from '../web3/account'
 import type { Token } from "../../../../functions/common";
 import { calcGas, tokenAmount, hash } from "../../../../functions/common";
 import ERC20_ABI from "../abi/ERC20_ABI.json";
 
 import config from "../../bundler_config.json";
+import { UserOperationStruct } from "@hexlink/contracts/dist/types/Account";
+import { signMessage } from "@/web3/wallet";
 
 const estimatedGasAmount = "150000"; // hardcoded, can optimize later
 const chooseTotalDrop = ref<boolean>(false);
@@ -166,15 +171,15 @@ const hasBalanceWarning = ref<boolean>(false);
 const tokenStore = useTokenStore();
 const hexlAccountBalances = ref<BalanceMap>({});
 const tokens = ref<Token[]>([]);
-const isInputAddress = ref<boolean>(false);
 const message = ref<string>("Let's go!");
 const showStep2 = ref<boolean>(false);
 const erc20Interface = new ethers.utils.Interface(ERC20_ABI);
 
 interface TokenTransaction {
   to: string,
+  toInput: string,
   salt: string,
-  amount: string,
+  amount: EthBigNumber,
   amountInput: string,
   token: string,
   gasToken: string,
@@ -183,20 +188,26 @@ interface TokenTransaction {
 
 const transaction = ref<TokenTransaction>({
   to: "",
+  toInput: "",
   salt: hash(new Date().toISOString()),
-  amount: "0",
+  amount: EthBigNumber.from(0),
   amountInput: "0.1",
   token: tokenStore.nativeCoin.address,
   gasToken: tokenStore.nativeCoin.address,
   estimatedGas: "0",
 })
 
-const token = computed(() => tokenStore.token(transaction.value.token));
-const gasToken = computed(() => tokenStore.token(transaction.value.gasToken));
+const token = computed(
+  () => tokenStore.token(transaction.value.token)
+);
+
+const gasToken = computed(
+  () => tokenStore.token(transaction.value.gasToken)
+);
 
 const tokenBalance = (token: string): string => {
   return hexlAccountBalances.value[token]?.normalized || "0";
-}
+};
 
 const transactionTokenBalance = computed(
   () => tokenBalance(transaction.value.token)
@@ -288,81 +299,155 @@ watch(
   }
 );
 
-const verifySendTo = () => {
-  if (transaction.value.to.length > 0) {
-    if (ethers.utils.isAddress(transaction.value.to)) {
-      isInputAddress.value = true;
-      return true;
-    } else if (validateEmail(transaction.value.to)) {
-      isInputAddress.value = false;
-      return true;
-    } else {
-      createNotification("Invalid Input", "error");
-      return false;
-    }
+const genUserOpHash = async (
+  userOp: UserOperationStruct,
+  api: HexlinkAccountAPI
+) => {
+  const op = await ethers.utils.resolveProperties(userOp);
+  const opHash = ethers.utils.keccak256(
+    ethers.utils.defaultAbiCoder.encode(
+      [
+        'address',
+        'uint256',
+        'bytes32',
+        'bytes32',
+        'uint256',
+        'uint256',
+        'uint256',
+        'uint256',
+        'uint256',
+        'bytes32',
+      ],
+      [
+        op.sender,
+        op.nonce,
+        ethers.utils.keccak256(op.initCode),
+        ethers.utils.keccak256(op.callData),
+        op.callGasLimit,
+        op.verificationGasLimit,
+        op.preVerificationGas,
+        op.maxFeePerGas,
+        op.maxPriorityFeePerGas,
+        ethers.utils.keccak256(op.paymasterAndData)
+      ]
+    )
+  );
+  const chainId = (await api.provider.getNetwork()).chainId;
+  return ethers.utils.keccak256(
+    ethers.utils.defaultAbiCoder.encode(
+      ["bytes32", "address", "uint256"],
+      [opHash, api.entryPointAddress, chainId]
+    )
+  );
+}
+
+const buildErc20TransferUserOp = async (
+  tx: TokenTransaction,
+  api: HexlinkAccountAPI,
+  bundler: HttpRpcClient,
+) : Promise<UserOperationStruct> => {
+  const sender = await getAccountAddress();
+  let nonce : EthBigNumber = EthBigNumber.from(0);
+  let initCode : [] | string = [];
+  if (await isContract(sender)) {
+    nonce = await getNonce(api.entryPointAddress, sender);
   } else {
-    createNotification("Empty Input", "error");
-    return false;
+    initCode = await api.getInitCode();
   }
+  const callData = buildAccountExecData(
+    tx.token,
+    0,
+    erc20Interface.encodeFunctionData(
+      "transfer", [tx.to, tx.amount]
+    )
+  );
+  const gasInfo = await api.provider.getFeeData();
+  const userOp : UserOperationStruct = {
+      sender,
+      nonce,
+      initCode,
+      callData,
+      callGasLimit: 0,
+      verificationGasLimit: 0,
+      preVerificationGas: 0,
+      maxFeePerGas: gasInfo.maxFeePerGas ?? 0,
+      maxPriorityFeePerGas: gasInfo.maxPriorityFeePerGas ?? 0,
+      paymasterAndData: [],
+      signature: [],
+  };
+  console.log(userOp);
+  const gas = await bundler.estimateUserOpGas(userOp);
+  console.log(gas);
+  throw new Error("invalid gas");
+  const userOpHash = await genUserOpHash(userOp, api);
+  const signature = await signMessage(api.ownerAddress!, userOpHash);
+  return {
+    ...userOp,
+    signature,
+  };
 };
 
 const onSubmit = async (_e: Event) => {
-  if (verifySendTo()) {
+  try {
     transaction.value.amount = tokenAmount(
       transaction.value.amountInput,
-      tokenStore.token(transaction.value.token).decimals
-    ).toString();
-    try {
-      sendStatus.value = "processing";
-      message.value = "Check your wallet to confirm the operation...";
+      token.value.decimals
+    );
+    sendStatus.value = "processing";
+    message.value = "Check your wallet to confirm the operation...";
 
-      const target = ethers.utils.getAddress(transaction.value.to);
-      const value = ethers.utils.parseEther(transaction.value.amount);
-      const bundlerProvider = new ethers.providers.JsonRpcProvider(config.rpcUrl);
-      const hexlinkAccountAPI = new HexlinkAccountAPI({
-        provider: bundlerProvider,
-        entryPointAddress: config.entryPoint,
-        ownerAddress: useWalletStore().account!.address,
-        factoryAddress: config.accountFactory,
-        paymasterAPI: undefined,
-        name: getName(),
-      });
+    const name = getName();
+    const api = new HexlinkAccountAPI({
+      provider: useChainStore().provider,
+      entryPointAddress: config.entryPoint,
+      ownerAddress: useWalletStore().account!.address,
+      factoryAddress: config.accountFactory,
+      paymasterAPI: undefined,
+      name
+    });
+    const bundler = await getHttpRpcClient(
+      useChainStore().provider,
+      config.bundlerUrl,
+      config.entryPoint
+    );
+    const op = await buildErc20TransferUserOp(
+      transaction.value, api, bundler
+    );
+    console.log(`Signed UserOperation: ${await printOp(op)}`);
 
-      const data = erc20Interface.encodeFunctionData("transfer", [target, value]);
-      const op = await hexlinkAccountAPI.createSignedUserOp({
-        target,
-        value,
-        data,
-        ...(await getGasFee(bundlerProvider)),
-      });
-      console.log(`Signed UserOperation: ${await printOp(op)}`);
-      const client = await getHttpRpcClient(
-        bundlerProvider,
-        config.bundlerUrl,
-        config.entryPoint
-      );
-      const uoHash = await client.sendUserOpToBundler(op);
-      console.log(`UserOpHash: ${uoHash}`);
+    const uoHash = await bundler.sendUserOpToBundler(op);
+    console.log(`UserOpHash: ${uoHash}`);
 
-      console.log("Waiting for transaction...");
-      const txHash = await hexlinkAccountAPI.getUserOpReceipt(uoHash);
-      console.log(`Transaction hash: ${txHash}`);
+    console.log("Waiting for transaction...");
+    const txHash = await api.getUserOpReceipt(uoHash);
+    console.log(`Transaction hash: ${txHash}`);
 
-      message.value = "Done!";
-      sendStatus.value = "success";
-    } catch(error) {
-      console.log(error);
-      sendStatus.value = "error";
-      message.value = "Something went wrong...";
-      createNotification("Error: " + error as string, "error");
-    }
+    message.value = "Done!";
+    sendStatus.value = "success";
+  } catch(error) {
+    console.log(error);
+    sendStatus.value = "error";
+    message.value = "Something went wrong...";
+    createNotification("Error: " + error as string, "error");
   }
 }
 
-const goToStep2 = () => {
+const goToStep2 = async () => {
   showStep2.value = false;
-  if (verifySendTo()) {
-    showStep2.value = true;
+  if (transaction.value.toInput.length > 0) {
+    if (ethers.utils.isAddress(transaction.value.toInput)) {
+      transaction.value.to = transaction.value.toInput;
+      showStep2.value = true;
+    } else if (validateEmail(transaction.value.toInput)) {
+      transaction.value.to = await getAccountAddress(
+        getNameFromEmail(transaction.value.toInput)
+      );
+      showStep2.value = true;
+    } else {
+      createNotification("Invalid Input", "error");
+    }
+  } else {
+    createNotification("Empty Input", "error");
   }
 }
 

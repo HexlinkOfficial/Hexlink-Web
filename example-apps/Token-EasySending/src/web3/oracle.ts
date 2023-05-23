@@ -1,10 +1,18 @@
+import { ethers } from "ethers";
 import { getFunctions, httpsCallable, type HttpsCallable } from '@firebase/functions'
 import { useWalletStore } from "@/stores/wallet";
 import { useAuthStore } from "@/stores/auth";
 import { useChainStore } from "@/stores/chain";
-import { Hexlink } from "@hexlink/contracts"
+import type {Provider} from "@ethersproject/providers";
+import {
+    Account__factory,
+    Hexlink__factory,
+} from '@hexlink/contracts';
+import { hexlContract } from "../../../../functions/common/src/hexlink"
 
 const functions = getFunctions();
+const accountInterface = Account__factory.createInterface();
+const hexlinkInterface = Hexlink__factory.createInterface();
 
 export const buildAccountInitData = async (owner: string) => {
     return accountInterface.encodeFunctionData("init", [owner]);
@@ -16,7 +24,7 @@ export const genRequestId = async function(
     func: string
 ) {
     const hexlink = await hexlContract(provider);
-    const data = buildAccountInitData(owner);
+    const data = await buildAccountInitData(owner);
     const requestId = ethers.utils.keccak256(
         ethers.utils.defaultAbiCoder.encode(
         ["bytes4", "address", "uint256", "bytes"],
@@ -39,17 +47,17 @@ export async function genDeployAuthProof() : Promise<{ proof: string }> {
 
     const identityType = useAuthStore().user!.schema;
     let genAuthProof: HttpsCallable;
-    if (schema === "mailto") {
+    if (identityType === "mailto") {
         genAuthProof = httpsCallable(functions, 'genEmailAuthProof');
     } else {
-        throw new Error(`identity schema ${schema} is not supported.`)
+        throw new Error(`identity schema ${identityType} is not supported.`)
     }
 
     const requestId = await genRequestId(
         useChainStore().provider,
         wallet.account!.address,
-        hexlInterface.getSighash("deploy")
+        hexlinkInterface.getSighash("deploy")
     );
     const result = await genAuthProof({requestId});
-    return (result.data as any).proof as string;
+    return { proof: (result.data as any).proof as string };
 }

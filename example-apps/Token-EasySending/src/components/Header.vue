@@ -143,7 +143,7 @@
                                 {{ addressTextLong(account.owner) }}
                               </h5>
                               <h5 v-else @click="doCopy(walletStore.account?.address)">
-                                {{ addressTextLong(account.address) }}
+                                {{ addressTextLong(walletStore.account?.address) }}
                               </h5>
                             </span>
                           </div>

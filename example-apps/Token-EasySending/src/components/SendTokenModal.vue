@@ -1,26 +1,24 @@
 <template>
   <form v-if="sendStatus === '' && !showStep2" class="form-send" @submit.prevent>
     <div style="display: block;">
+      <img src="@/assets/svg/send-logo.svg" style="width: 50px; height: 50px; margin: 1rem 0;" alt="send icon" />
       <h2 class="people-title">Send Token</h2>
-      <div style="margin-top: 15px; position: relative;">
-        <div class="people-input-box">
-          <span class="input-search-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" width="1em" height="1em">
-              <path
-                d="M20.21 17.544l-2.785-2.785a7.752 7.752 0 0 0 1.114-3.986C18.54 6.49 15.05 3 10.77 3S3 6.49 3 10.773c0 4.282 3.489 7.772 7.77 7.772a7.686 7.686 0 0 0 3.985-1.114l2.784 2.785a1.66 1.66 0 0 0 2.34 0l.33-.33a1.645 1.645 0 0 0 0-2.342zM4.723 10.773c0-3.334 2.714-6.05 6.047-6.05 3.332 0 6.047 2.716 6.047 6.05 0 3.333-2.715 6.049-6.047 6.049-3.333 0-6.047-2.716-6.047-6.05z">
-              </path>
-            </svg>
-          </span>
-          <input v-model="transaction.to" class="send-people" type="text" placeholder="email or wallet address" aria-expanded="false" autocomplete="off" autocorrect="off">
-        </div>
+      <div class="people-text">Enter receiver's email address or public address(0x)</div>
+      <div class="people-input-box">
+        <span class="input-search-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" width="1em" height="1em">
+            <path
+              d="M20.21 17.544l-2.785-2.785a7.752 7.752 0 0 0 1.114-3.986C18.54 6.49 15.05 3 10.77 3S3 6.49 3 10.773c0 4.282 3.489 7.772 7.77 7.772a7.686 7.686 0 0 0 3.985-1.114l2.784 2.785a1.66 1.66 0 0 0 2.34 0l.33-.33a1.645 1.645 0 0 0 0-2.342zM4.723 10.773c0-3.334 2.714-6.05 6.047-6.05 3.332 0 6.047 2.716 6.047 6.05 0 3.333-2.715 6.049-6.047 6.049-3.333 0-6.047-2.716-6.047-6.05z">
+            </path>
+          </svg>
+        </span>
+        <input v-model="transaction.to" class="send-people" type="text" placeholder="email or wallet address" aria-expanded="false" autocomplete="off" autocorrect="off">
       </div>
     </div>
-    <div style="display: flex; justify-content: center; width: 100%; padding: 0 15px;">
-      <button class="cta-button" @click="goToStep2">Continue</button>
-    </div>
+    <button class="cta-button" @click="goToStep2">Continue</button>
   </form>
   <form v-if="showStep2 && sendStatus == ''" class="form-send" @submit.prevent="onSubmit">
-    <div style="text-align: center; background: white; padding: 35px 20px 5px;">
+    <div style="text-align: center; padding: 35px 20px 0px;">
       <div class="profile-info">
         <div class="profile-wrapper">
             <i v-if="!isInputAddress" class="fa-solid fa-circle-check fa-2x"></i>
@@ -116,6 +114,7 @@
       <button :disabled="hasBalanceWarning" class="cta-button">Send</button>
     </div>
   </form>
+  
   <div v-if="sendStatus != ''" class="form-send">
     <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
       <h2 class="transition" style="display: flex; justify-content: center; align-items: center; flex-direction: column;">
@@ -422,7 +421,7 @@ const validateEmail = (input: string) => {
   justify-content: center;
   padding: 0.75rem 0.5rem;
   border-radius: 0.5rem;
-  border: 1.5px solid #076AE0;
+  border: 2px solid #076AE0;
   transition: border-color 150ms ease-in-out; }
 .name {
   display: flex;
@@ -440,7 +439,7 @@ const validateEmail = (input: string) => {
   @success-color: #4BAE4F,
   @error-color: #FD4755,
   @default-color: #076AE0,
-  @background-color: white,
+  @background-color: #fffc,
 ) {
   @check-size: @radius * .57;
   display: inline-block;
@@ -548,14 +547,19 @@ const validateEmail = (input: string) => {
   background-color: rgb(7, 106, 224);
   color: white;
   padding: 10px;
-  margin-top: 10px;
-  margin-bottom: 20px;
   width: 100%;
-  border-radius: 50px;
+  border-radius: 0.5rem;
+  white-space: nowrap;
+  font-weight: 500;
+  transition: all 0.3s cubic-bezier(0.4,0,0.2,1),outline 0s;
+  justify-content: center;
+  outline-offset: 0.125rem;
+  outline: 2px solid transparent;
   border: none; }
+.cta-button:hover {
+  background-color: rgb(106, 165, 237); }
 .cta-button:disabled {
-  background-color: rgb(106, 165, 237);
-}
+  background-color: rgb(106, 165, 237); }
 .token-box {
   display: flex;
   flex-direction: column;
@@ -598,7 +602,7 @@ const validateEmail = (input: string) => {
 .input-search-icon {
   top: 13.5px;
   color: #515354;
-  left: 30px;
+  left: 15px;
   pointer-events: none;
   z-index: 1;
   right: auto;
@@ -607,27 +611,28 @@ const validateEmail = (input: string) => {
   line-height: 1;
   display: inline-block; }
 .people-input-box {
+  margin-top: 15px;
   font-size: 1.125rem;
   line-height: 1.5rem;
   font-weight: normal;
   color: black;
-  padding: 0 15px;
   position: relative;
   text-align: left; }
 .people-title {
   color: #0c0c0d;
-  font-size: 1.75rem;
-  line-height: 2.25rem;
-  font-weight: 500;
+  font-size: 1.5rem;
+  line-height: 1.2;
+  font-weight: 600;
   margin-top: 0px;
-  margin-left: 20px;
   margin-top: 10px; }
+.people-text {
+  color: rgba(19,21,23,0.64);
+  font-size: 1.25rem; }
 .people-section {
   display: block;
   background-color: white;
   padding: 25px 0px calc(5%); }
 .form-send {
-  background-color: white;
   position: static;
   border-radius: 15px;
   overflow: visible;
@@ -635,28 +640,33 @@ const validateEmail = (input: string) => {
   height: 100%;
   display: flex;
   flex-direction: column;
-  padding: 1rem 0 1rem 0;
+  padding: 1.25rem 1.25rem;
   justify-content: space-between; }
 .send-people {
-  border-color: #909191;
+  transition: all 0.3 cubic-bezier(0.4,0,0.2,1);
+  color: rgb(19,21,23);
+  line-height: 1;
+  border-radius: 0.5rem;
+  border: 1px solid #ebeced;
+  background-color: #fff;
   box-shadow: none;
-  border-radius: 4rem;
   padding-left: 3.6875rem;
   padding-right: 3.6875rem;
   padding: 10px 1rem 10px 2.5rem;
   font-size: 1.125rem;
-  line-height: 1.5rem;
-  font-weight: normal;
+  font-weight: 600;
   text-overflow: ellipsis;
   display: block;
   box-sizing: border-box;
   width: 100%;
-  border: #909697 solid 0.0625rem;
-  background-color: #ffffff;
   margin: 0;
   outline: none;
   position: relative;
   -webkit-appearance: none; }
+.send-people:hover {
+  background-color: #fff;
+  border-color: rgb(19,21,23);
+  outline: 0; }
 .send-amount {
   width: auto;
   font-size: 40px;

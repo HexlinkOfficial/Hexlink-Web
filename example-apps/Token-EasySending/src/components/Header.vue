@@ -104,74 +104,6 @@
                         </div>
                       </div>
                     </div>
-                    <div v-if="walletStore.connected || account.owner" class="user-balance">
-                      <h5>External Account Address </h5>
-                      <div class="user_wallet" style="border: 0 solid #e5e7eb; padding: 10px 0px 0px 0px;">
-                        <div class="user2">
-                          <div class="wallet-image-wrapper">
-                            <img v-if="walletStore.connected" class="wallet-image" :src="useWalletStore().walletIcon">
-                            <img v-else class="wallet-image" style="margin-right: 0rem;" src="@/assets/svg/wallet.svg"/> 
-                            <div v-if="!account.owner" class="wallet-presence-wrapper">
-                              <a-tooltip placement="right">
-                                <template #title>
-                                  <span>Start to send money to bind this wallet with Hexlink account</span>
-                                </template>
-                                <img class="wallet-presence" src="../assets/exclamation-mark.png" alt="" />
-                              </a-tooltip>
-                            </div>
-                            <div v-if="account.owner && walletStore.connected" class="wallet-presence-wrapper">
-                              <a-tooltip placement="right">
-                                <template #title>
-                                  <span>Wallet is Available</span>
-                                </template>
-                                <img class="wallet-presence" src="../assets/presence_green_dot.png" alt="" />
-                              </a-tooltip>
-                            </div>
-                            <div v-if="account.owner && !walletStore.connected" class="wallet-presence-wrapper">
-                              <a-tooltip placement="right">
-                                <template #title>
-                                  <span>Your connected wallet is unavailable in this session, please</span>
-                                  <span class="reconnect-text" @click="connectWallet"> reconnect</span>
-                                </template>
-                                <img class="wallet-presence" src="../assets/presence_grey_dot.png" alt="" />
-                              </a-tooltip>
-                            </div>
-                          </div>
-                          <div class="user-info">
-                            <span style="margin-bottom: 0;" class="smart-contract-address">
-                              <h5 v-if="account.owner" @click="doCopy(account.owner)">
-                                {{ addressTextLong(account.owner) }}
-                              </h5>
-                              <h5 v-else @click="doCopy(walletStore.account?.address)">
-                                {{ addressTextLong(walletStore.account?.address) }}
-                              </h5>
-                            </span>
-                          </div>
-                          <div v-if="!account.owner"> 
-                            <a-tooltip placement="bottom">
-                              <template #title>
-                                <span>Disconnect</span>
-                              </template>
-                              <svg @click="disconnectWallet" style="margin-left: 0.1rem;" width="30" height="30" viewBox="0 0 30 30" fill="none"
-                                xmlns="http://www.w3.org/2000/svg">
-                                <path
-                                  d="M16.8456 10.8141L20.9985 6.77662L16.8456 5.73846V10.8141V10.8141ZM14.9946 9.53076L14.1491 5.65186L11.6972 7.71389L14.9946 9.53076ZM11.7734 13.9805C11.4033 13.7673 11.0102 13.6026 10.6051 13.484C11.0119 13.2137 13.1562 11.9604 13.1562 11.9604L14.31 13.834C14.31 13.834 12.8425 14.6949 12.7799 14.7314C12.4782 14.4463 12.1425 14.1929 11.7734 13.9805ZM26.3524 15.2823L22.077 14.1314C21.4356 13.9588 20.7785 13.9282 20.1414 14.0322C19.5374 13.5326 18.8316 13.1221 18.1345 12.7173L16.8457 11.9677L15.6899 13.8329L17.0295 14.6201C17.3288 14.7939 17.6012 14.9543 17.8494 15.1083C17.1619 15.7042 16.6671 16.4892 16.4257 17.3855C16.2689 17.9681 16.2342 18.5548 16.3014 19.1202H17.1871C17.6985 19.1202 18.1563 18.8932 18.469 18.5358C18.4727 18.3443 18.4985 18.1505 18.5506 17.9574C18.6945 17.4226 19.0118 16.9643 19.4538 16.6417C19.5483 16.8716 19.598 17.1233 19.598 17.4124C19.598 18.1756 19.2148 18.916 18.5979 19.3633C18.5974 19.3619 18.5971 19.3603 18.5966 19.3589C18.2011 19.6429 17.717 19.8117 17.1919 19.8117L13.5624 19.8232C13.7791 19.0515 13.7985 18.214 13.5755 17.3854C13.2604 16.2147 12.4731 15.1943 11.4229 14.5896C10.5556 14.0902 9.51329 13.8828 8.51321 14.0141C7.97192 14.0853 3.64864 15.2821 3.64864 15.2821C2.46094 15.6019 1.46813 16.3665 0.85278 17.4351C0.237429 18.5037 0.0745383 19.7462 0.394343 20.9337C0.71403 22.1213 1.47856 23.1142 2.54708 23.7293C3.25805 24.1388 4.04567 24.3477 4.84313 24.3477C5.24438 24.3477 5.64821 24.2947 6.04571 24.1878L10.3212 23.0369C11.0586 22.8383 11.7054 22.4698 12.2327 21.986C12.4229 22.0101 12.6163 22.0239 12.8129 22.0239C12.8129 22.0239 17.1868 22.0239 17.1873 22.0239C18.3679 21.9947 19.5272 21.5544 20.3825 20.7322C20.7306 20.3972 21.0264 20.0081 21.2562 19.5788C21.2579 19.5755 21.2596 19.572 21.2613 19.5687C21.7134 18.7201 21.8827 17.7331 21.7566 16.7812C21.7344 16.6142 21.7047 16.4533 21.6656 16.2997L25.7801 17.4073C26.4008 17.5743 26.9199 17.974 27.2415 18.5328C27.5632 19.0915 27.6484 19.741 27.4812 20.3618C27.1357 21.6455 25.8102 22.4087 24.5268 22.063L20.9964 21.1126C20.3315 21.797 19.4851 22.304 18.535 22.5532C18.8852 22.7606 19.2675 22.9261 19.6794 23.037L23.9549 24.1879C24.3524 24.2949 24.7561 24.3478 25.1575 24.3478C25.9548 24.3478 26.7425 24.1387 27.4535 23.7294C28.522 23.1142 29.2867 22.1214 29.6064 20.9338C30.2675 18.4785 28.8076 15.9433 26.3524 15.2823ZM11.4028 19.3638C10.8103 18.9345 10.4196 18.244 10.4038 17.4617C10.2819 17.3224 10.1393 17.2006 9.97395 17.1054C9.71321 16.9552 9.41919 16.8637 9.12434 16.8758C8.73458 16.8919 8.21532 17.0601 8.21532 17.0601C8.20723 17.1747 8.20173 17.2915 8.20173 17.4126C8.20173 18.8028 8.82106 20.0503 9.79723 20.8964C9.78094 20.9011 9.76571 20.9076 9.7493 20.912L5.47372 22.0629C4.85309 22.23 4.20352 22.1448 3.64477 21.8231C3.08614 21.5015 2.68641 20.9824 2.5193 20.3617C2.17372 19.078 2.93684 17.7525 4.22051 17.4071C4.88579 17.228 7.22274 16.6098 7.72348 16.4645C8.23958 16.3147 8.76927 16.1597 9.31255 16.1837C9.66634 16.1994 10.0194 16.32 10.325 16.4959C10.8732 16.8116 11.2861 17.3463 11.4505 17.9572C11.5798 18.4383 11.5536 18.925 11.4028 19.3638Z"
-                                  fill="#F46A6A" />
-                              </svg>
-                            </a-tooltip>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div v-if="!walletStore.connected && !account.owner" style="margin-top: 20px; margin-bottom: 10px; margin-left: 24px; margin-right:24px;">
-                      <button class="connect-wallet-button"  @click="connectWallet">
-                        <img src="@/assets/svg/white-wallet.svg" style="margin-right: 10px;"/>
-                        Connect Wallet
-                      </button>
-                      <div style="font-size: 0.8em; font-weight: 350; margin-top: 15px;">
-                        Connect a wallet for sending tokens, learn more
-                      </div>
-                    </div>
                     <div v-if="false" style="margin-top: 20px; margin-bottom: 10px; margin-left: 24px; margin-right:24px;">
                       <router-link to="/?action=bind-auth-app">
                         <button class="connect-wallet-button"  @click="connectWallet">
@@ -198,7 +130,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue';
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import { useAuthStore } from '@/stores/auth';
 import { useWalletStore } from '@/stores/wallet';
 import { useChainStore } from '@/stores/chain';
@@ -206,7 +138,6 @@ import { createToaster } from "@meforma/vue-toaster";
 import {
     GOERLI,
     MUMBAI,
-    ARBITRUM_TESTNET,
     prettyPrintAddress,
 } from "../../../../functions/common";
 import { switchNetwork, getProvider } from "@/web3/network";
@@ -230,7 +161,7 @@ const showTestnet = ref<boolean>(true);
 const { toClipboard } = useClipboard();
 
 const mainNet = [];
-const testNet = [GOERLI, MUMBAI, ARBITRUM_TESTNET];
+const testNet = [GOERLI, MUMBAI];
 
 const addressTextLong = function (address: string | undefined) {
   if (address) {
@@ -382,7 +313,7 @@ cursor: pointer; }
   align-items: center;
   width: auto;
   height: 2.5rem;
-  border-radius: 9999px;
+  border-radius: 0.5rem;
   border-width: 1px;
   transition: 0.2s ease-in-out;
   border-color: #F3F4F6;
@@ -696,7 +627,7 @@ cursor: pointer; }
     align-items: center;
     width: auto;
     height: 2.5rem;
-    border-radius: 9999px;
+    border-radius: 0.5rem;
     border-width: 1px;
     border-color: #F3F4F6;
     cursor: pointer;
@@ -903,56 +834,4 @@ cursor: pointer; }
   font-size: 0.875rem;
   line-height: 1.25rem;
   border-radius: 0.5rem; }
-.wallet-info {
-  // margin-bottom: 1rem;
-}
-.wallet-image-wrapper {
-  display: flex;  
-  margin-right: 5px; }
-.wallet-image {
-  width: 30px;
-  height: 30px;
-  object-fit: cover;
-  object-position: 50% 50%; }
-.wallet-presence-wrapper {
-  position: relative;
-  top: 15px;
-  right: 10px; }
-.wallet-presence {
-  width: 12px; 
-  height: 12px;
-  border: 1px solid white;
-  border-radius: 100%;}
-.connect-wallet-button {
-  display: flex;
-  justify-content: center;
-  padding-top: 0.5rem;
-  padding-bottom: 0.5rem;
-  padding-left: 0.75rem;
-  padding-right: 0.75rem;
-  color: #000;
-  font-size: 0.875rem;
-  line-height: 1.25rem;
-  font-weight: 800;
-  line-height: 1.25rem;
-  border-radius: 50px;
-  @media (min-width: 640px) {
-    padding-left: 1.5rem;
-    padding-right: 1.5rem;
-    width: 200px; }
-  @media (min-width: 768px) {
-    padding-left: 1.5rem;
-    padding-right: 1.5rem;
-    width: 200px; }
-  opacity: 1;
-  background-color: rgb(7, 106, 224);
-  color: white; }
-.reconnect-text {
-  color: #097aec;
-  font-weight: 500;
-}
-.reconnect-text:hover {
-  text-decoration: underline;
-  cursor: pointer;
-}
 </style>

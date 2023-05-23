@@ -18,7 +18,7 @@
     <button class="cta-button" @click="goToStep2">Continue</button>
   </form>
   <form v-if="showStep2 && sendStatus == ''" class="form-send" @submit.prevent="onSubmit">
-    <div style="text-align: center; padding: 35px 20px 0px;">
+    <div style="text-align: center; padding: 35px 10px 0px;">
       <div class="profile-info">
         <div class="profile-wrapper">
             <i v-if="!isInputAddress" class="fa-solid fa-circle-check fa-2x"></i>
@@ -114,7 +114,7 @@
       <button :disabled="hasBalanceWarning" class="cta-button">Send</button>
     </div>
   </form>
-  
+
   <div v-if="sendStatus != ''" class="form-send">
     <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
       <h2 class="transition" style="display: flex; justify-content: center; align-items: center; flex-direction: column;">

@@ -59,12 +59,9 @@ export class HexlinkAccountAPI extends BaseAccountAPI {
         throw new Error('no factory to get initCode')
       }
     }
-    return hexConcat([
-      this.factory.address,
-      this.factory.interface.encodeFunctionData(
-        'deploy',
-        [this.name])
-    ])
+    const data = this.factory.interface.encodeFunctionData(
+      'deploy', [this.name]);
+    return hexConcat([this.factory.address, data])
   }
 
   async getNonce (): Promise<BigNumber> {

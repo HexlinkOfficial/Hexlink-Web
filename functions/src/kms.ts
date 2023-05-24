@@ -256,5 +256,5 @@ export const sign = async (nameHash: string, message: string) => {
       KMS_KEY_TYPE[KMS_KEY_TYPE.operator],
       toEthSignedMessageHash(toSign)
   ) as string;
-  return {code: 200, signature};
+  return signature;
 };

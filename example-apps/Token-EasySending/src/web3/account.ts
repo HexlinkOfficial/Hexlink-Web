@@ -48,7 +48,7 @@ export async function getNonce(
 export function buildAccountExecData(
     target: string,
     value?: BigNumberish,
-    data?: string
+    data?: string | []
 ) {
     const iface = new ethers.utils.Interface(Account__factory.abi);
     return iface.encodeFunctionData("exec", [

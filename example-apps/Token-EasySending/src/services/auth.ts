@@ -162,11 +162,7 @@ export async function genSignature(otp: string, message: string) {
     const validateOTPCall = httpsCallable(functions, 'validateOTP');
     const inputParam : any = {email: user.email!, otp, action: "sign", message};
     const result = await validateOTPCall(inputParam);
-    const resultData = result.data as any;
-    if (resultData.code !== 200) {
-        return {code: resultData.code, message: resultData.message}
-    }
-    return resultData.siganture;
+    return result.data;
 }
 
 export async function init() {

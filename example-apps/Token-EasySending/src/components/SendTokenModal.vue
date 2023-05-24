@@ -349,10 +349,12 @@ const buildErc20TransferUserOp = async (
   const sender = await getAccountAddress();
   let nonce : EthBigNumber = EthBigNumber.from(0);
   let initCode : [] | string = [];
+  let preVerificationGas = 65000;
   if (await isContract(sender)) {
     nonce = await getNonce(api.entryPointAddress, sender);
   } else {
     initCode = await api.getInitCode();
+    preVerificationGas += 200000;
   }
   const callData = buildAccountExecData(
     tx.token,
@@ -367,18 +369,14 @@ const buildErc20TransferUserOp = async (
       nonce,
       initCode,
       callData,
-      callGasLimit: 0,
-      verificationGasLimit: 0,
-      preVerificationGas: 0,
+      callGasLimit: 1500000,
+      verificationGasLimit: 1500000,
+      preVerificationGas,
       maxFeePerGas: gasInfo.maxFeePerGas ?? 0,
       maxPriorityFeePerGas: gasInfo.maxPriorityFeePerGas ?? 0,
       paymasterAndData: [],
       signature: [],
   };
-  console.log(userOp);
-  const gas = await bundler.estimateUserOpGas(userOp);
-  console.log(gas);
-  throw new Error("invalid gas");
   const userOpHash = await genUserOpHash(userOp, api);
   const signature = await signMessage(api.ownerAddress!, userOpHash);
   return {

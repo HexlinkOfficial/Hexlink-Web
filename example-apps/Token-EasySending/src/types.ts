@@ -6,6 +6,7 @@ export interface IUser {
     schema: string;
     domain: string;
     handle: string;
+    name: string;
     uid: string;
     providerUid: string;
     displayName?: string;

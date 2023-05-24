@@ -26,67 +26,21 @@ export async function isContract(address: string) : Promise<boolean> {
     return false;
 }
 
-export function getNameFromEmail(email: string): NameStruct {
-    const [handle, domain] = email.split("@");
-    return {
-        schema: hash("mailto"),
-        domain: hash(domain),
-        handle: hash(handle),
-    };
+export function getName() {
+    return useAuthStore().user!.name;
 }
 
-export function getName(): NameStruct {
-    const user = useAuthStore().user!;
-    return {
-        schema: hash(user.schema),
-        domain: hash(user.domain),
-        handle: hash(user.handle),
-    };
+export function getNameHash() {
+    return hash(getName());
 }
 
-export function getNameHash(name?: NameStruct) {
-    if (!name) { name = getName(); }
-    return ethers.utils.keccak256(
-        ethers.utils.defaultAbiCoder.encode(
-            ['bytes32', 'bytes32', 'bytes32'],
-            [name.schema, name.domain, name.handle]
-        )
-    );
-}
-
-export async function getAccountAddress(name?: NameStruct) {
-    if (!name) { name = getName(); }
+export async function getAccountAddress() {
+    const nameHash = getNameHash();
     const hexlink = Hexlink__factory.connect(
         import.meta.env.VITE_ACCOUNT_FACTORY,
         useChainStore().provider
     );
-    return await hexlink.ownedAccount(getNameHash(name));
-}
-
-export async function getAccountOwner(
-    address?: string
-) : Promise<undefined | string> {
-    if (!address) { address = await getAccountAddress(); }
-    if (await isContract(address)) {
-        const account = Account__factory.connect(
-            address,
-            useChainStore().provider
-        );
-        return await account.owner();
-    }
-    return undefined;
-}
-
-export async function getAccount() : Promise<Account> {
-    const name = getName();
-    const nameHash = getNameHash(name);
-    const address = await getAccountAddress(name);
-    return {
-        name,
-        nameHash,
-        address,
-        owner: await getAccountOwner(address)
-    }
+    return await hexlink.ownedAccount(nameHash);
 }
 
 export async function getNonce(

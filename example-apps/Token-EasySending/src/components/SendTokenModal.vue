@@ -592,14 +592,9 @@ const onSubmit = async (_e: Event) => {
 }
 
 const goToStep3 = () => {
-  compareInputBalance();
-  if (hasBalanceWarning) {
-    createNotification("Insufficient Balance", "error");
-  } else {
-    showStep2.value = false;
-    showStep3.value = true;
-    sendOTP();
-  }
+  showStep2.value = false;
+  showStep3.value = true;
+  sendOTP();
 }
 
 const verifySendTo = async () => {

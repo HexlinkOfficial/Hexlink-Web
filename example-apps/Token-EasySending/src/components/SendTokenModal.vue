@@ -12,7 +12,7 @@
             </path>
           </svg>
         </span>
-        <input v-model="transaction.to" class="send-people" type="text" placeholder="email or wallet address" aria-expanded="false" autocomplete="off" autocorrect="off">
+        <input v-model="transaction.toInput" class="send-people" type="text" placeholder="email or wallet address" aria-expanded="false" autocomplete="off" autocorrect="off">
       </div>
     </div>
     <button class="cta-button" @click="goToStep2">Continue</button>
@@ -130,7 +130,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, watch } from "vue";
 import { useRouter } from "vue-router";
-import { BigNumber as EthBigNumber, Transaction } from "ethers";
+import { BigNumber as EthBigNumber } from "ethers";
 import { BigNumber } from "bignumber.js";
 import { ethers } from "ethers";
 import type { OnClickOutsideHandler } from '@vueuse/core';
@@ -144,7 +144,6 @@ import { printOp } from "../accountAPI/opUtils";
 import { tokenBase, createNotification, prettyPrint } from "@/web3/utils";
 import { useChainStore } from "@/stores/chain";
 import { useTokenStore } from "@/stores/token";
-import { useWalletStore } from "@/stores/wallet";
 import {
   getAccountAddress,
   getName,
@@ -159,7 +158,7 @@ import ERC20_ABI from "../abi/ERC20_ABI.json";
 
 import config from "../../bundler_config.json";
 import { UserOperationStruct } from "@hexlink/contracts/dist/types/Account";
-import { signMessage } from "@/web3/wallet";
+import { genSignature } from "@/services/auth";
 
 const estimatedGasAmount = "150000"; // hardcoded, can optimize later
 const chooseTotalDrop = ref<boolean>(false);
@@ -341,15 +340,15 @@ const genUserOpHash = async (
 
 const buildErc20TransferUserOp = async (
   tx: TokenTransaction,
+  otp: string,
   api: HexlinkAccountAPI,
-  bundler: HttpRpcClient,
 ) : Promise<UserOperationStruct> => {
   const sender = await getAccountAddress();
   let nonce : EthBigNumber = EthBigNumber.from(0);
   let initCode : [] | string = [];
   let preVerificationGas = 65000;
   if (await isContract(sender)) {
-    nonce = await getNonce(api.entryPointAddress, sender);
+    nonce = await getNonce(config.entryPoint, sender);
   } else {
     initCode = await api.getInitCode();
     preVerificationGas += 200000;
@@ -376,7 +375,7 @@ const buildErc20TransferUserOp = async (
       signature: [],
   };
   const userOpHash = await genUserOpHash(userOp, api);
-  const signature = await signMessage(api.ownerAddress!, userOpHash);
+  const signature = await genSignature(otp, userOpHash);
   return {
     ...userOp,
     signature,
@@ -396,21 +395,20 @@ const onSubmit = async (_e: Event) => {
     const api = new HexlinkAccountAPI({
       provider: useChainStore().provider,
       entryPointAddress: config.entryPoint,
-      ownerAddress: useWalletStore().account!.address,
       factoryAddress: config.accountFactory,
       paymasterAPI: undefined,
       name
     });
+    const op = await buildErc20TransferUserOp(
+      transaction.value, "", api
+    );
+    console.log(`Signed UserOperation: ${await printOp(op)}`);
+
     const bundler = await getHttpRpcClient(
       useChainStore().provider,
       config.bundlerUrl,
       config.entryPoint
     );
-    const op = await buildErc20TransferUserOp(
-      transaction.value, api, bundler
-    );
-    console.log(`Signed UserOperation: ${await printOp(op)}`);
-
     const uoHash = await bundler.sendUserOpToBundler(op);
     console.log(`UserOpHash: ${uoHash}`);
 
@@ -435,9 +433,8 @@ const goToStep2 = async () => {
       transaction.value.to = transaction.value.toInput;
       showStep2.value = true;
     } else if (validateEmail(transaction.value.toInput)) {
-      transaction.value.to = await getAccountAddress(
-        getNameFromEmail(transaction.value.toInput)
-      );
+      const nameHash = hash(`mailto:${transaction.value.toInput}`);
+      transaction.value.to = await getAccountAddress(nameHash);
       showStep2.value = true;
     } else {
       createNotification("Invalid Input", "error");

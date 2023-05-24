@@ -71,7 +71,7 @@ import { useWalletStore } from "@/stores/wallet";
 import { connectWallet } from "@/web3/wallet";
 import SendTokenModal from '@/components/SendTokenModal.vue';
 import ReceiveToken from '@/components/ReceiveToken.vue';
-import { genDeployAuthProof } from "@/web3/oracle";
+import { genDeployAuthProof } from "@/web3/auth";
 
 const openModal = ref<boolean>(false);
 const action = ref<string>("");

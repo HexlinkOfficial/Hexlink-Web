@@ -2,7 +2,6 @@ import { ethers, type BigNumberish } from "ethers";
 import {
     Hexlink__factory,
     Account__factory,
-    NameStruct
 } from '@hexlink/contracts'
 
 import { EntryPoint__factory } from "@account-abstraction/contracts";
@@ -10,13 +9,6 @@ import { EntryPoint__factory } from "@account-abstraction/contracts";
 import { useAuthStore } from "@/stores/auth";
 import { useChainStore } from "@/stores/chain";
 import { hash } from "@/web3/utils";
-
-export interface Account {
-    name: NameStruct;
-    nameHash: string;
-    address: string;
-    owner: string | undefined;
-}
 
 export async function isContract(address: string) : Promise<boolean> {
     try {
@@ -30,17 +22,16 @@ export function getName() {
     return useAuthStore().user!.name;
 }
 
-export function getNameHash() {
-    return hash(getName());
+export function getNameHash(name?: string) {
+    return hash(name || getName());
 }
 
-export async function getAccountAddress() {
-    const nameHash = getNameHash();
+export async function getAccountAddress(nameHash? : string) {
     const hexlink = Hexlink__factory.connect(
         import.meta.env.VITE_ACCOUNT_FACTORY,
         useChainStore().provider
     );
-    return await hexlink.ownedAccount(nameHash);
+    return await hexlink.ownedAccount(nameHash || getNameHash());
 }
 
 export async function getNonce(

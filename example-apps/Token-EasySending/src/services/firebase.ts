@@ -29,5 +29,5 @@ if (import.meta.env.VITE_ENVIRONMENT !== 'production') {
 if (import.meta.env.VITE_USE_FUNCTIONS_EMULATOR === 'true') {
     connectFunctionsEmulator(functions, 'localhost', 5001);
     connectStorageEmulator(storage, "localhost", 9199);
-    // connectAuthEmulator(auth, "http://localhost:9099");
+    //connectAuthEmulator(auth, "http://localhost:9099");
 }

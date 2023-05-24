@@ -4,9 +4,10 @@ import * as functions from "firebase-functions";
 import {getUser, insertUser, updateOTP} from "./graphql/user";
 import {getAuth} from "firebase-admin/auth";
 import {rateLimiter} from "./ratelimiter";
-import {decryptWithSymmKey, encryptWithSymmKey} from "./kms";
+import {decryptWithSymmKey, encryptWithSymmKey, sign} from "./kms";
 import formData from "form-data";
 import Mailgun from "mailgun.js";
+import {utils} from "ethers";
 
 const secrets = functions.config().doppler || {};
 const CHARS = "0123456789";
@@ -145,7 +146,6 @@ const validateEmail = async (email: string) => {
   if (email === null) {
     return false;
   }
-
   return EmailValidator.is_email_valid(email);
 };
 
@@ -177,9 +177,18 @@ export const validateOTP = functions.https.onCall(async (data, _context) => {
 
   const plainOTP = <string> await decryptWithSymmKey(user.otp);
   if (plainOTP === data.otp && user.isActive && isValidOTP(user.updatedAt)) {
-    const customToken = await createCustomToken(user.id);
     await updateOTP({id: user.id!, otp: user.otp, isActive: false});
-    return {code: 200, token: customToken};
+    if (data.action == "genToken") {
+      const customToken = await createCustomToken(user.id);
+      return {code: 200, token: customToken};
+    } else if (data.action == "sign") {
+      const name = `mailto:${data.email}`;
+      const nameHash = utils.keccak256(utils.toUtf8Bytes(name));
+      const signature = await sign(nameHash, data.message);
+      return {code: 200, signature};
+    } else {
+      throw new Error("invalid action");
+    }
   }
 
   return {code: 400, message: "Invalid OTP."};

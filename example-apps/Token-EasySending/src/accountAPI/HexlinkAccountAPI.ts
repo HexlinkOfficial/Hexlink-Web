@@ -1,20 +1,15 @@
 import { BigNumber, BigNumberish } from 'ethers'
-import { ethers } from "ethers";
 import {
   Account,
-  Account__factory, Hexlink,
+  Account__factory,
+  Hexlink,
   Hexlink__factory,
-  NameStruct
 } from '@hexlink/contracts'
 
 import { hexConcat } from 'ethers/lib/utils'
-import { signMessage } from "../web3/wallet";
 import { BaseApiParams, BaseAccountAPI } from './BaseAccountAPI'
-import { genDeployAuthProof } from '../web3/oracle'
-import { getAccountAddress, getName } from '../web3/account'
-
-const accountInterface = Account__factory.createInterface();
-const hexlinkInterface = Hexlink__factory.createInterface();
+import { genSignature } from '../services/auth'
+import { getAccountAddress } from '../web3/account'
 
 /**
  * constructor params, added no top of base params:
@@ -22,16 +17,14 @@ const hexlinkInterface = Hexlink__factory.createInterface();
  * @param factoryAddress address of contract "factory" to deploy new contracts (not needed if account already deployed)
  */
 export interface HexlinkAccountApiParams extends BaseApiParams {
-  ownerAddress: string
   factoryAddress?: string
-  name: NameStruct
+  name: string
 }
 
 /**
  * An implementation of the BaseAccountAPI using the Hexlink Account contract.
  */
 export class HexlinkAccountAPI extends BaseAccountAPI {
-  ownerAddress: string | undefined
   factoryAddress?: string
 
   /**
@@ -39,12 +32,11 @@ export class HexlinkAccountAPI extends BaseAccountAPI {
    */
   accountContract?: Account
   factory?: Hexlink
-  name: NameStruct;
+  name: string;
 
   constructor (params: HexlinkAccountApiParams) {
     super(params)
     this.factoryAddress = params.factoryAddress
-    this.ownerAddress = params.ownerAddress
     this.name = params.name
   }
 
@@ -59,32 +51,19 @@ export class HexlinkAccountAPI extends BaseAccountAPI {
    * return the value to put into the "initCode" field, if the account is not yet deployed.
    * this value holds the Hexlink contract address, followed by this account's information
    */
-  async getAccountInitCode (): Promise<string> {
+  async getAccountInitCode(): Promise<string> {
     if (this.factory == null) {
       if (this.factoryAddress != null && this.factoryAddress !== '') {
         this.factory = Hexlink__factory.connect(this.factoryAddress, this.provider)
-      } else {``
+      } else {
         throw new Error('no factory to get initCode')
       }
     }
-
-    // const accountContract = await this._getAccountContract()
-
-    if (this.ownerAddress == undefined) {
-        throw new Error('the owner account address is null')
-    }
-    
-    const initData = accountInterface.encodeFunctionData('init', [this.ownerAddress])
-    const { proof } = await genDeployAuthProof(this.ownerAddress);
     return hexConcat([
       this.factory.address,
       this.factory.interface.encodeFunctionData(
         'deploy',
-        [
-            this.name,
-            initData,
-            proof,
-        ])
+        [this.name])
     ])
   }
 
@@ -106,30 +85,14 @@ export class HexlinkAccountAPI extends BaseAccountAPI {
     const accountContract = await this._getAccountContract()
     return accountContract.interface.encodeFunctionData(
       'exec',
-      [
-        target,
-        value,
-        data
-      ])
+      [target, value, data])
   }
 
   async signUserOpHash (userOpHash: string): Promise<string> {
-    if (this.ownerAddress == undefined) {
-        throw new Error('the owner account address is null')
-    }
-    return await signMessage(this.ownerAddress, userOpHash)
+    return await genSignature(this.name, userOpHash)
   }
 
   async getAccountAddress (): Promise<string> {
     return getAccountAddress()
-  }
-
-  nameHash(name: NameStruct) : string {
-    return ethers.utils.keccak256(
-        ethers.utils.defaultAbiCoder.encode(
-          ["bytes32", "bytes32", "bytes32"],
-          [name.schema, name.domain, name.handle]
-        )
-    );
   }
 }

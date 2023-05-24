@@ -8,18 +8,11 @@ exports.refreshToken = refreshToken;
 
 import {
   isFollowing,
-  hasRetweeted} from "./twitter/twitter";
+  hasRetweeted,
+} from "./twitter/twitter";
 
 exports.isFollowing = isFollowing;
 exports.hasRetweeted = hasRetweeted;
-
-import {
-  genEmailAuthProof,
-  calcEthAddress,
-} from "./verifier";
-
-exports.genEmailAuthProof = genEmailAuthProof;
-exports.calcEthAddress = calcEthAddress;
 
 import {
   claimRedPacket,

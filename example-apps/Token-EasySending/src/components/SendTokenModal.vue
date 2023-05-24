@@ -1,5 +1,5 @@
 <template>
-  <form v-if="sendStatus === '' && !showStep2" class="form-send" @submit.prevent>
+  <form v-if="sendStatus === '' && !showStep2 && !showStep3" class="form-send" @submit.prevent>
     <div style="display: block;">
       <img src="@/assets/svg/send-logo.svg" style="width: 50px; height: 50px; margin: 1rem 0;" alt="send icon" />
       <h2 class="people-title">Send Token</h2>
@@ -17,7 +17,7 @@
     </div>
     <button class="cta-button" @click="goToStep2">Continue</button>
   </form>
-  <form v-if="showStep2 && sendStatus == ''" class="form-send" @submit.prevent="onSubmit">
+  <form v-if="showStep2 && sendStatus == ''" class="form-send" @submit.prevent>
     <div style="text-align: center; padding: 35px 10px 0px;">
       <div class="profile-info">
         <div class="profile-wrapper">
@@ -111,10 +111,30 @@
       </div>
     </div>
     <div style="display: flex; justify-content: center; width: 100%; padding: 0 15px;">
-      <button :disabled="hasBalanceWarning" class="cta-button">Send</button>
+      <button :disabled="hasBalanceWarning" class="cta-button" @click="goToStep3">Send</button>
     </div>
   </form>
-
+  <form v-if="showStep3 && sendStatus == ''" class="form-send" @submit.prevent="onSubmit">
+    <div style="display: block;">
+      <img src="@/assets/svg/password.svg" style="width: 50px; height: 50px; margin: 1rem 0;" alt="send icon" />
+      <h2 class="people-title">Enter Verification Code</h2>
+      <div class="people-text">Enter code that we have sent to your email <b>{{ userHandle }}</b></div>
+      <div class="social-login" style="flex-direction: column;">
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+          <input v-for="(arr, index) in code" :key="index" type="number" pattern="\d*" :id="'input_' + index"
+            maxlength="1" v-model="code[index]" @input="handleInput" @keypress="isNumber"
+            @keydown.delete="handleDelete" @paste="onPaste" class="otp"/>
+        </div>
+        <p v-if="!isResendLink" class="resend-plain">Resend the verification code in {{ countDown }}s.</p>
+        <a v-if="isResendLink" class="resend" @click="resendOTP">Resend the verification code.</a>
+        <Button class="cta-button" style="margin-bottom: 0px;" type="primary" :loading="isLoading" :disabled="isDisabled" @click="verifyOTP">
+            Verify
+        </Button>
+        <p v-if="isRateExceeded" style="color: #FF5C5C; text-align: center; margin-top: -8px;">Too many attempts. Please wait for five minutes.</p>
+        <p v-if="otpValidataionFailed" style="color: #FF5C5C; text-align: center; margin-top: -8px;">Invalid email or otp. Please try again.</p>
+      </div>
+    </div>
+  </form>
   <div v-if="sendStatus != ''" class="form-send">
     <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
       <h2 class="transition" style="display: flex; justify-content: center; align-items: center; flex-direction: column;">
@@ -149,13 +169,17 @@ import { useChainStore } from "@/stores/chain";
 import { useTokenStore } from "@/stores/token";
 import { useWalletStore } from "@/stores/wallet";
 import { getPriceInfo } from "@/web3/network";
-import { getName, createNameStruct, getAccountAddress } from '@/web3/account'
+import { useAuthStore } from '@/stores/auth';
+import { getName, createNameStruct, getAccountAddress, getAccount } from '@/web3/account'
 import type { Token } from "../../../../functions/common";
 import { calcGas, tokenAmount, hash } from "../../../../functions/common";
+import { genOTP, validateOTP } from '@/services/auth'
 import ERC20_ABI from "../abi/ERC20_ABI.json";
 
 import config from "../../bundler_config.json";
 
+const store = useAuthStore();
+const user = store.user!;
 const estimatedGasAmount = "150000"; // hardcoded, can optimize later
 const chooseTotalDrop = ref<boolean>(false);
 const chooseGasDrop = ref<boolean>(false);
@@ -167,7 +191,23 @@ const tokens = ref<Token[]>([]);
 const isInputAddress = ref<boolean>(false);
 const message = ref<string>("Let's go!");
 const showStep2 = ref<boolean>(false);
+const showStep3 = ref<boolean>(false);
 const erc20Interface = new ethers.utils.Interface(ERC20_ABI);
+let code: string[] = Array(6);
+let dataFromPaste: string[] | undefined;
+const keysAllowed: string[] = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9",];
+const isResendLink = ref<boolean>(false);
+const countDown = ref<number>(60);
+const isLoading = ref(false);
+const isDisabled = ref<boolean>(true);
+const isRateExceeded = ref<boolean>(false);
+const otpValidataionFailed = ref<boolean>(false);
+const userHandle = computed(() => {
+  if (useAuthStore().user?.provider.includes("twitter")) {
+    return "@" + user.handle;
+  }
+  return user?.handle;
+});
 
 interface TokenTransaction {
   to: string,
@@ -188,6 +228,123 @@ const transaction = ref<TokenTransaction>({
   gasToken: tokenStore.nativeCoin.address,
   estimatedGas: "0",
 })
+
+const isNumber = (event: Event) => {
+  (event.currentTarget as HTMLInputElement).value = "";
+  const keyPressed: string = (event as KeyboardEvent).key;
+  if (!keysAllowed.includes(keyPressed)) {
+    event.preventDefault();
+  }
+}
+
+const onPaste = (event: Event) => {
+  dataFromPaste = (event as ClipboardEvent).clipboardData
+    ?.getData("text")
+    .trim()
+    .split("");
+  if (dataFromPaste) {
+    isDisabled.value = false;
+    for (const num of dataFromPaste) {
+      if (!keysAllowed.includes(num)) event.preventDefault();
+    }
+  }
+}
+
+const handleDelete = (event: Event) => {
+  //keydown event = move to previous element then only delete number
+  let value = (event.target as HTMLInputElement).value;
+  let currentActiveElement = event.target as HTMLInputElement;
+  if (!value)
+    (currentActiveElement.previousElementSibling as HTMLElement)?.focus();
+}
+
+const handleInput = (event: Event) => {
+  const inputType = (event as InputEvent).inputType;
+  let currentActiveElement = event.target as HTMLInputElement;
+  if (currentActiveElement.id.split("_")[1] === "5") {
+    isDisabled.value = false;
+  }
+  if (inputType === "insertText")
+    (currentActiveElement.nextElementSibling as HTMLElement)?.focus();
+  if (inputType === "insertFromPaste" && dataFromPaste) {
+    for (const num of dataFromPaste) {
+      let id: number = parseInt(currentActiveElement.id.split("_")[1]);
+      currentActiveElement.value = num;
+      code[id] = num;
+      if (currentActiveElement.nextElementSibling) {
+        currentActiveElement =
+          currentActiveElement.nextElementSibling as HTMLInputElement;
+        (currentActiveElement.nextElementSibling as HTMLElement)?.focus();
+      }
+    }
+  }
+}
+
+const countDownTimer = () => {
+  let interval = setInterval(() => {
+    if (countDown.value > 0) {
+      countDown.value--;
+    } else {
+      clearInterval(interval);
+      isResendLink.value = true;
+    }
+  }, 1000)
+}
+
+const sendOTP = async () => {
+  console.log("hendleL: ", userHandle.value);
+  try {
+    const result = await genOTP(userHandle.value);
+    if (result === 429) {
+      console.error("Too many requests to send otp.");
+      createNotification("Too many requests to send otp.", "error");
+    }
+    else if (result === 200) {
+      countDownTimer();
+    }
+  } catch (err) {
+    console.log(err);
+    createNotification(err as string, "error");
+  }
+}
+
+const resendOTP = async () => {
+  countDown.value = 60;
+  isResendLink.value = false;
+  countDownTimer();
+  const result = await genOTP(userHandle.value);
+  if (result === 429) {
+    console.error("Too many requests to send otp.");
+    createNotification("Too many requests to send otp.", "error");
+  }
+}
+
+const verifyOTP = async () => {
+  isRateExceeded.value = false;
+  otpValidataionFailed.value = false;
+  isLoading.value = true;
+  try {
+    const result = await validateOTP(userHandle.value, code.join(""));
+    if (result?.code === 200) {
+      router.push(store.returnUrl || "/");
+      return true;
+    } else if (result?.code === 429) {
+      isRateExceeded.value = true;
+      return false;
+    } else if (result?.code === 400) {
+      if (!isRateExceeded.value) {
+        otpValidataionFailed.value = true;
+      }
+      return false;
+    }
+  } catch (err) {
+    console.log(err);
+    createNotification(err as string, "error");
+    return false;
+  } finally {
+    isLoading.value = false;
+  }
+}
 
 const token = computed(() => tokenStore.token(transaction.value.token));
 const gasToken = computed(() => tokenStore.token(transaction.value.gasToken));
@@ -305,7 +462,7 @@ const verifySendTo = () => {
 };
 
 const onSubmit = async (_e: Event) => {
-  if (verifySendTo()) {
+  if (verifySendTo() && await verifyOTP()) {
     transaction.value.amount = tokenAmount(
       transaction.value.amountInput,
       tokenStore.token(transaction.value.token).decimals
@@ -366,8 +523,15 @@ const onSubmit = async (_e: Event) => {
   }
 }
 
+const goToStep3 = () => {
+  showStep2.value = false;
+  showStep3.value = true;
+  sendOTP();
+}
+
 const goToStep2 = () => {
   showStep2.value = false;
+  showStep3.value = false;
   if (verifySendTo()) {
     showStep2.value = true;
   }
@@ -375,6 +539,7 @@ const goToStep2 = () => {
 
 const goToStep1 = () => {
   showStep2.value = false;
+  showStep3.value = false;
   transaction.value.to = "";
 }
 
@@ -384,6 +549,7 @@ const closeModal = () => {
     router.push("/");
   }
   sendStatus.value = "";
+  goToStep1();
 }
 
 const formatEmail = (email: string) => {
@@ -863,4 +1029,34 @@ input::-webkit-inner-spin-button {
   width: auto; }
 .transition {
   transition: .3s cubic-bezier(.3, 0, 0, 1.3) }
+.social-login {
+  display: flex;
+  justify-content: center;
+  gap: 10px; }
+.resend {
+  text-align: center; }
+.resend-plain {
+  color: #808080;
+  text-align: center;
+  margin-bottom: 0; }
+.otp {
+  width: 40px;
+  height: 40px;
+  font-size: 2rem;
+  text-align: center;
+  border-radius: 0.5rem;
+  box-shadow: none;
+  border: 1px solid #999;
+  margin: 15px 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  caret-color: transparent !important;  }
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0; }
+input[type="number"] {
+  -moz-appearance: textfield; }
 </style>

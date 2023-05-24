@@ -81,26 +81,15 @@ const price = computed(() => {
 });
 
 const open = async (mode: string) => {
-  // check if wallet is connected
-  const walletStore = useWalletStore();
-  // if connected, open send modal
-  if (!walletStore.connected && mode === 'send') {
-    // if not connected, connect wallet then open send modal
-    action.value = "";
-    if (typeof window.ethereum == 'undefined') {
-      console.log('MetaMask is not installed!');
-    }
-    await connectWallet();
-    await open(mode);
-  } else {
-    action.value = mode;
-  }
+  action.value = mode;
 }
 </script>
 
 <style lang="less" scoped>
 .receive-card {
-  background-color: #fff;
+  background-color: #fffc;
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
   height: auto;
   width: 90vw;
   max-width: 400px;
@@ -109,15 +98,17 @@ const open = async (mode: string) => {
   left: 50%;
   top: 45%;
   transform: translate(-50%, -50%);
-  box-shadow: 0px 10px 20px rgb(0 0 0 / 10%);
-  border-radius: 15px;
+  box-shadow: 0 3.3px 2.7px rgba(0,0,0,.03),0 8.3px 6.9px rgba(0,0,0,.04),0 17px 14.2px rgba(0,0,0,.05),0 35px 29.2px rgba(0,0,0,.06),0 96px 80px rgba(0,0,0,.07);
+  border-radius: 1rem;
   overflow: visible;
   z-index: 55;
   @media (max-width: 990px) {
     top: 47vh;
     left: 50%; } }
 .claim-card {
-  background-color: #fff;
+  background-color: #fffc;
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
   height: 400px;
   width: 90vw;
   max-width: 400px;
@@ -126,8 +117,8 @@ const open = async (mode: string) => {
   left: 50%;
   top: 45%;
   transform: translate(-50%, -50%);
-  box-shadow: 0px 10px 20px rgb(0 0 0 / 10%);
-  border-radius: 15px;
+  box-shadow: 0 3.3px 2.7px rgba(0,0,0,.03),0 8.3px 6.9px rgba(0,0,0,.04),0 17px 14.2px rgba(0,0,0,.05),0 35px 29.2px rgba(0,0,0,.06),0 96px 80px rgba(0,0,0,.07);
+  border-radius: 1rem;
   overflow: visible;
   z-index: 55;
   @media (max-width: 990px) {
@@ -136,7 +127,7 @@ const open = async (mode: string) => {
 .redpacket_close {
   position: absolute;
   z-index: 50;
-  margin: 0.5rem 0;
+  margin: 0.75rem 0.25rem;
   right: 0.5rem; }
 .transition {
   transition: .3s cubic-bezier(.3, 0, 0, 1.3) }
@@ -146,7 +137,7 @@ const open = async (mode: string) => {
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: rgba(0,0,0,0.5);
+  background-color: #b3b5b799;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -424,7 +415,7 @@ const open = async (mode: string) => {
     font-weight: 800;
     line-height: 1.25rem;
     width: 100px;
-    border-radius: 50px;
+    border-radius: 0.5rem;
     opacity: 1;
     background-color: rgb(7, 106, 224);
     color: white; }
@@ -467,7 +458,7 @@ svg {
   line-height: 1.25rem;
   font-weight: 800;
   line-height: 1.25rem;
-  border-radius: 50px;
+  border-radius: 0.5rem;
   @media (min-width: 640px) {
     padding-left: 1.5rem;
     padding-right: 1.5rem; }

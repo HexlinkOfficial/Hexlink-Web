@@ -12,7 +12,7 @@
     </div>
     <p class="or"></p>
     <p class="sending-reminder">Send only token on {{ useChainStore().chain.name }} network(id: {{ useChainStore().chain.chainId }}) to this address.<br>Sending tokens from other chains may result in permanent loss.</p>
-    <div style="display: flex; justify-content: center;">
+    <div style="display: flex; justify-content: center; width: 100%;">
       <button @click="copy(walletAddress, 'Claim URL Copied')" class="cta-button">Copy</button>
     </div>
   </div>
@@ -69,17 +69,19 @@ onMounted(async () => {
   background-color: rgb(7, 106, 224);
   color: white;
   padding: 10px;
-  margin-top: 20px;
-  margin-bottom: 20px;
-  width: 250px;
-  border-radius: 50px;
+  border-radius: 0.5rem;
+  border: none;
+  width: 60%;
+  margin: 1.25rem;
   border: none; }
+.cta-button:hover {
+  background-color: rgb(106, 165, 237); }
 .qrcode {
   display: flex;
   align-items: center;
   justify-content: center;
   border: 2px solid rgba(0, 0, 0, 0.1);
-  border-radius: 15px;
+  border-radius: 0.5rem;
   overflow: hidden;
   margin: 10px;
   margin-bottom: 10px;

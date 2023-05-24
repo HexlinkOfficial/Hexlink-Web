@@ -7,14 +7,8 @@
                 <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem;">
                     <img src="@/assets/svg/logo-beta.svg" style="height: 2.5rem;" />
                 </div>
-                <h2 class="title">Welcome To HexLink</h2>
+                <h2 class="title">Welcome To Hexlink</h2>
                 <p class="subtitle">Crypto for everyone</p>
-                <div class="social-login">
-                    <Button size="large" @click="twitter_login" type="primary" class="twitter-btn" :loading="isTwitterLoading">
-                        <i class="fa fa-twitter"></i>
-                        <span style="margin: 0 5px;">Sign in with Twitter</span>
-                    </Button>
-                </div>
                 <div class="social-login">
                     <Button size="large" @click="google_login" type="primary" class="google-btn" :loading="isGoogleLoading">
                         <i class="fa fa-google"></i>
@@ -88,12 +82,6 @@ const loginDisabled = ref<boolean>(true);
 
 const onSubmit = (e: Event) => {
     e.preventDefault();
-}
-
-const twitter_login = async () => {
-    isTwitterLoading.value = true;
-    await twitterSocialLogin();
-    router.push(store.returnUrl || "/");
 }
 
 const google_login = async () => {
@@ -321,18 +309,6 @@ a {
     border: none; }
 .cta-btn:hover {
     background-color: rgba(7, 106, 224, 0.8); }
-.twitter-btn {
-    background-color: #1DA1F2;
-    color: white;
-    padding: 18px 20px;
-    margin-top: 10px;
-    margin-bottom: 20px;
-    width: 100%;
-    height: auto;
-    border-radius: 10px;
-    border: none; }
-.twitter-btn:hover {
-    background-color: rgba(29, 161, 242, 0.8); }
 .google-btn {
     background-color: #1DA1F2;
     color: white;

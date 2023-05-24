@@ -21,6 +21,15 @@ async function isContract(provider: Provider, address: string) : Promise<boolean
     return false;
 }
 
+export function createNameStruct(input: string, type: "email" | "twitter"): NameStruct {
+    // Todo: need to update the handle part for Twitter account or other social accounts
+    return {
+        schema: hash((type == "email" ? "mailto" : "https").toString()),
+        domain: hash((type == "email" ? input.split("@")[1] : input.split(".").pop()!).toString()),
+        handle: hash((type == "email" && input).toString()),
+    }
+}
+
 export function getName(): NameStruct {
     const user = useAuthStore().user!;
     return {

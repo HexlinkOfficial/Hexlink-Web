@@ -27,9 +27,6 @@ export const useTokenStore = defineStore({
         tokens: (state) : Token[] => {
             return Object.values(state.data[chain().name] || {});
         },
-        visiableTokens() : Token[] {
-            return this.tokens.filter(t => t.preference?.display);
-        },
         token: (state) => {
             return (address: string) : Token => {
                 return state.data[chain().name][address.toLowerCase()];
@@ -65,10 +62,6 @@ export const useTokenStore = defineStore({
         },
         setMulti(tokens: Token[]) {
             tokens.forEach(t => this.set(t));
-        },
-        setPreference(token: Token, p: TokenPreference) {
-            const chain = getChain(token.chain || token.chainId);
-            this.data[chain.name][token.address].preference = p;
         },
         reset() {
             SUPPORTED_CHAINS.forEach(chain => delete this.data[chain.name]);

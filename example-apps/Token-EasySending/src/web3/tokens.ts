@@ -1,24 +1,12 @@
 import type { AssetTransfersWithMetadataParams, AssetTransfersWithMetadataResult } from "alchemy-sdk";
 import BigNumber from "bignumber.js";
-import {
-    getTokenPreferences,
-    insertTokenPreferences
-} from '@/graphql/preference';
-import type {
-    PreferenceInput,
-} from "@/graphql/preference";
-
-import { useAuthStore } from "@/stores/auth";
 import { useChainStore } from "@/stores/chain";
 import { useTokenStore } from "@/stores/token";
 import type { Token, Chain, NormalizedTokenBalance } from "../../../../functions/common";
 import { normalizeBalance, getPopularTokens } from "../../../../functions/common";
 import { Alchemy, Network } from "alchemy-sdk";
 import { alchemyKey } from "@/web3/network";
-import GOERLI_TOKENS from "../../../../functions/common/lib.esm/tokens/GOERLI_TOKENS.json";
-import MUMBAI_TOKENS from "../../../../functions/common/lib.esm/tokens/MUMBAI_TOKENS.json";
-import POLYGON_TOEKNS from "../../../../functions/common/lib.esm/tokens/POLYGON_TOKENS.json";
- 
+
 function alchemyNetwork(chain: Chain) : Network {
     if (chain.chainId == "5") {
         return Network.ETH_GOERLI;
@@ -75,12 +63,9 @@ export async function loadErc20Token(token: string) : Promise<Token> {
 }
 
 export async function initTokenList(chain: Chain) {
-    const auth = useAuthStore();
     const tokens = useTokenStore();
     const DEFAULT_TOKENS = await getPopularTokens(chain);
     DEFAULT_TOKENS.tokens.forEach(t => tokens.set(t));
-    const preferences : Token[] = await getTokenPreferences(auth.user!, chain);
-    preferences.forEach(p => tokens.set(p));
 }
 
 export type BalanceMap = {[key: string] : NormalizedTokenBalance};
@@ -107,29 +92,6 @@ export async function getBalances(account: string, balances: BalanceMap = {}) : 
         }
     });
     return balances;
-}
-
-export async function updatePreferences(balances: BalanceMap) {
-    const store = useTokenStore();
-    const balance = (t: Token) => balances[t.address.toLowerCase()];
-    const tokensToSetPreference : PreferenceInput[] = 
-        store.tokens.filter(
-            t => !t.preference && new BigNumber(balance(t)?.value).gt(0)
-        ).map(t => ({
-            chain: useChainStore().chain.name,
-            display: true,
-            tokenAddress: t.address.toLowerCase(),
-            metadata: t
-        }));
-    const inserted = await insertTokenPreferences(
-        useAuthStore().user!, tokensToSetPreference
-    );
-    inserted.forEach(res => {
-        store.setPreference(
-            res.metadata,
-            {id: res.id, display: res.display}
-        );
-    });
 }
 
 export interface Transaction {

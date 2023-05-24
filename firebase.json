@@ -34,7 +34,7 @@
     "singleProjectMode": true
   },
   "hosting": {
-    "public": "dist",
+    "public": "example-apps/Token-EasySending/dist",
     "ignore": [
       "firebase.json",
       "**/.*",

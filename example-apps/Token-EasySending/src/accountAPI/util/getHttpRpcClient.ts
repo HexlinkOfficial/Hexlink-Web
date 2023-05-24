@@ -1,8 +1,8 @@
 import { HttpRpcClient } from "@account-abstraction/sdk/dist/src/HttpRpcClient";
-import { JsonRpcProvider } from "@ethersproject/providers";
+import { Provider } from "@ethersproject/providers";
 
 export async function getHttpRpcClient(
-  provider: JsonRpcProvider,
+  provider: Provider,
   bundlerUrl: string,
   entryPointAddress: string
 ) {

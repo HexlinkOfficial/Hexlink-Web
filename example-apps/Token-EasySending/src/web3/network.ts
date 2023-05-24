@@ -12,10 +12,6 @@ const ALCHEMY_KEY = {
     "arbitrum": "Lw4de41huTiNuyyOvyzs_s5jTbCDg1yx",
 };
 
-async function doSwitch(chain: Chain) {
-    useChainStore().switchNetwork(chain);
-}
-
 export function alchemyKey(chain: Chain) : string {
     return (ALCHEMY_KEY as any)[chain.name] as string;
 }
@@ -24,7 +20,7 @@ export async function switchNetwork(chain: Chain) {
     if (chain.name === useChainStore().chain?.name) {
         return;
     }
-    doSwitch(chain);
+    useChainStore().switchNetwork(chain);
 }
 
 export function getProvider(chain: Chain) {

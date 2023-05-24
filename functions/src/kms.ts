@@ -7,6 +7,7 @@ import * as crc32c from "fast-crc32c";
 import * as BN from "bn.js";
 import {Signature} from "ethers";
 import {KMS_KEY_TYPE, kmsConfig, KMS_CONFIG_TYPE} from "./config";
+import {toEthSignedMessageHash} from "./account";
 
 const MAX_RETRY = 3;
 
@@ -242,4 +243,18 @@ export const decryptWithSymmKey = async function(text: string) {
   }
 
   return plaintextBuffer.toString("utf8");
+};
+
+export const sign = async (nameHash: string, message: string) => {
+  const toSign = ethers.utils.keccak256(
+      ethers.utils.defaultAbiCoder.encode(
+          ["bytes32", "bytes32"],
+          [nameHash, message]
+      )
+  );
+  const signature = await signWithKmsKey(
+      KMS_KEY_TYPE[KMS_KEY_TYPE.operator],
+      toEthSignedMessageHash(toSign)
+  ) as string;
+  return signature;
 };

@@ -8,19 +8,24 @@ import {
 } from '@firebase/auth';
 import type { User } from '@firebase/auth';
 import type { IUser } from "@/types";
-import { getFunctions, httpsCallable } from '@firebase/functions';
+import { getFunctions, httpsCallable,  type HttpsCallable } from '@firebase/functions';
 import { app } from '@/services/firebase';
 import { useAuthStore } from "@/stores/auth";
-import { useWalletStore } from "@/stores/wallet";
 import { switchNetwork } from "@/web3/network";
 import { GOERLI, SUPPORTED_CHAINS, type Chain } from "../../../../functions/common";
 import { useChainStore } from '@/stores/chain';
 import { initTokenList } from "@/web3/tokens";
 import { useTokenStore } from '@/stores/token';
 import * as jose from 'jose'
+import { ethers } from "ethers";
+
+import type {Provider} from "@ethersproject/providers";
+import { Hexlink__factory } from '@hexlink/contracts';
+import { hexlContract } from "../../../../functions/common/src/hexlink"
 
 const auth = getAuth(app)
 const functions = getFunctions()
+const hexlinkInterface = Hexlink__factory.createInterface();
 
 export async function genOTP(email: string) {
     const genOTPCall = httpsCallable(functions, 'genOTP');
@@ -30,7 +35,7 @@ export async function genOTP(email: string) {
 
 export async function validateOTP(email: string, otp: string) {
     const validateOTPCall = httpsCallable(functions, 'validateOTP');
-    const result = await validateOTPCall({email, otp});
+    const result = await validateOTPCall({email, otp, action: "genToken"});
     const resultData = result.data as any;
     if (resultData.code !== 200) {
         return {code: resultData.code, message: resultData.message}
@@ -40,11 +45,13 @@ export async function validateOTP(email: string, otp: string) {
         const userCredential = await signInWithCustomToken(auth, resultData.token);
         const cred = userCredential.user;
         const idToken = await getIdTokenAndSetClaimsIfNecessary(cred);
+        email = email.toLowerCase();
         const user : IUser = {
             provider: "email",
-            schema: "mailto",
-            domain: email.split("@")[1],
+            idType: "mailto",
+            email,
             handle: email,
+            name: `mailto:${email}`,
             uid: cred.uid,
             providerUid: email,
             displayName: "Anonymous",
@@ -95,12 +102,14 @@ export async function googleSocialLogin() {
     const provider = new GoogleAuthProvider();
     try {
         const result = await signInWithPopup(auth, provider)
-        const idToken = await getIdTokenAndSetClaimsIfNecessary(result.user)
+        const idToken = await getIdTokenAndSetClaimsIfNecessary(result.user);
+        const email = result.user.email!.toLowerCase();
         const user : IUser = {
             provider: "google.com",
-            schema: "mailto",
-            domain: "gmail.com",
-            handle: result.user.email == null ? "" : result.user.email,
+            idType: "mailto",
+            email: email,
+            handle: email,
+            name: `mailto:${email}`,
             uid: result.user.uid,
             providerUid: result.user.uid, // TODO: ensure this is google uid
             displayName: result.user.displayName || undefined,
@@ -124,9 +133,9 @@ export async function twitterSocialLogin() {
         const handle = result.user.reloadUserInfo.screenName;
         const user : IUser = {
             provider: "twitter.com",
-            schema: "https",
-            domain: "twitter.com",
-            handle,
+            idType: "twitter.com",
+            name: `https://twitter.com/${handle}`,
+            handle: `@${handle}`,
             uid: result.user.uid,
             providerUid: result.user.providerData[0].uid,
             displayName: result.user.displayName || undefined,
@@ -141,11 +150,21 @@ export async function twitterSocialLogin() {
 }
 
 export function signOutFirebase() {
-    useWalletStore().disconnectWallet();
     useAuthStore().signOut();
     useTokenStore().reset();
     useChainStore().reset();
     return signOut(auth);
+}
+
+export async function genSignature(otp: string, message: string) {
+    const user = useAuthStore().user!;
+    if (user.idType != "mailto") {
+        throw new Error("supported identity type");
+    }
+    const validateOTPCall = httpsCallable(functions, 'validateOTP');
+    const inputParam : any = {email: user.email!, otp, action: "sign", message};
+    const result = await validateOTPCall(inputParam);
+    return result.data;
 }
 
 export async function init() {

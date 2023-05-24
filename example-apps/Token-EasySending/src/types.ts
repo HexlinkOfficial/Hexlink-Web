@@ -3,10 +3,11 @@ import type { BigNumber as EthersBigNumber } from "ethers";
 
 export interface IUser {
     provider: string;
-    schema: string;
-    domain: string;
-    handle: string;
+    idType: string;
+    name: string;
+    handle: string,
     uid: string;
+    email?: string;
     providerUid: string;
     displayName?: string;
     photoURL?: string;

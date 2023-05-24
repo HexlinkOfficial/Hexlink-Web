@@ -3,7 +3,6 @@ import { BigNumber } from "bignumber.js";
 import type { Token } from "../../../../functions/common";
 import useClipboard from 'vue-clipboard3';
 import { createToaster } from "@meforma/vue-toaster";
-import { FastAverageColor } from 'fast-average-color';
 import { ethers } from "ethers";
 
 export function hash(value: string): string {
@@ -57,9 +56,9 @@ export const prettyPrintNumber = (amount: string) => {
     }
 };
 
-export function prettyPrint(input: string, length: number, firstCut: number, secondCut: number) {
+export function prettyPrint(input: string, length: number, firstCut: number, secondCut?: number) {
     if (input.length > length) {
-      return input.substring(0, firstCut) + "..." + input.slice(secondCut)
+      return input.substring(0, firstCut) + "..." + input.slice(secondCut ?? -4)
     } else {
       return input;
     }

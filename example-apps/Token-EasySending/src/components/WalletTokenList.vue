@@ -6,7 +6,7 @@
     >
     </EmptyContent>
   </div>
-  <div v-if="!loading && hasContent" v-for="(token, i) in useTokenStore().visiableTokens" :key="i" class="token-detail">
+  <div v-if="!loading && hasContent" v-for="(token, i) in visiableTokens" :key="i" class="token-detail">
     <div style="padding: 0.75rem; display: flex; align-items: center; justify-content: space-between; width: 100%;">
       <div class="token-description">
         <div class="token-logo">
@@ -35,11 +35,11 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, watch, computed } from 'vue'
 import type { Token } from "../../../../functions/common";
 import logo from "../assets/network-icons/hexlink.svg";
 import { useChainStore } from "@/stores/chain";
-import { getBalances, updatePreferences } from "@/web3/tokens";
+import { getBalances } from "@/web3/tokens";
 import type { BalanceMap } from "@/web3/tokens";
 import Loading from "@/components/Loading.vue";
 import { useTokenStore } from '@/stores/token';
@@ -47,6 +47,7 @@ import EmptyContent from '@/components/EmptyContent.vue';
 import { getTokenPrices } from "@/services/price";
 import { BigNumber } from "bignumber.js";
 import { getAccountAddress } from "@/web3/account";
+import { BigNumber as EthBigNumber } from "ethers";
 
 const loading = ref<boolean>(true);
 const balances = ref<BalanceMap>({});
@@ -61,15 +62,22 @@ const price = (token: Token) : string => {
   return prices.value[token.address] || "0";
 }
 
+const visiableTokens = computed(
+  () => useTokenStore().tokens.filter(
+    t => EthBigNumber.from(
+      balances.value[t.address].value || 0
+    ).gt(0)
+  )
+);
+
 const loadTokens = async () => {
   loading.value = true;
   const account = await getAccountAddress();
   if (account) {
     balances.value = await getBalances(account, balances.value);
-    await updatePreferences(balances.value);
   }
-  useTokenStore().visiableTokens.length > 0 ? hasContent.value = true : hasContent.value = false;
-  const tokensToCheckPrice = useTokenStore().visiableTokens.filter(
+  useTokenStore().tokens.length > 0 ? hasContent.value = true : hasContent.value = false;
+  const tokensToCheckPrice = useTokenStore().tokens.filter(
     t => Number(balance(t)) > 0
   ).map(t => t.address);
   prices.value = await getTokenPrices(useChainStore().chain, tokensToCheckPrice);

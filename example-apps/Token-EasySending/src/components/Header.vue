@@ -72,7 +72,7 @@
               <div class="profile_log dropdown" @click="activeDropDown('profile')" :class="active && 'show'">
                 <div class="user" data-toggle="dropdown">
                   <img class="profile" :src="user?.photoURL" :size="64" referrerpolicy="no-referrer"/>
-                  <span>{{ userHandle }}</span>
+                  <span>{{ user.handle }}</span>
                   <img src="@/assets/svg/arrowDown.svg" alt="arrow down icon" style="margin-right: 0.5rem; width: 1rem"/>
                 </div>
                 <!-- dropdown menu -->
@@ -83,7 +83,11 @@
                         <span class="thumb"><img :src="user?.photoURL" :size="64" referrerpolicy="no-referrer" /></span>
                         <div class="user-info">
                           <h5>{{ user?.displayName }}</h5>
-                          <span>{{ userHandle.length > 28 ? userHandle.substring(0,6) + '...' + userHandle.slice(-10) : userHandle }}</span>
+                          <span>{{
+                            user && user.handle.length > 28
+                            ? user?.handle.substring(0,6) + '...' + user?.handle.slice(-10)
+                            : user?.handle
+                          }}</span>
                         </div>
                       </div>
                     </div>
@@ -95,8 +99,8 @@
                             <img src="@/assets/svg/hexlinkCircle.svg" alt="hexlink logo" style="margin-right: 1rem;"/>
                             <div class="user-info">
                               <span style="margin-bottom: 0;" class="smart-contract-address">
-                                <h5 @click="doCopy(account.address)">
-                                  {{ addressTextLong(account.address) }}
+                                <h5 @click="doCopy(account)">
+                                  {{ addressTextLong(account) }}
                                 </h5>
                               </span>
                             </div>
@@ -106,7 +110,7 @@
                     </div>
                     <div v-if="false" style="margin-top: 20px; margin-bottom: 10px; margin-left: 24px; margin-right:24px;">
                       <router-link to="/?action=bind-auth-app">
-                        <button class="connect-wallet-button"  @click="connectWallet">
+                        <button class="connect-wallet-button">
                           Setup Auth App
                         </button>
                       </router-link>
@@ -132,36 +136,34 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import { useAuthStore } from '@/stores/auth';
-import { useWalletStore } from '@/stores/wallet';
 import { useChainStore } from '@/stores/chain';
 import { createToaster } from "@meforma/vue-toaster";
 import {
     GOERLI,
     MUMBAI,
     prettyPrintAddress,
+    type Chain,
 } from "../../../../functions/common";
-import { switchNetwork, getProvider } from "@/web3/network";
-import { connectWallet, disconnectWallet} from "@/web3/wallet";
 import { signOutFirebase } from "@/services/auth";
 import useClipboard from 'vue-clipboard3';
 import ScanQRCodeModal from './ScanQRCodeModal.vue';
 import { useRoute } from "vue-router";
-import { getAccount, type Account } from "@/web3/account";
+import { getAccountAddress } from '@/web3/account';
+import { switchNetwork } from "@/web3/network";
 
 const authStore = useAuthStore();
 const user = authStore.user!;
-const account = ref<Account>({
-  address: "0x",
-  isContract: false,
-  owner: "0x",
-});
-const walletStore = useWalletStore();
 const active = ref<string>("");
 const showTestnet = ref<boolean>(true);
 const { toClipboard } = useClipboard();
+const account = ref<string>("0x");
 
-const mainNet = [];
-const testNet = [GOERLI, MUMBAI];
+onMounted(async () => {
+  account.value = await getAccountAddress();
+});
+
+const mainNet: Chain[] = [];
+const testNet: Chain[] = [GOERLI, MUMBAI];
 
 const addressTextLong = function (address: string | undefined) {
   if (address) {
@@ -169,17 +171,6 @@ const addressTextLong = function (address: string | undefined) {
   }
   return "0x";
 };
-
-onMounted(async() => {
-  account.value = await getAccount();
-})
-
-const userHandle = computed(() => {
-  if (useAuthStore().user?.provider.includes("twitter")) {
-    return "@" + user.handle;
-  }
-  return user?.handle;
-});
 
 const root = ref<HTMLElement | null>(null);
 

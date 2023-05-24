@@ -45,6 +45,7 @@ export async function validateOTP(email: string, otp: string) {
         const userCredential = await signInWithCustomToken(auth, resultData.token);
         const cred = userCredential.user;
         const idToken = await getIdTokenAndSetClaimsIfNecessary(cred);
+        email = email.toLowerCase();
         const user : IUser = {
             provider: "email",
             idType: "mailto",
@@ -101,13 +102,14 @@ export async function googleSocialLogin() {
     const provider = new GoogleAuthProvider();
     try {
         const result = await signInWithPopup(auth, provider)
-        const idToken = await getIdTokenAndSetClaimsIfNecessary(result.user)
+        const idToken = await getIdTokenAndSetClaimsIfNecessary(result.user);
+        const email = result.user.email!.toLowerCase();
         const user : IUser = {
             provider: "google.com",
             idType: "mailto",
-            email: result.user.email!,
-            handle: result.user.email!,
-            name: `mailto:${result.user.email!}`,
+            email: email,
+            handle: email,
+            name: `mailto:${email}`,
             uid: result.user.uid,
             providerUid: result.user.uid, // TODO: ensure this is google uid
             displayName: result.user.displayName || undefined,

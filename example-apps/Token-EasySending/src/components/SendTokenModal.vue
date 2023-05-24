@@ -503,7 +503,6 @@ const buildTokenTransferUserOp = async (
   };
   const userOpHash = await genUserOpHash(userOp, api);
   const result = await genSignature(otp, userOpHash);
-  console.log(result);
   if (verifySignature(result)) {
     return {
       ...userOp,

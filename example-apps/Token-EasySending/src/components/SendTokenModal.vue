@@ -78,7 +78,7 @@
               <b>{{ totalServiceFee}}</b>
             </a-tooltip>
           </p>
-          <div class="total-choose-token">
+          <!-- <div class="total-choose-token">
             <div class="token-select">
               <div class="mode-dropdown" :class="chooseGasDrop && 'active'" @click.stop="chooseGasDrop = !chooseGasDrop;"
                 v-on-click-outside.bubble="chooseGasHandle">
@@ -103,12 +103,12 @@
                 </div>
               </div>
             </div>
-          </div>
+          </div> -->
         </div>
       </div>
     </div>
     <div style="display: flex; justify-content: center; width: 100%; padding: 0 15px;">
-      <button :disabled="hasBalanceWarning" class="cta-button" @click="goToStep3">Send</button>
+      <button :disabled="hasBalanceWarning" class="cta-button" @click="goToStep3">Confirm</button>
     </div>
   </form>
   <form v-if="showStep3 && sendStatus == ''" class="form-send" @submit.prevent="onSubmit">
@@ -210,6 +210,8 @@ const userHandle = computed(() => {
   }
   return user?.handle;
 });
+
+const emit = defineEmits(['closeModal'])
 
 interface TokenTransaction {
   to: string,
@@ -404,10 +406,14 @@ const tokenChoose =
     }
   };
 
-onMounted(genTokenList);
-onMounted(refreshGas);
-watch(() => useChainStore().current, genTokenList);
-watch([() => transaction.value.gasToken], setGas);
+const compareInputBalance = () => {
+  if (Number(transaction.value.amountInput) > Number(transactionTokenBalance)) {
+    hasBalanceWarning.value = true;
+  } else {
+    hasBalanceWarning.value = false;
+  }
+}
+
 watch(
   [() => transaction.value.amountInput, transactionTokenBalance],
   ([newAmountInput, newTokenBalance], _old) => {
@@ -418,6 +424,10 @@ watch(
     }
   }
 );
+onMounted(genTokenList);
+onMounted(refreshGas);
+watch(() => useChainStore().current, genTokenList);
+watch([() => transaction.value.gasToken], setGas);
 
 const genUserOpHash = async (
   userOp: UserOperationStruct,
@@ -582,9 +592,14 @@ const onSubmit = async (_e: Event) => {
 }
 
 const goToStep3 = () => {
-  showStep2.value = false;
-  showStep3.value = true;
-  sendOTP();
+  compareInputBalance();
+  if (hasBalanceWarning) {
+    createNotification("Insufficient Balance", "error");
+  } else {
+    showStep2.value = false;
+    showStep3.value = true;
+    sendOTP();
+  }
 }
 
 const verifySendTo = async () => {
@@ -628,6 +643,7 @@ const closeModal = () => {
   }
   sendStatus.value = "";
   goToStep1();
+  emit('closeModal', false);
 }
 
 const formatEmail = (email: string) => {

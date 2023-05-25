@@ -18,11 +18,11 @@ export async function getCoinPrice(chain: Chain) : Promise<string> {
     }
     const params = {ids: coin!, vs_currencies: "usd"};
     try {
-      const response = await axios.get(BASE_COIN_URL, { params });
+      const response = await axios.get(BASE_COIN_URL, { params, timeout: 2000 });
       return response.data[coin!.toLowerCase()]["usd"];
     } catch (err: any) {
       console.log(err);
-      throw new Error(`Error in 'axiosGetJsonData(${BASE_COIN_URL})': ${err.message}`);
+      return "0";
     }
 }
 
@@ -44,7 +44,7 @@ export async function getTokenPrices(
     }
     const url = BASE_TOKEN_URL + chain.name;
     try {
-      const response = await axios.get(url, { params });
+      const response = await axios.get(url, { params, timeout: 2000 });
       if (response.error) {
         throw new Error("failed to query price");
       }
@@ -55,6 +55,9 @@ export async function getTokenPrices(
       });
     } catch (err: any) {
       console.log(err);
+      tokensToSearch.forEach(token => {
+        prices[token] = "0";
+      });
     }
     return prices;
 }

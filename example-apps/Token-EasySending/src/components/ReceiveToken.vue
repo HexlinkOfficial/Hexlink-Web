@@ -10,7 +10,7 @@
       <canvas id="canvas" style="height: 200px; width: 200px;"></canvas>
       <p class="qrcode-address">{{ walletAddress }}</p>
     </div>
-    <p class="or"></p>
+    <p class="or" style="margin-top: 5px; margin-bottom: 10px;"></p>
     <p class="sending-reminder">Send only token on {{ useChainStore().chain.name }} network(id: {{ useChainStore().chain.chainId }}) to this address.<br>Sending tokens from other chains may result in permanent loss.</p>
     <div style="display: flex; justify-content: center; width: 100%;">
       <button @click="copy(walletAddress, 'Claim URL Copied')" class="cta-button">Copy</button>
@@ -102,5 +102,5 @@ onMounted(async () => {
     border-bottom: 1px solid #f5efef;
     line-height: 0.1em;
     margin-top: 10px;
-    margin-bottom: 10px; }
+    margin-bottom: 5px; }
 </style>

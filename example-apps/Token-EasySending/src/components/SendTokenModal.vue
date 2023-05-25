@@ -68,16 +68,24 @@
       </div>
       <div style="display: flex; margin: 0px; justify-content: center; margin-top: 20px;">
         <div class="gas-estimation" style="padding: 0 0.5rem 0 0.5rem;">
-          <p>
+          <p style="display: flex; align-items: center; gap: 10px;">
             <img style="width: 20px; height: 20px;" src="https://i.postimg.cc/RhXfgJR1/gas-pump.png" />
-            Estimated Fee:
+            <span style="line-height: 1.25;">Estimated Fee: </span>
             <a-tooltip placement="top">
               <template #title>
                 <span>The real service fee may differ per network conditions</span>
               </template>
-              <b>{{ totalServiceFee}}</b>
+              <b>{{ totalServiceFee.substring(0,8) }}</b>
             </a-tooltip>
           </p>
+          <div style="display: flex; align-items: center;">
+            <div class="token-icon">
+              <img :src="token.logoURI" />
+            </div>
+            <div class="token-box">
+              <b>{{ token.symbol }}</b>
+            </div>
+          </div>
           <!-- <div class="total-choose-token">
             <div class="token-select">
               <div class="mode-dropdown" :class="chooseGasDrop && 'active'" @click.stop="chooseGasDrop = !chooseGasDrop;"
@@ -604,7 +612,7 @@ const verifySendTo = async () => {
       transaction.value.to = transaction.value.toInput;
       return true;
     } else if (validateEmail(transaction.value.toInput)) {
-      const nameHash = hash(`mailto:${transaction.value.toInput}`);
+      const nameHash = hash(`mailto:${transaction.value.toInput.toLowerCase()}`);
       transaction.value.to = await getAccountAddress(nameHash);
       return true;
     } else {
@@ -953,7 +961,7 @@ input::-webkit-inner-spin-button {
   display: flex;
   p {
     margin-bottom: 0rem;
-    margin-right: 1rem;
+    margin-right: 0rem;
     font-weight: 500; } }
 .mode-options {
   display: flex;

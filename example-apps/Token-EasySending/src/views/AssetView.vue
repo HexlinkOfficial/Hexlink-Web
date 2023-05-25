@@ -113,7 +113,7 @@ const closeModal = (variable: boolean) => {
   background-color: #fffc;
   -webkit-backdrop-filter: blur(16px);
   backdrop-filter: blur(16px);
-  height: 400px;
+  height: 425px;
   width: 90vw;
   max-width: 400px;
   position: fixed;

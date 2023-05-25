@@ -76,7 +76,15 @@ const loadTokens = async () => {
   if (account) {
     balances.value = await getBalances(account, balances.value);
   }
-  useTokenStore().tokens.length > 0 ? hasContent.value = true : hasContent.value = false;
+  var availableCount = 0;
+  Object.keys(balances.value).map(function (personNamedIndex) {
+    let person = balances.value[personNamedIndex];
+    if (person.normalized.toString() != "0") {
+      availableCount += 1;
+    }
+  });
+  console.log(availableCount);
+  availableCount == 0 ? hasContent.value = false : hasContent.value = true;
   const tokensToCheckPrice = useTokenStore().tokens.filter(
     t => Number(balance(t)) > 0
   ).map(t => t.address);

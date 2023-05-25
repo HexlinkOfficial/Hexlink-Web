@@ -140,7 +140,6 @@ import { useChainStore } from '@/stores/chain';
 import { createToaster } from "@meforma/vue-toaster";
 import {
     GOERLI,
-    MUMBAI,
     prettyPrintAddress,
     type Chain,
 } from "../../../../functions/common";
@@ -163,7 +162,7 @@ onMounted(async () => {
 });
 
 const mainNet: Chain[] = [];
-const testNet: Chain[] = [GOERLI, MUMBAI];
+const testNet: Chain[] = [GOERLI];
 
 const addressTextLong = function (address: string | undefined) {
   if (address) {
@@ -660,7 +659,7 @@ cursor: pointer; }
       overflow-y: auto;
       position: fixed;
       padding-top: 1.5rem;
-      padding-bottom: 1.5rem;
+      padding-bottom: 0.5rem;
       right: 1.5rem;
       max-height: 20rem;
       background-color: white;

@@ -70,7 +70,10 @@ export async function initTokenList(chain: Chain) {
 
 export type BalanceMap = {[key: string] : NormalizedTokenBalance};
 
-export async function getBalances(account: string, balances: BalanceMap = {}) : Promise<BalanceMap> {
+export async function getBalances(
+    account: string,
+    balances: BalanceMap = {}
+) : Promise<BalanceMap> {
     const store = useTokenStore();
     const nativeCoin = useTokenStore().nativeCoin;
     const balance = await useChainStore().provider.getBalance(account);

@@ -80,10 +80,10 @@
           </p>
           <div style="display: flex; align-items: center;">
             <div class="token-icon">
-              <img :src="token.logoURI" />
+              <img :src="gasToken.logoURI" />
             </div>
             <div class="token-box">
-              <b>{{ token.symbol }}</b>
+              <b>{{ gasToken.symbol }}</b>
             </div>
           </div>
           <!-- <div class="total-choose-token">

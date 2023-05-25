@@ -73,14 +73,15 @@ const visiableTokens = computed(
 const loadTokens = async () => {
   loading.value = true;
   const account = await getAccountAddress();
-  if (account) {
-    balances.value = await getBalances(account, balances.value);
-  }
+  balances.value = await getBalances(account, balances.value);
   visiableTokens.value.length > 0 ? hasContent.value = true : hasContent.value = false;
   const tokensToCheckPrice = useTokenStore().tokens.filter(
     t => Number(balance(t)) > 0
   ).map(t => t.address);
-  prices.value = await getTokenPrices(useChainStore().chain, tokensToCheckPrice);
+  prices.value = await getTokenPrices(
+    useChainStore().chain,
+    tokensToCheckPrice
+  );
   loading.value = false;
 }
 onMounted(loadTokens);

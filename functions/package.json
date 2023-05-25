@@ -10,7 +10,7 @@
     "serve2": "CLOUD_RUNTIME_CONFIG=\"$(doppler secrets download --no-file | jq '{doppler: .}')\" firebase emulators:start --only functions",
     "shell": "CLOUD_RUNTIME_CONFIG=\"$(doppler secrets download --no-file | jq '{doppler: .}')\" firebase functions:shell",
     "start": "npm run shell",
-    "secrets-sync": "firebase functions:config:unset doppler && firebase functions:config:set doppler=\"$(doppler secrets download --config prd --no-file)\"",
+    "secrets-sync": "firebase functions:config:unset doppler && firebase functions:config:set doppler=\"$(doppler secrets download --config stg --no-file)\"",
     "deploy": "npm run secrets-sync && firebase deploy --only functions",
     "logs": "firebase functions:log"
   },

@@ -555,7 +555,7 @@ const onSubmit = async (_e: Event) => {
       token.value.decimals
     );
     sendStatus.value = "processing";
-    message.value = "Check your wallet to confirm the operation...";
+    message.value = "Processing your transaction...";
 
     const api = new HexlinkAccountAPI({
       provider: useChainStore().provider,

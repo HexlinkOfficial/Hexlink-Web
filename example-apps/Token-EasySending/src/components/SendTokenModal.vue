@@ -604,7 +604,7 @@ const verifySendTo = async () => {
       transaction.value.to = transaction.value.toInput;
       return true;
     } else if (validateEmail(transaction.value.toInput)) {
-      const nameHash = hash(`mailto:${transaction.value.toInput}`);
+      const nameHash = hash(`mailto:${transaction.value.toInput.toLowerCase()}`);
       transaction.value.to = await getAccountAddress(nameHash);
       return true;
     } else {

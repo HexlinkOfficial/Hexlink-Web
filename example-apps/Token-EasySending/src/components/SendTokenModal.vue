@@ -305,9 +305,24 @@ const countDownTimer = () => {
 }
 
 const sendOTP = async () => {
-  console.log("hendleL: ", userHandle.value);
   try {
-    const result = await genOTP(userHandle.value);
+    const result = await genOTP(userHandle.value, "authentication");
+    if (result === 429) {
+      console.error("Too many requests to send otp.");
+      createNotification("Too many requests to send otp.", "error");
+    }
+    else if (result === 200) {
+      countDownTimer();
+    }
+  } catch (err) {
+    console.log(err);
+    createNotification(err as string, "error");
+  }
+}
+
+const sendNotificationEmail = async () => {
+  try {
+    const result = await genOTP(transaction.value.toInput.toLowerCase(), "newTransfer", userHandle.value, transaction.value.amountInput, token.value);
     if (result === 429) {
       console.error("Too many requests to send otp.");
       createNotification("Too many requests to send otp.", "error");
@@ -325,7 +340,7 @@ const resendOTP = async () => {
   countDown.value = 60;
   isResendLink.value = false;
   countDownTimer();
-  const result = await genOTP(userHandle.value);
+  const result = await genOTP(userHandle.value, "authentication");
   if (result === 429) {
     console.error("Too many requests to send otp.");
     createNotification("Too many requests to send otp.", "error");
@@ -413,14 +428,6 @@ const tokenChoose =
       refreshGas();
     }
   };
-
-const compareInputBalance = () => {
-  if (Number(transaction.value.amountInput) > Number(transactionTokenBalance)) {
-    hasBalanceWarning.value = true;
-  } else {
-    hasBalanceWarning.value = false;
-  }
-}
 
 watch(
   [() => transaction.value.amountInput, transactionTokenBalance],
@@ -564,6 +571,7 @@ const onSubmit = async (_e: Event) => {
     );
     sendStatus.value = "processing";
     message.value = "Processing your transaction...";
+    console.log(token.value.logoURI);
 
     const api = new HexlinkAccountAPI({
       provider: useChainStore().provider,
@@ -591,6 +599,7 @@ const onSubmit = async (_e: Event) => {
 
     message.value = "Done!";
     sendStatus.value = "success";
+    sendNotificationEmail();
   } catch(error) {
     console.log(error);
     sendStatus.value = "error";

@@ -22,14 +22,15 @@ import { ethers } from "ethers";
 import type {Provider} from "@ethersproject/providers";
 import { Hexlink__factory } from '@hexlink/contracts';
 import { hexlContract } from "../../../../functions/common/src/hexlink"
+import type { Token } from "../../../../functions/common";
 
 const auth = getAuth(app)
 const functions = getFunctions()
 const hexlinkInterface = Hexlink__factory.createInterface();
 
-export async function genOTP(email: string) {
+export async function genOTP(email: string, mode: string, sender?: string, sendAmount?: string, token?: Token) {
     const genOTPCall = httpsCallable(functions, 'genOTP');
-    const result = await genOTPCall({email: email});
+    const result = await genOTPCall({email: email, mode: mode, sender: sender, sendAmount: sendAmount, token: token});
     return (result.data as any).code as number;
 }
 

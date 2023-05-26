@@ -156,7 +156,7 @@ const sendOTP = async () => {
     if(email.value != "") {
         isLoadingLogin.value = true;
         try {
-            const result = await genOTP(email.value);
+            const result = await genOTP(email.value, "signin");
             if (result === 429) {
                 console.error("Too many requests to send otp.");
                 createNotification("Too many requests to send otp.", "error");
@@ -181,7 +181,7 @@ const resendOTP = async() => {
     countDown.value = 60;
     isResendLink.value = false;
     countDownTimer();
-    const result = await genOTP(email.value);
+    const result = await genOTP(email.value, "signin");
     if (result === 429) {
         console.error("Too many requests to send otp.");
         createNotification("Too many requests to send otp.", "error");

@@ -43,6 +43,7 @@ import { getBalances } from "@/web3/tokens";
 import type { BalanceMap } from "@/web3/tokens";
 import Loading from "@/components/Loading.vue";
 import { useTokenStore } from '@/stores/token';
+import { useAuthStore } from '@/stores/auth';
 import EmptyContent from '@/components/EmptyContent.vue';
 import { getTokenPrices } from "@/services/price";
 import { BigNumber } from "bignumber.js";
@@ -82,6 +83,12 @@ const loadTokens = async () => {
     useChainStore().chain,
     tokensToCheckPrice
   );
+  // update the user total asset value
+  var tempBalance = 0;
+  visiableTokens.value.forEach((token) => {
+    tempBalance += Number(usdValue(token));
+  })
+  useAuthStore().setuserBalance(tempBalance);
   loading.value = false;
 }
 onMounted(loadTokens);

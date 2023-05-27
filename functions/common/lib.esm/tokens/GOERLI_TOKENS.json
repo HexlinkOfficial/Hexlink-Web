@@ -5,7 +5,7 @@
         "name": "Goerli Ethereum",
         "decimals": 18,
         "address": "0x0000000000000000000000000000000000000000",
-        "logoURI": "https://token.metaswap.codefi.network/assets/networkLogos/ethereum.svg"
+        "logoURI": "https://i.postimg.cc/qqFqP08S/ethPNG.png"
     },
     {
         "chainId": 5,
@@ -13,7 +13,7 @@
         "name": "USD Coin",
         "decimals": 18,
         "address": "0x2f3a40a3db8a7e3d09b0adfefbce4f6f81927557",
-        "logoURI": "https://wallet-asset.matic.network/img/tokens/usdc.svg"
+        "logoURI": "https://i.postimg.cc/XvDJjw1B/usdcPNG.png"
     },
     {
         "chainId": 5,
@@ -21,7 +21,7 @@
         "name": "USD Coin",
         "decimals": 6,
         "address": "0x07865c6E87B9F70255377e024ace6630C1Eaa37F",
-        "logoURI": "https://wallet-asset.matic.network/img/tokens/usdc.svg"
+        "logoURI": "https://i.postimg.cc/XvDJjw1B/usdcPNG.png"
     },
     {
         "chainId": 5,
@@ -29,7 +29,7 @@
         "name": "Wrapped Ether",
         "decimals": 18,
         "address": "0xb4fbf271143f4fbf7b91a5ded31805e42b2208d6",
-        "logoURI": "https://wallet-asset.matic.network/img/tokens/eth.svg"
+        "logoURI": "https://i.postimg.cc/qqFqP08S/ethPNG.png"
     },
     {
         "chainId": 5,
@@ -37,6 +37,6 @@
         "name": "Stablecoin DAI",
         "decimals": 18,
         "address": "0x11fe4b6ae13d2a6055c8d9cf65c55bac32b5d844",
-        "logoURI": "https://wallet-asset.matic.network/img/tokens/dai.svg"
+        "logoURI": "https://i.postimg.cc/9XyWK527/daiPNG.png"
     }
 ]

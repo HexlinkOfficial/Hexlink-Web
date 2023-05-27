@@ -13,7 +13,7 @@
         "symbol": "DAI",
         "name": "Dai Stablecoin",
         "decimals": 18,
-        "logoURI":"https://wallet-asset.matic.network/img/tokens/dai.svg"
+        "logoURI":"https://i.postimg.cc/9XyWK527/daiPNG.png"
     },
     {
         "chainId": 42170,
@@ -21,7 +21,7 @@
         "symbol": "USDC",
         "name": "USD Coin",
         "decimals": 6,
-        "logoURI": "https://wallet-asset.matic.network/img/tokens/usdc.svg"
+        "logoURI": "https://i.postimg.cc/XvDJjw1B/usdcPNG.png"
     },
     {
         "chainId": 42170,

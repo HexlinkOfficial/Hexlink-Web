@@ -25,7 +25,7 @@ export const GOERLI : Chain = {
     decimals: 18,
   },
   blockExplorerUrls: ["https://goerli.etherscan.io"],
-  logoUrl: "https://token.metaswap.codefi.network/assets/networkLogos/ethereum.svg",
+  logoUrl: "https://i.postimg.cc/qqFqP08S/ethPNG.png",
 };
 
 export const POLYGON : Chain = {

@@ -72,12 +72,13 @@ import { connectWallet } from "@/web3/wallet";
 import SendTokenModal from '@/components/SendTokenModal.vue';
 import ReceiveToken from '@/components/ReceiveToken.vue';
 import { genDeployAuthProof } from "@/web3/auth";
+import { useAuthStore } from '@/stores/auth';
 
 const openModal = ref<boolean>(false);
 const action = ref<string>("");
 
 const price = computed(() => {
-  return BigNumber(0);
+  return Math.round(useAuthStore().balance!);
 });
 
 const open = async (mode: string) => {

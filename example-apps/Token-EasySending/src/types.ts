@@ -18,4 +18,5 @@ export interface IAuth {
     authenticated: boolean,
     user?: IUser,
     returnUrl?: string,
+    balance?: number,
 }

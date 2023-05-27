@@ -8,6 +8,7 @@ export const useAuthStore = defineStore({
         authenticated: false,
         user: undefined,
         returnUrl: undefined,
+        balance: undefined,
     }),
     persist: true,
     getters: {
@@ -18,7 +19,10 @@ export const useAuthStore = defineStore({
             displayName: state.user!.displayName,
             provider: state.user!.provider,
             logoURI: state.user!.photoURL,
-        })
+        }),
+        balanceInfo: (state) => (
+            state.balance
+        )
     },
     actions: {
         signIn(user: IUser) {
@@ -45,5 +49,8 @@ export const useAuthStore = defineStore({
         setReturnUrl(returnUrl: string) {
             this.returnUrl = returnUrl;
         },
+        setuserBalance(balance: number) {
+            this.balance = balance;
+        }
     },
 });

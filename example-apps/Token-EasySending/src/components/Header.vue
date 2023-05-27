@@ -675,7 +675,7 @@ cursor: pointer; }
         transform-origin: top left;
         max-height: 100vh;
         padding-top: 1.5rem;
-        padding-bottom: 1.5rem;
+        padding-bottom: 0.5rem;
         box-shadow: 0 1.5rem 4rem rgba(22, 28, 45, 0.15);
         background-clip: padding-box;
         border: 0px solid rgba(0, 0, 0, 0.15);

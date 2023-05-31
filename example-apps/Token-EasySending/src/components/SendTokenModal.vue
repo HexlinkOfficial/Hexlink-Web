@@ -562,7 +562,7 @@ const onSubmit = async (_e: Event) => {
     message.value = "Something went wrong...";
     createNotification("Error: " + error as string, "error");
   }
-  if (sendStatus.value = "success") {
+  if (sendStatus.value === "success") {
     await notifyTransfer(
       userHandle.value,
       transaction.value.toInput,

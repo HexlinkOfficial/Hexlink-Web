@@ -71,7 +71,7 @@ export function getAuthenticationNotification(receipt: string, otp: string) {
                             </tr>
                             <tr>
                                 <td style="text-align:center;">
-                                    <p style="font-size:14px; color:rgba(69, 80, 86, 0.7411764705882353); line-height:18px; margin:0 0 0;">&copy; <strong>play.hexlink.io</strong> </p>
+                                    <p style="font-size:14px; color:rgba(69, 80, 86, 0.7411764705882353); line-height:18px; margin:0 0 0;">&copy; <strong>dev.hexlink.io</strong> </p>
                                 </td>
                             </tr>
                             <tr>
@@ -149,7 +149,7 @@ export function getNewTransferNotification(
                                                               <td style="display: flex;justify-content: flex-start;line-height: 1.5;">
                                                                 <strong>Received:&nbsp;</strong> 
                                                                 <div style="display: flex;">
-                                                                  <img width="25" src="${token.logoURI}" title="logo" alt="logo">
+                                                                  <img width="20" height="20" src="${token.logoURI}" title="logo" alt="logo">
                                                                   <span><strong>&nbsp;${sendAmount}&nbsp;${token.symbol}</strong></span>
                                                                 </div>
                                                               </td>
@@ -192,7 +192,7 @@ export function getNewTransferNotification(
                               </tr>
                               <tr>
                                   <td style="text-align:center;">
-                                      <p style="font-size:14px; color:rgba(69, 80, 86, 0.7411764705882353); line-height:18px; margin:0 0 0;">&copy; <strong>play.hexlink.io</strong> </p>
+                                      <p style="font-size:14px; color:rgba(69, 80, 86, 0.7411764705882353); line-height:18px; margin:0 0 0;">&copy; <strong>dev.hexlink.io</strong> </p>
                                   </td>
                               </tr>
                               <tr>

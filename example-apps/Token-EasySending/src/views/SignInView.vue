@@ -24,7 +24,7 @@
 import { ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { Button } from 'ant-design-vue';
-import { googleSocialLogin, emailAnonymousLogin } from '@/services/auth'
+import { emailAnonymousLogin } from '@/services/auth'
 import { useAuthStore } from '@/stores/auth'
 import background from "@/assets/background.png";
 
@@ -33,7 +33,6 @@ const router = useRouter();
 const show = ref<boolean>(true);
 const email = ref<string>("");
 const isLoadingLogin = ref(false);
-const isGoogleLoading = ref<boolean>(false);
 const loginDisabled = ref<boolean>(true);
 
 const onSubmit = (e: Event) => {

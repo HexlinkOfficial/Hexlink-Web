@@ -86,32 +86,6 @@
               <b>{{ gasToken.symbol }}</b>
             </div>
           </div>
-          <!-- <div class="total-choose-token">
-            <div class="token-select">
-              <div class="mode-dropdown" :class="chooseGasDrop && 'active'" @click.stop="chooseGasDrop = !chooseGasDrop;"
-                v-on-click-outside.bubble="chooseGasHandle">
-                <div class="token-icon">
-                  <img :src="gasToken.logoURI" />
-                </div>
-                <div class="mode-text2">{{ gasToken.symbol }}</div>
-                <input class="mode-input" type="text" placeholder="select" readonly>
-                <div class="mode-options">
-                  <div class="mode-option" v-for="(token, index) of tokens" :key="index"
-                    @click="tokenChoose('gas', token)">
-                    <div class="token-icon">
-                      <img :src="token.logoURI" />
-                    </div>
-                    <div class="token-box">
-                      <b>{{ token.symbol }}</b>
-                      <div style="margin-right:0.5rem;">
-                        Balance {{ tokenBalance(token.address) }}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div> -->
         </div>
       </div>
     </div>
@@ -182,7 +156,7 @@ import { getPriceInfo } from "@/web3/network";
 import { useAuthStore } from '@/stores/auth';
 import type { Token } from "../../../../functions/common";
 import { calcGas, tokenAmount, hash } from "../../../../functions/common";
-import { genOTP } from '@/services/auth'
+import { genOTP, notifyTransfer } from '@/services/auth'
 import ERC20_ABI from "../abi/ERC20_ABI.json";
 
 import config from "../../bundler_config.json";
@@ -306,23 +280,7 @@ const countDownTimer = () => {
 
 const sendOTP = async () => {
   try {
-    const result = await genOTP(userHandle.value, "authentication");
-    if (result === 429) {
-      console.error("Too many requests to send otp.");
-      createNotification("Too many requests to send otp.", "error");
-    }
-    else if (result === 200) {
-      countDownTimer();
-    }
-  } catch (err) {
-    console.log(err);
-    createNotification(err as string, "error");
-  }
-}
-
-const sendNotificationEmail = async () => {
-  try {
-    const result = await genOTP(transaction.value.toInput.toLowerCase(), "newTransfer", userHandle.value, transaction.value.amountInput, token.value);
+    const result = await genOTP(userHandle.value);
     if (result === 429) {
       console.error("Too many requests to send otp.");
       createNotification("Too many requests to send otp.", "error");
@@ -340,7 +298,7 @@ const resendOTP = async () => {
   countDown.value = 60;
   isResendLink.value = false;
   countDownTimer();
-  const result = await genOTP(userHandle.value, "authentication");
+  const result = await genOTP(userHandle.value);
   if (result === 429) {
     console.error("Too many requests to send otp.");
     createNotification("Too many requests to send otp.", "error");
@@ -527,6 +485,7 @@ const buildTokenTransferUserOp = async (
       signature: [],
   };
   const userOpHash = await genUserOpHash(userOp, api);
+  message.value = "Signing your transaction...";
   const result = await genSignature(otp, userOpHash);
   if (verifySignature(result)) {
     return {
@@ -570,9 +529,7 @@ const onSubmit = async (_e: Event) => {
       token.value.decimals
     );
     sendStatus.value = "processing";
-    message.value = "Processing your transaction...";
-    console.log(token.value.logoURI);
-
+    message.value = "Preparing your transaction...";
     const api = new HexlinkAccountAPI({
       provider: useChainStore().provider,
       entryPointAddress: config.entryPoint,
@@ -583,6 +540,7 @@ const onSubmit = async (_e: Event) => {
     const op = await buildTokenTransferUserOp(
       transaction.value, code.join(""), api
     );
+    message.value = "Sending your transaction...";
     console.log(`Signed UserOperation: ${await printOp(op)}`);
 
     const bundler = await getHttpRpcClient(
@@ -591,20 +549,26 @@ const onSubmit = async (_e: Event) => {
       config.entryPoint
     );
     const uoHash = await bundler.sendUserOpToBundler(op);
-    console.log(`UserOpHash: ${uoHash}`);
-
-    console.log("Waiting for transaction...");
+    message.value = "Waiting for transaction to finish...";
+    console.log(`Waiting for transaction ${uoHash}...`);
     const txHash = await api.getUserOpReceipt(uoHash);
     console.log(`Transaction hash: ${txHash}`);
-
+  
     message.value = "Done!";
     sendStatus.value = "success";
-    sendNotificationEmail();
   } catch(error) {
     console.log(error);
     sendStatus.value = "error";
     message.value = "Something went wrong...";
     createNotification("Error: " + error as string, "error");
+  }
+  if (sendStatus.value = "success") {
+    await notifyTransfer(
+      userHandle.value,
+      transaction.value.toInput,
+      transaction.value.amountInput,
+      token.value
+    );
   }
 }
 
@@ -621,7 +585,8 @@ const verifySendTo = async () => {
       transaction.value.to = transaction.value.toInput;
       return true;
     } else if (validateEmail(transaction.value.toInput)) {
-      const nameHash = hash(`mailto:${transaction.value.toInput.toLowerCase()}`);
+      transaction.value.toInput = transaction.value.toInput.toLowerCase();
+      const nameHash = hash(`mailto:${transaction.value.toInput}`);
       transaction.value.to = await getAccountAddress(nameHash);
       return true;
     } else {

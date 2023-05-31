@@ -22,10 +22,20 @@ import type { Token } from "../../../../functions/common";
 const auth = getAuth(app)
 const functions = getFunctions()
 
-export async function genOTP(email: string, mode: string, sender?: string, sendAmount?: string, token?: Token) {
+export async function genOTP(email: string) {
     const genOTPCall = httpsCallable(functions, 'genOTP');
-    const result = await genOTPCall({email: email, mode: mode, sender: sender, sendAmount: sendAmount, token: token});
+    const result = await genOTPCall({email: email});
     return (result.data as any).code as number;
+}
+
+export async function notifyTransfer(
+    sender: string,
+    receiver: string,
+    sendAmount: string,
+    token: Token
+) {
+    const genOTPCall = httpsCallable(functions, 'notifyTransfer');
+    await genOTPCall({sender, receiver, sendAmount, token});
 }
 
 export async function refreshToken() {

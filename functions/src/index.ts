@@ -37,7 +37,9 @@ exports.sendToken = sendToken;
 import {
   genOTP,
   validateOTP,
+  notifyTransfer,
 } from "./signin";
 
 exports.genOTP = genOTP;
 exports.validateOTP = validateOTP;
+exports.notifyTransfer = notifyTransfer;

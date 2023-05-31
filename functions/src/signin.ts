@@ -7,11 +7,9 @@ import {decryptWithSymmKey, encryptWithSymmKey, sign} from "./kms";
 import formData from "form-data";
 import Mailgun from "mailgun.js";
 import {utils} from "ethers";
-import type {Token} from "../common";
 import {
   getAuthenticationNotification,
   getNewTransferNotification,
-  getSignInNotification,
 } from "./notification";
 
 const secrets = functions.config().doppler || {};
@@ -19,32 +17,20 @@ const CHARS = "0123456789";
 const OTP_LEN = 6;
 const expiredAfter = 10 * 60000;
 
-const sendEmail = async (
-    receipt: string,
-    type: string,
-    otp?: string,
-    sender?: string,
-    sendAmount?: string,
-    token?: Token) => {
+interface EmailData {
+  from: string,
+  to: string,
+  subject: string,
+  text: string,
+  html: string
+}
+
+const sendEmail = async (data: EmailData) => {
   const mailgun = new Mailgun(formData);
   const mg = mailgun.client({
     username: "api",
     key: secrets.MAILGUN_API_KEY,
   });
-  let data = {
-    from: "",
-    to: "",
-    subject: "",
-    text: "",
-    html: "",
-  };
-  if (type == "signin") {
-    data = getSignInNotification(receipt, otp!);
-  } else if (type == "authentication") {
-    data = getAuthenticationNotification(receipt, otp!);
-  } else if (type == "newTransfer" && sender && token && sendAmount) {
-    data = getNewTransferNotification(sender, receipt, token, sendAmount);
-  }
   await mg.messages.create("hexlink.io", data);
 };
 
@@ -76,14 +62,18 @@ const preNotification = async (
 export const notifyTransfer = functions.https.onCall(async (data, context) => {
   Firebase.getInstance();
   try {
-    const email = await preNotification(data.email, 10, context);
-    await sendEmail(
-        email,
-        data.mode,
-        undefined,
-        data.sender,
+    const sender = await preNotification(data.sender, 3, context);
+    const user = await getUser(data.sender);
+    if (!user || !user.id) {
+      return {code: 400, message: "user not exists"};
+    }
+
+    await sendEmail(getNewTransferNotification(
+        sender,
+        data.receiver,
+        data.token,
         data.sendAmount,
-        data.token);
+    ));
     return {code: 200, sentAt: new Date().getTime()};
   } catch (e: any) {
     console.log(e);
@@ -106,14 +96,7 @@ export const genOTP = functions.https.onCall(async (data, context) => {
       await updateOTP({id: user.id!, otp: encryptedOTP, isActive: true});
     }
 
-    await sendEmail(
-        email,
-        data.mode,
-        plainOTP,
-        undefined,
-        undefined,
-        undefined
-    );
+    await sendEmail(getAuthenticationNotification(email, plainOTP));
     return {code: 200, sentAt: new Date().getTime()};
   } catch (e: any) {
     console.log(e);

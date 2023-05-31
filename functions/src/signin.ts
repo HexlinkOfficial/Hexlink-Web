@@ -23,7 +23,7 @@ interface EmailData {
   subject: string,
   text: string,
   html: string
-};
+}
 
 const sendEmail = async (data: EmailData) => {
   const mailgun = new Mailgun(formData);

@@ -42,7 +42,7 @@ const preNotification = async (
   email = email.toLowerCase();
   const isValidEmail = await validateEmail(email);
   if (!isValidEmail) {
-    throw new Error("Invalid email");
+    throw new Error("invalid_email");
   }
 
   let ip: string;
@@ -54,7 +54,7 @@ const preNotification = async (
 
   const isQuotaExceeded = await rateLimiter("notify transfer", `ip_${ip}`, 60, maxPerMin);
   if (isQuotaExceeded) {
-    throw new Error("rate limited");
+    throw new Error("rate_limited");
   }
   return email;
 };
@@ -77,7 +77,8 @@ export const notifyTransfer = functions.https.onCall(async (data, context) => {
     return {code: 200, sentAt: new Date().getTime()};
   } catch (e: any) {
     console.log(e);
-    return {code: 400, message: e.message};
+    const code = e.message === "rate_limited" ? 429 : 400;
+    return {code, message: e.message};
   }
 });
 
@@ -100,7 +101,8 @@ export const genOTP = functions.https.onCall(async (data, context) => {
     return {code: 200, sentAt: new Date().getTime()};
   } catch (e: any) {
     console.log(e);
-    return {code: 400, message: e.message};
+    const code = e.message === "rate_limited" ? 429 : 400;
+    return {code, message: e.message};
   }
 });
 
@@ -129,7 +131,7 @@ export const validateOTP = functions.https.onCall(async (data) => {
 
   const isQuotaExceeded = await rateLimiter("validateOTP", `email_${data.email}`, 300, 15);
   if (isQuotaExceeded) {
-    return {code: 429, message: "Too many requests of validateOTP."};
+    return {code: 429, message: "too many requests"};
   }
 
   const user = await getUser(data.email);

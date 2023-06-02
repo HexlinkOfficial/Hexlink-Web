@@ -1,5 +1,5 @@
 <template>
-  <div class="login-card" :style="{ backgroundImage: `url(${background})` }">
+  <div class="login-card">
     <div class="card" :style="!show ? 'display: flex; align-items: center; justify-content: center;' : ''">
       <form @submit="onSubmit">
         <div v-if="show" class="step1">
@@ -26,7 +26,6 @@ import { useRouter } from 'vue-router';
 import { Button } from 'ant-design-vue';
 import { emailAnonymousLogin } from '@/services/auth'
 import { useAuthStore } from '@/stores/auth'
-import background from "@/assets/background.png";
 
 const store = useAuthStore();
 const router = useRouter();
@@ -83,7 +82,6 @@ input[type="number"] {
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: rgb(228, 229, 247);
     height: 100vh; }
 .social-login img {
     width: 24px; }

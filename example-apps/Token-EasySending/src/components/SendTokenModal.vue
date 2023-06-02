@@ -1,5 +1,5 @@
 <template>
-  <form v-if="sendStatus === '' && !showStep2 && !showStep3" class="form-send" @submit.prevent>
+  <form v-if="step === 'input_email'" class="form-send" @submit.prevent>
     <div style="display: block;">
       <img src="@/assets/svg/send-logo.svg" style="width: 50px; height: 50px; margin: 1rem 0;" alt="send icon" />
       <h2 class="people-title">Send Token</h2>
@@ -15,9 +15,9 @@
         <input v-model="transaction.toInput" class="send-people" type="text" placeholder="email or wallet address" aria-expanded="false" autocomplete="off" autocorrect="off">
       </div>
     </div>
-    <button class="cta-button" @click="goToStep2">Continue</button>
+    <button class="cta-button" @click="inputToken">Continue</button>
   </form>
-  <form v-if="showStep2 && sendStatus == ''" class="form-send" @submit.prevent>
+  <form v-if="step === 'input_token'" class="form-send" @submit.prevent>
     <div style="text-align: center; padding: 35px 10px 0px;">
       <div class="profile-info">
         <div class="profile-wrapper">
@@ -28,7 +28,7 @@
             <span>{{ prettyPrint(transaction.toInput, 14, 7) }}</span>
           </div>
         </div>
-        <div @click="goToStep1" class="gotoStep1">
+        <div @click="reset" class="confirmButton">
           <img src="@/assets/svg/corssBlack.svg" style="width: 1.5rem; height: 1.5rem;"/> 
         </div>
       </div>
@@ -90,10 +90,10 @@
       </div>
     </div>
     <div style="display: flex; justify-content: center; width: 100%; padding: 0 15px;">
-      <button :disabled="hasBalanceWarning" class="cta-button" @click="goToStep3">Confirm</button>
+      <button :disabled="hasBalanceWarning" class="cta-button" @click="sendOtp">Confirm</button>
     </div>
   </form>
-  <form v-if="showStep3 && sendStatus == ''" class="form-send" @submit.prevent="onSubmit">
+  <form v-if="step === 'validate_otp'" class="form-send" @submit.prevent="onSubmit">
     <div style="display: block;">
       <img src="@/assets/svg/password.svg" style="width: 50px; height: 50px; margin: 1rem 0;" alt="send icon" />
       <h2 class="people-title">Enter Verification Code</h2>
@@ -104,27 +104,25 @@
             maxlength="1" v-model="code[index]" @input="handleInput" @keypress="isNumber"
             @keydown.delete="handleDelete" @paste="onPaste" class="otp"/>
         </div>
-        <p v-if="!isResendLink" class="resend-plain">Resend the verification code in {{ countDown }}s.</p>
-        <a v-if="isResendLink" class="resend" @click="resendOTP">Resend the verification code.</a>
-        <Button class="cta-button" style="margin-bottom: 0px;" type="primary" :loading="isLoading" :disabled="isDisabled" @click="verifyOTP">
+        <p v-if="countDown > 0" class="resend-plain">Resend the verification code in {{ countDown }}s.</p>
+        <a v-if="countDown <= 0 " class="resend" @click="resendOtp">Resend the verification code.</a>
+        <button class="cta-button" style="margin-bottom: 0px;" type="primary" :disabled="invalidOtp">
             Verify
-        </Button>
-        <p v-if="isRateExceeded" style="color: #FF5C5C; text-align: center; margin-top: -8px;">Too many attempts. Please wait for five minutes.</p>
-        <p v-if="otpValidataionFailed" style="color: #FF5C5C; text-align: center; margin-top: -8px;">Invalid email or otp. Please try again.</p>
+        </button>
       </div>
     </div>
   </form>
-  <div v-if="sendStatus != ''" class="form-send">
+  <div v-if="step === 'process_tx'" class="form-send">
     <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
       <h2 class="transition" style="display: flex; justify-content: center; align-items: center; flex-direction: column;">
-        <div class="spinner-lg" :class="sendStatus">
+        <div class="spinner-lg" :class="txStatus">
           <div class="check"></div>
         </div>
         <span style="font-size: 20px; margin: 20px 10px; text-align: center;">{{ message }}</span>
       </h2>
     </div>
     <div style="display: flex; justify-content: center; width: 100%; padding: 0 15px;">
-      <button @click="closeModal" class="cta-button">OK</button>
+      <button @click="closeModal" class="cta-button" :disabled="txStatus === 'processing'">OK</button>
     </div>
   </div>
 </template>
@@ -156,36 +154,31 @@ import { getPriceInfo } from "@/web3/network";
 import { useAuthStore } from '@/stores/auth';
 import type { Token } from "../../../../functions/common";
 import { calcGas, tokenAmount, hash } from "../../../../functions/common";
-import { genOTP, notifyTransfer } from '@/services/auth'
+import { genOtp, notifyTransfer } from '@/services/auth'
 import ERC20_ABI from "../abi/ERC20_ABI.json";
 
 import config from "../../bundler_config.json";
 import { UserOperationStruct } from "@hexlink/contracts/dist/types/Account";
 import { genSignature } from "@/services/auth";
+import { validateEmail } from "@/web3/utils";
 
 const store = useAuthStore();
 const user = store.user!;
 const estimatedGasAmount = "150000"; // hardcoded, can optimize later
 const chooseTotalDrop = ref<boolean>(false);
 const chooseGasDrop = ref<boolean>(false);
-const sendStatus = ref<string>("");
-const hasBalanceWarning = ref<boolean>(false);
+const txStatus = ref<string>("");
 const tokenStore = useTokenStore();
 const hexlAccountBalances = ref<BalanceMap>({});
 const tokens = ref<Token[]>([]);
 const message = ref<string>("Let's go!");
-const showStep2 = ref<boolean>(false);
-const showStep3 = ref<boolean>(false);
+const step = ref<string>("input_email");
 const erc20Interface = new ethers.utils.Interface(ERC20_ABI);
 let code: string[] = Array(6);
 let dataFromPaste: string[] | undefined;
 const keysAllowed: string[] = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9",];
-const isResendLink = ref<boolean>(false);
 const countDown = ref<number>(60);
-const isLoading = ref(false);
-const isDisabled = ref<boolean>(true);
-const isRateExceeded = ref<boolean>(false);
-const otpValidataionFailed = ref<boolean>(false);
+const invalidOtp = ref<boolean>(true);
 const userHandle = computed(() => {
   if (useAuthStore().user?.provider.includes("twitter")) {
     return "@" + user.handle;
@@ -231,7 +224,7 @@ const onPaste = (event: Event) => {
     .trim()
     .split("");
   if (dataFromPaste) {
-    isDisabled.value = false;
+    invalidOtp.value = false;
     for (const num of dataFromPaste) {
       if (!keysAllowed.includes(num)) event.preventDefault();
     }
@@ -249,7 +242,7 @@ const handleInput = (event: Event) => {
   const inputType = (event as InputEvent).inputType;
   let currentActiveElement = event.target as HTMLInputElement;
   if (currentActiveElement.id.split("_")[1] === "5") {
-    isDisabled.value = false;
+    invalidOtp.value = false;
   }
   if (inputType === "insertText")
     (currentActiveElement.nextElementSibling as HTMLElement)?.focus();
@@ -268,37 +261,19 @@ const handleInput = (event: Event) => {
 }
 
 const countDownTimer = () => {
-  let interval = setInterval(() => {
-    if (countDown.value > 0) {
-      countDown.value--;
-    } else {
-      clearInterval(interval);
-      isResendLink.value = true;
-    }
-  }, 1000)
-}
-
-const sendOTP = async () => {
-  try {
-    const result = await genOTP(userHandle.value);
-    if (result === 429) {
-      console.error("Too many requests to send otp.");
-      createNotification("Too many requests to send otp.", "error");
-    }
-    else if (result === 200) {
-      countDownTimer();
-    }
-  } catch (err) {
-    console.log(err);
-    createNotification(err as string, "error");
-  }
-}
-
-const resendOTP = async () => {
   countDown.value = 60;
-  isResendLink.value = false;
+  let interval = setInterval(() => {
+    if (countDown.value <= 0) {
+      clearInterval(interval);
+    } else {
+      countDown.value--;
+    }
+  }, 1000);
+}
+
+const resendOtp = async () => {
   countDownTimer();
-  const result = await genOTP(userHandle.value);
+  const result: any = await genOtp(userHandle.value);
   if (result === 429) {
     console.error("Too many requests to send otp.");
     createNotification("Too many requests to send otp.", "error");
@@ -312,9 +287,11 @@ const tokenBalance = (token: string): string => {
   return hexlAccountBalances.value[token]?.normalized || "0";
 };
 
-const transactionTokenBalance = computed(
-  () => tokenBalance(transaction.value.token)
-);
+const hasBalanceWarning = computed(() => {
+  return Number(
+    transaction.value.amountInput
+  ) > Number(tokenBalance(transaction.value.token));
+});
 
 const genTokenList = async function () {
   hexlAccountBalances.value = await getBalances(
@@ -387,16 +364,6 @@ const tokenChoose =
     }
   };
 
-watch(
-  [() => transaction.value.amountInput, transactionTokenBalance],
-  ([newAmountInput, newTokenBalance], _old) => {
-    if (Number(newAmountInput) > Number(newTokenBalance)) {
-      hasBalanceWarning.value = true;
-    } else {
-      hasBalanceWarning.value = false;
-    }
-  }
-);
 onMounted(genTokenList);
 onMounted(refreshGas);
 watch(() => useChainStore().current, genTokenList);
@@ -486,49 +453,27 @@ const buildTokenTransferUserOp = async (
   };
   const userOpHash = await genUserOpHash(userOp, api);
   message.value = "Signing your transaction...";
-  const result = await genSignature(otp, userOpHash);
-  if (verifySignature(result)) {
+  const result: any = await genSignature(otp, userOpHash);
+  if (result.code === 200) {
     return {
       ...userOp,
       signature: (result as any).signature,
     };
+  } else if (result.code === 429) {
+    throw new Error("Too many attempts. Please wait for five minutes");
   } else {
-    throw new Error();
+    throw new Error("Invalid email or otp. Please try again");
   }
 };
 
-const verifySignature = (result: any) => {
-  isRateExceeded.value = false;
-  otpValidataionFailed.value = false;
-  isLoading.value = true;
-  try {
-    if (result.code === 200) {
-      return true;
-    } else if (result.code === 429) {
-      isRateExceeded.value = true;
-      return false;
-    } else if (result.code === 400) {
-      if (!isRateExceeded.value) {
-        otpValidataionFailed.value = true;
-      }
-      return false;
-    }
-  } catch (err) {
-    console.log(err);
-    createNotification(err as string, "error");
-    return false;
-  } finally {
-    isLoading.value = false;
-  }
-}
-
 const onSubmit = async (_e: Event) => {
+  step.value = 'process_tx';
   try {
     transaction.value.amount = tokenAmount(
       transaction.value.amountInput,
       token.value.decimals
     );
-    sendStatus.value = "processing";
+    txStatus.value = "processing";
     message.value = "Preparing your transaction...";
     const api = new HexlinkAccountAPI({
       provider: useChainStore().provider,
@@ -549,90 +494,78 @@ const onSubmit = async (_e: Event) => {
       config.entryPoint
     );
     const uoHash = await bundler.sendUserOpToBundler(op);
-    message.value = "Waiting for transaction to finish...";
-    console.log(`Waiting for transaction ${uoHash}...`);
+    console.log(`transaction ${uoHash} sent...`);
+    message.value = "Waiting for confirmation...";
     const txHash = await api.getUserOpReceipt(uoHash);
     console.log(`Transaction hash: ${txHash}`);
   
     message.value = "Done!";
-    sendStatus.value = "success";
-  } catch(error) {
-    console.log(error);
-    sendStatus.value = "error";
-    message.value = "Something went wrong...";
-    createNotification("Error: " + error as string, "error");
-  }
-  if (sendStatus.value === "success") {
+    txStatus.value = "success";
     await notifyTransfer(
       userHandle.value,
       transaction.value.toInput,
       transaction.value.amountInput,
       token.value
     );
+  } catch(error: any) {
+    console.log(error);
+    txStatus.value = "error";
+    message.value = "Failed to process the transaction";
+    createNotification(error.message, "error");
   }
 }
 
-const goToStep3 = () => {
-  showStep2.value = false;
-  showStep3.value = true;
-  sendOTP();
+const reset = () => {
+  step.value = 'input_email';
+  transaction.value.toInput = "";
 }
 
-const verifySendTo = async () => {
-  showStep2.value = false;
-  if (transaction.value.toInput.length > 0) {
-    if (ethers.utils.isAddress(transaction.value.toInput)) {
-      transaction.value.to = transaction.value.toInput;
-      return true;
-    } else if (validateEmail(transaction.value.toInput)) {
-      transaction.value.toInput = transaction.value.toInput.toLowerCase();
-      const nameHash = hash(`mailto:${transaction.value.toInput}`);
+const inputToken = async () => {
+  const normalized = transaction.value.toInput.toLowerCase().trim();
+  if (normalized.length > 0) {
+    if (ethers.utils.isAddress(normalized)) {
+      transaction.value.to = normalized;
+      step.value = 'input_token';
+    } else if (validateEmail(normalized)) {
+      const nameHash = hash(`mailto:${normalized}`);
       transaction.value.to = await getAccountAddress(nameHash);
-      return true;
+      step.value = 'input_token';
     } else {
       createNotification("Invalid Input", "error");
-      return false;
     }
   } else {
     createNotification("Empty Input", "error");
-    return false;
   }
 }
 
-const goToStep2 = async () => {
-  showStep2.value = false;
-  showStep3.value = false;
-  if (await verifySendTo()) {
-    showStep2.value = true;
+const sendOtp = async () => {
+  step.value = 'validate_otp';
+  try {
+    const result: any = await genOtp(userHandle.value);
+    if (result === 429) {
+      console.error("Too many requests to send otp.");
+      createNotification("Too many requests to send otp.", "error");
+    } else if (result === 200) {
+      countDownTimer();
+    }
+  } catch (err) {
+    console.log(err);
+    createNotification(err as string, "error");
   }
-}
-
-const goToStep1 = () => {
-  showStep2.value = false;
-  showStep3.value = false;
-  transaction.value.to = "";
 }
 
 const router = useRouter();
 const closeModal = () => {
-  if (sendStatus.value == 'success') {
+  if (txStatus.value == 'success') {
     router.push("/");
   }
-  sendStatus.value = "";
-  goToStep1();
+  txStatus.value = "";
+  reset();
   emit('closeModal', false);
 }
 
 const formatEmail = (email: string) => {
   return email.match(/^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/);
-};
-
-const validateEmail = (input: string) => {
-  if (formatEmail(input)) {
-    return true;
-  } else {
-    return false;
-  }
 };
 </script>
 
@@ -643,7 +576,7 @@ const validateEmail = (input: string) => {
   font-weight: 600;
   @media (max-width: 640px) {
     font-size: 0.75rem; } }
-.gotoStep1 {
+.confirmButton {
   width: 3rem;
   height: 3rem;
   display: flex;

@@ -22,9 +22,9 @@ import type { Token } from "../../../../functions/common";
 const auth = getAuth(app)
 const functions = getFunctions()
 
-export async function genOTP(email: string) {
-    const genOTPCall = httpsCallable(functions, 'genOTP');
-    const result = await genOTPCall({email: email});
+export async function genOtp(email: string) {
+    const genOtpCall = httpsCallable(functions, 'genOTP');
+    const result = await genOtpCall({email: email});
     return (result.data as any).code as number;
 }
 
@@ -34,8 +34,13 @@ export async function notifyTransfer(
     sendAmount: string,
     token: Token
 ) {
-    const genOTPCall = httpsCallable(functions, 'notifyTransfer');
-    await genOTPCall({sender, receiver, sendAmount, token});
+    try {
+        const genOtpCall = httpsCallable(functions, 'notifyTransfer');
+        await genOtpCall({sender, receiver, sendAmount, token});
+    } catch(err) {
+        console.log(err);
+        createNotification("Faied to send the notification email.", "warning")
+    }
 }
 
 export async function refreshToken() {

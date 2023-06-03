@@ -121,7 +121,7 @@ export function getNewTransferNotification(
                               </tr>
                               <tr>
                                   <td style="text-align:center;">
-                                      <a href="play.hexlink.io" title="logo" target="_blank">
+                                      <a href="dev.hexlink.io" title="logo" target="_blank">
                                       <img width="300" src="https://i.postimg.cc/HkJWJSNj/hexlink.png" title="logo" alt="logo">
                                     </a>
                                   </td>

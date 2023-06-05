@@ -209,3 +209,15 @@ export function getNewTransferNotification(
         </html>`,
   };
 }
+
+export function buildNotifyTransferSmsMessage(
+    sender: string,
+    token: Token,
+    sendAmount: string
+) : string {
+  return `${sender} sends you ${sendAmount} ${token.symbol}!`;
+}
+
+export function buildSmsOtpMessage(otp: string) : string {
+  return `Your Hexlink verification code is ${otp}, do not share it with anyone.`;
+}

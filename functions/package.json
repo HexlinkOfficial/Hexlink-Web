@@ -42,6 +42,7 @@
     "oauth": "^0.10.0",
     "save": "^2.9.0",
     "totp-generator": "^0.0.14",
+    "twilio": "^4.11.2",
     "twitter-api-v2": "^1.14.0"
   },
   "devDependencies": {

@@ -481,7 +481,8 @@ const buildTokenTransferUserOp = async (
   } else if (result.code === 429) {
     throw new Error("Too many attempts. Please wait for five minutes");
   } else {
-    throw new Error("Invalid email or otp. Please try again");
+    console.log(result);
+    throw new Error("Failed to sign the user opeeration");
   }
 };
 

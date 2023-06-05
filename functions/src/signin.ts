@@ -10,8 +10,11 @@ import {utils} from "ethers";
 import {
   getAuthenticationNotification,
   getNewTransferNotification,
+  buildNotifyTransferSmsMessage,
+  buildSmsOtpMessage,
 } from "./notification";
 import {parsePhoneNumber, isValidPhoneNumber} from "libphonenumber-js";
+import {Twilio} from "twilio";
 
 const secrets = functions.config().doppler || {};
 const CHARS = "0123456789";
@@ -71,6 +74,19 @@ const sendEmail = async (data: EmailData) => {
   await mg.messages.create("hexlink.io", data);
 };
 
+const sendSms = async (receiver: string, data: string) => {
+  const twilioClient = new Twilio(
+      secrets.TWILIO_ACCOUNT_SID,
+      secrets.TWILIO_AUTH_TOKEN
+  );
+  const message = await twilioClient.messages.create({
+    messagingServiceSid: secrets.TWILIO_MG_SERVICE_ID,
+    body: data,
+    to: receiver,
+  });
+  console.log(message);
+};
+
 export const notifyTransfer = functions.https.onCall(async (data, context) => {
   Firebase.getInstance();
   try {
@@ -89,8 +105,14 @@ export const notifyTransfer = functions.https.onCall(async (data, context) => {
           data.sendAmount,
       ));
     } else if (data.receiver.schema === "tel") {
-      // TODO: send sms notification here
-      console.log("notify transfer ", data.receiver);
+      await sendSms(
+          data.receiver.value,
+          buildNotifyTransferSmsMessage(
+              data.sender.value,
+              data.token,
+              data.sendAmount
+          )
+      );
     }
     return {code: 200, sentAt: new Date().getTime()};
   } catch (e: any) {
@@ -120,8 +142,10 @@ export const genAndSendOTP = functions.https.onCall(async (data, context) => {
           getAuthenticationNotification(data.receiver.value, plainOTP)
       );
     } else if (data.receiver.schema === "tel") {
-      // TODO: send sms otp here
-      console.log("send otp ", data.receiver, plainOTP);
+      await sendSms(
+          data.receiver.value,
+          buildSmsOtpMessage(plainOTP)
+      );
     }
     return {code: 200, sentAt: new Date().getTime()};
   } catch (e: any) {
@@ -177,3 +201,4 @@ const randomCode = (length: number) => {
   }
   return code;
 };
+

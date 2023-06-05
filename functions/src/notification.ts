@@ -1,6 +1,7 @@
 import type {Token} from "../common/lib";
 
 export function getAuthenticationNotification(receipt: string, otp: string) {
+  receipt = receipt.toLowerCase();
   return {
     from: "Hexlink <no-reply@hexlink.io>",
     to: receipt,
@@ -94,6 +95,7 @@ export function getNewTransferNotification(
     token: Token,
     sendAmount: string
 ) {
+  receipt = receipt.toLowerCase();
   return {
     from: "Hexlink <no-reply@hexlink.io>",
     to: receipt,
@@ -206,4 +208,16 @@ export function getNewTransferNotification(
           </body>
         </html>`,
   };
+}
+
+export function buildNotifyTransferSmsMessage(
+    sender: string,
+    token: Token,
+    sendAmount: string
+) : string {
+  return `${sender} sends you ${sendAmount} ${token.symbol}!`;
+}
+
+export function buildSmsOtpMessage(otp: string) : string {
+  return `Your Hexlink verification code is ${otp}, do not share it with anyone.`;
 }

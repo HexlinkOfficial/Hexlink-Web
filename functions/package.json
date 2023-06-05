@@ -33,6 +33,7 @@
     "firebase-admin": "^11.4.1",
     "firebase-functions": "^4.2.1",
     "graphql": "^16.6.0",
+    "libphonenumber-js": "^1.10.33",
     "mailgun.js": "^8.2.0",
     "node-email-validation": "^1.0.4",
     "node-fetch": "^2.6.8",
@@ -41,6 +42,7 @@
     "oauth": "^0.10.0",
     "save": "^2.9.0",
     "totp-generator": "^0.0.14",
+    "twilio": "^4.11.2",
     "twitter-api-v2": "^1.14.0"
   },
   "devDependencies": {

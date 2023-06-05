@@ -21,11 +21,12 @@ export interface IAuth {
     balance?: number,
 }
 
-export interface PhoneDATA {
+export interface PhoneData {
     country?: string;
     dialCode?: string | number;
     nationalNumber?: string | number;
-    number?: string | number;
+    number?: string;
+    uri?: string;
     isValid?: boolean;
 }
 

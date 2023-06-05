@@ -4,6 +4,7 @@ import type { Token } from "../../../../functions/common";
 import useClipboard from 'vue-clipboard3';
 import { createToaster } from "@meforma/vue-toaster";
 import { ethers } from "ethers";
+import {parsePhoneNumber, isValidPhoneNumber} from "libphonenumber-js";
 
 export function hash(value: string): string {
     return ethers.utils.keccak256(ethers.utils.toUtf8Bytes(value));
@@ -68,6 +69,23 @@ export function delay(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-export function validateEmail(email: string) {
-    return /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,24}))$/.test(email);
+const EMAIL_REGEX = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,24}))$/;
+export function isValidEmail(email: string) {
+    return EMAIL_REGEX.test(email);
+}
+
+export function normalizeEmail(email: string) : string {
+    email = email.trim().toLowerCase();
+    if (!isValidEmail) {
+        throw new Error("invalid email");
+    }
+    return email
+}
+
+export function normalizePhoneNumber(phoneNumber: string) : string {
+    if (!isValidPhoneNumber(phoneNumber)) {
+        throw new Error("invalid phone number");
+    }
+    const pn = parsePhoneNumber(phoneNumber)
+    return pn.getURI();
 }

@@ -3,33 +3,6 @@
     data-lbgm-phonenumberinput="component">
     <!--phone-number-input core-->
     <div data-children="core" class="w-full flex flex-col relative">
-      <!--input-->
-      <!-- <div data-children="inputcore" ref="selectPhoneButton"
-        class="bg-white baseinput-core border w-full border-gray rounded-lg py-3 px-4 flex flex-shrink flex-nowrap items-center space-x-2"
-        :class="{ error: hasError, success: hasSuccess }">
-        <span @click="toggleSelect()" class="inline-flex flex-nowrap items-center space-x-2 cursor-pointer"
-          ref="basePhoneArrow" data-children="arrowGroup">
-          <template v-if="arrow">
-            <span v-if="$slots.arrow" class="inline-flex flex-shrink-0">
-              <slot name="arrow" />
-            </span>
-            <span v-else class="inline-flex flex-shrink-0">
-              <Down />
-            </span>
-          </template>
-          <span
-            class="opacity-50 select-none inline-flex flex-whrink-0 font-semibold text-black text-left text-sm leading-1dt125">
-            {{ `+${defaultSelected?.dialCode}` }}
-          </span>
-        </span>
-        <input data-children="htmlInput" :placeholder="placeholder"
-          class="border-0 outline-none appearance-none flex-shrink w-full bg-transparent" type="text" ref="inputBase"
-          :name="name" :id="name" :value="phone" @input="onPhoneInput($event)" :autocomplete="'off'" spellcheck="false"
-          v-typing="{
-            finish: emitPhoneData,
-            timing: 100,
-          }" />
-      </div> -->
       <div style="line-height: 24px; flex-direction: row; align-items: center; display: flex;">
         <div style="line-height: 24px; display: inline-block; width: auto; font-weight: normal; position: relative; font-size: 16px; margin-right: 8px; box-sizing: border-box;">
           <div @click="toggleSelect()"
@@ -152,7 +125,7 @@ import countries from "../services/all-countries";
 import parsePhoneNumber from "libphonenumber-js";
 import type { PhoneNumber } from "libphonenumber-js";
 import { typing } from "../services/directives";
-import type { PhoneDATA, Country } from "../types";
+import type { PhoneData, Country } from "../types";
 
 const vTyping = { ...typing };
 
@@ -265,8 +238,9 @@ const emitPhoneData = (): void => {
     dialCode: ph?.countryCallingCode,
     nationalNumber: ph?.nationalNumber,
     number: ph?.number,
+    uri: ph?.getURI(),
     isValid: ph?.isValid(),
-  } as PhoneDATA);
+  } as PhoneData);
 };
 
 /**

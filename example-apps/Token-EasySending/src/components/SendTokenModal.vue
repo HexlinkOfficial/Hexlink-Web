@@ -160,10 +160,9 @@ import ERC20_ABI from "../abi/ERC20_ABI.json";
 import config from "../../bundler_config.json";
 import { UserOperationStruct } from "@hexlink/contracts/dist/types/Account";
 import { genSignature } from "@/services/auth";
-import { validateEmail } from "@/web3/utils";
+import { isValidEmail } from "@/web3/utils";
+import { isValidPhoneNumber, parsePhoneNumber } from "libphonenumber-js";
 
-const store = useAuthStore();
-const user = store.user!;
 const estimatedGasAmount = "150000"; // hardcoded, can optimize later
 const chooseTotalDrop = ref<boolean>(false);
 const chooseGasDrop = ref<boolean>(false);
@@ -180,6 +179,7 @@ const keysAllowed: string[] = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
 const countDown = ref<number>(60);
 const invalidOtp = ref<boolean>(true);
 const userHandle = computed(() => {
+  const user = useAuthStore().user!;
   if (useAuthStore().user?.provider.includes("twitter")) {
     return "@" + user.handle;
   }
@@ -273,7 +273,8 @@ const countDownTimer = () => {
 
 const resendOtp = async () => {
   countDownTimer();
-  const result: any = await genOtp(userHandle.value);
+  const user = useAuthStore().user!;
+  const result: any = await genOtp(user.idType, userHandle.value);
   if (result === 429) {
     console.error("Too many requests to send otp.");
     createNotification("Too many requests to send otp.", "error");
@@ -501,7 +502,9 @@ const onSubmit = async (_e: Event) => {
   
     message.value = "Done!";
     txStatus.value = "success";
+    const user = useAuthStore().user!;
     await notifyTransfer(
+      user.idType,
       userHandle.value,
       transaction.value.toInput,
       transaction.value.amountInput,
@@ -522,26 +525,31 @@ const reset = () => {
 
 const inputToken = async () => {
   const normalized = transaction.value.toInput.toLowerCase().trim();
-  if (normalized.length > 0) {
-    if (ethers.utils.isAddress(normalized)) {
-      transaction.value.to = normalized;
-      step.value = 'input_token';
-    } else if (validateEmail(normalized)) {
-      const nameHash = hash(`mailto:${normalized}`);
-      transaction.value.to = await getAccountAddress(nameHash);
-      step.value = 'input_token';
-    } else {
-      createNotification("Invalid Input", "error");
-    }
+  if (ethers.utils.isAddress(normalized)) {
+    transaction.value.to = normalized;
+    step.value = 'input_token';
+  } else if (isValidEmail(normalized)) {
+    const nameHash = hash(`mailto:${normalized}`);
+    transaction.value.to = await getAccountAddress(nameHash);
+    step.value = 'input_token';
+  } else if (isValidPhoneNumber(normalized)) {
+    const pn = parsePhoneNumber(normalized).getURI();
+    const nameHash = hash(`tel:${pn}`);
+    transaction.value.to = await getAccountAddress(nameHash);
+    step.value = 'input_token';
   } else {
-    createNotification("Empty Input", "error");
+    createNotification(
+      "invalid receiver, only address, email or phone number are accepted",
+      "error"
+    );
   }
 }
 
 const sendOtp = async () => {
   step.value = 'validate_otp';
   try {
-    const result: any = await genOtp(userHandle.value);
+    const user = useAuthStore().user!;
+    const result: any = await genOtp(user.idType, userHandle.value);
     if (result === 429) {
       console.error("Too many requests to send otp.");
       createNotification("Too many requests to send otp.", "error");
@@ -563,10 +571,6 @@ const closeModal = () => {
   reset();
   emit('closeModal', false);
 }
-
-const formatEmail = (email: string) => {
-  return email.match(/^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/);
-};
 </script>
 
 <style lang="less" scoped>

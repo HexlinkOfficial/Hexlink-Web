@@ -1,7 +1,7 @@
 import * as EmailValidator from "node-email-validation";
 import {Firebase} from "./firebase";
 import * as functions from "firebase-functions";
-import {getUser, insertUser, updateOTP} from "./graphql/user";
+import {getUserById, insertUser, updateOTP} from "./graphql/user";
 import {rateLimiter} from "./ratelimiter";
 import {decryptWithSymmKey, encryptWithSymmKey, sign} from "./kms";
 import formData from "form-data";
@@ -11,6 +11,7 @@ import {
   getAuthenticationNotification,
   getNewTransferNotification,
 } from "./notification";
+import {parsePhoneNumber, isValidPhoneNumber} from "libphonenumber-js";
 
 const secrets = functions.config().doppler || {};
 const CHARS = "0123456789";
@@ -25,6 +26,44 @@ interface EmailData {
   html: string
 }
 
+function genUserId(
+    data: {schema: "mailto" | "tel", receiver: string},
+) : string {
+  let userId: string;
+  if (data.schema === "mailto") {
+    const email = data.receiver.toLowerCase();
+    if (!validateEmail(email)) {
+      throw new Error("invalid_email");
+    }
+    userId = `mailto:${email}`;
+  } else if (data.schema === "tel") {
+    if (!isValidPhoneNumber(data.receiver)) {
+      throw new Error("invalid_phone_number");
+    }
+    const phoneNumber = parsePhoneNumber(data.receiver);
+    userId = phoneNumber.getURI();
+  } else {
+    throw new Error("missing_receipt");
+  }
+  return userId;
+}
+
+async function sendOtpRateLimit(
+    maxPerMin: number,
+    context: any
+) {
+  let ip: string;
+  if (process.env.FUNCTIONS_EMULATOR) {
+    ip = context.rawRequest.headers.origin || "http://localhost:5173";
+  } else {
+    ip = context.rawRequest.ip;
+  }
+  const isQuotaExceeded = await rateLimiter("send_otp", `ip_${ip}`, 60, maxPerMin);
+  if (isQuotaExceeded) {
+    throw new Error("rate_limited");
+  }
+}
+
 const sendEmail = async (data: EmailData) => {
   const mailgun = new Mailgun(formData);
   const mg = mailgun.client({
@@ -34,46 +73,26 @@ const sendEmail = async (data: EmailData) => {
   await mg.messages.create("hexlink.io", data);
 };
 
-const preNotification = async (
-    email: string,
-    maxPerMin: number,
-    context: any
-) : Promise<string> => {
-  email = email.toLowerCase();
-  const isValidEmail = await validateEmail(email);
-  if (!isValidEmail) {
-    throw new Error("invalid_email");
-  }
-
-  let ip: string;
-  if (process.env.FUNCTIONS_EMULATOR) {
-    ip = context.rawRequest.headers.origin || "http://localhost:5173";
-  } else {
-    ip = context.rawRequest.ip;
-  }
-
-  const isQuotaExceeded = await rateLimiter("notify transfer", `ip_${ip}`, 60, maxPerMin);
-  if (isQuotaExceeded) {
-    throw new Error("rate_limited");
-  }
-  return email;
-};
-
 export const notifyTransfer = functions.https.onCall(async (data, context) => {
   Firebase.getInstance();
   try {
-    const sender = await preNotification(data.sender, 3, context);
-    const user = await getUser(data.sender);
+    const userId = genUserId(data);
+    await sendOtpRateLimit(3, context);
+    const user = await getUserById(userId);
     if (!user || !user.id) {
       return {code: 400, message: "user not exists"};
     }
 
-    await sendEmail(getNewTransferNotification(
-        sender,
-        data.receiver,
-        data.token,
-        data.sendAmount,
-    ));
+    if (data.schema === "mailto") {
+      await sendEmail(getNewTransferNotification(
+          data.sender,
+          data.receiver,
+          data.token,
+          data.sendAmount,
+      ));
+    } else {
+      // TODO: send sms notification
+    }
     return {code: 200, sentAt: new Date().getTime()};
   } catch (e: any) {
     console.log(e);
@@ -82,22 +101,26 @@ export const notifyTransfer = functions.https.onCall(async (data, context) => {
   }
 });
 
-export const genOTP = functions.https.onCall(async (data, context) => {
+export const genAndSendOTP = functions.https.onCall(async (data, context) => {
   Firebase.getInstance();
   try {
-    const email = await preNotification(data.email, 3, context);
+    const userId = genUserId(data);
+    await sendOtpRateLimit(3, context);
     const plainOTP = randomCode(OTP_LEN);
     const encryptedOTP = await encryptWithSymmKey(plainOTP);
 
-    const user = await getUser(data.email);
+    const user = await getUserById(userId);
     if (!user || !user.id) {
-      await insertUser(
-          [{email: data.email, otp: encryptedOTP, isActive: true}]);
+      await insertUser([{id: userId, otp: encryptedOTP}]);
     } else {
-      await updateOTP({id: user.id!, otp: encryptedOTP, isActive: true});
+      await updateOTP({id: userId, otp: encryptedOTP, isActive: true});
     }
 
-    await sendEmail(getAuthenticationNotification(email, plainOTP));
+    if (data.schema === "mailto") {
+      await sendEmail(getAuthenticationNotification(data.receiver, plainOTP));
+    } else {
+      // TODO: send sms otp here
+    }
     return {code: 200, sentAt: new Date().getTime()};
   } catch (e: any) {
     console.log(e);
@@ -106,44 +129,28 @@ export const genOTP = functions.https.onCall(async (data, context) => {
   }
 });
 
-const validateEmail = async (email: string) => {
-  if (email === null) {
-    return false;
-  }
-  return EmailValidator.is_email_valid(email);
-};
-
-const randomCode = (length: number) => {
-  let code = "";
-  const len = CHARS.length;
-  for (let i = 0; i < length; i++ ) {
-    code += CHARS[Math.floor(Math.random() * len)];
-  }
-  return code;
-};
-
 export const validateOTP = functions.https.onCall(async (data) => {
   Firebase.getInstance();
-  data.email = data.email.toLowerCase();
-  if (!data.email || !data.otp) {
+  const userId = genUserId(data.userId);
+  if (!data.otp) {
     return {code: 400, message: "Email or OTP is missing."};
   }
-
-  const isQuotaExceeded = await rateLimiter("validateOTP", `email_${data.email}`, 300, 15);
+  const isQuotaExceeded = await rateLimiter(
+      "validate_otp", userId, 300, 10
+  );
   if (isQuotaExceeded) {
     return {code: 429, message: "too many requests"};
   }
 
-  const user = await getUser(data.email);
-  if (!user || !user.id || !user.otp || !user.updatedAt || !user.isActive) {
-    return {code: 400, message: "No record for the email, " + data.email};
+  const user = await getUserById(userId);
+  if (!user || !user.otp || !user.updatedAt || !user.isActive) {
+    return {code: 400, message: "No record for the userId, " + userId};
   }
 
   const plainOTP = <string> await decryptWithSymmKey(user.otp);
   if (plainOTP === data.otp && user.isActive && isValidOTP(user.updatedAt)) {
     await updateOTP({id: user.id!, otp: user.otp, isActive: false});
-    const name = `mailto:${data.email}`;
-    const nameHash = utils.keccak256(utils.toUtf8Bytes(name));
+    const nameHash = utils.keccak256(utils.toUtf8Bytes(user.id));
     const signature = await sign(nameHash, data.message);
     return {code: 200, signature};
   }
@@ -154,4 +161,17 @@ export const validateOTP = functions.https.onCall(async (data) => {
 const isValidOTP = (updatedAt: string) => {
   const time = new Date().getTime() - new Date(updatedAt).getTime();
   return time < expiredAfter;
+};
+
+const validateEmail = (email: string) => {
+  return email && EmailValidator.is_email_valid(email);
+};
+
+const randomCode = (length: number) => {
+  let code = "";
+  const len = CHARS.length;
+  for (let i = 0; i < length; i++ ) {
+    code += CHARS[Math.floor(Math.random() * len)];
+  }
+  return code;
 };

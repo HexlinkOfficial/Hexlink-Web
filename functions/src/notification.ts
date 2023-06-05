@@ -1,6 +1,7 @@
 import type {Token} from "../common/lib";
 
 export function getAuthenticationNotification(receipt: string, otp: string) {
+  receipt = receipt.toLowerCase();
   return {
     from: "Hexlink <no-reply@hexlink.io>",
     to: receipt,
@@ -94,6 +95,7 @@ export function getNewTransferNotification(
     token: Token,
     sendAmount: string
 ) {
+  receipt = receipt.toLowerCase();
   return {
     from: "Hexlink <no-reply@hexlink.io>",
     to: receipt,

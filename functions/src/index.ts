@@ -29,17 +29,11 @@ exports.claimCountdown = claimCountdown;
 exports.refundRedPacket = refundRedPacket;
 
 import {
-  sendToken,
-} from "./operation";
-
-exports.sendToken = sendToken;
-
-import {
-  genOTP,
+  genAndSendOTP,
   validateOTP,
   notifyTransfer,
 } from "./signin";
 
-exports.genOTP = genOTP;
+exports.genAndSendOTP = genAndSendOTP;
 exports.validateOTP = validateOTP;
 exports.notifyTransfer = notifyTransfer;

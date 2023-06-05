@@ -33,6 +33,7 @@
     "firebase-admin": "^11.4.1",
     "firebase-functions": "^4.2.1",
     "graphql": "^16.6.0",
+    "libphonenumber-js": "^1.10.33",
     "mailgun.js": "^8.2.0",
     "node-email-validation": "^1.0.4",
     "node-fetch": "^2.6.8",

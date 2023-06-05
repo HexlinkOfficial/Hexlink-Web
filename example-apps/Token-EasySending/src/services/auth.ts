@@ -15,20 +15,21 @@ import { GOERLI, SUPPORTED_CHAINS, type Chain } from "../../../../functions/comm
 import { useChainStore } from '@/stores/chain';
 import { initTokenList } from "@/web3/tokens";
 import { useTokenStore } from '@/stores/token';
-import {validateEmail, createNotification} from "@/web3/utils";
+import { normalizeEmail, normalizePhoneNumber, createNotification } from "@/web3/utils";
 
 import type { Token } from "../../../../functions/common";
 
 const auth = getAuth(app)
 const functions = getFunctions()
 
-export async function genOtp(email: string) {
-    const genOtpCall = httpsCallable(functions, 'genOTP');
-    const result = await genOtpCall({email: email});
+export async function genOtp(schema: "mailto" | "tel", receiver: string) {
+    const genOtpCall = httpsCallable(functions, 'genAndSendOTP');
+    const result = await genOtpCall({schema, receiver});
     return (result.data as any).code as number;
 }
 
 export async function notifyTransfer(
+    schema: "mailto" | "tel",
     sender: string,
     receiver: string,
     sendAmount: string,
@@ -36,7 +37,7 @@ export async function notifyTransfer(
 ) {
     try {
         const genOtpCall = httpsCallable(functions, 'notifyTransfer');
-        await genOtpCall({sender, receiver, sendAmount, token});
+        await genOtpCall({schema, sender, receiver, sendAmount, token});
     } catch(err) {
         console.log(err);
         createNotification("Faied to send the notification email.", "warning")
@@ -49,13 +50,34 @@ export async function refreshToken() {
     store.refreshIdToken(idToken);
 }
 
+export async function phoneNumberAnonymousLogin(phoneNumber: string) {
+    try {
+        phoneNumber = normalizePhoneNumber(phoneNumber);
+        const result = await signInAnonymously(auth);
+        const idToken = await result.user!.getIdToken();
+        const user : IUser = {
+            provider: "hexlink.io",
+            idType: "tel",
+            email: phoneNumber,
+            handle: phoneNumber,
+            name: `tel:${phoneNumber}`,
+            uid: result.user.uid,
+            providerUid: result.user.uid, // TODO: ensure this is google uid
+            displayName: result.user.displayName || undefined,
+            photoURL: result.user.photoURL || undefined,
+            idToken
+        };
+        useAuthStore().signIn(user);
+        await init();
+    } catch(error: any) {
+        console.log(error);
+        createNotification(error.message, "error");
+    }
+}
+
 export async function emailAnonymousLogin(email: string) {
     try {
-        email = email.toLowerCase();
-        if (!validateEmail(email)) {
-            createNotification("invalid email address", "error");
-            return;
-        }
+        email = normalizeEmail(email);
         const result = await signInAnonymously(auth);
         const idToken = await result.user!.getIdToken();
         const user : IUser = {
@@ -139,13 +161,17 @@ export function signOutFirebase() {
     return signOut(auth);
 }
 
-export async function genSignature(otp: string, message: string) {
+export async function genSignature(
+    schema: "mailto" | "tel",
+    otp: string,
+    message: string
+) {
     const user = useAuthStore().user!;
     if (user.idType != "mailto") {
         throw new Error("supported identity type");
     }
     const validateOTPCall = httpsCallable(functions, 'validateOTP');
-    const inputParam : any = {email: user.email!, otp, message};
+    const inputParam : any = {schema, receiver: user.email!, otp, message};
     const result = await validateOTPCall(inputParam);
     return result.data;
 }

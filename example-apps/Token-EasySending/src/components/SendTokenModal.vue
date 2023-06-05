@@ -13,6 +13,17 @@
           </svg>
         </span>
         <input v-model="transaction.toInput" class="send-people" type="text" placeholder="email or wallet address" aria-expanded="false" autocomplete="off" autocorrect="off">
+        <div class="phone-login" style="margin-top: 10px;">
+          <phone-input
+            @phone="phone = $event"
+            @country="country = $event"
+            @phoneData="phoneData = $event"
+            name="phone-number-input"
+            required
+            :value="'1'"
+            style="margin-bottom: 15px;"
+          />
+        </div>
       </div>
     </div>
     <button class="cta-button" @click="inputToken">Continue</button>
@@ -128,7 +139,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed, watch } from "vue";
+import { ref, onMounted, computed, watch, type Ref } from "vue";
 import { useRouter } from "vue-router";
 import { BigNumber as EthBigNumber } from "ethers";
 import { BigNumber } from "bignumber.js";
@@ -161,6 +172,8 @@ import config from "../../bundler_config.json";
 import { UserOperationStruct } from "@hexlink/contracts/dist/types/Account";
 import { genSignature } from "@/services/auth";
 import { validateEmail } from "@/web3/utils";
+import PhoneInput from "@/components/PhoneInput.vue";
+import type { PhoneDATA } from "../types";
 
 const store = useAuthStore();
 const user = store.user!;
@@ -185,6 +198,9 @@ const userHandle = computed(() => {
   }
   return user?.handle;
 });
+const phone: Ref<string> = ref("");
+const country: Ref<string> = ref("");
+const phoneData: Ref<PhoneDATA> = ref({});
 
 const emit = defineEmits(['closeModal'])
 
@@ -521,7 +537,13 @@ const reset = () => {
 }
 
 const inputToken = async () => {
-  const normalized = transaction.value.toInput.toLowerCase().trim();
+  var normalized: string = "";
+  if (phone.value == "") {
+    normalized = transaction.value.toInput.toLowerCase().trim();
+  } else {
+    transaction.value.toInput = "+" + phone.value;
+    normalized = phone.value;
+  }
   if (normalized.length > 0) {
     if (ethers.utils.isAddress(normalized)) {
       transaction.value.to = normalized;
@@ -529,6 +551,9 @@ const inputToken = async () => {
     } else if (validateEmail(normalized)) {
       const nameHash = hash(`mailto:${normalized}`);
       transaction.value.to = await getAccountAddress(nameHash);
+      step.value = 'input_token';
+    } else if (phoneData.value.isValid) {
+      transaction.value.to = normalized;
       step.value = 'input_token';
     } else {
       createNotification("Invalid Input", "error");

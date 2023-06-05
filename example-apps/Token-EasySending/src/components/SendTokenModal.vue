@@ -13,6 +13,17 @@
           </svg>
         </span>
         <input v-model="transaction.toInput" class="send-people" type="text" placeholder="email or wallet address" aria-expanded="false" autocomplete="off" autocorrect="off">
+        <div class="phone-login" style="margin-top: 10px;">
+          <phone-input
+            @phone="phone = $event"
+            @country="country = $event"
+            @phoneData="phoneData = $event"
+            name="phone-number-input"
+            required
+            :value="'1'"
+            style="margin-bottom: 15px;"
+          />
+        </div>
       </div>
     </div>
     <button class="cta-button" @click="inputToken">Continue</button>
@@ -128,7 +139,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed, watch } from "vue";
+import { ref, onMounted, computed, watch, type Ref } from "vue";
 import { useRouter } from "vue-router";
 import { BigNumber as EthBigNumber } from "ethers";
 import { BigNumber } from "bignumber.js";
@@ -160,7 +171,8 @@ import ERC20_ABI from "../abi/ERC20_ABI.json";
 import config from "../../bundler_config.json";
 import { UserOperationStruct } from "@hexlink/contracts/dist/types/Account";
 import { isValidEmail } from "@/web3/utils";
-import { isValidPhoneNumber, parsePhoneNumber } from "libphonenumber-js";
+import PhoneInput from "@/components/PhoneInput.vue";
+import type { PhoneData } from "../types";
 
 const estimatedGasAmount = "150000"; // hardcoded, can optimize later
 const chooseTotalDrop = ref<boolean>(false);
@@ -184,6 +196,9 @@ const userHandle = computed(() => {
   }
   return user?.handle;
 });
+const phone: Ref<string> = ref("");
+const country: Ref<string> = ref("");
+const phoneData: Ref<PhoneData> = ref({});
 
 const emit = defineEmits(['closeModal'])
 
@@ -529,9 +544,8 @@ const inputToken = async () => {
     const nameHash = hash(`mailto:${normalized}`);
     transaction.value.to = await getAccountAddress(nameHash);
     step.value = 'input_token';
-  } else if (isValidPhoneNumber(normalized)) {
-    const pn = parsePhoneNumber(normalized).getURI();
-    const nameHash = hash(`tel:${pn}`);
+  } else if (phoneData.value.isValid) {
+    const nameHash = hash(phoneData.value.uri!);
     transaction.value.to = await getAccountAddress(nameHash);
     step.value = 'input_token';
   } else {

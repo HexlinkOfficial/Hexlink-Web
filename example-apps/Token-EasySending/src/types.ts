@@ -20,3 +20,18 @@ export interface IAuth {
     returnUrl?: string,
     balance?: number,
 }
+
+export interface PhoneData {
+    country?: string;
+    dialCode?: string | number;
+    nationalNumber?: string | number;
+    number?: string | number;
+    uri?: string,
+    isValid?: boolean;
+}
+
+export type Country = {
+    name: string;
+    dialCode: string;
+    iso2: string;
+}

@@ -26,9 +26,7 @@ interface EmailData {
   html: string
 }
 
-function genUserId(
-    data: {schema: "mailto" | "tel", receiver: string},
-) : string {
+function genUserId(data: {schema: string, receiver: string}) : string {
   let userId: string;
   if (data.schema === "mailto") {
     const email = data.receiver.toLowerCase();

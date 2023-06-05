@@ -30,10 +30,10 @@ exports.refundRedPacket = refundRedPacket;
 
 import {
   genAndSendOTP,
-  validateOTP,
+  validateOtp,
   notifyTransfer,
 } from "./signin";
 
 exports.genAndSendOTP = genAndSendOTP;
-exports.validateOTP = validateOTP;
+exports.validateOtp = validateOtp;
 exports.notifyTransfer = notifyTransfer;

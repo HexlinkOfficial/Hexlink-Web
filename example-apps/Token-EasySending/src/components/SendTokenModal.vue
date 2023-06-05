@@ -36,7 +36,7 @@
         </div>
         <div class="name" style="">
           <div class="confirmAddress">
-            <span>{{ prettyPrint(transaction.toInput, 14, 7) }}</span>
+            <span>{{ prettyPrint(transaction.receiver.value, 14, 7) }}</span>
           </div>
         </div>
         <div @click="reset" class="confirmButton">
@@ -108,7 +108,7 @@
     <div style="display: block;">
       <img src="@/assets/svg/password.svg" style="width: 50px; height: 50px; margin: 1rem 0;" alt="send icon" />
       <h2 class="people-title">Enter Verification Code</h2>
-      <div class="people-text">Enter code that we have sent to your email <b>{{ userHandle }}</b></div>
+      <div class="people-text">Enter code that we have sent to <b>{{ userHandle }}</b></div>
       <div class="social-login" style="flex-direction: column;">
         <div style="display: flex; align-items: center; justify-content: space-between;">
           <input v-for="(arr, index) in code" :key="index" type="number" pattern="\d*" :id="'input_' + index"
@@ -205,6 +205,10 @@ const emit = defineEmits(['closeModal'])
 interface TokenTransaction {
   to: string,
   toInput: string,
+  receiver: {
+    schema: string,
+    value: string,
+  },
   salt: string,
   amount: EthBigNumber,
   amountInput: string,
@@ -216,6 +220,7 @@ interface TokenTransaction {
 const transaction = ref<TokenTransaction>({
   to: "",
   toInput: "",
+  receiver: {schema: "", value: ""},
   salt: hash(new Date().toISOString()),
   amount: EthBigNumber.from(0),
   amountInput: "0.1",
@@ -287,8 +292,7 @@ const countDownTimer = () => {
 
 const resendOtp = async () => {
   countDownTimer();
-  const user = useAuthStore().user!;
-  const result: any = await genAndSendOtp(userHandle.value);
+  const result: any = await genAndSendOtp();
   if (result === 429) {
     console.error("Too many requests to send otp.");
     createNotification("Too many requests to send otp.", "error");
@@ -517,8 +521,7 @@ const onSubmit = async (_e: Event) => {
     message.value = "Done!";
     txStatus.value = "success";
     await notifyTransfer(
-      userHandle.value,
-      transaction.value.toInput,
+      transaction.value.receiver,
       transaction.value.amountInput,
       token.value
     );
@@ -536,15 +539,27 @@ const reset = () => {
 }
 
 const inputToken = async () => {
-  const normalized = transaction.value.toInput.toLowerCase().trim();
-  if (ethers.utils.isAddress(normalized)) {
-    transaction.value.to = normalized;
+  transaction.value.toInput = transaction.value.toInput.toLowerCase().trim();
+  if (ethers.utils.isAddress(transaction.value.toInput)) {
+    transaction.value.receiver = {
+      schema: "address",
+      value: transaction.value.toInput
+    };
+    transaction.value.to = transaction.value.toInput;
     step.value = 'input_token';
-  } else if (isValidEmail(normalized)) {
-    const nameHash = hash(`mailto:${normalized}`);
+  } else if (isValidEmail(transaction.value.toInput)) {
+    transaction.value.receiver = {
+      schema: "mailto",
+      value: transaction.value.toInput
+    };
+    const nameHash = hash(`mailto:${transaction.value.toInput}`);
     transaction.value.to = await getAccountAddress(nameHash);
     step.value = 'input_token';
   } else if (phoneData.value.isValid) {
+    transaction.value.receiver = {
+      schema: "tel",
+      value: phoneData.value.number!
+    };
     const nameHash = hash(phoneData.value.uri!);
     transaction.value.to = await getAccountAddress(nameHash);
     step.value = 'input_token';
@@ -559,7 +574,7 @@ const inputToken = async () => {
 const sendOtp = async () => {
   step.value = 'validate_otp';
   try {
-    const result: any = await genAndSendOtp(userHandle.value);
+    const result: any = await genAndSendOtp();
     if (result === 429) {
       console.error("Too many requests to send otp.");
       createNotification("Too many requests to send otp.", "error");

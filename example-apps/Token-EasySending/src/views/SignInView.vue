@@ -36,24 +36,22 @@
 import { ref, watch, type Ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { Button } from 'ant-design-vue';
-import { emailAnonymousLogin } from '@/services/auth';
+import { emailAnonymousLogin, phoneNumberAnonymousLogin } from '@/services/auth';
 import { useAuthStore } from '@/stores/auth';
 import PhoneInput from "@/components/PhoneInput.vue";
-import type { PhoneDATA } from "../types";
+import type { PhoneData } from "../types";
 
 const store = useAuthStore();
 const router = useRouter();
 const show = ref<boolean>(true);
-const email = ref<string>("");
 const isLoadingLogin = ref(false);
 const loginDisabled = ref<boolean>(true);
 
 const phone: Ref<string> = ref("");
 const country: Ref<string> = ref("");
-const phoneData: Ref<PhoneDATA> = ref({});
+const phoneData: Ref<PhoneData> = ref({});
 
 const inputData = ref<string>("");
-const isEmail = ref<boolean>(true);
 
 const onSubmit = (e: Event) => {
   e.preventDefault();
@@ -63,11 +61,10 @@ const emailLogin = async() => {
   isLoadingLogin.value = true;
   if (inputData.value != "") {
     await emailAnonymousLogin(inputData.value);
-    router.push(store.returnUrl || "/");
   } else {
-    console.log("Phone number: ", phone.value);
-    TODO: "Add phone number login"
+    await phoneNumberAnonymousLogin(phoneData.value);
   }
+  router.push(store.returnUrl || "/");
 }
 
 watch([inputData, phone], () => {

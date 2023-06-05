@@ -51,11 +51,11 @@ export async function genNameHash(
       return {code: 400, message: "identity type not match"};
     }
     const user = await getUserById(uid);
-    if (!user || !user.email) {
+    if (!user) {
       return {code: 400, message: "Invalid uid: no provider data nor valid record in user table."};
     }
 
-    const name = calcNameHash(EMAIL_PROVIDER_ID, user.email, version);
+    const name = calcNameHash(EMAIL_PROVIDER_ID, uid, version);
     return {code: 200, nameHash: name};
   }
 

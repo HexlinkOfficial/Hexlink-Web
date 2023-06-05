@@ -25,8 +25,8 @@ export interface PhoneData {
     country?: string;
     dialCode?: string | number;
     nationalNumber?: string | number;
-    number?: string | number;
-    uri?: string,
+    number?: string;
+    uri?: string;
     isValid?: boolean;
 }
 

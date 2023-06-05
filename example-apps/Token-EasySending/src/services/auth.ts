@@ -15,42 +15,52 @@ import { GOERLI, SUPPORTED_CHAINS, type Chain } from "../../../../functions/comm
 import { useChainStore } from '@/stores/chain';
 import { initTokenList } from "@/web3/tokens";
 import { useTokenStore } from '@/stores/token';
-import { normalizeEmail, normalizePhoneNumber, createNotification } from "@/web3/utils";
+import { normalizeEmail, createNotification } from "@/web3/utils";
 
 import type { Token } from "../../../../functions/common";
+import type { PhoneData } from "../types";
 
 const auth = getAuth(app)
 const functions = getFunctions()
 
-export async function genAndSendOtp(receiver: string) {
-    const schema = useAuthStore().user!.idType;
+export async function genAndSendOtp() {
+    const user = useAuthStore().user!;
     const genOtpCall = httpsCallable(functions, 'genAndSendOTP');
-    const result = await genOtpCall({schema, receiver});
+    const result = await genOtpCall({
+        receiver: {schema: user.idType, value: user.handle}
+    });
     return (result.data as any).code as number;
 }
 
 export async function genSignature(otp: string, message: string) {
-    const schema = useAuthStore().user!.idType;
     const user = useAuthStore().user!;
-    if (user.idType != "mailto") {
+    if (user.idType != "mailto" && user.idType != "tel") {
         throw new Error("supported identity type");
     }
-    const validateOTPCall = httpsCallable(functions, 'validateOTP');
-    const inputParam : any = {schema, receiver: user.email!, otp, message};
+    const validateOTPCall = httpsCallable(functions, 'validateOtp');
+    const inputParam : any = {
+        receiver: {schema: user.idType, value: user.handle},
+        otp,
+        message
+    };
     const result = await validateOTPCall(inputParam);
     return result.data;
 }
 
 export async function notifyTransfer(
-    sender: string,
-    receiver: string,
+    receiver: {schema: string, value: string},
     sendAmount: string,
     token: Token
 ) {
     try {
-        const schema = useAuthStore().user!.idType;
-        const genOtpCall = httpsCallable(functions, 'notifyTransfer');
-        await genOtpCall({schema, sender, receiver, sendAmount, token});
+        const sender = useAuthStore().user!;
+        const notifyTransferCall = httpsCallable(functions, 'notifyTransfer');
+        await notifyTransferCall({
+            sender: {schema: sender.idType, value: sender.handle},
+            receiver,
+            sendAmount,
+            token
+        });
     } catch(err) {
         console.log(err);
         createNotification("Faied to send the notification email.", "warning")
@@ -63,17 +73,16 @@ export async function refreshToken() {
     store.refreshIdToken(idToken);
 }
 
-export async function phoneNumberAnonymousLogin(phoneNumber: string) {
+export async function phoneNumberAnonymousLogin(pd: PhoneData) {
     try {
-        phoneNumber = normalizePhoneNumber(phoneNumber);
         const result = await signInAnonymously(auth);
         const idToken = await result.user!.getIdToken();
         const user : IUser = {
             provider: "hexlink.io",
             idType: "tel",
-            email: phoneNumber,
-            handle: phoneNumber,
-            name: `tel:${phoneNumber}`,
+            email: "",
+            handle: pd.number!,
+            name: pd.uri!,
             uid: result.user.uid,
             providerUid: result.user.uid, // TODO: ensure this is google uid
             displayName: result.user.displayName || undefined,

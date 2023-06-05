@@ -28,12 +28,14 @@ export const GET_USER_BY_ID = gql`
 
 export const UPDATE_OTP = gql`
     mutation (
-        $id: uuid!
+        $id: String!
+        $otp: String
         $isActive: Boolean
     ) {
         update_user_by_pk (
             pk_columns: {id: $id},
             _set: {
+              otp: $otp
               is_active: $isActive
             }
         ) {
@@ -75,7 +77,7 @@ export async function getUserById(
   }
 
   const user = result.data?.user_by_pk;
-  if (user === undefined || user.length < 1) {
+  if (user === undefined || user === null || user.length < 1) {
     console.log("Empty user data", user);
     return undefined;
   }

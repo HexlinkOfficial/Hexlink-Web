@@ -22,20 +22,33 @@ import type { Token } from "../../../../functions/common";
 const auth = getAuth(app)
 const functions = getFunctions()
 
-export async function genOtp(schema: "mailto" | "tel", receiver: string) {
+export async function genAndSendOtp(receiver: string) {
+    const schema = useAuthStore().user!.idType;
     const genOtpCall = httpsCallable(functions, 'genAndSendOTP');
     const result = await genOtpCall({schema, receiver});
     return (result.data as any).code as number;
 }
 
+export async function genSignature(otp: string, message: string) {
+    const schema = useAuthStore().user!.idType;
+    const user = useAuthStore().user!;
+    if (user.idType != "mailto") {
+        throw new Error("supported identity type");
+    }
+    const validateOTPCall = httpsCallable(functions, 'validateOTP');
+    const inputParam : any = {schema, receiver: user.email!, otp, message};
+    const result = await validateOTPCall(inputParam);
+    return result.data;
+}
+
 export async function notifyTransfer(
-    schema: "mailto" | "tel",
     sender: string,
     receiver: string,
     sendAmount: string,
     token: Token
 ) {
     try {
+        const schema = useAuthStore().user!.idType;
         const genOtpCall = httpsCallable(functions, 'notifyTransfer');
         await genOtpCall({schema, sender, receiver, sendAmount, token});
     } catch(err) {
@@ -159,21 +172,6 @@ export function signOutFirebase() {
     useTokenStore().reset();
     useChainStore().reset();
     return signOut(auth);
-}
-
-export async function genSignature(
-    schema: "mailto" | "tel",
-    otp: string,
-    message: string
-) {
-    const user = useAuthStore().user!;
-    if (user.idType != "mailto") {
-        throw new Error("supported identity type");
-    }
-    const validateOTPCall = httpsCallable(functions, 'validateOTP');
-    const inputParam : any = {schema, receiver: user.email!, otp, message};
-    const result = await validateOTPCall(inputParam);
-    return result.data;
 }
 
 export async function init() {

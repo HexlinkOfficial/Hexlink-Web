@@ -154,12 +154,11 @@ import { getPriceInfo } from "@/web3/network";
 import { useAuthStore } from '@/stores/auth';
 import type { Token } from "../../../../functions/common";
 import { calcGas, tokenAmount, hash } from "../../../../functions/common";
-import { genOtp, notifyTransfer } from '@/services/auth'
+import { genAndSendOtp, notifyTransfer, genSignature } from '@/services/auth'
 import ERC20_ABI from "../abi/ERC20_ABI.json";
 
 import config from "../../bundler_config.json";
 import { UserOperationStruct } from "@hexlink/contracts/dist/types/Account";
-import { genSignature } from "@/services/auth";
 import { isValidEmail } from "@/web3/utils";
 import { isValidPhoneNumber, parsePhoneNumber } from "libphonenumber-js";
 
@@ -208,7 +207,7 @@ const transaction = ref<TokenTransaction>({
   token: tokenStore.nativeCoin.address,
   gasToken: tokenStore.nativeCoin.address,
   estimatedGas: "0",
-})
+});
 
 const isNumber = (event: Event) => {
   (event.currentTarget as HTMLInputElement).value = "";
@@ -274,7 +273,7 @@ const countDownTimer = () => {
 const resendOtp = async () => {
   countDownTimer();
   const user = useAuthStore().user!;
-  const result: any = await genOtp(user.idType, userHandle.value);
+  const result: any = await genAndSendOtp(userHandle.value);
   if (result === 429) {
     console.error("Too many requests to send otp.");
     createNotification("Too many requests to send otp.", "error");
@@ -502,9 +501,7 @@ const onSubmit = async (_e: Event) => {
   
     message.value = "Done!";
     txStatus.value = "success";
-    const user = useAuthStore().user!;
     await notifyTransfer(
-      user.idType,
       userHandle.value,
       transaction.value.toInput,
       transaction.value.amountInput,
@@ -548,8 +545,7 @@ const inputToken = async () => {
 const sendOtp = async () => {
   step.value = 'validate_otp';
   try {
-    const user = useAuthStore().user!;
-    const result: any = await genOtp(user.idType, userHandle.value);
+    const result: any = await genAndSendOtp(userHandle.value);
     if (result === 429) {
       console.error("Too many requests to send otp.");
       createNotification("Too many requests to send otp.", "error");

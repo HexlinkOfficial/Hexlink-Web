@@ -12,7 +12,7 @@
             <div class="email-login">
               <input type="text" v-model="inputData" placeholder="Enter phone number or email" name="uname" class="email-input" required>
             </div>
-            <div style="display: flex; justify-content: center; margin: 10px 0; font-weight: 600;">or</div>
+            <div style="display: flex; justify-content: center; margin: 5px 0; font-weight: 600;">or</div>
             <div class="phone-login">
               <phone-input
                 @phone="phone = $event"
@@ -24,7 +24,7 @@
                 style="margin-bottom: 15px;"
               />
             </div>
-            <Button class="cta-btn" type="primary" :loading="isLoadingLogin" :disabled="loginDisabled" @click="emailLogin">
+            <Button class="cta-btn" type="primary" :loading="isLoadingLogin" @click="emailLogin">
               <div class="btn-text">Continue</div>
             </Button>
         </div>
@@ -41,12 +41,12 @@ import { emailAnonymousLogin, phoneNumberAnonymousLogin } from '@/services/auth'
 import { useAuthStore } from '@/stores/auth';
 import PhoneInput from "@/components/PhoneInput.vue";
 import type { PhoneData } from "../types";
+import { createNotification } from "@/web3/utils";
 
 const store = useAuthStore();
 const router = useRouter();
 const show = ref<boolean>(true);
 const isLoadingLogin = ref(false);
-const loginDisabled = ref<boolean>(true);
 
 const phone: Ref<string> = ref("");
 const country: Ref<string> = ref("");
@@ -59,22 +59,19 @@ const onSubmit = (e: Event) => {
 }
 
 const emailLogin = async() => {
-  isLoadingLogin.value = true;
-  if (inputData.value != "") {
-    await emailAnonymousLogin(inputData.value);
-  } else {
-    await phoneNumberAnonymousLogin(phoneData.value);
-  }
-  router.push(store.returnUrl || "/");
-}
-
-watch([inputData, phone], () => {
   if (inputData.value == "" && phone.value == "") {
-    loginDisabled.value = true;
+    createNotification("Empty Input", "error");
+    return;
   } else {
-    loginDisabled.value = false;
+    isLoadingLogin.value = true;
+    if (inputData.value != "") {
+      await emailAnonymousLogin(inputData.value);
+    } else {
+      await phoneNumberAnonymousLogin(phoneData.value);
+    }
+    router.push(store.returnUrl || "/");
   }
-})
+}
 </script>
 
 <style lang="less" scoped>

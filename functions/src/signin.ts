@@ -155,7 +155,6 @@ export const genAndSendOTP = functions.https.onCall(async (data, context) => {
     if (data.receiver.schema === "mailto") {
       const plainOTP = randomCode(OTP_LEN);
       const encryptedOTP = await encryptWithSymmKey(plainOTP);
-  
       const user = await getUserById(userId);
       if (!user) {
         await insertUser([{id: userId, otp: encryptedOTP}]);
@@ -211,7 +210,7 @@ const signMessage = async (userId: string, message: string) => {
   const nameHash = utils.keccak256(utils.toUtf8Bytes(userId));
   const signature = await sign(nameHash, message);
   return {code: 200, signature};
-}
+};
 
 const isValidOTP = (updatedAt: string) => {
   const time = new Date().getTime() - new Date(updatedAt).getTime();

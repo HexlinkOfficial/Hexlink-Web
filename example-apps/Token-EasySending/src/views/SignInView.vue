@@ -12,6 +12,7 @@
             <div class="email-login">
               <input type="text" v-model="inputData" placeholder="Enter phone number or email" name="uname" class="email-input" required>
             </div>
+            <div style="display: flex; justify-content: center; margin: 10px 0; font-weight: 600;">or</div>
             <div class="phone-login">
               <phone-input
                 @phone="phone = $event"
@@ -152,7 +153,7 @@ a {
 .email-input {
   padding: 10px 0 10px 12px;
   margin-top: 0.5rem;
-  margin-bottom: 15px;
+  // margin-bottom: 0.5rem;
   border: 2px solid transparent;
   background: #eee;
   border-radius: 8px;

@@ -13,6 +13,7 @@
           </svg>
         </span>
         <input v-model="transaction.toInput" class="send-people" type="text" placeholder="email or wallet address" aria-expanded="false" autocomplete="off" autocorrect="off">
+        <div style="display: flex; justify-content: center; margin: 5px 0; font-weight: 600;">or</div>
         <div class="phone-login" style="margin-top: 10px;">
           <phone-input
             @phone="phone = $event"
@@ -811,7 +812,7 @@ const closeModal = () => {
   line-height: 1;
   display: inline-block; }
 .people-input-box {
-  margin-top: 15px;
+  margin-top: 5px;
   font-size: 1.125rem;
   line-height: 1.5rem;
   font-weight: normal;

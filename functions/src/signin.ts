@@ -11,7 +11,6 @@ import {
   getAuthenticationNotification,
   getNewTransferNotification,
   buildNotifyTransferSmsMessage,
-  buildSmsOtpMessage,
 } from "./notification";
 import {parsePhoneNumber, isValidPhoneNumber} from "libphonenumber-js";
 import {Twilio} from "twilio";
@@ -79,12 +78,37 @@ const sendSms = async (receiver: string, data: string) => {
       secrets.TWILIO_ACCOUNT_SID,
       secrets.TWILIO_AUTH_TOKEN
   );
-  const message = await twilioClient.messages.create({
-    messagingServiceSid: secrets.TWILIO_MG_SERVICE_ID,
+  await twilioClient.messages.create({
+    messagingServiceSid: secrets.TWILIO_MG_SERVICE_SID,
     body: data,
     to: receiver,
   });
-  console.log(message);
+};
+
+const sendSmsOtp = async (receiver: string) => {
+  const twilioClient = new Twilio(
+      secrets.TWILIO_ACCOUNT_SID,
+      secrets.TWILIO_AUTH_TOKEN
+  );
+  await twilioClient.verify.v2.services(
+      secrets.TWILIO_VA_SERVICE_SID
+  ).verifications.create({to: receiver, channel: "sms"});
+};
+
+const checkSmsOtp = async (receiver: string, otp: string) => {
+  const twilioClient = new Twilio(
+      secrets.TWILIO_ACCOUNT_SID,
+      secrets.TWILIO_AUTH_TOKEN
+  );
+  try {
+    const check = await twilioClient.verify.v2.services(
+        secrets.TWILIO_VA_SERVICE_SID
+    ).verificationChecks.create({to: receiver, code: otp});
+    return check.status === "approved";
+  } catch (_err: any) {
+    // resource not found error
+    return false;
+  }
 };
 
 export const notifyTransfer = functions.https.onCall(async (data, context) => {
@@ -127,25 +151,22 @@ export const genAndSendOTP = functions.https.onCall(async (data, context) => {
   try {
     const userId = genUserId(data.receiver);
     await sendOtpRateLimit(3, context);
-    const plainOTP = randomCode(OTP_LEN);
-    const encryptedOTP = await encryptWithSymmKey(plainOTP);
-
-    const user = await getUserById(userId);
-    if (!user) {
-      await insertUser([{id: userId, otp: encryptedOTP}]);
-    } else {
-      await updateOTP({id: userId, otp: encryptedOTP, isActive: true});
-    }
 
     if (data.receiver.schema === "mailto") {
+      const plainOTP = randomCode(OTP_LEN);
+      const encryptedOTP = await encryptWithSymmKey(plainOTP);
+  
+      const user = await getUserById(userId);
+      if (!user) {
+        await insertUser([{id: userId, otp: encryptedOTP}]);
+      } else {
+        await updateOTP({id: userId, otp: encryptedOTP, isActive: true});
+      }
       await sendEmail(
           getAuthenticationNotification(data.receiver.value, plainOTP)
       );
     } else if (data.receiver.schema === "tel") {
-      await sendSms(
-          data.receiver.value,
-          buildSmsOtpMessage(plainOTP)
-      );
+      await sendSmsOtp(data.receiver.value);
     }
     return {code: 200, sentAt: new Date().getTime()};
   } catch (e: any) {
@@ -168,21 +189,29 @@ export const validateOtp = functions.https.onCall(async (data) => {
     return {code: 429, message: "too many requests"};
   }
 
-  const user = await getUserById(userId);
-  if (!user) {
-    return {code: 400, message: "No record for the userId, " + userId};
+  if (data.receiver.schema === "mailto") {
+    const user = await getUserById(userId);
+    if (!user) {
+      return {code: 400, message: "No record for the userId, " + userId};
+    }
+    const plainOTP = <string> await decryptWithSymmKey(user.otp);
+    if (plainOTP === data.otp && user.isActive && isValidOTP(user.updatedAt!)) {
+      await updateOTP({id: user.id!, otp: user.otp, isActive: false});
+      return signMessage(user.id, data.message);
+    }
+  } else if (data.receiver.schema === "tel") {
+    if (await checkSmsOtp(data.receiver.value, data.otp)) {
+      return signMessage(userId, data.message);
+    }
   }
-
-  const plainOTP = <string> await decryptWithSymmKey(user.otp);
-  if (plainOTP === data.otp && user.isActive && isValidOTP(user.updatedAt!)) {
-    await updateOTP({id: user.id!, otp: user.otp, isActive: false});
-    const nameHash = utils.keccak256(utils.toUtf8Bytes(user.id));
-    const signature = await sign(nameHash, data.message);
-    return {code: 200, signature};
-  }
-
-  return {code: 400, message: "Invalid OTP."};
+  return {code: 400, message: "failed to validate otp"};
 });
+
+const signMessage = async (userId: string, message: string) => {
+  const nameHash = utils.keccak256(utils.toUtf8Bytes(userId));
+  const signature = await sign(nameHash, message);
+  return {code: 200, signature};
+}
 
 const isValidOTP = (updatedAt: string) => {
   const time = new Date().getTime() - new Date(updatedAt).getTime();

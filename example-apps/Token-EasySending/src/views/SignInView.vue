@@ -8,9 +8,8 @@
             </div>
             <h2 class="title">Welcome To Hexlink</h2>
             <p class="subtitle">Crypto for everyone</p>
-            <h3 class="small-title">What's your phone number or email?</h3>
             <div class="email-login">
-              <input type="text" v-model="inputData" placeholder="Enter phone number or email" name="uname" class="email-input" required>
+              <input type="text" v-model="inputData" placeholder="Enter your email" name="uname" class="email-input" required>
             </div>
             <div style="display: flex; justify-content: center; margin: 10px 0; font-weight: 600;">or</div>
             <div class="phone-login">

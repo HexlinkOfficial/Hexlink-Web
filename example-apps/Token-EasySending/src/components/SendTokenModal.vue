@@ -157,10 +157,11 @@ import { useChainStore } from "@/stores/chain";
 import { useTokenStore } from "@/stores/token";
 import {
   getAccountAddress,
-  getNameHash,
   isContract,
   getNonce,
-  buildAccountExecData
+  buildAccountExecData,
+  getNameType,
+  getName,
 } from "@/web3/account";
 import { getPriceInfo } from "@/web3/network";
 import { useAuthStore } from '@/stores/auth';
@@ -169,11 +170,11 @@ import { calcGas, tokenAmount, hash } from "../../../../functions/common";
 import { genAndSendOtp, notifyTransfer, genSignature } from '@/services/auth'
 import ERC20_ABI from "../abi/ERC20_ABI.json";
 
-import config from "../../bundler_config.json";
 import { UserOperationStruct } from "@hexlink/contracts/dist/types/Account";
 import { isValidEmail } from "@/web3/utils";
 import PhoneInput from "@/components/PhoneInput.vue";
 import type { PhoneData } from "../types";
+import { ENTRYPOINT, ACCOUNT_FACTORY } from "@/web3/constants";
 
 const estimatedGasAmount = "150000"; // hardcoded, can optimize later
 const chooseTotalDrop = ref<boolean>(false);
@@ -452,7 +453,7 @@ const buildTokenTransferUserOp = async (
   let initCode : [] | string = [];
   let preVerificationGas = 65000;
   if (await isContract(sender)) {
-    nonce = await getNonce(config.entryPoint, sender);
+    nonce = await getNonce(ENTRYPOINT, sender);
   } else {
     initCode = await api.getInitCode();
     preVerificationGas += 200000;
@@ -498,10 +499,11 @@ const onSubmit = async (_e: Event) => {
     message.value = "Preparing your transaction...";
     const api = new HexlinkAccountAPI({
       provider: useChainStore().provider,
-      entryPointAddress: config.entryPoint,
-      factoryAddress: config.accountFactory,
+      entryPointAddress: ENTRYPOINT,
+      factoryAddress: ACCOUNT_FACTORY,
       paymasterAPI: undefined,
-      name: getNameHash()
+      nameType: hash(getNameType()),
+      name: hash(getName()),
     });
     const op = await buildTokenTransferUserOp(
       transaction.value, code.join(""), api
@@ -509,11 +511,7 @@ const onSubmit = async (_e: Event) => {
     message.value = "Sending your transaction...";
     console.log(`Signed UserOperation: ${await printOp(op)}`);
 
-    const bundler = await getHttpRpcClient(
-      useChainStore().provider,
-      config.bundlerUrl,
-      config.entryPoint
-    );
+    const bundler = await getHttpRpcClient(useChainStore().chain);
     const uoHash = await bundler.sendUserOpToBundler(op);
     console.log(`transaction ${uoHash} sent...`);
     message.value = "Waiting for confirmation...";
@@ -554,16 +552,20 @@ const inputToken = async () => {
       schema: "mailto",
       value: transaction.value.toInput
     };
-    const nameHash = hash(`mailto:${transaction.value.toInput}`);
-    transaction.value.to = await getAccountAddress(nameHash);
+    transaction.value.to = await getAccountAddress(
+      "mailto",
+      transaction.value.toInput
+    );
     step.value = 'input_token';
   } else if (phoneData.value.isValid) {
     transaction.value.receiver = {
       schema: "tel",
       value: phoneData.value.number!
     };
-    const nameHash = hash(phoneData.value.uri!);
-    transaction.value.to = await getAccountAddress(nameHash);
+    transaction.value.to = await getAccountAddress(
+      "tel",
+      phoneData.value.number,
+    );
     step.value = 'input_token';
   } else {
     createNotification(

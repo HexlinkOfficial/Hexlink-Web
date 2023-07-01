@@ -140,6 +140,7 @@ import { useChainStore } from '@/stores/chain';
 import { createToaster } from "@meforma/vue-toaster";
 import {
     GOERLI,
+    MUMBAI,
     prettyPrintAddress,
     type Chain,
 } from "../../../../functions/common";
@@ -162,7 +163,7 @@ onMounted(async () => {
 });
 
 const mainNet: Chain[] = [];
-const testNet: Chain[] = [GOERLI];
+const testNet: Chain[] = [GOERLI, MUMBAI];
 
 const addressTextLong = function (address: string | undefined) {
   if (address) {

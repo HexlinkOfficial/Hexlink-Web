@@ -245,11 +245,11 @@ export const decryptWithSymmKey = async function(text: string) {
   return plaintextBuffer.toString("utf8");
 };
 
-export const sign = async (nameHash: string, message: string) => {
+export const sign = async (nameType: string, name: string, message: string) => {
   const toSign = ethers.utils.keccak256(
       ethers.utils.defaultAbiCoder.encode(
-          ["bytes32", "bytes32"],
-          [nameHash, message]
+          ["bytes32", "bytes32", "bytes32"],
+          [nameType, name, message]
       )
   );
   const signature = await signWithKmsKey(

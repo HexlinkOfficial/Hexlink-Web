@@ -18,20 +18,22 @@ export async function isContract(address: string) : Promise<boolean> {
     return false;
 }
 
+export function getNameType() {
+    return useAuthStore().user!.idType;
+}
+
 export function getName() {
-    return useAuthStore().user!.name;
+    return useAuthStore().user!.handle;
 }
 
-export function getNameHash(name?: string) {
-    return hash(name || getName());
-}
-
-export async function getAccountAddress(nameHash? : string) {
+export async function getAccountAddress(nameType?: string, name?: string) {
     const hexlink = Hexlink__factory.connect(
         import.meta.env.VITE_ACCOUNT_FACTORY,
         useChainStore().provider
     );
-    return await hexlink.ownedAccount(nameHash || getNameHash());
+    nameType = hash(nameType || getNameType());
+    name = hash(name || getName());
+    return await hexlink.ownedAccount(nameType, name);
 }
 
 export async function getNonce(

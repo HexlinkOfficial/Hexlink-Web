@@ -8,8 +8,8 @@ import formData from "form-data";
 import Mailgun from "mailgun.js";
 import {utils} from "ethers";
 import {
-  getAuthenticationNotification,
-  getNewTransferNotification,
+  buildAuthenticationNotification,
+  buildNewTransferNotification,
   buildNotifyTransferSmsMessage,
 } from "./notification";
 import {parsePhoneNumber, isValidPhoneNumber} from "libphonenumber-js";
@@ -28,24 +28,36 @@ interface EmailData {
   html: string
 }
 
-function genUserId(user: {schema: string, value: string}) : string {
-  let userId: string;
+interface User {
+  id: string;
+  schema: string;
+  handle: string;
+}
+
+function genUser(user: {schema: string, value: string}) : User {
   if (user.schema === "mailto") {
     const email = user.value.toLowerCase();
     if (!validateEmail(email)) {
       throw new Error("invalid_email");
     }
-    userId = `mailto:${email}`;
+    return {
+      id: `mailto:${email}`,
+      schema: "mailto",
+      handle: email,
+    };
   } else if (user.schema === "tel") {
     if (!isValidPhoneNumber(user.value)) {
       throw new Error("invalid_phone_number");
     }
     const phoneNumber = parsePhoneNumber(user.value);
-    userId = phoneNumber.getURI();
+    return {
+      id: phoneNumber.getURI(),
+      schema: "tel",
+      handle: phoneNumber.number,
+    };
   } else {
     throw new Error("missing_receipt");
   }
-  return userId;
 }
 
 async function sendOtpRateLimit(
@@ -114,25 +126,26 @@ const checkSmsOtp = async (receiver: string, otp: string) => {
 export const notifyTransfer = functions.https.onCall(async (data, context) => {
   Firebase.getInstance();
   try {
-    const userId = genUserId(data.sender);
+    const sender = genUser(data.sender);
     await sendOtpRateLimit(3, context);
-    const user = await getUserById(userId);
+    const user = await getUserById(sender.id);
     if (!user || !user.id) {
       return {code: 400, message: "user not exists"};
     }
 
-    if (data.receiver.schema === "mailto") {
-      await sendEmail(getNewTransferNotification(
-          data.sender.value,
-          data.receiver.value,
+    const receiver = genUser(data.receiver);
+    if (receiver.schema === "mailto") {
+      await sendEmail(buildNewTransferNotification(
+          sender.handle,
+          receiver.handle,
           data.token,
           data.sendAmount,
       ));
-    } else if (data.receiver.schema === "tel") {
+    } else if (receiver.schema === "tel") {
       await sendSms(
-          data.receiver.value,
+          receiver.handle,
           buildNotifyTransferSmsMessage(
-              data.sender.value,
+              sender.handle,
               data.token,
               data.sendAmount
           )
@@ -149,23 +162,21 @@ export const notifyTransfer = functions.https.onCall(async (data, context) => {
 export const genAndSendOTP = functions.https.onCall(async (data, context) => {
   Firebase.getInstance();
   try {
-    const userId = genUserId(data.receiver);
+    const user = genUser(data.receiver);
     await sendOtpRateLimit(3, context);
 
-    if (data.receiver.schema === "mailto") {
+    if (user.schema === "mailto") {
       const plainOTP = randomCode(OTP_LEN);
       const encryptedOTP = await encryptWithSymmKey(plainOTP);
-      const user = await getUserById(userId);
-      if (!user) {
-        await insertUser([{id: userId, otp: encryptedOTP}]);
+      const queriedUser = await getUserById(user.id);
+      if (!queriedUser) {
+        await insertUser([{id: user.id, otp: encryptedOTP}]);
       } else {
-        await updateOTP({id: userId, otp: encryptedOTP, isActive: true});
+        await updateOTP({id: user.id, otp: encryptedOTP, isActive: true});
       }
-      await sendEmail(
-          getAuthenticationNotification(data.receiver.value, plainOTP)
-      );
-    } else if (data.receiver.schema === "tel") {
-      await sendSmsOtp(data.receiver.value);
+      await sendEmail(buildAuthenticationNotification(user.handle, plainOTP));
+    } else if (user.schema === "tel") {
+      await sendSmsOtp(user.handle);
     }
     return {code: 200, sentAt: new Date().getTime()};
   } catch (e: any) {
@@ -177,38 +188,45 @@ export const genAndSendOTP = functions.https.onCall(async (data, context) => {
 
 export const validateOtp = functions.https.onCall(async (data) => {
   Firebase.getInstance();
-  const userId = genUserId(data.receiver);
+  const user = genUser(data.receiver);
   if (!data.otp) {
     return {code: 400, message: "Email or OTP is missing."};
   }
   const isQuotaExceeded = await rateLimiter(
-      "validate_otp", userId, 300, 10
+      "validate_otp", user.id, 300, 10
   );
   if (isQuotaExceeded) {
     return {code: 429, message: "too many requests"};
   }
 
   if (data.receiver.schema === "mailto") {
-    const user = await getUserById(userId);
-    if (!user) {
-      return {code: 400, message: "No record for the userId, " + userId};
+    const queriedUser = await getUserById(user.id);
+    if (!queriedUser) {
+      return {code: 400, message: "No record for the userId, " + user.id};
     }
-    const plainOTP = <string> await decryptWithSymmKey(user.otp);
-    if (plainOTP === data.otp && user.isActive && isValidOTP(user.updatedAt!)) {
-      await updateOTP({id: user.id!, otp: user.otp, isActive: false});
-      return signMessage(user.id, data.message);
+    const plainOTP = <string> await decryptWithSymmKey(queriedUser.otp);
+    if (
+      plainOTP === data.otp &&
+      queriedUser.isActive &&
+      isValidOTP(queriedUser.updatedAt!)
+    ) {
+      await updateOTP({id: user.id!, otp: "", isActive: false});
+      return signMessage(user, data.message);
     }
   } else if (data.receiver.schema === "tel") {
     if (await checkSmsOtp(data.receiver.value, data.otp)) {
-      return signMessage(userId, data.message);
+      return signMessage(user, data.message);
     }
   }
   return {code: 400, message: "failed to validate otp"};
 });
 
-const signMessage = async (userId: string, message: string) => {
-  const nameHash = utils.keccak256(utils.toUtf8Bytes(userId));
-  const signature = await sign(nameHash, message);
+const hash = (message: string) => {
+  return utils.keccak256(utils.toUtf8Bytes(message))
+}
+
+const signMessage = async (user: User, message: string) => {
+  const signature = await sign(hash(user.schema), hash(user.handle), message);
   return {code: 200, signature};
 };
 

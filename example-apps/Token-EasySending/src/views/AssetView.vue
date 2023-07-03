@@ -66,15 +66,9 @@
 <script setup lang="ts">
 import { ref, computed } from "vue";
 import WalletTokenList from "@/components/WalletTokenList.vue";
-import { BigNumber } from "bignumber.js";
-import { useWalletStore } from "@/stores/wallet";
-import { connectWallet } from "@/web3/wallet";
 import SendTokenModal from '@/components/SendTokenModal.vue';
 import ReceiveToken from '@/components/ReceiveToken.vue';
-import { genDeployAuthProof } from "@/web3/auth";
 import { useAuthStore } from '@/stores/auth';
-
-const openModal = ref<boolean>(false);
 const action = ref<string>("");
 
 const price = computed(() => {

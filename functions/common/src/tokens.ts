@@ -1,6 +1,7 @@
 "use strict";
 
-import type {Chain} from "./chain";
+import {type Chain} from "./chain";
+import SEPOLIA_TOKENS from "./tokens/SEPOLIA_TOKENS.json";
 import GOERLI_TOKENS from "./tokens/GOERLI_TOKENS.json";
 import MUMBAI_TOKENS from "./tokens/MUMBAI_TOKENS.json";
 import POLYGON_TOKENS from "./tokens/POLYGON_TOKENS.json";
@@ -89,6 +90,12 @@ export async function getPopularTokens(chain: Chain) : Promise<TokenDataList> {
     return {
       timestamp: new Date().toISOString(),
       tokens: GOERLI_TOKENS,
+    };
+  }
+  if (chain.chainId == "11155111") {
+    return {
+      timestamp: new Date().toISOString(),
+      tokens: SEPOLIA_TOKENS,
     };
   }
   if (chain.chainId == "80001") {

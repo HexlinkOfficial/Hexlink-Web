@@ -28,12 +28,12 @@ export function getName() {
 
 export async function getAccountAddress(nameType?: string, name?: string) {
     const hexlink = Hexlink__factory.connect(
-        import.meta.env.VITE_ACCOUNT_FACTORY,
+        import.meta.env.VITE_ACCOUNT_FACTORY_V2,
         useChainStore().provider
     );
     nameType = hash(nameType || getNameType());
     name = hash(name || getName());
-    return await hexlink.ownedAccount(nameType, name);
+    return await hexlink.getOwnedAccount(nameType, name);
 }
 
 export async function getNonce(
@@ -53,9 +53,9 @@ export function buildAccountExecData(
     data?: string | []
 ) {
     const iface = new ethers.utils.Interface(Account__factory.abi);
-    return iface.encodeFunctionData("exec", [
-      target,
-      value ?? 0,
-      data ?? []
-    ]);
+    return iface.encodeFunctionData("execute", [{
+        target,
+        value: value ?? 0,
+        data: data ?? ""
+    }]);
 }

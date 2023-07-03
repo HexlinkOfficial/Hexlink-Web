@@ -174,7 +174,7 @@ import { UserOperationStruct } from "@hexlink/contracts/dist/types/Account";
 import { isValidEmail } from "@/web3/utils";
 import PhoneInput from "@/components/PhoneInput.vue";
 import type { PhoneData } from "../types";
-import { ENTRYPOINT, ACCOUNT_FACTORY } from "@/web3/constants";
+import { ENTRYPOINT } from "@/web3/constants";
 
 const estimatedGasAmount = "150000"; // hardcoded, can optimize later
 const chooseTotalDrop = ref<boolean>(false);
@@ -443,6 +443,13 @@ const buildCallData = (tx: TokenTransaction,) => {
   }
 }
 
+function genValidationData() : EthBigNumber {
+  const now = Math.floor(Date.now() / 1000);
+  return EthBigNumber.from(now + 3600).shl(160).add(
+    EthBigNumber.from(now).shl(208)
+  );
+}
+
 const buildTokenTransferUserOp = async (
   tx: TokenTransaction,
   otp: string,
@@ -473,12 +480,24 @@ const buildTokenTransferUserOp = async (
       signature: [],
   };
   const userOpHash = await genUserOpHash(userOp, api);
+  const validationData = genValidationData();
+  const toSign = ethers.utils.keccak256(
+    ethers.utils.defaultAbiCoder.encode(
+      ["uint256", "bytes32"],
+      [validationData, userOpHash]
+    )
+  );
   message.value = "Signing your transaction...";
-  const result: any = await genSignature(otp, userOpHash);
+  const result: any = await genSignature(otp, toSign);
   if (result.code === 200) {
+    const {signer, signature} = result as any;
+    const authInput = ethers.utils.defaultAbiCoder.encode(
+      ["tuple(uint256, address, bytes)"],
+      [[validationData, signer, signature]]
+    );
     return {
       ...userOp,
-      signature: (result as any).signature,
+      signature: authInput,
     };
   } else if (result.code === 429) {
     throw new Error("Too many attempts. Please wait for five minutes");
@@ -500,7 +519,7 @@ const onSubmit = async (_e: Event) => {
     const api = new HexlinkAccountAPI({
       provider: useChainStore().provider,
       entryPointAddress: ENTRYPOINT,
-      factoryAddress: ACCOUNT_FACTORY,
+      factoryAddress: import.meta.env.VITE_ACCOUNT_FACTORY_V2,
       paymasterAPI: undefined,
       nameType: hash(getNameType()),
       name: hash(getName()),

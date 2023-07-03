@@ -5,6 +5,8 @@ import { Chain } from "../../../../../functions/common/lib";
 function bundlerUrl(chain: Chain) : string {
   if (chain.name ===  "goerli") {
     return STACKUP_BUNDLER_URL_PREFIX + import.meta.env.VITE_STACKUP_API_KEY_GOERLI;
+  } else if (chain.name ===  "sepolia") {
+    return STACKUP_BUNDLER_URL_PREFIX + import.meta.env.VITE_STACKUP_API_KEY_SEPOLIA;
   } else if (chain.name === "mumbai") {
     return STACKUP_BUNDLER_URL_PREFIX + import.meta.env.VITE_STACKUP_API_KEY_MUMBAI;
   } else if (chain.name === "arbitrum_testnet") {

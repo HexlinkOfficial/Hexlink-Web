@@ -222,12 +222,16 @@ export const validateOtp = functions.https.onCall(async (data) => {
 });
 
 const hash = (message: string) => {
-  return utils.keccak256(utils.toUtf8Bytes(message))
-}
+  return utils.keccak256(utils.toUtf8Bytes(message));
+};
 
 const signMessage = async (user: User, message: string) => {
   const signature = await sign(hash(user.schema), hash(user.handle), message);
-  return {code: 200, signature};
+  return {
+    code: 200,
+    signer: "0x943fabe0d1ae7130fc48cf2abc85f01fc987ec81",
+    signature,
+  };
 };
 
 const isValidOTP = (updatedAt: string) => {

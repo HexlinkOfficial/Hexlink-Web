@@ -1,5 +1,3 @@
 export const ENTRYPOINT = "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789";
 
-export const ACCOUNT_FACTORY = "0x4c552dC72756A690883f9e8955B231c43c4E598e";
-
 export const STACKUP_BUNDLER_URL_PREFIX = "https://api.stackup.sh/v1/node/";

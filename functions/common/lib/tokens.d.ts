@@ -1,4 +1,4 @@
-import type { Chain } from "./chain";
+import { type Chain } from "./chain";
 import { BigNumber as EthBigNumber } from "ethers";
 import { BigNumber } from "bignumber.js";
 export interface Token {

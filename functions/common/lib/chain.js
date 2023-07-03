@@ -9,8 +9,21 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.refunder = exports.getChain = exports.getChainFromProvider = exports.SUPPORTED_CHAINS = exports.OK_TESTNET = exports.ARBITRUM = exports.ARBITRUM_NOVA = exports.ARBITRUM_TESTNET = exports.GALILEO = exports.MUMBAI = exports.POLYGON = exports.GOERLI = void 0;
+exports.refunder = exports.getChain = exports.getChainFromProvider = exports.SUPPORTED_CHAINS = exports.OK_TESTNET = exports.ARBITRUM = exports.ARBITRUM_NOVA = exports.ARBITRUM_TESTNET = exports.GALILEO = exports.MUMBAI = exports.POLYGON = exports.GOERLI = exports.SEPOLIA = void 0;
 const ethers_1 = require("ethers");
+exports.SEPOLIA = {
+    chainId: "11155111",
+    rpcUrls: ["https://sepolia.infura.io/v3/"],
+    name: "sepolia",
+    fullName: "Sepolia Test Network",
+    nativeCurrency: {
+        name: "Sepolia Eethereum",
+        symbol: "sETH",
+        decimals: 18,
+    },
+    blockExplorerUrls: ["https://sepolia.etherscan.io"],
+    logoUrl: "https://i.postimg.cc/qqFqP08S/ethPNG.png",
+};
 exports.GOERLI = {
     chainId: "5",
     name: "goerli",
@@ -115,7 +128,7 @@ exports.OK_TESTNET = {
     blockExplorerUrls: ["https://www.oklink.com/okc-test"],
     logoUrl: "https://static.oklink.com/cdn/assets/imgs/221/C267A35E6CF3829C.png",
 };
-exports.SUPPORTED_CHAINS = [exports.GOERLI, exports.MUMBAI, exports.ARBITRUM, exports.ARBITRUM_TESTNET, exports.OK_TESTNET];
+exports.SUPPORTED_CHAINS = [exports.SEPOLIA, exports.GOERLI, exports.MUMBAI, exports.ARBITRUM, exports.ARBITRUM_TESTNET, exports.OK_TESTNET];
 function getChainFromProvider(provider) {
     return __awaiter(this, void 0, void 0, function* () {
         const network = yield provider.getNetwork();
@@ -127,6 +140,9 @@ function getChain(chain) {
     chain = chain.toString();
     if (chain === "goerli" || chain === "5") {
         return exports.GOERLI;
+    }
+    else if (chain === "sepolia" || chain == "11155111") {
+        return exports.SEPOLIA;
     }
     else if (chain === "polygon" || chain === "137") {
         return exports.POLYGON;

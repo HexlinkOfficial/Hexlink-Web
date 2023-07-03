@@ -87,8 +87,8 @@ export class HexlinkAccountAPI extends BaseAccountAPI {
   async encodeExecute (target: string, value: BigNumberish, data: string): Promise<string> {
     const accountContract = await this._getAccountContract()
     return accountContract.interface.encodeFunctionData(
-      'exec',
-      [target, value, data])
+      "execute",
+      [{target, value, data}])
   }
 
   async signUserOpHash (userOpHash: string): Promise<string> {

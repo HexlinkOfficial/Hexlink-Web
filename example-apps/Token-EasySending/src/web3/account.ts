@@ -18,20 +18,22 @@ export async function isContract(address: string) : Promise<boolean> {
     return false;
 }
 
+export function getNameType() {
+    return useAuthStore().user!.idType;
+}
+
 export function getName() {
-    return useAuthStore().user!.name;
+    return useAuthStore().user!.handle;
 }
 
-export function getNameHash(name?: string) {
-    return hash(name || getName());
-}
-
-export async function getAccountAddress(nameHash? : string) {
+export async function getAccountAddress(nameType?: string, name?: string) {
     const hexlink = Hexlink__factory.connect(
-        import.meta.env.VITE_ACCOUNT_FACTORY,
+        import.meta.env.VITE_ACCOUNT_FACTORY_V2,
         useChainStore().provider
     );
-    return await hexlink.ownedAccount(nameHash || getNameHash());
+    nameType = hash(nameType || getNameType());
+    name = hash(name || getName());
+    return await hexlink.getOwnedAccount(nameType, name);
 }
 
 export async function getNonce(
@@ -51,9 +53,9 @@ export function buildAccountExecData(
     data?: string | []
 ) {
     const iface = new ethers.utils.Interface(Account__factory.abi);
-    return iface.encodeFunctionData("exec", [
-      target,
-      value ?? 0,
-      data ?? []
-    ]);
+    return iface.encodeFunctionData("execute", [{
+        target,
+        value: value ?? 0,
+        data: data ?? ""
+    }]);
 }

@@ -1,0 +1,26 @@
+[
+    {
+        "chainId": 11155111,
+        "symbol": "sETH",
+        "name": "Sepolia Ethereum",
+        "decimals": 18,
+        "address": "0x0000000000000000000000000000000000000000",
+        "logoURI": "https://i.postimg.cc/qqFqP08S/ethPNG.png"
+    },
+    {
+        "chainId": 11155111,
+        "symbol": "USDC",
+        "name": "USD Coin",
+        "decimals": 18,
+        "address": "0x6f14c02fc1f78322cfd7d707ab90f18bad3b54f5",
+        "logoURI": "https://i.postimg.cc/XvDJjw1B/usdcPNG.png"
+    },
+    {
+        "chainId": 11155111,
+        "symbol": "WETH",
+        "name": "Wrapped Ethereum",
+        "decimals": 18,
+        "address": "0xed43f81c17976372fcb5786dd214572e7dbb92c7",
+        "logoURI": "https://i.postimg.cc/qqFqP08S/ethPNG.png"
+    }
+]

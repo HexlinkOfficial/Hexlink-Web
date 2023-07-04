@@ -11,7 +11,7 @@ import { getFunctions, httpsCallable } from '@firebase/functions';
 import { app } from '@/services/firebase';
 import { useAuthStore } from "@/stores/auth";
 import { switchNetwork } from "@/web3/network";
-import { GOERLI, SUPPORTED_CHAINS, type Chain } from "../../../../functions/common";
+import { SEPOLIA, SUPPORTED_CHAINS, type Chain } from "../../../../functions/common";
 import { useChainStore } from '@/stores/chain';
 import { initTokenList } from "@/web3/tokens";
 import { useTokenStore } from '@/stores/token';
@@ -187,5 +187,5 @@ export async function init() {
     await Promise.all(
         SUPPORTED_CHAINS.map((chain: Chain) => initTokenList(chain))
     );
-    await switchNetwork(GOERLI);
+    await switchNetwork(SEPOLIA);
 }

@@ -12,6 +12,7 @@ export interface Chain {
     blockExplorerUrls: string[];
     logoUrl: string;
 }
+export declare const SEPOLIA: Chain;
 export declare const GOERLI: Chain;
 export declare const POLYGON: Chain;
 export declare const MUMBAI: Chain;

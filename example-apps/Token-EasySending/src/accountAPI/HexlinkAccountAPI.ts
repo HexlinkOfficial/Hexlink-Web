@@ -17,8 +17,9 @@ import { getAccountAddress } from '../web3/account'
  * @param factoryAddress address of contract "factory" to deploy new contracts (not needed if account already deployed)
  */
 export interface HexlinkAccountApiParams extends BaseApiParams {
-  factoryAddress?: string
-  name: string
+  factoryAddress?: string;
+  name: string;
+  nameType: string;
 }
 
 /**
@@ -32,17 +33,22 @@ export class HexlinkAccountAPI extends BaseAccountAPI {
    */
   accountContract?: Account
   factory?: Hexlink
+  nameType: string;
   name: string;
 
   constructor (params: HexlinkAccountApiParams) {
     super(params)
-    this.factoryAddress = params.factoryAddress
+    this.factoryAddress = params.factoryAddress;
+    this.nameType = params.nameType;
     this.name = params.name
   }
 
   async _getAccountContract (): Promise<Account> {
     if (this.accountContract == null) {
-      this.accountContract = Account__factory.connect(await this.getAccountAddress(), this.provider)
+      this.accountContract = Account__factory.connect(
+        await this.getAccountAddress(),
+        this.provider
+      );
     }
     return this.accountContract
   }
@@ -60,7 +66,7 @@ export class HexlinkAccountAPI extends BaseAccountAPI {
       }
     }
     const data = this.factory.interface.encodeFunctionData(
-      'deploy', [this.name]);
+      'deploy', [this.nameType, this.name]);
     return hexConcat([this.factory.address, data])
   }
 
@@ -81,8 +87,8 @@ export class HexlinkAccountAPI extends BaseAccountAPI {
   async encodeExecute (target: string, value: BigNumberish, data: string): Promise<string> {
     const accountContract = await this._getAccountContract()
     return accountContract.interface.encodeFunctionData(
-      'exec',
-      [target, value, data])
+      "execute",
+      [{target, value, data}])
   }
 
   async signUserOpHash (userOpHash: string): Promise<string> {

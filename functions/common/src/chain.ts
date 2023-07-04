@@ -14,6 +14,20 @@ export interface Chain {
     logoUrl: string,
 }
 
+export const SEPOLIA: Chain = {
+  chainId: "11155111",
+  rpcUrls: ["https://sepolia.infura.io/v3/"],
+  name: "sepolia",
+  fullName: "Sepolia Test Network",
+  nativeCurrency: {
+    name: "Sepolia Eethereum",
+    symbol: "sETH",
+    decimals: 18,
+  },
+  blockExplorerUrls: ["https://sepolia.etherscan.io"],
+  logoUrl: "https://i.postimg.cc/qqFqP08S/ethPNG.png",
+};
+
 export const GOERLI : Chain = {
   chainId: "5",
   name: "goerli",
@@ -126,7 +140,7 @@ export const OK_TESTNET: Chain = {
   logoUrl: "https://static.oklink.com/cdn/assets/imgs/221/C267A35E6CF3829C.png",
 };
 
-export const SUPPORTED_CHAINS = [GOERLI, MUMBAI, ARBITRUM, ARBITRUM_TESTNET, OK_TESTNET];
+export const SUPPORTED_CHAINS = [SEPOLIA, GOERLI, MUMBAI, ARBITRUM, ARBITRUM_TESTNET, OK_TESTNET];
 
 export async function getChainFromProvider(
     provider: ethers.providers.Provider
@@ -139,6 +153,8 @@ export function getChain(chain: string | number) : Chain {
   chain = chain.toString();
   if (chain === "goerli" || chain === "5") {
     return GOERLI;
+  } else if (chain === "sepolia" || chain == "11155111") {
+      return SEPOLIA;
   } else if (chain === "polygon" || chain === "137") {
     return POLYGON;
   } else if (chain === "mumbai" || chain == "80001") {

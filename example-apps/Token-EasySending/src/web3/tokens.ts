@@ -11,6 +11,9 @@ function alchemyNetwork(chain: Chain) : Network {
     if (chain.chainId == "5") {
         return Network.ETH_GOERLI;
     }
+    if (chain.chainId == "11155111") {
+        return Network.ETH_SEPOLIA;
+    }
     if (chain.chainId == "137") {
         return Network.MATIC_MAINNET;
     }

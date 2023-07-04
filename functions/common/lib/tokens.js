@@ -13,6 +13,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.tokenAmount = exports.tokenBase = exports.gasTokenDecimals = exports.isAllowedGasToken = exports.isStableCoin = exports.isWrappedCoin = exports.isNativeCoin = exports.getPopularTokens = exports.allowedGasToken = exports.stableCoinAddresses = exports.wrappedCoinAddress = exports.nativeCoinAddress = exports.stableCoins = exports.wrappedCoin = exports.nativeCoin = void 0;
+const SEPOLIA_TOKENS_json_1 = __importDefault(require("./tokens/SEPOLIA_TOKENS.json"));
 const GOERLI_TOKENS_json_1 = __importDefault(require("./tokens/GOERLI_TOKENS.json"));
 const MUMBAI_TOKENS_json_1 = __importDefault(require("./tokens/MUMBAI_TOKENS.json"));
 const POLYGON_TOKENS_json_1 = __importDefault(require("./tokens/POLYGON_TOKENS.json"));
@@ -71,6 +72,12 @@ function getPopularTokens(chain) {
             return {
                 timestamp: new Date().toISOString(),
                 tokens: GOERLI_TOKENS_json_1.default,
+            };
+        }
+        if (chain.chainId == "11155111") {
+            return {
+                timestamp: new Date().toISOString(),
+                tokens: SEPOLIA_TOKENS_json_1.default,
             };
         }
         if (chain.chainId == "80001") {

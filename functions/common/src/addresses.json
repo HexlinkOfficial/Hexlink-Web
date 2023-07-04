@@ -1,6 +1,5 @@
 {
     "goerli": {
-        "hexlink": "0x4c552dC72756A690883f9e8955B231c43c4E598e",
         "nativeCoin": {
             "address": "0x0000000000000000000000000000000000000000",
             "decimals": 18
@@ -15,8 +14,20 @@
             {"address": "0x11fe4b6ae13d2a6055c8d9cf65c55bac32b5d844", "decimals": 18}
         ]
     },
+    "sepolia": {
+        "nativeCoin": {
+            "address": "0x0000000000000000000000000000000000000000",
+            "decimals": 18
+        },
+        "wrappedCoin": {
+            "address": "0xed43f81c17976372fcb5786dd214572e7dbb92c7",
+            "decimals": 18
+        },
+        "stableCoins": [
+            {"address": "0x6f14c02fc1f78322cfd7d707ab90f18bad3b54f5", "decimals": 18}
+        ]
+    },
     "mumbai": {
-        "hexlink": "0x4c552dC72756A690883f9e8955B231c43c4E598e",
         "nativeCoin": {
             "address": "0x0000000000000000000000000000000000000000",
             "decimals": 18
@@ -45,7 +56,6 @@
         ]
     },
     "arbitrum": {
-        "hexlink": "0x4c552dC72756A690883f9e8955B231c43c4E598e",
         "nativeCoin": {
             "address": "0x0000000000000000000000000000000000000000",
             "decimals": 18
@@ -61,7 +71,6 @@
         ]
     },
     "arbitrum_testnet": {
-        "hexlink": "0x4c552dC72756A690883f9e8955B231c43c4E598e",
         "nativeCoin": {
             "address": "0x0000000000000000000000000000000000000000",
             "decimals": 18
@@ -71,7 +80,6 @@
         ]
     },
     "arbitrum_nova": {
-        "hexlink": "0x4c552dC72756A690883f9e8955B231c43c4E598e",
         "nativeCoin": {
             "address": "0x0000000000000000000000000000000000000000",
             "decimals": 18
@@ -86,7 +94,6 @@
         ]
     },
     "OKT": {
-        "hexlink": "0x4c552dC72756A690883f9e8955B231c43c4E598e",
         "nativeCoin": {
             "address": "0x61E1945CfbFb945f4156813410Ea6E34e39fbddB",
             "decimals": 18

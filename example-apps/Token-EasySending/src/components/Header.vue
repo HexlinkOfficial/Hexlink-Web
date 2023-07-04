@@ -134,12 +134,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
+import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue';
 import { useAuthStore } from '@/stores/auth';
 import { useChainStore } from '@/stores/chain';
 import { createToaster } from "@meforma/vue-toaster";
 import {
-    GOERLI,
+    SEPOLIA,
+    MUMBAI,
     prettyPrintAddress,
     type Chain,
 } from "../../../../functions/common";
@@ -157,12 +158,33 @@ const showTestnet = ref<boolean>(true);
 const { toClipboard } = useClipboard();
 const account = ref<string>("0x");
 
+onMounted(() => {
+  document.addEventListener('click', closeDropDown);
+});
+
+onBeforeUnmount(async () => {
+  document.removeEventListener('click', closeDropDown);
+});
+
 onMounted(async () => {
   account.value = await getAccountAddress();
 });
 
+const validateChain = () => {
+  if (useChainStore().current == "goerli") {
+    signOutFirebase();
+  }
+}
+watch(() => useChainStore().current, validateChain);
+
+const monitorChain = computed(() => {
+  const chain = useChainStore().chain;
+  console.log(chain);
+
+});
+
 const mainNet: Chain[] = [];
-const testNet: Chain[] = [GOERLI];
+const testNet: Chain[] = [SEPOLIA, MUMBAI];
 
 const addressTextLong = function (address: string | undefined) {
   if (address) {
@@ -199,14 +221,6 @@ const doCopy = (address: string | undefined) => {
 const showScanQRCodeModal = computed(() => {
   return useRoute().query.action == "bind-auth-app";
 })
-
-onMounted(() => {
-  document.addEventListener('click', closeDropDown);
-});
-
-onBeforeUnmount(async () => {
-  document.removeEventListener('click', closeDropDown);
-});
 </script>
 
 <style lang="scss" scoped>

@@ -6,10 +6,10 @@ import { useChainStore } from '@/stores/chain';
 
 const ALCHEMY_KEY = {
     "goerli": "U4LBbkMIAKCf4GpjXn7nB7H1_P9GiU4b",
+    "sepolia": "bxD5Q_FaAC26oV36IKd1px7WYm1WBo0Q",
     "polygon": "1GmfWOSlYIlUI0UcCu4Y2O-8DmFJrlqA",
     "mumbai": "Fj__UEjuIj0Xym6ofwZfJbehuuXGpDxe",
     "arbitrum_testnet": "ePtF_3xEZX-VJoFXnfiu5b_Tt0-bTcx6",
-    "arbitrum": "Lw4de41huTiNuyyOvyzs_s5jTbCDg1yx",
 };
 
 export function alchemyKey(chain: Chain) : string {
@@ -36,7 +36,11 @@ export function getProvider(chain: Chain) {
     }
 }
 
-export async function getPriceInfo(chain: Chain, gasToken: string) : Promise<{
+export async function getPriceInfo(
+    chain: Chain,
+    maxFeePerGas: EthBigNumber | null,
+    gasToken: string
+) : Promise<{
     gasPrice: BigNumberish,
     tokenPrice: BigNumberish
 }> {
@@ -47,11 +51,7 @@ export async function getPriceInfo(chain: Chain, gasToken: string) : Promise<{
     } else if (chain.name === 'arbitrum_nova') {
         gasPrice = EthBigNumber.from(10000000);
     } else {
-        const {maxFeePerGas} = await provider.getFeeData();
-        if (!maxFeePerGas) {
-            throw new Error("failed to get the gas price");
-        }
-        gasPrice = maxFeePerGas.mul(2);
+        gasPrice = EthBigNumber.from(maxFeePerGas ?? 0);
     }
     let tokenPrice;
     if (isNativeCoin(gasToken, chain) || isWrappedCoin(gasToken, chain)) {

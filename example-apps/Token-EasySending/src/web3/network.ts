@@ -36,7 +36,11 @@ export function getProvider(chain: Chain) {
     }
 }
 
-export async function getPriceInfo(chain: Chain, gasToken: string) : Promise<{
+export async function getPriceInfo(
+    chain: Chain,
+    maxFeePerGas: EthBigNumber | null,
+    gasToken: string
+) : Promise<{
     gasPrice: BigNumberish,
     tokenPrice: BigNumberish
 }> {
@@ -47,11 +51,7 @@ export async function getPriceInfo(chain: Chain, gasToken: string) : Promise<{
     } else if (chain.name === 'arbitrum_nova') {
         gasPrice = EthBigNumber.from(10000000);
     } else {
-        const {maxFeePerGas} = await provider.getFeeData();
-        if (!maxFeePerGas) {
-            throw new Error("failed to get the gas price");
-        }
-        gasPrice = maxFeePerGas.mul(2);
+        gasPrice = EthBigNumber.from(maxFeePerGas ?? 0);
     }
     let tokenPrice;
     if (isNativeCoin(gasToken, chain) || isWrappedCoin(gasToken, chain)) {

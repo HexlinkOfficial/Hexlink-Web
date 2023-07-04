@@ -1,5 +1,5 @@
 <template>
-  <form v-if="step === 'input_email'" class="form-send" @submit.prevent>
+  <div v-if="step === 'input_email'" class="form-send">
     <div style="display: block;">
       <img src="@/assets/svg/send-logo.svg" style="width: 50px; height: 50px; margin: 1rem 0;" alt="send icon" />
       <h2 class="people-title">Send Token</h2>
@@ -28,8 +28,8 @@
       </div>
     </div>
     <button class="cta-button" @click="inputToken">Continue</button>
-  </form>
-  <form v-if="step === 'input_token'" class="form-send" @submit.prevent>
+  </div>
+  <div v-if="step === 'input_token'" class="form-send">
     <div style="text-align: center; padding: 35px 10px 0px;">
       <div class="profile-info">
         <div class="profile-wrapper">
@@ -78,7 +78,32 @@
           </div>
         </div>
       </div>
-      <div style="display: flex; margin: 0px; justify-content: center; margin-top: 20px;">
+    </div>
+    <div style="display: flex; justify-content: center; width: 100%; padding: 0 15px;">
+      <button :disabled="hasBalanceWarning" class="cta-button" @click="checkOut">Confirm</button>
+    </div>
+  </div>
+  <div v-if="step === 'send_otp' || step == 'sending_otp' || step == 'validate_otp'" class="form-send">
+    <div style="display: block;">
+      <img src="@/assets/svg/password.svg" style="width: 50px; height: 50px; margin: 1rem 0;" alt="send icon" />
+      <h2 class="people-title">Enter Verification Code</h2>
+      <div class="people-text">Enter code that we have sent to <b>{{ userHandle }}</b></div>
+      <div class="social-login" style="flex-direction: column;">
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+          <input v-for="(arr, index) in code" :key="index" type="number" pattern="\d*" :id="'input_' + index"
+            maxlength="1" v-model="code[index]" @input="handleInput" @keypress="isNumber"
+            @keydown.delete="handleDelete" @paste="onPaste" class="otp"/>
+        </div>
+        <p v-if="step == 'validate_otp' && countDown > 0" class="resend-plain">Resend the verification code in {{ countDown }}s.</p>
+        <a v-if="step == 'validate_otp' && countDown <= 0 " class="resend" @click="resendOtp">Resend the verification code.</a>
+        <button
+          class="cta-button"
+          style="margin-bottom: 0px;"
+          :disabled="step == 'sending_otp' || (step == 'validate_otp' && invalidOtp)"
+          @click="sendOrValidateOtp"
+        >
+            {{ step == 'send_otp' ? 'Send Passcode' : (step == 'sending_otp' ? 'Sending' : 'Verify') }}
+        </button>
         <div class="gas-estimation" style="padding: 0 0.5rem 0 0.5rem;">
           <p style="display: flex; align-items: center; gap: 10px;">
             <img style="width: 20px; height: 20px;" src="https://i.postimg.cc/RhXfgJR1/gas-pump.png" />
@@ -87,7 +112,7 @@
               <template #title>
                 <span>The real service fee may differ per network conditions</span>
               </template>
-              <b>{{ totalServiceFee.substring(0,8) }}</b>
+              <b>{{ totalServiceFee }}</b>
             </a-tooltip>
           </p>
           <div style="display: flex; align-items: center;">
@@ -101,30 +126,8 @@
         </div>
       </div>
     </div>
-    <div style="display: flex; justify-content: center; width: 100%; padding: 0 15px;">
-      <button :disabled="hasBalanceWarning" class="cta-button" @click="sendOtp">Confirm</button>
-    </div>
-  </form>
-  <form v-if="step === 'validate_otp'" class="form-send" @submit.prevent="onSubmit">
-    <div style="display: block;">
-      <img src="@/assets/svg/password.svg" style="width: 50px; height: 50px; margin: 1rem 0;" alt="send icon" />
-      <h2 class="people-title">Enter Verification Code</h2>
-      <div class="people-text">Enter code that we have sent to <b>{{ userHandle }}</b></div>
-      <div class="social-login" style="flex-direction: column;">
-        <div style="display: flex; align-items: center; justify-content: space-between;">
-          <input v-for="(arr, index) in code" :key="index" type="number" pattern="\d*" :id="'input_' + index"
-            maxlength="1" v-model="code[index]" @input="handleInput" @keypress="isNumber"
-            @keydown.delete="handleDelete" @paste="onPaste" class="otp"/>
-        </div>
-        <p v-if="countDown > 0" class="resend-plain">Resend the verification code in {{ countDown }}s.</p>
-        <a v-if="countDown <= 0 " class="resend" @click="resendOtp">Resend the verification code.</a>
-        <button class="cta-button" style="margin-bottom: 0px;" type="primary" :disabled="invalidOtp">
-            Verify
-        </button>
-      </div>
-    </div>
-  </form>
-  <div v-if="step === 'process_tx'" class="form-send">
+  </div>
+  <div v-if="step === 'process_tx' || step === 'notified'" class="form-send">
     <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
       <h2 class="transition" style="display: flex; justify-content: center; align-items: center; flex-direction: column;">
         <div class="spinner-lg" :class="txStatus">
@@ -134,7 +137,9 @@
       </h2>
     </div>
     <div style="display: flex; justify-content: center; width: 100%; padding: 0 15px;">
-      <button @click="closeModal" class="cta-button" :disabled="txStatus === 'processing'">OK</button>
+      <button @click="notifyReceiver" class="cta-button" :disabled="txStatus === 'processing'">
+        {{  step === 'process_tx' ? (txStatus === 'processing' ? 'Processing' : 'Send Notification') : 'OK' }}
+      </button>
     </div>
   </div>
 </template>
@@ -149,34 +154,24 @@ import type { OnClickOutsideHandler } from '@vueuse/core';
 import { vOnClickOutside } from '@/services/directive';
 import type { BalanceMap } from "@/web3/tokens";
 import { getBalances } from "@/web3/tokens";
-import { HexlinkAccountAPI } from "../accountAPI/HexlinkAccountAPI";
 import { getHttpRpcClient} from "../accountAPI/util/getHttpRpcClient"
 import { printOp } from "../accountAPI/opUtils";
 import { tokenBase, createNotification, prettyPrint } from "@/web3/utils";
 import { useChainStore } from "@/stores/chain";
 import { useTokenStore } from "@/stores/token";
-import {
-  getAccountAddress,
-  isContract,
-  getNonce,
-  buildAccountExecData,
-  getNameType,
-  getName,
-} from "@/web3/account";
+import { getAccountAddress } from "@/web3/account";
 import { getPriceInfo } from "@/web3/network";
 import { useAuthStore } from '@/stores/auth';
 import type { Token } from "../../../../functions/common";
 import { calcGas, tokenAmount, hash } from "../../../../functions/common";
-import { genAndSendOtp, notifyTransfer, genSignature } from '@/services/auth'
-import ERC20_ABI from "../abi/ERC20_ABI.json";
+import { genAndSendOtp, notifyTransfer } from '@/services/auth'
 
-import { UserOperationStruct } from "@hexlink/contracts/dist/types/Account";
 import { isValidEmail } from "@/web3/utils";
 import PhoneInput from "@/components/PhoneInput.vue";
 import type { PhoneData } from "../types";
-import { ENTRYPOINT } from "@/web3/constants";
+import { buildTokenTransferUserOp, getHexlinkAccountApi, signUserOp } from "@/web3/userOp";
+import { UserOperationStruct } from "@account-abstraction/contracts";
 
-const estimatedGasAmount = "150000"; // hardcoded, can optimize later
 const chooseTotalDrop = ref<boolean>(false);
 const chooseGasDrop = ref<boolean>(false);
 const txStatus = ref<string>("");
@@ -185,7 +180,6 @@ const hexlAccountBalances = ref<BalanceMap>({});
 const tokens = ref<Token[]>([]);
 const message = ref<string>("Let's go!");
 const step = ref<string>("input_email");
-const erc20Interface = new ethers.utils.Interface(ERC20_ABI);
 let code: string[] = Array(6);
 let dataFromPaste: string[] | undefined;
 const keysAllowed: string[] = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9",];
@@ -201,8 +195,9 @@ const userHandle = computed(() => {
 const phone: Ref<string> = ref("");
 const country: Ref<string> = ref("");
 const phoneData: Ref<PhoneData> = ref({});
+const op = ref<Partial<UserOperationStruct>>({});
 
-const emit = defineEmits(['closeModal'])
+const emit = defineEmits(['closeModal']);
 
 interface TokenTransaction {
   to: string,
@@ -230,6 +225,31 @@ const transaction = ref<TokenTransaction>({
   gasToken: tokenStore.nativeCoin.address,
   estimatedGas: "0",
 });
+
+const genTokenList = async function () {
+  hexlAccountBalances.value = await getBalances(
+    await getAccountAddress(),
+    hexlAccountBalances.value,
+  );
+  tokens.value = tokenStore.tokens.filter(
+    t => Number(tokenBalance(t.address)) > 0
+  );
+  setDefaultToken(tokenBalance);
+}
+
+const setDefaultToken = function (getBalance: (t: string) => string) {
+  const nativeCoin = tokenStore.nativeCoin;
+  if (Number(getBalance(nativeCoin.address)) > 0 || tokens.value.length == 0) {
+    transaction.value.token = nativeCoin.address;
+    transaction.value.gasToken = nativeCoin.address;
+  } else {
+    transaction.value.token = tokens.value[0].address;
+    transaction.value.gasToken = tokens.value[0].address
+  }
+}
+
+onMounted(genTokenList);
+watch(() => useChainStore().current, genTokenList);
 
 const isNumber = (event: Event) => {
   (event.currentTarget as HTMLInputElement).value = "";
@@ -314,57 +334,64 @@ const hasBalanceWarning = computed(() => {
   ) > Number(tokenBalance(transaction.value.token));
 });
 
-const genTokenList = async function () {
-  hexlAccountBalances.value = await getBalances(
-    await getAccountAddress(),
-    hexlAccountBalances.value,
-  );
-  tokens.value = tokenStore.tokens.filter(
-    t => Number(tokenBalance(t.address)) > 0
-  );
-  setDefaultToken(tokenBalance);
-}
-
-const setDefaultToken = function (getBalance: (t: string) => string) {
-  const nativeCoin = tokenStore.nativeCoin;
-  if (Number(getBalance(nativeCoin.address)) > 0 || tokens.value.length == 0) {
-    transaction.value.token = nativeCoin.address;
-    transaction.value.gasToken = nativeCoin.address;
-  } else {
-    transaction.value.token = tokens.value[0].address;
-    transaction.value.gasToken = tokens.value[0].address
-  }
-}
-
 async function delay(ms: number) {
   return new Promise((resolve, _reject) => {
     window.setTimeout(() => resolve(null), ms);
   });
 }
 
+const checkOut = async function() {
+  step.value = 'send_otp';
+  transaction.value.amount = tokenAmount(
+    transaction.value.amountInput,
+    token.value.decimals
+  );
+  const api = getHexlinkAccountApi();
+  op.value = await buildTokenTransferUserOp(transaction.value, api);
+
+  const bundler = await getHttpRpcClient(useChainStore().chain);
+  const result = await bundler.estimateUserOpGas(op.value);
+  const { callGasLimit, preVerificationGas, verificationGas } = result as any;
+  op.value.callGasLimit = callGasLimit;
+  op.value.preVerificationGas = preVerificationGas;
+  op.value.verificationGasLimit = verificationGas;
+  await setGas();
+  refreshGas();
+}
+
 const setGas = async () => {
   const chain = useChainStore().chain;
-  const price = await getPriceInfo(chain, transaction.value.gasToken);
-  transaction.value.estimatedGas = calcGas(
-    chain,
-    tokenStore.token(transaction.value.gasToken),
-    EthBigNumber.from(estimatedGasAmount),
-    price,
-  ).toString();
+  const {maxFeePerGas, maxPriorityFeePerGas}
+    = await useChainStore().provider.getFeeData();
+  op.value.maxFeePerGas = maxFeePerGas ?? 0;
+  op.value.maxPriorityFeePerGas = maxPriorityFeePerGas ?? 0;
+  const price = await getPriceInfo(chain, maxFeePerGas, transaction.value.gasToken);
+  const token = tokenStore.token(transaction.value.gasToken);
+  const totalGas = EthBigNumber.from(op.value.verificationGasLimit!)
+    .add(op.value.callGasLimit as number)
+    .add(op.value.preVerificationGas as number);
+  transaction.value.estimatedGas
+    = calcGas(chain, token, totalGas, price).toString();
 }
 
 const refreshGas = async () => {
-  await setGas();
-  await delay(5000);
-  await refreshGas();
+  if (step.value == "validate_otp") {
+    await delay(10000);
+    await setGas();
+    await refreshGas();
+  }
 };
 
 const totalServiceFee = computed(() => {
-  return BigNumber(
-    transaction.value.estimatedGas
-  ).div(
-    tokenBase(gasToken.value)
-  ).dp(10).toString();
+  if (EthBigNumber.from(transaction.value.estimatedGas).gt(0)) {
+    return BigNumber(
+      transaction.value.estimatedGas
+    ).div(
+      tokenBase(gasToken.value)
+    ).dp(10).toString().substring(0,8)
+  } else {
+    return "calculating...";
+  }
 });
 
 const chooseTotalHandle: OnClickOutsideHandler = (event) => {
@@ -385,153 +412,42 @@ const tokenChoose =
     }
   };
 
-onMounted(genTokenList);
-onMounted(refreshGas);
-watch(() => useChainStore().current, genTokenList);
-watch([() => transaction.value.gasToken], setGas);
-
-const genUserOpHash = async (
-  userOp: UserOperationStruct,
-  api: HexlinkAccountAPI
-) => {
-  const op = await ethers.utils.resolveProperties(userOp);
-  const opHash = ethers.utils.keccak256(
-    ethers.utils.defaultAbiCoder.encode(
-      [
-        'address',
-        'uint256',
-        'bytes32',
-        'bytes32',
-        'uint256',
-        'uint256',
-        'uint256',
-        'uint256',
-        'uint256',
-        'bytes32',
-      ],
-      [
-        op.sender,
-        op.nonce,
-        ethers.utils.keccak256(op.initCode),
-        ethers.utils.keccak256(op.callData),
-        op.callGasLimit,
-        op.verificationGasLimit,
-        op.preVerificationGas,
-        op.maxFeePerGas,
-        op.maxPriorityFeePerGas,
-        ethers.utils.keccak256(op.paymasterAndData)
-      ]
-    )
-  );
-  const chainId = (await api.provider.getNetwork()).chainId;
-  return ethers.utils.keccak256(
-    ethers.utils.defaultAbiCoder.encode(
-      ["bytes32", "address", "uint256"],
-      [opHash, api.entryPointAddress, chainId]
-    )
-  );
-}
-
-const buildCallData = (tx: TokenTransaction,) => {
-  if (tx.token == ethers.constants.AddressZero) {
-    return buildAccountExecData(tx.to, tx.amount, []);
-  } else {
-    const erc20Data = erc20Interface.encodeFunctionData(
-      "transfer", [tx.to, tx.amount]
-    );
-    return buildAccountExecData(tx.token, 0, erc20Data);
+const sendOrValidateOtp = async function() {
+  if (step.value == 'send_otp') {
+    step.value = 'sending_otp';
+    try {
+      const result: any = await genAndSendOtp();
+      if (result === 429) {
+        step.value = 'send_otp';
+        console.error("Too many requests to send otp.");
+        createNotification("Too many requests to send otp.", "error");
+      } else if (result === 200) {
+        step.value = 'validate_otp';
+        countDownTimer();
+      }
+    } catch (err) {
+      step.value = 'send_otp';
+      console.log(err);
+      createNotification(err as string, "error");
+    }
+  } else if (step.value == 'validate_otp') {
+    await validateOtpAndSign();
   }
 }
 
-function genValidationData() : EthBigNumber {
-  const now = Math.floor(Date.now() / 1000);
-  return EthBigNumber.from(now + 3600).shl(160).add(
-    EthBigNumber.from(now).shl(208)
-  );
-}
-
-const buildTokenTransferUserOp = async (
-  tx: TokenTransaction,
-  otp: string,
-  api: HexlinkAccountAPI,
-) : Promise<UserOperationStruct> => {
-  const sender = await getAccountAddress();
-  let nonce : EthBigNumber = EthBigNumber.from(0);
-  let initCode : [] | string = [];
-  let preVerificationGas = 65000;
-  if (await isContract(sender)) {
-    nonce = await getNonce(ENTRYPOINT, sender);
-  } else {
-    initCode = await api.getInitCode();
-    preVerificationGas += 200000;
-  }
-  const gasInfo = await api.provider.getFeeData();
-  const userOp : UserOperationStruct = {
-      sender,
-      nonce,
-      initCode,
-      callData: buildCallData(tx),
-      callGasLimit: 1500000,
-      verificationGasLimit: 1500000,
-      preVerificationGas,
-      maxFeePerGas: gasInfo.maxFeePerGas ?? 0,
-      maxPriorityFeePerGas: gasInfo.maxPriorityFeePerGas ?? 0,
-      paymasterAndData: [],
-      signature: [],
-  };
-  const userOpHash = await genUserOpHash(userOp, api);
-  const validationData = genValidationData();
-  const toSign = ethers.utils.keccak256(
-    ethers.utils.defaultAbiCoder.encode(
-      ["uint256", "bytes32"],
-      [validationData, userOpHash]
-    )
-  );
-  message.value = "Signing your transaction...";
-  const result: any = await genSignature(otp, toSign);
-  if (result.code === 200) {
-    const {signer, signature} = result as any;
-    const authInput = ethers.utils.defaultAbiCoder.encode(
-      ["tuple(uint256, address, bytes)"],
-      [[validationData, signer, signature]]
-    );
-    return {
-      ...userOp,
-      signature: authInput,
-    };
-  } else if (result.code === 429) {
-    throw new Error("Too many attempts. Please wait for five minutes");
-  } else {
-    console.log(result);
-    throw new Error("Failed to sign the user opeeration");
-  }
-};
-
-const onSubmit = async (_e: Event) => {
+const validateOtpAndSign = async () => {
   step.value = 'process_tx';
   try {
-    transaction.value.amount = tokenAmount(
-      transaction.value.amountInput,
-      token.value.decimals
-    );
     txStatus.value = "processing";
-    message.value = "Preparing your transaction...";
-    const api = new HexlinkAccountAPI({
-      provider: useChainStore().provider,
-      entryPointAddress: ENTRYPOINT,
-      factoryAddress: import.meta.env.VITE_ACCOUNT_FACTORY_V2,
-      paymasterAPI: undefined,
-      nameType: hash(getNameType()),
-      name: hash(getName()),
-    });
-    const op = await buildTokenTransferUserOp(
-      transaction.value, code.join(""), api
-    );
+    message.value = "Signing your transaction...";
+    const api = getHexlinkAccountApi();
+    op.value.paymasterAndData = [];
+    op.value.signature = await signUserOp(op.value as UserOperationStruct, code.join(""), api);
     message.value = "Sending your transaction...";
-    console.log(`Signed UserOperation: ${await printOp(op)}`);
+    console.log(`Signed UserOperation: ${await printOp(op.value)}`);
 
     const bundler = await getHttpRpcClient(useChainStore().chain);
-    const uoHash = await bundler.sendUserOpToBundler(op);
+    const uoHash = await bundler.sendUserOpToBundler(op.value as UserOperationStruct);
     console.log(`transaction ${uoHash} sent...`);
     message.value = "Waiting for confirmation...";
     const txHash = await api.getUserOpReceipt(uoHash);
@@ -539,16 +455,26 @@ const onSubmit = async (_e: Event) => {
   
     message.value = "Done!";
     txStatus.value = "success";
-    await notifyTransfer(
-      transaction.value.receiver,
-      transaction.value.amountInput,
-      token.value
-    );
+
   } catch(error: any) {
     console.log(error);
     txStatus.value = "error";
     message.value = "Failed to process the transaction";
     createNotification(error.message, "error");
+  }
+}
+
+const notifyReceiver = async() => {
+  if (step.value = 'process_tx') {
+    await notifyTransfer(
+      transaction.value.receiver,
+      transaction.value.amountInput,
+      token.value
+    );
+    step.value = 'notified';
+    createNotification("Notification is sent.", "success");
+  } else {
+    closeModal();
   }
 }
 
@@ -591,22 +517,6 @@ const inputToken = async () => {
       "invalid receiver, only address, email or phone number are accepted",
       "error"
     );
-  }
-}
-
-const sendOtp = async () => {
-  step.value = 'validate_otp';
-  try {
-    const result: any = await genAndSendOtp();
-    if (result === 429) {
-      console.error("Too many requests to send otp.");
-      createNotification("Too many requests to send otp.", "error");
-    } else if (result === 200) {
-      countDownTimer();
-    }
-  } catch (err) {
-    console.log(err);
-    createNotification(err as string, "error");
   }
 }
 
@@ -918,6 +828,8 @@ input::-webkit-inner-spin-button {
   margin: 0; }
 .gas-estimation {
   display: flex;
+  margin-left: auto;
+  margin-right: auto;
   p {
     margin-bottom: 0rem;
     margin-right: 0rem;

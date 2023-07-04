@@ -140,7 +140,6 @@ import { useChainStore } from '@/stores/chain';
 import { createToaster } from "@meforma/vue-toaster";
 import {
     SEPOLIA,
-    GOERLI,
     MUMBAI,
     prettyPrintAddress,
     type Chain,

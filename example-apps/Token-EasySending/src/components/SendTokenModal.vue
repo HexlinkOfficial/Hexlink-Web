@@ -351,17 +351,15 @@ const checkOut = async function() {
   );
   const api = getHexlinkAccountApi();
   op.value = await buildTokenTransferUserOp(transaction.value, api);
-  const bundler = await getHttpRpcClient(useChainStore().chain);
-  const result = await bundler.estimateUserOpGas(op.value);
-  console.log(result);
-  const { callGasLimit, preVerificationGas, verificationGas } = result as any;
-  op.value.preVerificationGas = hexlify(preVerificationGas);
-  op.value.callGasLimit = hexlify(callGasLimit);
-  if (op.value.initCode == '0x') {
-    op.value.verificationGasLimit = hexlify(verificationGas);
-  } else {
-    op.value.verificationGasLimit = hexlify(verificationGas * 2);
-  }
+  const bundler = getPimlicoProvider(useChainStore().chain);
+  const result = await bundler.send(
+    'eth_estimateUserOperationGas',
+    [op.value, api.entryPointAddress]
+  );
+  const { callGasLimit, preVerificationGas, verificationGasLimit } = result as any;
+  op.value.preVerificationGas = preVerificationGas;
+  op.value.callGasLimit = callGasLimit;
+  op.value.verificationGasLimit = verificationGasLimit;
   await setGas();
   refreshGas();
 }
@@ -452,7 +450,7 @@ const validateOtpAndSign = async () => {
     message.value = "Sending your transaction...";
     console.log(`Signed UserOperation: ${await printOp(op.value)}`);
     const bundler = getPimlicoProvider(useChainStore().chain);
-    const hexifiedUserOp = deepHexlify(await resolveProperties(op.value))
+    const hexifiedUserOp = deepHexlify(await resolveProperties(op.value));
     const uoHash = await bundler.send(
       "eth_sendUserOperation",
       [hexifiedUserOp, api.entryPointAddress]

@@ -138,7 +138,7 @@
     </div>
     <div style="display: flex; justify-content: center; width: 100%; padding: 0 15px;">
       <button @click="notifyReceiver" class="cta-button" :disabled="txStatus === 'processing'">
-        {{  step === 'process_tx' ? (txStatus === 'processing' ? 'Processing' : 'Send Notification') : 'OK' }}
+        {{ getNextAction() }}
       </button>
     </div>
   </div>
@@ -220,7 +220,7 @@ const transaction = ref<TokenTransaction>({
   receiver: {schema: "", value: ""},
   salt: hash(new Date().toISOString()),
   amount: EthBigNumber.from(0),
-  amountInput: "0.1",
+  amountInput: "0.01",
   token: tokenStore.nativeCoin.address,
   gasToken: tokenStore.nativeCoin.address,
   estimatedGas: "0",
@@ -442,20 +442,17 @@ const validateOtpAndSign = async () => {
     message.value = "Signing your transaction...";
     const api = getHexlinkAccountApi();
     op.value.paymasterAndData = [];
+    op.value.callGasLimit = 1500000;
+    op.value.verificationGasLimit = 1500000;
     op.value.signature = await signUserOp(op.value as UserOperationStruct, code.join(""), api);
     message.value = "Sending your transaction...";
     console.log(`Signed UserOperation: ${await printOp(op.value)}`);
 
     const bundler = await getHttpRpcClient(useChainStore().chain);
     const uoHash = await bundler.sendUserOpToBundler(op.value as UserOperationStruct);
-    console.log(`transaction ${uoHash} sent...`);
-    message.value = "Waiting for confirmation...";
-    const txHash = await api.getUserOpReceipt(uoHash);
-    console.log(`Transaction hash: ${txHash}`);
-  
-    message.value = "Done!";
+    console.log(`user op ${uoHash} sent...`);
+    message.value = "Transaction sent! Your user op hash is " + uoHash;
     txStatus.value = "success";
-
   } catch(error: any) {
     console.log(error);
     txStatus.value = "error";
@@ -528,6 +525,20 @@ const closeModal = () => {
   txStatus.value = "";
   reset();
   emit('closeModal', false);
+}
+
+const getNextAction = () => {
+  if (step.value === 'process_tx') {
+    if (txStatus.value === 'processing') {
+      return "Processing...";
+    } else if (txStatus.value === 'error') {
+      return "Close";
+    } else if (txStatus.value === 'success') {
+      return "Send Notification"
+    }
+  } else if (step.value === 'notified') {
+    return "Close";
+  }
 }
 </script>
 

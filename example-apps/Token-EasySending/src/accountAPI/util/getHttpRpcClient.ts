@@ -1,5 +1,5 @@
 import { ENTRYPOINT, STACKUP_BUNDLER_URL_PREFIX } from "@/web3/constants";
-import { HttpRpcClient } from "@account-abstraction/sdk/dist/src/HttpRpcClient";
+import { HttpRpcClient } from "./HttpRpcClient";
 import { Chain } from "../../../../../functions/common/lib";
 
 function bundlerUrl(chain: Chain) : string {

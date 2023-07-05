@@ -356,10 +356,11 @@ const checkOut = async function() {
     'eth_estimateUserOperationGas',
     [op.value, api.entryPointAddress]
   );
-  const { callGasLimit, preVerificationGas, verificationGasLimit } = result as any;
+  console.log(result);
+  const { callGasLimit, preVerificationGas, verificationGas } = result as any;
   op.value.preVerificationGas = preVerificationGas;
   op.value.callGasLimit = callGasLimit;
-  op.value.verificationGasLimit = verificationGasLimit;
+  op.value.verificationGasLimit = verificationGas;
   await setGas();
   refreshGas();
 }
@@ -372,7 +373,7 @@ const setGas = async () => {
   op.value.maxPriorityFeePerGas = hexlify(maxPriorityFeePerGas ?? 0);
   const price = await getPriceInfo(chain, maxFeePerGas, transaction.value.gasToken);
   const token = tokenStore.token(transaction.value.gasToken);
-  const totalGas = EthBigNumber.from(op.value.verificationGasLimit!)
+  const totalGas = EthBigNumber.from(op.value.verificationGasLimit)
     .add(op.value.callGasLimit as number)
     .add(op.value.preVerificationGas as number);
   transaction.value.estimatedGas

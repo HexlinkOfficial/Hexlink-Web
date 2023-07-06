@@ -351,17 +351,16 @@ const checkOut = async function() {
   );
   const api = getHexlinkAccountApi();
   op.value = await buildTokenTransferUserOp(transaction.value, api);
-  const bundler = await getHttpRpcClient(useChainStore().chain);
-  const result = await bundler.estimateUserOpGas(op.value);
+  const bundler = getPimlicoProvider(useChainStore().chain);
+  const result = await bundler.send(
+    'eth_estimateUserOperationGas',
+    [op.value, api.entryPointAddress]
+  );
   console.log(result);
   const { callGasLimit, preVerificationGas, verificationGas } = result as any;
-  op.value.preVerificationGas = hexlify(preVerificationGas);
-  op.value.callGasLimit = hexlify(callGasLimit);
-  if (op.value.initCode == '0x') {
-    op.value.verificationGasLimit = hexlify(verificationGas);
-  } else {
-    op.value.verificationGasLimit = hexlify(verificationGas * 2);
-  }
+  op.value.preVerificationGas = preVerificationGas;
+  op.value.callGasLimit = callGasLimit;
+  op.value.verificationGasLimit = verificationGas;
   await setGas();
   refreshGas();
 }
@@ -374,7 +373,7 @@ const setGas = async () => {
   op.value.maxPriorityFeePerGas = hexlify(maxPriorityFeePerGas ?? 0);
   const price = await getPriceInfo(chain, maxFeePerGas, transaction.value.gasToken);
   const token = tokenStore.token(transaction.value.gasToken);
-  const totalGas = EthBigNumber.from(op.value.verificationGasLimit!)
+  const totalGas = EthBigNumber.from(op.value.verificationGasLimit)
     .add(op.value.callGasLimit as number)
     .add(op.value.preVerificationGas as number);
   transaction.value.estimatedGas
@@ -452,7 +451,7 @@ const validateOtpAndSign = async () => {
     message.value = "Sending your transaction...";
     console.log(`Signed UserOperation: ${await printOp(op.value)}`);
     const bundler = getPimlicoProvider(useChainStore().chain);
-    const hexifiedUserOp = deepHexlify(await resolveProperties(op.value))
+    const hexifiedUserOp = deepHexlify(await resolveProperties(op.value));
     const uoHash = await bundler.send(
       "eth_sendUserOperation",
       [hexifiedUserOp, api.entryPointAddress]

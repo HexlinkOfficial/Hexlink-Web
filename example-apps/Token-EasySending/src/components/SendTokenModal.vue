@@ -176,8 +176,8 @@
       </h2>
     </div>
     <div style="display: flex; justify-content: center; width: 100%; padding: 0 15px;">
-      <button @click="notifyReceiver" class="cta-button" :disabled="txStatus === 'processing'">
-        {{  step === 'process_tx' ? (txStatus === 'processing' ? 'Processing' : 'Send Notification') : 'OK' }}
+      <button @click="closeModal" class="cta-button" :disabled="txStatus === 'processing'">
+        {{ getNextAction() }}
       </button>
     </div>
   </div>
@@ -204,13 +204,16 @@ import { getPriceInfo } from "@/web3/network";
 import { useAuthStore } from '@/stores/auth';
 import type { Token } from "../../../../functions/common";
 import { calcGas, tokenAmount, hash } from "../../../../functions/common";
-import { genAndSendOtp, notifyTransfer } from '@/services/auth'
+import { genAndSendOtp } from '@/services/auth'
 
 import { isValidEmail } from "@/web3/utils";
 import PhoneInput from "@/components/PhoneInput.vue";
 import type { PhoneData } from "../types";
 import { buildTokenTransferUserOp, getHexlinkAccountApi, signUserOp } from "@/web3/userOp";
 import { UserOperationStruct } from "@account-abstraction/contracts";
+import { getPimlicoProvider } from "@/accountAPI/PimlicoBundler";
+import { hexlify, resolveProperties } from "ethers/lib/utils"
+import { deepHexlify } from '@account-abstraction/utils'
 
 const chooseTotalDrop = ref<boolean>(false);
 const chooseGasDrop = ref<boolean>(false);
@@ -260,7 +263,7 @@ const transaction = ref<TokenTransaction>({
   receiver: {schema: "", value: ""},
   salt: hash(new Date().toISOString()),
   amount: EthBigNumber.from(0),
-  amountInput: "0.1",
+  amountInput: "0.01",
   token: tokenStore.nativeCoin.address,
   gasToken: tokenStore.nativeCoin.address,
   estimatedGas: "0",
@@ -388,13 +391,17 @@ const checkOut = async function() {
   );
   const api = getHexlinkAccountApi();
   op.value = await buildTokenTransferUserOp(transaction.value, api);
-
   const bundler = await getHttpRpcClient(useChainStore().chain);
   const result = await bundler.estimateUserOpGas(op.value);
+  console.log(result);
   const { callGasLimit, preVerificationGas, verificationGas } = result as any;
-  op.value.callGasLimit = callGasLimit;
-  op.value.preVerificationGas = preVerificationGas;
-  op.value.verificationGasLimit = verificationGas;
+  op.value.preVerificationGas = hexlify(preVerificationGas);
+  op.value.callGasLimit = hexlify(callGasLimit);
+  if (op.value.initCode == '0x') {
+    op.value.verificationGasLimit = hexlify(verificationGas);
+  } else {
+    op.value.verificationGasLimit = hexlify(verificationGas * 2);
+  }
   await setGas();
   refreshGas();
 }
@@ -407,8 +414,8 @@ const setGas = async () => {
   const chain = useChainStore().chain;
   const {maxFeePerGas, maxPriorityFeePerGas}
     = await useChainStore().provider.getFeeData();
-  op.value.maxFeePerGas = maxFeePerGas ?? 0;
-  op.value.maxPriorityFeePerGas = maxPriorityFeePerGas ?? 0;
+  op.value.maxFeePerGas = hexlify(maxFeePerGas ?? 0);
+  op.value.maxPriorityFeePerGas = hexlify(maxPriorityFeePerGas ?? 0);
   const price = await getPriceInfo(chain, maxFeePerGas, transaction.value.gasToken);
   const token = tokenStore.token(transaction.value.gasToken);
   const totalGas = EthBigNumber.from(op.value.verificationGasLimit!)
@@ -485,40 +492,23 @@ const validateOtpAndSign = async () => {
     txStatus.value = "processing";
     message.value = "Signing your transaction...";
     const api = getHexlinkAccountApi();
-    op.value.paymasterAndData = [];
     op.value.signature = await signUserOp(op.value as UserOperationStruct, code.join(""), api);
     message.value = "Sending your transaction...";
     console.log(`Signed UserOperation: ${await printOp(op.value)}`);
-
-    const bundler = await getHttpRpcClient(useChainStore().chain);
-    const uoHash = await bundler.sendUserOpToBundler(op.value as UserOperationStruct);
-    console.log(`transaction ${uoHash} sent...`);
-    message.value = "Waiting for confirmation...";
-    const txHash = await api.getUserOpReceipt(uoHash);
-    console.log(`Transaction hash: ${txHash}`);
-  
-    message.value = "Done!";
+    const bundler = getPimlicoProvider(useChainStore().chain);
+    const hexifiedUserOp = deepHexlify(await resolveProperties(op.value))
+    const uoHash = await bundler.send(
+      "eth_sendUserOperation",
+      [hexifiedUserOp, api.entryPointAddress]
+    );
+    console.log(`user op ${uoHash} sent...`);
+    message.value = "Transaction sent! Check the status at your transaction history.";
     txStatus.value = "success";
-
   } catch(error: any) {
     console.log(error);
     txStatus.value = "error";
     message.value = "Failed to process the transaction";
     createNotification(error.message, "error");
-  }
-}
-
-const notifyReceiver = async() => {
-  if (step.value = 'process_tx') {
-    await notifyTransfer(
-      transaction.value.receiver,
-      transaction.value.amountInput,
-      token.value
-    );
-    step.value = 'notified';
-    createNotification("Notification is sent.", "success");
-  } else {
-    closeModal();
   }
 }
 
@@ -572,6 +562,20 @@ const closeModal = () => {
   txStatus.value = "";
   reset();
   emit('closeModal', false);
+}
+
+const getNextAction = () => {
+  if (step.value === 'process_tx') {
+    if (txStatus.value === 'processing') {
+      return "Processing...";
+    } else if (txStatus.value === 'error') {
+      return "Close";
+    } else if (txStatus.value === 'success') {
+      return "Close"
+    }
+  } else if (step.value === 'notified') {
+    return "Close";
+  }
 }
 </script>
 

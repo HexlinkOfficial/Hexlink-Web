@@ -10,6 +10,7 @@ import { genSignature } from "@/services/auth";
 import { HexlinkAccountAPI } from "@/accountAPI/HexlinkAccountAPI";
 import { DUMMY_PAYMASTER_AND_DATA, DUMMY_SIGNATURE, ENTRYPOINT } from "./constants";
 import { hash } from "./utils";
+import { hexlify } from "ethers/lib/utils"
 
 const erc20Interface = new ethers.utils.Interface(ERC20_ABI);
 
@@ -25,11 +26,11 @@ const buildCallData = (token: string, to: string, amount: EthBigNumber) => {
   }
 
 function genValidationData() : EthBigNumber {
-    const now = Math.floor(Date.now() / 1000);
-    return EthBigNumber.from(now + 3600).shl(160).add(
-      EthBigNumber.from(now).shl(208)
-    );
-  }
+  const now = Math.floor(Date.now() / 1000) - 60;
+  return EthBigNumber.from(now + 1800).shl(160).add(
+    EthBigNumber.from(now).shl(208)
+  );
+}
 
 export const buildTokenTransferUserOp = async (
     tx: {token: string, to: string, amount: EthBigNumber},
@@ -37,29 +38,29 @@ export const buildTokenTransferUserOp = async (
   ) : Promise<Partial<UserOperationStruct>> => {
     const sender = await getAccountAddress();
     let nonce : EthBigNumber = EthBigNumber.from(0);
-    let initCode : [] | string = [];
+    let initCode = "0x";
     if (await isContract(sender)) {
       nonce = await getNonce(api.entryPointAddress, sender);
     } else {
       initCode = await api.getInitCode();
     }
     const gasInfo = await api.provider.getFeeData();
-    const signature = ethers.utils.defaultAbiCoder.encode(
-      ["uint256", "bytes32", "bytes"],
-      [0, ethers.constants.HashZero, DUMMY_SIGNATURE]
+    const authInput = ethers.utils.defaultAbiCoder.encode(
+      ["tuple(uint256, address, bytes)"],
+      [[0, ethers.constants.AddressZero, DUMMY_SIGNATURE]]
     );
     return {
         sender,
-        nonce,
+        nonce: hexlify(nonce),
         initCode,
         callData: buildCallData(tx.token, tx.to, tx.amount),
-        callGasLimit: 0,
-        verificationGasLimit: 0,
-        maxFeePerGas: gasInfo.maxFeePerGas ?? 0,
-        maxPriorityFeePerGas: gasInfo.maxPriorityFeePerGas ?? 0,
-        preVerificationGas: 0,
-        paymasterAndData: DUMMY_PAYMASTER_AND_DATA,
-        signature,
+        callGasLimit: hexlify(0),
+        verificationGasLimit: hexlify(0),
+        maxFeePerGas: hexlify(gasInfo.maxFeePerGas ?? 0),
+        maxPriorityFeePerGas: hexlify(gasInfo.maxPriorityFeePerGas ?? 0),
+        preVerificationGas: hexlify(0),
+        paymasterAndData: "0x",
+        signature: authInput,
     };
   };
 

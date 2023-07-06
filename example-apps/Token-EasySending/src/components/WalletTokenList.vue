@@ -35,7 +35,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, watch, computed } from 'vue'
+import { ref, onMounted, watch, computed } from 'vue';
 import type { Token } from "../../../../functions/common";
 import logo from "../assets/network-icons/hexlink.svg";
 import { useChainStore } from "@/stores/chain";
@@ -112,7 +112,6 @@ const usdValue = (token: Token) : string => {
   align-items: center;
   justify-content: center;
   height: 425px;
-  width: 90vw;
   max-width: 700px;
   @media (max-width: 990px) {
     height: 150px; } }

@@ -5,14 +5,16 @@
       <h2 class="people-title">Send Token</h2>
       <div class="people-text">Enter receiver's email address or public address(0x)</div>
       <div class="people-input-box">
-        <span class="input-search-icon">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" width="1em" height="1em">
-            <path
-              d="M20.21 17.544l-2.785-2.785a7.752 7.752 0 0 0 1.114-3.986C18.54 6.49 15.05 3 10.77 3S3 6.49 3 10.773c0 4.282 3.489 7.772 7.77 7.772a7.686 7.686 0 0 0 3.985-1.114l2.784 2.785a1.66 1.66 0 0 0 2.34 0l.33-.33a1.645 1.645 0 0 0 0-2.342zM4.723 10.773c0-3.334 2.714-6.05 6.047-6.05 3.332 0 6.047 2.716 6.047 6.05 0 3.333-2.715 6.049-6.047 6.049-3.333 0-6.047-2.716-6.047-6.05z">
-            </path>
-          </svg>
-        </span>
-        <input v-model="transaction.toInput" class="send-people" type="text" placeholder="email or wallet address" aria-expanded="false" autocomplete="off" autocorrect="off">
+        <div class="phoneNumber">
+          <div style="display: flex; align-items: center;">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" width="1em" height="1em">
+              <path
+                d="M20.21 17.544l-2.785-2.785a7.752 7.752 0 0 0 1.114-3.986C18.54 6.49 15.05 3 10.77 3S3 6.49 3 10.773c0 4.282 3.489 7.772 7.77 7.772a7.686 7.686 0 0 0 3.985-1.114l2.784 2.785a1.66 1.66 0 0 0 2.34 0l.33-.33a1.645 1.645 0 0 0 0-2.342zM4.723 10.773c0-3.334 2.714-6.05 6.047-6.05 3.332 0 6.047 2.716 6.047 6.05 0 3.333-2.715 6.049-6.047 6.049-3.333 0-6.047-2.716-6.047-6.05z">
+              </path>
+            </svg>
+          </div>
+          <input v-model="transaction.toInput" placeholder="email or wallet address" class="border-0 outline-none appearance-none flex-shrink w-full bg-transparent" type="text" name="phone-number-input" id="phone-number-input" autocomplete="off" spellcheck="false" style="padding-left: 10px; width: 100%;">
+        </div>
         <div style="display: flex; justify-content: center; margin: 5px 0; font-weight: 600;">or</div>
         <div class="phone-login" style="margin-top: 10px;">
           <phone-input
@@ -64,7 +66,7 @@
             </div>
             <div class="mode-text2">{{ token.symbol }}</div>
             <input class="mode-input" type="text" placeholder="select" readonly>
-            <div class="mode-options" style="right: -48px;">
+            <div class="mode-options" style="right: -25.375px;">
               <div class="mode-option" v-for="(token, index) of tokens" :key="index" @click="tokenChoose('token', token)">
                 <div class="token-icon">
                   <img :src="token.logoURI" />
@@ -82,6 +84,43 @@
     <div style="display: flex; justify-content: center; width: 100%; padding: 0 15px;">
       <button :disabled="hasBalanceWarning" class="cta-button" @click="checkOut">Confirm</button>
     </div>
+  </div>
+  <div v-if="step === 'checkout'" class="form-send">
+    <div style="display: block;">
+      <img src="@/assets/svg/checkout.svg" style="width: 50px; height: 50px; margin: 1rem 0;" alt="send icon" />
+      <h2 class="people-title">Confirm</h2>
+      <div class="people-text">Confirm your transaction details</div>
+      <div class="token-amount" style="display: flex; justify-content: space-between; align-items: center;">
+        <div style="display: block; color: #737577;">Amount</div>
+        <div style="display: flex;">
+          {{ transaction.amountInput }}
+          <div style="display: flex; align-items: center;">
+            <div class="token-icon">
+              <img :src="gasToken.logoURI" />
+            </div>
+            <div class="token-box">
+              <b>{{ gasToken.symbol }}</b>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="gas-amount" style="display: flex; justify-content: space-between; align-items: center;">
+          <div style="display: block; color: #737577;">Estimated Gas Fee</div>
+          <div style="display: flex;">
+            {{ totalServiceFee }}
+            <div style="display: flex; align-items: center;">
+              <div class="token-icon">
+                <img :src="gasToken.logoURI" />
+              </div>
+              <div class="token-box">
+                <b>{{ gasToken.symbol }}</b>
+              </div>
+            </div>
+          </div>
+        </div>
+      <div class="gas-amount"></div>
+    </div>
+    <button class="cta-button" @click="sendtransaction">Send transaction</button>
   </div>
   <div v-if="step === 'send_otp' || step == 'sending_otp' || step == 'validate_otp'" class="form-send">
     <div style="display: block;">
@@ -152,6 +191,7 @@ import { BigNumber } from "bignumber.js";
 import { ethers } from "ethers";
 import type { OnClickOutsideHandler } from '@vueuse/core';
 import { vOnClickOutside } from '@/services/directive';
+import { onClickOutside } from '@vueuse/core'
 import type { BalanceMap } from "@/web3/tokens";
 import { getBalances } from "@/web3/tokens";
 import { getHttpRpcClient} from "../accountAPI/util/getHttpRpcClient"
@@ -341,7 +381,7 @@ async function delay(ms: number) {
 }
 
 const checkOut = async function() {
-  step.value = 'send_otp';
+  step.value = 'checkout';
   transaction.value.amount = tokenAmount(
     transaction.value.amountInput,
     token.value.decimals
@@ -357,6 +397,10 @@ const checkOut = async function() {
   op.value.verificationGasLimit = verificationGas;
   await setGas();
   refreshGas();
+}
+
+const sendtransaction = () => {
+  step.value = "send_otp";
 }
 
 const setGas = async () => {
@@ -532,6 +576,17 @@ const closeModal = () => {
 </script>
 
 <style lang="less" scoped>
+.phoneNumber {
+  padding: 10px 0 10px 12px;
+  border-radius: 0.5rem;
+  border: 2px solid transparent;
+  background: #eee;
+  flex-direction: row;
+  display: flex;
+  width: 100%; }
+.phoneNumber:focus-visible {
+  border-color: black;
+  background-color: white; }
 .confirmAddress {
   color: #076AE0;
   font-size: 1rem;
@@ -732,7 +787,6 @@ const closeModal = () => {
   background: white;
   padding: 35px 20px 5px; }
 .input-search-icon {
-  top: 13.5px;
   color: #515354;
   left: 15px;
   pointer-events: none;
@@ -755,11 +809,11 @@ const closeModal = () => {
   font-size: 1.5rem;
   line-height: 1.2;
   font-weight: 600;
-  margin-top: 0px;
-  margin-top: 10px; }
+  margin-top: 0px; }
 .people-text {
   color: rgba(19,21,23,0.64);
-  font-size: 1.25rem; }
+  margin-bottom: 0.5rem;
+  font-size: 1rem; }
 .people-section {
   display: block;
   background-color: white;

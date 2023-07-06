@@ -39,21 +39,22 @@
       <div class="col-xxl-6" style="width: 90vw; max-width: 700px;">
         <div class="card">
           <div class="card-body">
-            <div class="token-list">
-              <div class="title">
-                <div class="title-col">
-                  <div class="content">
-                    <div class="text">Assets</div>
-                    <img src="@/assets/svg/colon.svg" alt="colon icon"/>
-                  </div>
-                </div>
-              </div>
+            <div style="display: flex; justify-content: flex-start; flex-direction: row;">
+              <button :class="tokenSelected ? 'tab tab-selected' : 'tab'" type="button" @click="clickTab('token')">
+                Tokens
+              </button>
+              <button :class="tokenSelected ? 'tab' : 'tab tab-selected'" type="button" @click="clickTab('history')">
+                History
+              </button>
             </div>
             <div class="token-listDetail">
-              <div class="token-table">
+              <div v-if="tokenSelected" class="token-table">
                 <div style="overflow: visible; border-radius: 0.75rem;">
                   <WalletTokenList></WalletTokenList>
                 </div>
+              </div>
+              <div v-if="!tokenSelected">
+                <HistoryList></HistoryList>
               </div>
             </div>
           </div>
@@ -68,14 +69,24 @@ import { ref, computed } from "vue";
 import WalletTokenList from "@/components/WalletTokenList.vue";
 import SendTokenModal from '@/components/SendTokenModal.vue';
 import ReceiveToken from '@/components/ReceiveToken.vue';
+import HistoryList from '@/components/HistoryList.vue';
 import { useAuthStore } from '@/stores/auth';
 const action = ref<string>("");
+const tokenSelected = ref<boolean>(true);
 
 const price = computed(() => {
   return Math.round(useAuthStore().balance!);
 });
 
-const open = async (mode: string) => {
+const clickTab = (tab: string) => {
+  if (tab == "token") {
+    tokenSelected.value = true;
+  } else {
+    tokenSelected.value = false;
+  }
+}
+
+const open = (mode: string) => {
   action.value = mode;
 }
 
@@ -85,6 +96,32 @@ const closeModal = (variable: boolean) => {
 </script>
 
 <style lang="less" scoped>
+.tab {
+  border-color: transparent;
+  opacity: 0.4;
+  outline: transparent solid 2px;
+  outline-offset: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition-property: background-color,border-color,color,fill,stroke,opacity,box-shadow,transform;
+  transition-duration: 200ms;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  padding-inline-start: 1rem;
+  padding-inline-end: 1rem;
+  border-bottom-width: 2px;
+  border-bottom-style: solid;
+  margin-bottom: -2px;
+  color: rgb(82 107 121);
+  font-weight: 700;
+  padding-left: 10px;
+  padding-right: 10px;
+  gap: 0.25rem; }
+.tab-selected {
+  border-color: #076AE0;
+  color: #076AE0;
+  opacity: 1; }
 .receive-card {
   background-color: #fffc;
   -webkit-backdrop-filter: blur(16px);
@@ -197,7 +234,7 @@ const closeModal = (variable: boolean) => {
   color: #495057;
   font-weight: 600; }
 .card .card-body {
-  padding: 20px;
+  padding: 10px 20px 20px 20px;
   background: transparent;
   border-radius: 15px; }
 .card .card-footer {

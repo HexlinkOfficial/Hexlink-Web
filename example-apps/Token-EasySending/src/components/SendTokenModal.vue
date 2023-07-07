@@ -82,7 +82,7 @@
       </div>
     </div>
     <div style="display: flex; justify-content: center; width: 100%; padding: 0 15px;">
-      <button :disabled="hasBalanceWarningOrProcessing" class="cta-button" @click="checkOut">
+      <button :disabled="processing || hasBalanceWarning" class="cta-button" @click="checkOut">
         {{ processing ? 'Processing' : 'Continue' }}
       </button>
     </div>
@@ -202,9 +202,10 @@ import { UserOperationStruct } from "@account-abstraction/contracts";
 import { getPimlicoProvider } from "@/accountAPI/PimlicoBundler";
 import { hexlify, resolveProperties } from "ethers/lib/utils"
 import { deepHexlify } from '@account-abstraction/utils'
+import type { UserOp } from '@/stores/history';
+import { useHistoryStore } from '@/stores/history';
 
 const chooseTotalDrop = ref<boolean>(false);
-const chooseGasDrop = ref<boolean>(false);
 const txStatus = ref<string>("");
 const tokenStore = useTokenStore();
 const hexlAccountBalances = ref<BalanceMap>({});
@@ -360,10 +361,10 @@ const tokenBalance = (token: string): string => {
   return hexlAccountBalances.value[token]?.normalized || "0";
 };
 
-const hasBalanceWarningOrProcessing = computed(() => {
+const hasBalanceWarning = computed(() => {
   return Number(
     transaction.value.amountInput
-  ) > Number(tokenBalance(transaction.value.token)) || processing.value;
+  ) > Number(tokenBalance(transaction.value.token));
 });
 
 async function delay(ms: number) {
@@ -385,7 +386,6 @@ const checkOut = async function() {
     'eth_estimateUserOperationGas',
     [op.value, api.entryPointAddress]
   );
-  console.log(result);
   const { callGasLimit, preVerificationGas, verificationGas } = result as any;
   op.value.preVerificationGas = preVerificationGas;
   op.value.callGasLimit = callGasLimit;
@@ -455,10 +455,6 @@ const chooseTotalHandle: OnClickOutsideHandler = (event) => {
   chooseTotalDrop.value = false;
 }
 
-const chooseGasHandle: OnClickOutsideHandler = (event) => {
-  chooseGasDrop.value = false;
-}
-
 const tokenChoose =
   async (mode: "token" | "gas", token: Token) => {
     if (mode === "token") {
@@ -488,6 +484,20 @@ const validateOtpAndSign = async () => {
     message.value = "Transaction sent! Check the status at your transaction history.";
     txStatus.value = "success";
     step.value = 'process_tx';
+
+    const now = new Date();
+    useHistoryStore().add({
+      userOpHash: uoHash,
+      erc20Transfer: {
+        receipt: transaction.value.toInput,
+        to: transaction.value.to,
+        amount: transaction.value.amountInput,
+        token: token.value,
+      },
+      status: "pending",
+      sentAt: now,
+      updatedAt: now,
+    } as UserOp);
   } catch(error: any) {
     console.log(error);
     txStatus.value = "error";

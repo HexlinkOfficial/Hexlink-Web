@@ -1,10 +1,8 @@
 import { defineStore } from 'pinia';
 import { useChainStore } from './chain';
-import { useAuthStore } from './auth';
-import { getAccountAddress } from '@/web3/account';
 
 export interface Erc20Transfer {
-    from: string;
+    receipt?: string;
     to: string;
     amount: string;
     token: {
@@ -16,18 +14,12 @@ export interface Erc20Transfer {
     }
 }
 
-export enum TxStatus {
-    PENDING,
-    FAILED,
-    SUCCESS,
-}
-
 export interface UserOp {
     userOpHash: string;
-    erc20Transfers: Erc20Transfer[];
-    status: TxStatus;
-    sentAt: number;
-    updateAt: number;
+    erc20Transfer: Erc20Transfer;
+    status: "pending" | "failed" | "success";
+    sentAt: Date;
+    updatedAt: Date;
 }
 
 const chain = () => {
@@ -45,26 +37,11 @@ export const useHistoryStore = defineStore({
     getters: {
         history: (state) => {
             const c = chain();
+            if (state.histories[c.name] == undefined) {
+                return state.histories[c.name] = []
+            }
             return state.histories[c.name];
         },
-        failed: (state) => {
-            const c = chain();
-            return state.histories[c.name].map(
-                h => h.status == TxStatus.FAILED
-            );
-        },
-        pending: (state) => {
-            const c = chain();
-            return state.histories[c.name].map(
-                h => h.status == TxStatus.PENDING
-            );
-        },
-        success: (state) => {
-            const c = chain();
-            return state.histories[c.name].map(
-                h => h.status == TxStatus.SUCCESS
-            );
-        }
     },
     actions: {
         add(userOp: UserOp) {

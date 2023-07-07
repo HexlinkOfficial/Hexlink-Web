@@ -89,25 +89,12 @@
     <div style="display: block;">
       <img src="@/assets/svg/checkout.svg" style="width: 50px; height: 50px; margin: 1rem 0;" alt="send icon" />
       <h2 class="people-title">Confirm</h2>
-      <div class="people-text">Confirm your transaction details</div>
-      <div class="token-amount" style="display: flex; justify-content: space-between; align-items: center;">
-        <div style="display: block; color: #737577;">Amount</div>
-        <div style="display: flex;">
-          {{ transaction.amountInput }}
-          <div style="display: flex; align-items: center;">
-            <div class="token-icon">
-              <img :src="gasToken.logoURI" />
-            </div>
-            <div class="token-box">
-              <b>{{ gasToken.symbol }}</b>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="gas-amount" style="display: flex; justify-content: space-between; align-items: center;">
-          <div style="display: block; color: #737577;">Estimated Gas Fee</div>
+      <div class="people-text" style="margin-bottom: 1rem;">Confirm your transaction details</div>
+      <div style="display: flex; flex-direction: column; gap: 1rem;">
+        <div class="token-amount" style="display: flex; justify-content: space-between; align-items: center;">
+          <div style="display: block; color: #737577;">Amount</div>
           <div style="display: flex;">
-            {{ totalServiceFee }}
+            {{ transaction.amountInput }}
             <div style="display: flex; align-items: center;">
               <div class="token-icon">
                 <img :src="gasToken.logoURI" />
@@ -118,7 +105,21 @@
             </div>
           </div>
         </div>
-      <div class="gas-amount"></div>
+        <div class="gas-amount" style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: block; color: #737577;">Estimated Gas Fee</div>
+            <div style="display: flex;">
+              {{ totalServiceFee }}
+              <div style="display: flex; align-items: center;">
+                <div class="token-icon">
+                  <img :src="gasToken.logoURI" />
+                </div>
+                <div class="token-box">
+                  <b>{{ gasToken.symbol }}</b>
+                </div>
+              </div>
+            </div>
+        </div>
+      </div>
     </div>
     <button class="cta-button" @click="sendtransaction">Send transaction</button>
   </div>
@@ -212,8 +213,9 @@ import type { PhoneData } from "../types";
 import { buildTokenTransferUserOp, getHexlinkAccountApi, signUserOp } from "@/web3/userOp";
 import { UserOperationStruct } from "@account-abstraction/contracts";
 import { getPimlicoProvider } from "@/accountAPI/PimlicoBundler";
-import { hexlify, resolveProperties } from "ethers/lib/utils"
-import { deepHexlify } from '@account-abstraction/utils'
+import { hexlify, resolveProperties } from "ethers/lib/utils";
+import { deepHexlify } from '@account-abstraction/utils';
+import SkeletonLoader from '@/components/SkeletonLoader.vue';
 
 const chooseTotalDrop = ref<boolean>(false);
 const chooseGasDrop = ref<boolean>(false);

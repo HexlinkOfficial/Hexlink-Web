@@ -1,7 +1,7 @@
 <template>
   <div>
     <EmptyContent 
-      title="Start by Sending the first transaction"
+      title="Start by sending the first transaction"
       message="Unlocking the potential of Hexlink by depositing your first token or claim your first airdrop"
     >
     </EmptyContent>

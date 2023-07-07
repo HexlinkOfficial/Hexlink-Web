@@ -89,3 +89,17 @@ export function normalizePhoneNumber(phoneNumber: string) : string {
     const pn = parsePhoneNumber(phoneNumber)
     return pn.getURI();
 }
+
+export function prettyPrintTime(timestamp: Date) : string {
+    const now = new Date();
+    const diff = Math.floor((now.getTime() - new Date(timestamp).getTime()) / 1000);
+    if (diff < 60)  {
+        return diff + " seconds ago";
+    } else if (diff < 3600) {
+        return Math.floor(diff / 60) + " minutes ago";
+    } else if (diff < 86400) {
+        return Math.floor(diff / 3600) + " hours ago";
+    } else {
+        return timestamp.toLocaleString().split(',')[0];
+    }
+}

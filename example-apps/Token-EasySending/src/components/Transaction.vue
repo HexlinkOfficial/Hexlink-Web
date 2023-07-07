@@ -90,13 +90,13 @@ const checkStatus = async () => {
             status: result.success ? 'success' : 'failed',
           });
         } else {
-          delay(3000);
+          await delay(5000);
           checkStatus();
         }
     } catch(err) {
         console.log(err);
         errors.value += 1;
-        delay(3000);
+        await delay(5000);
         checkStatus();
     }
 }

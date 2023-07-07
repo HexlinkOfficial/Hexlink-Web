@@ -91,7 +91,7 @@
     <div style="display: block;">
       <img src="@/assets/svg/checkout.svg" style="width: 50px; height: 50px; margin: 1rem 0;" alt="send icon" />
       <h2 class="people-title">Confirm</h2>
-      <div class="people-text" style="margin-bottom: 1rem;">Confirm your transaction details</div>
+      <div class="people-text">Confirm your transaction details</div>
       <div style="display: flex; flex-direction: column; gap: 0.8rem;">
         <div class="token-amount">
           <div style="display: block; color: #737577;">Receiver</div>
@@ -118,7 +118,7 @@
             </div>
           </div>
         </div>
-        <div class="gas-amount">
+        <div class="token-amount">
             <div style="display: block; color: #737577;">Estimated Gas Fee</div>
             <div style="display: flex;">
               {{ totalServiceFee }}

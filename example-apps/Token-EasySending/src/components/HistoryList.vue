@@ -1,19 +1,25 @@
 <template>
-  <div>
+  <div v-if="userOps.length == 0">
     <EmptyContent 
-      title="Start by Sending the first transaction"
+      title="Start by sending the first transaction"
       message="Unlocking the potential of Hexlink by depositing your first token or claim your first airdrop"
     >
     </EmptyContent>
   </div>
+  <div v-if="userOps.length > 0">
+  </div>
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import EmptyContent from '@/components/EmptyContent.vue';
+import { type UserOp, useHistoryStore } from '@/stores/history';
 
-const loading = ref<boolean>(false);
-const hasContent = ref<boolean>(false);
+const userOps = ref<UserOp[]>([]);
+
+onMounted(() => {
+  userOps.value = useHistoryStore().history;
+});
 </script>
 
 <style lang="less" scoped>

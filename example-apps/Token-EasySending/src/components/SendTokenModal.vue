@@ -501,7 +501,7 @@ const validateOtpAndSign = async () => {
   } catch(error: any) {
     console.log(error);
     txStatus.value = "error";
-    message.value = "Failed to process the transaction";
+    message.value = "Failed to validate the code";
     createNotification(error.message, "error");
   }
   processing.value = false;

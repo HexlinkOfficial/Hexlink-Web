@@ -30,7 +30,7 @@
             </div>
             <div class="sent-info" style="margin-left: 20px;">
                 <div class="sending-status">
-                  <div v-if="props.userOp.status == 'pending'">
+                  <div v-if="props.userOp.status == 'pending' && errors <= MAX_TRIED">
                     Processing <loading-outlined />
                   </div>
                   <div v-if="props.userOp.status == 'success'" class="mobile-icon">
@@ -66,7 +66,7 @@ const props = defineProps({
   }
 });
 
-const tried = ref<number>(0);
+const errors = ref<number>(0);
 const MAX_TRIED = 5;
 
 const exploerURI = () => {
@@ -74,10 +74,7 @@ const exploerURI = () => {
 }
 
 const checkStatus = async () => {
-    if (props.userOp.status != 'pending') {
-        return;
-    }
-    if (tried.value > MAX_TRIED) {
+    if (props.userOp.status != 'pending' || errors.value > MAX_TRIED) {
         return;
     }
     const bundler = getPimlicoProvider(useChainStore().chain);
@@ -86,17 +83,19 @@ const checkStatus = async () => {
             'eth_getUserOperationReceipt',
             [props.userOp.userOpHash]
         );
-        if (result == null) {
-            delay(3000);
-            checkStatus();
-        }
-        useHistoryStore().update(props.index, {
+        console.log(result);
+        if (result) {
+          useHistoryStore().update(props.index, {
             ...props.userOp,
             status: result.success ? 'success' : 'failed',
-        });
+          });
+        } else {
+          delay(3000);
+          checkStatus();
+        }
     } catch(err) {
         console.log(err);
-        tried.value += 1;
+        errors.value += 1;
         delay(3000);
         checkStatus();
     }
@@ -104,7 +103,7 @@ const checkStatus = async () => {
 
 const shouldDisplayFailed = () => {
     return props.userOp.status == 'failed' || (
-        props.userOp.status == 'pending' && tried.value > MAX_TRIED
+        props.userOp.status == 'pending' && errors.value > MAX_TRIED
     );
 }
 

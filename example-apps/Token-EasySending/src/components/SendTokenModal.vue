@@ -91,34 +91,21 @@
     <div style="display: block;">
       <img src="@/assets/svg/checkout.svg" style="width: 50px; height: 50px; margin: 1rem 0;" alt="send icon" />
       <h2 class="people-title">Confirm</h2>
-      <div class="people-text">Confirm your transaction details</div>
-      <div class="token-amount" style="display: flex; justify-content: space-between; align-items: center;">
-        <div style="display: block; color: #737577;">Receiver</div>
-        <a-tooltip placement="top">
-            <template #title>
-              <span>Address {{ transaction.to }}</span>
-            </template>
-            <div style="display: flex;">
-              {{ transaction.toInput }}
-            </div>
-        </a-tooltip>
-      </div>
-      <div class="token-amount" style="display: flex; justify-content: space-between; align-items: center;">
-        <div style="display: block; color: #737577;">Amount</div>
-        <div style="display: flex;">
-          {{ transaction.amountInput }}
-          <div style="display: flex; align-items: center;">
-            <div class="token-icon">
-              <img :src="gasToken.logoURI" />
-            </div>
-            <div class="token-box">
-              <b>{{ gasToken.symbol }}</b>
-            </div>
-          </div>
+      <div class="people-text" style="margin-bottom: 1rem;">Confirm your transaction details</div>
+      <div style="display: flex; flex-direction: column; gap: 0.8rem;">
+        <div class="token-amount">
+          <div style="display: block; color: #737577;">Receiver</div>
+          <a-tooltip placement="top">
+              <template #title>
+                <span>Address {{ transaction.to }}</span>
+              </template>
+              <div style="display: flex; font-weight: 600;">
+                {{ transaction.toInput }}
+              </div>
+          </a-tooltip>
         </div>
-      </div>
-      <div class="token-amount" style="display: flex; justify-content: space-between; align-items: center;">
-          <div style="display: block; color: #737577;">Estimated Gas Fee</div>
+        <div class="token-amount">
+          <div style="display: block; color: #737577;">Amount</div>
           <div style="display: flex;">
             {{ transaction.amountInput }}
             <div style="display: flex; align-items: center;">
@@ -131,7 +118,7 @@
             </div>
           </div>
         </div>
-        <div class="gas-amount" style="display: flex; justify-content: space-between; align-items: center;">
+        <div class="gas-amount">
             <div style="display: block; color: #737577;">Estimated Gas Fee</div>
             <div style="display: flex;">
               {{ totalServiceFee }}
@@ -144,6 +131,21 @@
                 </div>
               </div>
             </div>
+        </div>
+        <div style="display: block;"><hr style="margin: 0; border-style: solid; border-color: rgba(19,21,23,0.08); border-width: 0 0 1px;"></div>
+        <div class="token-amount">
+          <div style="display: block; color: #737577;">Total</div>
+          <div style="display: flex;">
+            {{ Number(transaction.amountInput) + Number(totalServiceFee) }}
+            <div style="display: flex; align-items: center;">
+              <div class="token-icon">
+                <img :src="gasToken.logoURI" />
+              </div>
+              <div class="token-box">
+                <b>{{ gasToken.symbol }}</b>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -415,6 +417,7 @@ const sendOtp = async () => {
   processing.value = true;
   try {
     const result: any = await genAndSendOtp();
+    console.log(result);
     if (result === 429) {
       step.value = 'send_otp';
       console.error("Too many requests to send otp.");
@@ -590,6 +593,11 @@ const getNextAction = () => {
 </script>
 
 <style lang="less" scoped>
+.token-amount {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 16px; }
 .phoneNumber {
   padding: 10px 0 10px 12px;
   border-radius: 0.5rem;

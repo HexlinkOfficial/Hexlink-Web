@@ -82,17 +82,43 @@
       </div>
     </div>
     <div style="display: flex; justify-content: center; width: 100%; padding: 0 15px;">
-      <button :disabled="hasBalanceWarning" class="cta-button" @click="checkOut">Confirm</button>
+      <button :disabled="processing || hasBalanceWarning" class="cta-button" @click="checkOut">
+        {{ processing ? 'Processing' : 'Continue' }}
+      </button>
     </div>
   </div>
   <div v-if="step === 'checkout'" class="form-send">
     <div style="display: block;">
       <img src="@/assets/svg/checkout.svg" style="width: 50px; height: 50px; margin: 1rem 0;" alt="send icon" />
       <h2 class="people-title">Confirm</h2>
-      <div class="people-text" style="margin-bottom: 1rem;">Confirm your transaction details</div>
-      <div style="display: flex; flex-direction: column; gap: 1rem;">
-        <div class="token-amount" style="display: flex; justify-content: space-between; align-items: center;">
-          <div style="display: block; color: #737577;">Amount</div>
+      <div class="people-text">Confirm your transaction details</div>
+      <div class="token-amount" style="display: flex; justify-content: space-between; align-items: center;">
+        <div style="display: block; color: #737577;">Receiver</div>
+        <a-tooltip placement="top">
+            <template #title>
+              <span>Address {{ transaction.to }}</span>
+            </template>
+            <div style="display: flex;">
+              {{ transaction.toInput }}
+            </div>
+        </a-tooltip>
+      </div>
+      <div class="token-amount" style="display: flex; justify-content: space-between; align-items: center;">
+        <div style="display: block; color: #737577;">Amount</div>
+        <div style="display: flex;">
+          {{ transaction.amountInput }}
+          <div style="display: flex; align-items: center;">
+            <div class="token-icon">
+              <img :src="gasToken.logoURI" />
+            </div>
+            <div class="token-box">
+              <b>{{ gasToken.symbol }}</b>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="token-amount" style="display: flex; justify-content: space-between; align-items: center;">
+          <div style="display: block; color: #737577;">Estimated Gas Fee</div>
           <div style="display: flex;">
             {{ transaction.amountInput }}
             <div style="display: flex; align-items: center;">
@@ -121,9 +147,11 @@
         </div>
       </div>
     </div>
-    <button class="cta-button" @click="sendtransaction">Send transaction</button>
+    <button class="cta-button" @click="sendOtp" :disabled='processing'>
+      {{ processing ? 'Processing': 'Checkout' }}
+    </button>
   </div>
-  <div v-if="step === 'send_otp' || step == 'sending_otp' || step == 'validate_otp'" class="form-send">
+  <div v-if="step == 'validate_otp'" class="form-send">
     <div style="display: block;">
       <img src="@/assets/svg/password.svg" style="width: 50px; height: 50px; margin: 1rem 0;" alt="send icon" />
       <h2 class="people-title">Enter Verification Code</h2>
@@ -134,36 +162,11 @@
             maxlength="1" v-model="code[index]" @input="handleInput" @keypress="isNumber"
             @keydown.delete="handleDelete" @paste="onPaste" class="otp"/>
         </div>
-        <p v-if="step == 'validate_otp' && countDown > 0" class="resend-plain">Resend the verification code in {{ countDown }}s.</p>
-        <a v-if="step == 'validate_otp' && countDown <= 0 " class="resend" @click="resendOtp">Resend the verification code.</a>
-        <button
-          class="cta-button"
-          style="margin-bottom: 0px;"
-          :disabled="step == 'sending_otp' || (step == 'validate_otp' && invalidOtp)"
-          @click="sendOrValidateOtp"
-        >
-            {{ step == 'send_otp' ? 'Send Passcode' : (step == 'sending_otp' ? 'Sending' : 'Verify') }}
+        <p v-if="countDown > 0" class="resend-plain">Resend the verification code in {{ countDown }}s.</p>
+        <a v-if="countDown <= 0 " class="resend" @click="resendOtp">Resend the verification code.</a>
+        <button class="cta-button" style="margin-bottom: 0px;" :disabled='invalidOtp' @click="validateOtpAndSign">
+          {{ processing ? 'Processing': 'Verify' }}
         </button>
-        <div class="gas-estimation" style="padding: 0 0.5rem 0 0.5rem;">
-          <p style="display: flex; align-items: center; gap: 10px;">
-            <img style="width: 20px; height: 20px;" src="https://i.postimg.cc/RhXfgJR1/gas-pump.png" />
-            <span style="line-height: 1.25;">Estimated Fee: </span>
-            <a-tooltip placement="top">
-              <template #title>
-                <span>The real service fee may differ per network conditions</span>
-              </template>
-              <b>{{ totalServiceFee }}</b>
-            </a-tooltip>
-          </p>
-          <div style="display: flex; align-items: center;">
-            <div class="token-icon">
-              <img :src="gasToken.logoURI" />
-            </div>
-            <div class="token-box">
-              <b>{{ gasToken.symbol }}</b>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   </div>
@@ -192,10 +195,8 @@ import { BigNumber } from "bignumber.js";
 import { ethers } from "ethers";
 import type { OnClickOutsideHandler } from '@vueuse/core';
 import { vOnClickOutside } from '@/services/directive';
-import { onClickOutside } from '@vueuse/core'
 import type { BalanceMap } from "@/web3/tokens";
 import { getBalances } from "@/web3/tokens";
-import { getHttpRpcClient} from "../accountAPI/util/getHttpRpcClient"
 import { printOp } from "../accountAPI/opUtils";
 import { tokenBase, createNotification, prettyPrint } from "@/web3/utils";
 import { useChainStore } from "@/stores/chain";
@@ -213,12 +214,13 @@ import type { PhoneData } from "../types";
 import { buildTokenTransferUserOp, getHexlinkAccountApi, signUserOp } from "@/web3/userOp";
 import { UserOperationStruct } from "@account-abstraction/contracts";
 import { getPimlicoProvider } from "@/accountAPI/PimlicoBundler";
-import { hexlify, resolveProperties } from "ethers/lib/utils";
-import { deepHexlify } from '@account-abstraction/utils';
 import SkeletonLoader from '@/components/SkeletonLoader.vue';
+import { hexlify, resolveProperties } from "ethers/lib/utils"
+import { deepHexlify } from '@account-abstraction/utils'
+import type { UserOp } from '@/stores/history';
+import { useHistoryStore } from '@/stores/history';
 
 const chooseTotalDrop = ref<boolean>(false);
-const chooseGasDrop = ref<boolean>(false);
 const txStatus = ref<string>("");
 const tokenStore = useTokenStore();
 const hexlAccountBalances = ref<BalanceMap>({});
@@ -241,6 +243,7 @@ const phone: Ref<string> = ref("");
 const country: Ref<string> = ref("");
 const phoneData: Ref<PhoneData> = ref({});
 const op = ref<Partial<UserOperationStruct>>({});
+const processing = ref<boolean>(false);
 
 const emit = defineEmits(['closeModal']);
 
@@ -386,30 +389,46 @@ async function delay(ms: number) {
 }
 
 const checkOut = async function() {
-  step.value = 'checkout';
+  processing.value = true;
   transaction.value.amount = tokenAmount(
     transaction.value.amountInput,
     token.value.decimals
   );
   const api = getHexlinkAccountApi();
   op.value = await buildTokenTransferUserOp(transaction.value, api);
-  const bundler = await getHttpRpcClient(useChainStore().chain);
-  const result = await bundler.estimateUserOpGas(op.value);
-  console.log(result);
+  const bundler = getPimlicoProvider(useChainStore().chain);
+  const result = await bundler.send(
+    'eth_estimateUserOperationGas',
+    [op.value, api.entryPointAddress]
+  );
   const { callGasLimit, preVerificationGas, verificationGas } = result as any;
-  op.value.preVerificationGas = hexlify(preVerificationGas);
-  op.value.callGasLimit = hexlify(callGasLimit);
-  if (op.value.initCode == '0x') {
-    op.value.verificationGasLimit = hexlify(verificationGas);
-  } else {
-    op.value.verificationGasLimit = hexlify(verificationGas * 2);
-  }
+  op.value.preVerificationGas = preVerificationGas;
+  op.value.callGasLimit = callGasLimit;
+  op.value.verificationGasLimit = verificationGas;
   await setGas();
   refreshGas();
+  step.value = 'checkout';
+  processing.value = false;
 }
 
-const sendtransaction = () => {
-  step.value = "send_otp";
+const sendOtp = async () => {
+  processing.value = true;
+  try {
+    const result: any = await genAndSendOtp();
+    if (result === 429) {
+      step.value = 'send_otp';
+      console.error("Too many requests to send otp.");
+      createNotification("Too many requests to send otp.", "error");
+    } else if (result === 200) {
+      step.value = "validate_otp";
+      countDownTimer();
+    }
+  } catch (err) {
+    step.value = 'send_otp';
+    console.log(err);
+    createNotification(err as string, "error");
+  }
+  processing.value = false;
 }
 
 const setGas = async () => {
@@ -420,7 +439,7 @@ const setGas = async () => {
   op.value.maxPriorityFeePerGas = hexlify(maxPriorityFeePerGas ?? 0);
   const price = await getPriceInfo(chain, maxFeePerGas, transaction.value.gasToken);
   const token = tokenStore.token(transaction.value.gasToken);
-  const totalGas = EthBigNumber.from(op.value.verificationGasLimit!)
+  const totalGas = EthBigNumber.from(op.value.verificationGasLimit)
     .add(op.value.callGasLimit as number)
     .add(op.value.preVerificationGas as number);
   transaction.value.estimatedGas
@@ -451,10 +470,6 @@ const chooseTotalHandle: OnClickOutsideHandler = (event) => {
   chooseTotalDrop.value = false;
 }
 
-const chooseGasHandle: OnClickOutsideHandler = (event) => {
-  chooseGasDrop.value = false;
-}
-
 const tokenChoose =
   async (mode: "token" | "gas", token: Token) => {
     if (mode === "token") {
@@ -465,31 +480,8 @@ const tokenChoose =
     }
   };
 
-const sendOrValidateOtp = async function() {
-  if (step.value == 'send_otp') {
-    step.value = 'sending_otp';
-    try {
-      const result: any = await genAndSendOtp();
-      if (result === 429) {
-        step.value = 'send_otp';
-        console.error("Too many requests to send otp.");
-        createNotification("Too many requests to send otp.", "error");
-      } else if (result === 200) {
-        step.value = 'validate_otp';
-        countDownTimer();
-      }
-    } catch (err) {
-      step.value = 'send_otp';
-      console.log(err);
-      createNotification(err as string, "error");
-    }
-  } else if (step.value == 'validate_otp') {
-    await validateOtpAndSign();
-  }
-}
-
 const validateOtpAndSign = async () => {
-  step.value = 'process_tx';
+  processing.value = true;
   try {
     txStatus.value = "processing";
     message.value = "Signing your transaction...";
@@ -498,7 +490,7 @@ const validateOtpAndSign = async () => {
     message.value = "Sending your transaction...";
     console.log(`Signed UserOperation: ${await printOp(op.value)}`);
     const bundler = getPimlicoProvider(useChainStore().chain);
-    const hexifiedUserOp = deepHexlify(await resolveProperties(op.value))
+    const hexifiedUserOp = deepHexlify(await resolveProperties(op.value));
     const uoHash = await bundler.send(
       "eth_sendUserOperation",
       [hexifiedUserOp, api.entryPointAddress]
@@ -506,12 +498,28 @@ const validateOtpAndSign = async () => {
     console.log(`user op ${uoHash} sent...`);
     message.value = "Transaction sent! Check the status at your transaction history.";
     txStatus.value = "success";
+    step.value = 'process_tx';
+
+    const now = new Date();
+    useHistoryStore().add({
+      userOpHash: uoHash,
+      erc20Transfer: {
+        receipt: transaction.value.toInput,
+        to: transaction.value.to,
+        amount: transaction.value.amountInput,
+        token: token.value,
+      },
+      status: "pending",
+      sentAt: now,
+      updatedAt: now,
+    } as UserOp);
   } catch(error: any) {
     console.log(error);
     txStatus.value = "error";
-    message.value = "Failed to process the transaction";
+    message.value = "Failed to validate the code";
     createNotification(error.message, "error");
   }
+  processing.value = false;
 }
 
 const reset = () => {

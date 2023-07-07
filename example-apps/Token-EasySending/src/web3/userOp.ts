@@ -8,7 +8,7 @@ import { buildAccountExecData } from "./account";
 import ERC20_ABI from "../abi/ERC20_ABI.json";
 import { genSignature } from "@/services/auth";
 import { HexlinkAccountAPI } from "@/accountAPI/HexlinkAccountAPI";
-import { DUMMY_PAYMASTER_AND_DATA, DUMMY_SIGNATURE, ENTRYPOINT } from "./constants";
+import { DUMMY_SIGNATURE, ENTRYPOINT } from "./constants";
 import { hash } from "./utils";
 import { hexlify } from "ethers/lib/utils"
 
@@ -54,11 +54,11 @@ export const buildTokenTransferUserOp = async (
         nonce: hexlify(nonce),
         initCode,
         callData: buildCallData(tx.token, tx.to, tx.amount),
-        callGasLimit: hexlify(0),
-        verificationGasLimit: hexlify(0),
+        callGasLimit: hexlify(2000000),
+        verificationGasLimit: hexlify(2000000),
         maxFeePerGas: hexlify(gasInfo.maxFeePerGas ?? 0),
         maxPriorityFeePerGas: hexlify(gasInfo.maxPriorityFeePerGas ?? 0),
-        preVerificationGas: hexlify(0),
+        preVerificationGas: hexlify(2000000),
         paymasterAndData: "0x",
         signature: authInput,
     };

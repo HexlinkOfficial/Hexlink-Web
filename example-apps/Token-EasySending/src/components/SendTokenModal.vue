@@ -150,7 +150,7 @@
         </div>
         <p v-if="countDown > 0" class="resend-plain">Resend the verification code in {{ countDown }}s.</p>
         <a v-if="countDown <= 0 " class="resend" @click="resendOtp">Resend the verification code.</a>
-        <button class="cta-button" style="margin-bottom: 0px;" :disabled='invalidOtp' @click="validateOtpAndSign">
+        <button class="cta-button" style="margin-bottom: 0px;" :disabled='invalidOtp || processing' @click="validateOtpAndSign">
           {{ processing ? 'Processing': 'Verify' }}
         </button>
       </div>
@@ -474,7 +474,7 @@ const validateOtpAndSign = async () => {
     op.value.signature = await signUserOp(userOpInfo.value, code.join(""));
     message.value = "Sending your transaction...";
     console.log(`Signed UserOperation: ${await printOp(op.value)}`);
-    console.log(`Signed UserOpInfo: ${userOpInfo.value}`);
+    console.log(`UserOpInfo: ${(JSON.stringify(userOpInfo.value, null, 2))}`);
     const bundler = getPimlicoProvider(useChainStore().chain);
     const hexifiedUserOp = deepHexlify(await resolveProperties(op.value));
     const uoHash = await bundler.send(

@@ -6,7 +6,6 @@ import { BigNumber as EthBigNumber } from "ethers";
 import { getAccountAddress, getName, getNameType, getNonce, isContract } from "./account";
 import { buildAccountExecData } from "./account";
 import ERC20_ABI from "../abi/ERC20_ABI.json";
-import { genSignature } from "@/services/auth";
 import { HexlinkAccountAPI } from "@/accountAPI/HexlinkAccountAPI";
 import { DUMMY_SIGNATURE, ENTRYPOINT } from "./constants";
 import { hash } from "./utils";

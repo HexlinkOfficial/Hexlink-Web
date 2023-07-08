@@ -71,13 +71,22 @@ function isHexlinkValidator(address: string) : boolean {
 }
 
 export async function getAuthProviderType() : Promise<string> {
+    let validator;
     const account = await getAccountAddress();
-    const contract = Account__factory.connect(
-        account,
-        useChainStore().provider
-    );
-    const [factor1,] = await contract.getAuthFactors();
-    const [, validator] = factor1;
+    if (await isContract(account)) {
+        const contract = Account__factory.connect(
+            account,
+            useChainStore().provider
+        );
+        const [factor1,] = await contract.getAuthFactors();
+        validator = factor1[1];
+    } else {
+        const hexlink = Hexlink__factory.connect(
+            import.meta.env.VITE_ACCOUNT_FACTORY_V2,
+            useChainStore().provider
+        );
+        validator = await hexlink.getDefaultValidator(hash(getNameType()));
+    }
     if (isDAuthValidator(validator)) {
         return "dauth";
     } else if (isHexlinkValidator(validator)) {

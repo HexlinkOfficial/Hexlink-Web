@@ -16,7 +16,8 @@ export interface Erc20Transfer {
 
 export interface UserOp {
     userOpHash: string;
-    erc20Transfer: Erc20Transfer;
+    type: string,
+    metadata: any,
     status: "pending" | "failed" | "success";
     sentAt: Date;
     updatedAt: Date;
@@ -50,5 +51,8 @@ export const useHistoryStore = defineStore({
         update(index: number, userOp: UserOp) {
             this.history[index] = userOp;
         },
+        reset() {
+            this.histories = {};
+        }
     },
 });

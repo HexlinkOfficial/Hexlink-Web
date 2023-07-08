@@ -8,7 +8,7 @@
   </div>
   <div v-if="userOps.length > 0">
     <div v-for="(userOp, index) of userOps" :key="userOp.userOpHash" style="margin-top: 20px;">
-      <Transaction :index='index' :userOp="userOp"/>
+      <Transaction :index='index' :userOp='userOp'/>
     </div>
   </div>
 </template>

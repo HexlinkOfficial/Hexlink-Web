@@ -25,6 +25,7 @@ import { UserOpInfo } from '@/web3/userOp';
 import { ethers } from 'ethers';
 
 import DAuth from "@dauth/core";
+import { useHistoryStore } from '@/stores/history';
 const dauth = new DAuth({
     baseURL: 'https://demo-api.dauth.network/dauth/sdk/v1.1/',
     clientID: 'demo',
@@ -234,6 +235,7 @@ export function signOutFirebase() {
     useAuthStore().signOut();
     useTokenStore().reset();
     useChainStore().reset();
+    useHistoryStore().reset();
     return signOut(auth);
 }
 

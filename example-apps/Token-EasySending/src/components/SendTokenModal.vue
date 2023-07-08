@@ -131,51 +131,16 @@
             </div>
           </div>
         </div>
-      <div class="gas-amount"></div>
     </div>
     <button class="cta-button" @click="sendOtp" :disabled='processing'>
       {{ processing ? 'Processing': 'Checkout' }}
     </button>
   </div>
-  <div v-if="step == 'validate_otp'" class="form-send">
-    <div style="display: block;">
-      <img src="@/assets/svg/password.svg" style="width: 50px; height: 50px; margin: 1rem 0;" alt="send icon" />
-      <h2 class="people-title">Enter Verification Code</h2>
-      <div class="people-text">Enter code that we have sent to <b>{{ userHandle }}</b></div>
-      <div class="social-login" style="flex-direction: column;">
-        <div style="display: flex; align-items: center; justify-content: space-between;">
-          <input v-for="(arr, index) in code" :key="index" type="number" pattern="\d*" :id="'input_' + index"
-            maxlength="1" v-model="code[index]" @input="handleInput" @keypress="isNumber"
-            @keydown.delete="handleDelete" @paste="onPaste" class="otp"/>
-        </div>
-        <p v-if="countDown > 0" class="resend-plain">Resend the verification code in {{ countDown }}s.</p>
-        <a v-if="countDown <= 0 " class="resend" @click="resendOtp">Resend the verification code.</a>
-        <button class="cta-button" style="margin-bottom: 0px;" :disabled='invalidOtp' @click="validateOtpAndSign">
-          {{ processing ? 'Processing': 'Verify' }}
-        </button>
-      </div>
-    </div>
-  </div>
-  <div v-if="step === 'process_tx' || step === 'notified'" class="form-send">
-    <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
-      <h2 class="transition" style="display: flex; justify-content: center; align-items: center; flex-direction: column;">
-        <div class="spinner-lg" :class="txStatus">
-          <div class="check"></div>
-        </div>
-        <span style="font-size: 20px; margin: 20px 10px; text-align: center;">{{ message }}</span>
-      </h2>
-    </div>
-    <div style="display: flex; justify-content: center; width: 100%; padding: 0 15px;">
-      <button @click="closeModal" class="cta-button" :disabled="txStatus === 'processing'">
-        {{ getNextAction() }}
-      </button>
-    </div>
-  </div>
+  <UserOpExecuteModal v-if="step == 'process_userop'" @close="reset"></UserOpExecuteModal>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, computed, watch, type Ref } from "vue";
-import { useRouter } from "vue-router";
 import { BigNumber as EthBigNumber } from "ethers";
 import { BigNumber } from "bignumber.js";
 import { ethers } from "ethers";
@@ -183,63 +148,23 @@ import type { OnClickOutsideHandler } from '@vueuse/core';
 import { vOnClickOutside } from '@/services/directive';
 import type { BalanceMap } from "@/web3/tokens";
 import { getBalances } from "@/web3/tokens";
-import { printOp } from "../accountAPI/opUtils";
 import { tokenBase, createNotification, prettyPrint } from "@/web3/utils";
 import { useChainStore } from "@/stores/chain";
 import { useTokenStore } from "@/stores/token";
 import { getAccountAddress } from "@/web3/account";
 import { getPriceInfo } from "@/web3/network";
-import { useAuthStore } from '@/stores/auth';
 import type { Token } from "../../../../functions/common";
 import { calcGas, tokenAmount, hash } from "../../../../functions/common";
-import { genAndSendOtpViaDAuth, signUserOpViaDAuth } from '@/services/auth'
 
 import { isValidEmail } from "@/web3/utils";
 import PhoneInput from "@/components/PhoneInput.vue";
 import type { PhoneData } from "../types";
-import { UserOpInfo, buildTokenTransferUserOp, genUserOpInfo, getHexlinkAccountApi } from "@/web3/userOp";
-import { UserOperationStruct } from "@account-abstraction/contracts";
+import { buildTokenTransferUserOp, getHexlinkAccountApi } from "@/web3/userOp";
 import { getPimlicoProvider } from "@/accountAPI/PimlicoBundler";
-import { hexlify, resolveProperties } from "ethers/lib/utils"
-import { deepHexlify } from '@account-abstraction/utils'
-import type { UserOp } from '@/stores/history';
-import { useHistoryStore } from '@/stores/history';
+import { hexlify } from "ethers/lib/utils"
 import { ENTRYPOINT } from "@/web3/constants";
-
-const chooseTotalDrop = ref<boolean>(false);
-const txStatus = ref<string>("");
-const tokenStore = useTokenStore();
-const hexlAccountBalances = ref<BalanceMap>({});
-const tokens = ref<Token[]>([]);
-const message = ref<string>("Let's go!");
-const step = ref<string>("input_email");
-let code: string[] = Array(6);
-let dataFromPaste: string[] | undefined;
-const keysAllowed: string[] = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9",];
-const countDown = ref<number>(60);
-const invalidOtp = ref<boolean>(true);
-const userHandle = computed(() => {
-  const user = useAuthStore().user!;
-  if (useAuthStore().user?.provider.includes("twitter")) {
-    return "@" + user.handle;
-  }
-  return user?.handle;
-});
-const phone: Ref<string> = ref("");
-const country: Ref<string> = ref("");
-const phoneData: Ref<PhoneData> = ref({});
-const op = ref<Partial<UserOperationStruct>>({});
-const processing = ref<boolean>(false);
-const userOpInfo = ref<UserOpInfo>({
-  userOpHash: "",
-  signedMessage: "",
-  validationData: EthBigNumber.from(0),
-  signer: "",
-  name: "",
-  nameType: "",
-});
-
-const emit = defineEmits(['closeModal']);
+import { useUserOpStore } from "@/stores/userOp";
+import UserOpExecuteModal from "@/components/UserOpExecuteModal.vue";
 
 interface TokenTransaction {
   to: string,
@@ -255,6 +180,17 @@ interface TokenTransaction {
   gasToken: string,
   estimatedGas: string,
 }
+
+const chooseTotalDrop = ref<boolean>(false);
+const tokenStore = useTokenStore();
+const hexlAccountBalances = ref<BalanceMap>({});
+const tokens = ref<Token[]>([]);
+const phone: Ref<string> = ref("");
+const country: Ref<string> = ref("");
+const phoneData: Ref<PhoneData> = ref({});
+const step = ref<string>("input_email");
+const processing = ref<boolean>(false);
+const shouldRefreshGas = ref<boolean>(false);
 
 const transaction = ref<TokenTransaction>({
   to: "",
@@ -293,78 +229,6 @@ const setDefaultToken = function (getBalance: (t: string) => string) {
 onMounted(genTokenList);
 watch(() => useChainStore().current, genTokenList);
 
-const isNumber = (event: Event) => {
-  (event.currentTarget as HTMLInputElement).value = "";
-  const keyPressed: string = (event as KeyboardEvent).key;
-  if (!keysAllowed.includes(keyPressed)) {
-    event.preventDefault();
-  }
-}
-
-const onPaste = (event: Event) => {
-  dataFromPaste = (event as ClipboardEvent).clipboardData
-    ?.getData("text")
-    .trim()
-    .split("");
-  if (dataFromPaste) {
-    invalidOtp.value = false;
-    for (const num of dataFromPaste) {
-      if (!keysAllowed.includes(num)) event.preventDefault();
-    }
-  }
-}
-
-const handleDelete = (event: Event) => {
-  let value = (event.target as HTMLInputElement).value;
-  let currentActiveElement = event.target as HTMLInputElement;
-  if (!value)
-    (currentActiveElement.previousElementSibling as HTMLElement)?.focus();
-}
-
-const handleInput = (event: Event) => {
-  const inputType = (event as InputEvent).inputType;
-  let currentActiveElement = event.target as HTMLInputElement;
-  if (currentActiveElement.id.split("_")[1] === "5") {
-    invalidOtp.value = false;
-  }
-  if (inputType === "insertText")
-    (currentActiveElement.nextElementSibling as HTMLElement)?.focus();
-  if (inputType === "insertFromPaste" && dataFromPaste) {
-    for (const num of dataFromPaste) {
-      let id: number = parseInt(currentActiveElement.id.split("_")[1]);
-      currentActiveElement.value = num;
-      code[id] = num;
-      if (currentActiveElement.nextElementSibling) {
-        currentActiveElement =
-          currentActiveElement.nextElementSibling as HTMLInputElement;
-        (currentActiveElement.nextElementSibling as HTMLElement)?.focus();
-      }
-    }
-  }
-}
-
-const countDownTimer = () => {
-  countDown.value = 60;
-  let interval = setInterval(() => {
-    if (countDown.value <= 0) {
-      clearInterval(interval);
-    } else {
-      countDown.value--;
-    }
-  }, 1000);
-}
-
-const resendOtp = async () => {
-  countDownTimer();
-  const result: any = await genAndSendOtpViaDAuth(
-    userOpInfo.value.signedMessage
-  );
-  if (result === 429) {
-    console.error("Too many requests to send otp.");
-    createNotification("Too many requests to send otp.", "error");
-  }
-}
-
 const token = computed(() => tokenStore.token(transaction.value.token));
 const gasToken = computed(() => tokenStore.token(transaction.value.gasToken));
 
@@ -391,57 +255,59 @@ const checkOut = async function() {
     token.value.decimals
   );
   const api = getHexlinkAccountApi();
-  op.value = await buildTokenTransferUserOp(transaction.value, api);
+  const op = await buildTokenTransferUserOp(transaction.value, api);
   const bundler = getPimlicoProvider(useChainStore().chain);
   const result = await bundler.send(
     'eth_estimateUserOperationGas',
-    [op.value, ENTRYPOINT]
+    [op, ENTRYPOINT]
   );
   const { callGasLimit, preVerificationGas, verificationGas } = result as any;
-  op.value.preVerificationGas = preVerificationGas;
-  op.value.callGasLimit = callGasLimit;
-  op.value.verificationGasLimit = verificationGas;
+  op.preVerificationGas = preVerificationGas;
+  op.callGasLimit = callGasLimit;
+  op.verificationGasLimit = verificationGas;
+  useUserOpStore().reset();
+  useUserOpStore().updateOp(op);
+  useUserOpStore().updateOpInfo({
+    txType: 'erc20Transfer',
+    txMetadata: {
+      receipt: transaction.value.toInput,
+      to: transaction.value.to,
+      amount: transaction.value.amountInput,
+      token: token.value,
+    }
+  });
   step.value = 'checkout';
   processing.value = false;
-  refreshGas();
+  shouldRefreshGas.value = true;
+  setGas();
 }
 
 const sendOtp = async () => {
-  processing.value = true;
-  try {
-    userOpInfo.value = await genUserOpInfo(op.value as UserOperationStruct);
-    await genAndSendOtpViaDAuth(userOpInfo.value.signedMessage);
-    step.value = "validate_otp";
-    countDownTimer();
-  } catch (err) {
-    console.log(err);
-    createNotification(err as string, "error");
-  }
-  processing.value = false;
+  shouldRefreshGas.value = false;
+  step.value = "process_userop";
 }
 
 const setGas = async () => {
   const chain = useChainStore().chain;
   const {maxFeePerGas, maxPriorityFeePerGas}
     = await useChainStore().provider.getFeeData();
-  op.value.maxFeePerGas = hexlify(maxFeePerGas ?? 0);
-  op.value.maxPriorityFeePerGas = hexlify(maxPriorityFeePerGas ?? 0);
+  useUserOpStore().updateOp({
+    maxFeePerGas: hexlify(maxFeePerGas ?? 0),
+    maxPriorityFeePerGas: hexlify(maxPriorityFeePerGas ?? 0),
+  });
   const price = await getPriceInfo(chain, maxFeePerGas, transaction.value.gasToken);
   const token = tokenStore.token(transaction.value.gasToken);
-  const totalGas = EthBigNumber.from(op.value.verificationGasLimit)
-    .add(op.value.callGasLimit as number)
-    .add(op.value.preVerificationGas as number);
+  const op = useUserOpStore().op;
+  const totalGas = EthBigNumber.from(op.verificationGasLimit)
+    .add(op.callGasLimit as number)
+    .add(op.preVerificationGas as number);
   transaction.value.estimatedGas
     = calcGas(chain, token, totalGas, price).toString();
-}
-
-const refreshGas = async () => {
-  if (step.value == "checkout" && !processing.value) {
-    await setGas();
+  if (shouldRefreshGas.value) {
     await delay(3000);
-    await refreshGas();
+    await setGas();
   }
-};
+}
 
 const totalServiceFee = computed(() => {
   if (EthBigNumber.from(transaction.value.estimatedGas).gt(0)) {
@@ -465,55 +331,14 @@ const tokenChoose =
       transaction.value.token = token.address;
     } else {
       transaction.value.gasToken = token.address;
-      refreshGas();
+      setGas();
     }
   };
-
-const validateOtpAndSign = async () => {
-  processing.value = true;
-  try {
-    txStatus.value = "processing";
-    message.value = "Signing your transaction...";
-    const api = getHexlinkAccountApi();
-    op.value.signature = await signUserOpViaDAuth(userOpInfo.value, code.join(""));
-    message.value = "Sending your transaction...";
-    console.log(`Signed UserOperation: ${await printOp(op.value)}`);
-    const bundler = getPimlicoProvider(useChainStore().chain);
-    const hexifiedUserOp = deepHexlify(await resolveProperties(op.value));
-    const uoHash = await bundler.send(
-      "eth_sendUserOperation",
-      [hexifiedUserOp, api.entryPointAddress]
-    );
-    console.log(`user op ${uoHash} sent...`);
-    message.value = "Transaction sent! Check the status at your transaction history.";
-    txStatus.value = "success";
-    step.value = 'process_tx';
-
-    const now = new Date();
-    useHistoryStore().add({
-      userOpHash: uoHash,
-      erc20Transfer: {
-        receipt: transaction.value.toInput,
-        to: transaction.value.to,
-        amount: transaction.value.amountInput,
-        token: token.value,
-      },
-      status: "pending",
-      sentAt: now,
-      updatedAt: now,
-    } as UserOp);
-  } catch(error: any) {
-    console.log(error);
-    txStatus.value = "error";
-    message.value = "Failed to validate the code";
-    createNotification(error.message, "error");
-  }
-  processing.value = false;
-}
 
 const reset = () => {
   step.value = 'input_email';
   transaction.value.toInput = "";
+  shouldRefreshGas.value = false;
 }
 
 const inputToken = async () => {
@@ -550,30 +375,6 @@ const inputToken = async () => {
       "invalid receiver, only address, email or phone number are accepted",
       "error"
     );
-  }
-}
-
-const router = useRouter();
-const closeModal = () => {
-  if (txStatus.value == 'success') {
-    router.push("/");
-  }
-  txStatus.value = "";
-  reset();
-  emit('closeModal', false);
-}
-
-const getNextAction = () => {
-  if (step.value === 'process_tx') {
-    if (txStatus.value === 'processing') {
-      return "Processing...";
-    } else if (txStatus.value === 'error') {
-      return "Close";
-    } else if (txStatus.value === 'success') {
-      return "Close"
-    }
-  } else if (step.value === 'notified') {
-    return "Close";
   }
 }
 </script>
@@ -1052,31 +853,6 @@ input::-webkit-inner-spin-button {
   height: 18px;
   color: #FE646F;
   width: auto; }
-.transition {
-  transition: .3s cubic-bezier(.3, 0, 0, 1.3) }
-.social-login {
-  display: flex;
-  justify-content: center;
-  gap: 10px; }
-.resend {
-  text-align: center; }
-.resend-plain {
-  color: #808080;
-  text-align: center;
-  margin-bottom: 0; }
-.otp {
-  width: 40px;
-  height: 40px;
-  font-size: 2rem;
-  text-align: center;
-  border-radius: 0.5rem;
-  box-shadow: none;
-  border: 1px solid #999;
-  margin: 15px 5px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  caret-color: transparent !important;  }
 /* Chrome, Safari, Edge, Opera */
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {

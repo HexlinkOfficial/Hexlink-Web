@@ -192,7 +192,7 @@ import { getPriceInfo } from "@/web3/network";
 import { useAuthStore } from '@/stores/auth';
 import type { Token } from "../../../../functions/common";
 import { calcGas, tokenAmount, hash } from "../../../../functions/common";
-import { genAndSendOtpViaDAuth, signUserOpViaDAuth } from '@/services/auth'
+import { genAndSendOtp, signUserOp } from '@/services/auth'
 
 import { isValidEmail } from "@/web3/utils";
 import PhoneInput from "@/components/PhoneInput.vue";
@@ -219,11 +219,7 @@ const keysAllowed: string[] = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
 const countDown = ref<number>(60);
 const invalidOtp = ref<boolean>(true);
 const userHandle = computed(() => {
-  const user = useAuthStore().user!;
-  if (useAuthStore().user?.provider.includes("twitter")) {
-    return "@" + user.handle;
-  }
-  return user?.handle;
+  return useAuthStore().user?.handle;
 });
 const phone: Ref<string> = ref("");
 const country: Ref<string> = ref("");
@@ -356,7 +352,7 @@ const countDownTimer = () => {
 
 const resendOtp = async () => {
   countDownTimer();
-  const result: any = await genAndSendOtpViaDAuth(
+  const result: any = await genAndSendOtp(
     userOpInfo.value.signedMessage
   );
   if (result === 429) {
@@ -410,7 +406,7 @@ const sendOtp = async () => {
   processing.value = true;
   try {
     userOpInfo.value = await genUserOpInfo(op.value as UserOperationStruct);
-    await genAndSendOtpViaDAuth(userOpInfo.value.signedMessage);
+    await genAndSendOtp(userOpInfo.value.signedMessage);
     step.value = "validate_otp";
     countDownTimer();
   } catch (err) {
@@ -475,9 +471,10 @@ const validateOtpAndSign = async () => {
     txStatus.value = "processing";
     message.value = "Signing your transaction...";
     const api = getHexlinkAccountApi();
-    op.value.signature = await signUserOpViaDAuth(userOpInfo.value, code.join(""));
+    op.value.signature = await signUserOp(userOpInfo.value, code.join(""));
     message.value = "Sending your transaction...";
     console.log(`Signed UserOperation: ${await printOp(op.value)}`);
+    console.log(`Signed UserOpInfo: ${userOpInfo.value}`);
     const bundler = getPimlicoProvider(useChainStore().chain);
     const hexifiedUserOp = deepHexlify(await resolveProperties(op.value));
     const uoHash = await bundler.send(

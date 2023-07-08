@@ -14,30 +14,40 @@
                     {{ prettyPrint(props.userOp.userOpHash, 10, 4) }}
                 </a>
             </a-tooltip>
-            <div class="action-and-time" style="margin-left: 5px;">
+            <div class="action-and-time" style="margin-left: 20px;">
                 ({{ prettyPrintTime(props.userOp.sentAt) }})
             </div>
         </div>
         <div class="token-amount">
             <div class="sent-info">
-                <div class="transaction-amount">
-                    - {{ props.userOp.erc20Transfer.amount }}
+                <div >
+                  - {{ props.userOp.erc20Transfer.amount }}
                 </div>
                 <div class="token-icon" style="margin-right: 0.25rem; margin-left: 0.25rem;">
                     <img :src="props.userOp.erc20Transfer.token.logoURI">
                 </div>
                 {{ props.userOp.erc20Transfer.token.symbol }}
+                <a-tooltip placement="top">
+                    <template #title>
+                    <span>
+                        {{  props.userOp.erc20Transfer.to }}
+                    </span>
+                    </template>
+                    <div style="margin-left: 10px">
+                      -> {{ props.userOp.erc20Transfer.receipt }}
+                    </div>
+                </a-tooltip>
             </div>
             <div class="sent-info" style="margin-left: 20px;">
                 <div class="sending-status">
-                  <div v-if="props.userOp.status == 'pending' && errors <= MAX_TRIED">
-                    Processing <loading-outlined />
+                  <div v-if="props.userOp.status == 'pending' && errors <= MAX_TRIED" style="fontSize: 20px;">
+                   <loading-outlined />
                   </div>
-                  <div v-if="props.userOp.status == 'success'" class="mobile-icon">
-                    <img src="@/assets/svg/createRedpacketSent-small.svg" />
+                  <div v-if="props.userOp.status == 'success'" style="color: green; fontSize: 20px;">
+                    <check-circle-filled />
                   </div>
-                  <div v-if="shouldDisplayFailed()" class="mobile-icon" style="background-color: rgb(253, 71, 85);">
-                    <img src="@/assets/svg/claimRedpacketError-small.svg" />
+                  <div v-if="shouldDisplayFailed()" style="color: rgb(253, 71, 85); fontSize: 20px;">
+                    <close-circle-filled />
                   </div>
                 </div>
             </div>
@@ -50,9 +60,8 @@ import { PropType, onMounted, ref } from 'vue';
 import { type UserOp } from '@/stores/history';
 import { useChainStore } from '@/stores/chain';
 import { delay, prettyPrint, prettyPrintTime } from '@/web3/utils';
-import { LoadingOutlined } from '@ant-design/icons-vue';
+import { LoadingOutlined, CheckCircleFilled, CloseCircleFilled } from '@ant-design/icons-vue';
 import { useHistoryStore } from '@/stores/history';
-import { getHttpRpcClient } from '@/accountAPI/util/getHttpRpcClient';
 import { getPimlicoProvider } from '@/accountAPI/PimlicoBundler';
 
 const props = defineProps({
@@ -83,7 +92,6 @@ const checkStatus = async () => {
             'eth_getUserOperationReceipt',
             [props.userOp.userOpHash]
         );
-        console.log(result);
         if (result) {
           useHistoryStore().update(props.index, {
             ...props.userOp,

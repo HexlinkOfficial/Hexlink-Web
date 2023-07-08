@@ -192,18 +192,19 @@ import { getPriceInfo } from "@/web3/network";
 import { useAuthStore } from '@/stores/auth';
 import type { Token } from "../../../../functions/common";
 import { calcGas, tokenAmount, hash } from "../../../../functions/common";
-import { genAndSendOtp } from '@/services/auth'
+import { genAndSendOtpViaDAuth, signUserOpViaDAuth } from '@/services/auth'
 
 import { isValidEmail } from "@/web3/utils";
 import PhoneInput from "@/components/PhoneInput.vue";
 import type { PhoneData } from "../types";
-import { buildTokenTransferUserOp, getHexlinkAccountApi, signUserOp } from "@/web3/userOp";
+import { UserOpInfo, buildTokenTransferUserOp, genUserOpInfo, getHexlinkAccountApi } from "@/web3/userOp";
 import { UserOperationStruct } from "@account-abstraction/contracts";
 import { getPimlicoProvider } from "@/accountAPI/PimlicoBundler";
 import { hexlify, resolveProperties } from "ethers/lib/utils"
 import { deepHexlify } from '@account-abstraction/utils'
 import type { UserOp } from '@/stores/history';
 import { useHistoryStore } from '@/stores/history';
+import { ENTRYPOINT } from "@/web3/constants";
 
 const chooseTotalDrop = ref<boolean>(false);
 const txStatus = ref<string>("");
@@ -229,6 +230,14 @@ const country: Ref<string> = ref("");
 const phoneData: Ref<PhoneData> = ref({});
 const op = ref<Partial<UserOperationStruct>>({});
 const processing = ref<boolean>(false);
+const userOpInfo = ref<UserOpInfo>({
+  userOpHash: "",
+  signedMessage: "",
+  validationData: EthBigNumber.from(0),
+  signer: "",
+  name: "",
+  nameType: "",
+});
 
 const emit = defineEmits(['closeModal']);
 
@@ -347,7 +356,9 @@ const countDownTimer = () => {
 
 const resendOtp = async () => {
   countDownTimer();
-  const result: any = await genAndSendOtp();
+  const result: any = await genAndSendOtpViaDAuth(
+    userOpInfo.value.signedMessage
+  );
   if (result === 429) {
     console.error("Too many requests to send otp.");
     createNotification("Too many requests to send otp.", "error");
@@ -384,32 +395,25 @@ const checkOut = async function() {
   const bundler = getPimlicoProvider(useChainStore().chain);
   const result = await bundler.send(
     'eth_estimateUserOperationGas',
-    [op.value, api.entryPointAddress]
+    [op.value, ENTRYPOINT]
   );
   const { callGasLimit, preVerificationGas, verificationGas } = result as any;
   op.value.preVerificationGas = preVerificationGas;
   op.value.callGasLimit = callGasLimit;
   op.value.verificationGasLimit = verificationGas;
-  await setGas();
-  refreshGas();
   step.value = 'checkout';
   processing.value = false;
+  refreshGas();
 }
 
 const sendOtp = async () => {
   processing.value = true;
   try {
-    const result: any = await genAndSendOtp();
-    if (result === 429) {
-      step.value = 'send_otp';
-      console.error("Too many requests to send otp.");
-      createNotification("Too many requests to send otp.", "error");
-    } else if (result === 200) {
-      step.value = "validate_otp";
-      countDownTimer();
-    }
+    userOpInfo.value = await genUserOpInfo(op.value as UserOperationStruct);
+    await genAndSendOtpViaDAuth(userOpInfo.value.signedMessage);
+    step.value = "validate_otp";
+    countDownTimer();
   } catch (err) {
-    step.value = 'send_otp';
     console.log(err);
     createNotification(err as string, "error");
   }
@@ -432,9 +436,9 @@ const setGas = async () => {
 }
 
 const refreshGas = async () => {
-  if (step.value == "validate_otp") {
-    await delay(10000);
+  if (step.value == "checkout" && !processing.value) {
     await setGas();
+    await delay(3000);
     await refreshGas();
   }
 };
@@ -471,7 +475,7 @@ const validateOtpAndSign = async () => {
     txStatus.value = "processing";
     message.value = "Signing your transaction...";
     const api = getHexlinkAccountApi();
-    op.value.signature = await signUserOp(op.value as UserOperationStruct, code.join(""), api);
+    op.value.signature = await signUserOpViaDAuth(userOpInfo.value, code.join(""));
     message.value = "Sending your transaction...";
     console.log(`Signed UserOperation: ${await printOp(op.value)}`);
     const bundler = getPimlicoProvider(useChainStore().chain);

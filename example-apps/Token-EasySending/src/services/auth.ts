@@ -20,6 +20,16 @@ import { normalizeEmail, createNotification } from "@/web3/utils";
 import type { Token } from "../../../../functions/common";
 import type { PhoneData } from "../types";
 
+import { getName, getNameType } from '@/web3/account';
+import { UserOpInfo } from '@/web3/userOp';
+import { ethers } from 'ethers';
+
+import DAuth from "@dauth/core";
+const dauth = new DAuth({
+    baseURL: 'https://demo-api.dauth.network/dauth/sdk/v1.1/',
+    clientID: 'demo',
+});
+
 const auth = getAuth(app)
 const functions = getFunctions()
 
@@ -32,7 +42,7 @@ export async function genAndSendOtp() {
     return (result.data as any).code as number;
 }
 
-export async function genSignature(otp: string, message: string) {
+async function genSignature(otp: string, message: string) {
     const user = useAuthStore().user!;
     if (user.idType != "mailto" && user.idType != "tel") {
         throw new Error("supported identity type");
@@ -45,6 +55,50 @@ export async function genSignature(otp: string, message: string) {
     };
     const result = await validateOTPCall(inputParam);
     return result.data;
+}
+
+export const signUserOp = async(
+    userOpInfo: UserOpInfo,
+    otp: string,
+) : Promise<string> => {
+    const result: any = await genSignature(otp, userOpInfo.signedMessage);
+    if (result.code === 200) {
+      const {signer, signature} = result as any;
+      const authInput = ethers.utils.defaultAbiCoder.encode(
+        ["tuple(uint256, address, bytes)"],
+        [[userOpInfo.validationData, signer, signature]]
+      );
+      return authInput;
+    } else if (result.code === 429) {
+      throw new Error("Too many attempts. Please wait for five minutes");
+    } else {
+      console.log(result);
+      throw new Error("Failed to sign the user opeeration");
+    }
+}
+
+export async function genAndSendOtpViaDAuth(requestId: string) {
+    await dauth.service.sendOtp({
+        account: getName(),
+        id_type: getNameType(),
+        request_id: requestId,
+    });
+}
+
+export const signUserOpViaDAuth = async(
+    userOpInfo: UserOpInfo,
+    otp: string,
+) : Promise<string> => {
+    const {signature} = await dauth.service.authOptConfirm({
+        code: otp,
+        request_id: userOpInfo.signedMessage,
+        mode: 'proof',
+        id_type: getNameType(),
+    });
+    return ethers.utils.defaultAbiCoder.encode(
+        ["tuple(uint256, address, bytes)"],
+        [[userOpInfo.validationData, userOpInfo.signer, signature]]
+    );
 }
 
 export async function notifyTransfer(

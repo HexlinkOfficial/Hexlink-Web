@@ -12,3 +12,7 @@ export const getPimlicoProvider = (chain: Chain) => {
     console.log(pimlicoEndpoint(chain));
     return new StaticJsonRpcProvider(pimlicoEndpoint(chain));
 }
+
+export const getStackuppaymaster = () => {
+    return new StaticJsonRpcProvider(`https://api.stackup.sh/v1/paymaster/21fb220e2606b06acc1149fdf78d4176da167e89880f8dc83893b2dbb237babc`)
+}

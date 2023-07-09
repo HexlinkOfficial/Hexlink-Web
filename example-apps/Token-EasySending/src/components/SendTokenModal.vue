@@ -221,6 +221,9 @@ import { hexlify, resolveProperties } from "ethers/lib/utils"
 import { deepHexlify } from '@account-abstraction/utils'
 import type { UserOp } from '@/stores/history';
 import { useHistoryStore } from '@/stores/history';
+import { getERC20Paymaster } from "@pimlico/erc20-paymaster";
+import { Client, Presets, UserOperationBuilder } from "userop";
+import { getHttpRpcClient } from '@/accountAPI/util/getHttpRpcClient';
 
 const chooseTotalDrop = ref<boolean>(false);
 const txStatus = ref<string>("");
@@ -390,6 +393,43 @@ async function delay(ms: number) {
   });
 }
 
+const inputToken = async () => {
+  transaction.value.toInput = transaction.value.toInput.toLowerCase().trim();
+  if (ethers.utils.isAddress(transaction.value.toInput)) {
+    transaction.value.receiver = {
+      schema: "address",
+      value: transaction.value.toInput
+    };
+    transaction.value.to = transaction.value.toInput;
+    step.value = 'input_token';
+  } else if (isValidEmail(transaction.value.toInput)) {
+    transaction.value.receiver = {
+      schema: "mailto",
+      value: transaction.value.toInput
+    };
+    transaction.value.to = await getAccountAddress(
+      "mailto",
+      transaction.value.toInput
+    );
+    step.value = 'input_token';
+  } else if (phoneData.value.isValid) {
+    transaction.value.receiver = {
+      schema: "tel",
+      value: phoneData.value.number!
+    };
+    transaction.value.to = await getAccountAddress(
+      "tel",
+      phoneData.value.number,
+    );
+    step.value = 'input_token';
+  } else {
+    createNotification(
+      "invalid receiver, only address, email or phone number are accepted",
+      "error"
+    );
+  }
+}
+
 const checkOut = async function() {
   processing.value = true;
   transaction.value.amount = tokenAmount(
@@ -398,11 +438,24 @@ const checkOut = async function() {
   );
   const api = getHexlinkAccountApi();
   op.value = await buildTokenTransferUserOp(transaction.value, api);
+  console.log(op.value);
   const bundler = getPimlicoProvider(useChainStore().chain);
+  console.log(useChainStore().chain);
   const result = await bundler.send(
     'eth_estimateUserOperationGas',
     [op.value, api.entryPointAddress]
   );
+  const result2 = await getHttpRpcClient(useChainStore().chain);
+  console.log(result2);
+
+  const paymasterMiddleware = Presets.Middleware.verifyingPaymaster(
+    "https://api.stackup.sh/v1/paymaster/21fb220e2606b06acc1149fdf78d4176da167e89880f8dc83893b2dbb237babc",
+    {
+      "type": "erc20token",
+      "token": "0x3870419Ba2BBf0127060bCB37f69A1b1C090992B"
+    }
+  )
+
   const { callGasLimit, preVerificationGas, verificationGas } = result as any;
   op.value.preVerificationGas = preVerificationGas;
   op.value.callGasLimit = callGasLimit;
@@ -417,7 +470,6 @@ const sendOtp = async () => {
   processing.value = true;
   try {
     const result: any = await genAndSendOtp();
-    console.log(result);
     if (result === 429) {
       step.value = 'send_otp';
       console.error("Too many requests to send otp.");
@@ -498,6 +550,7 @@ const validateOtpAndSign = async () => {
       "eth_sendUserOperation",
       [hexifiedUserOp, api.entryPointAddress]
     );
+    console.log(hexifiedUserOp);
     console.log(`user op ${uoHash} sent...`);
     message.value = "Transaction sent! Check the status at your transaction history.";
     txStatus.value = "success";
@@ -528,43 +581,6 @@ const validateOtpAndSign = async () => {
 const reset = () => {
   step.value = 'input_email';
   transaction.value.toInput = "";
-}
-
-const inputToken = async () => {
-  transaction.value.toInput = transaction.value.toInput.toLowerCase().trim();
-  if (ethers.utils.isAddress(transaction.value.toInput)) {
-    transaction.value.receiver = {
-      schema: "address",
-      value: transaction.value.toInput
-    };
-    transaction.value.to = transaction.value.toInput;
-    step.value = 'input_token';
-  } else if (isValidEmail(transaction.value.toInput)) {
-    transaction.value.receiver = {
-      schema: "mailto",
-      value: transaction.value.toInput
-    };
-    transaction.value.to = await getAccountAddress(
-      "mailto",
-      transaction.value.toInput
-    );
-    step.value = 'input_token';
-  } else if (phoneData.value.isValid) {
-    transaction.value.receiver = {
-      schema: "tel",
-      value: phoneData.value.number!
-    };
-    transaction.value.to = await getAccountAddress(
-      "tel",
-      phoneData.value.number,
-    );
-    step.value = 'input_token';
-  } else {
-    createNotification(
-      "invalid receiver, only address, email or phone number are accepted",
-      "error"
-    );
-  }
 }
 
 const router = useRouter();

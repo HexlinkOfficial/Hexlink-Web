@@ -22,7 +22,7 @@
                 <div class="modal-bg" v-if="action == 'send'">
                   <div class="claim-card transition">
                     <img @click="action = ''" class="redpacket_close transition" src="@/assets/svg/closeButton.svg" alt="close button" />
-                    <SendTokenModal @closeModal="closeModal"/>
+                    <SendTokenModal />
                   </div>
                 </div>
                 <div class="modal-bg" v-if="action == 'receive'">
@@ -88,10 +88,6 @@ const clickTab = (tab: string) => {
 
 const open = (mode: string) => {
   action.value = mode;
-}
-
-const closeModal = (variable: boolean) => {
-  action.value = "";
 }
 </script>
 

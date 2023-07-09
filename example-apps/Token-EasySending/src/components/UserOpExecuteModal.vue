@@ -28,11 +28,6 @@
                 <span style="font-size: 20px; margin: 20px 10px; text-align: center;">{{ message }}</span>
             </h2>
         </div>
-        <div style="display: flex; justify-content: center; width: 100%; padding: 0 15px;">
-            <button @click="closeModal" class="cta-button">
-                Close
-            </button>
-        </div>
     </div>
 </template>
 
@@ -46,7 +41,7 @@ import { useHistoryStore, UserOp } from '@/stores/history';
 import { genUserOpInfo, getHexlinkAccountApi } from '@/web3/userOp';
 import { createNotification } from '@/web3/utils';
 import { resolveProperties } from 'ethers/lib/utils';
-import { computed, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { deepHexlify } from "@account-abstraction/utils";
 import { UserOpInfo, useUserOpStore } from "@/stores/userOp";
@@ -58,14 +53,13 @@ const message = ref<string>("Let's go!");
 const invalidOtp = ref<boolean>(true);
 const countDown = ref<number>(60);
 const otpSent = ref<boolean>(false);
-
 const step = ref<string>("send_and_validate_otp");
 const processing = ref<boolean>(false);
-const emit = defineEmits(['close']);
-
 const userHandle = computed(() => {
   return useAuthStore().user?.handle;
 });
+
+onMounted(() => otpSent.value = false);
 
 const countDownTimer = () => {
     countDown.value = 60;
@@ -207,13 +201,6 @@ const isNumber = (event: Event) => {
   if (!keysAllowed.includes(keyPressed)) {
     event.preventDefault();
   }
-}
-
-const router = useRouter();
-const closeModal = () => {
-  router.push("/");
-  otpSent.value = false;
-  emit('close', false);
 }
 </script>
 

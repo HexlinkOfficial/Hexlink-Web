@@ -136,7 +136,7 @@
       {{ processing ? 'Processing': 'Checkout' }}
     </button>
   </div>
-  <UserOpExecuteModal v-if="step == 'process_userop'" @close="reset"></UserOpExecuteModal>
+  <UserOpExecuteModal v-if="step == 'process_userop'"></UserOpExecuteModal>
 </template>
 
 <script setup lang="ts">
@@ -193,7 +193,7 @@ const step = ref<string>("input_email");
 const processing = ref<boolean>(false);
 const shouldRefreshGas = ref<boolean>(false);
 
-const transaction = ref<TokenTransaction>({
+const EMPTY_TRANSACTION = {
   to: "",
   toInput: "",
   receiver: {schema: "", value: ""},
@@ -203,7 +203,8 @@ const transaction = ref<TokenTransaction>({
   token: tokenStore.nativeCoin.address,
   gasToken: tokenStore.nativeCoin.address,
   estimatedGas: "0",
-});
+};
+const transaction = ref<TokenTransaction>({...EMPTY_TRANSACTION});
 
 const genTokenList = async function () {
   hexlAccountBalances.value = await getBalances(
@@ -228,6 +229,11 @@ const setDefaultToken = function (getBalance: (t: string) => string) {
 }
 
 onMounted(genTokenList);
+onMounted(() => {
+  step.value = 'input_email';
+  transaction.value = {...EMPTY_TRANSACTION};
+  shouldRefreshGas.value = false;
+});
 watch(() => useChainStore().current, genTokenList);
 
 const token = computed(() => tokenStore.token(transaction.value.token));
@@ -344,14 +350,6 @@ const tokenChoose =
       setGas();
     }
   };
-
-const router = useRouter();
-const reset = () => {
-  router.push("/");
-  step.value = 'input_email';
-  transaction.value.toInput = "";
-  shouldRefreshGas.value = false;
-}
 
 const inputToken = async () => {
   transaction.value.toInput = transaction.value.toInput.toLowerCase().trim();

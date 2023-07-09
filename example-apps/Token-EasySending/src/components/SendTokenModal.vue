@@ -150,7 +150,7 @@
         </div>
         <p v-if="countDown > 0" class="resend-plain">Resend the verification code in {{ countDown }}s.</p>
         <a v-if="countDown <= 0 " class="resend" @click="resendOtp">Resend the verification code.</a>
-        <button class="cta-button" style="margin-bottom: 0px;" :disabled='invalidOtp' @click="validateOtpAndSign">
+        <button class="cta-button" style="margin-bottom: 0px;" :disabled='invalidOtp || processing' @click="validateOtpAndSign">
           {{ processing ? 'Processing': 'Verify' }}
         </button>
       </div>
@@ -192,18 +192,19 @@ import { getPriceInfo } from "@/web3/network";
 import { useAuthStore } from '@/stores/auth';
 import type { Token } from "../../../../functions/common";
 import { calcGas, tokenAmount, hash } from "../../../../functions/common";
-import { genAndSendOtp } from '@/services/auth'
+import { genAndSendOtp, signUserOp } from '@/services/auth'
 
 import { isValidEmail } from "@/web3/utils";
 import PhoneInput from "@/components/PhoneInput.vue";
 import type { PhoneData } from "../types";
-import { buildTokenTransferUserOp, getHexlinkAccountApi, signUserOp } from "@/web3/userOp";
+import { UserOpInfo, buildTokenTransferUserOp, genUserOpInfo, getHexlinkAccountApi } from "@/web3/userOp";
 import { UserOperationStruct } from "@account-abstraction/contracts";
 import { getPimlicoProvider } from "@/accountAPI/PimlicoBundler";
 import { hexlify, resolveProperties } from "ethers/lib/utils"
 import { deepHexlify } from '@account-abstraction/utils'
 import type { UserOp } from '@/stores/history';
 import { useHistoryStore } from '@/stores/history';
+import { ENTRYPOINT } from "@/web3/constants";
 
 const chooseTotalDrop = ref<boolean>(false);
 const txStatus = ref<string>("");
@@ -218,17 +219,21 @@ const keysAllowed: string[] = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
 const countDown = ref<number>(60);
 const invalidOtp = ref<boolean>(true);
 const userHandle = computed(() => {
-  const user = useAuthStore().user!;
-  if (useAuthStore().user?.provider.includes("twitter")) {
-    return "@" + user.handle;
-  }
-  return user?.handle;
+  return useAuthStore().user?.handle;
 });
 const phone: Ref<string> = ref("");
 const country: Ref<string> = ref("");
 const phoneData: Ref<PhoneData> = ref({});
 const op = ref<Partial<UserOperationStruct>>({});
 const processing = ref<boolean>(false);
+const userOpInfo = ref<UserOpInfo>({
+  userOpHash: "",
+  signedMessage: "",
+  validationData: EthBigNumber.from(0),
+  signer: "",
+  name: "",
+  nameType: "",
+});
 
 const emit = defineEmits(['closeModal']);
 
@@ -347,7 +352,9 @@ const countDownTimer = () => {
 
 const resendOtp = async () => {
   countDownTimer();
-  const result: any = await genAndSendOtp();
+  const result: any = await genAndSendOtp(
+    userOpInfo.value.signedMessage
+  );
   if (result === 429) {
     console.error("Too many requests to send otp.");
     createNotification("Too many requests to send otp.", "error");
@@ -379,37 +386,36 @@ const checkOut = async function() {
     transaction.value.amountInput,
     token.value.decimals
   );
-  const api = getHexlinkAccountApi();
-  op.value = await buildTokenTransferUserOp(transaction.value, api);
-  const bundler = getPimlicoProvider(useChainStore().chain);
-  const result = await bundler.send(
-    'eth_estimateUserOperationGas',
-    [op.value, api.entryPointAddress]
-  );
-  const { callGasLimit, preVerificationGas, verificationGas } = result as any;
-  op.value.preVerificationGas = preVerificationGas;
-  op.value.callGasLimit = callGasLimit;
-  op.value.verificationGasLimit = verificationGas;
-  await setGas();
-  refreshGas();
-  step.value = 'checkout';
+  try {
+    const api = getHexlinkAccountApi();
+    op.value = await buildTokenTransferUserOp(transaction.value, api);
+    const bundler = getPimlicoProvider(useChainStore().chain);
+    const result = await bundler.send(
+      'eth_estimateUserOperationGas',
+      [op.value, ENTRYPOINT]
+    );
+    console.log(result);
+    const { callGasLimit, preVerificationGas, verificationGas } = result as any;
+    op.value.preVerificationGas = preVerificationGas;
+    op.value.callGasLimit = callGasLimit;
+    op.value.verificationGasLimit = verificationGas;
+    step.value = 'checkout';
+    refreshGas();
+  } catch(err) {
+    console.log(err);
+    createNotification("unable to estimate gas, balance may be too low", "error");
+  }
   processing.value = false;
 }
 
 const sendOtp = async () => {
   processing.value = true;
   try {
-    const result: any = await genAndSendOtp();
-    if (result === 429) {
-      step.value = 'send_otp';
-      console.error("Too many requests to send otp.");
-      createNotification("Too many requests to send otp.", "error");
-    } else if (result === 200) {
-      step.value = "validate_otp";
-      countDownTimer();
-    }
+    userOpInfo.value = await genUserOpInfo(op.value as UserOperationStruct);
+    await genAndSendOtp(userOpInfo.value.signedMessage);
+    step.value = "validate_otp";
+    countDownTimer();
   } catch (err) {
-    step.value = 'send_otp';
     console.log(err);
     createNotification(err as string, "error");
   }
@@ -432,9 +438,9 @@ const setGas = async () => {
 }
 
 const refreshGas = async () => {
-  if (step.value == "validate_otp") {
-    await delay(10000);
+  if (step.value == "checkout") {
     await setGas();
+    await delay(3000);
     await refreshGas();
   }
 };
@@ -471,9 +477,10 @@ const validateOtpAndSign = async () => {
     txStatus.value = "processing";
     message.value = "Signing your transaction...";
     const api = getHexlinkAccountApi();
-    op.value.signature = await signUserOp(op.value as UserOperationStruct, code.join(""), api);
+    op.value.signature = await signUserOp(userOpInfo.value, code.join(""));
     message.value = "Sending your transaction...";
     console.log(`Signed UserOperation: ${await printOp(op.value)}`);
+    console.log(`UserOpInfo: ${(JSON.stringify(userOpInfo.value, null, 2))}`);
     const bundler = getPimlicoProvider(useChainStore().chain);
     const hexifiedUserOp = deepHexlify(await resolveProperties(op.value));
     const uoHash = await bundler.send(

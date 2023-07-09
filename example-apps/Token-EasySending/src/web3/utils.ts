@@ -100,6 +100,6 @@ export function prettyPrintTime(timestamp: Date) : string {
     } else if (diff < 86400) {
         return Math.floor(diff / 3600) + " hours ago";
     } else {
-        return timestamp.toLocaleString().split(',')[0];
+        return timestamp.toLocaleString().split('T')[0];
     }
 }

@@ -39,7 +39,7 @@
 <script setup lang="ts">
 import { getPimlicoProvider } from '@/accountAPI/PimlicoBundler';
 import { printOp } from '@/accountAPI/opUtils';
-import { genAndSendOtpViaDAuth, signUserOpViaDAuth } from '@/services/auth';
+import { genAndSendOtp, signUserOp } from '@/services/auth';
 import { useAuthStore } from '@/stores/auth';
 import { useChainStore } from '@/stores/chain';
 import { useHistoryStore, UserOp } from '@/stores/history';
@@ -49,7 +49,7 @@ import { resolveProperties } from 'ethers/lib/utils';
 import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { deepHexlify } from "@account-abstraction/utils";
-import { useUserOpStore } from "@/stores/userOp";
+import { UserOpInfo, useUserOpStore } from "@/stores/userOp";
 
 const keysAllowed: string[] = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9",];
 let code: string[] = Array(6);
@@ -84,7 +84,7 @@ const countDownTimer = () => {
 
 const resendOtp = async () => {
     countDownTimer();
-    const result: any = await genAndSendOtpViaDAuth(
+    const result: any = await genAndSendOtp(
         useUserOpStore().opInfo.signedMessage!
     );
     if (result === 429) {
@@ -125,7 +125,7 @@ const sendOtp = async () => {
   try {
     const opInfo = await genUserOpInfo(useUserOpStore().op);
     useUserOpStore().updateOpInfo(opInfo);
-    await genAndSendOtpViaDAuth(opInfo.signedMessage);
+    await genAndSendOtp(opInfo.signedMessage);
     otpSent.value = true;
     countDownTimer();
   } catch (err) {
@@ -137,12 +137,12 @@ const sendOtp = async () => {
 
 const validateOtpAndSign = async () => {
   const op = useUserOpStore().op;
-  const opInfo = useUserOpStore().opInfo;
+  const opInfo = useUserOpStore().opInfo as UserOpInfo;
   processing.value = true;
   try {
     message.value = "Signing your transaction...";
     const api = getHexlinkAccountApi();
-    op.signature = await signUserOpViaDAuth(opInfo, code.join(""));
+    op.signature = await signUserOp(opInfo, code.join(""));
     message.value = "Sending your transaction...";
     console.log(`Signed UserOperation: ${await printOp(op)}`);
     const bundler = getPimlicoProvider(useChainStore().chain);

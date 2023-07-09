@@ -386,20 +386,26 @@ const checkOut = async function() {
     transaction.value.amountInput,
     token.value.decimals
   );
-  const api = getHexlinkAccountApi();
-  op.value = await buildTokenTransferUserOp(transaction.value, api);
-  const bundler = getPimlicoProvider(useChainStore().chain);
-  const result = await bundler.send(
-    'eth_estimateUserOperationGas',
-    [op.value, ENTRYPOINT]
-  );
-  const { callGasLimit, preVerificationGas, verificationGas } = result as any;
-  op.value.preVerificationGas = preVerificationGas;
-  op.value.callGasLimit = callGasLimit;
-  op.value.verificationGasLimit = verificationGas;
-  step.value = 'checkout';
+  try {
+    const api = getHexlinkAccountApi();
+    op.value = await buildTokenTransferUserOp(transaction.value, api);
+    const bundler = getPimlicoProvider(useChainStore().chain);
+    const result = await bundler.send(
+      'eth_estimateUserOperationGas',
+      [op.value, ENTRYPOINT]
+    );
+    console.log(result);
+    const { callGasLimit, preVerificationGas, verificationGas } = result as any;
+    op.value.preVerificationGas = preVerificationGas;
+    op.value.callGasLimit = callGasLimit;
+    op.value.verificationGasLimit = verificationGas;
+    step.value = 'checkout';
+    refreshGas();
+  } catch(err) {
+    console.log(err);
+    createNotification("unable to estimate gas, balance may be too low", "error");
+  }
   processing.value = false;
-  refreshGas();
 }
 
 const sendOtp = async () => {
@@ -432,7 +438,7 @@ const setGas = async () => {
 }
 
 const refreshGas = async () => {
-  if (step.value == "checkout" && !processing.value) {
+  if (step.value == "checkout") {
     await setGas();
     await delay(3000);
     await refreshGas();

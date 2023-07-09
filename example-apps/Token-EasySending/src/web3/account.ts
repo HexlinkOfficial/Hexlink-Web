@@ -4,7 +4,7 @@ import {
     Account__factory,
 } from '@hexlink/contracts'
 
-import { EntryPoint__factory, IAccount__factory } from "@account-abstraction/contracts";
+import { EntryPoint__factory } from "@account-abstraction/contracts";
 
 import { useAuthStore } from "@/stores/auth";
 import { useChainStore } from "@/stores/chain";

@@ -400,12 +400,13 @@ const checkOut = async function() {
     op.value.callGasLimit = callGasLimit;
     op.value.verificationGasLimit = verificationGas;
     step.value = 'checkout';
+    processing.value = false;
     refreshGas();
   } catch(err) {
     console.log(err);
     createNotification("unable to estimate gas, balance may be too low", "error");
+    processing.value = false;
   }
-  processing.value = false;
 }
 
 const sendOtp = async () => {
@@ -426,6 +427,7 @@ const setGas = async () => {
   const chain = useChainStore().chain;
   const {maxFeePerGas, maxPriorityFeePerGas}
     = await useChainStore().provider.getFeeData();
+  if (processing.value) { return; }
   op.value.maxFeePerGas = hexlify(maxFeePerGas ?? 0);
   op.value.maxPriorityFeePerGas = hexlify(maxPriorityFeePerGas ?? 0);
   const price = await getPriceInfo(chain, maxFeePerGas, transaction.value.gasToken);
@@ -438,7 +440,7 @@ const setGas = async () => {
 }
 
 const refreshGas = async () => {
-  if (step.value == "checkout") {
+  if (step.value == "checkout" && !processing.value) {
     await setGas();
     await delay(3000);
     await refreshGas();

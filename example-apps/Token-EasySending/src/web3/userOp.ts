@@ -9,16 +9,8 @@ import ERC20_ABI from "../abi/ERC20_ABI.json";
 import { HexlinkAccountAPI } from "@/accountAPI/HexlinkAccountAPI";
 import { DUMMY_SIGNATURE, ENTRYPOINT } from "./constants";
 import { hash } from "./utils";
-import { hexlify } from "ethers/lib/utils"
-
-export interface UserOpInfo {
-  userOpHash: string;
-  validationData: EthBigNumber;
-  signer: string;
-  name: string;
-  nameType: string;
-  signedMessage: string;
-}
+import { hexlify } from "ethers/lib/utils";
+import { UserOpInfo } from "@/stores/userOp";
 
 const erc20Interface = new ethers.utils.Interface(ERC20_ABI);
 
@@ -73,7 +65,7 @@ export const buildTokenTransferUserOp = async (
   };
 
 export const genUserOpInfo = async (
-  userOp: UserOperationStruct,
+  userOp: Partial<UserOperationStruct>,
 ) : Promise<UserOpInfo> => {
   const userOpHash = await genUserOpHash(
     userOp,
@@ -98,7 +90,7 @@ export const genUserOpInfo = async (
 }
 
 export const genUserOpHash = async (
-    userOp: UserOperationStruct,
+    userOp: Partial<UserOperationStruct>,
     chainId: string,
     entryPointAddress: string
   ) => {
@@ -120,14 +112,14 @@ export const genUserOpHash = async (
         [
           op.sender,
           op.nonce,
-          ethers.utils.keccak256(op.initCode),
-          ethers.utils.keccak256(op.callData),
+          ethers.utils.keccak256(op.initCode!),
+          ethers.utils.keccak256(op.callData!),
           op.callGasLimit,
           op.verificationGasLimit,
           op.preVerificationGas,
           op.maxFeePerGas,
           op.maxPriorityFeePerGas,
-          ethers.utils.keccak256(op.paymasterAndData)
+          ethers.utils.keccak256(op.paymasterAndData!)
         ]
       )
     );

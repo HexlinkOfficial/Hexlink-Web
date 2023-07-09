@@ -50,5 +50,8 @@ export const useHistoryStore = defineStore({
         update(index: number, userOp: UserOp) {
             this.history[index] = userOp;
         },
+        reset() {
+            this.histories = {};
+        },
     },
 });

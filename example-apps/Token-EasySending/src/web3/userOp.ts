@@ -55,10 +55,10 @@ export const buildTokenTransferUserOp = async (
         initCode,
         callData: buildCallData(tx.token, tx.to, tx.amount),
         callGasLimit: hexlify(2000000),
-        verificationGasLimit: hexlify(2000000),
+        verificationGasLimit: hexlify(500000),
         maxFeePerGas: hexlify(gasInfo.maxFeePerGas ?? 0),
         maxPriorityFeePerGas: hexlify(gasInfo.maxPriorityFeePerGas ?? 0),
-        preVerificationGas: hexlify(2000000),
+        preVerificationGas: hexlify(100000),
         paymasterAndData: "0x",
         signature: authInput,
     };

@@ -53,6 +53,6 @@ export const useHistoryStore = defineStore({
         },
         reset() {
             this.histories = {};
-        }
+        },
     },
 });

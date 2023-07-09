@@ -20,13 +20,13 @@ import { normalizeEmail, createNotification } from "@/web3/utils";
 import type { Token } from "../../../../functions/common";
 import type { PhoneData } from "../types";
 
-import { getName, getNameType } from '@/web3/account';
-import { UserOpInfo } from '@/web3/userOp';
+import { getAuthProviderType, getName, getNameType } from '@/web3/account';
 import { ethers } from 'ethers';
 
 import DAuth from "@dauth/core";
 import { useHistoryStore } from '@/stores/history';
-const dauth = new DAuth({
+import { UserOpInfo } from '@/stores/userOp';
+const dauthClient = new DAuth({
     baseURL: 'https://demo-api.dauth.network/dauth/sdk/v1.1/',
     clientID: 'demo',
 });
@@ -34,13 +34,22 @@ const dauth = new DAuth({
 const auth = getAuth(app)
 const functions = getFunctions()
 
-export async function genAndSendOtp() {
-    const user = useAuthStore().user!;
-    const genOtpCall = httpsCallable(functions, 'genAndSendOTP');
-    const result = await genOtpCall({
-        receiver: {schema: user.idType, value: user.handle}
-    });
-    return (result.data as any).code as number;
+export async function genAndSendOtp(requestId: string) {
+    const authProviderType = await getAuthProviderType();
+    if (authProviderType === "hexlink") {
+        const user = useAuthStore().user!;
+        const genOtpCall = httpsCallable(functions, 'genAndSendOTP');
+        const result = await genOtpCall({
+            receiver: {schema: user.idType, value: user.handle}
+        });
+        return (result.data as any).code as number;
+    } else {
+        await dauthClient.service.sendOtp({
+            account: getName(),
+            id_type: getNameType(),
+            request_id: requestId, // remove 0x
+        });
+    }
 }
 
 async function genSignature(otp: string, message: string) {
@@ -62,44 +71,35 @@ export const signUserOp = async(
     userOpInfo: UserOpInfo,
     otp: string,
 ) : Promise<string> => {
-    const result: any = await genSignature(otp, userOpInfo.signedMessage);
-    if (result.code === 200) {
-      const {signer, signature} = result as any;
-      const authInput = ethers.utils.defaultAbiCoder.encode(
-        ["tuple(uint256, address, bytes)"],
-        [[userOpInfo.validationData, signer, signature]]
-      );
-      return authInput;
-    } else if (result.code === 429) {
-      throw new Error("Too many attempts. Please wait for five minutes");
+    const authProviderType = await getAuthProviderType();
+    if (authProviderType === "hexlink") {
+        const result: any = await genSignature(otp, userOpInfo.signedMessage);
+        if (result.code === 200) {
+          const {signer, signature} = result as any;
+          const authInput = ethers.utils.defaultAbiCoder.encode(
+            ["tuple(uint256, address, bytes)"],
+            [[userOpInfo.validationData, signer, signature]]
+          );
+          return authInput;
+        } else if (result.code === 429) {
+          throw new Error("Too many attempts. Please wait for five minutes");
+        } else {
+          console.log(result);
+          throw new Error("Failed to sign the user opeeration");
+        }
     } else {
-      console.log(result);
-      throw new Error("Failed to sign the user opeeration");
+        const result = await dauthClient.service.authOtpConfirm({
+            code: otp,
+            request_id: userOpInfo.signedMessage,
+            mode: 'proof',
+            id_type: getNameType(),
+        });
+        const signature = "0x" + result.data.signature;
+        return ethers.utils.defaultAbiCoder.encode(
+            ["tuple(uint256, address, bytes)"],
+            [[userOpInfo.validationData, userOpInfo.signer, signature]]
+        );
     }
-}
-
-export async function genAndSendOtpViaDAuth(requestId: string) {
-    await dauth.service.sendOtp({
-        account: getName(),
-        id_type: getNameType(),
-        request_id: requestId,
-    });
-}
-
-export const signUserOpViaDAuth = async(
-    userOpInfo: UserOpInfo,
-    otp: string,
-) : Promise<string> => {
-    const {signature} = await dauth.service.authOptConfirm({
-        code: otp,
-        request_id: userOpInfo.signedMessage,
-        mode: 'proof',
-        id_type: getNameType(),
-    });
-    return ethers.utils.defaultAbiCoder.encode(
-        ["tuple(uint256, address, bytes)"],
-        [[userOpInfo.validationData, userOpInfo.signer, signature]]
-    );
 }
 
 export async function notifyTransfer(
@@ -157,7 +157,7 @@ export async function emailAnonymousLogin(email: string) {
         email = normalizeEmail(email);
         const result = await signInAnonymously(auth);
         const idToken = await result.user!.getIdToken();
-        const user : IUser = {
+        const user = {
             provider: "hexlink.io",
             idType: "mailto",
             email: email,

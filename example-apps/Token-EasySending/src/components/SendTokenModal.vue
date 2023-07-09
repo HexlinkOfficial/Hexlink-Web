@@ -254,32 +254,38 @@ const checkOut = async function() {
     transaction.value.amountInput,
     token.value.decimals
   );
-  const api = getHexlinkAccountApi();
-  const op = await buildTokenTransferUserOp(transaction.value, api);
-  const bundler = getPimlicoProvider(useChainStore().chain);
-  const result = await bundler.send(
-    'eth_estimateUserOperationGas',
-    [op, ENTRYPOINT]
-  );
-  const { callGasLimit, preVerificationGas, verificationGas } = result as any;
-  op.preVerificationGas = preVerificationGas;
-  op.callGasLimit = callGasLimit;
-  op.verificationGasLimit = verificationGas;
-  useUserOpStore().reset();
-  useUserOpStore().updateOp(op);
-  useUserOpStore().updateOpInfo({
-    txType: 'erc20Transfer',
-    txMetadata: {
-      receipt: transaction.value.toInput,
-      to: transaction.value.to,
-      amount: transaction.value.amountInput,
-      token: token.value,
-    }
-  });
-  step.value = 'checkout';
-  processing.value = false;
-  shouldRefreshGas.value = true;
-  setGas();
+  try {
+    const api = getHexlinkAccountApi();
+    const op = await buildTokenTransferUserOp(transaction.value, api);
+    const bundler = getPimlicoProvider(useChainStore().chain);
+    const result = await bundler.send(
+      'eth_estimateUserOperationGas',
+      [op, ENTRYPOINT]
+    );
+    const { callGasLimit, preVerificationGas, verificationGas } = result as any;
+    op.preVerificationGas = preVerificationGas;
+    op.callGasLimit = callGasLimit;
+    op.verificationGasLimit = verificationGas;
+    useUserOpStore().reset();
+    useUserOpStore().updateOp(op);
+    useUserOpStore().updateOpInfo({
+      txType: 'erc20Transfer',
+      txMetadata: {
+        receipt: transaction.value.toInput,
+        to: transaction.value.to,
+        amount: transaction.value.amountInput,
+        token: token.value,
+      }
+    });
+    step.value = 'checkout';
+    processing.value = false;
+    shouldRefreshGas.value = true;
+    setGas();
+  } catch(err) {
+    console.log(err);
+    createNotification("unable to estimate gas", "error");
+    processing.value = false;
+  }
 }
 
 const sendOtp = async () => {

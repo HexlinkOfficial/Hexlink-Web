@@ -21,20 +21,20 @@
         <div class="token-amount">
             <div class="sent-info">
                 <div >
-                  - {{ props.userOp.erc20Transfer.amount }}
+                  - {{ props.userOp.metadata.amount }}
                 </div>
                 <div class="token-icon" style="margin-right: 0.25rem; margin-left: 0.25rem;">
-                    <img :src="props.userOp.erc20Transfer.token.logoURI">
+                    <img :src="props.userOp.metadata.token.logoURI">
                 </div>
-                {{ props.userOp.erc20Transfer.token.symbol }}
+                {{ props.userOp.metadata.token.symbol }}
                 <a-tooltip placement="top">
                     <template #title>
                     <span>
-                        {{  props.userOp.erc20Transfer.to }}
+                        {{  props.userOp.metadata.to }}
                     </span>
                     </template>
                     <div style="margin-left: 10px">
-                      -> {{ props.userOp.erc20Transfer.receipt }}
+                      -> {{ props.userOp.metadata.receipt }}
                     </div>
                 </a-tooltip>
             </div>

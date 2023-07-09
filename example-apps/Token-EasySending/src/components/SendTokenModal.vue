@@ -165,6 +165,7 @@ import { hexlify } from "ethers/lib/utils"
 import { ENTRYPOINT } from "@/web3/constants";
 import { useUserOpStore } from "@/stores/userOp";
 import UserOpExecuteModal from "@/components/UserOpExecuteModal.vue";
+import { useRouter } from "vue-router";
 
 interface TokenTransaction {
   to: string,
@@ -297,6 +298,9 @@ const setGas = async () => {
   const chain = useChainStore().chain;
   const {maxFeePerGas, maxPriorityFeePerGas}
     = await useChainStore().provider.getFeeData();
+  if (!shouldRefreshGas.value) {
+    return;
+  }
   useUserOpStore().updateOp({
     maxFeePerGas: hexlify(maxFeePerGas ?? 0),
     maxPriorityFeePerGas: hexlify(maxPriorityFeePerGas ?? 0),
@@ -341,7 +345,9 @@ const tokenChoose =
     }
   };
 
+const router = useRouter();
 const reset = () => {
+  router.push("/");
   step.value = 'input_email';
   transaction.value.toInput = "";
   shouldRefreshGas.value = false;

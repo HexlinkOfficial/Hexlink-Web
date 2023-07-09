@@ -12,7 +12,7 @@
                 </div>
                 <p v-if="otpSent && countDown > 0" class="resend-plain">Resend the verification code in {{ countDown }}s.</p>
                 <a v-if="otpSent && countDown <= 0" class="resend" @click="resendOtp">Resend the verification code.</a>
-                <button class="cta-button" style="margin-bottom: 0px;" :disabled='invalidOtp' @click="sendOrValidateOtp">
+                <button class="cta-button" style="margin-bottom: 0px;" :disabled='otpSent && invalidOtp' @click="sendOrValidateOtp">
                     {{ otpPrompt() }}
                 </button>
             </div>
@@ -64,11 +64,7 @@ const processing = ref<boolean>(false);
 const emit = defineEmits(['close']);
 
 const userHandle = computed(() => {
-  const user = useAuthStore().user!;
-  if (useAuthStore().user?.provider.includes("twitter")) {
-    return "@" + user.handle;
-  }
-  return user?.handle;
+  return useAuthStore().user?.handle;
 });
 
 const countDownTimer = () => {
@@ -101,10 +97,10 @@ const handleDelete = (event: Event) => {
 }
 
 const sendOrValidateOtp = async () => {
-    if (step.value === "validate_otp" && otpSent) {
-        validateOtpAndSign();
+    if (otpSent.value) {
+        await validateOtpAndSign();
     } else {
-        sendOtp();
+        await sendOtp();
     }
 }
 

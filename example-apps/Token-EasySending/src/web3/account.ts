@@ -18,12 +18,12 @@ export async function isContract(address: string) : Promise<boolean> {
     return false;
 }
 
-export function getNameType() {
-    return useAuthStore().user!.idType;
+export function getNameType() : string {
+    return useAuthStore().user!.idType!;
 }
 
-export function getName() {
-    return useAuthStore().user!.handle;
+export function getName() : string {
+    return useAuthStore().user!.handle!;
 }
 
 export async function getAccountAddress(nameType?: string, name?: string) {
@@ -58,4 +58,40 @@ export function buildAccountExecData(
         value: value ?? 0,
         data: data ?? ""
     }]);
+}
+
+function isDAuthValidator(address: string) : boolean {
+    const validator = import.meta.env.VITE_DAUTH_VALIDATOR;
+    return validator.toLowerCase() === address.toLowerCase();
+}
+
+function isHexlinkValidator(address: string) : boolean {
+    const validator = import.meta.env.VITE_HEXLINK_VALIDATOR;
+    return validator.toLowerCase() === address.toLowerCase();
+}
+
+export async function getAuthProviderType() : Promise<string> {
+    let validator;
+    const account = await getAccountAddress();
+    if (await isContract(account)) {
+        const contract = Account__factory.connect(
+            account,
+            useChainStore().provider
+        );
+        const [factor1,] = await contract.getAuthFactors();
+        validator = factor1[1];
+    } else {
+        const hexlink = Hexlink__factory.connect(
+            import.meta.env.VITE_ACCOUNT_FACTORY_V2,
+            useChainStore().provider
+        );
+        validator = await hexlink.getDefaultValidator(hash(getNameType()));
+    }
+    if (isDAuthValidator(validator)) {
+        return "dauth";
+    } else if (isHexlinkValidator(validator)) {
+        return "hexlink";
+    } else {
+        throw new Error("unsupported validator");
+    }
 }

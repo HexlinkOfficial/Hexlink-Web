@@ -8,7 +8,6 @@ import {
 
 import { hexConcat } from 'ethers/lib/utils'
 import { BaseApiParams, BaseAccountAPI } from './BaseAccountAPI'
-import { genSignature } from '../services/auth'
 import { getAccountAddress } from '../web3/account'
 
 /**
@@ -91,8 +90,8 @@ export class HexlinkAccountAPI extends BaseAccountAPI {
       [{target, value, data}])
   }
 
-  async signUserOpHash (userOpHash: string): Promise<string> {
-    return await genSignature(this.name, userOpHash)
+  signUserOpHash(userOpHash: string): Promise<string> {
+    throw new Error('Method not implemented.')
   }
 
   async getAccountAddress (): Promise<string> {

@@ -24,7 +24,7 @@ export const useAuthStore = defineStore({
         )
     },
     actions: {
-        signIn(user: IUser) {
+        signIn(user: Partial<IUser>) {
             console.log("User logged in");
             this.user = user;
             if (!this.user.photoURL) {

@@ -6,11 +6,19 @@ import { BigNumber as EthBigNumber } from "ethers";
 import { getAccountAddress, getName, getNameType, getNonce, isContract } from "./account";
 import { buildAccountExecData } from "./account";
 import ERC20_ABI from "../abi/ERC20_ABI.json";
-import { genSignature } from "@/services/auth";
 import { HexlinkAccountAPI } from "@/accountAPI/HexlinkAccountAPI";
 import { DUMMY_SIGNATURE, ENTRYPOINT } from "./constants";
 import { hash } from "./utils";
 import { hexlify } from "ethers/lib/utils"
+
+export interface UserOpInfo {
+  userOpHash: string;
+  validationData: EthBigNumber;
+  signer: string;
+  name: string;
+  nameType: string;
+  signedMessage: string;
+}
 
 const erc20Interface = new ethers.utils.Interface(ERC20_ABI);
 
@@ -55,48 +63,39 @@ export const buildTokenTransferUserOp = async (
         initCode,
         callData: buildCallData(tx.token, tx.to, tx.amount),
         callGasLimit: hexlify(2000000),
-        verificationGasLimit: hexlify(2000000),
+        verificationGasLimit: hexlify(500000),
         maxFeePerGas: hexlify(gasInfo.maxFeePerGas ?? 0),
         maxPriorityFeePerGas: hexlify(gasInfo.maxPriorityFeePerGas ?? 0),
-        preVerificationGas: hexlify(2000000),
+        preVerificationGas: hexlify(100000),
         paymasterAndData: "0x",
         signature: authInput,
     };
   };
 
-export const signUserOp = async(
-    userOp: UserOperationStruct,
-    otp: string,
-    api: HexlinkAccountAPI,
-) : Promise<string> => {
-    const userOpHash = await genUserOpHash(
-      userOp,
-      useChainStore().chain.chainId!,
-      api.entryPointAddress
-    );
-    const validationData = genValidationData();
-    const toSign = ethers.utils.keccak256(
-      ethers.utils.defaultAbiCoder.encode(
-        ["uint256", "bytes32"],
-        [validationData, userOpHash]
-      )
-    );
-    const result: any = await genSignature(otp, toSign);
-    if (result.code === 200) {
-      const {signer, signature} = result as any;
-      const authInput = ethers.utils.defaultAbiCoder.encode(
-        ["tuple(uint256, address, bytes)"],
-        [[validationData, signer, signature]]
-      );
-      return authInput;
-    } else if (result.code === 429) {
-      throw new Error("Too many attempts. Please wait for five minutes");
-    } else {
-      console.log(result);
-      throw new Error("Failed to sign the user opeeration");
-    }
+export const genUserOpInfo = async (
+  userOp: UserOperationStruct,
+) : Promise<UserOpInfo> => {
+  const userOpHash = await genUserOpHash(
+    userOp,
+    useChainStore().chain.chainId!,
+    ENTRYPOINT,
+  );
+  const validationData = genValidationData();
+  const signedMessage = ethers.utils.keccak256(
+    ethers.utils.defaultAbiCoder.encode(
+      ["uint256", "bytes32"],
+      [validationData, userOpHash]
+    )
+  );
+  return {
+    userOpHash,
+    validationData,
+    signer: import.meta.env.VITE_DAUTH_VALIDATOR,
+    signedMessage,
+    name: getName(),
+    nameType: getNameType(),
+  }
 }
-
 
 export const genUserOpHash = async (
     userOp: UserOperationStruct,

@@ -9,7 +9,7 @@ import ERC20_ABI from "../abi/ERC20_ABI.json";
 import { HexlinkAccountAPI } from "@/accountAPI/HexlinkAccountAPI";
 import { DUMMY_SIGNATURE, ENTRYPOINT } from "./constants";
 import { hash } from "./utils";
-import { hexlify } from "ethers/lib/utils"
+import { hexlify } from "ethers/lib/utils";
 
 export interface UserOpInfo {
   userOpHash: string;

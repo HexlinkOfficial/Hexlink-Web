@@ -66,14 +66,16 @@
             </div>
             <div class="mode-text2">{{ token.symbol }}</div>
             <input class="mode-input" type="text" placeholder="select" readonly>
-            <div class="mode-options" style="right: -25.375px;">
-              <div class="mode-option" v-for="(token, index) of tokens" :key="index" @click="tokenChoose('token', token)">
-                <div class="token-icon">
-                  <img :src="token.logoURI" />
-                </div>
-                <div class="token-box">
-                  <b>{{ token.symbol }}</b>
-                  <div style="margin-right:0.5rem;">balance {{ tokenBalance(token.address) }}</div>
+            <div class="mode-options-wrap">
+              <div class="mode-options">
+                <div class="mode-option" v-for="(token, index) of tokens" :key="index" @click="tokenChoose('token', token)">
+                  <div class="token-icon">
+                    <img :src="token.logoURI" />
+                  </div>
+                  <div class="token-box">
+                    <b>{{ token.symbol }}</b>
+                    <div style="margin-right:0.5rem;">balance {{ tokenBalance(token.address) }}</div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -215,7 +217,7 @@ import PhoneInput from "@/components/PhoneInput.vue";
 import type { PhoneData } from "../types";
 import { UserOpInfo, buildTokenTransferUserOp, genUserOpInfo, getHexlinkAccountApi } from "@/web3/userOp";
 import { UserOperationStruct } from "@account-abstraction/contracts";
-import { getPimlicoProvider } from "@/accountAPI/PimlicoBundler";
+import { getPimlicoProvider, getStackupPaymaster } from "@/accountAPI/PimlicoBundler";
 import SkeletonLoader from '@/components/SkeletonLoader.vue';
 import { hexlify, resolveProperties } from "ethers/lib/utils"
 import { deepHexlify } from '@account-abstraction/utils'
@@ -225,6 +227,7 @@ import { getERC20Paymaster } from "@pimlico/erc20-paymaster";
 import { Client, Presets, UserOperationBuilder } from "userop";
 import { getHttpRpcClient } from '@/accountAPI/util/getHttpRpcClient';
 import { ENTRYPOINT } from "@/web3/constants";
+import { StaticJsonRpcProvider } from "@ethersproject/providers"
 
 const chooseTotalDrop = ref<boolean>(false);
 const txStatus = ref<string>("");
@@ -452,20 +455,57 @@ const checkOut = async function() {
       [op.value, ENTRYPOINT]
     );
     console.log(result);
-    const result2 = await getHttpRpcClient(useChainStore().chain);
-    console.log(result2);
 
-    const paymasterMiddleware = Presets.Middleware.verifyingPaymaster(
-      "https://api.stackup.sh/v1/paymaster/21fb220e2606b06acc1149fdf78d4176da167e89880f8dc83893b2dbb237babc",
-      {
-        "type": "erc20token",
-        "token": "0x3870419Ba2BBf0127060bCB37f69A1b1C090992B"
-      }
-    )
+
     const { callGasLimit, preVerificationGas, verificationGas } = result as any;
     op.value.preVerificationGas = preVerificationGas;
     op.value.callGasLimit = callGasLimit;
     op.value.verificationGasLimit = verificationGas;
+
+    console.log(op.value);
+
+
+    // const stackupBundler = getStackupPaymaster();
+    // const result2 = await stackupBundler.send(
+    //   "pm_sponsorUserOperation",
+    //   [
+    //     op.value,
+    //     ENTRYPOINT,
+    //     {
+    //       "type": "erc20token",
+    //       "token": "0x3870419Ba2BBf0127060bCB37f69A1b1C090992B"
+    //     }
+    //   ]
+    // )
+    // console.log("paymaster: ", result2)
+    const options = {
+      method: 'POST',
+      headers: { accept: 'application/json', 'content-type': 'application/json' },
+      body: JSON.stringify({
+        jsonrpc: '2.0',
+        id: 1,
+        method: 'pm_sponsorUserOperation',
+        params: [
+          op.value,
+          ENTRYPOINT,
+          {
+            "type": "erc20token",
+            "token": "0x3870419Ba2BBf0127060bCB37f69A1b1C090992B"
+          }
+        ]
+      })
+    };
+
+    fetch('https://api.stackup.sh/v1/paymaster/21fb220e2606b06acc1149fdf78d4176da167e89880f8dc83893b2dbb237babc', options)
+      .then(response => response.json())
+      .then(response => console.log(response))
+      .catch(err => console.error(err));
+    // const provider = useChainStore().provider;
+    // const erc20Paymaster = await getERC20Paymaster(provider, "USDC");
+    // const paymasterAndData = await erc20Paymaster.generatePaymasterAndData(op.value);
+    // await erc20Paymaster.verifyTokenApproval(op.value)
+    // op.value.paymasterAndData = paymasterAndData;
+
     step.value = 'checkout';
     refreshGas();
   } catch(err) {
@@ -930,11 +970,17 @@ input::-webkit-inner-spin-button {
     margin-bottom: 0rem;
     margin-right: 0rem;
     font-weight: 500; } }
+.mode-options-wrap {
+  display: flex;
+  position: absolute;
+  align-items: center;
+  justify-content: center;
+  width: 100%; }
 .mode-options {
   display: flex;
   align-items: center;
   position: absolute;
-  top: 50px;
+  top: 30px;
   width: auto;
   background: #fff;
   box-shadow: 0px 10px 20px rgb(0 0 0 / 10%);
@@ -991,9 +1037,10 @@ input::-webkit-inner-spin-button {
   align-items: center;
   justify-content: flex-end;
   width: auto;
-  border-radius: 8px;
-  background-color: rgb(242, 246, 250);
   font-size: 14px;
+  border-radius: 0.5rem;
+  border: 2px solid transparent;
+  background: #eee;
   overflow: unset !important; }
 .mode-dropdown::before {
   content: '';

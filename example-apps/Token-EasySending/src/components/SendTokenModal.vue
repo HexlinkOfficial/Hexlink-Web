@@ -134,7 +134,7 @@
               </div>
             </div>
         </div>
-        <div style="display: block;"><hr style="margin: 0; border-style: solid; border-color: rgba(19,21,23,0.08); border-width: 0 0 1px;"></div>
+        <!-- <div style="display: block;"><hr style="margin: 0; border-style: solid; border-color: rgba(19,21,23,0.08); border-width: 0 0 1px;"></div>
         <div class="token-amount">
           <div style="display: block; color: #737577;">Total</div>
           <div style="display: flex;">
@@ -148,7 +148,7 @@
               </div>
             </div>
           </div>
-        </div>
+        </div> -->
       </div>
     </div>
     <button class="cta-button" @click="sendOtp" :disabled='processing'>
@@ -168,11 +168,11 @@
         </div>
         <p v-if="countDown > 0" class="resend-plain">Resend the verification code in {{ countDown }}s.</p>
         <a v-if="countDown <= 0 " class="resend" @click="resendOtp">Resend the verification code.</a>
-        <button class="cta-button" style="margin-bottom: 0px;" :disabled='invalidOtp || processing' @click="validateOtpAndSign">
-          {{ processing ? 'Processing': 'Verify' }}
-        </button>
       </div>
     </div>
+    <button class="cta-button" style="margin-bottom: 0px;" :disabled='invalidOtp || processing' @click="validateOtpAndSign">
+      {{ processing ? 'Processing' : 'Verify' }}
+    </button>
   </div>
   <div v-if="step === 'process_tx' || step === 'notified'" class="form-send">
     <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
@@ -217,7 +217,7 @@ import PhoneInput from "@/components/PhoneInput.vue";
 import type { PhoneData } from "../types";
 import { UserOpInfo, buildTokenTransferUserOp, genUserOpInfo, getHexlinkAccountApi } from "@/web3/userOp";
 import { UserOperationStruct } from "@account-abstraction/contracts";
-import { getPimlicoProvider, getStackupPaymaster } from "@/accountAPI/PimlicoBundler";
+import { getPimlicoProvider, getStackupPaymaster } from "@/accountAPI/AAServiceProvider";
 import SkeletonLoader from '@/components/SkeletonLoader.vue';
 import { hexlify, resolveProperties } from "ethers/lib/utils"
 import { deepHexlify } from '@account-abstraction/utils'
@@ -1142,8 +1142,7 @@ input::-webkit-inner-spin-button {
   transition: .3s cubic-bezier(.3, 0, 0, 1.3) }
 .social-login {
   display: flex;
-  justify-content: center;
-  gap: 10px; }
+  justify-content: center; }
 .resend {
   text-align: center; }
 .resend-plain {

@@ -25,18 +25,18 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const authAppController = __importStar(require("../controller/auth-app-controller"));
-const express_validator_1 = require("express-validator");
 const router = (0, express_1.Router)();
-router.put('/setup', [
-    (0, express_validator_1.body)('name').trim().isLength({ min: 3 }).withMessage('Too small name'),
-    (0, express_validator_1.body)('email')
-        .trim()
-        .isEmail()
-        .withMessage('Please enter a valid email')
-        .normalizeEmail(),
-    (0, express_validator_1.body)('password')
-        .trim()
-        .isLength({ min: 5 })
-        .withMessage('Too small password'),
-], authAppController.authAppSetupController);
+// router.get(
+//   '/setup',
+//   [
+//     body('address').trim().isLength({ min: 3 }).withMessage('Not valid address'),
+//   ],
+//   authAppController.authAppSetupController
+// );
+// router.get(
+//   '/setup',
+//   [],
+//   authAppController.authAppSetupController
+// );
+router.get('/setup', authAppController.authAppSetupController);
 exports.default = router;

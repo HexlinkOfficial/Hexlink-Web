@@ -10,30 +10,21 @@ import { HexlinkAccountAPI } from "@/accountAPI/HexlinkAccountAPI";
 import { DUMMY_SIGNATURE, ENTRYPOINT } from "./constants";
 import { hash } from "./utils";
 import { hexlify } from "ethers/lib/utils";
-
-export interface UserOpInfo {
-  userOpHash: string;
-  validationData: EthBigNumber;
-  signer: string;
-  name: string;
-  nameType: string;
-  signedMessage: string;
-}
-
-const erc20Interface = new ethers.utils.Interface(ERC20_ABI);
+import { UserOpInfo } from "@/stores/userOp";
 
 const buildCallData = (token: string, to: string, amount: EthBigNumber) => {
-    if (token == ethers.constants.AddressZero) {
-      return buildAccountExecData(to, amount, []);
-    } else {
-      const erc20Data = erc20Interface.encodeFunctionData(
-        "transfer", [to, amount]
-      );
-      return buildAccountExecData(token, 0, erc20Data);
-    }
+  if (token == ethers.constants.AddressZero) {
+    return buildAccountExecData(to, amount, []);
+  } else {
+    const erc20Interface = new ethers.utils.Interface(ERC20_ABI);
+    const erc20Data = erc20Interface.encodeFunctionData(
+      "transfer", [to, amount]
+    );
+    return buildAccountExecData(token, 0, erc20Data);
   }
+}
 
-function genValidationData() : EthBigNumber {
+function genValidationData(): EthBigNumber {
   const now = Math.floor(Date.now() / 1000) - 60;
   return EthBigNumber.from(now + 1800).shl(160).add(
     EthBigNumber.from(now).shl(208)
@@ -41,40 +32,40 @@ function genValidationData() : EthBigNumber {
 }
 
 export const buildTokenTransferUserOp = async (
-    tx: {token: string, to: string, amount: EthBigNumber},
-    api: HexlinkAccountAPI,
-  ) : Promise<Partial<UserOperationStruct>> => {
-    const sender = await getAccountAddress();
-    let nonce : EthBigNumber = EthBigNumber.from(0);
-    let initCode = "0x";
-    if (await isContract(sender)) {
-      nonce = await getNonce(api.entryPointAddress, sender);
-    } else {
-      initCode = await api.getInitCode();
-    }
-    const gasInfo = await api.provider.getFeeData();
-    const authInput = ethers.utils.defaultAbiCoder.encode(
-      ["tuple(uint256, address, bytes)"],
-      [[0, ethers.constants.AddressZero, DUMMY_SIGNATURE]]
-    );
-    return {
-        sender,
-        nonce: hexlify(nonce),
-        initCode,
-        callData: buildCallData(tx.token, tx.to, tx.amount),
-        callGasLimit: hexlify(2000000),
-        verificationGasLimit: hexlify(500000),
-        maxFeePerGas: hexlify(gasInfo.maxFeePerGas ?? 0),
-        maxPriorityFeePerGas: hexlify(gasInfo.maxPriorityFeePerGas ?? 0),
-        preVerificationGas: hexlify(100000),
-        paymasterAndData: "0x",
-        signature: authInput,
-    };
+  tx: { token: string, to: string, amount: EthBigNumber },
+  api: HexlinkAccountAPI,
+): Promise<Partial<UserOperationStruct>> => {
+  const sender = await getAccountAddress();
+  let nonce: EthBigNumber = EthBigNumber.from(0);
+  let initCode = "0x";
+  if (await isContract(sender)) {
+    nonce = await getNonce(api.entryPointAddress, sender);
+  } else {
+    initCode = await api.getInitCode();
+  }
+  const gasInfo = await api.provider.getFeeData();
+  const authInput = ethers.utils.defaultAbiCoder.encode(
+    ["tuple(uint256, address, bytes)"],
+    [[0, ethers.constants.AddressZero, DUMMY_SIGNATURE]]
+  );
+  return {
+    sender,
+    nonce: hexlify(nonce),
+    initCode,
+    callData: buildCallData(tx.token, tx.to, tx.amount),
+    callGasLimit: hexlify(2000000),
+    verificationGasLimit: hexlify(500000),
+    maxFeePerGas: hexlify(gasInfo.maxFeePerGas ?? 0),
+    maxPriorityFeePerGas: hexlify(gasInfo.maxPriorityFeePerGas ?? 0),
+    preVerificationGas: hexlify(100000),
+    paymasterAndData: "0x",
+    signature: authInput,
   };
+};
 
 export const genUserOpInfo = async (
-  userOp: UserOperationStruct,
-) : Promise<UserOpInfo> => {
+  userOp: Partial<UserOperationStruct>,
+): Promise<UserOpInfo> => {
   const userOpHash = await genUserOpHash(
     userOp,
     useChainStore().chain.chainId!,
@@ -94,52 +85,54 @@ export const genUserOpInfo = async (
     signedMessage,
     name: getName(),
     nameType: getNameType(),
+    txType: "",
+    txMetadata: ""
   }
 }
 
 export const genUserOpHash = async (
-    userOp: UserOperationStruct,
-    chainId: string,
-    entryPointAddress: string
-  ) => {
-    const op = await ethers.utils.resolveProperties(userOp);
-    const opHash = ethers.utils.keccak256(
-      ethers.utils.defaultAbiCoder.encode(
-        [
-          'address',
-          'uint256',
-          'bytes32',
-          'bytes32',
-          'uint256',
-          'uint256',
-          'uint256',
-          'uint256',
-          'uint256',
-          'bytes32',
-        ],
-        [
-          op.sender,
-          op.nonce,
-          ethers.utils.keccak256(op.initCode),
-          ethers.utils.keccak256(op.callData),
-          op.callGasLimit,
-          op.verificationGasLimit,
-          op.preVerificationGas,
-          op.maxFeePerGas,
-          op.maxPriorityFeePerGas,
-          ethers.utils.keccak256(op.paymasterAndData)
-        ]
-      )
-    );
-    return ethers.utils.keccak256(
-      ethers.utils.defaultAbiCoder.encode(
-        ["bytes32", "address", "uint256"],
-        [opHash, entryPointAddress, Number(chainId)]
-      )
-    );
-  }
+  userOp: Partial<UserOperationStruct>,
+  chainId: string,
+  entryPointAddress: string
+) => {
+  const op = await ethers.utils.resolveProperties(userOp);
+  const opHash = ethers.utils.keccak256(
+    ethers.utils.defaultAbiCoder.encode(
+      [
+        'address',
+        'uint256',
+        'bytes32',
+        'bytes32',
+        'uint256',
+        'uint256',
+        'uint256',
+        'uint256',
+        'uint256',
+        'bytes32',
+      ],
+      [
+        op.sender,
+        op.nonce,
+        ethers.utils.keccak256(op.initCode!),
+        ethers.utils.keccak256(op.callData!),
+        op.callGasLimit,
+        op.verificationGasLimit,
+        op.preVerificationGas,
+        op.maxFeePerGas,
+        op.maxPriorityFeePerGas,
+        ethers.utils.keccak256(op.paymasterAndData!)
+      ]
+    )
+  );
+  return ethers.utils.keccak256(
+    ethers.utils.defaultAbiCoder.encode(
+      ["bytes32", "address", "uint256"],
+      [opHash, entryPointAddress, Number(chainId)]
+    )
+  );
+}
 
-export const getHexlinkAccountApi = () : HexlinkAccountAPI => {
+export const getHexlinkAccountApi = (): HexlinkAccountAPI => {
   return new HexlinkAccountAPI({
     provider: useChainStore().provider,
     entryPointAddress: ENTRYPOINT,

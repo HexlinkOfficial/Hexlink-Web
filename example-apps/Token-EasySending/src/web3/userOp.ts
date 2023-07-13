@@ -85,6 +85,8 @@ export const genUserOpInfo = async (
     signedMessage,
     name: getName(),
     nameType: getNameType(),
+    txType: "",
+    txMetadata: ""
   }
 }
 

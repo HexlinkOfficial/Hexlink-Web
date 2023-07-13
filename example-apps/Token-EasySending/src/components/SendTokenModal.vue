@@ -66,14 +66,16 @@
             </div>
             <div class="mode-text2">{{ token.symbol }}</div>
             <input class="mode-input" type="text" placeholder="select" readonly>
-            <div class="mode-options" style="right: -25.375px;">
-              <div class="mode-option" v-for="(token, index) of tokens" :key="index" @click="tokenChoose('token', token)">
-                <div class="token-icon">
-                  <img :src="token.logoURI" />
-                </div>
-                <div class="token-box">
-                  <b>{{ token.symbol }}</b>
-                  <div style="margin-right:0.5rem;">balance {{ tokenBalance(token.address) }}</div>
+            <div class="mode-options-wrap">
+              <div class="mode-options">
+                <div class="mode-option" v-for="(token, index) of tokens" :key="index" @click="tokenChoose('token', token)">
+                  <div class="token-icon">
+                    <img :src="token.logoURI" />
+                  </div>
+                  <div class="token-box">
+                    <b>{{ token.symbol }}</b>
+                    <div style="margin-right:0.5rem;">balance {{ tokenBalance(token.address) }}</div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -92,35 +94,22 @@
       <img src="@/assets/svg/checkout.svg" style="width: 50px; height: 50px; margin: 1rem 0;" alt="send icon" />
       <h2 class="people-title">Confirm</h2>
       <div class="people-text">Confirm your transaction details</div>
-      <div class="token-amount" style="display: flex; justify-content: space-between; align-items: center;">
-        <div style="display: block; color: #737577;">Receiver</div>
-        <a-tooltip placement="top">
-            <template #title>
-              <span>Address {{ transaction.to }}</span>
-            </template>
-            <div style="display: flex;">
-              {{ transaction.toInput }}
-            </div>
-        </a-tooltip>
-      </div>
-      <div class="token-amount" style="display: flex; justify-content: space-between; align-items: center;">
-        <div style="display: block; color: #737577;">Amount</div>
-        <div style="display: flex;">
-          {{ transaction.amountInput }}
-          <div style="display: flex; align-items: center;">
-            <div class="token-icon">
-              <img :src="gasToken.logoURI" />
-            </div>
-            <div class="token-box">
-              <b>{{ gasToken.symbol }}</b>
-            </div>
-          </div>
+      <div style="display: flex; flex-direction: column; gap: 0.8rem;">
+        <div class="token-amount">
+          <div style="display: block; color: #737577;">Receiver</div>
+          <a-tooltip placement="top">
+              <template #title>
+                <span>Address {{ transaction.to }}</span>
+              </template>
+              <div style="display: flex; font-weight: 600;">
+                {{ transaction.toInput }}
+              </div>
+          </a-tooltip>
         </div>
-      </div>
-      <div class="token-amount" style="display: flex; justify-content: space-between; align-items: center;">
-          <div style="display: block; color: #737577;">Estimated Gas Fee</div>
+        <div class="token-amount">
+          <div style="display: block; color: #737577;">Amount</div>
           <div style="display: flex;">
-            {{ totalServiceFee }}
+            {{ transaction.amountInput }}
             <div style="display: flex; align-items: center;">
               <div class="token-icon">
                 <img :src="gasToken.logoURI" />
@@ -131,6 +120,36 @@
             </div>
           </div>
         </div>
+        <div class="token-amount">
+            <div style="display: block; color: #737577;">Estimated Gas Fee</div>
+            <div style="display: flex;">
+              {{ totalServiceFee }}
+              <div style="display: flex; align-items: center;">
+                <div class="token-icon">
+                  <img :src="gasToken.logoURI" />
+                </div>
+                <div class="token-box">
+                  <b>{{ gasToken.symbol }}</b>
+                </div>
+              </div>
+            </div>
+        </div>
+        <!-- <div style="display: block;"><hr style="margin: 0; border-style: solid; border-color: rgba(19,21,23,0.08); border-width: 0 0 1px;"></div>
+        <div class="token-amount">
+          <div style="display: block; color: #737577;">Total</div>
+          <div style="display: flex;">
+            {{ Number(transaction.amountInput) + Number(totalServiceFee) }}
+            <div style="display: flex; align-items: center;">
+              <div class="token-icon">
+                <img :src="gasToken.logoURI" />
+              </div>
+              <div class="token-box">
+                <b>{{ gasToken.symbol }}</b>
+              </div>
+            </div>
+          </div>
+        </div> -->
+      </div>
     </div>
     <button class="cta-button" @click="sendOtp" :disabled='processing'>
       {{ processing ? 'Processing': 'Checkout' }}
@@ -160,7 +179,7 @@ import { isValidEmail } from "@/web3/utils";
 import PhoneInput from "@/components/PhoneInput.vue";
 import type { PhoneData } from "../types";
 import { buildTokenTransferUserOp, getHexlinkAccountApi } from "@/web3/userOp";
-import { getPimlicoProvider } from "@/accountAPI/PimlicoBundler";
+import { getPimlicoProvider } from "@/accountAPI/AAServiceProvider";
 import { hexlify } from "ethers/lib/utils"
 import { ENTRYPOINT } from "@/web3/constants";
 import { useUserOpStore } from "@/stores/userOp";
@@ -255,6 +274,43 @@ async function delay(ms: number) {
   });
 }
 
+const inputToken = async () => {
+  transaction.value.toInput = transaction.value.toInput.toLowerCase().trim();
+  if (ethers.utils.isAddress(transaction.value.toInput)) {
+    transaction.value.receiver = {
+      schema: "address",
+      value: transaction.value.toInput
+    };
+    transaction.value.to = transaction.value.toInput;
+    step.value = 'input_token';
+  } else if (isValidEmail(transaction.value.toInput)) {
+    transaction.value.receiver = {
+      schema: "mailto",
+      value: transaction.value.toInput
+    };
+    transaction.value.to = await getAccountAddress(
+      "mailto",
+      transaction.value.toInput
+    );
+    step.value = 'input_token';
+  } else if (phoneData.value.isValid) {
+    transaction.value.receiver = {
+      schema: "tel",
+      value: phoneData.value.number!
+    };
+    transaction.value.to = await getAccountAddress(
+      "tel",
+      phoneData.value.number,
+    );
+    step.value = 'input_token';
+  } else {
+    createNotification(
+      "invalid receiver, only address, email or phone number are accepted",
+      "error"
+    );
+  }
+}
+
 const checkOut = async function() {
   processing.value = true;
   transaction.value.amount = tokenAmount(
@@ -269,6 +325,7 @@ const checkOut = async function() {
       'eth_estimateUserOperationGas',
       [op, ENTRYPOINT]
     );
+
     const { callGasLimit, preVerificationGas, verificationGas } = result as any;
     op.preVerificationGas = preVerificationGas;
     op.callGasLimit = callGasLimit;
@@ -351,45 +408,14 @@ const tokenChoose =
     }
   };
 
-const inputToken = async () => {
-  transaction.value.toInput = transaction.value.toInput.toLowerCase().trim();
-  if (ethers.utils.isAddress(transaction.value.toInput)) {
-    transaction.value.receiver = {
-      schema: "address",
-      value: transaction.value.toInput
-    };
-    transaction.value.to = transaction.value.toInput;
-    step.value = 'input_token';
-  } else if (isValidEmail(transaction.value.toInput)) {
-    transaction.value.receiver = {
-      schema: "mailto",
-      value: transaction.value.toInput
-    };
-    transaction.value.to = await getAccountAddress(
-      "mailto",
-      transaction.value.toInput
-    );
-    step.value = 'input_token';
-  } else if (phoneData.value.isValid) {
-    transaction.value.receiver = {
-      schema: "tel",
-      value: phoneData.value.number!
-    };
-    transaction.value.to = await getAccountAddress(
-      "tel",
-      phoneData.value.number,
-    );
-    step.value = 'input_token';
-  } else {
-    createNotification(
-      "invalid receiver, only address, email or phone number are accepted",
-      "error"
-    );
-  }
-}
 </script>
 
 <style lang="less" scoped>
+.token-amount {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 16px; }
 .phoneNumber {
   padding: 10px 0 10px 12px;
   border-radius: 0.5rem;
@@ -702,11 +728,17 @@ input::-webkit-inner-spin-button {
     margin-bottom: 0rem;
     margin-right: 0rem;
     font-weight: 500; } }
+.mode-options-wrap {
+  display: flex;
+  position: absolute;
+  align-items: center;
+  justify-content: center;
+  width: 100%; }
 .mode-options {
   display: flex;
   align-items: center;
   position: absolute;
-  top: 50px;
+  top: 30px;
   width: auto;
   background: #fff;
   box-shadow: 0px 10px 20px rgb(0 0 0 / 10%);
@@ -763,9 +795,10 @@ input::-webkit-inner-spin-button {
   align-items: center;
   justify-content: flex-end;
   width: auto;
-  border-radius: 8px;
-  background-color: rgb(242, 246, 250);
   font-size: 14px;
+  border-radius: 0.5rem;
+  border: 2px solid transparent;
+  background: #eee;
   overflow: unset !important; }
 .mode-dropdown::before {
   content: '';

@@ -1,34 +1,33 @@
 <template>
-    <div v-if="step == 'send_and_validate_otp'" class="form-send">
-        <div style="display: block;">
-            <img src="@/assets/svg/password.svg" style="width: 50px; height: 50px; margin: 1rem 0;" alt="send icon" />
-            <h2 class="people-title">Enter Verification Code</h2>
-            <div class="people-text">Enter code that we have sent to <b>{{ userHandle }}</b></div>
-            <div class="social-login" style="flex-direction: column;">
-                <div style="display: flex; align-items: center; justify-content: space-between;">
-                    <input v-for="(arr, index) in code" :key="index" type="number" pattern="\d*" :id="'input_' + index"
-                        maxlength="1" v-model="code[index]" @input="handleInput" @keypress="isNumber"
-                        @keydown.delete="handleDelete" @paste="onPaste" class="otp" />
-                </div>
-                <p v-if="otpSent && countDown > 0" class="resend-plain">Resend the verification code in {{ countDown }}s.</p>
-                <a v-if="otpSent && countDown <= 0" class="resend" @click="resendOtp">Resend the verification code.</a>
-                <button class="cta-button" style="margin-bottom: 0px;" :disabled='otpSent && invalidOtp' @click="sendOrValidateOtp">
-                    {{ otpPrompt() }}
-                </button>
-            </div>
+  <div v-if="step == 'send_and_validate_otp'" class="form-send">
+    <div style="display: block;">
+      <img src="@/assets/svg/password.svg" style="width: 50px; height: 50px; margin: 1rem 0;" alt="send icon" />
+      <h2 class="people-title">Enter Verification Code</h2>
+      <div class="people-text">Enter code that we have sent to <b>{{ userHandle }}</b></div>
+      <div class="social-login" style="flex-direction: column;">
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+          <input v-for="(arr, index) in code" :key="index" type="number" pattern="\d*" :id="'input_' + index"
+            maxlength="1" v-model="code[index]" @input="handleInput" @keypress="isNumber" @keydown.delete="handleDelete"
+            @paste="onPaste" class="otp" />
         </div>
+        <p v-if="otpSent && countDown > 0" class="resend-plain">Resend the verification code in {{ countDown }}s.</p>
+        <a v-if="otpSent && countDown <= 0" class="resend" @click="resendOtp">Resend the verification code.</a>
+      </div>
     </div>
-    <div v-if="step === 'post_process'" class="form-send">
-        <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
-            <h2 class="transition"
-                style="display: flex; justify-content: center; align-items: center; flex-direction: column;">
-                <div class="spinner-lg">
-                    <div class="check"></div>
-                </div>
-                <span style="font-size: 20px; margin: 20px 10px; text-align: center;">{{ message }}</span>
-            </h2>
+    <button class="cta-button" style="margin-bottom: 0px;" :disabled='otpSent && invalidOtp' @click="sendOrValidateOtp">
+      {{ otpPrompt() }}
+    </button>
+  </div>
+  <div v-if="step === 'post_process'" class="form-send">
+    <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
+      <h2 class="transition" style="display: flex; justify-content: center; align-items: center; flex-direction: column;">
+        <div class="spinner-lg">
+          <div class="check"></div>
         </div>
+        <span style="font-size: 20px; margin: 20px 10px; text-align: center;">{{ message }}</span>
+      </h2>
     </div>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -62,40 +61,40 @@ const userHandle = computed(() => {
 onMounted(() => otpSent.value = false);
 
 const countDownTimer = () => {
-    countDown.value = 60;
-    let interval = setInterval(() => {
-        if (countDown.value <= 0) {
-            clearInterval(interval);
-        } else {
-            countDown.value--;
-        }
-    }, 1000);
+  countDown.value = 60;
+  let interval = setInterval(() => {
+    if (countDown.value <= 0) {
+      clearInterval(interval);
+    } else {
+      countDown.value--;
+    }
+  }, 1000);
 }
 
 const resendOtp = async () => {
-    countDownTimer();
-    const result: any = await genAndSendOtp(
-        useUserOpStore().opInfo.signedMessage!
-    );
-    if (result === 429) {
-        console.error("Too many requests to send otp.");
-        createNotification("Too many requests to send otp.", "error");
-    }
+  countDownTimer();
+  const result: any = await genAndSendOtp(
+    useUserOpStore().opInfo.signedMessage!
+  );
+  if (result === 429) {
+    console.error("Too many requests to send otp.");
+    createNotification("Too many requests to send otp.", "error");
+  }
 }
 
 const handleDelete = (event: Event) => {
-    let value = (event.target as HTMLInputElement).value;
-    let currentActiveElement = event.target as HTMLInputElement;
-    if (!value)
-        (currentActiveElement.previousElementSibling as HTMLElement)?.focus();
+  let value = (event.target as HTMLInputElement).value;
+  let currentActiveElement = event.target as HTMLInputElement;
+  if (!value)
+    (currentActiveElement.previousElementSibling as HTMLElement)?.focus();
 }
 
 const sendOrValidateOtp = async () => {
-    if (otpSent.value) {
-        await validateOtpAndSign();
-    } else {
-        await sendOtp();
-    }
+  if (otpSent.value) {
+    await validateOtpAndSign();
+  } else {
+    await sendOtp();
+  }
 }
 
 const otpPrompt = () => {
@@ -154,7 +153,7 @@ const validateOtpAndSign = async () => {
       sentAt: now,
       updatedAt: now,
     } as UserOp);
-  } catch(error: any) {
+  } catch (error: any) {
     console.log(error);
     message.value = "Failed to validate the code";
     createNotification(error.message, "error");
@@ -163,25 +162,25 @@ const validateOtpAndSign = async () => {
 }
 
 const handleInput = (event: Event) => {
-    const inputType = (event as InputEvent).inputType;
-    let currentActiveElement = event.target as HTMLInputElement;
-    if (currentActiveElement.id.split("_")[1] === "5") {
-        invalidOtp.value = false;
-    }
-    if (inputType === "insertText")
+  const inputType = (event as InputEvent).inputType;
+  let currentActiveElement = event.target as HTMLInputElement;
+  if (currentActiveElement.id.split("_")[1] === "5") {
+    invalidOtp.value = false;
+  }
+  if (inputType === "insertText")
+    (currentActiveElement.nextElementSibling as HTMLElement)?.focus();
+  if (inputType === "insertFromPaste" && dataFromPaste) {
+    for (const num of dataFromPaste) {
+      let id: number = parseInt(currentActiveElement.id.split("_")[1]);
+      currentActiveElement.value = num;
+      code[id] = num;
+      if (currentActiveElement.nextElementSibling) {
+        currentActiveElement =
+          currentActiveElement.nextElementSibling as HTMLInputElement;
         (currentActiveElement.nextElementSibling as HTMLElement)?.focus();
-    if (inputType === "insertFromPaste" && dataFromPaste) {
-        for (const num of dataFromPaste) {
-            let id: number = parseInt(currentActiveElement.id.split("_")[1]);
-            currentActiveElement.value = num;
-            code[id] = num;
-            if (currentActiveElement.nextElementSibling) {
-                currentActiveElement =
-                    currentActiveElement.nextElementSibling as HTMLInputElement;
-                (currentActiveElement.nextElementSibling as HTMLElement)?.focus();
-            }
-        }
+      }
     }
+  }
 }
 
 const onPaste = (event: Event) => {
@@ -215,17 +214,23 @@ const isNumber = (event: Event) => {
   display: flex;
   flex-direction: column;
   padding: 1.25rem 1.25rem;
-  justify-content: space-between; }
+  justify-content: space-between;
+}
+
 .people-title {
   color: #0c0c0d;
   font-size: 1.5rem;
   line-height: 1.2;
   font-weight: 600;
-  margin-top: 0px; }
+  margin-top: 0px;
+}
+
 .people-text {
-  color: rgba(19,21,23,0.64);
+  color: rgba(19, 21, 23, 0.64);
   margin-bottom: 0.5rem;
-  font-size: 1rem; }
+  font-size: 1rem;
+}
+
 .cta-button {
   background-color: rgb(7, 106, 224);
   color: white;
@@ -234,21 +239,30 @@ const isNumber = (event: Event) => {
   border-radius: 0.5rem;
   white-space: nowrap;
   font-weight: 500;
-  transition: all 0.3s cubic-bezier(0.4,0,0.2,1),outline 0s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1), outline 0s;
   justify-content: center;
   outline-offset: 0.125rem;
   outline: 2px solid transparent;
-  border: none; }
+  border: none;
+}
+
 .cta-button:hover {
-  background-color: rgb(106, 165, 237); }
+  background-color: rgb(106, 165, 237);
+}
+
 .cta-button:disabled {
-  background-color: rgb(106, 165, 237); }
+  background-color: rgb(106, 165, 237);
+}
+
 .transition {
-  transition: .3s cubic-bezier(.3, 0, 0, 1.3) }
+  transition: .3s cubic-bezier(.3, 0, 0, 1.3)
+}
+
 .spinner-lg {
-  .generate-spinner(); }
-.generate-spinner(
-  @radius: 60px,
+  .generate-spinner();
+}
+
+.generate-spinner(@radius: 60px,
   @border-width: 12px,
   @check-thickness: 12px,
   @success-color: #4BAE4F,
@@ -266,17 +280,29 @@ const isNumber = (event: Event) => {
   border: @border-width solid @default-color;
   border-radius: @radius;
   transition: border-color 200ms;
+
   &.success {
-    .context-class('success'); }
+    .context-class('success');
+  }
+
   &.error {
-    .context-class('error'); }
+    .context-class('error');
+  }
+
   &.processing {
     border-color: @background-color;
+
     &:before {
-      opacity: 1; }
-    > div {
-      opacity: 0; } }
+      opacity: 1;
+    }
+
+    >div {
+      opacity: 0;
+    }
+  }
+
   @check-height: 1.8837209302 * @check-size;
+
   .check {
     opacity: 1;
     transition: opacity 200ms;
@@ -288,35 +314,50 @@ const isNumber = (event: Event) => {
     transform: rotate(45deg);
     transition-property: transform, height, width, top, left;
     transition-duration: 200ms, 200ms, 200ms, 200ms, 200ms;
-    &:before, &:after {
+
+    &:before,
+    &:after {
       .pseudo-block();
       position: absolute;
       background-color: @default-color;
       transition-property: left, top, height, width;
       transition-duration: 200ms, 200ms, 200ms, 200ms;
-      border-radius: 20px; }
+      border-radius: 20px;
+    }
+
     &:before {
       width: @check-thickness;
       height: @check-height;
       left: @check-size - @check-thickness;
-      top: 0; }
+      top: 0;
+    }
+
     &:after {
       width: @check-size;
       height: @check-thickness;
       left: 0;
-      top: @check-height - @check-thickness; } }
+      top: @check-height - @check-thickness;
+    }
+  }
+
   &.error .check {
     transform: rotate(-135deg);
     height: @check-height;
     width: @check-height;
     top: @radius - (@check-height / 2) - @border-width;
     left: @radius - (@check-height / 2) - @border-width;
+
     &:before {
       height: @check-height;
-      left: 25.7116279064px; }
+      left: 25.7116279064px;
+    }
+
     &:after {
       width: @check-height;
-      top: 25.7116279064px; } }
+      top: 25.7116279064px;
+    }
+  }
+
   // spinning part
   &:before {
     .pseudo-block();
@@ -340,34 +381,59 @@ const isNumber = (event: Event) => {
     animation-name: check-loading-spinner;
     animation-duration: 1s;
     animation-iteration-count: infinite;
-    animation-timing-function: linear; }
+    animation-timing-function: linear;
+  }
+
   // @mixin
   .context-class(@name) {
     @color: color(~"@{@{name}-color}");
     border-color: @color;
+
     &:before {
-      border-color: @color; }
-    > div {
-      &:before, &:after {
-        background-color: @color; } } } }
+      border-color: @color;
+    }
+
+    >div {
+
+      &:before,
+      &:after {
+        background-color: @color;
+      }
+    }
+  }
+}
+
 @keyframes check-loading-spinner {
   from {
-    transform: rotate(0deg); }
+    transform: rotate(0deg);
+  }
+
   to {
-    transform: rotate(360deg); } }
+    transform: rotate(360deg);
+  }
+}
+
 .pseudo-block() {
   content: '';
-  display: block; }
+  display: block;
+}
+
 .resend {
-  text-align: center; }
+  text-align: center;
+}
+
 .resend-plain {
   color: #808080;
   text-align: center;
-  margin-bottom: 0; }
+  margin-bottom: 0;
+}
+
 .social-login {
   display: flex;
   justify-content: center;
-  gap: 10px; }
+  gap: 10px;
+}
+
 .otp {
   width: 40px;
   height: 40px;
@@ -380,12 +446,16 @@ const isNumber = (event: Event) => {
   display: flex;
   align-items: center;
   justify-content: center;
-  caret-color: transparent !important;  }
+  caret-color: transparent !important;
+}
+
 /* Chrome, Safari, Edge, Opera */
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
   -webkit-appearance: none;
-  margin: 0; }
+  margin: 0;
+}
+
 input[type="number"] {
-  -moz-appearance: textfield; }
-</style>
+  -moz-appearance: textfield;
+}</style>

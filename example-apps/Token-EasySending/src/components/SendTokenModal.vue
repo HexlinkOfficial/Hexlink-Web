@@ -66,7 +66,7 @@
             </div>
             <div class="mode-text2">{{ token.symbol }}</div>
             <input class="mode-input" type="text" placeholder="select" readonly>
-            <div class="mode-options" style="right: -25.375px;">
+            <div class="mode-options">
               <div class="mode-option" v-for="(token, index) of tokens" :key="index" @click="tokenChoose('token', token)">
                 <div class="token-icon">
                   <img :src="token.logoURI" />
@@ -255,6 +255,11 @@ async function delay(ms: number) {
   });
 }
 
+const reset = () => {
+  step.value = 'input_email';
+  transaction.value.toInput = "";
+}
+
 const checkOut = async function() {
   processing.value = true;
   transaction.value.amount = tokenAmount(
@@ -404,9 +409,7 @@ const inputToken = async () => {
 .confirmAddress {
   color: #076AE0;
   font-size: 1rem;
-  font-weight: 600;
-  @media (max-width: 640px) {
-    font-size: 0.75rem; } }
+  font-weight: 600; }
 .confirmButton {
   width: 3rem;
   height: 3rem;
@@ -761,12 +764,13 @@ input::-webkit-inner-spin-button {
   display: inline-flex;
   -webkit-box-align: center;
   align-items: center;
-  justify-content: flex-end;
   width: auto;
   border-radius: 8px;
   background-color: rgb(242, 246, 250);
   font-size: 14px;
-  overflow: unset !important; }
+  overflow: unset !important;
+  justify-content: center;
+  background-color: #eee; }
 .mode-dropdown::before {
   content: '';
   position: absolute;

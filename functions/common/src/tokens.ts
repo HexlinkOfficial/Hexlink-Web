@@ -52,6 +52,10 @@ export function wrappedCoin(chain: Chain) : IToken | undefined {
   return (ADDRESSES as any)[chain.name].wrappedCoin;
 }
 
+export function stackupCoin(chain: Chain) : IToken[] | undefined {
+  return (ADDRESSES as any)[chain.name].stackup;
+}
+
 export function stableCoins(chain: Chain) : IToken[] {
   return (ADDRESSES as any)[chain.name].stableCoins
 }
@@ -60,8 +64,12 @@ export function nativeCoinAddress(chain: Chain) : string {
   return nativeCoin(chain).address.toLowerCase();
 }
 
+export function stackupCoinAddress(chain: Chain) : string[] {
+  return stackupCoin(chain).map(a => a.address.toLowerCase());
+}
+
 export function wrappedCoinAddress(chain: Chain) : string | undefined {
-  return wrappedCoin(chain)?.address.toLowerCase();
+  return wrappedCoin(chain)?.address?.toLowerCase();
 }
 
 export function stableCoinAddresses(chain: Chain) : string[] {
@@ -69,11 +77,13 @@ export function stableCoinAddresses(chain: Chain) : string[] {
 }
 
 export function allowedGasToken(chain: Chain) : string[] {
-  const wrapped = wrappedCoinAddress(chain);
-  return [
-    nativeCoinAddress(chain),
-    ...stableCoinAddresses(chain),
-  ].concat(wrapped ? [wrapped] : []);
+  // const wrapped = wrappedCoinAddress(chain);
+  // return [
+  //   nativeCoinAddress(chain),
+  //   ...stableCoinAddresses(chain),
+  // ].concat(wrapped ? [wrapped] : []);
+  const gasTokens = stackupCoinAddress(chain);
+  return [nativeCoinAddress(chain)].concat(gasTokens ? gasTokens : []);
 }
 
 // const POLYGON_POPULAR_TOKENS = "https://api-polygon-tokens.polygon.technology/tokenlists/popularTokens.tokenlist.json";
@@ -145,10 +155,12 @@ export function isNativeCoin(token: string, chain: Chain) {
 
 export function isWrappedCoin(token: string, chain: Chain) {
   const wrapped = wrappedCoinAddress(chain);
-  if (!wrapped) {
-    return false;
-  }
+  if (!wrapped) return false;
   return equal(token, wrapped);
+}
+
+export function isStackupCoin(token: string, chain: Chain) {
+  return stackupCoinAddress(chain).includes(token.toLowerCase());
 }
 
 export function isStableCoin(token: string, chain: Chain) {
@@ -157,8 +169,7 @@ export function isStableCoin(token: string, chain: Chain) {
 
 export function isAllowedGasToken(token: string, chain: Chain) : boolean {
   return isNativeCoin(token, chain) ||
-    isWrappedCoin(token, chain) ||
-    isStableCoin(token, chain);
+    isStackupCoin(token, chain);
 }
 
 export function gasTokenDecimals(token: string, chain: Chain) : number | undefined {

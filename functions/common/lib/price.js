@@ -7,7 +7,7 @@ function calcGas(chain, gasToken, amount, price) {
     if ((0, tokens_1.isNativeCoin)(gasToken.address, chain) || (0, tokens_1.isWrappedCoin)(gasToken.address, chain)) {
         return amount.mul(price.gasPrice);
     }
-    else if ((0, tokens_1.isStableCoin)(gasToken.address, chain)) {
+    else if ((0, tokens_1.isStableCoin)(gasToken.address, chain) || (0, tokens_1.isStackupCoin)(gasToken.address, chain)) {
         const base = ethers_1.BigNumber.from(10).pow(gasToken.decimals);
         return amount.mul(price.gasPrice).mul(price.tokenPrice).div(base).add(1);
     }

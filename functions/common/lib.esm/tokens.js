@@ -16,24 +16,32 @@ export function nativeCoin(chain) {
 export function wrappedCoin(chain) {
     return ADDRESSES[chain.name].wrappedCoin;
 }
+export function stackupCoin(chain) {
+    return ADDRESSES[chain.name].stackup;
+}
 export function stableCoins(chain) {
     return ADDRESSES[chain.name].stableCoins;
 }
 export function nativeCoinAddress(chain) {
     return nativeCoin(chain).address.toLowerCase();
 }
+export function stackupCoinAddress(chain) {
+    return stackupCoin(chain).map(a => a.address.toLowerCase());
+}
 export function wrappedCoinAddress(chain) {
-    return wrappedCoin(chain)?.address.toLowerCase();
+    return wrappedCoin(chain)?.address?.toLowerCase();
 }
 export function stableCoinAddresses(chain) {
     return stableCoins(chain).map(a => a.address.toLowerCase());
 }
 export function allowedGasToken(chain) {
-    const wrapped = wrappedCoinAddress(chain);
-    return [
-        nativeCoinAddress(chain),
-        ...stableCoinAddresses(chain),
-    ].concat(wrapped ? [wrapped] : []);
+    // const wrapped = wrappedCoinAddress(chain);
+    // return [
+    //   nativeCoinAddress(chain),
+    //   ...stableCoinAddresses(chain),
+    // ].concat(wrapped ? [wrapped] : []);
+    const gasTokens = stackupCoinAddress(chain);
+    return [nativeCoinAddress(chain)].concat(gasTokens ? gasTokens : []);
 }
 // const POLYGON_POPULAR_TOKENS = "https://api-polygon-tokens.polygon.technology/tokenlists/popularTokens.tokenlist.json";
 export async function getPopularTokens(chain) {
@@ -101,18 +109,19 @@ export function isNativeCoin(token, chain) {
 }
 export function isWrappedCoin(token, chain) {
     const wrapped = wrappedCoinAddress(chain);
-    if (!wrapped) {
+    if (!wrapped)
         return false;
-    }
     return equal(token, wrapped);
+}
+export function isStackupCoin(token, chain) {
+    return stackupCoinAddress(chain).includes(token.toLowerCase());
 }
 export function isStableCoin(token, chain) {
     return stableCoinAddresses(chain).includes(token.toLowerCase());
 }
 export function isAllowedGasToken(token, chain) {
     return isNativeCoin(token, chain) ||
-        isWrappedCoin(token, chain) ||
-        isStableCoin(token, chain);
+        isStackupCoin(token, chain);
 }
 export function gasTokenDecimals(token, chain) {
     if (isNativeCoin(token, chain)) {

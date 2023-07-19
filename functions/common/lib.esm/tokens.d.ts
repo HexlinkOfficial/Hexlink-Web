@@ -33,14 +33,17 @@ interface IToken {
 }
 export declare function nativeCoin(chain: Chain): IToken;
 export declare function wrappedCoin(chain: Chain): IToken | undefined;
+export declare function stackupCoin(chain: Chain): IToken[] | undefined;
 export declare function stableCoins(chain: Chain): IToken[];
 export declare function nativeCoinAddress(chain: Chain): string;
+export declare function stackupCoinAddress(chain: Chain): string[];
 export declare function wrappedCoinAddress(chain: Chain): string | undefined;
 export declare function stableCoinAddresses(chain: Chain): string[];
 export declare function allowedGasToken(chain: Chain): string[];
 export declare function getPopularTokens(chain: Chain): Promise<TokenDataList>;
 export declare function isNativeCoin(token: string, chain: Chain): boolean;
 export declare function isWrappedCoin(token: string, chain: Chain): boolean;
+export declare function isStackupCoin(token: string, chain: Chain): boolean;
 export declare function isStableCoin(token: string, chain: Chain): boolean;
 export declare function isAllowedGasToken(token: string, chain: Chain): boolean;
 export declare function gasTokenDecimals(token: string, chain: Chain): number | undefined;

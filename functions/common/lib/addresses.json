@@ -9,22 +9,43 @@
             "decimals": 18
         },
         "stableCoins": [
-            { "address": "0x2f3a40a3db8a7e3d09b0adfefbce4f6f81927557", "decimals": 6 },
-            { "address": "0x07865c6E87B9F70255377e024ace6630C1Eaa37F", "decimals": 6 },
-            { "address": "0x11fe4b6ae13d2a6055c8d9cf65c55bac32b5d844", "decimals": 18 }
-        ]
+            {
+                "address": "0x2f3a40a3db8a7e3d09b0adfefbce4f6f81927557",
+                "decimals": 6
+            },
+            {
+                "address": "0x07865c6E87B9F70255377e024ace6630C1Eaa37F",
+                "decimals": 6
+            },
+            {
+                "address": "0x11fe4b6ae13d2a6055c8d9cf65c55bac32b5d844",
+                "decimals": 18
+            }
+        ],
+        "stackup": []
     },
     "sepolia": {
         "nativeCoin": {
             "address": "0x0000000000000000000000000000000000000000",
             "decimals": 18
         },
-        "wrappedCoin": {
-            "address": "0xed43f81c17976372fcb5786dd214572e7dbb92c7",
-            "decimals": 18
-        },
+        "wrappedCoin": [
+            {
+                "address": "0xed43f81c17976372fcb5786dd214572e7dbb92c7",
+                "decimals": 18
+            }
+        ],
         "stableCoins": [
-            { "address": "0x6f14c02fc1f78322cfd7d707ab90f18bad3b54f5", "decimals": 18 }
+            {
+                "address": "0x6f14c02fc1f78322cfd7d707ab90f18bad3b54f5",
+                "decimals": 18
+            }
+        ],
+        "stackup": [
+            {
+                "address": "0x3870419Ba2BBf0127060bCB37f69A1b1C090992B",
+                "decimals": 6
+            }
         ]
     },
     "mumbai": {
@@ -37,7 +58,16 @@
             "decimals": 18
         },
         "stableCoins": [
-            { "address": "0xE097d6B3100777DC31B34dC2c58fB524C2e76921", "decimals": 6 }
+            {
+                "address": "0xE097d6B3100777DC31B34dC2c58fB524C2e76921",
+                "decimals": 6
+            }
+        ],
+        "stackup": [
+            {
+                "address": "0x3870419Ba2BBf0127060bCB37f69A1b1C090992B",
+                "decimals": 6
+            }
         ]
     },
     "polygon": {
@@ -50,10 +80,20 @@
             "decimals": 18
         },
         "stableCoins": [
-            { "address": "0xc2132D05D31c914a87C6611C10748AEb04B58e8F", "decimals": 6 },
-            { "address": "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174", "decimals": 6 },
-            { "address": "0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063", "decimals": 18 }
-        ]
+            {
+                "address": "0xc2132D05D31c914a87C6611C10748AEb04B58e8F",
+                "decimals": 6
+            },
+            {
+                "address": "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174",
+                "decimals": 6
+            },
+            {
+                "address": "0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063",
+                "decimals": 18
+            }
+        ],
+        "stackup": []
     },
     "arbitrum": {
         "nativeCoin": {
@@ -65,10 +105,20 @@
             "decimals": 18
         },
         "stableCoins": [
-            { "address": "0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1", "decimals": 18 },
-            { "address": "0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8", "decimals": 6 },
-            { "address": "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9", "decimals": 6 }
-        ]
+            {
+                "address": "0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1",
+                "decimals": 18
+            },
+            {
+                "address": "0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8",
+                "decimals": 6
+            },
+            {
+                "address": "0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9",
+                "decimals": 6
+            }
+        ],
+        "stackup": []
     },
     "arbitrum_testnet": {
         "nativeCoin": {
@@ -76,8 +126,12 @@
             "decimals": 18
         },
         "stableCoins": [
-            { "address": "0xF4856cC575d3BbC39cf264c56D9dF003F965A8f1", "decimals": 18 }
-        ]
+            {
+                "address": "0xF4856cC575d3BbC39cf264c56D9dF003F965A8f1",
+                "decimals": 18
+            }
+        ],
+        "stackup": []
     },
     "arbitrum_nova": {
         "nativeCoin": {
@@ -89,9 +143,16 @@
             "decimals": 18
         },
         "stableCoins": [
-            { "address": "0x750ba8b76187092b0d1e87e28daaf484d1b5273b", "decimals": 6 },
-            { "address": "0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1", "decimals": 18 }
-        ]
+            {
+                "address": "0x750ba8b76187092b0d1e87e28daaf484d1b5273b",
+                "decimals": 6
+            },
+            {
+                "address": "0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1",
+                "decimals": 18
+            }
+        ],
+        "stackup": []
     },
     "OKT": {
         "nativeCoin": {
@@ -99,8 +160,15 @@
             "decimals": 18
         },
         "stableCoins": [
-            { "address": "0xDD5A98C55594dc942fd870D3B7F835680D1Bd5FB", "decimals": 6 },
-            { "address": "0xb23AE8b65073CDB2643D82B7F790FF352245deD3", "decimals": 6 }
-        ]
+            {
+                "address": "0xDD5A98C55594dc942fd870D3B7F835680D1Bd5FB",
+                "decimals": 6
+            },
+            {
+                "address": "0xb23AE8b65073CDB2643D82B7F790FF352245deD3",
+                "decimals": 6
+            }
+        ],
+        "stackup": []
     }
 }

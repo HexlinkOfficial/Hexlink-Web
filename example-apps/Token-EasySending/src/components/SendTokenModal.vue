@@ -7,11 +7,7 @@
       <div class="people-input-box">
         <div class="phoneNumber">
           <div style="display: flex; align-items: center;">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" width="1em" height="1em">
-              <path
-                d="M20.21 17.544l-2.785-2.785a7.752 7.752 0 0 0 1.114-3.986C18.54 6.49 15.05 3 10.77 3S3 6.49 3 10.773c0 4.282 3.489 7.772 7.77 7.772a7.686 7.686 0 0 0 3.985-1.114l2.784 2.785a1.66 1.66 0 0 0 2.34 0l.33-.33a1.645 1.645 0 0 0 0-2.342zM4.723 10.773c0-3.334 2.714-6.05 6.047-6.05 3.332 0 6.047 2.716 6.047 6.05 0 3.333-2.715 6.049-6.047 6.049-3.333 0-6.047-2.716-6.047-6.05z">
-              </path>
-            </svg>
+            <img src="../assets/svg/search.svg"/>
           </div>
           <input v-model="transaction.toInput" placeholder="email or wallet address" class="border-0 outline-none appearance-none flex-shrink w-full bg-transparent" type="text" name="phone-number-input" id="phone-number-input" autocomplete="off" spellcheck="false" style="padding-left: 10px; width: 100%;">
         </div>
@@ -66,7 +62,7 @@
             </div>
             <div class="mode-text2">{{ token.symbol }}</div>
             <input class="mode-input" type="text" placeholder="select" readonly>
-            <div class="mode-options" style="right: -25.375px;">
+            <div class="mode-options">
               <div class="mode-option" v-for="(token, index) of tokens" :key="index" @click="tokenChoose('token', token)">
                 <div class="token-icon">
                   <img :src="token.logoURI" />
@@ -255,6 +251,11 @@ async function delay(ms: number) {
   });
 }
 
+const reset = () => {
+  step.value = 'input_email';
+  transaction.value.toInput = "";
+}
+
 const checkOut = async function() {
   processing.value = true;
   transaction.value.amount = tokenAmount(
@@ -404,9 +405,7 @@ const inputToken = async () => {
 .confirmAddress {
   color: #076AE0;
   font-size: 1rem;
-  font-weight: 600;
-  @media (max-width: 640px) {
-    font-size: 0.75rem; } }
+  font-weight: 600; }
 .confirmButton {
   width: 3rem;
   height: 3rem;
@@ -761,12 +760,13 @@ input::-webkit-inner-spin-button {
   display: inline-flex;
   -webkit-box-align: center;
   align-items: center;
-  justify-content: flex-end;
   width: auto;
   border-radius: 8px;
   background-color: rgb(242, 246, 250);
   font-size: 14px;
-  overflow: unset !important; }
+  overflow: unset !important;
+  justify-content: center;
+  background-color: #eee; }
 .mode-dropdown::before {
   content: '';
   position: absolute;

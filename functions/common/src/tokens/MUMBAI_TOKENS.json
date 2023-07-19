@@ -22,5 +22,13 @@
         "decimals": 6,
         "address": "0xE097d6B3100777DC31B34dC2c58fB524C2e76921",
         "logoURI": "https://i.postimg.cc/XvDJjw1B/usdcPNG.png"
+    },
+    {
+        "chainId": 80001,
+        "symbol": "STACKUP",
+        "name": "Mumbai Stackup",
+        "decimals": 6,
+        "address": "0x3870419Ba2BBf0127060bCB37f69A1b1C090992B",
+        "logoURI": "https://app.stackup.sh/_next/static/media/logo.f2d11a39.svg"
     }
 ]

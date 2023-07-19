@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.tokenAmount = exports.tokenBase = exports.gasTokenDecimals = exports.isAllowedGasToken = exports.isStableCoin = exports.isWrappedCoin = exports.isNativeCoin = exports.getPopularTokens = exports.allowedGasToken = exports.stableCoinAddresses = exports.wrappedCoinAddress = exports.nativeCoinAddress = exports.stableCoins = exports.wrappedCoin = exports.nativeCoin = void 0;
+exports.tokenAmount = exports.tokenBase = exports.gasTokenDecimals = exports.isAllowedGasToken = exports.isStableCoin = exports.isStackupCoin = exports.isWrappedCoin = exports.isNativeCoin = exports.getPopularTokens = exports.allowedGasToken = exports.stableCoinAddresses = exports.wrappedCoinAddress = exports.stackupCoinAddress = exports.nativeCoinAddress = exports.stableCoins = exports.stackupCoin = exports.wrappedCoin = exports.nativeCoin = void 0;
 const SEPOLIA_TOKENS_json_1 = __importDefault(require("./tokens/SEPOLIA_TOKENS.json"));
 const GOERLI_TOKENS_json_1 = __importDefault(require("./tokens/GOERLI_TOKENS.json"));
 const MUMBAI_TOKENS_json_1 = __importDefault(require("./tokens/MUMBAI_TOKENS.json"));
@@ -32,6 +32,10 @@ function wrappedCoin(chain) {
     return addresses_json_1.default[chain.name].wrappedCoin;
 }
 exports.wrappedCoin = wrappedCoin;
+function stackupCoin(chain) {
+    return addresses_json_1.default[chain.name].stackup;
+}
+exports.stackupCoin = stackupCoin;
 function stableCoins(chain) {
     return addresses_json_1.default[chain.name].stableCoins;
 }
@@ -40,9 +44,13 @@ function nativeCoinAddress(chain) {
     return nativeCoin(chain).address.toLowerCase();
 }
 exports.nativeCoinAddress = nativeCoinAddress;
+function stackupCoinAddress(chain) {
+    return stackupCoin(chain).map(a => a.address.toLowerCase());
+}
+exports.stackupCoinAddress = stackupCoinAddress;
 function wrappedCoinAddress(chain) {
-    var _a;
-    return (_a = wrappedCoin(chain)) === null || _a === void 0 ? void 0 : _a.address.toLowerCase();
+    var _a, _b;
+    return (_b = (_a = wrappedCoin(chain)) === null || _a === void 0 ? void 0 : _a.address) === null || _b === void 0 ? void 0 : _b.toLowerCase();
 }
 exports.wrappedCoinAddress = wrappedCoinAddress;
 function stableCoinAddresses(chain) {
@@ -50,11 +58,13 @@ function stableCoinAddresses(chain) {
 }
 exports.stableCoinAddresses = stableCoinAddresses;
 function allowedGasToken(chain) {
-    const wrapped = wrappedCoinAddress(chain);
-    return [
-        nativeCoinAddress(chain),
-        ...stableCoinAddresses(chain),
-    ].concat(wrapped ? [wrapped] : []);
+    // const wrapped = wrappedCoinAddress(chain);
+    // return [
+    //   nativeCoinAddress(chain),
+    //   ...stableCoinAddresses(chain),
+    // ].concat(wrapped ? [wrapped] : []);
+    const gasTokens = stackupCoinAddress(chain);
+    return [nativeCoinAddress(chain)].concat(gasTokens ? gasTokens : []);
 }
 exports.allowedGasToken = allowedGasToken;
 // const POLYGON_POPULAR_TOKENS = "https://api-polygon-tokens.polygon.technology/tokenlists/popularTokens.tokenlist.json";
@@ -127,20 +137,22 @@ function isNativeCoin(token, chain) {
 exports.isNativeCoin = isNativeCoin;
 function isWrappedCoin(token, chain) {
     const wrapped = wrappedCoinAddress(chain);
-    if (!wrapped) {
+    if (!wrapped)
         return false;
-    }
     return equal(token, wrapped);
 }
 exports.isWrappedCoin = isWrappedCoin;
+function isStackupCoin(token, chain) {
+    return stackupCoinAddress(chain).includes(token.toLowerCase());
+}
+exports.isStackupCoin = isStackupCoin;
 function isStableCoin(token, chain) {
     return stableCoinAddresses(chain).includes(token.toLowerCase());
 }
 exports.isStableCoin = isStableCoin;
 function isAllowedGasToken(token, chain) {
     return isNativeCoin(token, chain) ||
-        isWrappedCoin(token, chain) ||
-        isStableCoin(token, chain);
+        isStackupCoin(token, chain);
 }
 exports.isAllowedGasToken = isAllowedGasToken;
 function gasTokenDecimals(token, chain) {
